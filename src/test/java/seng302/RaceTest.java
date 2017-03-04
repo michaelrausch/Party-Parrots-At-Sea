@@ -40,6 +40,6 @@ public class RaceTest
         race.addBoat(boat1);
         race.addBoat(boat2);
 
-        assertEquals(Array.getLength(boats.getBoats()), 2);
+        assertEquals(Array.getLength(race.getBoats()), 2);
     }
 }
