@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class BoatTest 
 {
+
     @Test
     public void testBoatCreation()
     {

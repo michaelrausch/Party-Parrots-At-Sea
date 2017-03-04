@@ -25,7 +25,7 @@ public class Race {
 
 	/*
 		Returns a list of boats in the order that they
-		finished the race (position 0 is first)
+		finished the race (position 0 is first place)
 
 		@returns a list of boats
 	*/
@@ -44,5 +44,43 @@ public class Race {
 	*/
 	public int getNumberOfBoats(){
 		return numberOfBoats;
+	}
+
+	/*
+		Returns a list of boats in the race
+
+		@returns a list of the boats competing in the race
+	*/
+	public Boat[] getBoats(){
+		return boats.toArray(new Boat[boats.size()]);
+	}
+
+	/*
+		Prints the order in which the boats finished
+	*/ 
+	public void displayFinishingOrder(){
+		int numberOfBoats = this.getNumberOfBoats();
+		Boat[] boats = this.getFinishedBoats();
+
+		System.out.println("--- Finishing Order ---");
+
+		for (int i = 0; i < numberOfBoats; i++) {
+			System.out.println("#" + Integer.toString(i+1) + " - " + boats[i].getTeamName());
+		}
+	}
+
+	/*
+		Prints the list of boats competing in the race
+
+	*/ 
+	public void displayStartingBoats(){
+		int numberOfBoats = this.getNumberOfBoats();
+		Boat[] boats = this.getBoats();
+
+		System.out.println("--- Competing Boats ---");
+
+		for (int i = 0; i < numberOfBoats; i++) {
+			System.out.println(boats[i].getTeamName());
+		}
 	}
 }

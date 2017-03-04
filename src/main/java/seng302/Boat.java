@@ -9,7 +9,6 @@ public class Boat
 {
 	// The name of the team, this is also the name of the boat
 	private String teamName = null;
-	private boolean finishedRace = false;
 
 	public Boat(String teamName) {
 		this.teamName = teamName;
