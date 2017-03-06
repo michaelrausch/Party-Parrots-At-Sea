@@ -8,10 +8,12 @@ import java.util.List;
 
 public class Race {
 	private ArrayList<Boat> boats;
+	private ArrayList<Leg> legs;
 	private int numberOfBoats = 0;
 
 	public Race(){
 		boats = new ArrayList<Boat>();
+		legs = new ArrayList<Leg>();
 	}
 
 	/*
@@ -71,7 +73,6 @@ public class Race {
 
 	/*
 		Prints the list of boats competing in the race
-
 	*/ 
 	public void displayStartingBoats(){
 		int numberOfBoats = this.getNumberOfBoats();
@@ -81,6 +82,16 @@ public class Race {
 
 		for (int i = 0; i < numberOfBoats; i++) {
 			System.out.println(boats[i].getTeamName());
+		}
+	}
+
+	public void addLeg(Leg leg){
+		this.legs.add(leg);
+	}
+
+	public void printLegs(){
+		for (Leg leg : this.legs.toArray(new Leg[legs.size()])){
+			System.out.println(leg.getLabel());
 		}
 	}
 }
