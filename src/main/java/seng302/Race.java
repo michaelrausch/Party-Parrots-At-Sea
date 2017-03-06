@@ -10,6 +10,8 @@ public class Race {
 	private ArrayList<Boat> boats;
 	private ArrayList<Leg> legs;
 	private int numberOfBoats = 0;
+	private long startTime = 0;
+	private int timeScale = 1;
 
 	public Race(){
 		boats = new ArrayList<Boat>();
@@ -103,11 +105,33 @@ public class Race {
 		this.legs.add(leg);
 	}
 
+	/**
+	 * Gets legs array
+	 * @return an array of legs
+	 */
+	public ArrayList<Leg> getLegs() {
+		return this.legs;
+	}
+
+	/**
+	 * Calculates how far a boat has travelled in meter
+	 * @param velocity the velocity of boat
+	 * @return a float number of distance the boat has been travelled
+	 */
+	public float getDistanceTravelled(long velocity) {
+		long timeDiff = System.currentTimeMillis() - this.startTime;
+		long timeElapse = timeDiff / 1000 * this.timeScale;
+		return timeElapse * velocity;
+	}
+
 	/*
 		Start the race and print each marker with the order
 		in which the boats passed that marker
 	*/
 	public void startRace(){
+		// record start time.
+		this.startTime = System.currentTimeMillis();
+
 		for (Leg leg : this.legs.toArray(new Leg[legs.size()])){
 			Boat[] boats = this.getShuffledBoats();
 

@@ -15,7 +15,6 @@ public class App
 		for (Map<String, Object> team : teams) {
 			boatNames.add((String) team.get("team-name"));
 		}
-		System.out.println(boatNames.toString());
 
 		// Shuffle team names
 		long seed = System.nanoTime();
