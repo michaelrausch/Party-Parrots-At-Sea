@@ -27,13 +27,12 @@ public class FileParserTest {
 	public void readValidFile() throws Exception{
 		FileParser fileParser = new FileParser("src/test/java/seng302/valid.json");
 
-		assertEquals(fileParser.getRaceName(), "IDK");
+		assertEquals("AC35", fileParser.getRaceName());
 
-		ArrayList<String> teams = new ArrayList<>();
-		teams.add("team1");
-		teams.add("team2");
-		teams.add("team3");
-		assertTrue(teams.equals(fileParser.getTeams()));
+		assertEquals("Oracle Team USA", fileParser.getTeams().get(0).get("team-name"));
+		assertEquals(20.9, fileParser.getTeams().get(0).get("velocity"));
+		assertEquals(2, fileParser.getRaceSize());
+		assertEquals(6, fileParser.getTotalNumberOfTeams());
 	}
 
 	/*
@@ -41,13 +40,13 @@ public class FileParserTest {
 		variable name.
 	 */
 	@Test
-	public void readInvaldFile() throws Exception {
+	public void readInvalidFile() throws Exception {
 		FileParser fileParser = new FileParser("src/test/java/seng302/invalid.json");
 
-		assertEquals(fileParser.getRaceName(), null);
-		assertEquals(fileParser.getTeams(), null);
-		assertEquals(fileParser.getTimeScale(), -1);
-		assertEquals(fileParser.getTeams(), null);
+		assertEquals(null, fileParser.getRaceName());
+		assertEquals(null, fileParser.getTeams());
+		assertEquals(-1, fileParser.getTimeScale());
+		assertEquals(null,fileParser.getTeams());
 	}
 
 }
