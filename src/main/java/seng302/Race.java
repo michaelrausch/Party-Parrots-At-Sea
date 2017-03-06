@@ -26,17 +26,26 @@ public class Race {
 	}
 
 	/*
+		Returns a list of boats in a random order
+
+		@returns a list of boats
+	*/
+	public Boat[] getShuffledBoats(){
+		// Shuffle the list of boats
+		long seed = System.nanoTime();
+		Collections.shuffle(this.boats, new Random(seed));
+
+		return boats.toArray(new Boat[boats.size()]);
+	}
+
+	/*
 		Returns a list of boats in the order that they
 		finished the race (position 0 is first place)
 
 		@returns a list of boats
 	*/
 	public Boat[] getFinishedBoats(){
-		// Shuffle the list of boats
-		long seed = System.nanoTime();
-		Collections.shuffle(this.boats, new Random(seed));
-
-		return boats.toArray(new Boat[boats.size()]);
+		return getShuffledBoats();
 	}
 
 	/*
@@ -74,24 +83,42 @@ public class Race {
 	/*
 		Prints the list of boats competing in the race
 	*/ 
-	public void displayStartingBoats(){
+	private void displayStartingBoats(){
 		int numberOfBoats = this.getNumberOfBoats();
 		Boat[] boats = this.getBoats();
 
-		System.out.println("--- Competing Boats ---");
+		System.out.println("--- Starting Boats ---");
 
 		for (int i = 0; i < numberOfBoats; i++) {
 			System.out.println(boats[i].getTeamName());
 		}
 	}
 
+	/*
+		Adds a leg to the race
+
+		@param leg, the leg to add to the race
+	*/
 	public void addLeg(Leg leg){
 		this.legs.add(leg);
 	}
 
-	public void printLegs(){
+	/*
+		Start the race and print each marker with the order
+		in which the boats passed that marker
+	*/
+	public void startRace(){
 		for (Leg leg : this.legs.toArray(new Leg[legs.size()])){
-			System.out.println(leg.getLabel());
-		}
+			Boat[] boats = this.getShuffledBoats();
+
+			System.out.println("--- " + leg.getMarkerLabel() + " ---");
+
+			// Print the order in which the boats passed the marker
+			for (int i = 0; i < this.getNumberOfBoats(); i++) {
+				System.out.println("#" + Integer.toString(i+1) + " - " + boats[i].getTeamName());
+			}
+
+			System.out.println("");
+		} 
 	}
 }

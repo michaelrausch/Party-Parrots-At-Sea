@@ -27,6 +27,12 @@ public class App
 			race.addBoat(new Boat(boatNames.get(i)));
 		}
 
+		race.addLeg(new Leg(035, 100, "Start"));
+		race.addLeg(new Leg(010, 300, "Marker 1"));
+		race.addLeg(new Leg(350, 400, "Leeward Gate"));
+		race.addLeg(new Leg(010, 400, "Windward Gate"));
+		race.addLeg(new Leg(010, 400, "Leeward Gate"));
+
 		return race;
 	}
 
@@ -43,11 +49,11 @@ public class App
     	}
 
     	if (race != null){
-    		race.displayStartingBoats();
-
-	 		System.out.println("");
+    		race.startRace();
 
 	    	race.displayFinishingOrder();	
+
+	    	
     	}
     	else{
     		System.out.println("e");
