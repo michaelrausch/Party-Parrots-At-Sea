@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 /**
@@ -36,10 +37,8 @@ public class FileParser {
 	private void readFile() throws FileNotFoundException{
 		JSONParser parser = new JSONParser();
 		try {
-			Object obj = parser.parse(new FileReader(filePath));
+			this.content = (JSONObject) parser.parse(new FileReader(filePath));
 
-			JSONObject jsonObject = (JSONObject) obj;
-			this.content = jsonObject;
 		} catch (FileNotFoundException e) {
 			throw e;
 		} catch (IOException e) {
@@ -54,6 +53,7 @@ public class FileParser {
 	 * @return long time scale. -1 if parameter is invalid (eg. scale is
 	 * negative number, or containing non numeric character) or cannot be found.
 	 */
+	@SuppressWarnings("unchecked")
 	public long getTimeScale() {
 		try {
 			long timeScale = (long) this.content.get("time-scale");
@@ -68,6 +68,7 @@ public class FileParser {
 	 * @return a string of race name. null if race name is invalid or cannot
 	 * be found.
 	 */
+	@SuppressWarnings("unchecked")
 	public String getRaceName() {
 		try {
 			return (String) this.content.get("race-name");
@@ -81,12 +82,43 @@ public class FileParser {
 	 * @return an ArrayList containing strings of team names. null if teams
 	 * setting is invalid or there is no team.
 	 */
-	public ArrayList<String> getTeams() {
+	@SuppressWarnings("unchecked")
+	public ArrayList<Map<String, Object>> getTeams() {
 		try {
-			return (ArrayList<String>) this.content.get("teams");
+			return (ArrayList<Map<String, Object>>) this.content.get("teams");
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
+	/**
+	 * Gets the total number of teams.
+	 * @return the number of teams. 0 if no teams or anything goes wrong.
+	 */
+	@SuppressWarnings("unchecked")
+	public long getTotalNumberOfTeams() {
+		ArrayList<Map<String, Object>> teams = getTeams();
+		try {
+			return teams.size();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	/**
+	 * Gets the number of boats that would compete during a race. Returns the
+	 * total number of race size if parameter is invalid or cannot be found.
+	 * @return an int of the race size.
+	 */
+	@SuppressWarnings("unchecked")
+	public long getRaceSize() {
+		long totalTeams = this.getTotalNumberOfTeams();
+		try {
+			long raceSize = (long) this.content.get("race-size");
+			return raceSize >= 0 && raceSize <= totalTeams? raceSize : totalTeams;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return totalTeams;
+		}
+	}
 }
