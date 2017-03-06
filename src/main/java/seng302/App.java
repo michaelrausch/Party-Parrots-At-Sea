@@ -1,10 +1,7 @@
 package seng302;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.lang.reflect.Array;
-import java.util.Random;
-import java.util.Collections;
-import java.util.List;
 
 public class App 
 {
@@ -12,8 +9,13 @@ public class App
 		Race race = new Race();
 
 		// Read team names from file
-		FileParser fp = new FileParser("src/test/java/seng302/valid.json");
-		ArrayList<String> boatNames = fp.getTeams();
+		FileParser fp = new FileParser("doc/examples/config.json");
+		ArrayList<String> boatNames = new ArrayList<>();
+		ArrayList<Map<String, Object>> teams = fp.getTeams();
+		for (Map<String, Object> team : teams) {
+			boatNames.add((String) team.get("team-name"));
+		}
+		System.out.println(boatNames.toString());
 
 		// Shuffle team names
 		long seed = System.nanoTime();
