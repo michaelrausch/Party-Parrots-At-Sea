@@ -1,12 +1,14 @@
 package seng302;
 
 import java.util.*;
-
+import java.lang.reflect.Array;
+import java.util.concurrent.TimeUnit;
 
 public class Race {
-	private ArrayList<Boat> boats;
-	private ArrayList<Leg> legs;
-	private PriorityQueue<Event> events;
+	private ArrayList<Boat> boats; // The boats in the race
+	private ArrayList<Leg> legs; // The legs in the race
+	private ArrayList<Boat> finishingOrder; // The order in which the boats finish the race
+	private PriorityQueue<Event> events; // The events that occur in the race
 	private int numberOfBoats = 0;
 	private long startTime = 0;
 	private int timeScale = 1;
@@ -14,12 +16,15 @@ public class Race {
 	public Race() {
 		this.boats = new ArrayList<Boat>();
 		this.legs = new ArrayList<Leg>();
-		// create a priority queue within custom Comparator to order events
+		this.finishingOrder = new ArrayList<Boat>();
+
+		// create a priority queue with a custom Comparator to order events
 		this.events = new PriorityQueue<Event>(new Comparator<Event>() {
 			@Override
 			public int compare(Event o1, Event o2) {
 				Long time1 = o1.getTime();
 				Long time2 = o2.getTime();
+
 				// order event asc. by time. if tie appears, then order team
 				// name alphabetically.
 				if (time1 != time2) {
@@ -60,7 +65,7 @@ public class Race {
 		@returns a list of boats
 	*/
 	public Boat[] getFinishedBoats() {
-		return getShuffledBoats();
+		return this.finishingOrder.toArray(new Boat[this.finishingOrder.size()]);
 	}
 
 	/*
@@ -88,9 +93,10 @@ public class Race {
 		int numberOfBoats = this.getNumberOfBoats();
 		Boat[] boats = this.getFinishedBoats();
 
-		System.out.println("--- Finishing Order ---");
+		System.out.println("\n\n");
+    		System.out.println("--- Finishing Order ---");
 
-		for (int i = 0; i < numberOfBoats; i++) {
+		for (int i = 0; i < Array.getLength(boats); i++) {
 			System.out.println("#" + Integer.toString(i + 1) + " - " + boats[i].getTeamName());
 		}
 	}
@@ -98,11 +104,13 @@ public class Race {
 	/*
 		Prints the list of boats competing in the race
 	*/
-	private void displayStartingBoats() {
+	public void displayStartingBoats() {
 		int numberOfBoats = this.getNumberOfBoats();
 		Boat[] boats = this.getBoats();
 
-		System.out.println("--- Starting Boats ---");
+		System.out.println("######################");
+		System.out.println("# Competing Boats    ");
+		System.out.println("######################");
 
 		for (int i = 0; i < numberOfBoats; i++) {
 			System.out.println(boats[i].getTeamName());
@@ -136,10 +144,10 @@ public class Race {
 		for (Boat boat : this.boats) {
 			long totalDistance = 0;
 			for (Leg leg : this.legs) {
-				totalDistance += leg.getDistance();
 				long time = (long) (1000 * totalDistance / (boat.getVelocity() * this.timeScale));
 				Event event = new Event(time, boat, leg);
 				events.add(event);
+				totalDistance += leg.getDistance();
 			}
 		}
 	}
@@ -158,20 +166,34 @@ public class Race {
 	}
 
 	/**
-	 * Micheal, here is a demo function shows you how to iterate all events
+	 * Iterate over events in the race and print the 
+	 * event string for each event
 	 */
 	public void iterateEvents() {
 		// iterates all events. ends when no event in events.
 		while (!events.isEmpty()) {
 			Event peekEvent = events.peek();
 			long currentTime = System.currentTimeMillis() - this.startTime;
+
 			if (currentTime > peekEvent.getTime()) {
 				// pull out the event
 				Event nextEvent = events.poll();
+
 				// I just simply print it out for testing
-				System.out.println(nextEvent.getTimeString() + ", " +
-						nextEvent.getBoat().getTeamName() + " passed " +
-						nextEvent.getLeg().getMarkerLabel());
+				System.out.println(nextEvent.getEventString());
+				nextEvent.addBoatToMarker();
+
+				if (nextEvent.getLeg().getIsFinishingLeg()){
+					this.finishingOrder.add(nextEvent.getBoat());
+				}
+			}
+
+			// Wait for 100ms to slow down the while loop
+			try{
+				Thread.sleep(100);
+			}
+			catch(java.lang.InterruptedException e){
+				continue;
 			}
 		}
 	}
@@ -185,9 +207,14 @@ public class Race {
 		generateEvents();
 		this.startTime = System.currentTimeMillis();
 		iterateEvents();
+	}
 
+	/*
+		Print the order in which the boats passed each marker
+	*/
+	public void showRaceMarkerResults(){
 		for (Leg leg : this.legs) {
-			Boat[] boats = this.getShuffledBoats();
+			Boat[] boats = leg.getMarker().getBoats();
 
 			System.out.println("--- " + leg.getMarkerLabel() + " ---");
 

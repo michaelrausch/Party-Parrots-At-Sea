@@ -1,6 +1,6 @@
 {
   "race-name": "AC35",
-  "time-scale": 1,
+  "time-scale": 100,
   "race-size": 2,
   "teams": [
     {"team-name": "Oracle Team USA", "velocity": 20.9},

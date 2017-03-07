@@ -84,6 +84,13 @@ public class Leg {
 	}
 
 	/*
+		Tell the marker that the boat has passed it
+	*/
+	public void addBoatToMarker(Boat boat){
+		this.startingMarker.addBoat(boat);
+	}
+
+	/*
 		Specify whether or not the race finishes on this leg
 
 		@param isFinishingLeg whether or not the race finishes on this leg
