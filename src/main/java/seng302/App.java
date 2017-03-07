@@ -5,6 +5,11 @@ import java.lang.reflect.Array;
 
 public class App 
 {
+	/**
+	* Builds a race object for the AC35 course
+	*
+	* @param numberOfBoats, the number of boats to include in the race
+	*/
 	public static Race createRace(int numberOfBoats) throws Exception{
 		Race race = new Race();
 
@@ -12,6 +17,7 @@ public class App
 		FileParser fp = new FileParser("doc/examples/config.json");
 		ArrayList<String> boatNames = new ArrayList<>();
 		ArrayList<Map<String, Object>> teams = fp.getTeams();
+
 		for (Map<String, Object> team : teams) {
 			boatNames.add((String) team.get("team-name"));
 		}
@@ -25,14 +31,18 @@ public class App
 		}
 
 		for (int i = 0; i < numberOfBoats; i++) {
-			race.addBoat(new Boat(boatNames.get(i)));
+			race.addBoat(new Boat(boatNames.get(i), (Double)(teams.get(i).get("velocity"))));
 		}
 
 		race.addLeg(new Leg(035, 100, "Start"));
 		race.addLeg(new Leg(010, 300, "Marker 1"));
 		race.addLeg(new Leg(350, 400, "Leeward Gate"));
 		race.addLeg(new Leg(010, 400, "Windward Gate"));
-		race.addLeg(new Leg(010, 400, "Leeward Gate"));
+
+		Leg finishingLeg = new Leg(010, 400, "Leeward Gate");
+		finishingLeg.setFinishingLeg(true);
+
+		race.addLeg(finishingLeg);
 
 		return race;
 	}
@@ -43,21 +53,30 @@ public class App
 
     	try{
     		 race = createRace(2);
-    		
     	}
     	catch (Exception e){
     		System.out.println(e);
     	}
 
+    	// If race was created
     	if (race != null){
+    		race.displayStartingBoats();
+
+    		System.out.println("\n\n");
+    		System.out.println("######################");
+    		System.out.println("# Live Race Updates   ");
+    		System.out.println("######################");
     		race.startRace();
 
-	    	race.displayFinishingOrder();	
-
-	    	
+    		System.out.println("\n\n");
+    		System.out.println("######################");
+    		System.out.println("# Race Results   ");
+    		System.out.println("######################");
+    		race.showRaceMarkerResults();
+	    	race.displayFinishingOrder();
     	}
     	else{
-    		System.out.println("e");
+    		System.out.println("There was an error creating the race.");
     	}
     }
 }

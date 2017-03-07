@@ -6,6 +6,10 @@ import java.util.Date;
 /**
  * Event class containing the time of specific event, related team/boat, and
  * event location such as leg.
+ *
+ * @param eventTime, what time the event happens
+ * @param eventBoat, the boat that the event belongs to
+ * @param eventLeg, the leg the event happens on
  */
 public class Event {
 
@@ -73,5 +77,24 @@ public class Event {
 	 */
 	public Leg getLeg() {
 		return this.leg;
+	}
+
+	/**
+	* Call when the boat reaches the marker, this will tell the marker the order
+	* in which boats pass it
+	*/
+	public void addBoatToMarker(){
+		this.leg.addBoatToMarker(boat);
+	}
+
+	/**
+	* Get a string that contains the timestamp and course information for this event
+	* @return A string that contains the timestamp and course information for this event
+	*/
+	public String getEventString(){
+		String currentHeading = Integer.toString(this.getLeg().getHeading());
+		String velocityKnots = String.format("%1.2f", this.getBoat().getVelocity() * 1.943844492); // Convert meters/second to knots
+
+		return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.getLeg().getMarkerLabel() + " going heading " + currentHeading + " at " + velocityKnots + " knots.");
 	}
 }
