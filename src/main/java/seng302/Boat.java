@@ -9,7 +9,7 @@ public class Boat
 {
 	// The name of the team, this is also the name of the boat
 	private String teamName = null;
-	private float velocity = 0;
+	private float velocity = 70; // please set this one to a reasonable num!!!!!, i set it just for testing ;)
 
 	public Boat(String teamName) {
 		this.teamName = teamName;
