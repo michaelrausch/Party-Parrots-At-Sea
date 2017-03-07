@@ -14,6 +14,10 @@ public class Boat
 	public Boat(String teamName) {
 		this.teamName = teamName;
 	}
+	public Boat(String teamName, float boatVelocity) {
+		this.teamName = teamName;
+		this.velocity = boatVelocity;
+	}
 
 	/*
 		Returns the name of the team sailing the boat
