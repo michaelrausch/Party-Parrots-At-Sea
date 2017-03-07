@@ -9,9 +9,14 @@ public class Boat
 {
 	// The name of the team, this is also the name of the boat
 	private String teamName = null;
+	private float velocity = 70; // please set this one to a reasonable num!!!!!, i set it just for testing ;)
 
 	public Boat(String teamName) {
 		this.teamName = teamName;
+	}
+	public Boat(String teamName, float boatVelocity) {
+		this.teamName = teamName;
+		this.velocity = boatVelocity;
 	}
 
 	/*
@@ -28,5 +33,21 @@ public class Boat
 	*/
 	public void setTeamName(String teamName){
 		this.teamName = teamName;
+	}
+
+	/**
+	 * Sets velocity of the boat
+	 * @param velocity The velocity of boat
+	 */
+	public void setVelocity(float velocity) {
+		this.velocity = velocity;
+	}
+
+	/**
+	 * Gets velocity of the boat
+	 * @return a float number of the boat velocity
+	 */
+	public float getVelocity() {
+		return this.velocity;
 	}
 }
