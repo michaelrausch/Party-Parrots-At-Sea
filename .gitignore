@@ -175,3 +175,5 @@ local.properties
 
 # Code Recommenders
 .recommenders/
+
+Makefile
