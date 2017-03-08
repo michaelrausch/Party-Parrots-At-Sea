@@ -136,6 +136,14 @@ public class Race {
 	}
 
 	/**
+	 * Sets time scale
+	 * @param timeScale
+	 */
+	public void setTimeScale(int timeScale) {
+		this.timeScale = timeScale;
+	}
+
+	/**
 	 * Temporary method used to generated all the events.
 	 */
 	private void generateEvents() {
@@ -144,7 +152,7 @@ public class Race {
 		for (Boat boat : this.boats) {
 			long totalDistance = 0;
 			for (Leg leg : this.legs) {
-				long time = (long) (1000 * totalDistance / (boat.getVelocity() * this.timeScale));
+				long time = (long) (1000 * totalDistance / boat.getVelocity());
 				Event event = new Event(time, boat, leg);
 				events.add(event);
 				totalDistance += leg.getDistance();
@@ -173,7 +181,7 @@ public class Race {
 		// iterates all events. ends when no event in events.
 		while (!events.isEmpty()) {
 			Event peekEvent = events.peek();
-			long currentTime = System.currentTimeMillis() - this.startTime;
+			long currentTime = (System.currentTimeMillis() - this.startTime) * this.timeScale;
 
 			if (currentTime > peekEvent.getTime()) {
 				// pull out the event

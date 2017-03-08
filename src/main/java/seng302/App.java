@@ -7,16 +7,21 @@ public class App
 {
 	/**
 	* Builds a race object for the AC35 course
-	*
-	* @param numberOfBoats, the number of boats to include in the race
 	*/
-	public static Race createRace(int numberOfBoats) throws Exception{
+	public static Race createRace() throws Exception{
 		Race race = new Race();
 
 		// Read team names from file
 		FileParser fp = new FileParser("doc/examples/config.json");
 		ArrayList<String> boatNames = new ArrayList<>();
 		ArrayList<Map<String, Object>> teams = fp.getTeams();
+
+		//get race size
+		int numberOfBoats = (int) fp.getRaceSize();
+
+		//get time scale
+		int timeScale = (int) fp.getTimeScale();
+		race.setTimeScale(timeScale);
 
 		for (Map<String, Object> team : teams) {
 			boatNames.add((String) team.get("team-name"));
@@ -52,7 +57,7 @@ public class App
     	Race race = null;
 
     	try{
-    		 race = createRace(2);
+    		 race = createRace();
     	}
     	catch (Exception e){
     		System.out.println(e);

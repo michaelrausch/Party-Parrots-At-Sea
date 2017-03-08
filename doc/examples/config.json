@@ -1,7 +1,7 @@
 {
   "race-name": "AC35",
-  "time-scale": 100,
-  "race-size": 2,
+  "time-scale": 1000,
+  "race-size": 4,
   "teams": [
     {"team-name": "Oracle Team USA", "velocity": 20.9},
     {"team-name": "Artemis Racing", "velocity": 18.3},
