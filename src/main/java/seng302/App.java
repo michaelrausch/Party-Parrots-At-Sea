@@ -39,12 +39,12 @@ public class App
 			race.addBoat(new Boat(boatNames.get(i), (Double)(teams.get(i).get("velocity"))));
 		}
 
-		race.addLeg(new Leg(035, 100, "Start"));
-		race.addLeg(new Leg(010, 300, "Marker 1"));
+		race.addLeg(new Leg(35, 100, "Start"));
+		race.addLeg(new Leg(10, 300, "Marker 1"));
 		race.addLeg(new Leg(350, 400, "Leeward Gate"));
-		race.addLeg(new Leg(010, 400, "Windward Gate"));
+		race.addLeg(new Leg(10, 400, "Windward Gate"));
 
-		Leg finishingLeg = new Leg(010, 400, "Leeward Gate");
+		Leg finishingLeg = new Leg(10, 400, "Leeward Gate");
 		finishingLeg.setFinishingLeg(true);
 
 		race.addLeg(finishingLeg);
