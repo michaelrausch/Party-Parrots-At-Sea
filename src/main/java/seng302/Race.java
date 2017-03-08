@@ -199,7 +199,7 @@ public class Race {
 
                 // I just simply print it out for testing
                 System.out.println(nextEvent.getEventString());
-                nextEvent.addBoatToMarker();
+                nextEvent.boatPassedMarker();
 
                 if (nextEvent.getIsFinishingEvent()) {
                     this.finishingOrder.add(nextEvent.getBoat());

@@ -3,13 +3,12 @@ package seng302;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
 public class Event {
 
-    private long time;
-    private Boat boat;
-    private Leg leg;
-    private boolean isFinishingEvent = false;
+    private long time; // Time the event occurs
+    private Boat boat; 
+    private Leg leg; // Leg of the race the event occurs on
+    private boolean isFinishingEvent = false; // This event occurs when a boat finishes the race
 
     /**
      * Event class containing the time of specific event, related team/boat, and
@@ -25,6 +24,15 @@ public class Event {
         this.leg = eventLeg;
     }
 
+    /**
+     * Event class containing the time of specific event, related team/boat, and
+     * event location such as leg.
+     *
+     * @param eventTime, what time the event happens
+     * @param eventBoat, the boat that the event belongs to
+     * @param eventLeg,  the leg the event happens on
+     * @param isFinishingEvent,  true if this event is the boat crossing the finishing line
+     */
     public Event(long eventTime, Boat eventBoat, Leg eventLeg, boolean isFinishingEvent) {
         this.time = eventTime;
         this.boat = eventBoat;
@@ -96,10 +104,10 @@ public class Event {
     }
 
     /**
-     * Call when the boat reaches the marker, this will tell the marker the order
-     * in which boats pass it
+     * Called when the boat in this event passes
+     * the marker.
      */
-    public void addBoatToMarker() {
+    public void boatPassedMarker() {
         this.leg.addBoatToMarker(boat);
     }
 
@@ -113,11 +121,12 @@ public class Event {
     /**
      * Get a string that contains the timestamp and course information for this event
      *
-     * @return A string that contains the timestamp and course information for this event
+     * @return A string that details what happened in this event
      */
     public String getEventString() {
         String currentHeading = Integer.toString(this.getLeg().getHeading());
 
+        // This event is a boat finishing the race
         if (this.isFinishingEvent) {
             return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " finished the race");
         }

@@ -100,7 +100,8 @@ public class Leg {
     }
 
     /**
-     * @returns true if this the race finishes after this leg
+     * Returns whether or not the race finishes after this leg
+     * @return true if this the race finishes after this leg
      */
     public boolean getIsFinishingLeg() {
         return this.isFinishingLeg;

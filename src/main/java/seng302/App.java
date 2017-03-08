@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.Random;
 
 public class App {
+
     /**
      * Builds a race object for the AC35 course
+     *
+     * @return a Race object for the AC35 course
      */
     public static Race createRace() throws Exception {
         Race race = new Race();
@@ -60,7 +63,7 @@ public class App {
         try {
             race = createRace();
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("There was an error creating the race.");
         }
 
         // If race was created
@@ -71,14 +74,18 @@ public class App {
             System.out.println("######################");
             System.out.println("# Live Race Updates   ");
             System.out.println("######################");
+
             race.startRace();
+
 
             System.out.println("\n\n");
             System.out.println("######################");
             System.out.println("# Race Results   ");
             System.out.println("######################");
+
             race.showRaceMarkerResults();
             race.displayFinishingOrder();
+
         } else {
             System.out.println("There was an error creating the race.");
         }
