@@ -80,20 +80,19 @@ public class Race {
     /**
      * Returns a list of boats in the race
      *
-     * @returns a list of the boats competing in the race
+     * @return a list of the boats competing in the race
      */
     public Boat[] getBoats() {
         return boats.toArray(new Boat[boats.size()]);
     }
 
     /**
-     * Prints the order in which the boats finished
+     * Prints the order in which the boats finished the race
      */
     public void displayFinishingOrder() {
         int numberOfBoats = this.getNumberOfBoats();
         Boat[] boats = this.getFinishedBoats();
 
-        System.out.println("\n\n");
         System.out.println("--- Finishing Order ---");
 
         for (int i = 0; i < Array.getLength(boats); i++) {
@@ -138,7 +137,7 @@ public class Race {
     }
 
     /**
-     * Sets time scale
+     * Sets time scale 
      *
      * @param timeScale
      */
@@ -147,11 +146,10 @@ public class Race {
     }
 
     /**
-     * Temporary method used to generated all the events.
+     * Generate all events that will happen during the race.
      */
     private void generateEvents() {
-
-        //calculate the time for every boat passes each leg, and create an event
+        //calculate the time every boat passes each leg, and create an event
         for (Boat boat : this.boats) {
             long totalDistance = 0;
             for (Leg leg : this.legs) {
@@ -171,8 +169,7 @@ public class Race {
     }
 
     /**
-     * Note: this function is useless so far
-     * Calculates how far a boat has travelled in meter
+     * Calculates how far a boat has travelled in meters
      *
      * @param velocity the velocity of boat
      * @return a float number of distance the boat has been travelled
@@ -194,19 +191,19 @@ public class Race {
             long currentTime = (long) ((System.currentTimeMillis() - this.startTime) * this.timeScale);
 
             if (currentTime > peekEvent.getTime()) {
-                // pull out the event
                 Event nextEvent = events.poll();
 
-                // I just simply print it out for testing
+                // Display a summary of the event
                 System.out.println(nextEvent.getEventString());
                 nextEvent.boatPassedMarker();
 
+                // If event is a boat finishing the race
                 if (nextEvent.getIsFinishingEvent()) {
                     this.finishingOrder.add(nextEvent.getBoat());
                 }
             }
 
-            // Wait for 100ms to slow down the while loop
+            // Wait for 100ms to throttle the while loop
             try {
                 Thread.sleep(100);
             } catch (java.lang.InterruptedException e) {

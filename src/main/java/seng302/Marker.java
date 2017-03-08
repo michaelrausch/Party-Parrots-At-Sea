@@ -2,28 +2,53 @@ package seng302;
 
 import java.util.ArrayList;
 
-class Marker {
+class Marker{
     private String name;
     private ArrayList<Boat> boatOrder;
 
-    public Marker(String name) {
+    /**
+    * Represents the marker at the beginning of a leg
+    *
+    * @param name, the name of the marker
+    */
+    public Marker(String name){
         this.name = name;
         this.boatOrder = new ArrayList<Boat>();
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
+    /**
+    * Set the name of the marker
+    *
+    * @param name, the name of the marker
+    */
+    public void setName(String name){
         this.name = name;
     }
 
-    public void addBoat(Boat boat) {
+    /**
+    * Get the name of the marker
+    *
+    * @return the name of the marker
+    */
+    public String getName(){
+        return this.name;
+    }
+
+    /**
+    * Add a boat as they pass the marker
+    *
+    * @param boat, the boat that passed the marker
+    */
+    public void addBoat(Boat boat){
         this.boatOrder.add(boat);
     }
 
-    public Boat[] getBoats() {
+    /**
+    * Get a list of boats in the order they passed the marker
+    *
+    * @return An array of boats in the order they passed the marker
+    */
+    public Boat[] getBoats(){
         return this.boatOrder.toArray(new Boat[this.boatOrder.size()]);
     }
 }
