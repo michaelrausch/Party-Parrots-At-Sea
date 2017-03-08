@@ -54,12 +54,13 @@ public class FileParser {
 	 * negative number, or containing non numeric character) or cannot be found.
 	 */
 	@SuppressWarnings("unchecked")
-	public long getTimeScale() {
+	public double getTimeScale() {
 		try {
-			long timeScale = (long) this.content.get("time-scale");
+			double timeScale = (double) this.content.get("time-scale");
 			return timeScale >= 0 ? timeScale : -1;
 		} catch (Exception e) {
-			return -1;
+			e.printStackTrace();
+			return 1;
 		}
 	}
 

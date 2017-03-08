@@ -11,7 +11,7 @@ public class Race {
 	private PriorityQueue<Event> events; // The events that occur in the race
 	private int numberOfBoats = 0;
 	private long startTime = 0;
-	private int timeScale = 1;
+	private double timeScale = 1;
 
 	public Race() {
 		this.boats = new ArrayList<Boat>();
@@ -141,7 +141,7 @@ public class Race {
 	 * Sets time scale
 	 * @param timeScale
 	 */
-	public void setTimeScale(int timeScale) {
+	public void setTimeScale(double timeScale) {
 		this.timeScale = timeScale;
 	}
 
@@ -178,7 +178,7 @@ public class Race {
 	 */
 	public float getDistanceTravelled(long velocity) {
 		long timeDiff = System.currentTimeMillis() - this.startTime;
-		long timeElapse = timeDiff / 1000 * this.timeScale;
+		long timeElapse = (long) (timeDiff / 1000 * this.timeScale);
 		return timeElapse * velocity;
 	}
 
@@ -190,7 +190,7 @@ public class Race {
 		// iterates all events. ends when no event in events.
 		while (!events.isEmpty()) {
 			Event peekEvent = events.peek();
-			long currentTime = (System.currentTimeMillis() - this.startTime) * this.timeScale;
+			long currentTime = (long) ((System.currentTimeMillis() - this.startTime) * this.timeScale);
 
 			if (currentTime > peekEvent.getTime()) {
 				// pull out the event
