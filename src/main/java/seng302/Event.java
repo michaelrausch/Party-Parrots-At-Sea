@@ -93,8 +93,7 @@ public class Event {
 	*/
 	public String getEventString(){
 		String currentHeading = Integer.toString(this.getLeg().getHeading());
-		String velocityKnots = String.format("%1.2f", this.getBoat().getVelocity() * 1.943844492); // Convert meters/second to knots
 
-		return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.getLeg().getMarkerLabel() + " going heading " + currentHeading + " at " + velocityKnots + " knots.");
+		return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.getLeg().getMarkerLabel() + " going heading " + currentHeading + "°");
 	}
 }
