@@ -12,6 +12,9 @@ public class Race {
     private long startTime = 0;
     private double timeScale = 1;
 
+    /**
+    * Race class containing the boats and legs in the race
+    */
     public Race() {
         this.boats = new ArrayList<Boat>();
         this.legs = new ArrayList<Leg>();

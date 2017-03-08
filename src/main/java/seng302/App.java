@@ -40,6 +40,7 @@ public class App {
             return null;
         }
 
+        // Add boats to the race
         for (int i = 0; i < numberOfBoats; i++) {
             race.addBoat(new Boat(boatNames.get(i), (Double) (teams.get(i).get("velocity"))));
         }
