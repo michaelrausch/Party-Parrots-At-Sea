@@ -56,7 +56,7 @@ public class Boat {
      *
      * @param velocity The velocity of boat
      */
-    public void setVelocity(float velocity) {
+    public void setVelocity(double velocity) {
         this.velocity = velocity;
     }
 }

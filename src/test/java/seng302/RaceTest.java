@@ -24,4 +24,16 @@ public class RaceTest {
 
         assertEquals(Array.getLength(race.getBoats()), 2);
     }
+
+    @Test
+    public void testGetShuffledBoats(){
+        Boat boat1 = new Boat("Team 1");
+        Boat boat2 = new Boat("Team 2");
+
+        Race race = new Race();
+        race.addBoat(boat1);
+        race.addBoat(boat2);
+
+        assertEquals(Array.getLength(race.getShuffledBoats()), 2);
+    }
 }
