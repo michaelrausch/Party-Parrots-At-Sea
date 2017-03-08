@@ -3,8 +3,8 @@ package seng302;
 import java.util.ArrayList;
 
 class Marker{
-	private String name;
-	private ArrayList<Boat> boatOrder;
+    private String name;
+    private ArrayList<Boat> boatOrder;
 
 	/**
 	* Represents the marker at the beginning of a leg

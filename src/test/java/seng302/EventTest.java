@@ -1,9 +1,8 @@
 package seng302;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test for Event class
@@ -11,11 +10,11 @@ import static org.junit.Assert.*;
  */
 public class EventTest {
 
-	@Test
-	public void getTimeString() throws Exception {
-		Leg leg = new Leg(035, 100, "Start");
-		Boat boat = new Boat("testBoat");
-		Event event = new Event(1231242, boat, leg);
-		assertEquals("20:31:242", event.getTimeString());
-	}
+    @Test
+    public void getTimeString() throws Exception {
+        Leg leg = new Leg(035, 100, "Start");
+        Boat boat = new Boat("testBoat");
+        Event event = new Event(1231242, boat, leg);
+        assertEquals("20:31:242", event.getTimeString());
+    }
 }

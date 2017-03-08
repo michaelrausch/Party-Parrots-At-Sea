@@ -1,21 +1,20 @@
 package seng302;
 
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
+
 import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for the Leg class.
  */
-public class LegTest{
+public class LegTest {
 
-	/*
-		Test creation of the leg by specifying a string
-		for the marker label
-	*/
-	@Test
-	public void testLegCreationUsingMarkerLabel()
-    {
+    /*
+        Test creation of the leg by specifying a string
+        for the marker label
+    */
+    @Test
+    public void testLegCreationUsingMarkerLabel() {
         Leg leg = new Leg(010, 100, "Marker");
 
         assertEquals(leg.getHeading(), 010);
@@ -25,12 +24,11 @@ public class LegTest{
     }
 
     /*
-		Test creation of the leg by providing a 
+        Test creation of the leg by providing a
 		Marker object
 	*/
     @Test
-	public void testLegCreation()
-    {
+    public void testLegCreation() {
         Leg leg = new Leg(010, 100, new Marker("Marker"));
 
         assertEquals(leg.getHeading(), 010);
@@ -40,12 +38,11 @@ public class LegTest{
     }
 
     /*
-		Test changing whether or not a 
+        Test changing whether or not a
 		leg is the finishing leg
     */
     @Test
-	public void testSetFinishLeg()
-    {
+    public void testSetFinishLeg() {
         Leg leg = new Leg(010, 100, "Marker");
 
         leg.setFinishingLeg(true);
