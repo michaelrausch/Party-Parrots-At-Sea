@@ -3,6 +3,9 @@ package seng302;
 import java.lang.reflect.Array;
 import java.util.*;
 
+/**
+* Race class containing the boats and legs in the race
+*/
 public class Race {
     private ArrayList<Boat> boats; // The boats in the race
     private ArrayList<Leg> legs; // The legs in the race

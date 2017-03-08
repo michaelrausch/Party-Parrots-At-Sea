@@ -3,6 +3,10 @@ package seng302;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+* Event class containing the time of specific event, related team/boat, and
+* event location such as leg.
+*/
 public class Event {
 
     private long time; // Time the event occurs

@@ -2,6 +2,9 @@ package seng302;
 
 import java.util.ArrayList;
 
+/**
+* Represents the marker at the beginning of a leg
+*/
 class Marker{
     private String name;
     private ArrayList<Boat> boatOrder;

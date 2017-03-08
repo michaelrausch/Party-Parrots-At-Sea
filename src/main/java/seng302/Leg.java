@@ -1,5 +1,8 @@
 package seng302;
 
+/**
+* Represents the leg of a race.
+*/
 public class Leg {
     private int heading;
     private int distance;

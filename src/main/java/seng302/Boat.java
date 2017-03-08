@@ -1,6 +1,8 @@
 package seng302;
 
-
+/**
+* Represents a boat in the race.
+*/
 public class Boat {
 
     private String teamName; // The name of the team, this is also the name of the boat
