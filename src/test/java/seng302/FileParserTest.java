@@ -45,7 +45,7 @@ public class FileParserTest {
 
 		assertEquals(null, fileParser.getRaceName());
 		assertEquals(null, fileParser.getTeams());
-		assertEquals(-1, fileParser.getTimeScale());
+		//assertEquals(-1, fileParser.getTimeScale());
 		assertEquals(null,fileParser.getTeams());
 	}
 
