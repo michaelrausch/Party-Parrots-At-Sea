@@ -16,11 +16,19 @@ public class Event {
 	private long time;
 	private Boat boat;
 	private Leg leg;
+	private boolean isFinishingEvent = false;
 
 	public Event(long eventTime, Boat eventBoat, Leg eventLeg) {
 		this.time = eventTime;
 		this.boat = eventBoat;
 		this.leg = eventLeg;
+	}
+
+	public Event(long eventTime, Boat eventBoat, Leg eventLeg, boolean isFinishingEvent) {
+		this.time = eventTime;
+		this.boat = eventBoat;
+		this.leg = eventLeg;
+		this.isFinishingEvent = isFinishingEvent;
 	}
 
 	/**
@@ -88,11 +96,23 @@ public class Event {
 	}
 
 	/**
+	* Returns true if this event is the boat finishing the race
+	*
+	*/
+	public boolean getIsFinishingEvent(){
+		return this.isFinishingEvent;
+	}
+
+	/**
 	* Get a string that contains the timestamp and course information for this event
 	* @return A string that contains the timestamp and course information for this event
 	*/
 	public String getEventString(){
 		String currentHeading = Integer.toString(this.getLeg().getHeading());
+
+		if (this.isFinishingEvent){
+			return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " finished the race");
+		}
 
 		return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.getLeg().getMarkerLabel() + " going heading " + currentHeading + "°");
 	}

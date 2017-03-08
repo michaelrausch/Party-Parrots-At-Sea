@@ -158,6 +158,13 @@ public class Race {
 				Event event = new Event(time, boat, leg);
 				events.add(event);
 				totalDistance += leg.getDistance();
+
+				// If finishing leg, add another event for when the boat finishes the race
+				if (leg.getIsFinishingLeg()){
+					time = (long) (1000 * totalDistance / boat.getVelocity());
+					event = new Event(time, boat, leg, true);
+					events.add(event);
+				}
 			}
 		}
 	}
@@ -193,7 +200,7 @@ public class Race {
 				System.out.println(nextEvent.getEventString());
 				nextEvent.addBoatToMarker();
 
-				if (nextEvent.getLeg().getIsFinishingLeg()){
+				if (nextEvent.getIsFinishingEvent()){
 					this.finishingOrder.add(nextEvent.getBoat());
 				}
 			}
