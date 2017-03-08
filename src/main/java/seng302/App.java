@@ -20,7 +20,7 @@ public class App
 		int numberOfBoats = (int) fp.getRaceSize();
 
 		//get time scale
-		int timeScale = (int) fp.getTimeScale();
+		double timeScale = fp.getTimeScale();
 		race.setTimeScale(timeScale);
 
 		for (Map<String, Object> team : teams) {
