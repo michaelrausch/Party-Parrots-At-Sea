@@ -13,6 +13,7 @@ public class BoatTest {
     public void testBoatCreation() {
         Boat boat1 = new Boat("Team 1");
         assertEquals(boat1.getTeamName(), "Team 1");
+        assertEquals(boat1.getVelocity(), (double) 10.0, 1e-15);
     }
 
     @Test
@@ -20,5 +21,14 @@ public class BoatTest {
         Boat boat1 = new Boat("Team 1");
         boat1.setTeamName("Team 2");
         assertEquals(boat1.getTeamName(), "Team 2");
+    }
+
+    @Test
+    public void testSetVelocity() {
+        Boat boat1 = new Boat("Team 1", 29.0);
+        assertEquals(boat1.getVelocity(), (double) 29.0, 1e-15);
+
+        boat1.setVelocity(12.0);
+        assertEquals(boat1.getVelocity(), (double)12.0, 1e-15);
     }
 }
