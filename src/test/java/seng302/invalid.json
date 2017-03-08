@@ -1,5 +1,9 @@
 {
   "time-scale": "abc",
   "race-name": 123,
-  "teams-with-wrong-name":["team1","team2","team3"]
+  "teams-with-wrong-name": [
+    "team1",
+    "team2",
+    "team3"
+  ]
 }
