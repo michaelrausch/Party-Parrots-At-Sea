@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
+import java.io.FileNotFoundException;
 
 public class App {
 
@@ -13,11 +14,19 @@ public class App {
      *
      * @return a Race object for the AC35 course
      */
-    public static Race createRace() throws Exception {
+    public static Race createRace(String configFile) throws Exception {
         Race race = new Race();
+        FileParser fp;
 
         // Read team names from file
-        FileParser fp = new FileParser("doc/examples/config.json");
+        try{
+            fp = new FileParser(configFile);
+        }
+        catch (FileNotFoundException e){
+            System.out.println("Config file does not exist");
+            return null;
+        }
+
         ArrayList<String> boatNames = new ArrayList<>();
         ArrayList<Map<String, Object>> teams = fp.getTeams();
 
@@ -60,9 +69,18 @@ public class App {
 
     public static void main(String[] args) {
         Race race = null;
+        String raceConfigFile;
+
+        if (args.length == 2 && args[0].equals("-f")){
+            raceConfigFile = args[1];
+        }
+        else{
+            // Use default config
+            raceConfigFile = "doc/examples/config.json";
+        }
 
         try {
-            race = createRace();
+            race = createRace(raceConfigFile);
         } catch (Exception e) {
             System.out.println("There was an error creating the race.");
         }
@@ -78,7 +96,6 @@ public class App {
 
             race.startRace();
 
-
             System.out.println("\n\n");
             System.out.println("######################");
             System.out.println("# Race Results   ");
@@ -88,7 +105,7 @@ public class App {
             race.displayFinishingOrder();
 
         } else {
-            System.out.println("There was an error creating the race.");
+            System.out.println("There was an error creating the race. Exiting.");
         }
     }
 }
