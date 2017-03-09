@@ -120,7 +120,7 @@ public class Race {
         for (int i = 0; i < numberOfBoats; i++) {
             String velocityKnots = String.format("%1.2f", boats[i].getVelocity() * 1.943844492);
 
-            System.out.println(boats[i].getTeamName() + " Velocity: " + velocityKnots);
+            System.out.println(boats[i].getTeamName() + " Velocity: " + velocityKnots + " Knots/s");
         }
     }
 
