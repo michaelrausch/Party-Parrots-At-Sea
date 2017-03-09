@@ -12,16 +12,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class FileParserTest {
 
-    /*
-        test if it fails from reading non existed file
+    /**
+     * test if it fails from reading non existed file
      */
     @Test(expected = FileNotFoundException.class)
     public void readNonExistedFile() throws Exception {
         FileParser fileParser = new FileParser("test/java/seng302/non-existed.json");
     }
 
-    /*
-        test a valid json file with valid content.
+    /**
+     * test a valid json file with valid content.
      */
     @Test
     public void readValidFile() throws Exception {
@@ -35,9 +35,9 @@ public class FileParserTest {
         assertEquals(6, fileParser.getTotalNumberOfTeams());
     }
 
-    /*
-        test an invalid json file within wrong type value and misnamed
-        variable name.
+    /**
+     * test an invalid json file within wrong type value and misnamed
+     * variable name.
      */
     @Test
     public void readInvalidFile() throws Exception {

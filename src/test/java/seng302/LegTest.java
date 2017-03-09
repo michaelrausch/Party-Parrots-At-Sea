@@ -9,10 +9,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class LegTest {
 
-    /*
-        Test creation of the leg by specifying a string
-        for the marker label
-    */
+    /**
+     * Test creation of the leg by specifying a string
+     * for the marker label
+     */
     @Test
     public void testLegCreationUsingMarkerLabel() {
         Leg leg = new Leg(010, 100, "Marker");
@@ -23,10 +23,10 @@ public class LegTest {
         assertEquals(leg.getIsFinishingLeg(), false);
     }
 
-    /*
-        Test creation of the leg by providing a
-		Marker object
-	*/
+    /**
+     * Test creation of the leg by providing a
+     * Marker object
+     */
     @Test
     public void testLegCreation() {
         Leg leg = new Leg(010, 100, new Marker("Marker"));
@@ -37,10 +37,10 @@ public class LegTest {
         assertEquals(leg.getIsFinishingLeg(), false);
     }
 
-    /*
-        Test changing whether or not a
-		leg is the finishing leg
-    */
+    /**
+     * Test changing whether or not a
+     * leg is the finishing leg
+     */
     @Test
     public void testSetFinishLeg() {
         Leg leg = new Leg(010, 100, "Marker");
