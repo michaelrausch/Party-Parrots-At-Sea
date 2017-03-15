@@ -1,6 +1,8 @@
 package seng302;
 
 import org.junit.Test;
+import seng302.models.Leg;
+import seng302.models.Marker;
 
 import static org.junit.Assert.assertEquals;
 

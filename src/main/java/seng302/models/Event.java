@@ -1,4 +1,4 @@
-package seng302;
+package seng302.models;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

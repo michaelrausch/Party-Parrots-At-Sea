@@ -1,6 +1,9 @@
 package seng302;
 
 import org.junit.Test;
+import seng302.models.Boat;
+import seng302.models.Event;
+import seng302.models.Leg;
 
 import static org.junit.Assert.assertEquals;
 

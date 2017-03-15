@@ -1,6 +1,7 @@
 package seng302;
 
 import org.junit.Test;
+import seng302.models.FileParser;
 
 import java.io.FileNotFoundException;
 

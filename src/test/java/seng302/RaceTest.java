@@ -1,6 +1,8 @@
 package seng302;
 
 import org.junit.Test;
+import seng302.models.Boat;
+import seng302.models.Race;
 
 import java.lang.reflect.Array;
 

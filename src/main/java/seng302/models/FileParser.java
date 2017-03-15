@@ -1,4 +1,4 @@
-package seng302;
+package seng302.models;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

@@ -1,4 +1,4 @@
-package seng302;
+package seng302.models;
 
 /**
 * Represents a boat in the race.

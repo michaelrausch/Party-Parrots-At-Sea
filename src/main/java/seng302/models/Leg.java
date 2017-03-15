@@ -1,4 +1,4 @@
-package seng302;
+package seng302.models;
 
 /**
 * Represents the leg of a race.
