@@ -8,9 +8,9 @@ import java.util.*;
 */
 public class Race {
     private ArrayList<Boat> boats; // The boats in the race
-    private ArrayList<Leg> legs; // The legs in the race
     private ArrayList<Boat> finishingOrder; // The order in which the boats finish the race
     private PriorityQueue<Event> events; // The events that occur in the race
+    private ArrayList<Mark> marks; // Marks in the race
     private int numberOfBoats = 0;
     private long startTime = 0;
     private double timeScale = 1;
@@ -20,15 +20,15 @@ public class Race {
     */
     public Race() {
         this.boats = new ArrayList<Boat>();
-        this.legs = new ArrayList<Leg>();
         this.finishingOrder = new ArrayList<Boat>();
+        this.marks = new ArrayList<Mark>();
 
         // create a priority queue with a custom Comparator to order events
         this.events = new PriorityQueue<Event>(new Comparator<Event>() {
             @Override
             public int compare(Event o1, Event o2) {
-                Long time1 = o1.getTime();
-                Long time2 = o2.getTime();
+                Double time1 = o1.getTime();
+                Double time2 = o2.getTime();
 
                 // order event asc. by time. if tie appears, then order team
                 // name alphabetically.
@@ -123,25 +123,6 @@ public class Race {
             System.out.println(boats[i].getTeamName() + " Velocity: " + velocityKnots + " Knots/s");
         }
     }
-
-    /**
-     * Adds a leg to the race
-     *
-     * @param leg, the leg to add to the race
-     */
-    public void addLeg(Leg leg) {
-        this.legs.add(leg);
-    }
-
-    /**
-     * Gets legs array
-     *
-     * @return an array of legs
-     */
-    public ArrayList<Leg> getLegs() {
-        return this.legs;
-    }
-
     /**
      * Sets time scale 
      *
@@ -156,18 +137,24 @@ public class Race {
      */
     private void generateEvents() {
         //calculate the time every boat passes each leg, and create an event
-        for (Boat boat : this.boats) {
-            long totalDistance = 0;
-            for (Leg leg : this.legs) {
-                long time = (long) (1000 * totalDistance / boat.getVelocity());
-                Event event = new Event(time, boat, leg);
-                events.add(event);
-                totalDistance += leg.getDistance();
 
-                // If finishing leg, add another event for when the boat finishes the race
-                if (leg.getIsFinishingLeg()) {
-                    time = (long) (1000 * totalDistance / boat.getVelocity());
-                    event = new Event(time, boat, leg, true);
+        for (Boat boat : this.boats) {
+            double totalDistance = 0;
+            int numberOfMarks = this.marks.size();
+
+            for(int i = 0; i < numberOfMarks; i++){
+                Double time = (Double) (1000 * totalDistance / boat.getVelocity());
+
+                // If there are marks after this event
+                if (i < numberOfMarks-1) {
+                    Event event = new Event(time, boat, marks.get(i), marks.get(i + 1));
+                    events.add(event);
+                    totalDistance += event.getDistanceBetweenMarks();
+
+                }
+                // There are no more marks after this event
+                else{
+                    Event event = new Event(time, boat, marks.get(i));
                     events.add(event);
                 }
             }
@@ -192,6 +179,7 @@ public class Race {
      */
     public void iterateEvents() {
         // iterates all events. ends when no event in events.
+
         while (!events.isEmpty()) {
             Event peekEvent = events.peek();
             long currentTime = (long) ((System.currentTimeMillis() - this.startTime) * this.timeScale);
@@ -201,7 +189,13 @@ public class Race {
 
                 // Display a summary of the event
                 System.out.println(nextEvent.getEventString());
-                nextEvent.boatPassedMarker();
+
+                // Display latitude and longitude
+                if (!nextEvent.getIsFinishingEvent()){
+                    System.out.println(nextEvent.getMark().getLatitude() + ", " + nextEvent.getNextMark().getLongitude());
+                }
+
+                System.out.println();
 
                 // If event is a boat finishing the race
                 if (nextEvent.getIsFinishingEvent()) {
@@ -230,20 +224,10 @@ public class Race {
     }
 
     /**
-     * Print the order in which the boats passed each marker
+     * Add a mark to the race (in order)
+     * @param mark, the mark to add
      */
-    public void showRaceMarkerResults() {
-        for (Leg leg : this.legs) {
-            Boat[] boats = leg.getMarker().getBoats();
-
-            System.out.println("--- " + leg.getMarkerLabel() + " ---");
-
-            // Print the order in which the boats passed the marker
-            for (int i = 0; i < this.getNumberOfBoats(); i++) {
-                System.out.println("#" + Integer.toString(i + 1) + " - " + boats[i].getTeamName());
-            }
-
-            System.out.println("");
-        }
+    public void addMark(Mark mark){
+        this.marks.add(mark);
     }
 }

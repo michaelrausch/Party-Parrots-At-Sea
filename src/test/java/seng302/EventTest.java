@@ -3,7 +3,7 @@ package seng302;
 import org.junit.Test;
 import seng302.models.Boat;
 import seng302.models.Event;
-import seng302.models.Leg;
+import seng302.models.Mark;
 
 import static org.junit.Assert.assertEquals;
 
@@ -15,29 +15,24 @@ public class EventTest {
 
     @Test
     public void getTimeString() throws Exception {
-        Leg leg = new Leg(35, 100, "Start");
         Boat boat = new Boat("testBoat");
-        Event event = new Event(1231242, boat, leg);
+        Event event = new Event(1231242.2, boat, new Mark("mark1"), new Mark("mark2"));
         assertEquals("20:31:242", event.getTimeString());
     }
 
-    /**
-    * ensure all boats are added as they pass the marker
-    */
     @Test
-    public void boatOrderTest() throws Exception {
-        Leg leg = new Leg(35, 100, "1");
+    public void testBoatHeading() throws Exception {
+        Boat boat = new Boat("testBoat");
+        Event event = new Event(1231242.2, boat, new Mark("mark1", 142.5, 122.1), new Mark("mark2", 121.9,99.2));
 
-        Boat boat1 = new Boat("testBoat");
-        Boat boat2 = new Boat("testBoat2");
+        assertEquals(event.getBoatHeading(), 221.9733862944651, 1e-15);
+    }
 
-        Event event1 = new Event(1231242, boat1, leg);
-        Event event2 = new Event(1231242, boat2, leg);
+    @Test
+    public void testDistanceBetweenMarks() throws Exception {
+        Boat boat = new Boat("testBoat");
+        Event event = new Event(1231242.2, boat, new Mark("mark1", 142.5, 122.1), new Mark("mark2", 121.9,99.2));
 
-        event1.boatPassedMarker();
-        event2.boatPassedMarker();
-
-        assertEquals(event1.getLeg().getMarker().getBoats()[0].getTeamName(), "testBoat");
-        assertEquals(event2.getLeg().getMarker().getBoats()[1].getTeamName(), "testBoat2");
+        assertEquals(event.getDistanceBetweenMarks(), 30.80211031731429, 1e-15);
     }
 }
