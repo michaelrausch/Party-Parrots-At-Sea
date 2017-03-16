@@ -16,11 +16,11 @@ public class OldApp {
      */
     public static Race createRace(String configFile) throws Exception {
         Race race = new Race();
-        FileParser fp;
+        OldFileParser fp;
 
         // Read team names from file
         try{
-            fp = new FileParser(configFile);
+            fp = new OldFileParser(configFile);
         }
         catch (FileNotFoundException e){
             System.out.println("Config file does not exist");
