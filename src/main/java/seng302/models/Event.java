@@ -114,7 +114,7 @@ public class Event {
         if (this.isFinishingEvent) {
             return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " finished the race");
         }
-
+        System.out.println(this.getDistanceBetweenMarks());
         return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.mark1.getName() + " going heading " + this.getBoatHeading() + "°");
     }
 
@@ -122,7 +122,17 @@ public class Event {
      * @return the distance between the two marks
      */
     public double getDistanceBetweenMarks(){
-        return Math.sqrt(Math.pow(mark1.getLatitude()-mark2.getLatitude(), 2) + Math.pow(mark1.getLongitude()-mark2.getLongitude(), 2));
+        //return Math.sqrt(Math.pow(mark1.getLatitude()-mark2.getLatitude(), 2) + Math.pow(mark1.getLongitude()-mark2.getLongitude(), 2));
+        double earth_radius = 6378.137;
+        double dLat = this.mark2.getLatitude() * Math.PI / 180 - this.mark1.getLatitude() * Math.PI / 180;
+        double dLon = this.mark2.getLongitude() * Math.PI / 180 - this.mark1.getLongitude() * Math.PI / 180;
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(this.mark1.getLatitude() * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = earth_radius * c;
+
+        return d * 1000;
     }
 
     /**
