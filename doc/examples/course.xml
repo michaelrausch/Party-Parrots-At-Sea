@@ -1,0 +1,61 @@
+<course>
+    <marks>
+        <gate>
+            <name>Start</name>
+            <mark>
+                <lat>32.296038</lat>
+                <lon>-64.854401</lon>
+            </mark>
+            <mark>
+                <lat>32.293834</lat>
+                <lon>-64.855195</lon>
+            </mark>
+        </gate>
+        <mark>
+            <name>Mid Mark</name>
+            <lat>32.292881</lat>
+            <lon>-64.843231</lon>
+        </mark>
+        <gate>
+            <name>Leeward Gate</name>
+            <mark>
+                <lat>32.283808</lat>
+                <lon>-64.850012</lon>
+            </mark>
+            <mark>
+                <lat>32.283216</lat>
+                <lon>-64.847686</lon>
+            </mark>
+        </gate>
+        <gate>
+            <name>Windward Gate</name>
+            <mark>
+                <lat>32.309908</lat>
+                <lon>-64.833665</lon>
+            </mark>
+            <mark>
+                <lat>32.309158</lat>
+                <lon>-64.830834</lon>
+            </mark>
+        </gate>
+        <gate>
+            <name>Finish</name>
+            <mark>
+                <lat>32.318439</lat>
+                <lon>-64.837367</lon>
+            </mark>
+            <mark>
+                <lat>32.318303</lat>
+                <lon>-64.834974</lon>
+            </mark>
+        </gate>
+    </marks>
+    <order>
+        <one>Start</one>
+        <two>Mid Mark</two>
+        <three>Leeward Gate</three>
+        <four>Windward Gate</four>
+        <five>Leeward Gate</five>
+        <six>Finish</six>
+    </order>
+</course>
