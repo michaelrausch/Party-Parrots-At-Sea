@@ -1,5 +1,7 @@
 package seng302.models;
 
+import javafx.scene.paint.Color;
+
 /**
 * Represents a boat in the race.
 */
@@ -10,6 +12,7 @@ public class Boat {
     private double lat; // Boats position
     private double lon; // -
     private double distanceToNextMark;
+    private Color color;
 
     public Boat(String teamName) {
         this.teamName = teamName;
@@ -17,6 +20,7 @@ public class Boat {
         this.lat = 0.0;
         this.lon = 0.0;
         this.distanceToNextMark = 0.0;
+        this.color = Colors.getColor();
     }
 
     /**
@@ -88,5 +92,9 @@ public class Boat {
 
     public double getLongitude(){
         return this.lon;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }
