@@ -55,7 +55,7 @@ public class App {
         }
 
         race.addLeg(new Leg(35, 100, "Start"));
-        race.addLeg(new Leg(10, 300, "Marker 1"));
+        race.addLeg(new Leg(10, 300, "Mark 1"));
         race.addLeg(new Leg(350, 400, "Leeward Gate"));
         race.addLeg(new Leg(10, 400, "Windward Gate"));
 

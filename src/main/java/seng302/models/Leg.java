@@ -7,19 +7,19 @@ public class Leg {
     private int heading;
     private int distance;
     private boolean isFinishingLeg;
-    private Marker startingMarker;
+    private Mark startingMark;
 
     /**
      * Create a new leg
      *
      * @param heading,  the magnetic heading of this leg
      * @param distance, the total distance of this leg in meters
-     * @param marker,   the marker this leg starts on
+     * @param mark,   the mark this leg starts on
      */
-    public Leg(int heading, int distance, Marker marker) {
+    public Leg(int heading, int distance, Mark mark) {
         this.heading = heading;
         this.distance = distance;
-        this.startingMarker = marker;
+        this.startingMark = mark;
         this.isFinishingLeg = false;
     }
 
@@ -33,7 +33,7 @@ public class Leg {
     public Leg(int heading, int distance, String markerName) {
         this.heading = heading;
         this.distance = distance;
-        this.startingMarker = new Marker(markerName);
+        this.startingMark = new Mark(markerName);
         this.isFinishingLeg = false;
     }
 
@@ -68,29 +68,29 @@ public class Leg {
     /**
      * Returns the marker this leg started on
      */
-    public Marker getMarker() {
-        return this.startingMarker;
+    public Mark getMarker() {
+        return this.startingMark;
     }
 
     /**
-     * Set the marker this leg starts on
+     * Set the mark this leg starts on
      */
-    public void setMarker(Marker marker) {
-        this.startingMarker = marker;
+    public void setMarker(Mark mark) {
+        this.startingMark = mark;
     }
 
     /**
      * Returns the name of the marker this leg started on
      */
     public String getMarkerLabel() {
-        return this.startingMarker.getName();
+        return this.startingMark.getName();
     }
 
     /**
      * Tell the marker that the boat has passed it
      */
     public void addBoatToMarker(Boat boat) {
-        this.startingMarker.addBoat(boat);
+        this.startingMark.addBoat(boat);
     }
 
     /**
