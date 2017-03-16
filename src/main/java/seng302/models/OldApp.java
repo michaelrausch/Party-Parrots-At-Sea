@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.io.FileNotFoundException;
 
-public class App {
+public class OldApp {
 
     /**
      * Builds a race object for the AC35 course
@@ -54,30 +54,22 @@ public class App {
             race.addBoat(new Boat(boatNames.get(i), (Double) (teams.get(i).get("velocity"))));
         }
 
-        race.addLeg(new Leg(35, 100, "Start"));
-        race.addLeg(new Leg(10, 300, "Mark 1"));
-        race.addLeg(new Leg(350, 400, "Leeward Gate"));
-        race.addLeg(new Leg(10, 400, "Windward Gate"));
-
-        Leg finishingLeg = new Leg(10, 400, "Leeward Gate");
-        finishingLeg.setFinishingLeg(true);
-
-        race.addLeg(finishingLeg);
+        // Add marks to race in order
+        race.addMark(new Mark("Start", 32.296038,-64.854401  ));
+        race.addMark(new Mark("Mid Mark", 32.292881,-64.843231  ));
+        race.addMark(new Mark("Leeward Gate", 32.283808,-64.850012  ));
+        race.addMark(new Mark("Windward Gate", 32.309908,-64.833665  ));
+        race.addMark(new Mark("Finish", 32.318439,-64.837367  ));
 
         return race;
     }
 
-    public static void main(String[] args) {
+    public static void main() {
         Race race = null;
         String raceConfigFile;
 
-        if (args.length == 2 && args[0].equals("-f")){
-            raceConfigFile = args[1];
-        }
-        else{
-            // Use default config
-            raceConfigFile = "doc/examples/config.json";
-        }
+        raceConfigFile = "doc/examples/config.json";
+
 
         try {
             race = createRace(raceConfigFile);
@@ -101,7 +93,7 @@ public class App {
             System.out.println("# Race Results   ");
             System.out.println("######################");
 
-            race.showRaceMarkerResults();
+            //race.showRaceMarkerResults();
             race.displayFinishingOrder();
 
         } else {

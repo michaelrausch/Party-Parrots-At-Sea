@@ -7,10 +7,16 @@ public class Boat {
 
     private String teamName; // The name of the team, this is also the name of the boat
     private double velocity; // In meters/second
+    private double lat; // Boats position
+    private double lon; // -
+    private double distanceToNextMark;
 
     public Boat(String teamName) {
         this.teamName = teamName;
         this.velocity = 10; // Default velocity
+        this.lat = 0.0;
+        this.lon = 0.0;
+        this.distanceToNextMark = 0.0;
     }
 
     /**
@@ -22,6 +28,7 @@ public class Boat {
     public Boat(String teamName, double boatVelocity) {
         this.teamName = teamName;
         this.velocity = boatVelocity;
+        this.distanceToNextMark = 0.0;
     }
 
     /**
@@ -58,5 +65,28 @@ public class Boat {
      */
     public void setVelocity(double velocity) {
         this.velocity = velocity;
+    }
+
+    /**
+     * Sets the boats location
+     *
+     * @param lat, the boats latitude
+     * @param lon, the boats longitude
+     */
+    public void setLocation(double lat, double lon) {
+        this.lat = lat;
+        this.lon = lon;
+    }
+
+    public void setDistanceToNextMark(double distance){
+        this.distanceToNextMark = distance;
+    }
+
+    public double getLatitude(){
+        return this.lat;
+    }
+
+    public double getLongitude(){
+        return this.lon;
     }
 }

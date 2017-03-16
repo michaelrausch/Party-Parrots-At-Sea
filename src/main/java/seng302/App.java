@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-
 public class App extends Application
 {
     @Override
@@ -16,6 +15,8 @@ public class App extends Application
         Parent root = FXMLLoader.load(getClass().getResource("/RaceView.fxml"));
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
+
+        //OldApp.main(); // Run this to show how positions are updated
 
         primaryStage.show();
     }

@@ -12,14 +12,28 @@ public class Mark {
     private ArrayList<Boat> boatOrder;
 
 	/**
-	* Represents the marker at the beginning of a leg
+	* Represents a marker
 	*
-	* @param name, the name of the marker
+	* @param name, the name of the marker*
+    * @param lat, the latitude of the marker
+    * @param lon, the longitude of the marker
 	*/
 	public Mark(String name, double lat, double lon){
 		this.name = name;
 		this.lat = lat;
 		this.lon = lon;
+		this.boatOrder = new ArrayList<Boat>();
+	}
+
+	/**
+	 * Represents the marker at the beginning of a leg
+	 *
+	 * @param name, the name of the marker
+	 */
+	public Mark(String name){
+		this.name = name;
+		this.lat = 0;
+		this.lon = 0;
 		this.boatOrder = new ArrayList<Boat>();
 	}
 
@@ -35,4 +49,11 @@ public class Mark {
 	public Boat[] getBoats(){
 		return this.boatOrder.toArray(new Boat[this.boatOrder.size()]);
 	}
+	public double getLatitude(){
+	    return this.lat;
+    }
+
+    public double getLongitude(){
+	    return this.lon;
+    }
 }
