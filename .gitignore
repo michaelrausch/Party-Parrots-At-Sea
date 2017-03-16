@@ -84,6 +84,9 @@ nbactions.xml
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff:
+# get rid of these annoying files
+.idea/
+*.iml
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/dictionaries
