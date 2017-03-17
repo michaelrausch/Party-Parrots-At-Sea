@@ -16,7 +16,7 @@ import java.util.Map;
  * efficiently from external files.
  */
 
-public class FileParser {
+public class OldFileParser {
 
     private String filePath;
     private JSONObject content;
@@ -27,7 +27,7 @@ public class FileParser {
      * @param filePath a string like path to show location of desired file to
      *                 be parsed
      */
-    public FileParser(String filePath) throws Exception {
+    public OldFileParser(String filePath) throws Exception {
         this.filePath = filePath;
         this.readFile();
     }

@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+
+<teams>
+    <team>
+        <name>Oracle Team USA</name>
+        <alais>USA</alais>
+        <speed>23.4</speed>
+    </team>
+    <team>
+        <name>Emirates Team New Zealand</name>
+        <alais>NZL</alais>
+        <speed>25.2</speed>
+    </team>
+</teams>
