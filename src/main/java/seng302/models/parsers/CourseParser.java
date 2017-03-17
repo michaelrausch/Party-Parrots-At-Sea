@@ -1,8 +1,7 @@
 package seng302.models.parsers;
 
 import org.w3c.dom.*;
-import seng302.models.GateMark;
-import seng302.models.Mark;
+import seng302.models.mark.*;
 
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -26,15 +25,15 @@ public class CourseParser extends FileParser {
 	 * @param node
 	 * @return a mark, or null if fails to create a mark
 	 */
-	private Mark generateMark(Node node) {
+	private SingleMark generateSingleMark(Node node) {
 		try {
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element element = (Element) node;
 				String name = element.getElementsByTagName("name").item(0).getTextContent();
 				double lat = Double.valueOf(element.getElementsByTagName("latitude").item(0).getTextContent());
 				double lon = Double.valueOf(element.getElementsByTagName("longitude").item(0).getTextContent());
-				Mark mark = new Mark(name, lat, lon);
-				return mark;
+				SingleMark singleMark = new SingleMark(name, lat, lon);
+				return singleMark;
 			} else {
 				throw new NoSuchElementException("Cannot generate a mark by given node.");
 			}
@@ -49,7 +48,7 @@ public class CourseParser extends FileParser {
 	 *
 	 * @return an arrayList of gates, or null if no gate has been found.
 	 */
-	public ArrayList<GateMark> getGates() {
+	public ArrayList<GateMark> getGateMarks() {
 		ArrayList<GateMark> gateMarks = new ArrayList<>();
 
 		try {
@@ -61,8 +60,8 @@ public class CourseParser extends FileParser {
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
 					Element element = (Element) node;
 					String name = element.getElementsByTagName("name").item(0).getTextContent();
-					Mark mark1 = generateMark(element.getElementsByTagName("mark").item(0));
-					Mark mark2 = generateMark(element.getElementsByTagName("mark").item(1));
+					SingleMark mark1 = generateSingleMark(element.getElementsByTagName("mark").item(0));
+					SingleMark mark2 = generateSingleMark(element.getElementsByTagName("mark").item(1));
 					GateMark gateMark = new GateMark(name, mark1, mark2);
 					gateMarks.add(gateMark);
 				}
@@ -78,8 +77,8 @@ public class CourseParser extends FileParser {
 	 *
 	 * @return an arrayList of marks, or null if no gate has been found.
 	 */
-	public ArrayList<Mark> getMarks() {
-		ArrayList<Mark> marks = new ArrayList<>();
+	public ArrayList<SingleMark> getSingleMarks() {
+		ArrayList<SingleMark> singleMarks = new ArrayList<>();
 
 		try {
 			// find the "marks" tag
@@ -90,11 +89,11 @@ public class CourseParser extends FileParser {
 				if (n.getNodeType() == Node.ELEMENT_NODE) {
 					Element element = (Element) n;
 					if (element.getNodeName() == "mark") {
-						marks.add(generateMark(n));
+						singleMarks.add(generateSingleMark(n));
 					}
 				}
 			}
-			return marks;
+			return singleMarks;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
