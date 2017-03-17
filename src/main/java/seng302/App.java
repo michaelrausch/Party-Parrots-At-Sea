@@ -10,13 +10,12 @@ public class App extends Application
 {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        System.out.println(getClass().getResource("/RaceView.fxml"));
-
         Parent root = FXMLLoader.load(getClass().getResource("/RaceView.fxml"));
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
 
-        seng302.models.OldApp.main(); // Run this to show how positions are updated
+//        seng302.models.OldApp.main(); // Run this to show how positions are updated
+//        seng302.controllers.RaceController.initializeRace();
 
         primaryStage.show();
     }

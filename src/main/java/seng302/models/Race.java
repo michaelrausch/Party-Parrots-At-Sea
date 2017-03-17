@@ -1,5 +1,6 @@
 package seng302.models;
 
+import seng302.models.mark.Mark;
 import seng302.models.mark.SingleMark;
 
 import java.lang.reflect.Array;
@@ -11,8 +12,8 @@ import java.util.*;
 public class Race {
     private ArrayList<Boat> boats; // The boats in the race
     private ArrayList<Boat> finishingOrder; // The order in which the boats finish the race
-    private PriorityQueue<Event> events; // The events that occur in the race
-    private ArrayList<SingleMark> singleMarks; // Marks in the race
+    private HashMap<Boat, List> events = new HashMap<>(); // The events that occur in the race
+    private ArrayList<Mark> marks; // Marks in the race
     private int numberOfBoats = 0;
     private long startTime = 0;
     private double timeScale = 1;
@@ -23,24 +24,24 @@ public class Race {
     public Race() {
         this.boats = new ArrayList<Boat>();
         this.finishingOrder = new ArrayList<Boat>();
-        this.singleMarks = new ArrayList<SingleMark>();
+        this.marks = new ArrayList<Mark>();
 
         // create a priority queue with a custom Comparator to order events
-        this.events = new PriorityQueue<Event>(new Comparator<Event>() {
-            @Override
-            public int compare(Event o1, Event o2) {
-                Double time1 = o1.getTime();
-                Double time2 = o2.getTime();
-
-                // order event asc. by time. if tie appears, then order team
-                // name alphabetically.
-                if (time1 != time2) {
-                    return time1.compareTo(time2);
-                } else {
-                    return o1.getBoat().getTeamName().compareTo(o2.getBoat().getTeamName());
-                }
-            }
-        });
+//        this.events = new PriorityQueue<Event>(new Comparator<Event>() {
+//            @Override
+//            public int compare(Event o1, Event o2) {
+//                Double time1 = o1.getTime();
+//                Double time2 = o2.getTime();
+//
+//                // order event asc. by time. if tie appears, then order team
+//                // name alphabetically.
+//                if (time1 != time2) {
+//                    return time1.compareTo(time2);
+//                } else {
+//                    return o1.getBoat().getTeamName().compareTo(o2.getBoat().getTeamName());
+//                }
+//            }
+//        });
     }
 
     /**
@@ -142,23 +143,28 @@ public class Race {
 
         for (Boat boat : this.boats) {
             double totalDistance = 0;
-            int numberOfMarks = this.singleMarks.size();
+            int numberOfMarks = this.marks.size();
 
             for(int i = 0; i < numberOfMarks; i++){
                 Double time = (Double) (1000 * totalDistance / boat.getVelocity());
 
                 // If there are singleMarks after this event
                 if (i < numberOfMarks-1) {
-                    Event event = new Event(time, boat, singleMarks.get(i), singleMarks.get(i + 1));
-                    events.add(event);
-                    totalDistance += event.getDistanceBetweenMarks();
+                    Event event = new Event(time, boat, marks.get(i), marks.get(i + 1));
 
+                    try {
+                        events.get(boat).add(event);
+
+                    } catch (NullPointerException e) {
+                        events.put(boat, new ArrayList<Event>(Arrays.asList(event)));
+                    }
+                    totalDistance += event.getDistanceBetweenMarks();
                 }
-                // There are no more singleMarks after this event
-                else{
-                    Event event = new Event(time, boat, singleMarks.get(i));
-                    events.add(event);
-                }
+                // There are no more marks after this event
+//                else{
+//                    Event event = new Event(time, boat, marks.get(i));
+//                    events.put(boat, new ArrayList<Event>(Arrays.asList(event)));
+//                }
             }
         }
     }
@@ -179,40 +185,40 @@ public class Race {
      * Iterate over events in the race and print the
      * event string for each event
      */
-    public void iterateEvents() {
-        // iterates all events. ends when no event in events.
-
-        while (!events.isEmpty()) {
-            Event peekEvent = events.peek();
-            long currentTime = (long) ((System.currentTimeMillis() - this.startTime) * this.timeScale);
-
-            if (currentTime > peekEvent.getTime()) {
-                Event nextEvent = events.poll();
-
-                // Display a summary of the event
-                System.out.println(nextEvent.getEventString());
-
-                // Display latitude and longitude
-                if (!nextEvent.getIsFinishingEvent()){
-                    System.out.println(nextEvent.getMark().getLatitude() + ", " + nextEvent.getNextMark().getLongitude());
-                }
-
-                System.out.println();
-
-                // If event is a boat finishing the race
-                if (nextEvent.getIsFinishingEvent()) {
-                    this.finishingOrder.add(nextEvent.getBoat());
-                }
-            }
-
-            // Wait for 100ms to throttle the while loop
-            try {
-                Thread.sleep(100);
-            } catch (java.lang.InterruptedException e) {
-                continue;
-            }
-        }
-    }
+//    public void iterateEvents() {
+//        // iterates all events. ends when no event in events.
+//
+//        while (!events.isEmpty()) {
+//            Event peekEvent = events.peek();
+//            long currentTime = (long) ((System.currentTimeMillis() - this.startTime) * this.timeScale);
+//
+//            if (currentTime > peekEvent.getTime()) {
+//                Event nextEvent = events.poll();
+//
+//                // Display a summary of the event
+//                System.out.println(nextEvent.getEventString());
+//
+//                // Display latitude and longitude
+//                if (!nextEvent.getIsFinishingEvent()){
+//                    System.out.println(nextEvent.getMark().getLatitude() + ", " + nextEvent.getNextMark().getLongitude());
+//                }
+//
+//                System.out.println();
+//
+//                // If event is a boat finishing the race
+//                if (nextEvent.getIsFinishingEvent()) {
+//                    this.finishingOrder.add(nextEvent.getBoat());
+//                }
+//            }
+//
+//            // Wait for 100ms to throttle the while loop
+//            try {
+//                Thread.sleep(100);
+//            } catch (java.lang.InterruptedException e) {
+//                continue;
+//            }
+//        }
+//    }
 
     /**
      * Start the race and print each marker with the order
@@ -221,8 +227,8 @@ public class Race {
     public void startRace() {
         // record start time.
         generateEvents();
-        this.startTime = System.currentTimeMillis();
-        iterateEvents();
+//        this.startTime = System.currentTimeMillis();
+//        iterateEvents();
     }
 
     /**
@@ -230,6 +236,10 @@ public class Race {
      * @param singleMark, the singleMark to add
      */
     public void addMark(SingleMark singleMark){
-        this.singleMarks.add(singleMark);
+        this.marks.add(singleMark);
+    }
+
+    public HashMap<Boat, List> getEvents() {
+        return events;
     }
 }
