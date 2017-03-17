@@ -2,7 +2,7 @@ package seng302;
 
 import org.junit.Test;
 import seng302.models.Leg;
-import seng302.models.Mark;
+import seng302.models.mark.SingleMark;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,25 +17,25 @@ public class LegTest {
      */
     @Test
     public void testLegCreationUsingMarkerLabel() {
-        Leg leg = new Leg(010, 100, "Mark");
+        Leg leg = new Leg(010, 100, "SingleMark");
 
         assertEquals(leg.getHeading(), 010);
         assertEquals(leg.getDistance(), 100);
-        assertEquals(leg.getMarkerLabel(), "Mark");
+        assertEquals(leg.getMarkerLabel(), "SingleMark");
         assertEquals(leg.getIsFinishingLeg(), false);
     }
 
     /**
      * Test creation of the leg by providing a
-     * Mark object
+     * SingleMark object
      */
     @Test
     public void testLegCreation() {
-        Leg leg = new Leg(010, 100, new Mark("Mark"));
+        Leg leg = new Leg(010, 100, new SingleMark("SingleMark"));
 
         assertEquals(leg.getHeading(), 010);
         assertEquals(leg.getDistance(), 100);
-        assertEquals(leg.getMarkerLabel(), "Mark");
+        assertEquals(leg.getMarkerLabel(), "SingleMark");
         assertEquals(leg.getIsFinishingLeg(), false);
     }
 
@@ -45,7 +45,7 @@ public class LegTest {
      */
     @Test
     public void testSetFinishLeg() {
-        Leg leg = new Leg(010, 100, "Mark");
+        Leg leg = new Leg(010, 100, "SingleMark");
 
         leg.setFinishingLeg(true);
         assertEquals(leg.getIsFinishingLeg(), true);

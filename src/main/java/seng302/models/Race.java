@@ -1,5 +1,7 @@
 package seng302.models;
 
+import seng302.models.mark.SingleMark;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -10,7 +12,7 @@ public class Race {
     private ArrayList<Boat> boats; // The boats in the race
     private ArrayList<Boat> finishingOrder; // The order in which the boats finish the race
     private PriorityQueue<Event> events; // The events that occur in the race
-    private ArrayList<Mark> marks; // Marks in the race
+    private ArrayList<SingleMark> singleMarks; // Marks in the race
     private int numberOfBoats = 0;
     private long startTime = 0;
     private double timeScale = 1;
@@ -21,7 +23,7 @@ public class Race {
     public Race() {
         this.boats = new ArrayList<Boat>();
         this.finishingOrder = new ArrayList<Boat>();
-        this.marks = new ArrayList<Mark>();
+        this.singleMarks = new ArrayList<SingleMark>();
 
         // create a priority queue with a custom Comparator to order events
         this.events = new PriorityQueue<Event>(new Comparator<Event>() {
@@ -140,21 +142,21 @@ public class Race {
 
         for (Boat boat : this.boats) {
             double totalDistance = 0;
-            int numberOfMarks = this.marks.size();
+            int numberOfMarks = this.singleMarks.size();
 
             for(int i = 0; i < numberOfMarks; i++){
                 Double time = (Double) (1000 * totalDistance / boat.getVelocity());
 
-                // If there are marks after this event
+                // If there are singleMarks after this event
                 if (i < numberOfMarks-1) {
-                    Event event = new Event(time, boat, marks.get(i), marks.get(i + 1));
+                    Event event = new Event(time, boat, singleMarks.get(i), singleMarks.get(i + 1));
                     events.add(event);
                     totalDistance += event.getDistanceBetweenMarks();
 
                 }
-                // There are no more marks after this event
+                // There are no more singleMarks after this event
                 else{
-                    Event event = new Event(time, boat, marks.get(i));
+                    Event event = new Event(time, boat, singleMarks.get(i));
                     events.add(event);
                 }
             }
@@ -224,10 +226,10 @@ public class Race {
     }
 
     /**
-     * Add a mark to the race (in order)
-     * @param mark, the mark to add
+     * Add a singleMark to the race (in order)
+     * @param singleMark, the singleMark to add
      */
-    public void addMark(Mark mark){
-        this.marks.add(mark);
+    public void addMark(SingleMark singleMark){
+        this.singleMarks.add(singleMark);
     }
 }
