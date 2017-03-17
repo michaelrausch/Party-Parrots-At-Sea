@@ -16,7 +16,7 @@ public class App extends Application
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
 
-        //OldApp.main(); // Run this to show how positions are updated
+        seng302.models.OldApp.main(); // Run this to show how positions are updated
 
         primaryStage.show();
     }

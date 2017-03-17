@@ -1,5 +1,7 @@
 package seng302.models;
 
+import seng302.models.mark.SingleMark;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,11 +57,11 @@ public class OldApp {
         }
 
         // Add marks to race in order
-        race.addMark(new Mark("Start", 32.296038,-64.854401  ));
-        race.addMark(new Mark("Mid Mark", 32.292881,-64.843231  ));
-        race.addMark(new Mark("Leeward Gate", 32.283808,-64.850012  ));
-        race.addMark(new Mark("Windward Gate", 32.309908,-64.833665  ));
-        race.addMark(new Mark("Finish", 32.318439,-64.837367  ));
+        race.addMark(new SingleMark("Start", 32.296038,-64.854401  ));
+        race.addMark(new SingleMark("Mid SingleMark", 32.292881,-64.843231  ));
+        race.addMark(new SingleMark("Leeward Gate", 32.283808,-64.850012  ));
+        race.addMark(new SingleMark("Windward Gate", 32.309908,-64.833665  ));
+        race.addMark(new SingleMark("Finish", 32.318439,-64.837367  ));
 
         return race;
     }

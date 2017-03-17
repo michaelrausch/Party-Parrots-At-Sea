@@ -1,5 +1,7 @@
 package seng302.models;
 
+import seng302.models.mark.SingleMark;
+
 /**
 * Represents the leg of a race.
 */
@@ -7,19 +9,19 @@ public class Leg {
     private int heading;
     private int distance;
     private boolean isFinishingLeg;
-    private Mark startingMark;
+    private SingleMark startingSingleMark;
 
     /**
      * Create a new leg
      *
      * @param heading,  the magnetic heading of this leg
      * @param distance, the total distance of this leg in meters
-     * @param mark,   the mark this leg starts on
+     * @param singleMark,   the singleMark this leg starts on
      */
-    public Leg(int heading, int distance, Mark mark) {
+    public Leg(int heading, int distance, SingleMark singleMark) {
         this.heading = heading;
         this.distance = distance;
-        this.startingMark = mark;
+        this.startingSingleMark = singleMark;
         this.isFinishingLeg = false;
     }
 
@@ -33,7 +35,7 @@ public class Leg {
     public Leg(int heading, int distance, String markerName) {
         this.heading = heading;
         this.distance = distance;
-        this.startingMark = new Mark(markerName);
+        this.startingSingleMark = new SingleMark(markerName);
         this.isFinishingLeg = false;
     }
 
@@ -68,30 +70,25 @@ public class Leg {
     /**
      * Returns the marker this leg started on
      */
-    public Mark getMarker() {
-        return this.startingMark;
+    public SingleMark getMarker() {
+        return this.startingSingleMark;
     }
 
     /**
-     * Set the mark this leg starts on
+     * Set the singleMark this leg starts on
      */
-    public void setMarker(Mark mark) {
-        this.startingMark = mark;
+    public void setMarker(SingleMark singleMark) {
+        this.startingSingleMark = singleMark;
     }
 
     /**
      * Returns the name of the marker this leg started on
      */
     public String getMarkerLabel() {
-        return this.startingMark.getName();
+        return this.startingSingleMark.getName();
     }
 
-    /**
-     * Tell the marker that the boat has passed it
-     */
-    public void addBoatToMarker(Boat boat) {
-        this.startingMark.addBoat(boat);
-    }
+
 
     /**
      * Specify whether or not the race finishes on this leg
