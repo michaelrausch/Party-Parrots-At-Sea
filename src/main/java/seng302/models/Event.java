@@ -1,5 +1,6 @@
 package seng302.models;
 
+import seng302.models.mark.Mark;
 import seng302.models.mark.SingleMark;
 
 import java.text.SimpleDateFormat;
@@ -11,10 +12,10 @@ import java.util.Date;
 */
 public class Event {
     private Double time; // Time the event occurs
-    private Boat boat; 
+    private Boat boat;
     private boolean isFinishingEvent = false; // This event occurs when a boat finishes the race
-    private SingleMark singleMark1; // This mark
-    private SingleMark singleMark2; // Next SingleMark
+    private Mark mark1; // This mark
+    private Mark mark2; // Next mark
 
 
     /**
@@ -24,12 +25,12 @@ public class Event {
      * @param eventTime, what time the event happens
      * @param eventBoat, the boat that the event belongs to
      */
-    public Event(Double eventTime, Boat eventBoat, SingleMark singleMark1, SingleMark singleMark2) {
+    public Event(Double eventTime, Boat eventBoat, Mark mark1, Mark mark2) {
         this.time = eventTime;
         this.boat = eventBoat;
         //this.leg = eventLeg;
-        this.singleMark1 = singleMark1;
-        this.singleMark2 = singleMark2;
+        this.mark1 = mark1;
+        this.mark2 = mark2;
     }
 
     /**
@@ -39,10 +40,10 @@ public class Event {
      * @param eventTime, what time the event happens
      * @param eventBoat, the boat that the event belongs to
      */
-    public Event(Double eventTime, Boat eventBoat, SingleMark singleMark1) {
+    public Event(Double eventTime, Boat eventBoat, SingleMark mark1) {
         this.time = eventTime;
         this.boat = eventBoat;
-        this.singleMark1 = singleMark1;
+        this.mark1 = mark1;
         this.isFinishingEvent = true;
     }
 
@@ -110,21 +111,21 @@ public class Event {
             return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " finished the race");
         }
         System.out.println(this.getDistanceBetweenMarks());
-        return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.singleMark1.getName() + " going heading " + this.getBoatHeading() + "°");
+        return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.mark1.getName() + " going heading " + this.getBoatHeading() + "°");
     }
 
     /**
      * @return the distance between the two marks
      */
-    public double getDistanceBetweenMarks(){
-        //return Math.sqrt(Math.pow(singleMark1.getLatitude()-singleMark2.getLatitude(), 2) + Math.pow(singleMark1.getLongitude()-singleMark2.getLongitude(), 2));
+    public double getDistanceBetweenMarks() {
+        //return Math.sqrt(Math.pow(mark1.getLatitude()-mark2.getLatitude(), 2) + Math.pow(mark1.getLongitude()-mark2.getLongitude(), 2));
         double earth_radius = 6378.137;
-        double dLat = this.singleMark2.getLatitude() * Math.PI / 180 - this.singleMark1.getLatitude() * Math.PI / 180;
-        double dLon = this.singleMark2.getLongitude() * Math.PI / 180 - this.singleMark1.getLongitude() * Math.PI / 180;
+        double dLat = this.mark2.getLatitude() * Math.PI / 180 - this.mark1.getLatitude() * Math.PI / 180;
+        double dLon = this.mark2.getLongitude() * Math.PI / 180 - this.mark1.getLongitude() * Math.PI / 180;
 
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(this.singleMark1.getLatitude() * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(this.mark1.getLatitude() * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = earth_radius * c;
 
         return d * 1000;
@@ -133,8 +134,8 @@ public class Event {
     /**
      * @return the boats heading
      */
-    public double getBoatHeading(){
-        double bearing = Math.atan2(singleMark2.getLatitude() - singleMark1.getLatitude(), singleMark2.getLongitude() - singleMark1.getLongitude());
+    public double getBoatHeading() {
+        double bearing = Math.atan2(mark2.getLatitude() - mark1.getLatitude(), mark2.getLongitude() - mark1.getLongitude());
         if (bearing < 0) {
             bearing += Math.PI * 2;
         }
@@ -143,17 +144,19 @@ public class Event {
 
     /**
      * Get the mark the event happened on
+     *
      * @return the mark
      */
-    public SingleMark getMark(){
-        return this.singleMark1;
+    public Mark getMark() {
+        return this.mark2;
     }
 
     /**
      * Get the next mark
+     *
      * @return the next mark
      */
-    public SingleMark getNextMark(){
-        return this.singleMark2;
+    public Mark getNextMark() {
+        return this.mark1;
     }
 }

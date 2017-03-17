@@ -1,7 +1,6 @@
 package seng302.models;
 
-import seng302.models.mark.Mark;
-import seng302.models.mark.SingleMark;
+import seng302.models.mark.*;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -13,7 +12,7 @@ public class Race {
     private ArrayList<Boat> boats; // The boats in the race
     private ArrayList<Boat> finishingOrder; // The order in which the boats finish the race
     private HashMap<Boat, List> events = new HashMap<>(); // The events that occur in the race
-    private ArrayList<Mark> marks; // Marks in the race
+    private List<Mark> course; // Marks in the race
     private int numberOfBoats = 0;
     private long startTime = 0;
     private double timeScale = 1;
@@ -24,7 +23,7 @@ public class Race {
     public Race() {
         this.boats = new ArrayList<Boat>();
         this.finishingOrder = new ArrayList<Boat>();
-        this.marks = new ArrayList<Mark>();
+        this.course = new ArrayList<Mark>();
 
         // create a priority queue with a custom Comparator to order events
 //        this.events = new PriorityQueue<Event>(new Comparator<Event>() {
@@ -143,14 +142,14 @@ public class Race {
 
         for (Boat boat : this.boats) {
             double totalDistance = 0;
-            int numberOfMarks = this.marks.size();
+            int numberOfMarks = this.course.size();
 
             for(int i = 0; i < numberOfMarks; i++){
                 Double time = (Double) (1000 * totalDistance / boat.getVelocity());
 
                 // If there are singleMarks after this event
                 if (i < numberOfMarks-1) {
-                    Event event = new Event(time, boat, marks.get(i), marks.get(i + 1));
+                    Event event = new Event(time, boat, course.get(i), course.get(i + 1));
 
                     try {
                         events.get(boat).add(event);
@@ -230,13 +229,21 @@ public class Race {
 //        this.startTime = System.currentTimeMillis();
 //        iterateEvents();
     }
+//
+//    /**
+//     * Add a singleMark to the race (in order)
+//     * @param singleMark, the singleMark to add
+//     */
+//    public void addMark(SingleMark singleMark){
+//        this.marks.add(singleMark);
+//    }
 
-    /**
-     * Add a singleMark to the race (in order)
-     * @param singleMark, the singleMark to add
-     */
-    public void addMark(SingleMark singleMark){
-        this.marks.add(singleMark);
+    public void addCourse(List<Mark> course){
+        this.course = course;
+    }
+
+    public List<Mark> getCourse() {
+        return course;
     }
 
     public HashMap<Boat, List> getEvents() {

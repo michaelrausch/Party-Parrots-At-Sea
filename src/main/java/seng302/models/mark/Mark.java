@@ -8,6 +8,8 @@ public abstract class Mark {
 
     private String name;
     private MarkType markType;
+    private double latitude;
+    private double longitude;
 
     /**
      * Create a mark instance by passing its name and type
@@ -17,6 +19,13 @@ public abstract class Mark {
     public Mark (String name, MarkType markType) {
         this.name = name;
         this.markType = markType;
+    }
+
+    public Mark(String name, MarkType markType, double latitude, double longitude) {
+        this.name = name;
+        this.markType = markType;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public String getName() {
@@ -33,5 +42,13 @@ public abstract class Mark {
 
     public void setMarkType(MarkType markType) {
         this.markType = markType;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
     }
 }

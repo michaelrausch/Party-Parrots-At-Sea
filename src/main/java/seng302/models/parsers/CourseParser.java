@@ -4,6 +4,8 @@ import org.w3c.dom.*;
 import seng302.models.mark.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -13,6 +15,7 @@ import java.util.NoSuchElementException;
 public class CourseParser extends FileParser {
 
 	private Document doc;
+	private HashMap<String, Mark> marks = new HashMap<>();
 
 	public CourseParser(String path) {
 		super(path);
@@ -48,7 +51,7 @@ public class CourseParser extends FileParser {
 	 *
 	 * @return an arrayList of gates, or null if no gate has been found.
 	 */
-	public ArrayList<GateMark> getGateMarks() {
+	private void generateGateMarks() {
 		ArrayList<GateMark> gateMarks = new ArrayList<>();
 
 		try {
@@ -62,14 +65,13 @@ public class CourseParser extends FileParser {
 					String name = element.getElementsByTagName("name").item(0).getTextContent();
 					SingleMark mark1 = generateSingleMark(element.getElementsByTagName("mark").item(0));
 					SingleMark mark2 = generateSingleMark(element.getElementsByTagName("mark").item(1));
-					GateMark gateMark = new GateMark(name, mark1, mark2);
-					gateMarks.add(gateMark);
+					GateMark gateMark = new GateMark(name, mark1, mark2, mark1.getLatitude(), mark1.getLongitude());
+					marks.put(name, gateMark);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return gateMarks;
 	}
 
 	/**
@@ -77,7 +79,7 @@ public class CourseParser extends FileParser {
 	 *
 	 * @return an arrayList of marks, or null if no gate has been found.
 	 */
-	public ArrayList<SingleMark> getSingleMarks() {
+	private void generateSingleMarks() {
 		ArrayList<SingleMark> singleMarks = new ArrayList<>();
 
 		try {
@@ -89,14 +91,13 @@ public class CourseParser extends FileParser {
 				if (n.getNodeType() == Node.ELEMENT_NODE) {
 					Element element = (Element) n;
 					if (element.getNodeName() == "mark") {
-						singleMarks.add(generateSingleMark(n));
+						Mark mark = generateSingleMark(n);
+						marks.put(mark.getName(), mark);
 					}
 				}
 			}
-			return singleMarks;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
 		}
 	}
 
@@ -105,7 +106,7 @@ public class CourseParser extends FileParser {
 	 *
 	 * @return an arrayList of the names of ordered course marks
 	 */
-	public ArrayList<String> getOrder() {
+	private ArrayList<String> getOrder() {
 		ArrayList<String> markOrder = new ArrayList<>();
 
 		try {
@@ -121,5 +122,19 @@ public class CourseParser extends FileParser {
 			e.printStackTrace();
 		}
 		return markOrder;
+	}
+
+	public ArrayList<Mark> getCourse() {
+		generateSingleMarks();
+		generateGateMarks();
+		ArrayList<Mark> course = new ArrayList<>();
+		try {
+            for (String mark : getOrder()) {
+                course.add(marks.get(mark));
+            }
+        } catch (Exception e) {
+		    e.printStackTrace();
+        }
+		return course;
 	}
 }

@@ -1,31 +1,31 @@
 {
   "race-name": "AC35",
   "time-scale": 1.0,
-  "race-size": 2,
+  "race-size": 6,
   "teams": [
     {
       "team-name": "Oracle Team USA",
-      "velocity": 20.9
+      "velocity": 30.9
     },
     {
       "team-name": "Artemis Racing",
-      "velocity": 18.3
+      "velocity": 10.3
     },
     {
       "team-name": "Emirates Team New Zealand",
-      "velocity": 21.5
+      "velocity": 51.5
     },
     {
       "team-name": "Groupama Team France",
-      "velocity": 19.9
+      "velocity": 9.9
     },
     {
       "team-name": "Land Rover BAR",
-      "velocity": 17.6
+      "velocity": 99.6
     },
     {
       "team-name": "SoftBank Team Japan",
-      "velocity": 16.6
+      "velocity": 45.6
     }
   ]
 }

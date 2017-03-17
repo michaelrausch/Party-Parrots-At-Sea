@@ -12,6 +12,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import seng302.models.*;
+import seng302.models.mark.Mark;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,14 +25,16 @@ import static java.lang.Math.abs;
  */
 public class CanvasController {
     @FXML private Canvas canvas;
+    Race race;
+    GraphicsContext gc;
 
 
     public void initialize() {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc = canvas.getGraphicsContext2D();
         gc.scale(5,5);
         RaceController raceController = new RaceController();
         raceController.initializeRace();
-        Race race = raceController.getRace();
+        race = raceController.getRace();
         HashMap<Boat, TimelineInfo> timelineInfos = new HashMap<>();
 
         HashMap<Boat, List> boat_events = race.getEvents();
@@ -60,12 +63,13 @@ public class CanvasController {
             public void handle(long now) {
                 GraphicsContext gc = canvas.getGraphicsContext2D();
                 gc.clearRect(0,0,760,360);
+                drawCourse();
                 gc.setFill(Color.FORESTGREEN);
                 for (Boat boat: timelineInfos.keySet()){
                     TimelineInfo timelineInfo = timelineInfos.get(boat);
 //                    System.out.println(timelineInfo.getX().doubleValue());
 //                    System.out.println(timelineInfo.getY().doubleValue());
-                    drawBoat(gc, timelineInfo.getX().doubleValue(), timelineInfo.getY().doubleValue(), boat.getColor());
+                    drawBoat(timelineInfo.getX().doubleValue(), timelineInfo.getY().doubleValue(), boat.getColor());
                 }
             }
         };
@@ -86,7 +90,7 @@ public class CanvasController {
 
     }
 
-    private void drawBoat(GraphicsContext gc, double x, double y, Color color) {
+    private void drawBoat(double x, double y, Color color) {
         x = abs(x - 32.313291) * 1000;  // to prevent negative longtitude
         y = abs(y + 64.887057) * 1000;  // to prevent negative latitude
 
@@ -94,5 +98,15 @@ public class CanvasController {
         int diameter = 2;
         gc.setFill(color);
         gc.fillOval(x, y, diameter, diameter);
+    }
+
+    private void drawCourse(){
+        for (Mark mark: race.getCourse()){
+            double x = abs(mark.getLatitude() - 32.313291) * 1000;  // to prevent negative longtitude
+            double y = abs(mark.getLongitude() + 64.887057) * 1000;  // to prevent negative latitude
+
+            gc.setFill(Color.BLACK);
+            gc.fillOval(x, y, 2, 2);
+        }
     }
 }

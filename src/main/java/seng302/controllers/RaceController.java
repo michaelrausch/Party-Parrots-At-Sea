@@ -1,8 +1,9 @@
 package seng302.controllers;
 
 import seng302.models.Boat;
-import seng302.models.FileParser;
-import seng302.models.Mark;
+import seng302.models.OldFileParser;
+import seng302.models.parsers.*;
+import seng302.models.mark.*;
 import seng302.models.Race;
 
 import java.io.FileNotFoundException;
@@ -38,11 +39,11 @@ public class RaceController {
 
     public Race createRace(String configFile) throws Exception {
         Race race = new Race();
-        FileParser fp;
+        OldFileParser fp;
 
         // Read team names from file
         try{
-            fp = new FileParser(configFile);
+            fp = new OldFileParser(configFile);
         }
         catch (FileNotFoundException e){
             System.out.println("Config file does not exist");
@@ -76,12 +77,8 @@ public class RaceController {
             race.addBoat(new Boat(boatNames.get(i), (Double) (teams.get(i).get("velocity"))));
         }
 
-        // Add marks to race in order
-        race.addMark(new Mark("Start", 32.296038,-64.854401  ));
-        race.addMark(new Mark("Mid Mark", 32.292881,-64.843231  ));
-        race.addMark(new Mark("Leeward Gate", 32.283808,-64.850012  ));
-        race.addMark(new Mark("Windward Gate", 32.309908,-64.833665  ));
-        race.addMark(new Mark("Finish", 32.318439,-64.837367  ));
+        CourseParser cp = new CourseParser("doc/examples/course.xml");
+        race.addCourse(cp.getCourse());
 
         return race;
     }
