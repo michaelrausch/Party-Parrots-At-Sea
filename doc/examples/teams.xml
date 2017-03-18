@@ -3,12 +3,32 @@
 <teams>
     <team>
         <name>Oracle Team USA</name>
-        <alais>USA</alais>
-        <speed>23.4</speed>
+        <alias>USA</alias>
+        <velocity>23.4</velocity>
+    </team>
+    <team>
+        <name>Artemis Racing</name>
+        <alias>ART</alias>
+        <velocity>12.9</velocity>
     </team>
     <team>
         <name>Emirates Team New Zealand</name>
-        <alais>NZL</alais>
-        <speed>25.2</speed>
+        <alias>NZL</alias>
+        <velocity>25.2</velocity>
+    </team>
+    <team>
+        <name>Land Rover BAR</name>
+        <alias>BAR</alias>
+        <velocity>16.4</velocity>
+    </team>
+    <team>
+        <name>SoftBank Team Japan</name>
+        <alias>JAP</alias>
+        <velocity>19.22</velocity>
+    </team>
+    <team>
+        <name>Groupama Team France</name>
+        <alias>FRC</alias>
+        <velocity>28.8</velocity>
     </team>
 </teams>
