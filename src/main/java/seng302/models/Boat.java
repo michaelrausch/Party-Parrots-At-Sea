@@ -20,7 +20,6 @@ public class Boat {
         this.lat = 0.0;
         this.lon = 0.0;
         this.distanceToNextMark = 0.0;
-        this.color = Colors.getColor();
     }
 
     /**
@@ -33,6 +32,7 @@ public class Boat {
         this.teamName = teamName;
         this.velocity = boatVelocity;
         this.distanceToNextMark = 0.0;
+        this.color = Colors.getColor();
     }
 
     /**
