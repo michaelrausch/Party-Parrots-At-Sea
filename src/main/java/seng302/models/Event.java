@@ -147,8 +147,8 @@ public class Event {
      *
      * @return the mark
      */
-    public Mark getMark() {
-        return this.mark2;
+    public Mark getThisMark() {
+        return this.mark1;
     }
 
     /**
@@ -157,6 +157,6 @@ public class Event {
      * @return the next mark
      */
     public Mark getNextMark() {
-        return this.mark1;
+        return this.mark2;
     }
 }

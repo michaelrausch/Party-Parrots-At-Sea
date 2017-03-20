@@ -82,8 +82,8 @@ public class CanvasController {
             for (Event event : events) {
                 keyFrames.add(
                         new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
-                                new KeyValue(x, event.getMark().getLatitude()),
-                                new KeyValue(y, event.getMark().getLongitude())
+                                new KeyValue(x, event.getThisMark().getLatitude()),
+                                new KeyValue(y, event.getThisMark().getLongitude())
                         )
                 );
             }

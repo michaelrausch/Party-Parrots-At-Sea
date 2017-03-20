@@ -100,6 +100,13 @@ public class Race {
                     }
                     totalDistance += event.getDistanceBetweenMarks();
                 }
+
+                // There are no more marks after this event
+
+                else{
+                    Event event = new Event(time, boat, course.get(i), course.get(i));
+                    events.get(boat).add(event);
+                }
             }
         }
     }
