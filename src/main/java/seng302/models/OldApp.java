@@ -81,7 +81,7 @@ public class OldApp {
 
         // If race was created
         if (race != null) {
-            race.displayStartingBoats();
+            //race.displayStartingBoats();
 
             System.out.println("\n\n");
             System.out.println("######################");
@@ -96,7 +96,7 @@ public class OldApp {
             System.out.println("######################");
 
             //race.showRaceMarkerResults();
-            race.displayFinishingOrder();
+            //race.displayFinishingOrder();
 
         } else {
             System.out.println("There was an error creating the race. Exiting.");
