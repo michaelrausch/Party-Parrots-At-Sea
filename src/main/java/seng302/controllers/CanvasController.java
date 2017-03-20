@@ -40,7 +40,7 @@ public class CanvasController {
 
     public void initialize() {
         gc = canvas.getGraphicsContext2D();
-        gc.scale(5, 5);
+        gc.scale(22, 22);
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
@@ -53,6 +53,7 @@ public class CanvasController {
                 gc.clearRect(0, 0, 760, 360);
                 drawCourse();
                 drawBoats();
+
             }
         };
 
@@ -71,6 +72,7 @@ public class CanvasController {
      */
     private void generateTimeline() {
         HashMap<Boat, List> boat_events = race.getEvents();
+
         for (Boat boat : boat_events.keySet()) {
             // x, y are the real time coordinates
             DoubleProperty x = new SimpleDoubleProperty();
@@ -104,17 +106,37 @@ public class CanvasController {
     }
 
     /**
+     * @return the distance between the two marks
+     */
+    public double getDistanceBetweenMarks(Mark mark1, Mark mark2) {
+        double earth_radius = 6378.137;
+        double dLat = mark2.getLatitude() * Math.PI / 180 - mark1.getLatitude() * Math.PI / 180;
+        double dLon = mark2.getLongitude() * Math.PI / 180 - mark1.getLongitude() * Math.PI / 180;
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(mark1.getLatitude() * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = earth_radius * c;
+
+        return d * 1000;
+    }
+
+    /**
      * Draws a boat with given (x, y) position in the given color
      *
      * @param x
      * @param y
      * @param color
      */
-    private void drawBoat(double x, double y, Color color) {
-        x = abs(x - 32.313291) * 1000;  // to prevent negative longitude
-        y = abs(y + 64.887057) * 1000;  // to prevent negative latitude
+    private void drawBoat(double lat, double lon, Color color) {
+        // Latitude
+        //Double x = (MAP_WIDTH / 360.0) * (180 + lon);
+        //Double y = (MAP_HEIGHT / 180.0) * (80 - lat);
 
-        int diameter = 2;
+        double x = abs(lat - 32.283808) * 1000;  // to prevent negative longitude
+        double y = abs(lon + 64.854401) * 1000;  // to prevent negative latitude
+
+        double diameter = 0.5;
         gc.setFill(color);
         gc.fillOval(x, y, diameter, diameter);
     }
@@ -138,10 +160,11 @@ public class CanvasController {
      * @param singleMark
      */
     private void drawSingleMark(SingleMark singleMark) {
-        double x = abs(singleMark.getLatitude() - 32.313291) * 1000;  // to prevent negative longitude
-        double y = abs(singleMark.getLongitude() + 64.887057) * 1000;  // to prevent negative latitude
+        double x = abs(singleMark.getLatitude() - 32.283808) * 1000;  // to prevent negative longitude
+        double y = abs(singleMark.getLongitude() + 64.854401) * 1000;  // to prevent negative latitude
+
         gc.setFill(Color.BLACK);
-        gc.fillOval(x, y, 2, 2);
+        gc.fillOval(x, y, 0.5, 0.5);
     }
 
     /**
