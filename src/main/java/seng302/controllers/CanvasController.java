@@ -12,7 +12,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import seng302.models.*;
+import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
+import seng302.models.mark.MarkType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ public class CanvasController {
     @FXML private Canvas canvas;
     Race race;
     GraphicsContext gc;
+    HashMap<Boat, TimelineInfo> timelineInfos;
 
 
     public void initialize() {
@@ -35,10 +38,12 @@ public class CanvasController {
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
-        HashMap<Boat, TimelineInfo> timelineInfos = new HashMap<>();
+        timelineInfos = new HashMap<>();
 
         HashMap<Boat, List> boat_events = race.getEvents();
 //        System.out.println(boat_events);
+
+        // generating timelines
         for (Boat boat : boat_events.keySet()) {
             DoubleProperty x  = new SimpleDoubleProperty();
             DoubleProperty y  = new SimpleDoubleProperty();
@@ -61,16 +66,9 @@ public class CanvasController {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                GraphicsContext gc = canvas.getGraphicsContext2D();
                 gc.clearRect(0,0,760,360);
                 drawCourse();
-                gc.setFill(Color.FORESTGREEN);
-                for (Boat boat: timelineInfos.keySet()){
-                    TimelineInfo timelineInfo = timelineInfos.get(boat);
-//                    System.out.println(timelineInfo.getX().doubleValue());
-//                    System.out.println(timelineInfo.getY().doubleValue());
-                    drawBoat(timelineInfo.getX().doubleValue(), timelineInfo.getY().doubleValue(), boat.getColor());
-                }
+                drawBoats();
             }
         };
         timer.start();
@@ -78,16 +76,13 @@ public class CanvasController {
             Timeline timeline = timelineInfo.getTimeline();
             timeline.play();
         }
+    }
 
-//        drawBoat(gc, 0, 0, Color.GREEN);
-//        drawBoat(gc, 100, 100, Color.BLUE);
-//        drawBoat(gc, 32.296577, -64.854304, Color.RED);
-//        drawBoat(gc, 32.293771, -64.855242, Color.RED);
-//        drawBoat(gc, 32.317379, -64.839291, Color.GREEN);
-//        drawBoat(gc, 32.317257, -64.836260, Color.GREEN);
-//        drawBoat(gc, 32.313291, -64.887057, Color.YELLOW);
-
-
+    private void drawBoats(){
+        for (Boat boat: timelineInfos.keySet()){
+            TimelineInfo timelineInfo = timelineInfos.get(boat);
+            drawBoat(timelineInfo.getX().doubleValue(), timelineInfo.getY().doubleValue(), boat.getColor());
+        }
     }
 
     private void drawBoat(double x, double y, Color color) {
@@ -102,11 +97,30 @@ public class CanvasController {
 
     private void drawCourse(){
         for (Mark mark: race.getCourse()){
-            double x = abs(mark.getLatitude() - 32.313291) * 1000;  // to prevent negative longtitude
-            double y = abs(mark.getLongitude() + 64.887057) * 1000;  // to prevent negative latitude
-
             gc.setFill(Color.BLACK);
-            gc.fillOval(x, y, 2, 2);
+
+            if (mark.getMarkType() == MarkType.SINGLE_MARK){
+                double x = abs(mark.getLatitude() - 32.313291) * 1000;  // to prevent negative longtitude
+                double y = abs(mark.getLongitude() + 64.887057) * 1000;  // to prevent negative latitude
+
+                gc.fillOval(x, y, 2, 2);
+            }
+
+            else if (mark.getMarkType() == MarkType.GATE_MARK){
+                double x;
+                double y;
+                GateMark gateMark = (GateMark) mark;
+                Mark mark1 = gateMark.getSingleMark1();
+                Mark mark2 = gateMark.getSingleMark1();
+
+                x = abs(mark1.getLatitude() - 32.313291) * 1000;  // to prevent negative longtitude
+                y = abs(mark1.getLongitude() + 64.887057) * 1000;  // to prevent negative latitude
+                gc.fillOval(x, y, 2, 2);
+
+                x = abs(mark2.getLatitude() - 32.313291) * 1000;  // to prevent negative longtitude
+                y = abs(mark2.getLongitude() + 64.887057) * 1000;  // to prevent negative latitude
+                gc.fillOval(x, y, 2, 2);
+            }
         }
     }
 }
