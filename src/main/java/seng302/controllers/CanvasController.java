@@ -58,7 +58,7 @@ public class CanvasController {
             System.err.println(e.getCause());
         } catch (IOException e) {
             System.err.println(e);
-        
+        }
     }
 
     public void initialize() {
