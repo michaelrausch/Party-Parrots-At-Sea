@@ -124,8 +124,8 @@ public class CanvasController {
     /**
      * Draws a boat with given (x, y) position in the given color
      *
-     * @param x
-     * @param y
+     * @param lat
+     * @param lon
      * @param color
      */
     private void drawBoat(double lat, double lon, Color color) {
