@@ -31,12 +31,15 @@ import static java.lang.Math.abs;
  * Modified by Haoming Yin (hyi25) on 20/3/2017.
  */
 public class CanvasController {
+    @FXML
+    private Canvas canvas;
 
     private Race race;
     private GraphicsContext gc;
     private HashMap<Boat, TimelineInfo> timelineInfos;
-    @FXML
-    private Canvas canvas;
+    private final double VIEW_CORNER_LAT = 32.280808;
+    private final double VIEW_CORNER_LON = -64.858401;
+
 
     public void initialize() {
         gc = canvas.getGraphicsContext2D();
@@ -133,8 +136,8 @@ public class CanvasController {
         //Double x = (MAP_WIDTH / 360.0) * (180 + lon);
         //Double y = (MAP_HEIGHT / 180.0) * (80 - lat);
 
-        double x = abs(lat - 32.283808) * 1000;  // to prevent negative longitude
-        double y = abs(lon + 64.854401) * 1000;  // to prevent negative latitude
+        double x = (lat - VIEW_CORNER_LAT) * 1000;  // to prevent negative longitude
+        double y = (lon - VIEW_CORNER_LON) * 1000;  // to prevent negative latitude
 
         double diameter = 0.5;
         gc.setFill(color);
@@ -160,8 +163,8 @@ public class CanvasController {
      * @param singleMark
      */
     private void drawSingleMark(SingleMark singleMark) {
-        double x = abs(singleMark.getLatitude() - 32.283808) * 1000;  // to prevent negative longitude
-        double y = abs(singleMark.getLongitude() + 64.854401) * 1000;  // to prevent negative latitude
+        double x = (singleMark.getLatitude() - VIEW_CORNER_LAT) * 1000;  // to prevent negative longitude
+        double y = (singleMark.getLongitude() - VIEW_CORNER_LON) * 1000;  // to prevent negative latitude
 
         gc.setFill(Color.BLACK);
         gc.fillOval(x, y, 0.5, 0.5);
