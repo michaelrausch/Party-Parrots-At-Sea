@@ -1,7 +1,6 @@
 package seng302.models;
 
 import seng302.models.mark.Mark;
-import seng302.models.mark.SingleMark;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,7 +39,7 @@ public class Event {
      * @param eventTime, what time the event happens
      * @param eventBoat, the boat that the event belongs to
      */
-    public Event(Double eventTime, Boat eventBoat, SingleMark mark1) {
+    public Event(Double eventTime, Boat eventBoat, Mark mark1) {
         this.time = eventTime;
         this.boat = eventBoat;
         this.mark1 = mark1;

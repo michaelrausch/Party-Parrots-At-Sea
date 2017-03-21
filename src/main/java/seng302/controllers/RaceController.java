@@ -2,9 +2,8 @@ package seng302.controllers;
 
 import seng302.models.Boat;
 import seng302.models.OldFileParser;
-import seng302.models.parsers.*;
-import seng302.models.mark.*;
 import seng302.models.Race;
+import seng302.models.parsers.CourseParser;
 
 import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
@@ -20,6 +19,7 @@ import java.util.Random;
  */
 public class RaceController {
     Race race = null;
+
     public void initializeRace() {
         String raceConfigFile;
         raceConfigFile = "doc/examples/config.json";

@@ -5,8 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.RaceResultController">
    <children>
       <GridPane layoutX="444.0" layoutY="256.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <columnConstraints>
@@ -22,13 +21,13 @@
           <RowConstraints maxHeight="812.0" minHeight="10.0" prefHeight="753.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Race Results:" textAlignment="CENTER" wrappingWidth="640.244140625" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Race Results:" textAlignment="CENTER" wrappingWidth="640.244140625" GridPane.rowIndex="3">
                <font>
                   <Font size="45.0" />
                </font>
             </Text>
-            <VBox fx:id="resultsVBox" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Finish!" textAlignment="CENTER" wrappingWidth="640.0234375" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <VBox fx:id="resultsVBox" prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="4" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Finish!" textAlignment="CENTER" wrappingWidth="640.0234375" GridPane.rowIndex="1">
                <font>
                   <Font size="75.0" />
                </font>

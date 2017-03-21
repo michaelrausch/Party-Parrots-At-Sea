@@ -10,7 +10,7 @@ public class App extends Application
 {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/RaceView.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/MainView.fxml"));
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
 

@@ -104,8 +104,9 @@ public class Race {
                 // There are no more marks after this event
 
                 else{
-                    Event event = new Event(time, boat, course.get(i), course.get(i));
+                    Event event = new Event(time, boat, course.get(i));
                     events.get(boat).add(event);
+
                 }
             }
         }
@@ -131,5 +132,9 @@ public class Race {
 
     public HashMap<Boat, List> getEvents() {
         return events;
+    }
+
+    public void setBoatFinished(Boat boat){
+        this.finishingOrder.add(boat);
     }
 }
