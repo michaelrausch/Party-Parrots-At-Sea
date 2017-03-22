@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static java.lang.Math.abs;
-
 /**
  * Created by ptg19 on 15/03/17.
  * Modified by Haoming Yin (hyi25) on 20/3/2017.
@@ -39,6 +37,9 @@ public class CanvasController {
     private Race race;
     private GraphicsContext gc;
     private HashMap<Boat, TimelineInfo> timelineInfos;
+
+    private final double ORIGIN_LAT = 32.320504;
+    private final double ORIGIN_LON = -64.857063;
 
     @FXML
     private Canvas canvas;
@@ -85,10 +86,16 @@ public class CanvasController {
         timer.start();
 
         int i = 0;
+        Double maxDuration = 0.0;
 
         for (TimelineInfo timelineInfo : timelineInfos.values()) {
 
             Timeline timeline = timelineInfo.getTimeline();
+            System.out.println();
+
+            if (/*timeline.getTotalDuration().greaterThanOrEqualTo(maxDuration)*/ true){
+
+            }
 
             if (i == timelineInfos.values().size() - 1) {
                 timeline.setOnFinished(event -> {
@@ -99,6 +106,10 @@ public class CanvasController {
                     }
 
                 });
+                System.out.println("B");
+            }
+            else{
+                System.out.println("A");
             }
 
             timeline.play();
@@ -164,18 +175,11 @@ public class CanvasController {
      */
     private void drawBoat(double lat, double lon, Color color) {
         // Latitude
-        //Double x = (MAP_WIDTH / 360.0) * (180 + lon);
-        //Double y = (MAP_HEIGHT / 180.0) * (80 - lat);
-        double yLat = lon;
-        double yLon = lat;
-
-        //double x = abs(yLat - 32.283808) * 1000;  // to prevent negative longitude
-        //double y = abs(yLon + 64.854401) * 1000;  // to prevent negative latitude
-
-        double y = abs(yLat + 64.854401) * 1000;  // to prevent negative longitude
-        double x = abs(yLon - 32.283808) * 1000;  // to prevent negative latitude
+        double x = (lon - ORIGIN_LON) * 1000;
+        double y = (ORIGIN_LAT - lat) * 1000;
 
         double diameter = 0.5;
+
         gc.setFill(color);
         gc.fillOval(x, y, diameter, diameter);
     }
@@ -199,24 +203,8 @@ public class CanvasController {
      * @param singleMark
      */
     private void drawSingleMark(SingleMark singleMark) {
-        double yLat = singleMark.getLongitude();
-        double yLon = singleMark.getLatitude();
-
-        //double yLat = singleMark.getLatitude();
-        //double yLon = singleMark.getLongitude();
-
-        System.out.println(yLat);
-        System.out.println(yLon);
-
-        //double x = abs(yLat - 32.283808) * 1000;  // to prevent negative longitude
-        //double y = abs(yLon + 64.854401) * 1000;  // to prevent negative latitude
-
-        double x = abs(yLon - 32.283808) * 1000;  // to prevent negative longitude
-        double y = abs(yLat + 64.854401) * 1000;  // to prevent negative latitude
-
-        System.out.println(x);
-        System.out.println(y);
-        System.out.println();
+        double x = (singleMark.getLongitude() - ORIGIN_LON) * 1000;
+        double y = (ORIGIN_LAT - singleMark.getLatitude()) * 1000;
 
         gc.setFill(Color.BLACK);
         gc.fillOval(x, y, 0.5, 0.5);
