@@ -7,8 +7,11 @@ import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import seng302.models.Boat;
@@ -20,11 +23,10 @@ import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static java.lang.Math.abs;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -35,12 +37,34 @@ public class CanvasController {
     private Race race;
     private GraphicsContext gc;
     private HashMap<Boat, TimelineInfo> timelineInfos;
+
+    private final double ORIGIN_LAT = 32.320504;
+    private final double ORIGIN_LON = -64.857063;
+
     @FXML
     private Canvas canvas;
 
+    @FXML
+    private AnchorPane contentAnchorPane;
+
+    @FXML
+    private RaceResultController raceResultController;
+
+    private void setContentPane(String jfxUrl) {
+        try {
+            contentAnchorPane.getChildren().removeAll();
+            contentAnchorPane.getChildren().clear();
+            contentAnchorPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+        } catch (javafx.fxml.LoadException e) {
+            System.err.println(e.getCause());
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
+
     public void initialize() {
         gc = canvas.getGraphicsContext2D();
-        gc.scale(22, 22);
+        gc.scale(15, 15);
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
@@ -53,7 +77,6 @@ public class CanvasController {
                 gc.clearRect(0, 0, 760, 360);
                 drawCourse();
                 drawBoats();
-
             }
         };
 
@@ -61,9 +84,37 @@ public class CanvasController {
 
         // starts the timer and reads events from each boat's time line
         timer.start();
+
+        int i = 0;
+        Double maxDuration = 0.0;
+
         for (TimelineInfo timelineInfo : timelineInfos.values()) {
+
             Timeline timeline = timelineInfo.getTimeline();
+            System.out.println();
+
+            if (/*timeline.getTotalDuration().greaterThanOrEqualTo(maxDuration)*/ true){
+
+            }
+
+            if (i == timelineInfos.values().size() - 1) {
+                timeline.setOnFinished(event -> {
+                    setContentPane("/FinishView.fxml");
+
+                    for (Boat boat : race.getFinishedBoats()) {
+                        System.out.println(boat.getTeamName());
+                    }
+
+                });
+                System.out.println("B");
+            }
+            else{
+                System.out.println("A");
+            }
+
             timeline.play();
+
+            i++;
         }
     }
 
@@ -82,12 +133,22 @@ public class CanvasController {
             List<Event> events = boat_events.get(boat);
             // iterates all events and convert each event to keyFrame, then add them into a list
             for (Event event : events) {
-                keyFrames.add(
-                        new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
-                                new KeyValue(x, event.getThisMark().getLatitude()),
-                                new KeyValue(y, event.getThisMark().getLongitude())
-                        )
-                );
+                if (event.getIsFinishingEvent()) {
+                    keyFrames.add(
+                            new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                                    event1 -> race.setBoatFinished(boat),
+                                    new KeyValue(x, event.getThisMark().getLatitude()),
+                                    new KeyValue(y, event.getThisMark().getLongitude())
+                            )
+                    );
+                } else {
+                    keyFrames.add(
+                            new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                                    new KeyValue(x, event.getThisMark().getLatitude()),
+                                    new KeyValue(y, event.getThisMark().getLongitude())
+                            )
+                    );
+                }
             }
 
             // uses the lists generated above to create a Timeline for the boat.
@@ -106,37 +167,19 @@ public class CanvasController {
     }
 
     /**
-     * @return the distance between the two marks
-     */
-    public double getDistanceBetweenMarks(Mark mark1, Mark mark2) {
-        double earth_radius = 6378.137;
-        double dLat = mark2.getLatitude() * Math.PI / 180 - mark1.getLatitude() * Math.PI / 180;
-        double dLon = mark2.getLongitude() * Math.PI / 180 - mark1.getLongitude() * Math.PI / 180;
-
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(mark1.getLatitude() * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double d = earth_radius * c;
-
-        return d * 1000;
-    }
-
-    /**
      * Draws a boat with given (x, y) position in the given color
      *
-     * @param x
-     * @param y
+     * @param lat
+     * @param lon
      * @param color
      */
     private void drawBoat(double lat, double lon, Color color) {
         // Latitude
-        //Double x = (MAP_WIDTH / 360.0) * (180 + lon);
-        //Double y = (MAP_HEIGHT / 180.0) * (80 - lat);
-
-        double x = abs(lat - 32.283808) * 1000;  // to prevent negative longitude
-        double y = abs(lon + 64.854401) * 1000;  // to prevent negative latitude
+        double x = (lon - ORIGIN_LON) * 1000;
+        double y = (ORIGIN_LAT - lat) * 1000;
 
         double diameter = 0.5;
+
         gc.setFill(color);
         gc.fillOval(x, y, diameter, diameter);
     }
@@ -147,7 +190,7 @@ public class CanvasController {
     private void drawCourse() {
         for (Mark mark : race.getCourse()) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
-                drawSingleMark((SingleMark) mark);
+                drawSingleMark((SingleMark) mark, Color.BLACK);
             } else if (mark.getMarkType() == MarkType.GATE_MARK) {
                 drawGateMark((GateMark) mark);
             }
@@ -159,11 +202,11 @@ public class CanvasController {
      *
      * @param singleMark
      */
-    private void drawSingleMark(SingleMark singleMark) {
-        double x = abs(singleMark.getLatitude() - 32.283808) * 1000;  // to prevent negative longitude
-        double y = abs(singleMark.getLongitude() + 64.854401) * 1000;  // to prevent negative latitude
+    private void drawSingleMark(SingleMark singleMark, Color color) {
+        double x = (singleMark.getLongitude() - ORIGIN_LON) * 1000;
+        double y = (ORIGIN_LAT - singleMark.getLatitude()) * 1000;
 
-        gc.setFill(Color.BLACK);
+        gc.setFill(color);
         gc.fillOval(x, y, 0.5, 0.5);
     }
 
@@ -173,7 +216,28 @@ public class CanvasController {
      * @param gateMark
      */
     private void drawGateMark(GateMark gateMark) {
-        drawSingleMark(gateMark.getSingleMark1());
-        drawSingleMark(gateMark.getSingleMark2());
+        Color color = Color.BLUE;
+
+        if (gateMark.getName().equals("Start") || gateMark.getName().equals("Finish")){
+            color = Color.RED;
+        }
+
+        drawSingleMark(gateMark.getSingleMark1(), color);
+        drawSingleMark(gateMark.getSingleMark2(), color);
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.setStroke(color);
+
+        //@todo Put this in Mark class
+        double x1 = (gateMark.getSingleMark1().getLongitude()- ORIGIN_LON) * 1000;
+        double y1 = (ORIGIN_LAT - gateMark.getSingleMark1().getLatitude()) * 1000;
+
+        double x2 = (gateMark.getSingleMark2().getLongitude() - ORIGIN_LON) * 1000;
+        double y2 = (ORIGIN_LAT - gateMark.getSingleMark2().getLatitude()) * 1000;
+
+        gc.setLineWidth(0.1);
+
+        gc.strokeLine(x1, y1, x2, y2);
     }
 }
