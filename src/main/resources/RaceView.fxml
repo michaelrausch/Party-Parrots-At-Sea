@@ -18,7 +18,7 @@
     <RowConstraints minHeight="10.0" prefHeight="320.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="960.0" prefWidth="1280.0" style="-fx-background-color: lightblue;" GridPane.columnIndex="1" GridPane.rowSpan="3">
+      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="960.0" prefWidth="1280.0" style="-fx-background-color: lightblue;" GridPane.columnIndex="1" GridPane.rowSpan="3" fx:id="contentAnchorPane">
          <children>
             <Canvas fx:id="canvas" height="960.0" style="-fx-background-color: Aqua;" width="1007.0" />
          </children>

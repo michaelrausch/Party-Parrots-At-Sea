@@ -55,13 +55,18 @@ public class RaceController {
 
         //get race size
         int numberOfBoats = (int) fp.getRaceSize();
+        int boatsAdded = 0;
 
         //get time scale
         double timeScale = fp.getTimeScale();
         race.setTimeScale(timeScale);
 
         for (Map<String, Object> team : teams) {
-            boatNames.add((String) team.get("team-name"));
+            if (boatsAdded < numberOfBoats){
+                boatNames.add((String) team.get("team-name"));
+                race.addBoat(new Boat(team.get("team-name").toString(), (Double) (team.get("velocity"))));
+            }
+            boatsAdded++;
         }
 
         // Shuffle team names
@@ -70,11 +75,6 @@ public class RaceController {
 
         if (numberOfBoats > Array.getLength(boatNames.toArray())) {
             return null;
-        }
-
-        // Add boats to the race
-        for (int i = 0; i < numberOfBoats; i++) {
-            race.addBoat(new Boat(boatNames.get(i), (Double) (teams.get(i).get("velocity"))));
         }
 
         CourseParser cp = new CourseParser("doc/examples/course.xml");
