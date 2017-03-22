@@ -33,6 +33,8 @@ import java.util.List;
  * Modified by Haoming Yin (hyi25) on 20/3/2017.
  */
 public class CanvasController {
+    @FXML
+    private Canvas canvas;
 
     private Race race;
     private GraphicsContext gc;
@@ -40,9 +42,9 @@ public class CanvasController {
 
     private final double ORIGIN_LAT = 32.320504;
     private final double ORIGIN_LON = -64.857063;
+    private final double VIEW_CORNER_LAT = 32.280808;
+    private final double VIEW_CORNER_LON = -64.858401;
 
-    @FXML
-    private Canvas canvas;
 
     @FXML
     private AnchorPane contentAnchorPane;
