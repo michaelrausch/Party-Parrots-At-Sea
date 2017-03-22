@@ -13,6 +13,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import seng302.models.Boat;
 import seng302.models.Event;
@@ -22,6 +23,8 @@ import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
+import seng302.models.parsers.ConfigParser;
+import seng302.models.parsers.CourseParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +50,8 @@ public class CanvasController {
 
     @FXML
     private AnchorPane contentAnchorPane;
+    @FXML
+    private Text windArrowText, windDirectionText;
 
     private void loadRaceResultView() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/FinishView.fxml"));
@@ -104,6 +109,11 @@ public class CanvasController {
         }
 
         maxTimeline.setOnFinished(event -> loadRaceResultView());
+
+        //set wind direction!!!!!!! can't find another place to put my code --haoming
+        double windDirection = new ConfigParser("doc/examples/config.xml").getWindDirection();
+        windDirectionText.setText(String.format("%.1f°", windDirection));
+        windArrowText.setRotate(windDirection);
     }
 
     /**
