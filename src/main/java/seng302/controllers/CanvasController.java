@@ -209,7 +209,8 @@ public class CanvasController {
         double y = (ORIGIN_LAT - singleMark.getLatitude()) * 1000;
 
         gc.setFill(color);
-        gc.fillOval(x, y, 0.5, 0.5);
+        gc.fillRect(x,y,0.5,0.5);
+        //gc.fillOval(x, y, 0.5, 0.5);
     }
 
     /**
