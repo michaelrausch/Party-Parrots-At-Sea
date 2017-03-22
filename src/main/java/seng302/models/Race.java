@@ -135,6 +135,7 @@ public class Race {
     }
 
     public void setBoatFinished(Boat boat){
+        System.out.println(boat.getTeamName() + " finished");
         this.finishingOrder.add(boat);
     }
 }

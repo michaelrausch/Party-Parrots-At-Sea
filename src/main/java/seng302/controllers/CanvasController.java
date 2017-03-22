@@ -40,23 +40,23 @@ public class CanvasController {
     private GraphicsContext gc;
     private HashMap<Boat, TimelineInfo> timelineInfos;
 
+    private AnchorPane raceResults;
+
     private final double ORIGIN_LAT = 32.320504;
     private final double ORIGIN_LON = -64.857063;
-    private final double VIEW_CORNER_LAT = 32.280808;
-    private final double VIEW_CORNER_LON = -64.858401;
-
 
     @FXML
     private AnchorPane contentAnchorPane;
 
-    @FXML
-    private RaceResultController raceResultController;
+    private void loadRaceResultView() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/FinishView.fxml"));
+        loader.setController(new RaceResultController(race));
 
-    private void setContentPane(String jfxUrl) {
         try {
             contentAnchorPane.getChildren().removeAll();
             contentAnchorPane.getChildren().clear();
-            contentAnchorPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+            contentAnchorPane.getChildren().addAll((Pane) loader.load());
+
         } catch (javafx.fxml.LoadException e) {
             System.err.println(e.getCause());
         } catch (IOException e) {
@@ -87,37 +87,23 @@ public class CanvasController {
         // starts the timer and reads events from each boat's time line
         timer.start();
 
-        int i = 0;
         Double maxDuration = 0.0;
+        Timeline maxTimeline = null;
 
         for (TimelineInfo timelineInfo : timelineInfos.values()) {
 
             Timeline timeline = timelineInfo.getTimeline();
             System.out.println();
 
-            if (/*timeline.getTotalDuration().greaterThanOrEqualTo(maxDuration)*/ true){
-
-            }
-
-            if (i == timelineInfos.values().size() - 1) {
-                timeline.setOnFinished(event -> {
-                    setContentPane("/FinishView.fxml");
-
-                    for (Boat boat : race.getFinishedBoats()) {
-                        System.out.println(boat.getTeamName());
-                    }
-
-                });
-                System.out.println("B");
-            }
-            else{
-                System.out.println("A");
+            if (timeline.getTotalDuration().toMillis() >= maxDuration) {
+                maxDuration = timeline.getTotalDuration().toMillis();
+                maxTimeline = timeline;
             }
 
             timeline.play();
-
-            i++;
         }
+
+        maxTimeline.setOnFinished(event -> loadRaceResultView());
     }
 
     /**
@@ -210,7 +196,6 @@ public class CanvasController {
 
         gc.setFill(color);
         gc.fillRect(x,y,0.5,0.5);
-        //gc.fillOval(x, y, 0.5, 0.5);
     }
 
     /**
@@ -221,8 +206,12 @@ public class CanvasController {
     private void drawGateMark(GateMark gateMark) {
         Color color = Color.BLUE;
 
-        if (gateMark.getName().equals("Start") || gateMark.getName().equals("Finish")){
+        if (gateMark.getName().equals("Start")){
             color = Color.RED;
+        }
+
+        if (gateMark.getName().equals("Finish")){
+            color = Color.GREEN;
         }
 
         drawSingleMark(gateMark.getSingleMark1(), color);
@@ -232,15 +221,18 @@ public class CanvasController {
 
         gc.setStroke(color);
 
-        //@todo Put this in Mark class
+        // Convert lat/lon to x,y
         double x1 = (gateMark.getSingleMark1().getLongitude()- ORIGIN_LON) * 1000;
         double y1 = (ORIGIN_LAT - gateMark.getSingleMark1().getLatitude()) * 1000;
 
         double x2 = (gateMark.getSingleMark2().getLongitude() - ORIGIN_LON) * 1000;
         double y2 = (ORIGIN_LAT - gateMark.getSingleMark2().getLatitude()) * 1000;
 
-        gc.setLineWidth(0.1);
-
+        gc.setLineWidth(0.07);
         gc.strokeLine(x1, y1, x2, y2);
+    }
+
+    public Race getRace(){
+        return this.race;
     }
 }
