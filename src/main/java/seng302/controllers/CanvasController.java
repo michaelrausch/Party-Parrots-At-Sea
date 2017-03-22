@@ -190,7 +190,7 @@ public class CanvasController {
     private void drawCourse() {
         for (Mark mark : race.getCourse()) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
-                drawSingleMark((SingleMark) mark);
+                drawSingleMark((SingleMark) mark, Color.BLACK);
             } else if (mark.getMarkType() == MarkType.GATE_MARK) {
                 drawGateMark((GateMark) mark);
             }
@@ -202,11 +202,11 @@ public class CanvasController {
      *
      * @param singleMark
      */
-    private void drawSingleMark(SingleMark singleMark) {
+    private void drawSingleMark(SingleMark singleMark, Color color) {
         double x = (singleMark.getLongitude() - ORIGIN_LON) * 1000;
         double y = (ORIGIN_LAT - singleMark.getLatitude()) * 1000;
 
-        gc.setFill(Color.BLACK);
+        gc.setFill(color);
         gc.fillOval(x, y, 0.5, 0.5);
     }
 
@@ -216,7 +216,28 @@ public class CanvasController {
      * @param gateMark
      */
     private void drawGateMark(GateMark gateMark) {
-        drawSingleMark(gateMark.getSingleMark1());
-        drawSingleMark(gateMark.getSingleMark2());
+        Color color = Color.BLUE;
+
+        if (gateMark.getName().equals("Start") || gateMark.getName().equals("Finish")){
+            color = Color.RED;
+        }
+
+        drawSingleMark(gateMark.getSingleMark1(), color);
+        drawSingleMark(gateMark.getSingleMark2(), color);
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.setStroke(color);
+
+        //@todo Put this in Mark class
+        double x1 = (gateMark.getSingleMark1().getLongitude()- ORIGIN_LON) * 1000;
+        double y1 = (ORIGIN_LAT - gateMark.getSingleMark1().getLatitude()) * 1000;
+
+        double x2 = (gateMark.getSingleMark2().getLongitude() - ORIGIN_LON) * 1000;
+        double y2 = (ORIGIN_LAT - gateMark.getSingleMark2().getLatitude()) * 1000;
+
+        gc.setLineWidth(0.1);
+
+        gc.strokeLine(x1, y1, x2, y2);
     }
 }

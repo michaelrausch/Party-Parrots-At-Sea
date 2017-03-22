@@ -37,4 +37,12 @@ public class GateMark extends Mark {
     public void setSingleMark2(SingleMark singleMark2) {
         this.singleMark2 = singleMark2;
     }
+
+    public double getLatitude(){
+        return (this.getSingleMark1().getLatitude() + this.getSingleMark2().getLatitude()) / 2;
+    }
+
+    public double getLongitude(){
+        return (this.getSingleMark1().getLongitude() + this.getSingleMark2().getLongitude()) / 2;
+    }
 }
