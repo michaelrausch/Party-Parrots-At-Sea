@@ -6,9 +6,12 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import seng302.models.Boat;
@@ -33,6 +36,8 @@ import static java.lang.Math.abs;
 public class CanvasController {
     @FXML
     private Canvas canvas;
+    @FXML
+    TextArea boatOrder;
 
     private Race race;
     private GraphicsContext gc;
@@ -83,10 +88,18 @@ public class CanvasController {
 
             List<KeyFrame> keyFrames = new ArrayList<>();
             List<Event> events = boat_events.get(boat);
+
+            EventHandler onFinished = new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent event) {
+                    boat.getTeamName();
+                }
+            };
+
             // iterates all events and convert each event to keyFrame, then add them into a list
             for (Event event : events) {
                 keyFrames.add(
                         new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                                onFinished,
                                 new KeyValue(x, event.getThisMark().getLatitude()),
                                 new KeyValue(y, event.getThisMark().getLongitude())
                         )
