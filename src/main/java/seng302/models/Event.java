@@ -15,6 +15,7 @@ public class Event {
     private boolean isFinishingEvent = false; // This event occurs when a boat finishes the race
     private Mark mark1; // This mark
     private Mark mark2; // Next mark
+    private int markPosInRace; // the position of the current mark in the race course
 
 
     /**
@@ -24,12 +25,12 @@ public class Event {
      * @param eventTime, what time the event happens
      * @param eventBoat, the boat that the event belongs to
      */
-    public Event(Double eventTime, Boat eventBoat, Mark mark1, Mark mark2) {
+    public Event(Double eventTime, Boat eventBoat, Mark mark1, Mark mark2, int markPosInRace) {
         this.time = eventTime;
         this.boat = eventBoat;
-        //this.leg = eventLeg;
         this.mark1 = mark1;
         this.mark2 = mark2;
+        this.markPosInRace = markPosInRace;
     }
 
     /**
@@ -39,27 +40,18 @@ public class Event {
      * @param eventTime, what time the event happens
      * @param eventBoat, the boat that the event belongs to
      */
-    public Event(Double eventTime, Boat eventBoat, Mark mark1) {
+    public Event(Double eventTime, Boat eventBoat, Mark mark1, int markPosInRace) {
         this.time = eventTime;
         this.boat = eventBoat;
         this.mark1 = mark1;
+        this.markPosInRace = markPosInRace;
         this.isFinishingEvent = true;
     }
 
-    /**
-     * Gets the time for the event
-     *
-     * @return the time for event in millisecond
-     */
     public double getTime() {
         return this.time;
     }
 
-    /**
-     * Sets the time for the event
-     *
-     * @param eventTime the time for event in millisecond
-     */
     public void setTime(double eventTime) {
         this.time = eventTime;
     }
@@ -73,28 +65,14 @@ public class Event {
         return (new SimpleDateFormat("mm:ss:SSS")).format(new Date(time.longValue()));
     }
 
-    /**
-     * Gets the involved boat
-     *
-     * @return the boat involved in the event
-     */
     public Boat getBoat() {
         return this.boat;
     }
 
-    /**
-     * Sets the involved boat
-     *
-     * @param eventBoat the involved boat
-     */
     public void setBoat(Boat eventBoat) {
         this.boat = eventBoat;
     }
 
-
-    /**
-     * Returns true if this event is the boat finishing the race
-     */
     public boolean getIsFinishingEvent() {
         return this.isFinishingEvent;
     }
@@ -141,21 +119,11 @@ public class Event {
         return bearing * 180 / Math.PI;
     }
 
-    /**
-     * Get the mark the event happened on
-     *
-     * @return the mark
-     */
     public Mark getThisMark() {
         return this.mark1;
     }
 
-    /**
-     * Get the next mark
-     *
-     * @return the next mark
-     */
-    public Mark getNextMark() {
-        return this.mark2;
+    public int getMarkPosInRace() {
+        return markPosInRace;
     }
 }

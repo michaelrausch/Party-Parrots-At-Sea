@@ -51,6 +51,9 @@ public class CanvasController {
 
     @FXML Pane raceTimer;
 
+    @FXML
+    BoatPositionController teamPositionsController;
+
     private Animation.Status raceStatus = Animation.Status.PAUSED;
 
     /**
@@ -135,7 +138,7 @@ public class CanvasController {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                gc.clearRect(0, 0, 760, 360);
+                gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
                 gc.setFill(Color.SKYBLUE);
                 gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
                 drawCourse();
@@ -205,7 +208,7 @@ public class CanvasController {
                 if (event.getIsFinishingEvent()) {
                     keyFrames.add(
                             new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
-                                    event1 -> race.setBoatFinished(boat),
+                                    onFinished -> {race.setBoatFinished(boat); teamPositionsController.handleEvent(event);},
                                     new KeyValue(x, event.getThisMark().getLatitude()),
                                     new KeyValue(y, event.getThisMark().getLongitude())
                             )
@@ -213,6 +216,7 @@ public class CanvasController {
                 } else {
                     keyFrames.add(
                             new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                                    onFinished -> teamPositionsController.handleEvent(event),
                                     new KeyValue(x, event.getThisMark().getLatitude()),
                                     new KeyValue(y, event.getThisMark().getLongitude())
                             )

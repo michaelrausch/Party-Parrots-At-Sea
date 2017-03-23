@@ -13,6 +13,7 @@ public class Boat {
     private double lon; // -
     private double distanceToNextMark;
     private Color color;
+    private int markLastPast;
 
     public Boat(String teamName) {
         this.teamName = teamName;
@@ -96,5 +97,13 @@ public class Boat {
 
     public Color getColor() {
         return color;
+    }
+
+    public void setMarkLastPast(int markLastPast) {
+        this.markLastPast = markLastPast;
+    }
+
+    public int getMarkLastPast() {
+        return markLastPast;
     }
 }
