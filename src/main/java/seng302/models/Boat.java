@@ -97,4 +97,8 @@ public class Boat {
     public Color getColor() {
         return color;
     }
+
+    public double getSpeedInKnots(){
+        return Math.round((this.velocity * 1.94384) * 100d) / 100d;
+    }
 }
