@@ -1,15 +1,7 @@
 package seng302.controllers;
 
 import org.junit.Test;
-import seng302.models.Boat;
-import seng302.models.Event;
-import seng302.models.mark.SingleMark;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+//import static org.mockito.Mockito.when;
 
 /**
  * Created by ptg19 on 23/03/17.
