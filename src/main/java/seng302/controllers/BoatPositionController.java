@@ -2,6 +2,7 @@ package seng302.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import seng302.models.Boat;
 import seng302.models.Event;
 
@@ -30,5 +31,15 @@ public class BoatPositionController {
                 return b2.getMarkLastPast() - b1.getMarkLastPast();
             }
         });
+        displayBoats();
+    }
+
+    private void displayBoats(){
+        positionVbox.getChildren().clear();
+        positionVbox.getChildren().removeAll();
+
+        for (Boat boat: boatOrder){
+            positionVbox.getChildren().add(new Text(boat.getTeamName()));
+        }
     }
 }
