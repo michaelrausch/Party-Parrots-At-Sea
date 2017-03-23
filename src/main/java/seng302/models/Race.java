@@ -16,7 +16,7 @@ public class Race {
     private long startTime = 0;
     private double timeScale = 1;
     private boolean raceFinished = false; // Race is finished
-    private int raceTime = -10; // Current time in the race
+    private int raceTime = -2; // Current time in the race
 
     /**
      * Race class containing the boats and legs in the race

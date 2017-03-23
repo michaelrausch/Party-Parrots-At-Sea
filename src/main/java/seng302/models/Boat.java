@@ -99,6 +99,10 @@ public class Boat {
         return color;
     }
 
+    public double getSpeedInKnots(){
+        return Math.round((this.velocity * 1.94384) * 100d) / 100d;
+    }
+
     public void setMarkLastPast(int markLastPast) {
         this.markLastPast = markLastPast;
     }
