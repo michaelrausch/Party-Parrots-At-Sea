@@ -16,14 +16,14 @@ public class EventTest {
     @Test
     public void getTimeString() throws Exception {
         Boat boat = new Boat("testBoat");
-        Event event = new Event(1231242.2, boat, new SingleMark("mark1"), new SingleMark("mark2"));
+        Event event = new Event(1231242.2, boat, new SingleMark("mark1"), new SingleMark("mark2"), 0);
         assertEquals("20:31:242", event.getTimeString());
     }
 
     @Test
     public void testBoatHeading() throws Exception {
         Boat boat = new Boat("testBoat");
-        Event event = new Event(1231242.2, boat, new SingleMark("mark1", 142.5, 122.1), new SingleMark("mark2", 121.9,99.2));
+        Event event = new Event(1231242.2, boat, new SingleMark("mark1", 142.5, 122.1), new SingleMark("mark2", 121.9,99.2), 0);
 
         assertEquals(event.getBoatHeading(), 221.9733862944651, 1e-15);
     }
@@ -31,7 +31,7 @@ public class EventTest {
     @Test
     public void testDistanceBetweenMarks() throws Exception {
         Boat boat = new Boat("testBoat");
-        Event event = new Event(1231242.2, boat, new SingleMark("mark1", 142.5, 122.1), new SingleMark("mark2", 121.9,99.2));
+        Event event = new Event(1231242.2, boat, new SingleMark("mark1", 142.5, 122.1), new SingleMark("mark2", 121.9,99.2), 0);
 
         assertEquals(event.getDistanceBetweenMarks(), 339059.653830461, 1e-15);
     }

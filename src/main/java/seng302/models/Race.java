@@ -92,7 +92,7 @@ public class Race {
 
                 // If there are singleMarks after this event
                 if (i < numberOfMarks - 1) {
-                    Event event = new Event(time, boat, course.get(i), course.get(i + 1));
+                    Event event = new Event(time, boat, course.get(i), course.get(i + 1), i);
 
                     try {
                         events.get(boat).add(event);
@@ -106,7 +106,7 @@ public class Race {
                 // There are no more marks after this event
 
                 else{
-                    Event event = new Event(time, boat, course.get(i));
+                    Event event = new Event(time, boat, course.get(i), i);
                     events.get(boat).add(event);
                 }
             }
