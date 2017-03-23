@@ -1,9 +1,6 @@
 package seng302.controllers;
 
-import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
@@ -24,7 +21,6 @@ import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
 import seng302.models.parsers.ConfigParser;
-import seng302.models.parsers.CourseParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,6 +49,13 @@ public class CanvasController {
     @FXML
     private Text windArrowText, windDirectionText;
 
+    @FXML Pane raceTimer;
+
+    private Animation.Status raceStatus = Animation.Status.PAUSED;
+
+    /**
+     * Display the list of boats in the order they finished the race
+     */
     private void loadRaceResultView() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/FinishView.fxml"));
         loader.setController(new RaceResultController(race));
@@ -69,6 +72,57 @@ public class CanvasController {
         }
     }
 
+    /**
+     * Load the race timer
+     */
+    private void loadTimerView(){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/raceTimer.fxml"));
+        loader.setController(new RaceTimerController(race));
+
+        try{
+            raceTimer.getChildren().clear();
+            raceTimer.getChildren().removeAll();
+            raceTimer.getChildren().addAll((Pane) loader.load());
+        }
+        catch(javafx.fxml.LoadException e){
+            System.out.println(e);
+        }
+        catch(IOException e){
+            System.out.println(e);
+        }
+    }
+
+    /**
+     * Play each boats timeline
+     */
+    private void playTimelines(){
+        for (TimelineInfo timelineInfo : timelineInfos.values()){
+            Timeline timeline = timelineInfo.getTimeline();
+
+            if (timeline.getStatus() == Animation.Status.PAUSED){
+                timeline.play();
+            }
+        }
+        raceStatus = Animation.Status.RUNNING;
+    }
+
+    /**
+     * Pause each boats timeline
+     */
+    private void pauseTimelines(){
+        for (TimelineInfo timelineInfo : timelineInfos.values()){
+            Timeline timeline = timelineInfo.getTimeline();
+
+            if (timeline.getStatus() == Animation.Status.RUNNING){
+                timeline.pause();
+            }
+        }
+        raceStatus = Animation.Status.PAUSED;
+    }
+
+    /**
+     * Initialize the controller
+     */
     public void initialize() {
         gc = canvas.getGraphicsContext2D();
         gc.scale(15, 15);
@@ -84,13 +138,25 @@ public class CanvasController {
                 gc.clearRect(0, 0, 760, 360);
                 drawCourse();
                 drawBoats();
+
+                // If race has started, draw the boats and play the timeline
+                if (race.getRaceTime() > 1){
+                    playTimelines();
+
+                }
+                // Race has not started, pause the timelines
+                else if (race.getRaceTime() < 1 || raceStatus == Animation.Status.RUNNING){
+                    pauseTimelines();
+                }
+
             }
         };
 
         generateTimeline();
 
-        // starts the timer and reads events from each boat's time line
         timer.start();
+
+        loadTimerView();
 
         Double maxDuration = 0.0;
         Timeline maxTimeline = null;
@@ -105,10 +171,16 @@ public class CanvasController {
                 maxTimeline = timeline;
             }
 
+            // Timelines are paused by default
             timeline.play();
+            timeline.pause();
+            raceStatus = Animation.Status.RUNNING;
         }
 
-        maxTimeline.setOnFinished(event -> loadRaceResultView());
+        maxTimeline.setOnFinished(event -> {
+            race.setRaceFinished();
+            loadRaceResultView();
+        });
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
         double windDirection = new ConfigParser("doc/examples/config.xml").getWindDirection();
