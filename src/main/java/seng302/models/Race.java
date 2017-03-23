@@ -15,6 +15,8 @@ public class Race {
     private List<Mark> course; // Marks in the race
     private long startTime = 0;
     private double timeScale = 1;
+    private boolean raceFinished = false; // Race is finished
+    private int raceTime = -10; // Current time in the race
 
     /**
      * Race class containing the boats and legs in the race
@@ -106,7 +108,6 @@ public class Race {
                 else{
                     Event event = new Event(time, boat, course.get(i));
                     events.get(boat).add(event);
-
                 }
             }
         }
@@ -122,20 +123,74 @@ public class Race {
         generateEvents();
     }
 
+    /**
+     * Set the race course
+     * @param course a list of marks in the course
+     */
     public void addCourse(List<Mark> course) {
         this.course = course;
     }
 
+    /**
+     * Get a list of marks in the course
+     * @return
+     */
     public List<Mark> getCourse() {
         return course;
     }
 
+    /**
+     * Get a map of the events in the race
+     * @return
+     */
     public HashMap<Boat, List> getEvents() {
         return events;
     }
 
+    /**
+     * Set a boat as finished
+     * @param boat The boat that has finished the race
+     */
     public void setBoatFinished(Boat boat){
         System.out.println(boat.getTeamName() + " finished");
         this.finishingOrder.add(boat);
+    }
+
+    /**
+     * Set the race as finished
+     */
+    public void setRaceFinished(){
+        this.raceFinished = true;
+    }
+
+    /**
+     * Return whether or not the race is finished
+     * @return true if the race is finished
+     */
+    public boolean isRaceFinished(){
+        return this.raceFinished;
+    }
+
+    /**
+     * Set the race time
+     * @param raceTime the race time in seconds
+     */
+    public void setRaceTime(int raceTime){
+        this.raceTime = raceTime;
+    }
+
+    /**
+     * Return the race time
+     * @return the race time in seconds
+     */
+    public int getRaceTime(){
+        return this.raceTime;
+    }
+
+    /**
+     * Increment the race time by one second
+     */
+    public void incrementRaceTime(){
+        this.raceTime ++;
     }
 }
