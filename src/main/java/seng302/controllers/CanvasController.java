@@ -132,7 +132,7 @@ public class CanvasController {
      */
     public void initialize() {
         gc = canvas.getGraphicsContext2D();
-        //gc.scale(1, 1);
+        //gc.scale(2, 2);
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
@@ -144,7 +144,7 @@ public class CanvasController {
 
             @Override
             public void handle(long now) {
-                if (now - lastUpdate >= 16000000){
+                if (now - lastUpdate >= 33000000){
                     gc.clearRect(0, 0, 19200, 10800);
                     drawCourse();
                     drawBoats();

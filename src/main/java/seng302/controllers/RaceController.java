@@ -1,15 +1,14 @@
 package seng302.controllers;
 
 import seng302.models.Boat;
-import seng302.models.OldFileParser;
 import seng302.models.Race;
+import seng302.models.parsers.ConfigParser;
 import seng302.models.parsers.CourseParser;
+import seng302.models.parsers.TeamsParser;
 
-import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -21,11 +20,11 @@ public class RaceController {
     Race race = null;
 
     public void initializeRace() {
-        String raceConfigFile;
-        raceConfigFile = "doc/examples/config.json";
+        String raceConfigFile = "doc/examples/config.xml";
+        String teamsConfigFile = "doc/examples/teams.xml";
 
         try {
-            race = createRace(raceConfigFile);
+            race = createRace(raceConfigFile, teamsConfigFile);
         } catch (Exception e) {
             System.out.println("There was an error creating the race.");
         }
@@ -37,36 +36,28 @@ public class RaceController {
         }
     }
 
-    public Race createRace(String configFile) throws Exception {
+    public Race createRace(String configFile, String teamsConfigFile) throws Exception {
         Race race = new Race();
-        OldFileParser fp;
 
         // Read team names from file
-        try{
-            fp = new OldFileParser(configFile);
-        }
-        catch (FileNotFoundException e){
-            System.out.println("Config file does not exist");
-            return null;
-        }
+        TeamsParser tp = new TeamsParser(teamsConfigFile);
+
+        // Read course from file
+        ConfigParser config = new ConfigParser(configFile);
 
         ArrayList<String> boatNames = new ArrayList<>();
-        ArrayList<Map<String, Object>> teams = fp.getTeams();
+        ArrayList<Boat> teams = tp.getBoats();
 
         //get race size
-        int numberOfBoats = (int) fp.getRaceSize();
-        int boatsAdded = 0;
+        int numberOfBoats = teams.size();
 
         //get time scale
-        double timeScale = fp.getTimeScale();
+        double timeScale = config.getTimeScale();
         race.setTimeScale(timeScale);
 
-        for (Map<String, Object> team : teams) {
-            if (boatsAdded < numberOfBoats){
-                boatNames.add((String) team.get("team-name"));
-                race.addBoat(new Boat(team.get("team-name").toString(), (Double) (team.get("velocity"))));
-            }
-            boatsAdded++;
+        for (Boat boat : teams) {
+            boatNames.add(boat.getTeamName());
+            race.addBoat(boat);
         }
 
         // Shuffle team names
@@ -77,8 +68,8 @@ public class RaceController {
             return null;
         }
 
-        CourseParser cp = new CourseParser("doc/examples/course.xml");
-        race.addCourse(cp.getCourse());
+        CourseParser course = new CourseParser("doc/examples/course.xml");
+        race.addCourse(course.getCourse());
 
         return race;
     }
