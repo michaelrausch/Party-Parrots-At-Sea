@@ -42,4 +42,8 @@ public class BoatPositionController {
             positionVbox.getChildren().add(new Text(boat.getTeamName()));
         }
     }
+
+    public ArrayList<Boat> getBoatOrder() {
+        return boatOrder;
+    }
 }
