@@ -3,8 +3,6 @@ package seng302.controllers;
 import javafx.animation.*;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
@@ -36,8 +34,6 @@ import java.util.List;
 public class CanvasController {
     @FXML
     private Canvas canvas;
-    @FXML
-    TextArea boatOrder;
 
     private Race race;
     private GraphicsContext gc;
@@ -140,6 +136,8 @@ public class CanvasController {
             @Override
             public void handle(long now) {
                 gc.clearRect(0, 0, 760, 360);
+                gc.setFill(Color.SKYBLUE);
+                gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
                 drawCourse();
                 drawBoats();
 
@@ -156,10 +154,8 @@ public class CanvasController {
             }
         };
 
-        generateTimeline();
-
+        generateTimelines();
         timer.start();
-
         loadTimerView();
 
         Double maxDuration = 0.0;
@@ -168,8 +164,6 @@ public class CanvasController {
         for (TimelineInfo timelineInfo : timelineInfos.values()) {
 
             Timeline timeline = timelineInfo.getTimeline();
-            System.out.println();
-
             if (timeline.getTotalDuration().toMillis() >= maxDuration) {
                 maxDuration = timeline.getTotalDuration().toMillis();
                 maxTimeline = timeline;
@@ -195,7 +189,7 @@ public class CanvasController {
     /**
      * Generates time line for each boat, and stores time time into timelineInfos hash map
      */
-    private void generateTimeline() {
+    private void generateTimelines() {
         HashMap<Boat, List> boat_events = race.getEvents();
 
         for (Boat boat : boat_events.keySet()) {
@@ -205,12 +199,6 @@ public class CanvasController {
 
             List<KeyFrame> keyFrames = new ArrayList<>();
             List<Event> events = boat_events.get(boat);
-
-            EventHandler onFinished = new EventHandler<ActionEvent>() {
-                public void handle(ActionEvent event) {
-                    boat.getTeamName();
-                }
-            };
 
             // iterates all events and convert each event to keyFrame, then add them into a list
             for (Event event : events) {
