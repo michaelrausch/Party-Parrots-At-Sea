@@ -23,7 +23,7 @@ public class RaceTimerController implements Initializable{
      * @param time the time in seconds
      * @return a formatted string
      */
-    private String convertTimeToMinutesSeconds(int time){
+    public String convertTimeToMinutesSeconds(int time){
         if (time < 0){
             return String.format("-%02d:%02d", (time * -1) / 60, (time * -1)% 60);
         }
@@ -34,7 +34,7 @@ public class RaceTimerController implements Initializable{
      * Controller to control the race timer
      * @param race the race the timer is timing
      */
-    RaceTimerController(Race race){
+    public RaceTimerController(Race race){
         this.race = race;
     }
 
