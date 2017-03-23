@@ -271,7 +271,7 @@ public class CanvasController {
         gc.setFill(color);
         gc.setLineWidth(3);
         gc.setFontSmoothingType(FontSmoothingType.GRAY);
-        gc.fillText(name + ", " + speed + " knots",x+15,y+15);
+        gc.fillText(name + ", " + speed + " knots", x+15, y+15);
 
         gc.fillOval(x, y, diameter, diameter);
     }
