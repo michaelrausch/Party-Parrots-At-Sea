@@ -3,10 +3,13 @@ package seng302.controllers;
 import javafx.animation.*;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.CheckBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -36,6 +39,16 @@ import java.util.List;
 public class CanvasController {
     @FXML
     private Canvas canvas;
+    @FXML
+    private AnchorPane contentAnchorPane;
+    @FXML
+    private Text windArrowText, windDirectionText;
+    @FXML
+    private Pane raceTimer;
+    @FXML
+    private BoatPositionController teamPositionsController;
+    @FXML
+    private CheckBox toggleAnnotation;
 
     private Race race;
     private GraphicsContext gc;
@@ -46,86 +59,11 @@ public class CanvasController {
     private final double ORIGIN_LAT = 32.320504;
     private final double ORIGIN_LON = -64.857063;
 
-    @FXML
-    private AnchorPane contentAnchorPane;
-    @FXML
-    private Text windArrowText, windDirectionText;
-
-    @FXML Pane raceTimer;
-
-    @FXML
-    BoatPositionController teamPositionsController;
-
     private Animation.Status raceStatus = Animation.Status.PAUSED;
 
     private final int SCALE = 16000;
 
-    /**
-     * Display the list of boats in the order they finished the race
-     */
-    private void loadRaceResultView() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/FinishView.fxml"));
-        loader.setController(new RaceResultController(race));
-
-        try {
-            contentAnchorPane.getChildren().removeAll();
-            contentAnchorPane.getChildren().clear();
-            contentAnchorPane.getChildren().addAll((Pane) loader.load());
-
-        } catch (javafx.fxml.LoadException e) {
-            System.err.println(e.getCause());
-        } catch (IOException e) {
-            System.err.println(e);
-        }
-    }
-
-    /**
-     * Load the race timer
-     */
-    private void loadTimerView(){
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/raceTimer.fxml"));
-        loader.setController(new RaceTimerController(race));
-
-        try{
-            raceTimer.getChildren().clear();
-            raceTimer.getChildren().removeAll();
-            raceTimer.getChildren().addAll((Pane) loader.load());
-        }
-        catch(javafx.fxml.LoadException e){
-            System.out.println(e);
-        }
-        catch(IOException e){
-            System.out.println(e);
-        }
-    }
-
-    /**
-     * Play each boats timeline
-     */
-    private void playTimelines(){
-        for (TimelineInfo timelineInfo : timelineInfos.values()){
-            Timeline timeline = timelineInfo.getTimeline();
-
-            if (timeline.getStatus() == Animation.Status.PAUSED){
-                timeline.play();
-            }
-        }
-        raceStatus = Animation.Status.RUNNING;
-    }
-
-    /**
-     * Pause each boats timeline
-     */
-    private void pauseTimelines(){
-        for (TimelineInfo timelineInfo : timelineInfos.values()){
-            Timeline timeline = timelineInfo.getTimeline();
-
-            if (timeline.getStatus() == Animation.Status.RUNNING){
-                timeline.pause();
-            }
-        }
-        raceStatus = Animation.Status.PAUSED;
-    }
+    private boolean annotationCheck = true;
 
     /**
      * Initialize the controller
@@ -196,10 +134,84 @@ public class CanvasController {
             loadRaceResultView();
         });
 
+        toggleAnnotation.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                annotationCheck = !annotationCheck;
+            }
+        });
+
         //set wind direction!!!!!!! can't find another place to put my code --haoming
         double windDirection = new ConfigParser("doc/examples/config.xml").getWindDirection();
         windDirectionText.setText(String.format("%.1f°", windDirection));
         windArrowText.setRotate(windDirection);
+    }
+
+    /**
+     * Display the list of boats in the order they finished the race
+     */
+    private void loadRaceResultView() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/FinishView.fxml"));
+        loader.setController(new RaceResultController(race));
+
+        try {
+            contentAnchorPane.getChildren().removeAll();
+            contentAnchorPane.getChildren().clear();
+            contentAnchorPane.getChildren().addAll((Pane) loader.load());
+
+        } catch (javafx.fxml.LoadException e) {
+            System.err.println(e.getCause());
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
+
+    /**
+     * Load the race timer
+     */
+    private void loadTimerView(){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/raceTimer.fxml"));
+        loader.setController(new RaceTimerController(race));
+
+        try{
+            raceTimer.getChildren().clear();
+            raceTimer.getChildren().removeAll();
+            raceTimer.getChildren().addAll((Pane) loader.load());
+        }
+        catch(javafx.fxml.LoadException e){
+            System.out.println(e);
+        }
+        catch(IOException e){
+            System.out.println(e);
+        }
+    }
+
+    /**
+     * Play each boats timeline
+     */
+    private void playTimelines(){
+        for (TimelineInfo timelineInfo : timelineInfos.values()){
+            Timeline timeline = timelineInfo.getTimeline();
+
+            if (timeline.getStatus() == Animation.Status.PAUSED){
+                timeline.play();
+            }
+        }
+        raceStatus = Animation.Status.RUNNING;
+    }
+
+    /**
+     * Pause each boats timeline
+     */
+    private void pauseTimelines(){
+        for (TimelineInfo timelineInfo : timelineInfos.values()){
+            Timeline timeline = timelineInfo.getTimeline();
+
+            if (timeline.getStatus() == Animation.Status.RUNNING){
+                timeline.pause();
+            }
+        }
+        raceStatus = Animation.Status.PAUSED;
     }
 
     /**
@@ -258,6 +270,8 @@ public class CanvasController {
      * @param lat
      * @param lon
      * @param color
+     * @param name
+     * @param speed
      */
     private void drawBoat(double lat, double lon, Color color, String name, double speed) {
         // Latitude
@@ -266,12 +280,15 @@ public class CanvasController {
 
         double diameter = 9;
 
-        // Set boat text
-        gc.setFont(new Font(14));
         gc.setFill(color);
-        gc.setLineWidth(3);
-        gc.setFontSmoothingType(FontSmoothingType.GRAY);
-        gc.fillText(name + ", " + speed + " knots", x+15, y+15);
+
+        if (annotationCheck) {
+            // Set boat text
+            gc.setFont(new Font(14));
+            gc.setLineWidth(3);
+            gc.setFontSmoothingType(FontSmoothingType.GRAY);
+            gc.fillText(name + ", " + speed + " knots", x + 15, y + 15);
+        }
 
         gc.fillOval(x, y, diameter, diameter);
     }
