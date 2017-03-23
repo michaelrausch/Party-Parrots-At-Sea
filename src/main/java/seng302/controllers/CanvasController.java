@@ -148,11 +148,11 @@ public class CanvasController {
                     gc.clearRect(0, 0, 19200, 10800);
                     drawCourse();
                     drawBoats();
-                gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
-                gc.setFill(Color.SKYBLUE);
-                gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
-                drawCourse();
-                drawBoats();
+                    gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
+                    gc.setFill(Color.SKYBLUE);
+                    gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
+                    drawCourse();
+                    drawBoats();
 
                     // If race has started, draw the boats and play the timeline
                     if (race.getRaceTime() > 1){
