@@ -142,7 +142,7 @@ public class CanvasController {
         });
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
-        double windDirection = new ConfigParser("doc/examples/config.xml").getWindDirection();
+        double windDirection = new ConfigParser("/config.xml").getWindDirection();
         windDirectionText.setText(String.format("%.1f°", windDirection));
         windArrowText.setRotate(windDirection);
     }

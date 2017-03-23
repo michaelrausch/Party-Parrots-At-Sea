@@ -16,7 +16,7 @@ public class TeamsParserTest {
 	private TeamsParser tp;
 	@Before
 	public void readFile() {
-		tp = new TeamsParser("doc/examples/teams.xml");
+		tp = new TeamsParser("/teams.xml");
 	}
 
 	@Test
@@ -26,10 +26,10 @@ public class TeamsParserTest {
 		assertEquals(6, boats.size(), 1e-10);
 
 		assertEquals("Oracle Team USA", boats.get(0).getTeamName());
-		assertEquals(10, boats.get(0).getVelocity(), 1e-10);
+		assertEquals(30.9, boats.get(0).getVelocity(), 1e-10);
 
 		assertEquals("Groupama Team France", boats.get(5).getTeamName());
-		assertEquals(10, boats.get(5).getVelocity(), 1e-10);
+		assertEquals(45.6, boats.get(5).getVelocity(), 1e-10);
 	}
 
 }
