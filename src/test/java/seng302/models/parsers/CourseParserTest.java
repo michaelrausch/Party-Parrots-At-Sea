@@ -18,7 +18,7 @@ public class CourseParserTest {
 
 	@Before
 	public void initializeParser() throws Exception {
-		cp = new CourseParser("doc/examples/course.xml");
+		cp = new CourseParser("/course.xml");
 	}
 
 	@Test
