@@ -1,6 +1,5 @@
 package seng302.models.parsers;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import org.junit.Before;
 import org.junit.Test;
 import seng302.models.mark.*;
