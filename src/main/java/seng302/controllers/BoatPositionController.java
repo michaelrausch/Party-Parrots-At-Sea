@@ -39,7 +39,7 @@ public class BoatPositionController {
         positionVbox.getChildren().removeAll();
 
         for (Boat boat: boatOrder){
-            positionVbox.getChildren().add(new Text(boat.getTeamName() + " " + boat.getSpeedInKnots() + " Knots"));
+            positionVbox.getChildren().add(new Text(boat.getShortName() + " " + boat.getSpeedInKnots() + " Knots"));
         }
     }
 

@@ -15,6 +15,7 @@ public class Boat {
     private Color color;
     private int markLastPast;
     private double heading;
+    private String shortName;
 
     public Boat(String teamName) {
         this.teamName = teamName;
@@ -22,6 +23,7 @@ public class Boat {
         this.lat = 0.0;
         this.lon = 0.0;
         this.distanceToNextMark = 0.0;
+        this.shortName = "";
     }
 
     /**
@@ -29,12 +31,14 @@ public class Boat {
      *
      * @param teamName     The name of the team sailing the boat
      * @param boatVelocity The speed of the boat in meters/second
+     * @param shortName    A shorter version of the teams name
      */
-    public Boat(String teamName, double boatVelocity) {
+    public Boat(String teamName, double boatVelocity, String shortName) {
         this.teamName = teamName;
         this.velocity = boatVelocity;
         this.distanceToNextMark = 0.0;
         this.color = Colors.getColor();
+        this.shortName = shortName;
     }
 
     /**
@@ -118,5 +122,9 @@ public class Boat {
 
     public double getHeading(){
         return this.heading;
+    }
+
+    public String getShortName(){
+        return this.shortName;
     }
 }

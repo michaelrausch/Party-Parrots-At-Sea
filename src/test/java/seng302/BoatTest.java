@@ -26,7 +26,7 @@ public class BoatTest {
 
     @Test
     public void testSetVelocity() {
-        Boat boat1 = new Boat("Team 1", 29.0);
+        Boat boat1 = new Boat("Team 1", 29.0, "");
         assertEquals(boat1.getVelocity(), (double) 29.0, 1e-15);
 
         boat1.setVelocity(12.0);

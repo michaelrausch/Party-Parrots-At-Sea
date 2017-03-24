@@ -14,7 +14,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import seng302.models.Boat;
@@ -265,7 +264,7 @@ public class CanvasController {
 
             boat.setLocation(timelineInfo.getY().doubleValue(), timelineInfo.getX().doubleValue());
 
-            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getTeamName(), boat.getSpeedInKnots(), boat.getHeading());
+            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
     }
 
@@ -280,6 +279,7 @@ public class CanvasController {
      */
     private void drawWake(GraphicsContext gc, double x, double y, double speed, Color color, double heading){
         double angle = Math.toRadians(heading);
+        speed = speed * 0.50; // Half the size of the wake
 
         double newX = x + speed * Math.cos(angle);//(nextX * Math.cos(angle) - nextY * Math.sin(angle)) * length;
         double newY = y + speed *  Math.sin(angle);//(nextX * Math.sin(angle) + nextY * Math.cos(angle)) * length;
@@ -312,12 +312,14 @@ public class CanvasController {
             // Set boat text
             gc.setFont(new Font(14));
             gc.setLineWidth(3);
-            gc.setFontSmoothingType(FontSmoothingType.GRAY);
             gc.fillText(name + ", " + speed + " knots", x + 15, y + 15);
         }
 
         gc.fillOval(x, y, diameter, diameter);
-        drawWake(gc, x, y, speed, color, heading);
+
+        if (annotationCheck){
+            drawWake(gc, x, y, speed, color, heading);
+        }
     }
 
     /**
