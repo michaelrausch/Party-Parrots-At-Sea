@@ -5,27 +5,27 @@
   "teams": [
     {
       "team-name": "Oracle Team USA",
-      "velocity": 30.9
+      "velocity": 60.0
     },
     {
       "team-name": "Artemis Racing",
-      "velocity": 59.3
+      "velocity": 10.0
     },
     {
       "team-name": "Emirates Team New Zealand",
-      "velocity": 51.5
+      "velocity": 90.0
     },
     {
       "team-name": "Groupama Team France",
-      "velocity": 29.9
+      "velocity": 15.0
     },
     {
       "team-name": "Land Rover BAR",
-      "velocity": 99.6
+      "velocity": 70.0
     },
     {
       "team-name": "SoftBank Team Japan",
-      "velocity": 45.6
+      "velocity": 45.0
     }
   ]
 }

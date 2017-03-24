@@ -14,6 +14,7 @@ public class Boat {
     private double distanceToNextMark;
     private Color color;
     private int markLastPast;
+    private double heading;
 
     public Boat(String teamName) {
         this.teamName = teamName;
@@ -109,5 +110,13 @@ public class Boat {
 
     public int getMarkLastPast() {
         return markLastPast;
+    }
+
+    public void setHeading(double heading){
+        this.heading = heading;
+    }
+
+    public double getHeading(){
+        return this.heading;
     }
 }

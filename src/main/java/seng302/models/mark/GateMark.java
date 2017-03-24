@@ -39,10 +39,12 @@ public class GateMark extends Mark {
     }
 
     public double getLatitude(){
-        return (this.getSingleMark1().getLatitude() + this.getSingleMark2().getLatitude()) / 2;
+        //return (this.getSingleMark1().getLatitude() + this.getSingleMark2().getLatitude()) / 2;
+        return (this.getSingleMark1().getLatitude());
     }
 
     public double getLongitude(){
-        return (this.getSingleMark1().getLongitude() + this.getSingleMark2().getLongitude()) / 2;
+        //return (this.getSingleMark1().getLongitude() + this.getSingleMark2().getLongitude()) / 2;
+        return (this.getSingleMark1().getLongitude());
     }
 }
