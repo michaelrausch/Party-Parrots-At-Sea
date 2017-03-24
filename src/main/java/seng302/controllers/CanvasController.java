@@ -48,6 +48,7 @@ public class CanvasController {
 
     @FXML
     private AnchorPane contentAnchorPane;
+
     @FXML
     private Text windArrowText, windDirectionText;
 
@@ -132,7 +133,6 @@ public class CanvasController {
      */
     public void initialize() {
         gc = canvas.getGraphicsContext2D();
-        //gc.scale(2, 2);
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
@@ -145,9 +145,6 @@ public class CanvasController {
             @Override
             public void handle(long now) {
                 if (now - lastUpdate >= 33000000){
-                    gc.clearRect(0, 0, 19200, 10800);
-                    drawCourse();
-                    drawBoats();
                     gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
                     gc.setFill(Color.SKYBLUE);
                     gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
@@ -163,14 +160,17 @@ public class CanvasController {
                     else if (race.getRaceTime() < 1 || raceStatus == Animation.Status.RUNNING){
                         pauseTimelines();
                     }
-
                     lastUpdate = now;
                 }
-
             }
         };
 
-        generateTimelines();
+        try{
+            generateTimelines();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
         timer.start();
         loadTimerView();
 
@@ -229,7 +229,10 @@ public class CanvasController {
                 } else {
                     keyFrames.add(
                             new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
-                                    onFinished -> teamPositionsController.handleEvent(event),
+                                    onFinished ->{
+                                        teamPositionsController.handleEvent(event);
+                                        boat.setHeading(event.getBoatHeading());
+                                    },
                                     new KeyValue(x, event.getThisMark().getLatitude()),
                                     new KeyValue(y, event.getThisMark().getLongitude())
                             )
@@ -248,8 +251,32 @@ public class CanvasController {
     private void drawBoats() {
         for (Boat boat : timelineInfos.keySet()) {
             TimelineInfo timelineInfo = timelineInfos.get(boat);
-            drawBoat(timelineInfo.getX().doubleValue(), timelineInfo.getY().doubleValue(), boat.getColor(), boat.getTeamName(), boat.getSpeedInKnots());
+
+            boat.setLocation(timelineInfo.getY().doubleValue(), timelineInfo.getX().doubleValue());
+
+            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getTeamName(), boat.getSpeedInKnots(), boat.getHeading());
         }
+    }
+
+    /**
+     * Draw the wake line behind a boat
+     * @param gc The graphics context used for drawing the wake
+     * @param x the x position of the boat
+     * @param y the y position of the boat
+     * @param speed the speed of the boat
+     * @param color the color of the wake line
+     * @param heading the heading of the boat
+     */
+    private void drawWake(GraphicsContext gc, double x, double y, double speed, Color color, double heading){
+        double angle = Math.toRadians(heading);
+
+        double newX = x + speed * Math.cos(angle);//(nextX * Math.cos(angle) - nextY * Math.sin(angle)) * length;
+        double newY = y + speed *  Math.sin(angle);//(nextX * Math.sin(angle) + nextY * Math.cos(angle)) * length;
+
+        gc.setStroke(color);
+        gc.setLineWidth(1.0);
+
+        gc.strokeLine(x+5, y+5, newX, newY);
     }
 
     /**
@@ -259,7 +286,7 @@ public class CanvasController {
      * @param lon
      * @param color
      */
-    private void drawBoat(double lat, double lon, Color color, String name, double speed) {
+    private void drawBoat(double lat, double lon, Color color, String name, double speed, double heading) {
         // Latitude
         double x = (lon - ORIGIN_LON) * SCALE;
         double y = (ORIGIN_LAT - lat) * SCALE;
@@ -274,6 +301,7 @@ public class CanvasController {
         gc.fillText(name + ", " + speed + " knots",x+15,y+15);
 
         gc.fillOval(x, y, diameter, diameter);
+        drawWake(gc, x, y, speed, color, heading);
     }
 
     /**

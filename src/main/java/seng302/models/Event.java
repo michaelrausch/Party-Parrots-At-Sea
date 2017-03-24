@@ -17,6 +17,11 @@ public class Event {
     private Mark mark2; // Next mark
     private int markPosInRace; // the position of the current mark in the race course
 
+    private final double ORIGIN_LAT = 32.320504;
+    private final double ORIGIN_LON = -64.857063;
+    private final double SCALE = 16000;
+
+
 
     /**
      * Event class containing the time of specific event, related team/boat, and
@@ -95,7 +100,6 @@ public class Event {
      * @return the distance between the two marks
      */
     public double getDistanceBetweenMarks() {
-        //return Math.sqrt(Math.pow(mark1.getLatitude()-mark2.getLatitude(), 2) + Math.pow(mark1.getLongitude()-mark2.getLongitude(), 2));
         double earth_radius = 6378.137;
         double dLat = this.mark2.getLatitude() * Math.PI / 180 - this.mark1.getLatitude() * Math.PI / 180;
         double dLon = this.mark2.getLongitude() * Math.PI / 180 - this.mark1.getLongitude() * Math.PI / 180;
@@ -112,11 +116,23 @@ public class Event {
      * @return the boats heading
      */
     public double getBoatHeading() {
-        double bearing = Math.atan2(mark2.getLatitude() - mark1.getLatitude(), mark2.getLongitude() - mark1.getLongitude());
-        if (bearing < 0) {
-            bearing += Math.PI * 2;
+        if (mark2 == null){
+            return 0.0;
         }
-        return bearing * 180 / Math.PI;
+
+        double x1 = (mark1.getLongitude() - ORIGIN_LON) * SCALE;
+        double y1 = (ORIGIN_LAT - mark1.getLatitude()) * SCALE;
+        double x2 = (mark2.getLongitude() - ORIGIN_LON) * SCALE;
+        double y2 = (ORIGIN_LAT - mark2.getLatitude()) * SCALE;
+
+        double headingRadians = Math.atan2(y2-y1, x2-x1);
+
+        if (headingRadians < 0){
+            headingRadians += 2 * Math.PI;
+        }
+
+        // Convert back to degrees, and flip 180 degrees
+        return (Math.toDegrees(headingRadians) + 180) % 360;
     }
 
     public Mark getThisMark() {
