@@ -152,7 +152,6 @@ public class Race {
      * @param boat The boat that has finished the race
      */
     public void setBoatFinished(Boat boat){
-        System.out.println(boat.getTeamName() + " finished");
         this.finishingOrder.add(boat);
     }
 

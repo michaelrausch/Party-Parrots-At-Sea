@@ -78,15 +78,19 @@ public class CanvasController {
         // overriding the handle so that it can clean canvas and redraw boats and course marks
         AnimationTimer timer = new AnimationTimer() {
             private long lastUpdate = 0;
+            private long lastFpsUpdate = 0;
+            private int lastFpsCount = 0;
+            private int fpsCount = 0;
 
             @Override
             public void handle(long now) {
-                if (now - lastUpdate >= 33000000){
+                if (true){ //if statement for limiting refresh rate if needed
                     gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
                     gc.setFill(Color.SKYBLUE);
                     gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
                     drawCourse();
                     drawBoats();
+                    drawFps(lastFpsCount);
 
                     // If race has started, draw the boats and play the timeline
                     if (race.getRaceTime() > 1){
@@ -98,6 +102,12 @@ public class CanvasController {
                         pauseTimelines();
                     }
                     lastUpdate = now;
+                    fpsCount ++;
+                    if (now - lastFpsUpdate >= 1000000000){
+                        lastFpsCount = fpsCount;
+                        fpsCount = 0;
+                        lastFpsUpdate = now;
+                    }
                 }
             }
         };
@@ -254,6 +264,13 @@ public class CanvasController {
             // uses the lists generated above to create a Timeline for the boat.
             timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
         }
+    }
+
+    private void drawFps(int fps){
+        gc.setFill(Color.BLACK);
+        gc.setFont(new Font(14));
+        gc.setLineWidth(3);
+        gc.fillText(fps + " FPS", 5, 20);
     }
 
     /**
