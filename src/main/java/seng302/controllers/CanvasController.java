@@ -45,7 +45,7 @@ public class CanvasController {
     @FXML
     private BoatPositionController teamPositionsController;
     @FXML
-    private CheckBox toggleAnnotation;
+    private CheckBox toggleAnnotation, toggleFps;
 
     private Race race;
     private GraphicsContext gc;
@@ -61,6 +61,7 @@ public class CanvasController {
     private final int SCALE = 16000;
 
     private boolean annotationCheck = true;
+    private boolean displayFps = true;
 
     ///test
     private HashSet<Integer> headingTest = new HashSet<>();
@@ -147,6 +148,12 @@ public class CanvasController {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 annotationCheck = !annotationCheck;
+            }
+        });
+        toggleFps.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                displayFps = !displayFps;
             }
         });
 
@@ -267,10 +274,12 @@ public class CanvasController {
     }
 
     private void drawFps(int fps){
-        gc.setFill(Color.BLACK);
-        gc.setFont(new Font(14));
-        gc.setLineWidth(3);
-        gc.fillText(fps + " FPS", 5, 20);
+        if (displayFps){
+            gc.setFill(Color.BLACK);
+            gc.setFont(new Font(14));
+            gc.setLineWidth(3);
+            gc.fillText(fps + " FPS", 5, 20);
+        }
     }
 
     /**
