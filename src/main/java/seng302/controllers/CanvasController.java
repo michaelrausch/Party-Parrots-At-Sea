@@ -7,6 +7,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.CheckBox;
@@ -35,8 +36,6 @@ import java.util.*;
  */
 public class CanvasController {
     @FXML
-    private Canvas canvas;
-    @FXML
     private AnchorPane contentAnchorPane;
     @FXML
     private Text windArrowText, windDirectionText;
@@ -47,13 +46,15 @@ public class CanvasController {
     @FXML
     private CheckBox toggleAnnotation, toggleFps;
 
+    private ResizableCanvas canvas;
+
     private Race race;
     private GraphicsContext gc;
     private HashMap<Boat, TimelineInfo> timelineInfos;
 
     private AnchorPane raceResults;
 
-    private final double ORIGIN_LAT = 32.320504;
+    private final double ORIGIN_LAT = 32.321504;
     private final double ORIGIN_LON = -64.857063;
 
     private Animation.Status raceStatus = Animation.Status.PAUSED;
@@ -70,6 +71,15 @@ public class CanvasController {
      * Initialize the controller
      */
     public void initialize() {
+        canvas = new ResizableCanvas();
+
+        contentAnchorPane.getChildren().add(canvas);
+
+        // Bind canvas size to stack pane size.
+        canvas.widthProperty().bind(
+                contentAnchorPane.widthProperty());
+        canvas.heightProperty().bind(
+                contentAnchorPane.heightProperty());
         gc = canvas.getGraphicsContext2D();
         RaceController raceController = new RaceController();
         raceController.initializeRace();
@@ -161,6 +171,38 @@ public class CanvasController {
         double windDirection = new ConfigParser("/config.xml").getWindDirection();
         windDirectionText.setText(String.format("%.1f°", windDirection));
         windArrowText.setRotate(windDirection);
+    }
+
+    class ResizableCanvas extends Canvas {
+
+        public ResizableCanvas() {
+            // Redraw canvas when size changes.
+            widthProperty().addListener(evt -> draw());
+            heightProperty().addListener(evt -> draw());
+        }
+
+        private void draw() {
+            double width = getWidth();
+            double height = getHeight();
+
+            GraphicsContext gc = getGraphicsContext2D();
+            gc.clearRect(0, 0, width, height);
+        }
+
+        @Override
+        public boolean isResizable() {
+            return true;
+        }
+
+        @Override
+        public double prefWidth(double height) {
+            return getWidth();
+        }
+
+        @Override
+        public double prefHeight(double width) {
+            return getHeight();
+        }
     }
 
     /**
