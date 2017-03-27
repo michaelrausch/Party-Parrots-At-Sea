@@ -113,7 +113,8 @@ public class Event {
     }
 
     /**
-     * @return the boats heading
+     * Calculates current boat heading direction.
+     * @return the boats heading as degree. vertical upward is 0 degree, and degree goes up clockwise.
      */
     public double getBoatHeading() {
         if (mark2 == null){
@@ -132,7 +133,9 @@ public class Event {
         }
 
         // Convert back to degrees, and flip 180 degrees
-        return (Math.toDegrees(headingRadians) + 180) % 360;
+//        return ((headingRadians) * 180) / Math.PI;
+        return (Math.toDegrees(headingRadians) + 90) % 360;
+
     }
 
     public Mark getThisMark() {
