@@ -27,9 +27,7 @@ import seng302.models.mark.SingleMark;
 import seng302.models.parsers.ConfigParser;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -63,6 +61,9 @@ public class CanvasController {
     private final int SCALE = 16000;
 
     private boolean annotationCheck = true;
+
+    ///test
+    private HashSet<Integer> headingTest = new HashSet<>();
 
     /**
      * Initialize the controller
@@ -279,15 +280,13 @@ public class CanvasController {
      */
     private void drawWake(GraphicsContext gc, double x, double y, double speed, Color color, double heading){
         double angle = Math.toRadians(heading);
-        speed = speed * 0.50; // Half the size of the wake
-
-        double newX = x + speed * Math.cos(angle);//(nextX * Math.cos(angle) - nextY * Math.sin(angle)) * length;
-        double newY = y + speed *  Math.sin(angle);//(nextX * Math.sin(angle) + nextY * Math.cos(angle)) * length;
+        speed = speed * 0.5; // Half the size of the wake
+        Point newP = new Point(0, speed);
+        newP.rotate(angle);
 
         gc.setStroke(color);
         gc.setLineWidth(1.0);
-
-        gc.strokeLine(x+5, y+5, newX, newY);
+        gc.strokeLine(x, y, newP.x + x, newP.y + y);
     }
 
     /**
@@ -304,8 +303,6 @@ public class CanvasController {
         double x = (lon - ORIGIN_LON) * SCALE;
         double y = (ORIGIN_LAT - lat) * SCALE;
 
-        double diameter = 9;
-
         gc.setFill(color);
 
         if (annotationCheck) {
@@ -314,11 +311,43 @@ public class CanvasController {
             gc.setLineWidth(3);
             gc.fillText(name + ", " + speed + " knots", x + 15, y + 15);
         }
+//        double diameter = 9;
+//        gc.fillOval(x, y, diameter, diameter);
+        double angle = Math.toRadians(heading);
 
-        gc.fillOval(x, y, diameter, diameter);
+        Point p1 = new Point(0, -15); // apex point
+        Point p2 = new Point(7, 4); // base point
+        Point p3 = new Point(-7, 4); // base point
+        p1.rotate(angle);
+        p2.rotate(angle);
+        p3.rotate(angle);
+        double[] xx = new double[] {p1.x + x, p2.x + x, x, p3.x + x};
+        double[] yy = new double[] {p1.y + y, p2.y + y, y, p3.y + y};
+        gc.fillPolygon(xx, yy, 4);
 
         if (annotationCheck){
             drawWake(gc, x, y, speed, color, heading);
+        }
+    }
+
+    /**
+     * Inner class for creating point so that you can rotate it around origin point.
+     */
+    class Point {
+
+        double x, y;
+
+        Point (double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        void rotate(double angle) {
+            double oldX = x;
+            double oldY = y;
+            this.x = oldX * Math.cos(angle) - oldY * Math.sin(angle);
+            this.y = oldX * Math.sin(angle) + oldY * Math.cos(angle);
+
         }
     }
 
