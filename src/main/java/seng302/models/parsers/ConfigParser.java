@@ -50,7 +50,6 @@ public class ConfigParser extends FileParser {
 				val = Double.valueOf(element.getTextContent());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			return val;
 		}
@@ -72,7 +71,6 @@ public class ConfigParser extends FileParser {
 				string = element.getTextContent();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		} finally {
 			return string;
 		}
