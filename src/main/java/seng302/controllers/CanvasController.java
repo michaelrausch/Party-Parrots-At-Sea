@@ -35,56 +35,32 @@ import java.util.*;
  * Modified by Haoming Yin (hyi25) on 20/3/2017.
  */
 public class CanvasController {
+
     @FXML
-    private AnchorPane contentAnchorPane;
-    @FXML
-    private Text windArrowText, windDirectionText;
-    @FXML
-    private Pane raceTimer;
-    @FXML
-    private BoatPositionController teamPositionsController;
-    @FXML
-    private CheckBox toggleAnnotation, toggleFps;
+    private AnchorPane canvasPane;
 
     private ResizableCanvas canvas;
-
     private Race race;
     private GraphicsContext gc;
     private HashMap<Boat, TimelineInfo> timelineInfos;
-
-    private AnchorPane raceResults;
-
-    private final double ORIGIN_LAT = 32.321504;
-    private final double ORIGIN_LON = -64.857063;
-
     private Animation.Status raceStatus = Animation.Status.PAUSED;
-
-    private final int SCALE = 16000;
-
-    private boolean annotationCheck = true;
-    private boolean displayFps = true;
 
     ///test
     private HashSet<Integer> headingTest = new HashSet<>();
 
-    /**
-     * Initialize the controller
-     */
     public void initialize() {
         canvas = new ResizableCanvas();
 
-        contentAnchorPane.getChildren().add(canvas);
+        canvasPane.getChildren().add(canvas);
 
         // Bind canvas size to stack pane size.
         canvas.widthProperty().bind(
-                contentAnchorPane.widthProperty());
+                canvasPane.widthProperty());
         canvas.heightProperty().bind(
-                contentAnchorPane.heightProperty());
+                canvasPane.heightProperty());
         gc = canvas.getGraphicsContext2D();
-        RaceController raceController = new RaceController();
-        raceController.initializeRace();
-        race = raceController.getRace();
-        timelineInfos = new HashMap<>();
+//
+//        timelineInfos = new HashMap<>();
 
         // overriding the handle so that it can clean canvas and redraw boats and course marks
         AnimationTimer timer = new AnimationTimer() {
@@ -154,18 +130,7 @@ public class CanvasController {
             loadRaceResultView();
         });
 
-        toggleAnnotation.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                annotationCheck = !annotationCheck;
-            }
-        });
-        toggleFps.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                displayFps = !displayFps;
-            }
-        });
+
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
         double windDirection = new ConfigParser("/config.xml").getWindDirection();
@@ -221,26 +186,6 @@ public class CanvasController {
             System.err.println(e.getCause());
         } catch (IOException e) {
             System.err.println(e);
-        }
-    }
-
-    /**
-     * Load the race timer
-     */
-    private void loadTimerView(){
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/raceTimer.fxml"));
-        loader.setController(new RaceTimerController(race));
-
-        try{
-            raceTimer.getChildren().clear();
-            raceTimer.getChildren().removeAll();
-            raceTimer.getChildren().addAll((Pane) loader.load());
-        }
-        catch(javafx.fxml.LoadException e){
-            System.out.println(e);
-        }
-        catch(IOException e){
-            System.out.println(e);
         }
     }
 

@@ -1,7 +1,6 @@
 package seng302;
 
 import org.junit.Test;
-import seng302.controllers.RaceTimerController;
 import seng302.models.Race;
 
 import static org.junit.Assert.assertTrue;
