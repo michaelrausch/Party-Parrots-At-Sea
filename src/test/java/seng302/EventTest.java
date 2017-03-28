@@ -25,7 +25,7 @@ public class EventTest {
         Boat boat = new Boat("testBoat");
         Event event = new Event(1231242.2, boat, new SingleMark("mark1", 142.5, 122.1), new SingleMark("mark2", 121.9,99.2), 0);
 
-        assertEquals(event.getBoatHeading(), 318.02661370553494, 1e-15);
+        assertEquals(event.getBoatHeading(), 228.0266137055349, 1e-15);
     }
 
     @Test
