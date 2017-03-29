@@ -1,23 +1,29 @@
 package seng302.controllers;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import seng302.models.Boat;
 import seng302.models.Event;
 import seng302.models.Race;
+import seng302.models.TimelineInfo;
+import seng302.models.parsers.ConfigParser;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.ResourceBundle;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Created by ptg19 on 29/03/17.
@@ -33,35 +39,35 @@ public class RaceViewController {
     private AnchorPane contentAnchorPane;
     @FXML
     private Text windArrowText, windDirectionText;
+    @FXML
+    private CanvasController includedCanvasController;
 
     private boolean displayAnnotations;
     private boolean displayFps;
-    private Timeline timeline;
-    private Race race;
+    private Timeline timerTimeline;
+    private Map<Boat, TimelineInfo> timelineInfos = new HashMap<>();
     private ArrayList<Boat> boatOrder = new ArrayList<>();
-
-    private final double ORIGIN_LAT = 32.321504;
-    private final double ORIGIN_LON = -64.857063;
-    private final int SCALE = 16000;
-
-//    /**
-//     * Controller to control the race timer
-//     * @param race the race the timer is timing
-//     */
-//    public RaceTimerController(Race race){
-//        this.race = race;
-//    }
+    private Race race;
 
     public void initialize() {
+        includedCanvasController.setup(this);
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
 
         initializeTimer();
         initializeSettings();
+        try{
+            initializeTimelines();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
-
-
+        //set wind direction!!!!!!! can't find another place to put my code --haoming
+        double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
+        windDirectionText.setText(String.format("%.1f°", windDirection));
+        windArrowText.setRotate(windDirection);
     }
 
     private void initializeSettings(){
@@ -83,15 +89,15 @@ public class RaceViewController {
     }
 
     private void initializeTimer(){
-        timeline = new Timeline();
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        timerTimeline = new Timeline();
+        timerTimeline.setCycleCount(Timeline.INDEFINITE);
         // Run timer update every second
-        timeline.getKeyFrames().add(
+        timerTimeline.getKeyFrames().add(
                 new KeyFrame(Duration.seconds(1),
                         event -> {
                             // Stop timer if race is finished
                             if (this.race.isRaceFinished()) {
-                                this.timeline.stop();
+                                this.timerTimeline.stop();
                             } else {
                                 timerLabel.setText(convertTimeToMinutesSeconds(race.getRaceTime()));
                                 this.race.incrementRaceTime();
@@ -100,7 +106,117 @@ public class RaceViewController {
         );
 
         // Start the timer
-        timeline.playFromStart();
+        timerTimeline.playFromStart();
+    }
+
+    /**
+     * Generates time line for each boat, and stores time time into timelineInfos hash map
+     */
+    private void initializeTimelines() {
+        HashMap<Boat, List> boat_events = race.getEvents();
+
+        for (Boat boat : boat_events.keySet()) {
+            // x, y are the real time coordinates
+            DoubleProperty x = new SimpleDoubleProperty();
+            DoubleProperty y = new SimpleDoubleProperty();
+
+            List<KeyFrame> keyFrames = new ArrayList<>();
+            List<Event> events = boat_events.get(boat);
+
+            // iterates all events and convert each event to keyFrame, then add them into a list
+            for (Event event : events) {
+                if (event.getIsFinishingEvent()) {
+                    keyFrames.add(
+                            new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                                    onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
+                                    new KeyValue(x, event.getThisMark().getLatitude()),
+                                    new KeyValue(y, event.getThisMark().getLongitude())
+                            )
+                    );
+                } else {
+                    keyFrames.add(
+                            new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                                    onFinished ->{
+                                        handleEvent(event);
+                                        boat.setHeading(event.getBoatHeading());
+                                    },
+                                    new KeyValue(x, event.getThisMark().getLatitude()),
+                                    new KeyValue(y, event.getThisMark().getLongitude())
+                            )
+                    );
+                }
+            }
+            timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
+        }
+        setRaceDuration();
+    }
+
+    private void setRaceDuration(){
+        Double maxDuration = 0.0;
+        Timeline maxTimeline = null;
+
+        for (TimelineInfo timelineInfo : timelineInfos.values()) {
+
+            Timeline timeline = timelineInfo.getTimeline();
+            if (timeline.getTotalDuration().toMillis() >= maxDuration) {
+                maxDuration = timeline.getTotalDuration().toMillis();
+                maxTimeline = timeline;
+            }
+
+            // Timelines are paused by default
+            timeline.play();
+            timeline.pause();
+        }
+
+        maxTimeline.setOnFinished(event -> {
+            race.setRaceFinished();
+            loadRaceResultView();
+        });
+    }
+
+    /**
+     * Play each boats timerTimeline
+     */
+    public void playTimelines(){
+        for (TimelineInfo timelineInfo : timelineInfos.values()){
+            Timeline timeline = timelineInfo.getTimeline();
+
+            if (timeline.getStatus() == Animation.Status.PAUSED){
+                timeline.play();
+            }
+        }
+    }
+
+    /**
+     * Pause each boats timerTimeline
+     */
+    public void pauseTimelines(){
+        for (TimelineInfo timelineInfo : timelineInfos.values()){
+            Timeline timeline = timelineInfo.getTimeline();
+
+            if (timeline.getStatus() == Animation.Status.RUNNING){
+                timeline.pause();
+            }
+        }
+    }
+
+    /**
+     * Display the list of boats in the order they finished the race
+     */
+    private void loadRaceResultView() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/FinishView.fxml"));
+        loader.setController(new RaceResultController(race));
+
+        try {
+            contentAnchorPane.getChildren().removeAll();
+            contentAnchorPane.getChildren().clear();
+            contentAnchorPane.getChildren().addAll((Pane) loader.load());
+
+        } catch (javafx.fxml.LoadException e) {
+            System.err.println(e.getCause());
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
     public void handleEvent(Event event) {
@@ -139,17 +255,26 @@ public class RaceViewController {
         return String.format("%02d:%02d", time / 60, time % 60);
     }
 
-    /**
-     * Stop the race timer
-     */
-    public void stop() {
-        timeline.stop();
+    public void stopTimer() {
+        timerTimeline.stop();
+    }
+    public void startTimer() {
+        timerTimeline.play();
     }
 
-    /**
-     * Start the race timer
-     */
-    public void start() {
-        timeline.play();
+    public boolean isDisplayFps() {
+        return displayFps;
+    }
+
+    public boolean isDisplayAnnotations() {
+        return displayAnnotations;
+    }
+
+    public Race getRace() {
+        return race;
+    }
+
+    public Map<Boat, TimelineInfo> getTimelineInfos() {
+        return timelineInfos;
     }
 }

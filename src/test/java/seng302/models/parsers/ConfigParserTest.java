@@ -14,7 +14,7 @@ public class ConfigParserTest {
 
 	@Before
 	public void initializeParser() throws Exception {
-		cp = new ConfigParser("/config.xml");
+		cp = new ConfigParser("/config/config.xml");
 	}
 
 	@Test
