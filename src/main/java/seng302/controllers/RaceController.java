@@ -20,8 +20,8 @@ public class RaceController {
     Race race = null;
 
     public void initializeRace() {
-        String raceConfigFile = "/config.xml";
-        String teamsConfigFile = "/teams.xml";
+        String raceConfigFile = "/config/config.xml";
+        String teamsConfigFile = "/config/teams.xml";
 
         try {
             race = createRace(raceConfigFile, teamsConfigFile);
@@ -68,7 +68,7 @@ public class RaceController {
             return null;
         }
 
-        CourseParser course = new CourseParser("/course.xml");
+        CourseParser course = new CourseParser("/config/course.xml");
         race.addCourse(course.getCourse());
 
         return race;

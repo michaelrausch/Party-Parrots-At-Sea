@@ -16,7 +16,7 @@ public class TeamsParserTest {
 	private TeamsParser tp;
 	@Before
 	public void readFile() {
-		tp = new TeamsParser("/teams.xml");
+		tp = new TeamsParser("/config/teams.xml");
 	}
 
 	@Test

@@ -13,7 +13,7 @@ import java.util.ResourceBundle;
 /**
  * Created by michaelrausch on 21/03/17.
  */
-public class MasterViewController implements Initializable {
+public class Controller implements Initializable {
     @FXML
     private AnchorPane contentPane;
 
@@ -33,6 +33,6 @@ public class MasterViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setContentPane("/RaceView.fxml");
+        setContentPane("/views/RaceView.fxml");
     }
 }
