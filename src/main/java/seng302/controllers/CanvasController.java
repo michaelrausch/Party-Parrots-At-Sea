@@ -150,7 +150,7 @@ public class CanvasController {
      */
     private void drawWake(GraphicsContext gc, double x, double y, double speed, Color color, double heading){
         double angle = Math.toRadians(heading);
-        speed = speed * 0.5; // Half the size of the wake
+        speed = speed * 10;
         Point newP = new Point(0, speed);
         newP.rotate(angle);
 
