@@ -24,7 +24,7 @@ public class ConfigParserTest {
 
 	@Test
 	public void getTimeScale() throws Exception {
-		assertEquals(1.0, cp.getTimeScale(), 1e-10);
+		assertEquals(10.0, cp.getTimeScale(), 1e-10);
 	}
 
 	@Test
