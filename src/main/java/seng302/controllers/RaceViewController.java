@@ -127,7 +127,7 @@ public class RaceViewController {
             for (Event event : events) {
                 if (event.getIsFinishingEvent()) {
                     keyFrames.add(
-                            new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                            new KeyFrame(Duration.seconds(event.getTime()),
                                     onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
                                     new KeyValue(x, event.getThisMark().getLatitude()),
                                     new KeyValue(y, event.getThisMark().getLongitude())
@@ -135,7 +135,7 @@ public class RaceViewController {
                     );
                 } else {
                     keyFrames.add(
-                            new KeyFrame(Duration.seconds(event.getTime() / 60 / 60 / 5),
+                            new KeyFrame(Duration.seconds(event.getTime()),
                                     onFinished ->{
                                         handleEvent(event);
                                         boat.setHeading(event.getBoatHeading());

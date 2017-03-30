@@ -88,7 +88,7 @@ public class Race {
             int numberOfMarks = this.course.size();
 
             for (int i = 0; i < numberOfMarks; i++) {
-                Double time =  (1000 * totalDistance / boat.getVelocity());
+                Double time =  (totalDistance / boat.getVelocity() / timeScale);
 
                 // If there are singleMarks after this event
                 if (i < numberOfMarks - 1) {
@@ -101,6 +101,8 @@ public class Race {
                         events.put(boat, new ArrayList<>(Arrays.asList(event)));
                     }
                     totalDistance += event.getDistanceBetweenMarks();
+                    System.out.println(totalDistance);
+                    System.out.println(boat.getVelocity());
                 }
 
                 // There are no more marks after this event
@@ -190,6 +192,6 @@ public class Race {
      * Increment the race time by one second
      */
     public void incrementRaceTime(){
-        this.raceTime ++;
+        this.raceTime += this.timeScale;
     }
 }
