@@ -39,7 +39,7 @@ public class Race {
     /**
      * Returns a list of boats in a random order
      *
-     * @returns a list of boats
+     * @return a list of boats
      */
     public Boat[] getShuffledBoats() {
         // Shuffle the list of boats
@@ -53,7 +53,7 @@ public class Race {
      * Returns a list of boats in the order that they
      * finished the race (position 0 is first place)
      *
-     * @returns a list of boats
+     * @return a list of boats
      */
     public Boat[] getFinishedBoats() {
         return this.finishingOrder.toArray(new Boat[this.finishingOrder.size()]);

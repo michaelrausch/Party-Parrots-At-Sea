@@ -41,6 +41,7 @@ public class Leg {
 
     /**
      * Get the heading of this leg
+     * @return int
      */
     public int getHeading() {
         return this.heading;
@@ -48,6 +49,7 @@ public class Leg {
 
     /**
      * Set the heading for this leg
+     * @param heading
      */
     public void setHeading(int heading) {
         this.heading = heading;
@@ -55,6 +57,7 @@ public class Leg {
 
     /**
      * Get the total distance of this leg in meters
+     * @return int
      */
     public int getDistance() {
         return this.distance;
@@ -62,6 +65,7 @@ public class Leg {
 
     /**
      * Set the distance of this leg in meters
+     * @param distance
      */
     public void setDistance(int distance) {
         this.distance = distance;
@@ -69,6 +73,7 @@ public class Leg {
 
     /**
      * Returns the marker this leg started on
+     * @return SingleMark
      */
     public SingleMark getMarker() {
         return this.startingSingleMark;
@@ -76,6 +81,7 @@ public class Leg {
 
     /**
      * Set the singleMark this leg starts on
+     * @param singleMark
      */
     public void setMarker(SingleMark singleMark) {
         this.startingSingleMark = singleMark;
@@ -83,6 +89,7 @@ public class Leg {
 
     /**
      * Returns the name of the marker this leg started on
+     * @return String
      */
     public String getMarkerLabel() {
         return this.startingSingleMark.getName();
