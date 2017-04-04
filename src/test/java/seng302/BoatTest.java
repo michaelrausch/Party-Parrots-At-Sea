@@ -12,7 +12,6 @@ public class BoatTest {
 
     @Test
     public void testBoatCreation() {
-        assertEquals(false);
         Boat boat1 = new Boat("Team 1");
         assertEquals(boat1.getTeamName(), "Team 1");
         assertEquals(boat1.getVelocity(), (double) 10.0, 1e-15);
