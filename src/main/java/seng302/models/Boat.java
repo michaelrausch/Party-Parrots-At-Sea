@@ -1,28 +1,36 @@
 package seng302.models;
 
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
+import javafx.scene.text.Text;
 
 /**
 * Represents a boat in the race.
 */
 public class Boat {
 
+    private static final double BOAT_HEIGHT = 15d;
+    private static final double BOAT_WIDTH = 10d;
+    private static final double VELOCITY_WAKE_RATIO = 1/2d;             //Ratio for deciding how long the wake will be wrt velocity
+
     private String teamName; // The name of the team, this is also the name of the boat
-    private double velocity; // In meters/second
-    private double lat; // Boats position
-    private double lon; // -
-    private double distanceToNextMark;
+    private Double velocity; // In meters/second
+    private Double lat; // Boats position
+    private Double lon; // -
+    private Double legDistance;
     private Color color;
-    private int markLastPast;
-    private double heading;
+    private Leg currentLeg;
+    private Double heading;
     private String shortName;
+
+    private Polygon boatObject = new Polygon();
 
     public Boat(String teamName) {
         this.teamName = teamName;
-        this.velocity = 10; // Default velocity
+        this.velocity = 10d; // Default velocity
         this.lat = 0.0;
         this.lon = 0.0;
-        this.distanceToNextMark = 0.0;
+        this.legDistance = 0.0;
         this.shortName = "";
     }
 
@@ -36,9 +44,12 @@ public class Boat {
     public Boat(String teamName, double boatVelocity, String shortName) {
         this.teamName = teamName;
         this.velocity = boatVelocity;
-        this.distanceToNextMark = 0.0;
+        this.legDistance = 0.0;
         this.color = Colors.getColor();
         this.shortName = shortName;
+        this.boatObject.getPoints().addAll(BOAT_WIDTH /2,0.0,
+                BOAT_WIDTH, BOAT_HEIGHT,
+                0.0, BOAT_HEIGHT);
     }
 
     /**
@@ -88,8 +99,12 @@ public class Boat {
         this.lon = lon;
     }
 
-    public void setDistanceToNextMark(double distance){
-        this.distanceToNextMark = distance;
+    public Double getLegDistance() {
+        return legDistance;
+    }
+
+    public void setLegDistance(double legDistance){
+        this.legDistance = legDistance;
     }
 
     public double getLatitude(){
@@ -108,12 +123,12 @@ public class Boat {
         return Math.round((this.velocity * 1.94384) * 100d) / 100d;
     }
 
-    public void setMarkLastPast(int markLastPast) {
-        this.markLastPast = markLastPast;
+    public Leg getCurrentLeg() {
+        return currentLeg;
     }
 
-    public int getMarkLastPast() {
-        return markLastPast;
+    public void setCurrentLeg(Leg currentLeg) {
+        this.currentLeg = currentLeg;
     }
 
     public void setHeading(double heading){
@@ -126,5 +141,34 @@ public class Boat {
 
     public String getShortName(){
         return this.shortName;
+    }
+
+
+    /**
+     * Moves the boat and its children annotations from its current coordinates by specified amounts.
+     * @param x The amount to move the X coordinate by
+     * @param y The amount to move the Y coordinate by
+     */
+    void moveBoatBy(Double x, Double y) {
+        boatObject.setLayoutX(boatObject.getLayoutX() + x);
+        boatObject.setLayoutY(boatObject.getLayoutY() + y);
+        boatObject.relocate(boatObject.getLayoutX(), boatObject.getLayoutY());
+
+    }
+
+    /**
+     * Moves the boat and its children annotations to coordinates specified
+     * @param x The X coordinate to move the boat to
+     * @param y The Y coordinate to move the boat to
+     */
+    public void moveBoatTo(int x, int y) {
+        boatObject.setLayoutX(x);
+        boatObject.setLayoutY(y);
+        boatObject.relocate(boatObject.getLayoutX(), boatObject.getLayoutY());
+
+    }
+
+    public Polygon getBoatObject() {
+        return boatObject;
     }
 }

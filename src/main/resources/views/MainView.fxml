@@ -1,11 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.*?>
 <?import java.lang.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Group?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="contentPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.Controller">
-   <children>
-      <!--<fx:include source="RaceView.fxml" fx:id="raceView"/>-->
-   </children>
-</AnchorPane>
+<GridPane maxHeight="745.0" maxWidth="1200.0" minHeight="745.0" minWidth="1200.0" prefHeight="745.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.Controller">
+    <columnConstraints>
+        <ColumnConstraints hgrow="ALWAYS" minWidth="-Infinity" prefWidth="1200.0" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints maxHeight="548.0" minHeight="10.0" prefHeight="29.0" />
+        <RowConstraints maxHeight="586.0" minHeight="10.0" prefHeight="582.0" valignment="CENTER" vgrow="ALWAYS" />
+        <RowConstraints fillHeight="false" maxHeight="286.0" minHeight="10.0" prefHeight="101.0" valignment="CENTER" vgrow="NEVER" />
+    </rowConstraints>
+    <children>
+        <GridPane GridPane.rowIndex="1">
+            <columnConstraints>
+                <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="600.0" />
+                <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="500.0" minWidth="500.0" prefWidth="500.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+                <RowConstraints />
+                <RowConstraints />
+            </rowConstraints>
+            <children>
+                <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: lightskyblue;" GridPane.halignment="RIGHT" GridPane.hgrow="SOMETIMES" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
+                    <children>
+                        <Canvas fx:id="courseCanvas" height="595.0" layoutY="-4.0" width="680.0" />
+                        <Group fx:id="boatGroup" />
+                    </children>
+                </AnchorPane>
+            </children>
+        </GridPane>
+        <Button fx:id="playPauseButton" disable="true" mnemonicParsing="false" onAction="#playPause" text="Play" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+         <font>
+            <Font size="30.0" />
+         </font></Button>
+    </children>
+</GridPane>
