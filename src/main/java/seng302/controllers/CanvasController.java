@@ -1,7 +1,9 @@
 package seng302.controllers;
 
 import javafx.animation.*;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
@@ -14,6 +16,7 @@ import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
 
+import java.sql.Time;
 import java.util.*;
 
 /**
@@ -27,6 +30,7 @@ public class CanvasController {
 
     private RaceViewController raceViewController;
     private ResizableCanvas canvas;
+    private Group group;
     private GraphicsContext gc;
 
     private final double ORIGIN_LAT = 32.321504;
@@ -38,30 +42,51 @@ public class CanvasController {
     }
 
     public void initialize() {
+        raceViewController = new RaceViewController();
         canvas = new ResizableCanvas();
+        group = new Group();
+
         canvasPane.getChildren().add(canvas);
+        canvasPane.getChildren().add(group);
         // Bind canvas size to stack pane size.
-        canvas.widthProperty().bind(canvasPane.widthProperty());
-        canvas.heightProperty().bind(canvasPane.heightProperty());
+        canvas.widthProperty().bind(new SimpleDoubleProperty(1000));
+        canvas.heightProperty().bind(new SimpleDoubleProperty(1000));
+        group.minWidth(1000);
+        group.minHeight(1000);
+//        canvas.widthProperty().bind(canvasPane.widthProperty());
+//        canvas.heightProperty().bind(canvasPane.heightProperty());
+//        group.minWidth(canvas.getWidth());
+//        group.minHeight(canvas.getHeight());
+
+
+    }
+
+
+    public void setUpBoats(){
+
         gc = canvas.getGraphicsContext2D();
-
-
+        gc.save();
+        gc.setFill(Color.SKYBLUE);
+        gc.fillRect(0,0, 1000,1000);
+        gc.restore();
+        drawBoats();
+        drawCourse();
+        drawFps(12);
         // overriding the handle so that it can clean canvas and redraw boats and course marks
         AnimationTimer timer = new AnimationTimer() {
             private long lastUpdate = 0;
             private long lastFpsUpdate = 0;
             private int lastFpsCount = 0;
             private int fpsCount = 0;
+            boolean done = true;
 
             @Override
             public void handle(long now) {
                 if (true){ //if statement for limiting refresh rate if needed
-                    gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
-                    gc.setFill(Color.SKYBLUE);
-                    gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
-                    drawCourse();
-                    drawBoats();
-                    drawFps(lastFpsCount);
+//                    gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
+//                    gc.setFill(Color.SKYBLUE);
+//                    gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
+
 
                     // If race has started, draw the boats and play the timeline
                     if (raceViewController.getRace().getRaceTime() > 1){
@@ -129,14 +154,26 @@ public class CanvasController {
      * Draws all the boats.
      */
     private void drawBoats() {
-        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
-        for (Boat boat : timelineInfos.keySet()) {
-            TimelineInfo timelineInfo = timelineInfos.get(boat);
+//        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
+        ArrayList<Boat> boats = raceViewController.getStartingBoats();
+        Double startingY = (ORIGIN_LAT - raceViewController.getRace().getCourse().get(0).getLatitude()) * SCALE;
+        Double startingX = (ORIGIN_LON - raceViewController.getRace().getCourse().get(0).getLongitude()) * SCALE;
 
-            boat.setLocation(timelineInfo.getY().doubleValue(), timelineInfo.getX().doubleValue());
-
-            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
+        for (Boat boat : boats) {
+            boat.moveBoatTo(startingX, startingY);
+            group.getChildren().add(boat.getWake());
+            group.getChildren().add(boat.getBoatObject());
+            group.getChildren().add(boat.getTeamNameObject());
+            group.getChildren().add(boat.getVelocityObject());
+//            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
+//        for (Boat boat : timelineInfos.keySet()) {
+//            TimelineInfo timelineInfo = timelineInfos.get(boat);
+//
+//            boat.setLocation(timelineInfo.getY().doubleValue(), timelineInfo.getX().doubleValue());
+//
+//            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
+//        }
     }
 
     /**

@@ -16,7 +16,7 @@ public class Event {
     private Mark mark1; // This mark
     private Mark mark2; // Next mark
     private int markPosInRace; // the position of the current mark in the race course
-
+    private double heading;
     private final double ORIGIN_LAT = 32.320504;
     private final double ORIGIN_LON = -64.857063;
     private final double SCALE = 16000;
@@ -36,6 +36,8 @@ public class Event {
         this.mark1 = mark1;
         this.mark2 = mark2;
         this.markPosInRace = markPosInRace;
+        this.heading = angleFromCoordinate(mark1, mark2);
+
     }
 
     /**
@@ -92,7 +94,7 @@ public class Event {
         if (this.isFinishingEvent) {
             return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " finished the race");
         }
-        System.out.println(this.getDistanceBetweenMarks());
+//        System.out.println(this.getDistanceBetweenMarks());
         return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.mark1.getName() + " going heading " + this.getBoatHeading() + "°");
     }
 
@@ -136,6 +138,30 @@ public class Event {
 //        return ((headingRadians) * 180) / Math.PI;
         return (Math.toDegrees(headingRadians) + 90) % 360;
 
+    }
+
+    /**
+     * Calculates the angle between to angular co-ordinates on a sphere.
+     *
+     * @param geoPointOne first geographical location
+     * @param geoPointTwo second geographical location
+     * @return the angle from point one to point two
+     */
+    private Double angleFromCoordinate(Mark geoPointOne, Mark geoPointTwo) {
+        if (geoPointTwo == null)
+            return null;
+
+        double x1 = geoPointOne.getLatitude();
+        double y1 = -geoPointOne.getLongitude();
+        double x2 = geoPointTwo.getLatitude();
+        double y2 = -geoPointTwo.getLongitude();
+
+        return Math.toDegrees(Math.atan2(x2-x1, y2-y1));
+
+    }
+
+    public double getHeading() {
+        return heading;
     }
 
     public Mark getThisMark() {
