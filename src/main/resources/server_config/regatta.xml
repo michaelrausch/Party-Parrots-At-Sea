@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RegattaConfig>
+    <RegattaID>24</RegattaID>
+    <RegattaName>Gothenburg World Series 2015</RegattaName>
+    <CourseName>Gothenburg</CourseName>
+    <CentralLatitude>57.6679590</CentralLatitude>
+    <CentralLongitude>11.8503233</CentralLongitude>
+    <CentralAltitude>6.95</CentralAltitude>
+    <UtcOffset>2</UtcOffset>
+    <MagneticVariation>3.2</MagneticVariation>
+    <ShorelineName>gothenburg_shoreline</ShorelineName>
+</RegattaConfig>
