@@ -8,12 +8,16 @@ import java.net.Socket;
 
 public class InputStreamParser {
 
-    private static String currentLine;
+    //changed the currentline variable from sring to long in order to check it's value
+//    private static String currentLine;
+    private static long currentLine;
     private static BufferedReader buffer = null;
 
     private static void readLine() {
         try {
-            currentLine = buffer.readLine();
+            //Rather than read strings it reads a long which is used for checking the head
+//            currentLine = buffer.readline();
+            currentLine = buffer.read();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,10 +46,19 @@ public class InputStreamParser {
 
         readLine();
         boolean reading = true;
+        long prev = 0;
+        long len = 0;
         while(reading) {
-            System.out.println(currentLine);
+//            System.out.println(currentLine);
             readLine();
-            if (currentLine == null) {
+            //checking if it is the start of the packet
+            if(prev == 71 && currentLine == 65533) {
+                System.out.println("PACKET LENGTH: " + (len));
+                len = 0;
+            }
+            len += 1;
+            prev = currentLine;
+            if (currentLine == -1) {
                 reading = false;
             }
         }
