@@ -25,7 +25,7 @@ public class CourseParserTest {
 	public void getGates() throws Exception {
 		ArrayList<Mark> course = cp.getCourse();
 
-		assertTrue(MarkType.GATE_MARK == course.get(0).getMarkType());
+		assertTrue(MarkType.OPEN_GATE == course.get(0).getMarkType());
 
 		GateMark gateMark1 = (GateMark) course.get(0);
 		assertEquals(32.293771, gateMark1.getSingleMark2().getLatitude(), 0.00000001);

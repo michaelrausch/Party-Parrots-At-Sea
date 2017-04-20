@@ -9,8 +9,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.util.Pair;
 import seng302.models.Boat;
-import seng302.models.TimelineInfo;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
@@ -33,9 +33,27 @@ public class CanvasController {
     private Group group;
     private GraphicsContext gc;
 
-    private final double ORIGIN_LAT = 32.321504;
-    private final double ORIGIN_LON = -64.857063;
-    private final int SCALE = 16000;
+    private final int MARK_SIZE   = 10;
+    private final int BUFFER_SIZE = 25;
+    private final int CANVAS_SIZE = 1000;
+    private final int LHS_BUFFER  = BUFFER_SIZE;
+    private final int RHS_BUFFER  = BUFFER_SIZE + MARK_SIZE / 2;
+    private final int TOP_BUFFER  = BUFFER_SIZE;
+    private final int BOT_BUFFER  = TOP_BUFFER + MARK_SIZE / 2;
+
+    private double distanceScaleFactor;
+    private ScaleDirection scaleDirection;
+    private Mark minLatPoint;
+    private Mark minLonPoint;
+    private Mark maxLatPoint;
+    private Mark maxLonPoint;
+    private int referencePointX;
+    private int referencePointY;
+
+    private enum ScaleDirection {
+        HORIZONTAL,
+        VERTICAL
+    }
 
     public void setup(RaceViewController raceViewController){
         this.raceViewController = raceViewController;
@@ -49,10 +67,10 @@ public class CanvasController {
         canvasPane.getChildren().add(canvas);
         canvasPane.getChildren().add(group);
         // Bind canvas size to stack pane size.
-        canvas.widthProperty().bind(new SimpleDoubleProperty(1000));
-        canvas.heightProperty().bind(new SimpleDoubleProperty(1000));
-        group.minWidth(1000);
-        group.minHeight(1000);
+        canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_SIZE));
+        canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_SIZE));
+        group.minWidth(CANVAS_SIZE);
+        group.minHeight(CANVAS_SIZE);
 //        canvas.widthProperty().bind(canvasPane.widthProperty());
 //        canvas.heightProperty().bind(canvasPane.heightProperty());
 //        group.minWidth(canvas.getWidth());
@@ -67,10 +85,16 @@ public class CanvasController {
         gc = canvas.getGraphicsContext2D();
         gc.save();
         gc.setFill(Color.SKYBLUE);
-        gc.fillRect(0,0, 1000,1000);
+        gc.fillRect(0,0, CANVAS_SIZE,CANVAS_SIZE);
         gc.restore();
-        drawBoats();
         drawCourse();
+        for (Mark m : raceViewController.getRace().getCourse())
+        {
+            System.out.println("MARK NAME - " + m.getName());
+            System.out.println("X LOCATION - " + m.getX());
+            System.out.println("Y LOCATION - " + m.getY());
+        }
+        drawBoats();
         drawFps(12);
         // overriding the handle so that it can clean canvas and redraw boats and course marks
         AnimationTimer timer = new AnimationTimer() {
@@ -156,8 +180,8 @@ public class CanvasController {
     private void drawBoats() {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
         ArrayList<Boat> boats = raceViewController.getStartingBoats();
-        Double startingY = (ORIGIN_LAT - raceViewController.getRace().getCourse().get(0).getLatitude()) * SCALE;
-        Double startingX = (ORIGIN_LON - raceViewController.getRace().getCourse().get(0).getLongitude()) * SCALE;
+        Double startingX = (double) raceViewController.getRace().getCourse().get(0).getX();
+        Double startingY = (double) raceViewController.getRace().getCourse().get(0).getY();
 
         for (Boat boat : boats) {
             boat.moveBoatTo(startingX, startingY);
@@ -167,75 +191,8 @@ public class CanvasController {
             group.getChildren().add(boat.getVelocityObject());
 //            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
-//        for (Boat boat : timelineInfos.keySet()) {
-//            TimelineInfo timelineInfo = timelineInfos.get(boat);
-//
-//            boat.setLocation(timelineInfo.getY().doubleValue(), timelineInfo.getX().doubleValue());
-//
-//            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
-//        }
     }
 
-    /**
-     * Draw the wake line behind a boat
-     * @param gc The graphics context used for drawing the wake
-     * @param x the x position of the boat
-     * @param y the y position of the boat
-     * @param speed the speed of the boat
-     * @param color the color of the wake line
-     * @param heading the heading of the boat
-     */
-    private void drawWake(GraphicsContext gc, double x, double y, double speed, Color color, double heading){
-        double angle = Math.toRadians(heading);
-        speed = speed * 2;
-        Point newP = new Point(0, speed);
-        newP.rotate(angle);
-
-        gc.setStroke(color);
-        gc.setLineWidth(1.0);
-        gc.strokeLine(x, y, newP.x + x, newP.y + y);
-    }
-
-    /**
-     * Draws a boat with given (x, y) position in the given color
-     *
-     * @param lat
-     * @param lon
-     * @param color
-     * @param name
-     * @param speed
-     */
-    private void drawBoat(double lat, double lon, Color color, String name, double speed, double heading) {
-        // Latitude
-        double x = (lon - ORIGIN_LON) * SCALE;
-        double y = (ORIGIN_LAT - lat) * SCALE;
-
-        gc.setFill(color);
-
-        if (raceViewController.isDisplayAnnotations()) {
-            // Set boat text
-            gc.setFont(new Font(14));
-            gc.setLineWidth(3);
-            gc.fillText(name + ", " + speed + " knots", x + 15, y + 15);
-        }
-//        double diameter = 9;
-//        gc.fillOval(x, y, diameter, diameter);
-        double angle = Math.toRadians(heading);
-
-        Point p1 = new Point(0, -15); // apex point
-        Point p2 = new Point(7, 4); // base point
-        Point p3 = new Point(-7, 4); // base point
-        p1.rotate(angle);
-        p2.rotate(angle);
-        p3.rotate(angle);
-        double[] xx = new double[] {p1.x + x, p2.x + x, x, p3.x + x};
-        double[] yy = new double[] {p1.y + y, p2.y + y, y, p3.y + y};
-        gc.fillPolygon(xx, yy, 4);
-
-        if (raceViewController.isDisplayAnnotations()){
-            drawWake(gc, x, y, speed, color, heading);
-        }
-    }
 
     /**
      * Inner class for creating point so that you can rotate it around origin point.
@@ -262,10 +219,11 @@ public class CanvasController {
      * Draws the course.
      */
     private void drawCourse() {
+        fitToCanvas();
         for (Mark mark : raceViewController.getRace().getCourse()) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 drawSingleMark((SingleMark) mark, Color.BLACK);
-            } else if (mark.getMarkType() == MarkType.GATE_MARK) {
+            } else {
                 drawGateMark((GateMark) mark);
             }
         }
@@ -277,11 +235,8 @@ public class CanvasController {
      * @param singleMark
      */
     private void drawSingleMark(SingleMark singleMark, Color color) {
-        double x = (singleMark.getLongitude() - ORIGIN_LON) * SCALE;
-        double y = (ORIGIN_LAT - singleMark.getLatitude()) * SCALE;
-
         gc.setFill(color);
-        gc.fillRect(x,y,5.5,5.5);
+        gc.fillOval(singleMark.getX(), singleMark.getY(),MARK_SIZE,MARK_SIZE);
     }
 
     /**
@@ -304,17 +259,181 @@ public class CanvasController {
         drawSingleMark(gateMark.getSingleMark2(), color);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
-
+        gc.save();
         gc.setStroke(color);
+        if (gateMark.getMarkType() == MarkType.OPEN_GATE)
+            gc.setLineDashes(3, 5);
 
-        // Convert lat/lon to x,y
-        double x1 = (gateMark.getSingleMark1().getLongitude()- ORIGIN_LON) * SCALE;
-        double y1 = (ORIGIN_LAT - gateMark.getSingleMark1().getLatitude()) * SCALE;
+        gc.setLineWidth(2);
+        gc.strokeLine(
+                gateMark.getSingleMark1().getX() + MARK_SIZE / 2,
+                gateMark.getSingleMark1().getY() + MARK_SIZE / 2,
+                gateMark.getSingleMark2().getX() + MARK_SIZE / 2,
+                gateMark.getSingleMark2().getY() + MARK_SIZE / 2
+        );
+        gc.restore();
+    }
 
-        double x2 = (gateMark.getSingleMark2().getLongitude() - ORIGIN_LON) * SCALE;
-        double y2 = (ORIGIN_LAT - gateMark.getSingleMark2().getLatitude()) * SCALE;
+    /**
+     * Calculates x and y location for every marker that fits it to the canvas the race will be drawn on.
+     */
+    private void fitToCanvas() {
+        findMinMaxPoint();
+        double minLonToMaxLon = scaleRaceExtremities();
+        calculateReferencePointLocation(minLonToMaxLon);
+        givePointsXY();
+    }
 
-        gc.setLineWidth(1);
-        gc.strokeLine(x1, y1, x2, y2);
+    /**
+     * Sets the class variables minLatPoint, maxLatPoint, minLonPoint, maxLonPoint to the marker with the leftmost
+     * marker, rightmost marker, southern most marker and northern most marker respectively.
+     */
+    private void findMinMaxPoint() {
+        ArrayList<Mark> sortedPoints = new ArrayList<>();
+        for (Mark mark : raceViewController.getRace().getCourse())
+        {
+            if (mark.getMarkType() == MarkType.SINGLE_MARK)
+                sortedPoints.add(mark);
+            else {
+                sortedPoints.add(((GateMark) mark).getSingleMark1());
+                sortedPoints.add(((GateMark) mark).getSingleMark2());
+            }
+        }
+        sortedPoints.sort(Comparator.comparingDouble(Mark::getLatitude));
+        minLatPoint = sortedPoints.get(0);
+        maxLatPoint = sortedPoints.get(sortedPoints.size()-1);
+
+        sortedPoints.sort(Comparator.comparingDouble(Mark::getLongitude));
+        //If the course is on a point on the earth where longitudes wrap around.
+        // TODO: 30/03/17 cir27 - Correctly account for longitude wrapping around.
+        if (sortedPoints.get(sortedPoints.size()-1).getLongitude() - sortedPoints.get(0).getLongitude() > 180)
+            Collections.reverse(sortedPoints);
+        minLonPoint = sortedPoints.get(0);
+        maxLonPoint = sortedPoints.get(sortedPoints.size()-1);
+    }
+
+    /**
+     * Calculates the location of a reference point, this is always the point with minimum latitude, in relation to the
+     * canvas.
+     *
+     * @param minLonToMaxLon The horizontal distance between the point of minimum longitude to maximum longitude.
+     */
+    private void calculateReferencePointLocation (double minLonToMaxLon) {
+        Mark referencePoint = minLatPoint;
+        double referenceAngle;
+        double mapWidth = canvas.getWidth();
+        double mapHeight = canvas.getHeight();
+
+        if (scaleDirection == ScaleDirection.HORIZONTAL) {
+            referenceAngle = Mark.calculateHeadingRad(referencePoint, minLonPoint) - (Math.PI * (3/4));
+            referencePointX = LHS_BUFFER + (int) Math.round(distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint));
+
+            referenceAngle = Mark.calculateHeadingRad(referencePoint, maxLatPoint);
+            if (referenceAngle > (Math.PI / 2)) {
+                referenceAngle = (Math.PI * 2) - referenceAngle;
+            }
+            referencePointY  = (int) Math.round(mapHeight - (TOP_BUFFER + BOT_BUFFER));
+            referencePointY -= (int) Math.round(distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint));
+            referencePointY  = (int) Math.round(referencePointY / 2d);
+            referencePointY += TOP_BUFFER;
+            referencePointY += (int) Math.round(distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint));
+        } else {
+            referencePointY = (int) Math.round(mapHeight - BOT_BUFFER);
+
+            referenceAngle = (Math.PI * 2) - Mark.calculateHeadingRad(referencePoint, minLonPoint);
+
+            referencePointX  = LHS_BUFFER;
+            referencePointX += (int) Math.round(distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint));
+            referencePointX += (int) Math.round(((mapWidth - (LHS_BUFFER + RHS_BUFFER)) - (minLonToMaxLon * distanceScaleFactor)) / 2);
+        }
+        referencePoint.setX(referencePointX);
+        referencePoint.setY(referencePointY);
+        System.out.println("REF POINT = " + referencePoint.getName());
+        System.out.println(referencePointX);
+        System.out.println(referencePointY);
+    }
+
+    /**
+     * Finds the scale factor necessary to fit all race markers within the onscreen map and assigns it to distanceScaleFactor
+     * Returns the max horizontal distance of the map.
+     */
+    private double scaleRaceExtremities () {
+        double vertAngle = Mark.calculateHeadingRad(minLatPoint, maxLatPoint);
+        if (vertAngle > Math.PI)
+            vertAngle = (2 * Math.PI) - vertAngle;
+        double vertDistance = Math.cos(vertAngle) * Mark.calculateDistance(minLatPoint, maxLatPoint);
+
+        double horiAngle = Mark.calculateHeadingRad(minLonPoint, maxLonPoint);
+        if (horiAngle <= (Math.PI / 2))
+            horiAngle = (Math.PI / 2) - horiAngle;
+        else
+            horiAngle = horiAngle - (Math.PI / 2);
+        double horiDistance = Math.cos(horiAngle) * Mark.calculateDistance(minLonPoint, maxLonPoint);
+
+        double vertScale = (canvas.getHeight() - (TOP_BUFFER + BOT_BUFFER)) / vertDistance;
+
+        if ((horiDistance * vertScale) > (canvas.getWidth() - (RHS_BUFFER + LHS_BUFFER))) {
+            distanceScaleFactor = (canvas.getWidth() - (RHS_BUFFER + LHS_BUFFER)) / horiDistance;
+            scaleDirection = ScaleDirection.HORIZONTAL;
+        } else {
+            distanceScaleFactor = vertScale;
+            scaleDirection = ScaleDirection.VERTICAL;
+        }
+        return horiDistance;
+    }
+
+    /**
+     * Give all markers in the course an x,y location relative to a given reference with a known x,y location. Distances
+     * are scaled according to the distanceScaleFactor variable.
+     */
+    private void givePointsXY() {
+        Pair<Integer, Integer> canvasLocation;
+        ArrayList<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
+
+        for (Mark mark : allPoints) {
+            if (mark.getMarkType() != MarkType.SINGLE_MARK) {
+                GateMark gateMark = (GateMark) mark;
+
+                canvasLocation = findScaledXY(gateMark.getSingleMark1());
+                gateMark.getSingleMark1().setX(canvasLocation.getKey());
+                gateMark.getSingleMark1().setY(canvasLocation.getValue());
+
+                canvasLocation = findScaledXY(gateMark.getSingleMark2());
+                gateMark.getSingleMark2().setX(canvasLocation.getKey());
+                gateMark.getSingleMark2().setY(canvasLocation.getValue());
+            }
+            if (mark.getMarkType() == MarkType.CLOSED_GATE)
+                ((GateMark) mark).assignXYCentered();
+            else {
+                canvasLocation = findScaledXY(mark);
+                mark.setX(canvasLocation.getKey());
+                mark.setY(canvasLocation.getValue());
+            }
+        }
+    }
+
+    private Pair<Integer, Integer> findScaledXY (Mark unscaled) {
+        double distanceFromReference;
+        double angleFromReference;
+        int yAxisLocation;
+        int xAxisLocation;
+
+        angleFromReference = Mark.calculateHeadingRad(minLatPoint, unscaled);
+        distanceFromReference = Mark.calculateDistance(minLatPoint, unscaled);
+        //angleFromReference = Mark.calculateHeadingRad(lon1, lon2, lat1, lat2);
+        //distanceFromReference = Mark.calculateDistance(lon1, lon2, lat1, lat2);
+
+        if (angleFromReference > (Math.PI / 2)) {
+            angleFromReference = (Math.PI * 2) - angleFromReference;
+            xAxisLocation  = referencePointX;
+            xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+        } else {
+            xAxisLocation  = referencePointX;
+            xAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+        }
+        yAxisLocation  = referencePointY;
+        yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+
+        return new Pair<>(xAxisLocation, yAxisLocation);
     }
 }

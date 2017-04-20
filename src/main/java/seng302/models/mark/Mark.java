@@ -10,6 +10,8 @@ public abstract class Mark {
     private MarkType markType;
     private double latitude;
     private double longitude;
+    Integer xValue;
+    Integer yValue;
 
     /**
      * Create a mark instance by passing its name and type
@@ -28,6 +30,76 @@ public abstract class Mark {
         this.longitude = longitude;
     }
 
+    /**
+     * Calculated the heading in radians from first Mark to the second Mark.
+     *
+     * @param pointOne First Mark
+     * @param pointTwo Second Mark
+     * @return Heading in radians
+     */
+    public static Double calculateHeadingRad(Mark pointOne, Mark pointTwo) {
+        Double longitude1 = pointOne.getLongitude();
+        Double longitude2 = pointTwo.getLongitude();
+        Double latitude1 = pointOne.getLatitude();
+        Double latitude2 = pointTwo.getLatitude();
+        return calculateHeadingRad(longitude1, longitude2, latitude1, latitude2);
+    }
+
+    /**
+     * Calculate the heading in radians from geographical location with latitude1, longitude 1 to geographical
+     * latitude2, longitude 2
+     * @param longitude1 Longitude of first point in degrees
+     * @param longitude2 Longitude of second point in degrees
+     * @param latitude1  Latitude of first point in degrees
+     * @param latitude2 Latitude of first  point in degrees
+     * @return Heading in radians
+     */
+    public static double calculateHeadingRad (Double longitude1, Double longitude2, Double latitude1, Double latitude2) {
+        latitude1 = Math.toRadians(latitude1);
+        latitude2 = Math.toRadians(latitude2);
+        Double longDiff= Math.toRadians(longitude2-longitude1);
+        Double y = Math.sin(longDiff)*Math.cos(latitude2);
+        Double x = Math.cos(latitude1)*Math.sin(latitude2)-Math.sin(latitude1)*Math.cos(latitude2)*Math.cos(longDiff);
+        return Math.atan2(y, x);
+    }
+
+    /**
+     * Calculates the distance in meters from the first Mark to a second Mark
+     *
+     * @param pointOne First Mark
+     * @param pointTwo Second Mark
+     * @return Distance in meters
+     */
+    public static Double calculateDistance(Mark pointOne, Mark pointTwo) {
+        Double longitude1 = pointOne.getLongitude();
+        Double longitude2 = pointTwo.getLongitude();
+        Double latitude1 = pointOne.getLatitude();
+        Double latitude2 = pointTwo.getLatitude();
+        return calculateDistance(longitude1, longitude2, latitude1, latitude2);
+    }
+
+    /**
+     * Calculate the distance in meters from geographical location with latitude1, longitude 1 to geographical
+     * latitude2, longitude 2
+     *
+     * @param longitude1 Longitude of first point in degrees
+     * @param longitude2 Longitude of second point in degrees
+     * @param latitude1  Latitude of first point in degrees
+     * @param latitude2 Latitude of first  point in degrees
+     * @return Distance in meters
+     */
+    public static Double calculateDistance (Double longitude1, Double longitude2, Double latitude1, Double latitude2) {
+        Double theta = longitude1 - longitude2;
+        Double dist = Math.sin(Math.toRadians(latitude1)) * Math.sin(Math.toRadians(latitude2)) +
+                Math.cos(Math.toRadians(latitude1)) * Math.cos(Math.toRadians(latitude2)) *
+                        Math.cos(Math.toRadians(theta));
+        dist = Math.acos(dist);
+        dist = Math.toDegrees(dist);
+        dist = dist * 60 * 1.1508; //nautical mile (distance between two degrees) * (degrees in a minute)
+        dist = dist * 1609.344;    //ratio of miles to metres
+        return dist;
+    }
+    
     public String getName() {
         return name;
     }
@@ -51,4 +123,21 @@ public abstract class Mark {
     public double getLongitude() {
         return longitude;
     }
+
+    public int getX () {
+        return xValue;
+    }
+
+    public int getY () {
+        return yValue;
+    }
+
+    public void setX (int x) {
+        this.xValue = x;
+    }
+
+    public void setY (int y) {
+        this.yValue = y;
+    }
+
 }
