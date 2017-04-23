@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 
-public class InputStreamParser {
+public class StreamReceiver {
 
     private static InputStream stream = null;
     private static boolean reading = true;
