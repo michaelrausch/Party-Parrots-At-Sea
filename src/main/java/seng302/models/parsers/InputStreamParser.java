@@ -1,7 +1,9 @@
 package seng302.models.parsers;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 
@@ -9,10 +11,22 @@ public class InputStreamParser {
 
     private static InputStream stream = null;
     private static boolean reading = true;
+    private static BufferedReader buffer = null;
+    private static String currentLine;
+    private static boolean isWithinTag = false;
 
     private static void skipBytes(int n){
         for (int i=0; i < n; i++){
             readByte();
+        }
+    }
+
+    private static void readLine() {
+        try {
+            //Rather than read strings it reads a long which is used for checking the head
+            currentLine = buffer.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -29,10 +43,11 @@ public class InputStreamParser {
         return currentByte;
     }
 
-    private static void runTest() {
+    private static void runPacketLengthTest() {
 
         Socket host = null;
-        String hostAddress = "livedata.americascup.com";
+        String hostAddress = "csse-s302staff.canterbury.ac.nz";
+//        String hostAddress = "livedata.americascup.com";
         int hostPort = 4941;
 
         try {
@@ -78,6 +93,61 @@ public class InputStreamParser {
 
     }
 
+
+    private static void runParserTest() {
+        Socket host = null;
+        String hostAddress = "csse-s302staff.canterbury.ac.nz";
+        int hostPort = 4941;
+
+        try {
+            host = new Socket(hostAddress, hostPort);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (host != null) {
+                buffer = new BufferedReader(new InputStreamReader(host.getInputStream()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        readLine();
+        boolean reading = true;
+
+        while(reading) {
+            parseLine(currentLine);
+            readLine();
+
+            if (currentLine == null) {
+                reading = false;
+            }
+        }
+
+        try {
+            if (host != null) {
+                host.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void parseLine(String line){
+        if (line.startsWith("<Boat") || line.startsWith("<Race")){
+            isWithinTag = true;
+        }
+        if (isWithinTag) {
+//            System.out.println(line);
+        }
+        if (line.startsWith("</Boat") || line.startsWith("</Race")) {
+            isWithinTag = false;
+        }
+
+    }
+
     /**
      * takes an array of up to 4 bytes and returns and int
      * @return an int if there is less than 4 bytes -1 otherwise
@@ -97,8 +167,9 @@ public class InputStreamParser {
 
     public static void main(String[] args) {
 
-        runTest();
-
+        runPacketLengthTest();
+        runParserTest();
     }
+
 
 }
