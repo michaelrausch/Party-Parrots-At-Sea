@@ -3,16 +3,21 @@ package seng302.models.parsers;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 
-public class InputStreamParser {
+public class StreamReceiver {
 
     private static ByteArrayOutputStream buffer;
     private static InputStream stream = null;
     private static boolean reading = true;
+    private static Collection<StreamPacket> priorityQue = new ArrayList<>();
 
     private static void skipBytes(long n){
         for (int i=0; i < n; i++){
@@ -37,14 +42,13 @@ public class InputStreamParser {
     private static void runTest() {
 
         Socket host = null;
-        String hostAddress = "livedata.americascup.com";
+//        String hostAddress = "livedata.americascup.com";
+        String hostAddress = "csse-s302staff.canterbury.ac.nz";
         int hostPort = 4941;
 
         try {
             host = new Socket(hostAddress, hostPort);
-            if (host != null) {
-                stream = host.getInputStream();
-            }
+            stream = host.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,12 +59,15 @@ public class InputStreamParser {
         while(reading) {
             buffer = new ByteArrayOutputStream();
             sync1 = readByte();
-            System.out.println("sync1 = " + Integer.toBinaryString(sync1));
+//            System.out.println("sync1 = " + Integer.toBinaryString(sync1));
             sync2 = readByte();
             //checking if it is the start of the packet
             if(sync1 == 0x47 && sync2 == 0x83) {
-                System.out.println("message type: " + readByte());
-                skipBytes(10);
+                int type = readByte();
+//                System.out.println("message type: " + type);
+                byte[] timeStampBytes = getBytes(6);
+                skipBytes(4);
+
 //                byte[] b = new byte[2];
 //                try {
 //                    stream.read(b);
@@ -68,15 +75,23 @@ public class InputStreamParser {
 //                    e.printStackTrace();
 //                }
 //                System.out.println("b = " + Integer.toBinaryString(b[0]));
+//                System.out.println(timeStamp);
+                long timeStamp = 0;
+                long multiplier=1;
+                for(int i = 0;i < 6;i++) {
+                    timeStamp += timeStampBytes[i]*multiplier;
+                    multiplier *= 256;
+                }
                 long payloadLength = bytesToLong(getBytes(2));
-                System.out.println("payload length: " + payloadLength);
-                skipBytes(payloadLength);
-
+                //No. of milliseconds since Jan 1st 1970
+                System.out.println("timeStamp = " + timeStamp);
+//                System.out.println("payload length: " + payloadLength);
+                priorityQue.add(new StreamPacket(type, payloadLength, timeStamp, getBytes((int)payloadLength)));
                 Checksum checksum = new CRC32();
                 checksum.update(buffer.toByteArray(), 0, buffer.size());
-                System.out.println(checksum.getValue());
+//                System.out.println(checksum.getValue());
                 long crc = bytesToLong(getBytes(4));
-                System.out.println(crc);
+//                System.out.println(crc);
             }
         }
 
