@@ -1,32 +1,22 @@
 package seng302.models.parsers;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 
-public class StreamReceiver {
+public class InputStreamParser {
 
+    private static ByteArrayOutputStream buffer;
     private static InputStream stream = null;
     private static boolean reading = true;
-    private static BufferedReader buffer = null;
-    private static String currentLine;
-    private static boolean isWithinTag = false;
 
-    private static void skipBytes(int n){
+    private static void skipBytes(long n){
         for (int i=0; i < n; i++){
             readByte();
-        }
-    }
-
-    private static void readLine() {
-        try {
-            //Rather than read strings it reads a long which is used for checking the head
-            currentLine = buffer.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -34,6 +24,7 @@ public class StreamReceiver {
         int currentByte = -1;
         try {
             currentByte = stream.read();
+            buffer.write(currentByte);
             if (currentByte == -1){
                 reading = false;
             }
@@ -43,11 +34,10 @@ public class StreamReceiver {
         return currentByte;
     }
 
-    private static void runPacketLengthTest() {
+    private static void runTest() {
 
         Socket host = null;
-        String hostAddress = "csse-s302staff.canterbury.ac.nz";
-//        String hostAddress = "livedata.americascup.com";
+        String hostAddress = "livedata.americascup.com";
         int hostPort = 4941;
 
         try {
@@ -63,22 +53,30 @@ public class StreamReceiver {
         int sync2;
         //currently "reading" will not break the program nicely (because there are multiple readBytes within the while loop)
         while(reading) {
+            buffer = new ByteArrayOutputStream();
             sync1 = readByte();
+            System.out.println("sync1 = " + Integer.toBinaryString(sync1));
             sync2 = readByte();
             //checking if it is the start of the packet
             if(sync1 == 0x47 && sync2 == 0x83) {
                 System.out.println("message type: " + readByte());
                 skipBytes(10);
-                byte[] b = new byte[2];
-                try {
-                    stream.read(b);
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-                int payloadLength = bytesToInt(b);
+//                byte[] b = new byte[2];
+//                try {
+//                    stream.read(b);
+//                } catch (IOException e){
+//                    e.printStackTrace();
+//                }
+//                System.out.println("b = " + Integer.toBinaryString(b[0]));
+                long payloadLength = bytesToLong(getBytes(2));
                 System.out.println("payload length: " + payloadLength);
                 skipBytes(payloadLength);
-                skipBytes(4);
+
+                Checksum checksum = new CRC32();
+                checksum.update(buffer.toByteArray(), 0, buffer.size());
+                System.out.println(checksum.getValue());
+                long crc = bytesToLong(getBytes(4));
+                System.out.println(crc);
             }
         }
 
@@ -93,83 +91,42 @@ public class StreamReceiver {
 
     }
 
-
-    private static void runParserTest() {
-        Socket host = null;
-        String hostAddress = "csse-s302staff.canterbury.ac.nz";
-        int hostPort = 4941;
-
-        try {
-            host = new Socket(hostAddress, hostPort);
-        } catch (IOException e) {
-            e.printStackTrace();
+    private static byte[] getBytes(int n){
+        byte[] bytes = new byte[n];
+        for (int i = 0; i < n; i++){
+            bytes[i] = (byte) readByte();
+//            System.out.println(Integer.toBinaryString(bytes[i]));
+//            System.out.println(bytes[i]);
         }
-
-        try {
-            if (host != null) {
-                buffer = new BufferedReader(new InputStreamReader(host.getInputStream()));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        readLine();
-        boolean reading = true;
-
-        while(reading) {
-            parseLine(currentLine);
-            readLine();
-
-            if (currentLine == null) {
-                reading = false;
-            }
-        }
-
-        try {
-            if (host != null) {
-                host.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private static void parseLine(String line){
-        if (line.startsWith("<Boat") || line.startsWith("<Race")){
-            isWithinTag = true;
-        }
-        if (isWithinTag) {
-//            System.out.println(line);
-        }
-        if (line.startsWith("</Boat") || line.startsWith("</Race")) {
-            isWithinTag = false;
-        }
-
+        return bytes;
     }
 
     /**
-     * takes an array of up to 4 bytes and returns and int
-     * @return an int if there is less than 4 bytes -1 otherwise
+     * takes an array of up to 4 bytes and returns a positive
+     * long constructed from the input bytes
+     *
+     * (note it is assumed the bytes coming in need to be reversed like those from a stream)
+     *
+     * @return a positive long if there is less than 4 bytes -1 otherwise
      */
-    private static int bytesToInt(byte[] bytes){
-        int partialInt = 0;
+    private static long bytesToLong(byte[] bytes){
+        long partialLong = 0;
         int index = 0;
         for (byte b: bytes){
             if (index > 3){
                 return -1;
             }
-            partialInt = partialInt | (b & 0xFF) << (index * 8);
+            partialLong = partialLong | (b & 0xFFL) << (index * 8);
             index++;
         }
-        return partialInt;
+        return partialLong;
     }
+
 
     public static void main(String[] args) {
 
-        runPacketLengthTest();
-        runParserTest();
-    }
+        runTest();
 
+    }
 
 }
