@@ -53,10 +53,10 @@ public class StreamParser {
         byte[] boatIdBytes = Arrays.copyOfRange(payload,8,12);
         extractTimeStamp(Arrays.copyOfRange(payload,1,7));
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
-        long seq = StreamReceiver.bytesToLong(seqBytes);
-        long boatId = StreamReceiver.bytesToLong(boatIdBytes);
-        long lat = StreamReceiver.bytesToLong(latBytes);
-        long lon = StreamReceiver.bytesToLong(lonBytes);
+        long seq = bytesToLong(seqBytes);
+        long boatId = bytesToLong(boatIdBytes);
+        long lat = bytesToLong(latBytes);
+        long lon = bytesToLong(lonBytes);
         if (!ids.contains(boatId)) {
             ids.add(boatId);
         }
@@ -81,6 +81,23 @@ public class StreamParser {
         System.out.println("timeStamp = " + timeStamp);
     }
 
-
+    /**
+     * takes an array of up to 7 bytes and returns a positive
+     * long constructed from the input bytes
+     *
+     * @return a positive long if there is less than 7 bytes -1 otherwise
+     */
+    private static long bytesToLong(byte[] bytes){
+        long partialLong = 0;
+        int index = 0;
+        for (byte b: bytes){
+            if (index > 6){
+                return -1;
+            }
+            partialLong = partialLong | (b & 0xFFL) << (index * 8);
+            index++;
+        }
+        return partialLong;
+    }
 }
 

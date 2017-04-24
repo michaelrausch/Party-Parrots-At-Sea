@@ -47,22 +47,20 @@ public class StreamReceiver {
                 //checking if it is the start of the packet
                 if(sync1 == 0x47 && sync2 == 0x83) {
                     int type = readByte();
-                    System.out.println("message type: " + type);
                     long timeStamp = bytesToLong(getBytes(6));
                     skipBytes(4);
                     long payloadLength = bytesToLong(getBytes(2));
                     //No. of milliseconds since Jan 1st 1970
-                    System.out.println("timeStamp = " + timeStamp);
-                    System.out.println("payload length: " + payloadLength);
-
-
+                    byte[] payload = getBytes((int) payloadLength);
                     Checksum checksum = new CRC32();
                     checksum.update(crcBuffer.toByteArray(), 0, crcBuffer.size());
-//                System.out.println(checksum.getValue());
-                    long crc = bytesToLong(getBytes(4));
-//                System.out.println(crc);
-                    if (checksum.getValue() == crc) {
-                        packetBuffer.add(new StreamPacket(type, payloadLength, timeStamp, getBytes((int) payloadLength)));
+                    long computedCrc = checksum.getValue();
+                    long packetCrc = bytesToLong(getBytes(4));
+                    if (computedCrc == packetCrc) {
+                        System.out.println("message type: " + type);
+                        System.out.println("timeStamp = " + timeStamp);
+                        System.out.println("payload length: " + payloadLength);
+                        packetBuffer.add(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         System.err.println("Packet has been dropped");
                     }
@@ -74,20 +72,21 @@ public class StreamReceiver {
         }
     }
 
-    private int readByte() {
+    private int readByte() throws Exception {
         int currentByte = -1;
         try {
             currentByte = stream.read();
             crcBuffer.write(currentByte);
-            if (currentByte == -1){
-            }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (currentByte == -1){
+            throw new Exception();
         }
         return currentByte;
     }
 
-    private byte[] getBytes(int n){
+    private byte[] getBytes(int n) throws Exception{
         byte[] bytes = new byte[n];
         for (int i = 0; i < n; i++){
             bytes[i] = (byte) readByte();
@@ -96,7 +95,7 @@ public class StreamReceiver {
     }
 
 
-    private void skipBytes(long n){
+    private void skipBytes(long n) throws Exception{
         for (int i=0; i < n; i++){
             readByte();
         }
@@ -123,7 +122,13 @@ public class StreamReceiver {
 
 
     public static void main(String[] args) {
-//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
-//        sr.connect();
+        PriorityBlockingQueue<StreamPacket> pq = new PriorityBlockingQueue<>(256, new Comparator<StreamPacket>() {
+            @Override
+            public int compare(StreamPacket s1, StreamPacket s2) {
+                return (int) (s1.getTimeStamp() - s2.getTimeStamp());
+            }
+        });
+        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
+        sr.connect();
     }
 }

@@ -22,4 +22,8 @@ public class StreamPacket {
             StreamParser.extractBoatLocation(payload);
         }
     }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
 }
