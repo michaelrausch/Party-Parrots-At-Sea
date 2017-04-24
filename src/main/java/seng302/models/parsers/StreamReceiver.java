@@ -84,7 +84,7 @@ public class StreamReceiver {
                 }
                 long payloadLength = bytesToLong(getBytes(2));
                 //No. of milliseconds since Jan 1st 1970
-                System.out.println("timeStamp = " + timeStamp);
+//                System.out.println("timeStamp = " + timeStamp);
 //                System.out.println("payload length: " + payloadLength);
                 priorityQue.add(new StreamPacket(type, payloadLength, timeStamp, getBytes((int)payloadLength)));
                 Checksum checksum = new CRC32();

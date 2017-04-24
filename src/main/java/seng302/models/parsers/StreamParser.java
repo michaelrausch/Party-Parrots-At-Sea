@@ -8,6 +8,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * Created by kre39 on 23/04/17.
@@ -40,5 +42,27 @@ public class StreamParser {
         }
     }
 
+    static void extractBoatLocation(byte[] payload){
+        byte[] latBytes = Arrays.copyOfRange(payload,16,20);
+        byte[] lonBytes = Arrays.copyOfRange(payload,20,24);
+        byte[] boatIdBytes = Arrays.copyOfRange(payload,8,12);
+        int boatId = ByteBuffer.wrap(boatIdBytes).getInt();
+        int lat = ByteBuffer.wrap(latBytes).getInt();
+        int lon = ByteBuffer.wrap(lonBytes).getInt();
+//        System.out.println("boatId = " + boatId);
+//        System.out.println("lon = " + 180 * (lon/Math.pow(2,31)));
+//        System.out.println("lat = " + 180 * (lat/Math.pow(2,31)));
+    }
+
+    public static int toInt(byte[] bytes, int offset) {
+
+        int ret = 0;
+        for (int i=0; i<4 && i+offset<bytes.length; i++) {
+            ret <<= 8;
+            ret |= (int)bytes[i] & 0xFF;
+        }
+        return ret;
+    }
 
 }
+
