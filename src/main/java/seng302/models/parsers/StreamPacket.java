@@ -19,7 +19,6 @@ public class StreamPacket {
         this.payload = payload;
 //        System.out.println("type = " + type);
         if (this.type == PacketType.BOAT_LOCATION){
-            System.out.println(this.type.toString());
             StreamParser.extractBoatLocation(payload);
         }
     }

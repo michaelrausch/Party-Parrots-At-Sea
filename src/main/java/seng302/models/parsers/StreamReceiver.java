@@ -103,7 +103,6 @@ public class StreamReceiver {
             e.printStackTrace();
         }
 
-
     }
 
     private static byte[] getBytes(int n){
@@ -124,7 +123,7 @@ public class StreamReceiver {
      *
      * @return a positive long if there is less than 4 bytes -1 otherwise
      */
-    private static long bytesToLong(byte[] bytes){
+    static long bytesToLong(byte[] bytes){
         long partialLong = 0;
         int index = 0;
         for (byte b: bytes){
