@@ -246,8 +246,9 @@ public class CanvasController {
 
         for (Boat boat : boats) {
             BoatPolygon bp = new BoatPolygon(boat, Colors.getColor());
-            bp.moveBoatTo(startingX, startingY);
+            bp.moveBoatTo(startingX, startingY, 0d);
             bp.setDestination(firstMarkX, firstMarkY);
+            bp.forceRotation();
             group.getChildren().add(bp.getWake());
             group.getChildren().add(bp);
             group.getChildren().add(bp.getTeamNameObject());

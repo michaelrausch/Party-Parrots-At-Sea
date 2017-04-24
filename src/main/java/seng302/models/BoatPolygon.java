@@ -1,6 +1,7 @@
 package seng302.models;
 
 
+import com.sun.xml.internal.bind.v2.TODO;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
@@ -27,7 +28,9 @@ public class BoatPolygon extends Polygon {
     private Text teamNameObject;
     private Text velocityObject;
 
-    private double rotation;
+    private double rotationalGoal;
+    private double currentRotation;
+    private double rotationalVelocity;
     private double pixelVelocityX;
     private double pixelVelocityY;
     //private double destinationX;
@@ -70,7 +73,7 @@ public class BoatPolygon extends Polygon {
      * @param dx The amount to move the X coordinate by
      * @param dy The amount to move the Y coordinate by
      */
-    void moveBy(Double dx, Double dy) {
+    void moveBy(Double dx, Double dy, Double rotation) {
         super.setLayoutX(super.getLayoutX() + dx);
         super.setLayoutY(super.getLayoutY() + dy);
         super.relocate(super.getLayoutX(), super.getLayoutY());
@@ -86,6 +89,7 @@ public class BoatPolygon extends Polygon {
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
         wake.relocate(wake.getLayoutX(), wake.getLayoutY());
+        rotateBoat(rotation);
     }
 
     /**
@@ -93,7 +97,7 @@ public class BoatPolygon extends Polygon {
      * @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
      */
-    public void moveBoatTo(Double x, Double y) {
+    public void moveBoatTo(Double x, Double y, Double rotation) {
         super.setLayoutX(x);
         super.setLayoutY(y);
         super.relocate(super.getLayoutX(), super.getLayoutY());
@@ -109,12 +113,20 @@ public class BoatPolygon extends Polygon {
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.relocate(wake.getLayoutX(), wake.getLayoutY());
+        currentRotation = 0;
+        rotateBoat(rotation);
     }
 
     public void updatePosition (double timeInterval) {
         double dx = pixelVelocityX * timeInterval;
         double dy = pixelVelocityY * timeInterval;
-        moveBy(dx, dy);
+        double rotation = 0d;
+        if (rotationalGoal > currentRotation && rotationalVelocity > 0) {
+            rotation = rotationalVelocity * timeInterval;
+        } else if (rotationalGoal < currentRotation && rotationalVelocity < 0) {
+            rotation = rotationalVelocity * timeInterval;
+        }
+        moveBy(dx, dy, rotation);
     }
 
     public void setDestination (double newXValue, double newYValue) {
@@ -122,7 +134,7 @@ public class BoatPolygon extends Polygon {
         this.pixelVelocityY = (newYValue - super.getLayoutY()) / expectedUpdateInterval;
         //this.destinationX = newXValue;
         //this.destinationY = newYValue;
-        this.rotation  = Math.abs(
+        this.rotationalGoal = Math.abs(
                 Math.toDegrees(
                         Math.atan(
                                 (newYValue - super.getLayoutY()) / (newXValue - super.getLayoutX())
@@ -130,22 +142,29 @@ public class BoatPolygon extends Polygon {
                 )
         );
         if (super.getLayoutY() >= newYValue && super.getLayoutX() <= newXValue)
-            rotation = 90 - rotation;
+            rotationalGoal = 90 - rotationalGoal;
         else if (super.getLayoutY() < newYValue && super.getLayoutX() <= newXValue)
-            rotation = 90 + rotation;
+            rotationalGoal = 90 + rotationalGoal;
         else if (super.getLayoutY() >= newYValue && super.getLayoutX() > newXValue)
-            rotation = 270 + rotation;
+            rotationalGoal = 270 + rotationalGoal;
         else
-            rotation = 270 - rotation;
-        rotateBoat ();
+            rotationalGoal = 270 - rotationalGoal;
+        // TODO: 25/04/2017 cir27 - Verify this logic is correct. Want to produce the shortest path.
+        if (Math.abs(360 - rotationalGoal + currentRotation) < Math.abs(rotationalGoal - currentRotation)) {
+            System.out.println("ROTATE");
+            this.rotationalVelocity = (360 - rotationalGoal + currentRotation) / expectedUpdateInterval;
+        } else {
+            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+        }
     }
 
-    private void rotateBoat () {
+    public void rotateBoat (double rotationDeg) {
+        currentRotation += rotationDeg;
         super.getTransforms().clear();
-        super.getTransforms().add(new Rotate(rotation, BOAT_WIDTH/2, 0));
+        super.getTransforms().add(new Rotate(currentRotation, BOAT_WIDTH/2, 0));
         wake.getTransforms().clear();
         wake.getTransforms().add(new Translate(0, BOAT_HEIGHT));
-        wake.getTransforms().add(new Rotate(rotation, BOAT_WIDTH/2, -BOAT_HEIGHT));
+        wake.getTransforms().add(new Rotate(currentRotation, BOAT_WIDTH/2, -BOAT_HEIGHT));
     }
 
     public static double getExpectedUpdateInterval() {
@@ -168,4 +187,7 @@ public class BoatPolygon extends Polygon {
         return velocityObject;
     }
 
+    public void forceRotation () {
+        rotateBoat (rotationalGoal - currentRotation);
+    }
 }
