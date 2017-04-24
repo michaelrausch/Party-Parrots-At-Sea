@@ -1,13 +1,12 @@
 package seng302.server;
 
-import seng302.server.messages.Heartbeat;
-import seng302.server.messages.Message;
-import seng302.server.messages.XMLMessage;
-import seng302.server.messages.XMLMessageSubType;
+import seng302.server.messages.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,6 +14,7 @@ public class ServerThread implements Runnable{
     private Thread runner;
     private StreamingServerSocket server;
     private final int HEARTBEAT_PERIOD = 5000;
+    private final int RACE_STATUS_PERIOD = 1000;
     private final int PORT_NUMBER = 8085;
 
     public ServerThread(String threadName){
@@ -43,6 +43,29 @@ public class ServerThread implements Runnable{
         }
 
         return null;
+    }
+
+    /**
+     * @return A sample race status message
+     */
+    public Message getTestRaceStatusMessage(){
+        BoatSubMessage boat1 = new BoatSubMessage(1, BoatStatus.PRESTART, 0, 0, 0,
+                10000, 10000);
+
+        BoatSubMessage boat2 = new BoatSubMessage(2, BoatStatus.PRESTART, 0, 0, 0,
+                10000, 10000);
+
+        BoatSubMessage boat3 = new BoatSubMessage(3, BoatStatus.PRESTART, 0, 0, 0,
+                10000, 10000);
+
+
+        List<BoatSubMessage> boats = new ArrayList<BoatSubMessage>();
+        boats.add(boat1);
+        boats.add(boat2);
+        boats.add(boat3);
+
+        return new RaceStatusMessage(1, RaceStatus.PRESTART, 1000, WindDirection.EAST,
+                100, 3, RaceType.MATCH_RACE, 1, boats);
     }
 
     public void run() {
@@ -86,6 +109,21 @@ public class ServerThread implements Runnable{
                     }
                 }
             }, 0, HEARTBEAT_PERIOD);
+
+            // Timer to send the race status messages
+            Timer t1 = new Timer();
+            t1.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Message statusMessage = getTestRaceStatusMessage();
+
+                    try {
+                        server.send(statusMessage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 100, RACE_STATUS_PERIOD);
 
         } catch (IOException e) {
             System.err.println(e.getMessage());
