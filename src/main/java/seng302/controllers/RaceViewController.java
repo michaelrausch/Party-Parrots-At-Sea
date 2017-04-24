@@ -2,10 +2,7 @@ package seng302.controllers;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -65,15 +62,15 @@ public class RaceViewController {
 //        }
 
         includedCanvasController.setup(this);
-        includedCanvasController.setUpBoats();
-        initializeTimer();
+        includedCanvasController.initializeCanvas();
+        //initializeTimer();
         initializeSettings();
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
         double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
         windDirectionText.setText(String.format("%.1f°", windDirection));
         windArrowText.setRotate(windDirection);
-
+        includedCanvasController.timer.start();
     }
 
     private void initializeSettings(){

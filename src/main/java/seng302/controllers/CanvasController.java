@@ -3,6 +3,7 @@ package seng302.controllers;
 import javafx.animation.*;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,6 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
 import seng302.models.Boat;
+import seng302.models.BoatPolygon;
+import seng302.models.Colors;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
@@ -32,14 +35,17 @@ public class CanvasController {
     private ResizableCanvas canvas;
     private Group group;
     private GraphicsContext gc;
+    private List<BoatPolygon> boatPolygons = new ArrayList<>();
 
-    private final int MARK_SIZE   = 10;
-    private final int BUFFER_SIZE = 25;
-    private final int CANVAS_SIZE = 1000;
-    private final int LHS_BUFFER  = BUFFER_SIZE;
-    private final int RHS_BUFFER  = BUFFER_SIZE + MARK_SIZE / 2;
-    private final int TOP_BUFFER  = BUFFER_SIZE;
-    private final int BOT_BUFFER  = TOP_BUFFER + MARK_SIZE / 2;
+    private final int MARK_SIZE     = 10;
+    private final int BUFFER_SIZE   = 25;
+    private final int CANVAS_WIDTH  = 1000;
+    private final int CANVAS_HEIGHT = 1000;
+    private final int LHS_BUFFER    = BUFFER_SIZE;
+    private final int RHS_BUFFER    = BUFFER_SIZE + MARK_SIZE / 2;
+    private final int TOP_BUFFER    = BUFFER_SIZE;
+    private final int BOT_BUFFER    = TOP_BUFFER + MARK_SIZE / 2;
+    private final int FRAME_RATE    = 60;
 
     private double distanceScaleFactor;
     private ScaleDirection scaleDirection;
@@ -49,6 +55,9 @@ public class CanvasController {
     private Mark maxLonPoint;
     private int referencePointX;
     private int referencePointY;
+    private double metersToPixels;
+
+    public AnimationTimer timer;
 
     private enum ScaleDirection {
         HORIZONTAL,
@@ -67,70 +76,119 @@ public class CanvasController {
         canvasPane.getChildren().add(canvas);
         canvasPane.getChildren().add(group);
         // Bind canvas size to stack pane size.
-        canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_SIZE));
-        canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_SIZE));
-        group.minWidth(CANVAS_SIZE);
-        group.minHeight(CANVAS_SIZE);
-//        canvas.widthProperty().bind(canvasPane.widthProperty());
-//        canvas.heightProperty().bind(canvasPane.heightProperty());
-//        group.minWidth(canvas.getWidth());
-//        group.minHeight(canvas.getHeight());
-
-
+        canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_WIDTH));
+        canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_HEIGHT));
+        group.minWidth(CANVAS_WIDTH);
+        group.minHeight(CANVAS_HEIGHT);
     }
 
-
-    public void setUpBoats(){
+    public void initializeCanvas (){
 
         gc = canvas.getGraphicsContext2D();
         gc.save();
         gc.setFill(Color.SKYBLUE);
-        gc.fillRect(0,0, CANVAS_SIZE,CANVAS_SIZE);
+        gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
         gc.restore();
         drawCourse();
-        for (Mark m : raceViewController.getRace().getCourse())
-        {
-            System.out.println("MARK NAME - " + m.getName());
-            System.out.println("X LOCATION - " + m.getX());
-            System.out.println("Y LOCATION - " + m.getY());
-        }
         drawBoats();
-        drawFps(12);
-        // overriding the handle so that it can clean canvas and redraw boats and course marks
-        AnimationTimer timer = new AnimationTimer() {
-            private long lastUpdate = 0;
-            private long lastFpsUpdate = 0;
-            private int lastFpsCount = 0;
-            private int fpsCount = 0;
-            boolean done = true;
+//        drawFps(12);
+//        // overriding the handle so that it can clean canvas and redraw boats and course marks
+//        AnimationTimer timer = new AnimationTimer() {
+//            private long lastUpdate = 0;
+//            private long lastFpsUpdate = 0;
+//            private int lastFpsCount = 0;
+//            private int fpsCount = 0;
+//            boolean done = true;
+//
+//            @Override
+//            public void handle(long now) {
+//                if (true){ //if statement for limiting refresh rate if needed
+////                    gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
+////                    gc.setFill(Color.SKYBLUE);
+////                    gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
+//
+//
+//                    // If race has started, draw the boats and play the timeline
+//                    if (raceViewController.getRace().getRaceTime() > 1) {
+//                        raceViewController.playTimelines();
+//                    }
+//                    // Race has not started, pause the timelines
+//                    else {
+//                        raceViewController.pauseTimelines();
+//                    }
+//                    lastUpdate = now;
+//                    fpsCount ++;
+//                    if (now - lastFpsUpdate >= 1000000000){
+//                        lastFpsCount = fpsCount;
+//                        fpsCount = 0;
+//                        lastFpsUpdate = now;
+//                    }
+//                }
+//            }
+//        };
+//        timer.start();
+        //try {
+        //    Thread.sleep(10000);
+        //}catch (Exception e) {
+        //    e.printStackTrace();
+        //}
+        timer = new AnimationTimer() {
+
+            private int countdown = 60;
+            private int[] currentRaceMarker = {1, 1, 1, 1, 1, 1};
+            List<Mark> marks = raceViewController.getRace().getCourse();
 
             @Override
             public void handle(long now) {
-                if (true){ //if statement for limiting refresh rate if needed
-//                    gc.clearRect(0, 0, canvas.getWidth(),canvas.getHeight());
-//                    gc.setFill(Color.SKYBLUE);
-//                    gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
-
-
-                    // If race has started, draw the boats and play the timeline
-                    if (raceViewController.getRace().getRaceTime() > 1){
-                        raceViewController.playTimelines();
+                boolean raceFinished = true;
+                boolean descending;
+                int boatIndex = 0;
+                Mark nextMark;
+                if (countdown == 0) {
+                    for (BoatPolygon bp : boatPolygons) {
+                        if (currentRaceMarker[boatIndex] < marks.size()) {
+                            if (currentRaceMarker[boatIndex] == 6) {
+                                int debugLine = 4;
+                            }
+                            double xb4 = bp.getLayoutX();
+                            double yb4 = bp.getLayoutY();
+                            nextMark = marks.get(currentRaceMarker[boatIndex]);
+                            if (nextMark.getY() > bp.getLayoutY())
+                                descending = true;
+                            else
+                                descending = false;
+                            bp.updatePosition(1000 / 60);
+                            if (descending && nextMark.getY() < bp.getLayoutY()) {
+                                currentRaceMarker[boatIndex]++;
+                                bp.setDestination(
+                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+                                );
+                            } else if (!descending && nextMark.getY() > bp.getLayoutY()) {
+                                currentRaceMarker[boatIndex]++;
+                                bp.setDestination(
+                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+                                );
+                            }
+                            double xnew = bp.getLayoutX();
+                            double ynew = bp.getLayoutY();
+                            double dx = xnew - xb4;
+                            double dy = ynew -yb4;
+                            raceFinished = false;
+                            boatIndex++;
+                        }
                     }
-                    // Race has not started, pause the timelines
-                    else {
-                        raceViewController.pauseTimelines();
+                    if (raceFinished) {
+                        System.out.println("DONZEO LADS");
+                        this.stop();
                     }
-                    lastUpdate = now;
-                    fpsCount ++;
-                    if (now - lastFpsUpdate >= 1000000000){
-                        lastFpsCount = fpsCount;
-                        fpsCount = 0;
-                        lastFpsUpdate = now;
-                    }
+                } else {
+                    countdown--;
                 }
             }
         };
-        timer.start();
+        for (Mark m : raceViewController.getRace().getCourse())
+            System.out.println(m.getName());
+        //timer.start();
     }
 
     class ResizableCanvas extends Canvas {
@@ -179,16 +237,22 @@ public class CanvasController {
      */
     private void drawBoats() {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
-        ArrayList<Boat> boats = raceViewController.getStartingBoats();
-        Double startingX = (double) raceViewController.getRace().getCourse().get(0).getX();
-        Double startingY = (double) raceViewController.getRace().getCourse().get(0).getY();
+        List<Boat> boats  = raceViewController.getStartingBoats();
+        List<Mark> marks  = raceViewController.getRace().getCourse();
+        Double startingX  = (double) marks.get(0).getX();
+        Double startingY  = (double) marks.get(0).getY();
+        Double firstMarkX = (double) marks.get(1).getX();
+        Double firstMarkY = (double) marks.get(1).getY();
 
         for (Boat boat : boats) {
-            boat.moveBoatTo(startingX, startingY);
-            group.getChildren().add(boat.getWake());
-            group.getChildren().add(boat.getBoatObject());
-            group.getChildren().add(boat.getTeamNameObject());
-            group.getChildren().add(boat.getVelocityObject());
+            BoatPolygon bp = new BoatPolygon(boat, Colors.getColor());
+            bp.moveBoatTo(startingX, startingY);
+            bp.setDestination(firstMarkX, firstMarkY);
+            group.getChildren().add(bp.getWake());
+            group.getChildren().add(bp);
+            group.getChildren().add(bp.getTeamNameObject());
+            group.getChildren().add(bp.getVelocityObject());
+            boatPolygons.add(bp);
 //            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
     }
@@ -248,11 +312,11 @@ public class CanvasController {
         Color color = Color.BLUE;
 
         if (gateMark.getName().equals("Start")){
-            color = Color.RED;
+            color = Color.GREEN;
         }
 
         if (gateMark.getName().equals("Finish")){
-            color = Color.GREEN;
+            color = Color.RED;
         }
 
         drawSingleMark(gateMark.getSingleMark1(), color);
@@ -282,14 +346,16 @@ public class CanvasController {
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
         givePointsXY();
+        findMetersToPixels();
     }
+
 
     /**
      * Sets the class variables minLatPoint, maxLatPoint, minLonPoint, maxLonPoint to the marker with the leftmost
      * marker, rightmost marker, southern most marker and northern most marker respectively.
      */
     private void findMinMaxPoint() {
-        ArrayList<Mark> sortedPoints = new ArrayList<>();
+        List<Mark> sortedPoints = new ArrayList<>();
         for (Mark mark : raceViewController.getRace().getCourse())
         {
             if (mark.getMarkType() == MarkType.SINGLE_MARK)
@@ -348,9 +414,6 @@ public class CanvasController {
         }
         referencePoint.setX(referencePointX);
         referencePoint.setY(referencePointY);
-        System.out.println("REF POINT = " + referencePoint.getName());
-        System.out.println(referencePointX);
-        System.out.println(referencePointY);
     }
 
     /**
@@ -387,41 +450,44 @@ public class CanvasController {
      * are scaled according to the distanceScaleFactor variable.
      */
     private void givePointsXY() {
-        Pair<Integer, Integer> canvasLocation;
-        ArrayList<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
+        Point2D canvasLocation;
+        List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
 
         for (Mark mark : allPoints) {
             if (mark.getMarkType() != MarkType.SINGLE_MARK) {
                 GateMark gateMark = (GateMark) mark;
 
                 canvasLocation = findScaledXY(gateMark.getSingleMark1());
-                gateMark.getSingleMark1().setX(canvasLocation.getKey());
-                gateMark.getSingleMark1().setY(canvasLocation.getValue());
+                gateMark.getSingleMark1().setX((int) canvasLocation.getX());
+                gateMark.getSingleMark1().setY((int) canvasLocation.getY());
 
                 canvasLocation = findScaledXY(gateMark.getSingleMark2());
-                gateMark.getSingleMark2().setX(canvasLocation.getKey());
-                gateMark.getSingleMark2().setY(canvasLocation.getValue());
+                gateMark.getSingleMark2().setX((int) canvasLocation.getX());
+                gateMark.getSingleMark2().setY((int) canvasLocation.getY());
             }
             if (mark.getMarkType() == MarkType.CLOSED_GATE)
                 ((GateMark) mark).assignXYCentered();
             else {
                 canvasLocation = findScaledXY(mark);
-                mark.setX(canvasLocation.getKey());
-                mark.setY(canvasLocation.getValue());
+                mark.setX((int) canvasLocation.getX());
+                mark.setY((int) canvasLocation.getY());
             }
         }
     }
 
-    private Pair<Integer, Integer> findScaledXY (Mark unscaled) {
+    private Point2D findScaledXY (Mark unscaled) {
+        return findScaledXY (minLatPoint.getLatitude(), minLatPoint.getLongitude(),
+                             unscaled.getLatitude(), unscaled.getLongitude());
+    }
+
+    private Point2D findScaledXY (double latA, double lonA, double latB, double lonB) {
         double distanceFromReference;
         double angleFromReference;
         int yAxisLocation;
         int xAxisLocation;
 
-        angleFromReference = Mark.calculateHeadingRad(minLatPoint, unscaled);
-        distanceFromReference = Mark.calculateDistance(minLatPoint, unscaled);
-        //angleFromReference = Mark.calculateHeadingRad(lon1, lon2, lat1, lat2);
-        //distanceFromReference = Mark.calculateDistance(lon1, lon2, lat1, lat2);
+        angleFromReference = Mark.calculateHeadingRad(latA, lonA, latB, lonB);
+        distanceFromReference = Mark.calculateDistance(latA, lonA, latB, lonB);
 
         if (angleFromReference > (Math.PI / 2)) {
             angleFromReference = (Math.PI * 2) - angleFromReference;
@@ -434,6 +500,40 @@ public class CanvasController {
         yAxisLocation  = referencePointY;
         yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
 
-        return new Pair<>(xAxisLocation, yAxisLocation);
+        return new Point2D(xAxisLocation, yAxisLocation);
+    }
+
+
+
+    /**
+     * Find the number of meters per pixel.
+     */
+    private void findMetersToPixels () {
+        Double angularDistance;
+        Double angle;
+        Double straightLineDistance;
+        if (scaleDirection == ScaleDirection.HORIZONTAL) {
+            angularDistance = Mark.calculateDistance(minLonPoint, maxLonPoint);
+            angle = Mark.calculateHeadingRad(minLonPoint, maxLonPoint);
+            if (angle > Math.PI / 2) {
+                straightLineDistance = Math.cos(angle - Math.PI) * angularDistance;
+            } else {
+                straightLineDistance = Math.cos(angle) * angularDistance;
+            }
+            metersToPixels = (CANVAS_WIDTH - RHS_BUFFER - LHS_BUFFER) / straightLineDistance;
+        } else {
+            angularDistance = Mark.calculateDistance(minLatPoint, maxLatPoint);
+            angle = Mark.calculateHeadingRad(minLatPoint, maxLatPoint);
+            if (angle < Math.PI / 2) {
+                straightLineDistance = Math.cos(angle) * angularDistance;
+            } else {
+                straightLineDistance = Math.cos(-angle + Math.PI * 2) * angularDistance;
+            }
+            metersToPixels = (CANVAS_HEIGHT - TOP_BUFFER - BOT_BUFFER) / straightLineDistance;
+        }
+    }
+
+    private Point2D latLonToXY (double latitude, double longitude) {
+        return findScaledXY(minLatPoint.getLatitude(), minLatPoint.getLongitude(), latitude, longitude);
     }
 }

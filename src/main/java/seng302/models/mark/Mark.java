@@ -42,7 +42,7 @@ public abstract class Mark {
         Double longitude2 = pointTwo.getLongitude();
         Double latitude1 = pointOne.getLatitude();
         Double latitude2 = pointTwo.getLatitude();
-        return calculateHeadingRad(longitude1, longitude2, latitude1, latitude2);
+        return calculateHeadingRad(latitude1, longitude1, latitude2, longitude2);
     }
 
     /**
@@ -54,7 +54,7 @@ public abstract class Mark {
      * @param latitude2 Latitude of first  point in degrees
      * @return Heading in radians
      */
-    public static double calculateHeadingRad (Double longitude1, Double longitude2, Double latitude1, Double latitude2) {
+    public static double calculateHeadingRad (Double latitude1, Double longitude1, Double latitude2, Double longitude2) {
         latitude1 = Math.toRadians(latitude1);
         latitude2 = Math.toRadians(latitude2);
         Double longDiff= Math.toRadians(longitude2-longitude1);
@@ -75,7 +75,7 @@ public abstract class Mark {
         Double longitude2 = pointTwo.getLongitude();
         Double latitude1 = pointOne.getLatitude();
         Double latitude2 = pointTwo.getLatitude();
-        return calculateDistance(longitude1, longitude2, latitude1, latitude2);
+        return calculateDistance(latitude1, longitude1, latitude2, longitude2);
     }
 
     /**
@@ -88,7 +88,7 @@ public abstract class Mark {
      * @param latitude2 Latitude of first  point in degrees
      * @return Distance in meters
      */
-    public static Double calculateDistance (Double longitude1, Double longitude2, Double latitude1, Double latitude2) {
+    public static Double calculateDistance (Double latitude1, Double longitude1, Double latitude2, Double longitude2) {
         Double theta = longitude1 - longitude2;
         Double dist = Math.sin(Math.toRadians(latitude1)) * Math.sin(Math.toRadians(latitude2)) +
                 Math.cos(Math.toRadians(latitude1)) * Math.cos(Math.toRadians(latitude2)) *
