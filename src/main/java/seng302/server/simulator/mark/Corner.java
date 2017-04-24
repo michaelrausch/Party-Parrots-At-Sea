@@ -15,6 +15,16 @@ public class Corner {
 		this.zoneSize = zoneSize;
 	}
 
+	/**
+	 * Prints out corner's info and its compound mark, good for testing
+	 * @return a string showing its details
+	 */
+	@Override
+	public String toString() {
+		return String.format("Corner: %d - %s - %d, %s\n",
+				seqID, roundingType.getType(), zoneSize, compoundMark.toString());
+	}
+
 	public int getSeqID() {
 		return seqID;
 	}

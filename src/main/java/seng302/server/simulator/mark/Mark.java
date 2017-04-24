@@ -18,6 +18,15 @@ public class Mark {
         this.lng = lng;
     }
 
+    /**
+     * Prints out mark's info and its geo location, good for testing
+     * @return a string showing its details
+     */
+    @Override
+    public String toString() {
+        return String.format("Mark: %d (%s), lat: %f, lng: %f", seqID, name, lat, lng);
+    }
+
     public int getSeqID() {
         return seqID;
     }

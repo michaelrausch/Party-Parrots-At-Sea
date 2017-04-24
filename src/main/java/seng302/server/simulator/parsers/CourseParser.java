@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * parse a course xml file
+ * Parses the race xml file to get course details
  * Created by Haoming Yin (hyi25) on 16/3/2017
  */
 public class CourseParser extends FileParser {
@@ -28,10 +28,11 @@ public class CourseParser extends FileParser {
 		this.doc = this.parseFile();
 	}
 
+	// TODO: should handle error / invalid file gracefully
 	public List<Corner> getCourse() {
-		compoundMarksMap = getCompoundMarks(doc);
+		compoundMarksMap = getCompoundMarks(doc.getDocumentElement());
 		List<Corner> corners = new ArrayList<>();
-		NodeList cMarksSequence = doc.getElementsByTagName("CompoundMarkSequence");
+		NodeList cMarksSequence = doc.getElementsByTagName("Corner");
 
 		for (int i = 0; i < cMarksSequence.getLength(); i++) {
 			corners.add(getCorner(cMarksSequence.item(i)));
@@ -47,7 +48,7 @@ public class CourseParser extends FileParser {
 			Integer seqId = Integer.valueOf(e.getAttribute("SeqID"));
 			Integer cMarkId = Integer.valueOf(e.getAttribute("CompoundMarkID"));
 			CompoundMark cMark = compoundMarksMap.get(cMarkId);
-			RoundingType roundingType = RoundingType.valueOf(e.getAttribute("Rounding"));
+			RoundingType roundingType = RoundingType.typeOf(e.getAttribute("Rounding"));
 			Integer zoneSize = Integer.valueOf(e.getAttribute("ZoneSize"));
 
 			return new Corner(seqId, cMark, roundingType, zoneSize);
@@ -60,11 +61,11 @@ public class CourseParser extends FileParser {
 
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element element = (Element) node;
-			NodeList course = element.getElementsByTagName("Course");
+			NodeList cMarks = element.getElementsByTagName("CompoundMark");
 
 			// loop through all compound marks who are the children of course node
-			for (int i = 0; i < course.getLength(); i++) {
-				CompoundMark cMark = getCompoundMark(course.item(i));
+			for (int i = 0; i < cMarks.getLength(); i++) {
+				CompoundMark cMark = getCompoundMark(cMarks.item(i));
 				if (cMark != null)
 					compoundMarksMap.put(cMark.getMarkID(), cMark);
 			}
@@ -78,7 +79,8 @@ public class CourseParser extends FileParser {
 	private CompoundMark getCompoundMark(Node node) {
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element e = (Element) node;
-			Integer markID = Integer.valueOf(e.getAttribute("CompoundmarkID"));
+			Integer markID = Integer.valueOf(e.getAttribute("CompoundMarkID"));
+
 			String name = e.getAttribute("Name");
 			CompoundMark cMark = new CompoundMark(markID, name);
 

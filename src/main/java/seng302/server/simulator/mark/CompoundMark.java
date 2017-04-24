@@ -21,6 +21,19 @@ public class CompoundMark {
 		}
 	}
 
+	/**
+	 * Prints out compoundMark's info and its marks, good for testing
+	 * @return a string showing its details
+	 */
+	@Override
+	public String toString(){
+		if (mark2 == null)
+			return String.format("CompoundMark: %d (%s), [%s]",
+					markID, name, mark1.toString());
+		return String.format("CompoundMark: %d (%s), [%s; %s]",
+				markID, name, mark1.toString(), mark2.toString());
+	}
+
 	public int getMarkID() {
 		return markID;
 	}

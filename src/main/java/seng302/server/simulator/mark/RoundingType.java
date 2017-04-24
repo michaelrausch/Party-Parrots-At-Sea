@@ -1,9 +1,9 @@
 package seng302.server.simulator.mark;
 
-public enum RoundingType{
+public enum RoundingType {
 
 	// the mark should be rounded to port (boat's left)
-	PORT("PS"),
+	PORT("Port"),
 
 	// the mark should be rounded to starboard (boat's right)
 	STARBOARD("Stbd"),
@@ -24,5 +24,20 @@ public enum RoundingType{
 
 	public String getType() {
 		return this.type;
+	}
+
+	public static RoundingType typeOf(String type) {
+		switch (type) {
+			case "Port":
+				return PORT;
+			case "Stbd":
+				return STARBOARD;
+			case "SP":
+				return SP;
+			case "PS":
+				return PS;
+			default:
+				return null;
+		}
 	}
 }
