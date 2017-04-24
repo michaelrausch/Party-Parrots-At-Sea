@@ -1,7 +1,7 @@
 package seng302.models;
 
-
-import com.sun.xml.internal.bind.v2.TODO;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
@@ -9,10 +9,9 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
 /**
- * Created by cir27 on 24/04/17.
+ * Created by CJIRWIN on 25/04/2017.
  */
-public class BoatPolygon extends Polygon {
-
+public class BoatGroup extends Group{
     private static final double TEAMNAME_X_OFFSET = 15d;
     private static final double TEAMNAME_Y_OFFSET = -20d;
     private static final double VELOCITY_X_OFFSET = 15d;
@@ -21,52 +20,66 @@ public class BoatPolygon extends Polygon {
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
     //Time between sections of race - Should be changed to 200 for actual program.
-    private static double expectedUpdateInterval = 5000;
+    private static double expectedUpdateInterval = 2000;
 
     private Boat boat;
-    private Polygon wake;
-    private Text teamNameObject;
-    private Text velocityObject;
 
     private double rotationalGoal;
     private double currentRotation;
     private double rotationalVelocity;
     private double pixelVelocityX;
     private double pixelVelocityY;
-    //private double destinationX;
-    //private double destinationY;
 
-    public BoatPolygon (Boat boat, Color color){
+    public BoatGroup (Boat boat, Color color){
         super();
-        super.setFill(color);
-        super.getPoints().addAll(
-                BOAT_WIDTH / 2, 0.0,
-                BOAT_WIDTH    , BOAT_HEIGHT,
-                0.0           , BOAT_HEIGHT
-        );
         this.boat = boat;
-        initAnnotations();
+        initChildren(color);
     }
 
-    public BoatPolygon (Boat boat, Color color, double... points)
+    public BoatGroup (Boat boat, Color color, double... points)
     {
-        super(points);
-        super.setFill(color);
-        this.boat = boat;
-        initAnnotations();
+        super();
+        initChildren(color, points);
     }
 
-    private void initAnnotations ()
-    {
-        wake = new Polygon();
-        wake.setFill(Color.DARKBLUE);
-        wake.getPoints().addAll(
+    private void initChildren (Color color, double... points) {
+        Polygon boatPoly = new Polygon(points);
+        boatPoly.setFill(color);
+
+        Polygon wake = new Polygon(
                 5.0,0.0,
                 10.0, boat.getVelocity() * VELOCITY_WAKE_RATIO,
                 0.0, boat.getVelocity() * VELOCITY_WAKE_RATIO
         );
-        teamNameObject = new Text(boat.getShortName());
-        velocityObject = new Text(String.valueOf(boat.getVelocity()));
+        wake.setFill(Color.DARKBLUE);
+
+        Text teamNameObject = new Text(boat.getShortName());
+        Text velocityObject = new Text(String.valueOf(boat.getVelocity()));
+
+        boatPoly.setLayoutX(0);
+        boatPoly.setLayoutY(0);
+        boatPoly.relocate(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+
+        teamNameObject.setX(TEAMNAME_X_OFFSET);
+        teamNameObject.setY(TEAMNAME_Y_OFFSET);
+        teamNameObject.relocate(teamNameObject.getX(), teamNameObject.getY());
+
+        velocityObject.setX(VELOCITY_X_OFFSET);
+        velocityObject.setY(VELOCITY_Y_OFFSET);
+        velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
+
+        wake.setLayoutX(0);
+        wake.setLayoutY(0);
+        wake.relocate(wake.getLayoutX(), wake.getLayoutY());
+
+        super.getChildren().addAll(boatPoly, wake, teamNameObject, velocityObject);
+    }
+
+    private void initChildren (Color color) {
+       initChildren(color,
+               BOAT_WIDTH / 2, 0.0,
+               BOAT_WIDTH, BOAT_HEIGHT,
+               0.0, BOAT_HEIGHT);
     }
     /**
      * Moves the boat and its children annotations from its current coordinates by specified amounts.
@@ -76,19 +89,6 @@ public class BoatPolygon extends Polygon {
     void moveBy(Double dx, Double dy, Double rotation) {
         super.setLayoutX(super.getLayoutX() + dx);
         super.setLayoutY(super.getLayoutY() + dy);
-        super.relocate(super.getLayoutX(), super.getLayoutY());
-
-        teamNameObject.setX(teamNameObject.getX() + dx);
-        teamNameObject.setY(teamNameObject.getY() + dy);
-        teamNameObject.relocate(teamNameObject.getX(), teamNameObject.getY());
-
-        velocityObject.setX(velocityObject.getX() + dx);
-        velocityObject.setY(velocityObject.getY() + dy);
-        velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
-
-        wake.setLayoutX(wake.getLayoutX() + dx);
-        wake.setLayoutY(wake.getLayoutY() + dy);
-        wake.relocate(wake.getLayoutX(), wake.getLayoutY());
         rotateBoat(rotation);
     }
 
@@ -98,21 +98,7 @@ public class BoatPolygon extends Polygon {
      * @param y The Y coordinate to move the boat to
      */
     public void moveBoatTo(Double x, Double y, Double rotation) {
-        super.setLayoutX(x);
-        super.setLayoutY(y);
-        super.relocate(super.getLayoutX(), super.getLayoutY());
-
-        teamNameObject.setX(x + TEAMNAME_X_OFFSET);
-        teamNameObject.setY(y + TEAMNAME_Y_OFFSET);
-        teamNameObject.relocate(teamNameObject.getX(), teamNameObject.getY());
-
-        velocityObject.setX(x + VELOCITY_X_OFFSET);
-        velocityObject.setY(y + VELOCITY_Y_OFFSET);
-        velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
-
-        wake.setLayoutX(x);
-        wake.setLayoutY(y);
-        wake.relocate(wake.getLayoutX(), wake.getLayoutY());
+        super.relocate(x, y);
         currentRotation = 0;
         rotateBoat(rotation);
     }
@@ -160,8 +146,10 @@ public class BoatPolygon extends Polygon {
 
     public void rotateBoat (double rotationDeg) {
         currentRotation += rotationDeg;
-        super.getTransforms().clear();
-        super.getTransforms().add(new Rotate(currentRotation, BOAT_WIDTH/2, 0));
+        Node boatPoly = super.getChildren().get(0);
+        boatPoly.getTransforms().clear();
+        boatPoly.getTransforms().add(new Rotate(currentRotation, BOAT_WIDTH/2, 0));
+        Node wake = super.getChildren().get(1);
         wake.getTransforms().clear();
         wake.getTransforms().add(new Translate(0, BOAT_HEIGHT));
         wake.getTransforms().add(new Rotate(currentRotation, BOAT_WIDTH/2, -BOAT_HEIGHT));
@@ -172,22 +160,16 @@ public class BoatPolygon extends Polygon {
     }
 
     public static void setExpectedUpdateInterval(double expectedUpdateInterval) {
-        BoatPolygon.expectedUpdateInterval = expectedUpdateInterval;
-    }
-
-    public Polygon getWake() {
-        return wake;
-    }
-
-    public Text getTeamNameObject() {
-        return teamNameObject;
-    }
-
-    public Text getVelocityObject() {
-        return velocityObject;
+        BoatGroup.expectedUpdateInterval = expectedUpdateInterval;
     }
 
     public void forceRotation () {
         rotateBoat (rotationalGoal - currentRotation);
+    }
+
+    public void toogleAnnotations () {
+        super.getChildren().get(1).setVisible(false);
+        super.getChildren().get(2).setVisible(false);
+        super.getChildren().get(3).setVisible(false);
     }
 }

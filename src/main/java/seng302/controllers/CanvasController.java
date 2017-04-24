@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
 import seng302.models.Boat;
-import seng302.models.BoatPolygon;
+import seng302.models.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
@@ -35,7 +35,7 @@ public class CanvasController {
     private ResizableCanvas canvas;
     private Group group;
     private GraphicsContext gc;
-    private List<BoatPolygon> boatPolygons = new ArrayList<>();
+    private List<BoatGroup> boatGroups = new ArrayList<>();
 
     private final int MARK_SIZE     = 10;
     private final int BUFFER_SIZE   = 25;
@@ -142,35 +142,47 @@ public class CanvasController {
             public void handle(long now) {
                 boolean raceFinished = true;
                 boolean descending;
+                boolean leftToRight;
                 int boatIndex = 0;
                 Mark nextMark;
                 if (countdown == 0) {
-                    for (BoatPolygon bp : boatPolygons) {
+                    for (BoatGroup boatGroup : boatGroups) {
                         if (currentRaceMarker[boatIndex] < marks.size()) {
                             if (currentRaceMarker[boatIndex] == 6) {
                                 int debugLine = 4;
                             }
-                            double xb4 = bp.getLayoutX();
-                            double yb4 = bp.getLayoutY();
+                            double xb4 = boatGroup.getLayoutX();
+                            double yb4 = boatGroup.getLayoutY();
                             nextMark = marks.get(currentRaceMarker[boatIndex]);
-                            if (nextMark.getY() > bp.getLayoutY())
-                                descending = true;
-                            else
-                                descending = false;
-                            bp.updatePosition(1000 / 60);
-                            if (descending && nextMark.getY() < bp.getLayoutY()) {
+
+                            descending = nextMark.getY() > boatGroup.getLayoutY();
+                            leftToRight = nextMark.getX() < boatGroup.getLayoutX();
+
+                            boatGroup.updatePosition(1000 / 60);
+                            if (descending && nextMark.getY() < boatGroup.getLayoutY()) {
                                 currentRaceMarker[boatIndex]++;
-                                bp.setDestination(
+                                boatGroup.setDestination(
                                         marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
                                 );
-                            } else if (!descending && nextMark.getY() > bp.getLayoutY()) {
+                            } else if (!descending && nextMark.getY() > boatGroup.getLayoutY()) {
                                 currentRaceMarker[boatIndex]++;
-                                bp.setDestination(
+                                boatGroup.setDestination(
+                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+                                );
+                            } else if (leftToRight && nextMark.getX() > boatGroup.getLayoutX()) {
+                                currentRaceMarker[boatIndex]++;
+                                boatGroup.setDestination(
+                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+                                );
+                            } else if (!leftToRight && nextMark.getX() < boatGroup.getLayoutX()) {
+                                currentRaceMarker[boatIndex]++;
+                                boatGroup.setDestination(
                                         marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
                                 );
                             }
-                            double xnew = bp.getLayoutX();
-                            double ynew = bp.getLayoutY();
+
+                            double xnew = boatGroup.getLayoutX();
+                            double ynew = boatGroup.getLayoutY();
                             double dx = xnew - xb4;
                             double dy = ynew -yb4;
                             raceFinished = false;
@@ -245,15 +257,12 @@ public class CanvasController {
         Double firstMarkY = (double) marks.get(1).getY();
 
         for (Boat boat : boats) {
-            BoatPolygon bp = new BoatPolygon(boat, Colors.getColor());
-            bp.moveBoatTo(startingX, startingY, 0d);
-            bp.setDestination(firstMarkX, firstMarkY);
-            bp.forceRotation();
-            group.getChildren().add(bp.getWake());
-            group.getChildren().add(bp);
-            group.getChildren().add(bp.getTeamNameObject());
-            group.getChildren().add(bp.getVelocityObject());
-            boatPolygons.add(bp);
+            BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
+            boatGroup.moveBoatTo(startingX, startingY, 0d);
+            boatGroup.setDestination(firstMarkX, firstMarkY);
+            boatGroup.forceRotation();
+            group.getChildren().add(boatGroup);
+            boatGroups.add(boatGroup);
 //            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
     }

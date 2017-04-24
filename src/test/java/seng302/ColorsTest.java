@@ -1,16 +1,9 @@
 package seng302;
 
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import org.junit.Assert;
 import org.junit.Test;
-import seng302.models.Boat;
-import seng302.models.BoatPolygon;
 import seng302.models.Colors;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
