@@ -1,25 +1,24 @@
 package seng302.models.parsers;
 
 
-import org.w3c.dom.Element;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
+import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Created by kre39 on 23/04/17.
  */
 public class StreamParser {
 
-    static void parsePacket(StreamPacket packet) {
+     static void parsePacket(StreamPacket packet) {
         switch (packet.getType()){
             case HEARTBEAT:
                 extractHeartBeat(packet);
@@ -74,7 +73,41 @@ public class StreamParser {
 
     }
 
-    private static void extractXmlMessage(StreamPacket packet){
+    static void extractXmlMessage(StreamPacket packet){
+
+        byte[] payload = packet.getPayload();
+        String xmlMessage = "";
+
+        ByteArrayInputStream payloadStream = new ByteArrayInputStream(payload);
+
+        //Bunch of data we don't want (Message Version Number, AckNumber, Timestamp)
+        payloadStream.skip(9);
+        int xmlMessageSubType = payloadStream.read();
+        payloadStream.skip(2);
+
+        //checks the length of the xml message itself
+        int xmlMessageLength = payloadStream.read() | payloadStream.read() << 8;
+
+        //Converts XML message to string to be parsed
+        int currentChar;
+        while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
+        xmlMessage += (char)currentChar;
+        }
+
+        //Create XML document Object
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
+            // TODO: 25/04/17 ajm412: Check that the object matches expected structure and return Document object.
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
