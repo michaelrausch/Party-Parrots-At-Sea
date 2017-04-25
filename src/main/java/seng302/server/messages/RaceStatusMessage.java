@@ -11,7 +11,6 @@ public class RaceStatusMessage extends Message{
     private final int MESSAGE_VERSION = 2; //Always set to 1
     private final int MESSAGE_BASE_SIZE = 24;
 
-    // fields
     private long currentTime;
     private long raceId;
     private RaceStatus raceStatus;
@@ -56,7 +55,7 @@ public class RaceStatusMessage extends Message{
      */
     @Override
     public int getSize() {
-        return MESSAGE_BASE_SIZE + (20 * (int) numBoatsInRace);
+        return MESSAGE_BASE_SIZE + (20 * ((int) numBoatsInRace));
     }
 
     /**
@@ -65,64 +64,28 @@ public class RaceStatusMessage extends Message{
      */
     @Override
     public void send(DataOutputStream outputStream) {
-        ByteBuffer buff = ByteBuffer.allocate(Header.getSize() + getSize() + 4/*CRC*/);
+        allocateBuffer();
+        writeHeaderToBuffer();
 
-        buff.put(getHeader().getByteBuffer());
-        buff.position(Header.getSize());
-
-        // Version Number, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)MESSAGE_VERSION).array());
-        buff.position(Header.getSize() + 1);
-
-        // Current time, 2 bytes
-        buff.put(ByteBuffer.allocate(6).putInt((int)currentTime).array());
-        buff.position(Header.getSize() + 7);
-
-        // Race id, 4 bytes
-        buff.put(ByteBuffer.allocate(4).putInt((int)raceId).array());
-        buff.position(Header.getSize() + 11);
-
-        // Race status, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)raceStatus.getCode()).array());
-        buff.position(Header.getSize() + 12);
-
-        // Expected start time, 6 bytes
-        buff.put(ByteBuffer.allocate(6).putInt((int)expectedStartTime).array());
-        buff.position(Header.getSize() + 18);
-
-        // Wind direction, 2 bytes
-        buff.put(ByteBuffer.allocate(2).putShort((short)raceWindDirection.getCode()).array());
-        buff.position(Header.getSize() + 20);
-
-        // Wind Speed, 2 bytes
-        buff.put(ByteBuffer.allocate(2).putShort((short)windSpeed).array());
-        buff.position(Header.getSize() + 22);
-
-        // Number of boats, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)numBoatsInRace).array());
-        buff.position(Header.getSize() + 23);
-
-        // Race Type, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)raceType.getCode()).array());
-        buff.position(Header.getSize() + 24);
-
-        int buffPosition = Header.getSize() + 24;
+        putByte((byte) MESSAGE_VERSION);
+        putInt((int) currentTime, 6);
+        putInt((int) raceId, 4);
+        putByte((byte) raceStatus.getCode());
+        putInt((int) expectedStartTime, 6);
+        putInt((int) raceWindDirection.getCode(), 2);
+        putInt((int) windSpeed, 2);
+        putByte((byte) numBoatsInRace);
+        putByte((byte) raceType.getCode());
 
         for (BoatSubMessage boatSubMessage : boats){
-            buff.put(boatSubMessage.getByteBuffer());
-            buffPosition += boatSubMessage.getSize();
-            buff.position(buffPosition);
+            putBytes(boatSubMessage.getByteBuffer(), boatSubMessage.getSize());
         }
 
-        // calculate CRC
-        crc.update(buff.array());
-
-        // Add CRC to message
-        buff.put(ByteBuffer.allocate(4).putInt((short)crc.getValue()).array());
+        writeCRC();
 
         // Send
         try {
-            outputStream.write(buff.array());
+            outputStream.write(getBuffer().array());
         } catch (IOException e) {
             e.printStackTrace();
         }

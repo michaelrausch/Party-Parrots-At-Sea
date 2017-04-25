@@ -1,11 +1,12 @@
 package seng302.server.messages;
 
+import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 
 /**
  * The status of each boat, sent within a race status message
  */
-public class BoatSubMessage {
+public class BoatSubMessage{
     private final int MESSAGE_SIZE = 20;
 
     private long sourceId;
@@ -57,22 +58,22 @@ public class BoatSubMessage {
         buff.position(buffPos);
 
         // Boat Status, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) boatStatus.getCode()).array());
+        buff.put(ByteBuffer.allocate(1).put((byte) (boatStatus.getCode() & 0xff)).array());
         buffPos += 1;
         buff.position(buffPos);
 
         // Leg number, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) legNumber).array());
+        buff.put(ByteBuffer.allocate(1).put((byte) (legNumber & 0xff)).array());
         buffPos += 1;
         buff.position(buffPos);
 
         // Number of penalties awarded, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) numberPenaltiesAwarded).array());
+        buff.put(ByteBuffer.allocate(1).put((byte) (numberPenaltiesAwarded & 0xff)).array());
         buffPos += 1;
         buff.position(buffPos);
 
         // Number of penalties served, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) numberPenaltiesServed).array());
+        buff.put(ByteBuffer.allocate(1).put((byte) (numberPenaltiesServed & 0xff)).array());
         buffPos += 1;
         buff.position(buffPos);
 

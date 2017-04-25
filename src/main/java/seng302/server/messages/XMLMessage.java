@@ -11,26 +11,24 @@ public class XMLMessage extends Message{
     private final int MESSAGE_SIZE = 14;
 
     // Message fields
-    private int timeStamp;
-    private short ack = 0x00; //Unused
+    private long timeStamp;
+    private long ack = 0x00; //Unused
     private XMLMessageSubType xmlMessageSubType;
-    private Short length;
-    private Short sequence;
+    private long length;
+    private long sequence;
     private String content;
-    private CRC32 crc;
 
     /**
      * XML Message from the AC35 Streaming data spec
      * @param content The XML content
      * @param type The XML Message Sub Type
      */
-    public XMLMessage(String content, XMLMessageSubType type, short sequenceNum){
+    public XMLMessage(String content, XMLMessageSubType type, long sequenceNum){
         this.content = content;
         this.xmlMessageSubType = type;
-        crc = new CRC32();
-        timeStamp = (int) (System.currentTimeMillis() / 1000L);
+        timeStamp = System.currentTimeMillis() / 1000L;
         ack = 0;
-        length = (short) this.content.length();
+        length = this.content.length();
         sequence = sequenceNum;
 
         setHeader(new Header(MESSAGE_TYPE, 0x01, (short) getSize()));
@@ -48,47 +46,23 @@ public class XMLMessage extends Message{
      * @param outputStream The output stream to send the message
      */
     public void send(DataOutputStream outputStream) {
-        ByteBuffer buff = ByteBuffer.allocate(Header.getSize() + getSize() + 4);
-        buff.put(getHeader().getByteBuffer());
-        buff.position(Header.getSize());
+        allocateBuffer();
+        writeHeaderToBuffer();
 
-        // Version Number, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)MESSAGE_VERSION).array());
-        buff.position(Header.getSize() + 1);
+        // Write message fields
+        putUnsignedByte((byte) MESSAGE_VERSION);
+        putInt((int) ack, 2);
+        putInt((int) timeStamp, 6);
+        putByte((byte)xmlMessageSubType.getType());
+        putInt((int) sequence, 2);
+        putInt((int) length, 2);
+        putBytes(content.getBytes());
 
-        // Ack, 2 bytes
-        buff.put(ByteBuffer.allocate(2).putShort(ack).array());
-        buff.position(Header.getSize() + 3);
-
-        // Timestamp, 6 bytes
-        buff.put(ByteBuffer.allocate(6).putInt(timeStamp).array());
-        buff.position(Header.getSize() + 9);
-
-        // XML message sub type, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)xmlMessageSubType.getType()).array());
-        buff.position(Header.getSize() + 10);
-
-        // Seq num, 2 bytes
-        buff.put(ByteBuffer.allocate(2).putShort(sequence).array());
-        buff.position(Header.getSize() + 12);
-
-        // Message length, 2 bytes
-        buff.put(ByteBuffer.allocate(2).putShort(length).array());
-        buff.position(Header.getSize() + 14);
-
-        // XML Content
-        buff.put(this.content.getBytes());
-        buff.position(Header.getSize() + 14 + this.content.getBytes().length);
-
-        // calculate CRC
-        crc.update(buff.array());
-
-        // Add CRC to message
-        buff.put(ByteBuffer.allocate(4).putInt((short)crc.getValue()).array());
+        writeCRC();
 
         // Send
         try {
-            outputStream.write(buff.array());
+            outputStream.write(getBuffer().array());
         } catch (IOException e) {
             e.printStackTrace();
         }

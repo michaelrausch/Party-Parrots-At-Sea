@@ -26,24 +26,15 @@ public class Heartbeat extends Message {
     public void send(DataOutputStream outputStream) {
         setHeader(new Header(MessageType.HEARTBEAT, 0x01, (short) getSize()));
 
-        ByteBuffer buff = ByteBuffer.allocate(Header.getSize() + getSize() + getSize());
+        allocateBuffer();
+        writeHeaderToBuffer();
 
-        // Write header
-        buff.put(getHeader().getByteBuffer());
-        buff.position(Header.getSize());
+        putUnsignedInt(seqNo, 4);
 
-        // Write seq num
-        buff.put(ByteBuffer.allocate(4).putInt(seqNo).array());
-        buff.position(Header.getSize()+4);
-
-        // Write CRC
-        CRC32 crc = new CRC32();
-        crc.update(buff.array());
-
-        buff.put(ByteBuffer.allocate(4).putInt((short)crc.getValue()).array());
+        writeCRC();
 
         try {
-            outputStream.write(buff.array());
+            outputStream.write(getBuffer().array());
         } catch (IOException e) {
             e.printStackTrace();
         }

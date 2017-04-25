@@ -15,6 +15,7 @@ public class ServerThread implements Runnable{
     private StreamingServerSocket server;
     private final int HEARTBEAT_PERIOD = 5000;
     private final int RACE_STATUS_PERIOD = 1000;
+    private final int BOAT_LOCATION_PERIOD = 1000/5;
     private final int PORT_NUMBER = 8085;
 
     public ServerThread(String threadName){
@@ -68,6 +69,19 @@ public class ServerThread implements Runnable{
                 100, 3, RaceType.MATCH_RACE, 1, boats);
     }
 
+    /**
+     * @return A list of sample boat location messages
+     */
+    public List<Message> getTestBoatLocationMessages(){
+        List<Message> messages = new ArrayList<>();
+
+        messages.add(new BoatLocationMessage(1, 1, 100, 200, 231, 23));
+        messages.add(new BoatLocationMessage(2, 2, 400, 300, 211, 13));
+
+        return messages;
+    }
+
+
     public void run() {
         try{
             server = new StreamingServerSocket(PORT_NUMBER);
@@ -105,7 +119,7 @@ public class ServerThread implements Runnable{
                     try {
                         server.send(hb);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.print("");
                     }
                 }
             }, 0, HEARTBEAT_PERIOD);
@@ -120,10 +134,26 @@ public class ServerThread implements Runnable{
                     try {
                         server.send(statusMessage);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.print("");
                     }
                 }
             }, 100, RACE_STATUS_PERIOD);
+
+            t1.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    List<Message> messages = getTestBoatLocationMessages();
+
+                    for (Message m : messages){
+                        try {
+                            server.send(m);
+                        } catch (IOException e) {
+                            System.out.print("");
+                        }
+                    }
+
+                }
+            }, 100, BOAT_LOCATION_PERIOD);
 
         } catch (IOException e) {
             System.err.println(e.getMessage());
