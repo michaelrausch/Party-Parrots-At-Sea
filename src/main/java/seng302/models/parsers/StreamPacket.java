@@ -12,7 +12,7 @@ public class StreamPacket {
     private long timeStamp;
     private byte[] payload;
 
-    public StreamPacket(int type, long messageLength, long timeStamp, byte[] payload) {
+    StreamPacket(int type, long messageLength, long timeStamp, byte[] payload) {
         this.type = PacketType.assignPacketType(type);
         this.messageLength = messageLength;
         this.timeStamp = timeStamp;
@@ -20,11 +20,11 @@ public class StreamPacket {
 //        System.out.println("type = " + type);
         if (this.type == PacketType.OTHER){
             System.out.println("type = " + type);
-//     StreamParser.extractBoatLocation(payload);
+            StreamParser.parsePacket(this);
         }
     }
 
-    public PacketType getType() {
+    PacketType getType() {
         return type;
     }
 
@@ -32,11 +32,11 @@ public class StreamPacket {
         return messageLength;
     }
 
-    public byte[] getPayload() {
+    byte[] getPayload() {
         return payload;
     }
 
-    public long getTimeStamp() {
+    long getTimeStamp() {
         return timeStamp;
     }
 }

@@ -19,39 +19,51 @@ import java.util.Map;
  */
 public class StreamParser {
 
-    static void parseLine(StreamPacket packet) {
+    static void parsePacket(StreamPacket packet) {
         switch (packet.getType()){
             case HEARTBEAT:
                 extractHeartBeat(packet);
+                break;
             case RACE_STATUS:
                 extractRaceStatus(packet);
+                break;
             case DISPLAY_TEXT_MESSAGE:
                 extractDisplayMessage(packet);
+                break;
             case XML_MESSAGE:
                 extractXmlMessage(packet);
+                break;
             case RACE_START_STATUS:
                 extractRaceStartStatus(packet);
+                break;
             case YACHT_EVENT_CODE:
                 extractYachtEventCode(packet);
+                break;
             case YACHT_ACTION_CODE:
                 extractYachtActionCode(packet);
+                break;
             case CHATTER_TEXT:
                 extractChatterText(packet);
+                break;
             case BOAT_LOCATION:
                 extractBoatLocation(packet);
+                break;
             case MARK_ROUNDING:
                 extractMarkRounding(packet);
+                break;
             case COURSE_WIND:
                 extractCourseWind(packet);
+                break;
             case AVG_WIND:
                 extractAvgWind(packet);
+                break;
+            default:
+                System.out.println(packet.getType().toString());
         }
-
-
     }
 
     private static void extractHeartBeat(StreamPacket packet){
-
+        System.out.println(bytesToLong(packet.getPayload()));
     }
 
     private static void extractRaceStatus(StreamPacket packet){
