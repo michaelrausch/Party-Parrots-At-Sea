@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -61,16 +62,49 @@ public class StreamParser {
         }
     }
 
-    private static void extractHeartBeat(StreamPacket packet){
-        System.out.println(bytesToLong(packet.getPayload()));
+    private static void extractHeartBeat(StreamPacket packet) {
+        long heartbeat = bytesToLong(packet.getPayload());
+        System.out.println("Heartbeat: " + heartbeat);
+
     }
 
     private static void extractRaceStatus(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long currentTime = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long raceId = bytesToLong(Arrays.copyOfRange(payload,7,11));
+        int raceStatus = payload[11];
+        System.out.println("raceStatus = " + raceStatus);
+        long expectedStartTime = extractTimeStamp(Arrays.copyOfRange(payload,12,18), 6);
+        long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+        long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
+        int noBoats = payload[22];
+        int raceType = payload[23];
+        ArrayList<String> boatStatuses = new ArrayList<>();
+        for (int i = 0; i < noBoats; i++){
+            String boatStatus = "SourceID: " + bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
+            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
+            boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
+            boatStatus += "\nPenaltiesAwarded: " + (int)payload[29 + (i * 20)];
+            boatStatus += "\nPenaltiesServed: " + (int)payload[30 + (i * 20)];
+            boatStatus += "\nEstTimeAtNextMark: " + extractTimeStamp(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)), 6);
+            boatStatus += "\nEstTimeAtFinish: " + extractTimeStamp(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)), 6);
+            boatStatuses.add(boatStatus);
+        }
     }
 
     private static void extractDisplayMessage(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        int numOfLines = payload[3];
+        int totalLen = 0;
+        for (int i = 0; i < numOfLines; i++){
+            int lineNum = payload[4 + totalLen];
+            int textLength = payload[5 + totalLen];
+            byte[] messageTextBytes = Arrays.copyOfRange(payload,6 + totalLen,6 + textLength + totalLen);
+            String messageText = new String(messageTextBytes);
+            totalLen += 2 + textLength;
+        }
     }
 
     static void extractXmlMessage(StreamPacket packet){
@@ -112,19 +146,40 @@ public class StreamParser {
     }
 
     private static void extractRaceStartStatus(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long raceStartTime = extractTimeStamp(Arrays.copyOfRange(payload,9,15), 6);
+        long raceId = bytesToLong(Arrays.copyOfRange(payload,15,19));
+        int notificationType = payload[19];
     }
 
     private static void extractYachtEventCode(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long raceId = bytesToLong(Arrays.copyOfRange(payload,9,13));
+        long subjectId = bytesToLong(Arrays.copyOfRange(payload,13,17));
+        long incidentId = bytesToLong(Arrays.copyOfRange(payload,17,21));
+        int eventId = payload[21];
     }
 
     private static void extractYachtActionCode(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long subjectId = bytesToLong(Arrays.copyOfRange(payload,9,13));
+        long incidentId = bytesToLong(Arrays.copyOfRange(payload,13,17));
+        int eventId = payload[17];
+        System.out.println("eventId = " + eventId);
     }
 
     private static void extractChatterText(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        int messageType = payload[1];
+        int length = payload[2];
+        String message = new String(Arrays.copyOfRange(payload,3,3 + length));
     }
 
 
@@ -135,7 +190,7 @@ public class StreamParser {
         byte[] latBytes = Arrays.copyOfRange(payload,16,20);
         byte[] lonBytes = Arrays.copyOfRange(payload,20,24);
         byte[] boatIdBytes = Arrays.copyOfRange(payload,8,12);
-        extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
         long boatId = bytesToLong(boatIdBytes);
@@ -147,33 +202,66 @@ public class StreamParser {
 //            System.out.println("deviceType = " + (long)deviceType);
 //            System.out.println("seq = " + seq);
             //needs to be validated
-//            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
-//            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
+            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
+            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
         }
 
     }
 
 
     private static void extractMarkRounding(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long raceId = bytesToLong(Arrays.copyOfRange(payload,9,13));
+        long subjectId = bytesToLong(Arrays.copyOfRange(payload,13,17));
+        int boatStatus = payload[17];
+        int roundingSide = payload[18];
+        int markType = payload[19];
+        int markId = payload[20];
     }
 
     private static void extractCourseWind(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        int selectedWindId = payload[1];
+        int loopCount = payload[2];
+        ArrayList<String> windInfo = new ArrayList<>();
+        for (int i = 0; i < loopCount; i++){
+            String wind = "WindId: " + payload[3 + (20 * i)];
+            wind += "\nTime: " + extractTimeStamp(Arrays.copyOfRange(payload,4 + (20 * i),10 + (20 * i)), 6);
+            wind += "\nRaceId: " + bytesToLong(Arrays.copyOfRange(payload,10 + (20 * i),14 + (20 * i)));
+            wind += "\nWindDirection: " + bytesToLong(Arrays.copyOfRange(payload,14 + (20 * i),16 + (20 * i)));
+            wind += "\nWindSpeed: " + bytesToLong(Arrays.copyOfRange(payload,16 + (20 * i),18 + (20 * i)));
+            wind += "\nBestUpWindAngle: " + bytesToLong(Arrays.copyOfRange(payload,18 + (20 * i),20 + (20 * i)));
+            wind += "\nBestDownWindAngle: " + bytesToLong(Arrays.copyOfRange(payload,20 + (20 * i),22 + (20 * i)));
+            wind += "\nFlags: " + String.format("%8s", Integer.toBinaryString(payload[22 + (20 * i)] & 0xFF)).replace(' ', '0');
+            windInfo.add(wind);
+        }
     }
 
     private static void extractAvgWind(StreamPacket packet){
-
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long rawPeriod = bytesToLong(Arrays.copyOfRange(payload,7,9));
+        long rawSamplePeriod = bytesToLong(Arrays.copyOfRange(payload,9,11));
+        long period2 = bytesToLong(Arrays.copyOfRange(payload,11,13));
+        long speed2 = bytesToLong(Arrays.copyOfRange(payload,13,15));
+        long period3 = bytesToLong(Arrays.copyOfRange(payload,15,17));
+        long speed3 = bytesToLong(Arrays.copyOfRange(payload,17,19));
+        long period4 = bytesToLong(Arrays.copyOfRange(payload,19,21));
+        long speed4 = bytesToLong(Arrays.copyOfRange(payload,21,23));
     }
 
-    private static void extractTimeStamp(byte[] timeStampBytes, int noOfBytes){
+    private static long extractTimeStamp(byte[] timeStampBytes, int noOfBytes){
         long timeStamp = 0;
         long multiplier=1;
         for(int i = 0;i < noOfBytes;i++) {
             timeStamp += timeStampBytes[i]*multiplier;
             multiplier *= 256;
         }
-        System.out.println("timeStamp = " + timeStamp);
+        return timeStamp;
     }
 
     /**

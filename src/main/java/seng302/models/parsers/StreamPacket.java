@@ -18,8 +18,8 @@ public class StreamPacket {
         this.timeStamp = timeStamp;
         this.payload = payload;
 //        System.out.println("type = " + type);
-        if (this.type == PacketType.OTHER){
-            System.out.println("type = " + type);
+        //switch the packet type to deal with what ever specific packet you want to deal with
+        if (this.type == PacketType.AVG_WIND){
             StreamParser.parsePacket(this);
         }
     }
