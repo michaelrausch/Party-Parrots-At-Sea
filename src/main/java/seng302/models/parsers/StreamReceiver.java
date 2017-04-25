@@ -47,19 +47,19 @@ public class StreamReceiver {
                 //checking if it is the start of the packet
                 if(sync1 == 0x47 && sync2 == 0x83) {
                     int type = readByte();
+                    //No. of milliseconds since Jan 1st 1970
                     long timeStamp = bytesToLong(getBytes(6));
                     skipBytes(4);
                     long payloadLength = bytesToLong(getBytes(2));
-                    //No. of milliseconds since Jan 1st 1970
                     byte[] payload = getBytes((int) payloadLength);
                     Checksum checksum = new CRC32();
                     checksum.update(crcBuffer.toByteArray(), 0, crcBuffer.size());
                     long computedCrc = checksum.getValue();
                     long packetCrc = bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-                        System.out.println("message type: " + type);
-                        System.out.println("timeStamp = " + timeStamp);
-                        System.out.println("payload length: " + payloadLength);
+//                        System.out.println("message type: " + type);
+//                        System.out.println("timeStamp = " + timeStamp);
+//                        System.out.println("payload length: " + payloadLength);
                         packetBuffer.add(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         System.err.println("Packet has been dropped");
@@ -128,7 +128,8 @@ public class StreamReceiver {
                 return (int) (s1.getTimeStamp() - s2.getTimeStamp());
             }
         });
-        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
+        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, pq);
+//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
         sr.connect();
     }
 }

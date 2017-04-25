@@ -18,9 +18,22 @@ public class StreamPacket {
         this.timeStamp = timeStamp;
         this.payload = payload;
 //        System.out.println("type = " + type);
-        if (this.type == PacketType.BOAT_LOCATION){
-            StreamParser.extractBoatLocation(payload);
+        if (this.type == PacketType.OTHER){
+            System.out.println("type = " + type);
+//     StreamParser.extractBoatLocation(payload);
         }
+    }
+
+    public PacketType getType() {
+        return type;
+    }
+
+    public long getMessageLength() {
+        return messageLength;
+    }
+
+    public byte[] getPayload() {
+        return payload;
     }
 
     public long getTimeStamp() {

@@ -19,62 +19,112 @@ import java.util.Map;
  */
 public class StreamParser {
 
-    private static boolean isWithinTag;
-    public static ArrayList<Long> ids = new ArrayList<>();
+    static void parseLine(StreamPacket packet) {
+        switch (packet.getType()){
+            case HEARTBEAT:
+                extractHeartBeat(packet);
+            case RACE_STATUS:
+                extractRaceStatus(packet);
+            case DISPLAY_TEXT_MESSAGE:
+                extractDisplayMessage(packet);
+            case XML_MESSAGE:
+                extractXmlMessage(packet);
+            case RACE_START_STATUS:
+                extractRaceStartStatus(packet);
+            case YACHT_EVENT_CODE:
+                extractYachtEventCode(packet);
+            case YACHT_ACTION_CODE:
+                extractYachtActionCode(packet);
+            case CHATTER_TEXT:
+                extractChatterText(packet);
+            case BOAT_LOCATION:
+                extractBoatLocation(packet);
+            case MARK_ROUNDING:
+                extractMarkRounding(packet);
+            case COURSE_WIND:
+                extractCourseWind(packet);
+            case AVG_WIND:
+                extractAvgWind(packet);
+        }
 
-    static void parseLine(byte[] bytes) {
-        //TODO overhaul all of this to treat packets as appropriate
-        String line = new String(bytes);
-        if (line.startsWith("<")){
-            isWithinTag = true;
-        }
-//        System.out.println("line = ---------------------------------------------\n" + line);
-        if (isWithinTag) {
-//            try {
-//                Element node = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(line.getBytes())).getDocumentElement();
-//                if (node.getAttributes().getNamedItem("Type") != null) {
-//                    System.out.println(node.getAttributes().getNamedItem("Type") );
-//                    System.out.println(line);
-//                }
-//            } catch (Throwable e){
-////                e.printStackTrace();
-//            }
-        }
-        if (line.startsWith("</")) {
-            isWithinTag = false;
-        }
+
     }
 
-    static void extractBoatLocation(byte[] payload){
+    private static void extractHeartBeat(StreamPacket packet){
+
+    }
+
+    private static void extractRaceStatus(StreamPacket packet){
+
+    }
+
+    private static void extractDisplayMessage(StreamPacket packet){
+
+    }
+
+    private static void extractXmlMessage(StreamPacket packet){
+
+    }
+
+    private static void extractRaceStartStatus(StreamPacket packet){
+
+    }
+
+    private static void extractYachtEventCode(StreamPacket packet){
+
+    }
+
+    private static void extractYachtActionCode(StreamPacket packet){
+
+    }
+
+    private static void extractChatterText(StreamPacket packet){
+
+    }
+
+
+    static void extractBoatLocation(StreamPacket packet){
+        byte[] payload = packet.getPayload();
         byte deviceType = payload[15];
         byte[] seqBytes = Arrays.copyOfRange(payload,11,15);
         byte[] latBytes = Arrays.copyOfRange(payload,16,20);
         byte[] lonBytes = Arrays.copyOfRange(payload,20,24);
         byte[] boatIdBytes = Arrays.copyOfRange(payload,8,12);
-        extractTimeStamp(Arrays.copyOfRange(payload,1,7));
+        extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
         long boatId = bytesToLong(boatIdBytes);
         long lat = bytesToLong(latBytes);
         long lon = bytesToLong(lonBytes);
-        if (!ids.contains(boatId)) {
-            ids.add(boatId);
-        }
+
         if (boatId != 0){
-            System.out.println("boatId = " + boatId);
-            System.out.println("deviceType = " + (long)deviceType);
+//            System.out.println("boatId = " + boatId);
+//            System.out.println("deviceType = " + (long)deviceType);
 //            System.out.println("seq = " + seq);
             //needs to be validated
-            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
-            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
+//            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
+//            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
         }
 
     }
 
-    private static void extractTimeStamp(byte[] timeStampBytes){
+
+    private static void extractMarkRounding(StreamPacket packet){
+
+    }
+
+    private static void extractCourseWind(StreamPacket packet){
+
+    }
+
+    private static void extractAvgWind(StreamPacket packet){
+
+    }
+
+    private static void extractTimeStamp(byte[] timeStampBytes, int noOfBytes){
         long timeStamp = 0;
         long multiplier=1;
-        for(int i = 0;i < 6;i++) {
+        for(int i = 0;i < noOfBytes;i++) {
             timeStamp += timeStampBytes[i]*multiplier;
             multiplier *= 256;
         }
