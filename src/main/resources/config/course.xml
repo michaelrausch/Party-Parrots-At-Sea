@@ -7,56 +7,56 @@
             <mark>
                 <name>Start1</name>
                 <latitude>57.6703330</latitude>
-                <longitude>57.6703330</longitude>
+                <longitude>11.8278330</longitude>
             </mark>
             <mark>
                 <name>Start2</name>
-                <latitude>32.293771</latitude>
-                <longitude>-64.855242</longitude>
+                <latitude>57.6703330</latitude>
+                <longitude>11.8278330</longitude>
             </mark>
         </gate>
         <mark>
             <name>Mid Mark</name>
-            <latitude>32.293039</latitude>
-            <longitude>-64.843983</longitude>
+            <latitude>57.6675700</latitude>
+            <longitude>11.8359880</longitude>
         </mark>
         <gate>
             <name>Leeward Gate</name>
             <mark>
                 <name>Leeward Gate1</name>
-                <latitude>32.284680</latitude>
-                <longitude>-64.850045</longitude>
+                <latitude>57.6708220</latitude>
+                <longitude>11.8433900</longitude>
             </mark>
             <mark>
                 <name>Leeward Gate2</name>
-                <latitude>32.280164</latitude>
-                <longitude>-64.847591</longitude>
+                <latitude>57.6708220</latitude>
+                <longitude>11.8433900</longitude>
             </mark>
         </gate>
         <gate>
             <name>Windward Gate</name>
             <mark>
                 <name>Windward Gate1</name>
-                <latitude>32.309693</latitude>
-                <longitude>-64.835249</longitude>
+                <latitude>57.6650170</latitude>
+                <longitude>11.8279170</longitude>
             </mark>
             <mark>
                 <name>Windward Gate2</name>
-                <latitude>32.308046</latitude>
-                <longitude>-64.831785</longitude>
+                <latitude>57.6650170</latitude>
+                <longitude>11.8279170</longitude>
             </mark>
         </gate>
         <gate type="finish-line">
             <name>Finish</name>
             <mark>
                 <name>Finish1</name>
-                <latitude>32.317379</latitude>
-                <longitude>-64.839291</longitude>
+                <latitude>57.6715240</latitude>
+                <longitude>11.8444950</longitude>
             </mark>
             <mark>
                 <name>Finish2</name>
-                <latitude>32.317257</latitude>
-                <longitude>-64.836260</longitude>
+                <latitude>57.6715240</latitude>
+                <longitude>11.8444950</longitude>
             </mark>
         </gate>
     </marks>
