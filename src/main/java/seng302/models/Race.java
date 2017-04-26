@@ -9,6 +9,7 @@ import java.util.*;
  * Created by mra106 on 8/3/2017.
  */
 public class Race {
+
     private ArrayList<Boat> boats; // The boats in the race
     private ArrayList<Boat> finishingOrder; // The order in which the boats finish the race
     private HashMap<Boat, List> events = new HashMap<>(); // The events that occur in the race

@@ -2,10 +2,7 @@ package seng302.controllers;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -42,6 +39,7 @@ public class RaceViewController {
     @FXML
     private CanvasController includedCanvasController;
 
+    private ArrayList<Boat> startingBoats = new ArrayList<>();
     private boolean displayAnnotations;
     private boolean displayFps;
     private Timeline timerTimeline;
@@ -50,24 +48,29 @@ public class RaceViewController {
     private Race race;
 
     public void initialize() {
-        includedCanvasController.setup(this);
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
+        for (Boat boat : race.getBoats()) {
+            startingBoats.add(boat);
+        }
+//        try{
+//            initializeTimelines();
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
 
-        initializeTimer();
+        includedCanvasController.setup(this);
+        includedCanvasController.initializeCanvas();
+        //initializeTimer();
         initializeSettings();
-        try{
-            initializeTimelines();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
         double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
         windDirectionText.setText(String.format("%.1f°", windDirection));
         windArrowText.setRotate(windDirection);
+        includedCanvasController.timer.start();
     }
 
     private void initializeSettings(){
@@ -114,39 +117,39 @@ public class RaceViewController {
      */
     private void initializeTimelines() {
         HashMap<Boat, List> boat_events = race.getEvents();
-
         for (Boat boat : boat_events.keySet()) {
-            // x, y are the real time coordinates
-            DoubleProperty x = new SimpleDoubleProperty();
-            DoubleProperty y = new SimpleDoubleProperty();
-
-            List<KeyFrame> keyFrames = new ArrayList<>();
-            List<Event> events = boat_events.get(boat);
-
-            // iterates all events and convert each event to keyFrame, then add them into a list
-            for (Event event : events) {
-                if (event.getIsFinishingEvent()) {
-                    keyFrames.add(
-                            new KeyFrame(Duration.seconds(event.getTime()),
-                                    onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
-                                    new KeyValue(x, event.getThisMark().getLatitude()),
-                                    new KeyValue(y, event.getThisMark().getLongitude())
-                            )
-                    );
-                } else {
-                    keyFrames.add(
-                            new KeyFrame(Duration.seconds(event.getTime()),
-                                    onFinished ->{
-                                        handleEvent(event);
-                                        boat.setHeading(event.getBoatHeading());
-                                    },
-                                    new KeyValue(x, event.getThisMark().getLatitude()),
-                                    new KeyValue(y, event.getThisMark().getLongitude())
-                            )
-                    );
-                }
-            }
-            timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
+            startingBoats.add(boat);
+//            // x, y are the real time coordinates
+//            DoubleProperty x = new SimpleDoubleProperty();
+//            DoubleProperty y = new SimpleDoubleProperty();
+//
+//            List<KeyFrame> keyFrames = new ArrayList<>();
+//            List<Event> events = boat_events.get(boat);
+//
+//            // iterates all events and convert each event to keyFrame, then add them into a list
+//            for (Event event : events) {
+//                if (event.getIsFinishingEvent()) {
+//                    keyFrames.add(
+//                            new KeyFrame(Duration.seconds(event.getTime()),
+//                                    onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
+//                                    new KeyValue(x, event.getThisMark().getLatitude()),
+//                                    new KeyValue(y, event.getThisMark().getLongitude())
+//                            )
+//                    );
+//                } else {
+//                    keyFrames.add(
+//                            new KeyFrame(Duration.seconds(event.getTime()),
+//                                    onFinished ->{
+//                                        handleEvent(event);
+//                                        boat.setHeading(event.getBoatHeading());
+//                                    },
+//                                    new KeyValue(x, event.getThisMark().getLatitude()),
+//                                    new KeyValue(y, event.getThisMark().getLongitude())
+//                            )
+//                    );
+//                }
+//            }
+//            timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
         }
         setRaceDuration();
     }
@@ -276,5 +279,9 @@ public class RaceViewController {
 
     public Map<Boat, TimelineInfo> getTimelineInfos() {
         return timelineInfos;
+    }
+
+    public ArrayList<Boat> getStartingBoats(){
+        return startingBoats;
     }
 }
