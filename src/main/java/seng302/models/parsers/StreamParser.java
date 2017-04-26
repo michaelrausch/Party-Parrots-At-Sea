@@ -1,6 +1,8 @@
 package seng302.models.parsers;
 
 
+import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -13,13 +15,48 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by kre39 on 23/04/17.
  */
-public class StreamParser {
+public class StreamParser extends Thread{
 
+     public static ConcurrentHashMap<Long,Point3D> boatPositions = new ConcurrentHashMap<>();
      private static ArrayList<Long> boat_IDS = new ArrayList<>();
+     private String threadName;
+     private Thread t;
+
+     StreamParser(String threadName){
+        this.threadName = threadName;
+     }
+
+     public void run(){
+         try {
+             while (StreamReceiver.packetBuffer.size() <= 1) {
+                 Thread.sleep(1);
+             }
+             StreamPacket packet = StreamReceiver.packetBuffer.take();
+             while (packet != null){
+                 parsePacket(packet);
+                 Thread.sleep(10);
+                 packet = StreamReceiver.packetBuffer.take();
+             }
+         } catch (Exception e){
+             e.printStackTrace();
+         }
+     }
+
+    public void start () {
+        System.out.println("Starting " +  threadName );
+        if (t == null) {
+            t = new Thread (this, threadName);
+            t.start ();
+        }
+    }
+
      static void parsePacket(StreamPacket packet) {
         switch (packet.getType()){
             case HEARTBEAT:
@@ -65,7 +102,7 @@ public class StreamParser {
 
     private static void extractHeartBeat(StreamPacket packet) {
         long heartbeat = bytesToLong(packet.getPayload());
-        System.out.println("Heartbeat: " + heartbeat);
+//        System.out.println("Heartbeat: " + heartbeat);
 
     }
 
@@ -75,7 +112,7 @@ public class StreamParser {
         long currentTime = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
         long raceId = bytesToLong(Arrays.copyOfRange(payload,7,11));
         int raceStatus = payload[11];
-        System.out.println("raceStatus = " + raceStatus);
+//        System.out.println("raceStatus = " + raceStatus);
         long expectedStartTime = extractTimeStamp(Arrays.copyOfRange(payload,12,18), 6);
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
@@ -172,7 +209,7 @@ public class StreamParser {
         long subjectId = bytesToLong(Arrays.copyOfRange(payload,9,13));
         long incidentId = bytesToLong(Arrays.copyOfRange(payload,13,17));
         int eventId = payload[17];
-        System.out.println("eventId = " + eventId);
+//        System.out.println("eventId = " + eventId);
     }
 
     private static void extractChatterText(StreamPacket packet){
@@ -191,27 +228,26 @@ public class StreamParser {
         byte[] latBytes = Arrays.copyOfRange(payload,16,20);
         byte[] lonBytes = Arrays.copyOfRange(payload,20,24);
         byte[] boatIdBytes = Arrays.copyOfRange(payload,7,11);
+        byte[] headingBytes = Arrays.copyOfRange(payload,28,30);
         long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
         long boatId = bytesToLong(boatIdBytes);
         long lat = bytesToLong(latBytes);
         long lon = bytesToLong(lonBytes);
+        long heading = bytesToLong(headingBytes);
 
         if ((int)deviceType == 1){
-            if (!boat_IDS.contains(boatId)){
-                boat_IDS.add(boatId);
-            }
-            System.out.println("boatId = " + boatId);
-            System.out.println("deviceType = " + (long)deviceType);
-            System.out.println("seq = " + seq);
+//            System.out.println("boatId = " + boatId);
+//            System.out.println("deviceType = " + (long)deviceType);
+//            System.out.println("seq = " + seq);
             //needs to be validated
-            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
-            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
+            Point3D point = new Point3D(((180d * (double)lat)/Math.pow(2,31)),((180d *(double)lon)/Math.pow(2,31)),(double)heading);
+            boatPositions.putIfAbsent(boatId, point);
+            boatPositions.replace(boatId, point);
+//            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
+//            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
         }
-
-        System.out.println("boat_IDS = " + boat_IDS);
-        System.out.println("boat_IDS = " + boat_IDS.size());
     }
 
 

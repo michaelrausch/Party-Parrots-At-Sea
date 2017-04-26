@@ -27,7 +27,8 @@ public class TeamsParser extends FileParser {
 				String name = element.getElementsByTagName("name").item(0).getTextContent();
 				String alias = element.getElementsByTagName("alias").item(0).getTextContent();
 				double velocity = Double.valueOf(element.getElementsByTagName("velocity").item(0).getTextContent());
-				Boat boat = new Boat(name, velocity, alias);
+				int id = Integer.valueOf(element.getElementsByTagName("id").item(0).getTextContent());
+				Boat boat = new Boat(name, velocity, alias, id);
 				return boat;
 			} else {
 				throw new NoSuchElementException("Cannot generate a boat by given node");

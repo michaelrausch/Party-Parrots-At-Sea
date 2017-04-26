@@ -12,21 +12,46 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 
-public class StreamReceiver {
+public class StreamReceiver extends Thread {
     private InputStream stream;
     private Socket host;
     private  ByteArrayOutputStream crcBuffer;
-    public PriorityBlockingQueue<StreamPacket> packetBuffer;
+    private Thread t;
+    private String threadName;
+    public static PriorityBlockingQueue<StreamPacket> packetBuffer;
 
-    public StreamReceiver(String hostAddress, int hostPort, PriorityBlockingQueue packetBuffer) {
+    public StreamReceiver(String hostAddress, int hostPort, String threadName) {
+        this.threadName = threadName;
         try {
             host = new Socket(hostAddress, hostPort);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        this.packetBuffer = packetBuffer;
     }
+
+    public void run(){
+        PriorityBlockingQueue<StreamPacket> pq = new PriorityBlockingQueue<>(256, new Comparator<StreamPacket>() {
+            @Override
+            public int compare(StreamPacket s1, StreamPacket s2) {
+                return (int) (s1.getTimeStamp() - s2.getTimeStamp());
+            }
+        });
+        packetBuffer = pq;
+        connect();
+        StreamParser streamParser = new StreamParser("TestThread2");
+
+        streamParser.start();
+    }
+
+    public void start () {
+        System.out.println("Starting " +  threadName );
+        if (t == null) {
+            t = new Thread (this, threadName);
+            t.start ();
+        }
+    }
+
 
     public void connect(){
         try {
@@ -121,15 +146,13 @@ public class StreamReceiver {
     }
 
 
+
+
     public static void main(String[] args) {
-        PriorityBlockingQueue<StreamPacket> pq = new PriorityBlockingQueue<>(256, new Comparator<StreamPacket>() {
-            @Override
-            public int compare(StreamPacket s1, StreamPacket s2) {
-                return (int) (s1.getTimeStamp() - s2.getTimeStamp());
-            }
-        });
-        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, pq);
-//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
-        sr.connect();
+
+        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
+        //StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
+        sr.start();
+
     }
 }

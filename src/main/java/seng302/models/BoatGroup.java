@@ -117,6 +117,15 @@ public class BoatGroup extends Group{
         moveBy(dx, dy, rotation);
     }
 
+    public void setDestination (double newXValue, double newYValue, double rotation) {
+        this.pixelVelocityX = (newXValue - super.getLayoutX()) / expectedUpdateInterval;
+        this.pixelVelocityY = (newYValue - super.getLayoutY()) / expectedUpdateInterval;
+        //this.destinationX = newXValue;
+        //this.destinationY = newYValue;
+        this.rotationalGoal = rotation;
+        this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+    }
+
     public void setDestination (double newXValue, double newYValue) {
         this.pixelVelocityX = (newXValue - super.getLayoutX()) / expectedUpdateInterval;
         this.pixelVelocityY = (newYValue - super.getLayoutY()) / expectedUpdateInterval;
@@ -173,5 +182,9 @@ public class BoatGroup extends Group{
         super.getChildren().get(1).setVisible(false);
         super.getChildren().get(2).setVisible(false);
         super.getChildren().get(3).setVisible(false);
+    }
+
+    public Boat getBoat() {
+        return boat;
     }
 }

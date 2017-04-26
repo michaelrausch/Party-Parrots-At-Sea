@@ -25,7 +25,7 @@ import java.util.*;
 /**
  * Created by ptg19 on 29/03/17.
  */
-public class RaceViewController {
+public class RaceViewController extends Thread{
     @FXML
     private VBox positionVbox;
     @FXML
@@ -48,6 +48,7 @@ public class RaceViewController {
     private Race race;
 
     public void initialize() {
+
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
@@ -72,6 +73,8 @@ public class RaceViewController {
         windArrowText.setRotate(windDirection);
         includedCanvasController.timer.start();
     }
+
+
 
     private void initializeSettings(){
         displayAnnotations = true;

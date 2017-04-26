@@ -1,5 +1,6 @@
 package seng302.models;
 
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
@@ -19,6 +20,8 @@ public class Boat {
     private double heading;
     private int markLastPast;
     private String shortName;
+    private int id;
+    private Point2D currentPos;
 
     public Boat(String teamName) {
         this.teamName = teamName;
@@ -26,6 +29,16 @@ public class Boat {
         this.lat = 0.0;
         this.lon = 0.0;
         this.shortName = "";
+        currentPos = null;
+    }
+
+    public boolean isSamePos(Point2D newPos){
+        if(newPos.equals(currentPos)){
+            return true;
+        } else {
+            currentPos = newPos;
+            return false;
+        }
     }
 
     /**
@@ -35,10 +48,13 @@ public class Boat {
      * @param boatVelocity The speed of the boat in meters/second
      * @param shortName    A shorter version of the teams name
      */
-    public Boat(String teamName, double boatVelocity, String shortName) {
+    public Boat(String teamName, double boatVelocity, String shortName, int id) {
         this.teamName = teamName;
         this.velocity = boatVelocity;
         this.shortName = shortName;
+        this.id = id;
+        currentPos = null;
+
     }
 
     /**
@@ -133,4 +149,7 @@ public class Boat {
         return this.shortName;
     }
 
+    public int getId() {
+        return id;
+    }
 }

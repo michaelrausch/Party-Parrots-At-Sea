@@ -4,6 +4,7 @@ import javafx.animation.*;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -18,6 +19,8 @@ import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
+import seng302.models.parsers.StreamParser;
+import seng302.models.parsers.StreamReceiver;
 
 import java.sql.Time;
 import java.util.*;
@@ -132,8 +135,12 @@ public class CanvasController {
         //}catch (Exception e) {
         //    e.printStackTrace();
         //}
-        timer = new AnimationTimer() {
 
+        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
+//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
+        sr.start();
+
+        timer = new AnimationTimer() {
             private int countdown = 60;
             private int[] currentRaceMarker = {1, 1, 1, 1, 1, 1};
             List<Mark> marks = raceViewController.getRace().getCourse();
@@ -144,44 +151,56 @@ public class CanvasController {
                 boolean descending;
                 boolean leftToRight;
                 int boatIndex = 0;
+
                 Mark nextMark;
-                if (countdown == 0) {
+                //if (countdown == 0) {
                     for (BoatGroup boatGroup : boatGroups) {
-                        if (currentRaceMarker[boatIndex] < marks.size()) {
-                            if (currentRaceMarker[boatIndex] == 6) {
-                                int debugLine = 4;
-                            }
+                        //if (currentRaceMarker[boatIndex] < marks.size()) {
+                            //if (currentRaceMarker[boatIndex] == 6) {
+                            //    int debugLine = 4;
+                            //}
                             double xb4 = boatGroup.getLayoutX();
                             double yb4 = boatGroup.getLayoutY();
                             nextMark = marks.get(currentRaceMarker[boatIndex]);
 
-                            descending = nextMark.getY() > boatGroup.getLayoutY();
-                            leftToRight = nextMark.getX() < boatGroup.getLayoutX();
+                            //descending = nextMark.getY() > boatGroup.getLayoutY();
+                            //leftToRight = nextMark.getX() < boatGroup.getLayoutX();
 
-                            boatGroup.updatePosition(1000 / 60);
-//                            Point2D p = latLonToXY(lat, lon);
-//                            boatGroup.setDestination(p.getX(), p.getY());
-                            if (descending && nextMark.getY() < boatGroup.getLayoutY()) {
-                                currentRaceMarker[boatIndex]++;
-                                boatGroup.setDestination(
-                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
-                                );
-                            } else if (!descending && nextMark.getY() > boatGroup.getLayoutY()) {
-                                currentRaceMarker[boatIndex]++;
-                                boatGroup.setDestination(
-                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
-                                );
-                            } else if (leftToRight && nextMark.getX() > boatGroup.getLayoutX()) {
-                                currentRaceMarker[boatIndex]++;
-                                boatGroup.setDestination(
-                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
-                                );
-                            } else if (!leftToRight && nextMark.getX() < boatGroup.getLayoutX()) {
-                                currentRaceMarker[boatIndex]++;
-                                boatGroup.setDestination(
-                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
-                                );
+                            boatGroup.updatePosition(1000 / 6);
+                            Point3D p = StreamParser.boatPositions.get((long)boatGroup.getBoat().getId());
+                            //System.out.println("boatGroup = " + boatGroup.getBoat().getId());
+                            //System.out.println("StreamParser.boatPositions.toString() = " + StreamParser.boatPositions.toString());
+                            if (p != null) {
+                                Point2D p2d = latLonToXY(p.getX(), p.getY());
+                                System.out.println("p2d = " + p2d);
+                                if (!boatGroup.getBoat().isSamePos(p2d)) {
+                                    //System.out.println("p.toString() = " + p.toString());
+                                    double heading = 360.0 / 0xffff * p.getZ();
+                                    System.out.println("heading = " + heading);
+                                    boatGroup.setDestination(p.getX(), p.getY(), heading);
+                                }
                             }
+//                            if (descending && nextMark.getY() < boatGroup.getLayoutY()) {
+//                                currentRaceMarker[boatIndex]++;
+//                                boatGroup.setDestination(
+//                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+//                                );
+//                            } else if (!descending && nextMark.getY() > boatGroup.getLayoutY()) {
+//                                currentRaceMarker[boatIndex]++;
+//                                boatGroup.setDestination(
+//                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+//                                );
+//                            } else if (leftToRight && nextMark.getX() > boatGroup.getLayoutX()) {
+//                                currentRaceMarker[boatIndex]++;
+//                                boatGroup.setDestination(
+//                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+//                                );
+//                            } else if (!leftToRight && nextMark.getX() < boatGroup.getLayoutX()) {
+//                                currentRaceMarker[boatIndex]++;
+//                                boatGroup.setDestination(
+//                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
+//                                );
+//                            }
 
                             double xnew = boatGroup.getLayoutX();
                             double ynew = boatGroup.getLayoutY();
@@ -190,18 +209,19 @@ public class CanvasController {
                             raceFinished = false;
                             boatIndex++;
                         }
-                    }
-                    if (raceFinished) {
-                        System.out.println("DONZEO LADS");
-                        this.stop();
-                    }
-                } else {
-                    countdown--;
-                }
+                    //}
+                    //if (raceFinished) {
+                    //    System.out.println("DONZEO LADS");
+                    //    this.stop();
+                    //}
+                //} else {
+                //    countdown--;
+                //}
             }
         };
-        for (Mark m : raceViewController.getRace().getCourse())
+        for (Mark m : raceViewController.getRace().getCourse()) {
             System.out.println(m.getName());
+        }
         //timer.start();
     }
 
@@ -261,7 +281,7 @@ public class CanvasController {
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
             boatGroup.moveBoatTo(startingX, startingY, 0d);
-            boatGroup.setDestination(firstMarkX, firstMarkY);
+//            boatGroup.setDestination(firstMarkX, firstMarkY);
             boatGroup.forceRotation();
             group.getChildren().add(boatGroup);
             boatGroups.add(boatGroup);
@@ -515,6 +535,7 @@ public class CanvasController {
     }
 
     private Point2D findScaledXY (Mark unscaled) {
+        System.out.println("unscaled.getName() = " + unscaled.getName());
         return findScaledXY (minLatPoint.getLatitude(), minLatPoint.getLongitude(),
                              unscaled.getLatitude(), unscaled.getLongitude());
     }
@@ -527,15 +548,36 @@ public class CanvasController {
 
         angleFromReference = Mark.calculateHeadingRad(latA, lonA, latB, lonB);
         distanceFromReference = Mark.calculateDistance(latA, lonA, latB, lonB);
-
-        if (angleFromReference > (Math.PI / 2)) {
-            angleFromReference = (Math.PI * 2) - angleFromReference;
-            xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-        } else {
+        if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
+            //System.out.println("1");
             xAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+        } else if (angleFromReference >= 0) {
+            //System.out.println("2");
+            angleFromReference = angleFromReference - Math.PI / 2;
+            xAxisLocation += (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            yAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+        } else if (angleFromReference < 0 && angleFromReference >= -Math.PI / 2) {
+            //System.out.println("3");
+            System.out.println(distanceFromReference);
+            angleFromReference = Math.abs(angleFromReference);
+            System.out.println(Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+        } else {
+            //System.out.println("4");
+            angleFromReference = Math.abs(angleFromReference) - Math.PI / 2;
+            xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            yAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         }
-        yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-
+//        if (angleFromReference > (Math.PI / 2)) {
+//            angleFromReference = (Math.PI * 2) - angleFromReference;
+//            xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+//        } else {
+//            xAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+//        }
+//        yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+        //System.out.println(xAxisLocation + " *** " + yAxisLocation);
         return new Point2D(xAxisLocation, yAxisLocation);
     }
 
