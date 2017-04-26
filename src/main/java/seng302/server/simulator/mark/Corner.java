@@ -8,6 +8,10 @@ public class Corner {
 	private RoundingType roundingType;
 	private int zoneSize; // size of the zone around a mark in boat-lengths.
 
+	// TODO: this shouldn't be used in the future!!!!
+	private double bearingToNextCorner, distanceToNextCorner;
+	private Corner nextCorner;
+
 	public Corner(int seqID, CompoundMark compoundMark, RoundingType roundingType, int zoneSize) {
 		this.seqID = seqID;
 		this.compoundMark = compoundMark;
@@ -55,5 +59,31 @@ public class Corner {
 
 	public void setZoneSize(int zoneSize) {
 		this.zoneSize = zoneSize;
+	}
+
+
+	// TODO: next six setters & getters shouldn't be used in the future.
+	public double getBearingToNextCorner() {
+		return bearingToNextCorner;
+	}
+
+	public void setBearingToNextCorner(double bearingToNextCorner) {
+		this.bearingToNextCorner = bearingToNextCorner;
+	}
+
+	public double getDistanceToNextCorner() {
+		return distanceToNextCorner;
+	}
+
+	public void setDistanceToNextCorner(double distanceToNextCorner) {
+		this.distanceToNextCorner = distanceToNextCorner;
+	}
+
+	public Corner getNextCorner() {
+		return nextCorner;
+	}
+
+	public void setNextCorner(Corner nextCorner) {
+		this.nextCorner = nextCorner;
 	}
 }

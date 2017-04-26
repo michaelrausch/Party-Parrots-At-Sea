@@ -4,18 +4,16 @@ package seng302.server.simulator.mark;
  * An abstract class to represent general marks
  * Created by Haoming Yin (hyi25) on 17/3/17.
  */
-public class Mark {
+public class Mark extends Position {
 
     private int seqID;
     private String name;
-    private double lat;
-    private double lng;
-    //private int sourceID;
+    private int sourceID;
 
-    public Mark(String name, double lat, double lng) {
+    public Mark(String name, double lat, double lng, int sourceID) {
+        super(lat, lng);
         this.name = name;
-        this.lat = lat;
-        this.lng = lng;
+        this.sourceID = sourceID;
     }
 
     /**
@@ -24,7 +22,7 @@ public class Mark {
      */
     @Override
     public String toString() {
-        return String.format("Mark: %d (%s), lat: %f, lng: %f", seqID, name, lat, lng);
+        return String.format("Mark%d: %s, source: %d, lat: %f, lng: %f", seqID, name, sourceID, lat, lng);
     }
 
     public int getSeqID() {
@@ -43,20 +41,12 @@ public class Mark {
         this.name = name;
     }
 
-    public double getLat() {
-        return lat;
+    public int getSourceID() {
+        return sourceID;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
-    public double getLng() {
-        return lng;
-    }
-
-    public void setLng(double lng) {
-        this.lng = lng;
+    public void setSourceID(int sourceID) {
+        this.sourceID = sourceID;
     }
 }
 

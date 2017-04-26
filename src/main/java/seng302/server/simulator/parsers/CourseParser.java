@@ -29,7 +29,7 @@ public class CourseParser extends FileParser {
 	}
 
 	// TODO: should handle error / invalid file gracefully
-	public List<Corner> getCourse() {
+	protected List<Corner> getCourse() {
 		compoundMarksMap = getCompoundMarks(doc.getDocumentElement());
 		List<Corner> corners = new ArrayList<>();
 		NodeList cMarksSequence = doc.getElementsByTagName("Corner");
@@ -104,8 +104,9 @@ public class CourseParser extends FileParser {
 			String name = e.getAttribute("Name");
 			Double lat = Double.valueOf(e.getAttribute("TargetLat"));
 			Double lng = Double.valueOf(e.getAttribute("TargetLng"));
+			Integer sourceId = Integer.valueOf(e.getAttribute("SourceID"));
 
-			Mark mark = new Mark(name, lat, lng);
+			Mark mark = new Mark(name, lat, lng, sourceId);
 			mark.setSeqID(seqId);
 
 			return mark;
