@@ -123,7 +123,29 @@ public class BoatGroup extends Group{
         //this.destinationX = newXValue;
         //this.destinationY = newYValue;
         this.rotationalGoal = rotation;
-        this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+//        if (super.getLayoutY() >= newYValue && super.getLayoutX() <= newXValue)
+//            rotationalGoal = 90 - rotationalGoal;
+//        else if (super.getLayoutY() < newYValue && super.getLayoutX() <= newXValue)
+//            rotationalGoal = 90 + rotationalGoal;
+//        else if (super.getLayoutY() >= newYValue && super.getLayoutX() > newXValue)
+//            rotationalGoal = 270 + rotationalGoal;
+//        else
+//            rotationalGoal = 270 - rotationalGoal;
+//        if (Math.abs(360 - rotationalGoal + currentRotation) < Math.abs(rotationalGoal - currentRotation)) {
+//            System.out.println("ROTATE");
+//            this.rotationalVelocity = (360 - rotationalGoal + currentRotation) / expectedUpdateInterval;
+//        } else {
+//            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+//        }
+        if (Math.abs(rotationalGoal - currentRotation) > 180) {
+            if (rotationalGoal - currentRotation >= 0) {
+                this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
+            } else {
+                this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
+            }
+        } else {
+            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+        }
     }
 
     public void setDestination (double newXValue, double newYValue) {
@@ -146,10 +168,12 @@ public class BoatGroup extends Group{
             rotationalGoal = 270 + rotationalGoal;
         else
             rotationalGoal = 270 - rotationalGoal;
-        // TODO: 25/04/2017 cir27 - Verify this logic is correct. Want to produce the shortest path.
-        if (Math.abs(360 - rotationalGoal + currentRotation) < Math.abs(rotationalGoal - currentRotation)) {
-            System.out.println("ROTATE");
-            this.rotationalVelocity = (360 - rotationalGoal + currentRotation) / expectedUpdateInterval;
+        if (Math.abs(rotationalGoal - currentRotation) > 180) {
+            if (rotationalGoal - currentRotation >= 0) {
+                this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
+            } else {
+                this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
+            }
         } else {
             this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
         }
