@@ -53,8 +53,8 @@ public class CanvasController {
     private Mark minLonPoint;
     private Mark maxLatPoint;
     private Mark maxLonPoint;
-    private int referencePointX;
-    private int referencePointY;
+    private double referencePointX;
+    private double referencePointY;
     private double metersToPixels;
 
     public AnimationTimer timer;
@@ -303,6 +303,13 @@ public class CanvasController {
                 drawGateMark((GateMark) mark);
             }
         }
+        System.out.println("MIN/MAX POINTS");
+        System.out.println(minLatPoint.getName() + " " +  minLatPoint.getX() + " " + minLatPoint.getY());
+        System.out.println(maxLatPoint.getName() + " " +  maxLatPoint.getX() + " " + maxLatPoint.getY());
+        System.out.println(minLonPoint.getName() + " " +  minLonPoint.getX() + " " + minLonPoint.getY());
+        System.out.println(maxLonPoint.getName() + " " +  maxLonPoint.getX() + " " + maxLonPoint.getY());
+        System.out.println(referencePointX);
+        System.out.println(referencePointY);
     }
 
     /**
@@ -312,6 +319,7 @@ public class CanvasController {
      */
     private void drawSingleMark(SingleMark singleMark, Color color) {
         gc.setFill(color);
+        System.out.println("DRAWING " + singleMark.getName() + " at "  + singleMark.getX() + ", " + singleMark.getY());
         gc.fillOval(singleMark.getX(), singleMark.getY(),MARK_SIZE,MARK_SIZE);
     }
 
@@ -388,6 +396,16 @@ public class CanvasController {
             Collections.reverse(sortedPoints);
         minLonPoint = sortedPoints.get(0);
         maxLonPoint = sortedPoints.get(sortedPoints.size()-1);
+        System.out.println("ALL POINTS");
+        for (Mark m : sortedPoints)
+        {
+            System.out.println(m.getName() + " " +  m.getLatitude() + " " + m.getLongitude());
+        }
+        System.out.println("MIN/MAX POINTS");
+        System.out.println(minLatPoint.getName() + " " +  minLatPoint.getLatitude() + " " + minLatPoint.getLongitude());
+        System.out.println(maxLatPoint.getName() + " " +  maxLatPoint.getLatitude() + " " + maxLatPoint.getLongitude());
+        System.out.println(minLonPoint.getName() + " " +  minLonPoint.getLatitude() + " " + minLonPoint.getLongitude());
+        System.out.println(maxLonPoint.getName() + " " +  maxLonPoint.getLatitude() + " " + maxLonPoint.getLongitude());
     }
 
     /**
@@ -399,33 +417,41 @@ public class CanvasController {
     private void calculateReferencePointLocation (double minLonToMaxLon) {
         Mark referencePoint = minLatPoint;
         double referenceAngle;
-        double mapWidth = canvas.getWidth();
-        double mapHeight = canvas.getHeight();
+        //double mapWidth = canvas.getWidth();
+        //double mapHeight = canvas.getHeight();
 
         if (scaleDirection == ScaleDirection.HORIZONTAL) {
-            referenceAngle = Mark.calculateHeadingRad(referencePoint, minLonPoint) - (Math.PI * (3/4));
-            referencePointX = LHS_BUFFER + (int) Math.round(distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint));
+            System.out.println("HORIZONTAL");
+            System.out.println("ref angle " + Mark.calculateHeadingRad(referencePoint, minLonPoint));
+            //referenceAngle = Mark.calculateHeadingRad(referencePoint, minLonPoint) - (Math.PI * (3/4));
+            referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
+            referencePointX = LHS_BUFFER + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
 
-            referenceAngle = Mark.calculateHeadingRad(referencePoint, maxLatPoint);
-            if (referenceAngle > (Math.PI / 2)) {
-                referenceAngle = (Math.PI * 2) - referenceAngle;
-            }
-            referencePointY  = (int) Math.round(mapHeight - (TOP_BUFFER + BOT_BUFFER));
-            referencePointY -= (int) Math.round(distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint));
-            referencePointY  = (int) Math.round(referencePointY / 2d);
+            //referenceAngle = Mark.calculateHeadingRad(referencePoint, maxLatPoint);
+            //if (referenceAngle > Math.PI) {
+            //    referenceAngle = (Math.PI * 2) - referenceAngle;
+            //}
+            referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, maxLatPoint));
+            referencePointY  = CANVAS_HEIGHT - (TOP_BUFFER + BOT_BUFFER);
+            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
+            referencePointY  = referencePointY / 2;
             referencePointY += TOP_BUFFER;
-            referencePointY += (int) Math.round(distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint));
+            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
         } else {
-            referencePointY = (int) Math.round(mapHeight - BOT_BUFFER);
+            System.out.println("VERTICAL");
+            referencePointY = CANVAS_HEIGHT - BOT_BUFFER;
 
-            referenceAngle = (Math.PI * 2) - Mark.calculateHeadingRad(referencePoint, minLonPoint);
+            //referenceAngle = (Math.PI * 2) - Mark.calculateHeadingRad(referencePoint, minLonPoint);
+            referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
 
             referencePointX  = LHS_BUFFER;
-            referencePointX += (int) Math.round(distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint));
-            referencePointX += (int) Math.round(((mapWidth - (LHS_BUFFER + RHS_BUFFER)) - (minLonToMaxLon * distanceScaleFactor)) / 2);
+            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
+            referencePointX += ((CANVAS_WIDTH - (LHS_BUFFER + RHS_BUFFER)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
         }
-        referencePoint.setX(referencePointX);
-        referencePoint.setY(referencePointY);
+        referencePointX = Math.round(referencePointX);
+        referencePointY = Math.round(referencePointY);
+        referencePoint.setX((int) referencePointX);
+        referencePoint.setY((int) referencePointY);
     }
 
     /**
@@ -433,9 +459,10 @@ public class CanvasController {
      * Returns the max horizontal distance of the map.
      */
     private double scaleRaceExtremities () {
-        double vertAngle = Mark.calculateHeadingRad(minLatPoint, maxLatPoint);
-        if (vertAngle > Math.PI)
-            vertAngle = (2 * Math.PI) - vertAngle;
+        //double vertAngle = Mark.calculateHeadingRad(minLatPoint, maxLatPoint);
+        double vertAngle = Math.abs(Mark.calculateHeadingRad(minLatPoint, maxLatPoint));
+//        if (vertAngle > Math.PI)
+//            vertAngle = (2 * Math.PI) - vertAngle;
         double vertDistance = Math.cos(vertAngle) * Mark.calculateDistance(minLatPoint, maxLatPoint);
 
         double horiAngle = Mark.calculateHeadingRad(minLonPoint, maxLonPoint);
@@ -445,10 +472,10 @@ public class CanvasController {
             horiAngle = horiAngle - (Math.PI / 2);
         double horiDistance = Math.cos(horiAngle) * Mark.calculateDistance(minLonPoint, maxLonPoint);
 
-        double vertScale = (canvas.getHeight() - (TOP_BUFFER + BOT_BUFFER)) / vertDistance;
+        double vertScale = (CANVAS_HEIGHT - (TOP_BUFFER + BOT_BUFFER)) / vertDistance;
 
-        if ((horiDistance * vertScale) > (canvas.getWidth() - (RHS_BUFFER + LHS_BUFFER))) {
-            distanceScaleFactor = (canvas.getWidth() - (RHS_BUFFER + LHS_BUFFER)) / horiDistance;
+        if ((horiDistance * vertScale) > (CANVAS_WIDTH - (RHS_BUFFER + LHS_BUFFER))) {
+            distanceScaleFactor = (CANVAS_WIDTH - (RHS_BUFFER + LHS_BUFFER)) / horiDistance;
             scaleDirection = ScaleDirection.HORIZONTAL;
         } else {
             distanceScaleFactor = vertScale;
@@ -495,21 +522,18 @@ public class CanvasController {
     private Point2D findScaledXY (double latA, double lonA, double latB, double lonB) {
         double distanceFromReference;
         double angleFromReference;
-        int yAxisLocation;
-        int xAxisLocation;
+        int xAxisLocation = (int) referencePointX;
+        int yAxisLocation = (int) referencePointY;
 
         angleFromReference = Mark.calculateHeadingRad(latA, lonA, latB, lonB);
         distanceFromReference = Mark.calculateDistance(latA, lonA, latB, lonB);
 
         if (angleFromReference > (Math.PI / 2)) {
             angleFromReference = (Math.PI * 2) - angleFromReference;
-            xAxisLocation  = referencePointX;
             xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         } else {
-            xAxisLocation  = referencePointX;
             xAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         }
-        yAxisLocation  = referencePointY;
         yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
 
         return new Point2D(xAxisLocation, yAxisLocation);
