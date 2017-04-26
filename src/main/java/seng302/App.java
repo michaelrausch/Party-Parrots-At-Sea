@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import seng302.server.ServerThread;
+import seng302.server.simulator.Simulator;
 
 public class App extends Application
 {
@@ -20,6 +21,7 @@ public class App extends Application
 
     public static void main(String[] args) {
         new ServerThread("Racevision Test Server");
+        new Thread(new Simulator(1000)).run();
         launch(args);
     }
 }
