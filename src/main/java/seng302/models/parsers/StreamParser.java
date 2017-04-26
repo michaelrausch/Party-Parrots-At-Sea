@@ -96,7 +96,8 @@ public class StreamParser extends Thread{
                 extractAvgWind(packet);
                 break;
             default:
-                System.out.println(packet.getType().toString());
+                break;
+                //System.out.println(packet.getType().toString());
         }
     }
 

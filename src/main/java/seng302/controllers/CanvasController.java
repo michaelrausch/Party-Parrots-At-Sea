@@ -37,7 +37,6 @@ public class CanvasController {
     private ResizableCanvas canvas;
     private Group group;
     private GraphicsContext gc;
-    private List<BoatGroup> boatGroups = new ArrayList<>();
 
     private final int MARK_SIZE     = 10;
     private final int BUFFER_SIZE   = 25;
@@ -154,6 +153,7 @@ public class CanvasController {
 
                 Mark nextMark;
                 //if (countdown == 0) {
+                //System.out.println("called the at");
                     for (RaceObject raceObject : raceObjects) {
                         //if (currentRaceMarker[boatIndex] < marks.size()) {
                             //if (currentRaceMarker[boatIndex] == 6) {
@@ -166,18 +166,23 @@ public class CanvasController {
                             //descending = nextMark.getY() > boatGroup.getLayoutY();
                             //leftToRight = nextMark.getX() < boatGroup.getLayoutX();
 
+
                             raceObject.updatePosition(1000 / 60);
                             for (int id : raceObject.getRaceIds()) {
-                                if (StreamParser.boatPositions.containsKey(id)) {
-                                    Point3D p = StreamParser.boatPositions.get((long) id);
-                                    Point2D p2d = latLonToXY(p.getX(), p.getY());
-                                    //System.out.println("p2d = " + p2d);
+                                //System.out.println("id = " + id);
+                                if (id != 0 && StreamParser.boatPositions.size() > 0) {
+                                    boolean test = StreamParser.boatPositions.containsKey(id);
+                                    if (StreamParser.boatPositions.containsKey((long) id)) {
+                                        Point3D p = StreamParser.boatPositions.get((long) id);
+                                        Point2D p2d = latLonToXY(p.getX(), p.getY());
+                                        //System.out.println("p2d = " + p2d);
                                         //System.out.println("p.toString() = " + p.toString());
-                                    double heading = 360.0 / 0xffff * p.getZ();
+                                        double heading = 360.0 / 0xffff * p.getZ();
                                         //System.out.println("heading = " + heading);
-                                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, id);
+                                        raceObject.setDestination(p2d.getX(), p2d.getY(), heading, id);
+                                    }
+                                    StreamParser.boatPositions.remove((long) id);
                                 }
-                                StreamParser.boatPositions.remove((long) id);
                             }
                             //Point3D p = StreamParser.boatPositions.get((long) raceObject.getRaceIds()[0]);
                             //System.out.println("boatGroup = " + boatGroup.getBoat().getId());
@@ -292,10 +297,11 @@ public class CanvasController {
     private void drawBoats() {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
         List<Boat> boats  = raceViewController.getStartingBoats();
-        Double startingX  = group.getChildren().get(0).getLayoutX();
-        Double startingY  = group.getChildren().get(0).getLayoutY();
-        Double firstMarkX = group.getChildren().get(1).getLayoutX();
-        Double firstMarkY = group.getChildren().get(1).getLayoutY();
+        System.out.println("raceObjects " + raceObjects);
+        Double startingX  = raceObjects.get(0).getLayoutX();
+        Double startingY  = raceObjects.get(0).getLayoutY();
+        Double firstMarkX = raceObjects.get(1).getLayoutX();
+        Double firstMarkY = raceObjects.get(1).getLayoutY();
 
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
@@ -303,7 +309,7 @@ public class CanvasController {
             boatGroup.setDestination(firstMarkX, firstMarkY);
             boatGroup.forceRotation();
             group.getChildren().add(boatGroup);
-            boatGroups.add(boatGroup);
+            raceObjects.add(boatGroup);
 //            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
     }
@@ -529,14 +535,16 @@ public class CanvasController {
      */
     private void givePointsXY() {
         //Point2D canvasLocation;
-//        List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
-        Set<Mark> unqiuePoints = new HashSet<>(raceViewController.getRace().getCourse());
-        System.out.println("unqiuePoints = " + unqiuePoints);
+        List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
+        List<Mark> processed = new ArrayList<>();
+        //Set<Mark> unqiuePoints = new HashSet<>(raceViewController.getRace().getCourse());
+        //System.out.println("unqiuePoints = " + unqiuePoints);
         RaceObject markGroup;
 
-        for (Mark mark : unqiuePoints) {
-            if (mark.getMarkType() != MarkType.SINGLE_MARK) {
-                GateMark gateMark = (GateMark) mark;
+        for (Mark mark : allPoints) {
+            if (!processed.contains(mark)) {
+                if (mark.getMarkType() != MarkType.SINGLE_MARK) {
+                    GateMark gateMark = (GateMark) mark;
 //                canvasLocation = findScaledXY(gateMark.getSingleMark1());
 //                gateMark.getSingleMark1().setX((int) canvasLocation.getX());
 //                gateMark.getSingleMark1().setY((int) canvasLocation.getY());
@@ -545,14 +553,17 @@ public class CanvasController {
 //                gateMark.getSingleMark2().setX((int) canvasLocation.getX());
 //                gateMark.getSingleMark2().setY((int) canvasLocation.getY());
 
-                markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
-                group.getChildren().add(markGroup);
-            }
-            else {
+                    markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
+                    group.getChildren().add(markGroup);
+                    raceObjects.add(markGroup);
+                } else {
 //                canvasLocation = findScaledXY(mark);
 //                mark.setX((int) canvasLocation.getX());
 //                mark.setY((int) canvasLocation.getY());
-                markGroup = new MarkGroup(mark, findScaledXY(mark));
+                    markGroup = new MarkGroup(mark, findScaledXY(mark));
+                    group.getChildren().add(markGroup);
+                }
+                processed.add(mark);
             }
         }
     }

@@ -28,6 +28,10 @@ public class MarkGroup extends RaceObject {
     private Point2D[] nodeDestinations;
 
     public MarkGroup (Mark mark, Point2D... points) {
+//        for (Point2D p : points) {
+//            System.out.println("p.getX() = " + p.getX());
+//            System.out.println("p.getY() = " + p.getY());
+//        }
         marks.add(mark);
         mainMark = mark;
         Color color = Color.BLACK;
@@ -36,43 +40,75 @@ public class MarkGroup extends RaceObject {
         } else if (mark.getName().equals("Finish")){
             color = Color.RED;
         }
+        System.out.println("HERE ARE THE CHILDREN LOL");
         if (mark.getMarkType() == MarkType.SINGLE_MARK) {
             super.getChildren().add(new Circle(0, 0, MARK_RADIUS, color));
+//            System.out.println("SingleMark?");
+//            System.out.println("super.getChildren().get(0).getLayoutX() = " + super.getChildren().get(0).getLayoutX());
+//            System.out.println("super.getChildren().get(0).getLayoutY() = " + super.getChildren().get(0).getLayoutY());
         } else {
             marks.add(((GateMark) mark).getSingleMark1());
             marks.add(((GateMark) mark).getSingleMark2());
             super.getChildren().add(
                     new Circle(
-                            (points[1].getX() - points[0].getX() / 2),
-                            (points[1].getY() - points[0].getY() / 2),
+                            (points[1].getX() - points[0].getX()) / 2d,
+                            (points[1].getY() - points[0].getY()) / 2d,
                             MARK_RADIUS,
                             color
                     )
             );
+//            super.getChildren().add(new Circle(0, 0, MARK_RADIUS, color));
+//            super.getChildren().get(0).setLayoutX((points[1].getX() - points[0].getX()) / 2d);
+//            super.getChildren().get(0).setLayoutY((points[1].getY() - points[0].getY()) / 2d);
+//            System.out.println("!!!!!!!!!!!!!!!!!");
+//            System.out.println((points[1].getX() - points[0].getX()) / 2d);
+//            System.out.println((points[1].getY() - points[0].getY()) / 2d);
+//            System.out.println(super.getChildren().get(0));
             super.getChildren().add(
                     new Circle(
-                            -(points[1].getX() - points[0].getX() / 2),
-                            -(points[1].getY() - points[0].getY() / 2),
+                            -(points[1].getX() - points[0].getX()) / 2d,
+                            -(points[1].getY() - points[0].getY()) / 2d,
                             MARK_RADIUS,
                             color
                     )
             );
+//            super.getChildren().add(new Circle(0, 0, MARK_RADIUS, color));
+//            super.getChildren().get(1).setLayoutX(-(points[1].getX() - points[0].getX()) / 2d);
+//            super.getChildren().get(1).setLayoutY(-(points[1].getY() - points[0].getY()) / 2d);
             Line line = new Line(
-                    0,
-                    0,
-                    points[1].getX() - points[0].getX(),
-                    points[1].getY() - points[0].getY()
+                    (points[1].getX() - points[0].getX()) / 2d,
+                    (points[1].getY() - points[0].getY()) / 2d,
+                    -(points[1].getX() - points[0].getX()) / 2d,
+                    -(points[1].getY() - points[0].getY()) / 2d
             );
             line.setStrokeWidth(LINE_THICKNESS);
+            line.setStroke(color);
             if (mark.getMarkType() == MarkType.OPEN_GATE) {
                 line.getStrokeDashArray().addAll(DASHED_GAP_LEN, DASHED_LINE_LEN);
             }
             super.getChildren().add(line);
-            nodePixelVelocitiesX = new double[2];
-            nodePixelVelocitiesY = new double[2];
-            nodeDestinations     = new Point2D[2];
+            nodePixelVelocitiesX = new double[]{0d,0d};
+            nodePixelVelocitiesY = new double[]{0d,0d};
+            nodeDestinations     = new Point2D[]{
+                    new Point2D(super.getChildren().get(0).getLayoutX(), super.getChildren().get(0).getLayoutY()),
+                    new Point2D(super.getChildren().get(1).getLayoutX(), super.getChildren().get(1).getLayoutY())
+            };
+//            nodeDestinations = new Point2D[]{new Point2D(0,0), new Point2D(0,0)};
+//            System.out.println("super.getChildren().get(0).getLayoutX() = " + super.getChildren().get(0).getLayoutX());
+//            System.out.println("super.getChildren().get(0).getLayoutY() = " + super.getChildren().get(0).getLayoutY());
+//            System.out.println("super.getChildren().get(1).getLayoutX() = " + super.getChildren().get(1).getLayoutX());
+//            System.out.println("super.getChildren().get(1).getLayoutY() = " + super.getChildren().get(1).getLayoutY());
         }
         moveTo(points[0].getX(), points[0].getY());
+//        System.out.println("OKAY HERE IS A MARK");
+//        System.out.println("super.getLayoutX() = " + super.getLayoutX());
+//        System.out.println("super.getLayoutY() = " + super.getLayoutY());
+//        System.out.println("super.getChildren().get(0).getLayoutX() = " + super.getChildren().get(0).getLayoutX());
+//        System.out.println("super.getChildren().get(0).getLayoutY() = " + super.getChildren().get(0).getLayoutY());
+//        pixelVelocityX = 0;
+//        pixelVelocityY = 0;
+//        rotationalVelocity = 0;
+//        rotationalGoal = 0;
     }
 
     public void setDestination (double x, double y, double rotation, int... raceIds) {
@@ -118,13 +154,14 @@ public class MarkGroup extends RaceObject {
 
     public void rotateTo (double rotation) {
         super.getTransforms().clear();
-        super.getTransforms().add(
-                new Rotate(
-                        rotation,
-                        super.getChildren().get(1).getLayoutX() - super.getChildren().get(0).getLayoutX(),
-                        super.getChildren().get(1).getLayoutY() - super.getChildren().get(0).getLayoutY()
-                )
-        );
+//        super.getTransforms().add(
+//                new Rotate(
+//                        rotation,
+//                        super.getChildren().get(1).getLayoutX() - super.getChildren().get(0).getLayoutX(),
+//                        super.getChildren().get(1).getLayoutY() - super.getChildren().get(0).getLayoutY()
+//                )
+//        );
+        super.getTransforms().add(new Rotate(rotation, 0 , 0));
     }
 
     public void updatePosition (double timeInterval) {
@@ -137,7 +174,7 @@ public class MarkGroup extends RaceObject {
 
     public void moveGroupBy (double x, double y, double rotation) {
         super.setLayoutX(super.getLayoutX() + x);
-        super.setLayoutY(super.getOpacity() + y);
+        super.setLayoutY(super.getLayoutY() + y);
         rotateTo(rotation + currentRotation);
     }
 

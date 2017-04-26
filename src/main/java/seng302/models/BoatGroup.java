@@ -7,6 +7,9 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by CJIRWIN on 25/04/2017.
  */
@@ -21,10 +24,11 @@ public class BoatGroup extends RaceObject{
     private static final double BOAT_WIDTH = 10d;
     //Time between sections of race - Should be changed to 200 for actual program.
     private static double expectedUpdateInterval = 200;
-    private static int WAKE_FRAME_INTERVAL = 40;
+    private static int WAKE_FRAME_INTERVAL = 80;
 
     private Boat boat;
     private int wakeCounter = WAKE_FRAME_INTERVAL;
+    private List<Wake> wakes = new ArrayList<>();
 
     public BoatGroup (Boat boat, Color color){
         this.boat = boat;
@@ -107,21 +111,40 @@ public class BoatGroup extends RaceObject{
             rotation = rotationalVelocity * timeInterval;
         }
         moveGroupBy(dx, dy, rotation);
-        for (Node wake : super.getChildren().subList(4, super.getChildren().size())) {
-            if (!((Wake) wake).updatePosition(timeInterval))
+//        if (super.getChildren().size() > 3) {
+//            for (Node wake : super.getChildren().subList(4, super.getChildren().size())) {
+//                if (!((Wake) wake).updatePosition(timeInterval))
+//                    super.getChildren().remove(wake);
+//            }
+//        }
+        for (Wake wake : wakes) {
+            if (wake.updatePosition(timeInterval)) {
                 super.getChildren().remove(wake);
+            }
         }
         if (wakeCounter-- == 0) {
             wakeCounter = WAKE_FRAME_INTERVAL;
-            super.getChildren().add(
-                    new Wake(
-                            super.getLayoutX(), super.getLayoutY(), pixelVelocityX, pixelVelocityY
-                    )
-            );
+            if (pixelVelocityX > 0 && pixelVelocityY > 0) {
+//                super.getChildren().add(
+//                        new Wake(
+//                                super.getLayoutX() + BOAT_HEIGHT, super.getLayoutY() + BOAT_HEIGHT, pixelVelocityX, pixelVelocityY
+//                        )
+//                );
+                Wake wake = new Wake(
+                        super.getLayoutX(),
+                        super.getLayoutY(),
+                        pixelVelocityX,
+                        pixelVelocityY
+                );
+                super.getChildren().add(wake);
+                wakes.add(wake);
+            }
+
         }
     }
 
     public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
+        //System.out.println("MADE IT");
         if (hasRaceId(raceIds)) {
             this.pixelVelocityX = (newXValue - super.getLayoutX()) / expectedUpdateInterval;
             this.pixelVelocityY = (newYValue - super.getLayoutY()) / expectedUpdateInterval;
