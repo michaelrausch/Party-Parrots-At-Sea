@@ -11,8 +11,6 @@ public abstract class Mark {
     private double latitude;
     private double longitude;
     private int id;
-    Integer xValue;
-    Integer yValue;
 
     /**
      * Create a mark instance by passing its name and type
@@ -125,22 +123,6 @@ public abstract class Mark {
 
     public double getLongitude() {
         return longitude;
-    }
-
-    public int getX () {
-        return xValue;
-    }
-
-    public int getY () {
-        return yValue;
-    }
-
-    public void setX (int x) {
-        this.xValue = x;
-    }
-
-    public void setY (int y) {
-        this.yValue = y;
     }
 
     public int getId() {

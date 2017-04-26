@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
@@ -15,10 +16,8 @@ import javafx.util.Pair;
 import seng302.models.Boat;
 import seng302.models.BoatGroup;
 import seng302.models.Colors;
-import seng302.models.mark.GateMark;
-import seng302.models.mark.Mark;
-import seng302.models.mark.MarkType;
-import seng302.models.mark.SingleMark;
+import seng302.models.RaceObject;
+import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.StreamReceiver;
 
@@ -59,6 +58,7 @@ public class CanvasController {
     private double referencePointX;
     private double referencePointY;
     private double metersToPixels;
+    private List<RaceObject> raceObjects = new ArrayList<>();
 
     public AnimationTimer timer;
 
@@ -154,39 +154,51 @@ public class CanvasController {
 
                 Mark nextMark;
                 //if (countdown == 0) {
-                    for (BoatGroup boatGroup : boatGroups) {
+                    for (RaceObject raceObject : raceObjects) {
                         //if (currentRaceMarker[boatIndex] < marks.size()) {
                             //if (currentRaceMarker[boatIndex] == 6) {
                             //    int debugLine = 4;
                             //}
-                            double xb4 = boatGroup.getLayoutX();
-                            double yb4 = boatGroup.getLayoutY();
-                            nextMark = marks.get(currentRaceMarker[boatIndex]);
+                            //double xb4 = boatGroup.getLayoutX();
+                            //double yb4 = boatGroup.getLayoutY();
+                            //nextMark = marks.get(currentRaceMarker[boatIndex]);
 
                             //descending = nextMark.getY() > boatGroup.getLayoutY();
                             //leftToRight = nextMark.getX() < boatGroup.getLayoutX();
 
-                            boatGroup.updatePosition(1000 / 60);
-                            Point3D p = StreamParser.boatPositions.get((long)boatGroup.getBoat().getId());
+                            raceObject.updatePosition(1000 / 60);
+                            for (int id : raceObject.getRaceIds()) {
+                                if (StreamParser.boatPositions.containsKey(id)) {
+                                    Point3D p = StreamParser.boatPositions.get((long) id);
+                                    Point2D p2d = latLonToXY(p.getX(), p.getY());
+                                    //System.out.println("p2d = " + p2d);
+                                        //System.out.println("p.toString() = " + p.toString());
+                                    double heading = 360.0 / 0xffff * p.getZ();
+                                        //System.out.println("heading = " + heading);
+                                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, id);
+                                }
+                                StreamParser.boatPositions.remove((long) id);
+                            }
+                            //Point3D p = StreamParser.boatPositions.get((long) raceObject.getRaceIds()[0]);
                             //System.out.println("boatGroup = " + boatGroup.getBoat().getId());
                             //System.out.println("StreamParser.boatPositions.toString() = " + StreamParser.boatPositions.toString());
-                            if (p != null) {
-                                Point2D p2d = latLonToXY(p.getX(), p.getY());
-                                //System.out.println("p2d = " + p2d);
-                                if (!boatGroup.isSamePos(p2d)) {
-                                    //System.out.println("p.toString() = " + p.toString());
-                                    double heading = 360.0 / 0xffff * p.getZ();
-                                    //System.out.println("heading = " + heading);
-
-
-
-                                    boatGroup.setDestination(p2d.getX(), p2d.getY(), heading);
+//                            if (p != null) {
+//                                Point2D p2d = latLonToXY(p.getX(), p.getY());
+//                                //System.out.println("p2d = " + p2d);
+//                                if (!boatGroup.isSamePos(p2d)) {
+//                                    //System.out.println("p.toString() = " + p.toString());
+//                                    double heading = 360.0 / 0xffff * p.getZ();
+//                                    //System.out.println("heading = " + heading);
+//
+//
+//
+//                                    boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, boatGroup.getRaceIds()[0]);
 
 
 
                                     //boatGroup.setDestination(p2d.getX(), p2d.getY());
-                                }
-                            }
+                              //  }
+                            //}
 
 //                            if (descending && nextMark.getY() < boatGroup.getLayoutY()) {
 //                                currentRaceMarker[boatIndex]++;
@@ -208,14 +220,14 @@ public class CanvasController {
 //                                boatGroup.setDestination(
 //                                        marks.get(currentRaceMarker[boatIndex]).getX(), marks.get(currentRaceMarker[boatIndex]).getY()
 //                                );
-//                            }
 
-                            double xnew = boatGroup.getLayoutX();
-                            double ynew = boatGroup.getLayoutY();
-                            double dx = xnew - xb4;
-                            double dy = ynew -yb4;
-                            raceFinished = false;
-                            boatIndex++;
+
+//                            double xnew = boatGroup.getLayoutX();
+//                            double ynew = boatGroup.getLayoutY();
+//                            double dx = xnew - xb4;
+//                            double dy = ynew -yb4;
+//                            raceFinished = false;
+//                            boatIndex++;
                         }
                     //}
                     //if (raceFinished) {
@@ -280,11 +292,10 @@ public class CanvasController {
     private void drawBoats() {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
         List<Boat> boats  = raceViewController.getStartingBoats();
-        List<Mark> marks  = raceViewController.getRace().getCourse();
-        Double startingX  = (double) marks.get(0).getX();
-        Double startingY  = (double) marks.get(0).getY();
-        Double firstMarkX = (double) marks.get(1).getX();
-        Double firstMarkY = (double) marks.get(1).getY();
+        Double startingX  = group.getChildren().get(0).getLayoutX();
+        Double startingY  = group.getChildren().get(0).getLayoutY();
+        Double firstMarkX = group.getChildren().get(1).getLayoutX();
+        Double firstMarkY = group.getChildren().get(1).getLayoutY();
 
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
@@ -324,67 +335,67 @@ public class CanvasController {
      */
     private void drawCourse() {
         fitToCanvas();
-        for (Mark mark : raceViewController.getRace().getCourse()) {
-            if (mark.getMarkType() == MarkType.SINGLE_MARK) {
-                drawSingleMark((SingleMark) mark, Color.BLACK);
-            } else {
-                drawGateMark((GateMark) mark);
-            }
-        }
-        System.out.println("MIN/MAX POINTS");
-        System.out.println(minLatPoint.getName() + " " +  minLatPoint.getX() + " " + minLatPoint.getY());
-        System.out.println(maxLatPoint.getName() + " " +  maxLatPoint.getX() + " " + maxLatPoint.getY());
-        System.out.println(minLonPoint.getName() + " " +  minLonPoint.getX() + " " + minLonPoint.getY());
-        System.out.println(maxLonPoint.getName() + " " +  maxLonPoint.getX() + " " + maxLonPoint.getY());
-        System.out.println(referencePointX);
-        System.out.println(referencePointY);
+//        for (Mark mark : raceViewController.getRace().getCourse()) {
+//            if (mark.getMarkType() == MarkType.SINGLE_MARK) {
+//                drawSingleMark((SingleMark) mark, Color.BLACK);
+//            } else {
+//                drawGateMark((GateMark) mark);
+//            }
+//        }
+//        System.out.println("MIN/MAX POINTS");
+//        System.out.println(minLatPoint.getName() + " " +  minLatPoint.getX() + " " + minLatPoint.getY());
+//        System.out.println(maxLatPoint.getName() + " " +  maxLatPoint.getX() + " " + maxLatPoint.getY());
+//        System.out.println(minLonPoint.getName() + " " +  minLonPoint.getX() + " " + minLonPoint.getY());
+//        System.out.println(maxLonPoint.getName() + " " +  maxLonPoint.getX() + " " + maxLonPoint.getY());
+//        System.out.println(referencePointX);
+//        System.out.println(referencePointY);
     }
 
-    /**
-     * Draw a given mark on canvas
-     *
-     * @param singleMark
-     */
-    private void drawSingleMark(SingleMark singleMark, Color color) {
-        gc.setFill(color);
-        System.out.println("DRAWING " + singleMark.getName() + " at "  + singleMark.getX() + ", " + singleMark.getY());
-        gc.fillOval(singleMark.getX(), singleMark.getY(),MARK_SIZE,MARK_SIZE);
-    }
-
-    /**
-     * Draw a gate mark which contains two single marks
-     *
-     * @param gateMark
-     */
-    private void drawGateMark(GateMark gateMark) {
-        Color color = Color.BLUE;
-
-        if (gateMark.getName().equals("Start")){
-            color = Color.GREEN;
-        }
-
-        if (gateMark.getName().equals("Finish")){
-            color = Color.RED;
-        }
-
-        drawSingleMark(gateMark.getSingleMark1(), color);
-        drawSingleMark(gateMark.getSingleMark2(), color);
-
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.save();
-        gc.setStroke(color);
-        if (gateMark.getMarkType() == MarkType.OPEN_GATE)
-            gc.setLineDashes(3, 5);
-
-        gc.setLineWidth(2);
-        gc.strokeLine(
-                gateMark.getSingleMark1().getX() + MARK_SIZE / 2,
-                gateMark.getSingleMark1().getY() + MARK_SIZE / 2,
-                gateMark.getSingleMark2().getX() + MARK_SIZE / 2,
-                gateMark.getSingleMark2().getY() + MARK_SIZE / 2
-        );
-        gc.restore();
-    }
+//    /**
+//     * Draw a given mark on canvas
+//     *
+//     * @param singleMark
+//     */
+//    private void drawSingleMark(SingleMark singleMark, Color color) {
+//        gc.setFill(color);
+//        System.out.println("DRAWING " + singleMark.getName() + " at "  + singleMark.getX() + ", " + singleMark.getY());
+//        gc.fillOval(singleMark.getX(), singleMark.getY(),MARK_SIZE,MARK_SIZE);
+//    }
+//
+//    /**
+//     * Draw a gate mark which contains two single marks
+//     *
+//     * @param gateMark
+//     */
+//    private void drawGateMark(GateMark gateMark) {
+//        Color color = Color.BLUE;
+//
+//        if (gateMark.getName().equals("Start")){
+//            color = Color.GREEN;
+//        }
+//
+//        if (gateMark.getName().equals("Finish")){
+//            color = Color.RED;
+//        }
+//
+//        drawSingleMark(gateMark.getSingleMark1(), color);
+//        drawSingleMark(gateMark.getSingleMark2(), color);
+//
+//        GraphicsContext gc = canvas.getGraphicsContext2D();
+//        gc.save();
+//        gc.setStroke(color);
+//        if (gateMark.getMarkType() == MarkType.OPEN_GATE)
+//            gc.setLineDashes(3, 5);
+//
+//        gc.setLineWidth(2);
+//        gc.strokeLine(
+//                gateMark.getSingleMark1().getX() + MARK_SIZE / 2,
+//                gateMark.getSingleMark1().getY() + MARK_SIZE / 2,
+//                gateMark.getSingleMark2().getX() + MARK_SIZE / 2,
+//                gateMark.getSingleMark2().getY() + MARK_SIZE / 2
+//        );
+//        gc.restore();
+//    }
 
     /**
      * Calculates x and y location for every marker that fits it to the canvas the race will be drawn on.
@@ -478,8 +489,8 @@ public class CanvasController {
         }
         referencePointX = Math.round(referencePointX);
         referencePointY = Math.round(referencePointY);
-        referencePoint.setX((int) referencePointX);
-        referencePoint.setY((int) referencePointY);
+//        referencePoint.setX((int) referencePointX);
+//        referencePoint.setY((int) referencePointY);
     }
 
     /**
@@ -517,27 +528,31 @@ public class CanvasController {
      * are scaled according to the distanceScaleFactor variable.
      */
     private void givePointsXY() {
-        Point2D canvasLocation;
-        List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
+        //Point2D canvasLocation;
+//        List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
+        Set<Mark> unqiuePoints = new HashSet<>(raceViewController.getRace().getCourse());
+        System.out.println("unqiuePoints = " + unqiuePoints);
+        RaceObject markGroup;
 
-        for (Mark mark : allPoints) {
+        for (Mark mark : unqiuePoints) {
             if (mark.getMarkType() != MarkType.SINGLE_MARK) {
                 GateMark gateMark = (GateMark) mark;
+//                canvasLocation = findScaledXY(gateMark.getSingleMark1());
+//                gateMark.getSingleMark1().setX((int) canvasLocation.getX());
+//                gateMark.getSingleMark1().setY((int) canvasLocation.getY());
+//
+//                canvasLocation = findScaledXY(gateMark.getSingleMark2());
+//                gateMark.getSingleMark2().setX((int) canvasLocation.getX());
+//                gateMark.getSingleMark2().setY((int) canvasLocation.getY());
 
-                canvasLocation = findScaledXY(gateMark.getSingleMark1());
-                gateMark.getSingleMark1().setX((int) canvasLocation.getX());
-                gateMark.getSingleMark1().setY((int) canvasLocation.getY());
-
-                canvasLocation = findScaledXY(gateMark.getSingleMark2());
-                gateMark.getSingleMark2().setX((int) canvasLocation.getX());
-                gateMark.getSingleMark2().setY((int) canvasLocation.getY());
+                markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
+                group.getChildren().add(markGroup);
             }
-            if (mark.getMarkType() == MarkType.CLOSED_GATE)
-                ((GateMark) mark).assignXYCentered();
             else {
-                canvasLocation = findScaledXY(mark);
-                mark.setX((int) canvasLocation.getX());
-                mark.setY((int) canvasLocation.getY());
+//                canvasLocation = findScaledXY(mark);
+//                mark.setX((int) canvasLocation.getX());
+//                mark.setY((int) canvasLocation.getY());
+                markGroup = new MarkGroup(mark, findScaledXY(mark));
             }
         }
     }

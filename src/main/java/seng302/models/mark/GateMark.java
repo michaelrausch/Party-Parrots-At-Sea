@@ -48,15 +48,4 @@ public class GateMark extends Mark {
         return (this.getSingleMark1().getLongitude());
     }
 
-    public void assignXYCentered () {
-        System.out.println("POSSIBLE GOOF " + xValue + " " + yValue);
-        System.out.println(singleMark1.getX() + " " + singleMark1.getY());
-        System.out.println(singleMark2.getX() + " " + singleMark2.getY());
-        double dx = singleMark2.getX() - singleMark1.getX();
-        System.out.println("dx + " + dx);
-        double dy = singleMark2.getY() - singleMark1.getY();
-        xValue = (int) Math.round(singleMark1.getX() + dx / 2);
-        yValue = (int) Math.round(singleMark1.getY() + dy / 2);
-        System.out.println("PROBABLE GAAF " + xValue + " " + yValue);
-    }
 }

@@ -20,9 +20,11 @@ public class BoatGroup extends RaceObject{
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
     //Time between sections of race - Should be changed to 200 for actual program.
-    private static double expectedUpdateInterval = 2000;
+    private static double expectedUpdateInterval = 200;
+    private static int WAKE_FRAME_INTERVAL = 40;
 
     private Boat boat;
+    private int wakeCounter = WAKE_FRAME_INTERVAL;
 
     public BoatGroup (Boat boat, Color color){
         this.boat = boat;
@@ -60,11 +62,7 @@ public class BoatGroup extends RaceObject{
         velocityObject.setY(VELOCITY_Y_OFFSET);
         velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
 
-        wake.setLayoutX(0);
-        wake.setLayoutY(0);
-        wake.relocate(wake.getLayoutX(), wake.getLayoutY());
-
-        super.getChildren().addAll(boatPoly, wake, teamNameObject, velocityObject);
+        super.getChildren().addAll(boatPoly, teamNameObject, velocityObject);
     }
 
     private void initChildren (Color color) {
@@ -78,10 +76,10 @@ public class BoatGroup extends RaceObject{
      * @param dx The amount to move the X coordinate by
      * @param dy The amount to move the Y coordinate by
      */
-    void moveBy(double dx, double dy, double rotation) {
+    public void moveGroupBy(double dx, double dy, double rotation) {
         super.setLayoutX(super.getLayoutX() + dx);
         super.setLayoutY(super.getLayoutY() + dy);
-        rotateBoat(rotation);
+        rotateTo(currentRotation + rotation);
     }
 
     /**
@@ -90,8 +88,7 @@ public class BoatGroup extends RaceObject{
      * @param y The Y coordinate to move the boat to
      */
     public void moveTo (double x, double y, double rotation) {
-        super.currentRotation = 0;
-        rotateBoat(rotation);
+        rotateTo(rotation);
         moveTo(x, y);
     }
 
@@ -109,98 +106,77 @@ public class BoatGroup extends RaceObject{
         } else if (rotationalGoal < currentRotation && rotationalVelocity < 0) {
             rotation = rotationalVelocity * timeInterval;
         }
-        moveBy(dx, dy, rotation);
-    }
-
-    public void setDestination (double newXValue, double newYValue, double rotation) {
-        this.pixelVelocityX = (newXValue - super.getLayoutX()) / expectedUpdateInterval;
-        this.pixelVelocityY = (newYValue - super.getLayoutY()) / expectedUpdateInterval;
-        //this.destinationX = newXValue;
-        //this.destinationY = newYValue;
-        this.rotationalGoal = rotation;
-//        if (super.getLayoutY() >= newYValue && super.getLayoutX() <= newXValue)
-//            rotationalGoal = 90 - rotationalGoal;
-//        else if (super.getLayoutY() < newYValue && super.getLayoutX() <= newXValue)
-//            rotationalGoal = 90 + rotationalGoal;
-//        else if (super.getLayoutY() >= newYValue && super.getLayoutX() > newXValue)
-//            rotationalGoal = 270 + rotationalGoal;
-//        else
-//            rotationalGoal = 270 - rotationalGoal;
-//        if (Math.abs(360 - rotationalGoal + currentRotation) < Math.abs(rotationalGoal - currentRotation)) {
-//            System.out.println("ROTATE");
-//            this.rotationalVelocity = (360 - rotationalGoal + currentRotation) / expectedUpdateInterval;
-//        } else {
-//            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
-//        }
-        if (Math.abs(rotationalGoal - currentRotation) > 180) {
-            if (rotationalGoal - currentRotation >= 0) {
-                this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
-            } else {
-                this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
-            }
-        } else {
-            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+        moveGroupBy(dx, dy, rotation);
+        for (Node wake : super.getChildren().subList(4, super.getChildren().size())) {
+            if (!((Wake) wake).updatePosition(timeInterval))
+                super.getChildren().remove(wake);
+        }
+        if (wakeCounter-- == 0) {
+            wakeCounter = WAKE_FRAME_INTERVAL;
+            super.getChildren().add(
+                    new Wake(
+                            super.getLayoutX(), super.getLayoutY(), pixelVelocityX, pixelVelocityY
+                    )
+            );
         }
     }
 
-    public void setDestination (double newXValue, double newYValue) {
-        this.pixelVelocityX = (newXValue - super.getLayoutX()) / expectedUpdateInterval;
-        this.pixelVelocityY = (newYValue - super.getLayoutY()) / expectedUpdateInterval;
-        //this.destinationX = newXValue;
-        //this.destinationY = newYValue;
-        this.rotationalGoal = Math.abs(
-                Math.toDegrees(
-                        Math.atan(
-                                (newYValue - super.getLayoutY()) / (newXValue - super.getLayoutX())
-                        )
-                )
-        );
-        if (super.getLayoutY() >= newYValue && super.getLayoutX() <= newXValue)
-            rotationalGoal = 90 - rotationalGoal;
-        else if (super.getLayoutY() < newYValue && super.getLayoutX() <= newXValue)
-            rotationalGoal = 90 + rotationalGoal;
-        else if (super.getLayoutY() >= newYValue && super.getLayoutX() > newXValue)
-            rotationalGoal = 270 + rotationalGoal;
-        else
-            rotationalGoal = 270 - rotationalGoal;
-        if (Math.abs(rotationalGoal - currentRotation) > 180) {
-            if (rotationalGoal - currentRotation >= 0) {
-                this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
+    public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
+        if (hasRaceId(raceIds)) {
+            this.pixelVelocityX = (newXValue - super.getLayoutX()) / expectedUpdateInterval;
+            this.pixelVelocityY = (newYValue - super.getLayoutY()) / expectedUpdateInterval;
+            this.rotationalGoal = rotation;
+            if (Math.abs(rotationalGoal - currentRotation) > 180) {
+                if (rotationalGoal - currentRotation >= 0) {
+                    this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
+                } else {
+                    this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
+                }
             } else {
-                this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
+                this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
             }
-        } else {
-            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
         }
     }
 
-    public void rotateBoat (double rotationDeg) {
-        currentRotation += rotationDeg;
+    public void setDestination (double newXValue, double newYValue, int... raceIDs) {
+        if (hasRaceId(raceIDs)) {
+            double rotation = Math.abs(
+                    Math.toDegrees(
+                            Math.atan(
+                                    (newYValue - super.getLayoutY()) / (newXValue - super.getLayoutX())
+                            )
+                    )
+            );
+            if (super.getLayoutY() >= newYValue && super.getLayoutX() <= newXValue)
+                rotation = 90 - rotation;
+            else if (super.getLayoutY() < newYValue && super.getLayoutX() <= newXValue)
+                rotation = 90 + rotation;
+            else if (super.getLayoutY() >= newYValue && super.getLayoutX() > newXValue)
+                rotation = 270 + rotation;
+            else
+                rotation = 270 - rotation;
+            setDestination(newXValue, newYValue, rotation, raceIDs);
+        }
+    }
+
+    public void rotateTo (double rotation) {
         Node boatPoly = super.getChildren().get(0);
         boatPoly.getTransforms().clear();
-        boatPoly.getTransforms().add(new Rotate(currentRotation, BOAT_WIDTH/2, 0));
+        boatPoly.getTransforms().add(new Rotate(rotation, BOAT_WIDTH/2, 0));
         Node wake = super.getChildren().get(1);
         wake.getTransforms().clear();
         wake.getTransforms().add(new Translate(0, BOAT_HEIGHT));
-        wake.getTransforms().add(new Rotate(currentRotation, BOAT_WIDTH/2, -BOAT_HEIGHT));
-    }
-
-    public static double getExpectedUpdateInterval() {
-        return expectedUpdateInterval;
-    }
-
-    public static void setExpectedUpdateInterval(double expectedUpdateInterval) {
-        BoatGroup.expectedUpdateInterval = expectedUpdateInterval;
+        wake.getTransforms().add(new Rotate(rotation, BOAT_WIDTH/2, -BOAT_HEIGHT));
     }
 
     public void forceRotation () {
-        rotateBoat (rotationalGoal - currentRotation);
+        rotateTo (rotationalGoal);
     }
 
     public void toggleAnnotations () {
-        super.getChildren().get(1).setVisible(false);
-        super.getChildren().get(2).setVisible(false);
-        super.getChildren().get(3).setVisible(false);
+        for (Node node : super.getChildren().subList(1, super.getChildren().size())) {
+            node.setVisible(false);
+        }
     }
 
     public Boat getBoat() {
@@ -213,5 +189,9 @@ public class BoatGroup extends RaceObject{
                 return true;
         }
         return false;
+    }
+
+    public int[] getRaceIds () {
+        return new int[] {boat.getId()};
     }
 }
