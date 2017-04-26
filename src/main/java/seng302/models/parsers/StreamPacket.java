@@ -17,9 +17,11 @@ public class StreamPacket {
         this.messageLength = messageLength;
         this.timeStamp = timeStamp;
         this.payload = payload;
-//        System.out.println("type = " + type);
+//        System.out.println("type = " + this.type.toString());
         //switch the packet type to deal with what ever specific packet you want to deal with
-        if (this.type == PacketType.AVG_WIND){
+        if (this.type == PacketType.XML_MESSAGE){
+            System.out.println("--------");
+            System.out.println(new String(payload));
             StreamParser.parsePacket(this);
         }
     }

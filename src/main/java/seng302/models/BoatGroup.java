@@ -12,6 +12,7 @@ import javafx.scene.transform.Translate;
  * Created by CJIRWIN on 25/04/2017.
  */
 public class BoatGroup extends Group{
+
     private static final double TEAMNAME_X_OFFSET = 15d;
     private static final double TEAMNAME_Y_OFFSET = -20d;
     private static final double VELOCITY_X_OFFSET = 15d;
@@ -98,7 +99,8 @@ public class BoatGroup extends Group{
      * @param y The Y coordinate to move the boat to
      */
     public void moveBoatTo(Double x, Double y, Double rotation) {
-        super.relocate(x, y);
+        super.setLayoutX(x);
+        super.setLayoutY(y);
         currentRotation = 0;
         rotateBoat(rotation);
     }

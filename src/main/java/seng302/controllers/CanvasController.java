@@ -159,6 +159,8 @@ public class CanvasController {
                             leftToRight = nextMark.getX() < boatGroup.getLayoutX();
 
                             boatGroup.updatePosition(1000 / 60);
+//                            Point2D p = latLonToXY(lat, lon);
+//                            boatGroup.setDestination(p.getX(), p.getY());
                             if (descending && nextMark.getY() < boatGroup.getLayoutY()) {
                                 currentRaceMarker[boatIndex]++;
                                 boatGroup.setDestination(

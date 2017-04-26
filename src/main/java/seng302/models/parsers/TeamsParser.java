@@ -44,11 +44,11 @@ public class TeamsParser extends FileParser {
 	 */
 	public ArrayList<Boat> getBoats() {
 		ArrayList<Boat> boats = new ArrayList<>();
+
 		try {
 			NodeList nodes = this.doc.getElementsByTagName("team");
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Node node = nodes.item(i);
-
 				boats.add(parseBoat(node));
 			}
 			return boats;

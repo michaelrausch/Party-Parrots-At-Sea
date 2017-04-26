@@ -19,6 +19,7 @@ import java.util.Arrays;
  */
 public class StreamParser {
 
+     private static ArrayList<Long> boat_IDS = new ArrayList<>();
      static void parsePacket(StreamPacket packet) {
         switch (packet.getType()){
             case HEARTBEAT:
@@ -189,7 +190,7 @@ public class StreamParser {
         byte[] seqBytes = Arrays.copyOfRange(payload,11,15);
         byte[] latBytes = Arrays.copyOfRange(payload,16,20);
         byte[] lonBytes = Arrays.copyOfRange(payload,20,24);
-        byte[] boatIdBytes = Arrays.copyOfRange(payload,8,12);
+        byte[] boatIdBytes = Arrays.copyOfRange(payload,7,11);
         long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
@@ -197,15 +198,20 @@ public class StreamParser {
         long lat = bytesToLong(latBytes);
         long lon = bytesToLong(lonBytes);
 
-        if (boatId != 0){
-//            System.out.println("boatId = " + boatId);
-//            System.out.println("deviceType = " + (long)deviceType);
-//            System.out.println("seq = " + seq);
+        if ((int)deviceType == 1){
+            if (!boat_IDS.contains(boatId)){
+                boat_IDS.add(boatId);
+            }
+            System.out.println("boatId = " + boatId);
+            System.out.println("deviceType = " + (long)deviceType);
+            System.out.println("seq = " + seq);
             //needs to be validated
             System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
             System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
         }
 
+        System.out.println("boat_IDS = " + boat_IDS);
+        System.out.println("boat_IDS = " + boat_IDS.size());
     }
 
 
