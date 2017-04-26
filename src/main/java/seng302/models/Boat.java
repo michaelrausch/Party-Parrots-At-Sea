@@ -21,7 +21,6 @@ public class Boat {
     private int markLastPast;
     private String shortName;
     private int id;
-    private Point2D currentPos;
 
     public Boat(String teamName) {
         this.teamName = teamName;
@@ -29,17 +28,8 @@ public class Boat {
         this.lat = 0.0;
         this.lon = 0.0;
         this.shortName = "";
-        currentPos = null;
     }
 
-    public boolean isSamePos(Point2D newPos){
-        if(newPos.equals(currentPos)){
-            return true;
-        } else {
-            currentPos = newPos;
-            return false;
-        }
-    }
 
     /**
      * Represents a boat in the race.
@@ -53,8 +43,6 @@ public class Boat {
         this.velocity = boatVelocity;
         this.shortName = shortName;
         this.id = id;
-        currentPos = null;
-
     }
 
     /**

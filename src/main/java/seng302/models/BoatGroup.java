@@ -1,6 +1,5 @@
 package seng302.models;
 
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
@@ -11,7 +10,7 @@ import javafx.scene.transform.Translate;
 /**
  * Created by CJIRWIN on 25/04/2017.
  */
-public class BoatGroup extends Group{
+public class BoatGroup extends RaceObject{
 
     private static final double TEAMNAME_X_OFFSET = 15d;
     private static final double TEAMNAME_Y_OFFSET = -20d;
@@ -25,21 +24,13 @@ public class BoatGroup extends Group{
 
     private Boat boat;
 
-    private double rotationalGoal;
-    private double currentRotation;
-    private double rotationalVelocity;
-    private double pixelVelocityX;
-    private double pixelVelocityY;
-
     public BoatGroup (Boat boat, Color color){
-        super();
         this.boat = boat;
         initChildren(color);
     }
 
     public BoatGroup (Boat boat, Color color, double... points)
     {
-        super();
         initChildren(color, points);
     }
 
@@ -87,7 +78,7 @@ public class BoatGroup extends Group{
      * @param dx The amount to move the X coordinate by
      * @param dy The amount to move the Y coordinate by
      */
-    void moveBy(Double dx, Double dy, Double rotation) {
+    void moveBy(double dx, double dy, double rotation) {
         super.setLayoutX(super.getLayoutX() + dx);
         super.setLayoutY(super.getLayoutY() + dy);
         rotateBoat(rotation);
@@ -98,11 +89,15 @@ public class BoatGroup extends Group{
      * @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
      */
-    public void moveBoatTo(Double x, Double y, Double rotation) {
+    public void moveTo (double x, double y, double rotation) {
+        super.currentRotation = 0;
+        rotateBoat(rotation);
+        moveTo(x, y);
+    }
+
+    public void moveTo (double x, double y) {
         super.setLayoutX(x);
         super.setLayoutY(y);
-        currentRotation = 0;
-        rotateBoat(rotation);
     }
 
     public void updatePosition (double timeInterval) {
@@ -202,7 +197,7 @@ public class BoatGroup extends Group{
         rotateBoat (rotationalGoal - currentRotation);
     }
 
-    public void toogleAnnotations () {
+    public void toggleAnnotations () {
         super.getChildren().get(1).setVisible(false);
         super.getChildren().get(2).setVisible(false);
         super.getChildren().get(3).setVisible(false);
@@ -210,5 +205,13 @@ public class BoatGroup extends Group{
 
     public Boat getBoat() {
         return boat;
+    }
+
+    public boolean hasRaceId (int... raceIds) {
+        for (int id : raceIds) {
+            if (id == boat.getId())
+                return true;
+        }
+        return false;
     }
 }

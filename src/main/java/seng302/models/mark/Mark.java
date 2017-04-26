@@ -10,6 +10,7 @@ public abstract class Mark {
     private MarkType markType;
     private double latitude;
     private double longitude;
+    private int id;
     Integer xValue;
     Integer yValue;
 
@@ -21,6 +22,7 @@ public abstract class Mark {
     public Mark (String name, MarkType markType) {
         this.name = name;
         this.markType = markType;
+        id = 0;
     }
 
     public Mark(String name, MarkType markType, double latitude, double longitude) {
@@ -28,6 +30,7 @@ public abstract class Mark {
         this.markType = markType;
         this.latitude = latitude;
         this.longitude = longitude;
+        id = 0;
     }
 
     /**
@@ -138,6 +141,14 @@ public abstract class Mark {
 
     public void setY (int y) {
         this.yValue = y;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
 }

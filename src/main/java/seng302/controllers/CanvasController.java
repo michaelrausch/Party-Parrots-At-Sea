@@ -173,7 +173,7 @@ public class CanvasController {
                             if (p != null) {
                                 Point2D p2d = latLonToXY(p.getX(), p.getY());
                                 //System.out.println("p2d = " + p2d);
-                                if (!boatGroup.getBoat().isSamePos(p2d)) {
+                                if (!boatGroup.isSamePos(p2d)) {
                                     //System.out.println("p.toString() = " + p.toString());
                                     double heading = 360.0 / 0xffff * p.getZ();
                                     //System.out.println("heading = " + heading);
@@ -288,7 +288,7 @@ public class CanvasController {
 
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
-            boatGroup.moveBoatTo(startingX, startingY, 0d);
+            boatGroup.moveTo(startingX, startingY, 0d);
             boatGroup.setDestination(firstMarkX, firstMarkY);
             boatGroup.forceRotation();
             group.getChildren().add(boatGroup);
