@@ -65,10 +65,65 @@ public class BoatLocationMessage extends Message {
         setHeader(new Header(MessageType.BOAT_LOCATION, 1, (short) getSize()));
     }
 
+    /**
+     * Convert binary latitude or longitude to floating point number
+     * @param binaryPackedLatLon Binary packed lat OR lon
+     * @return Floating point lat/lon
+     */
+    public static double binaryPackedToLatLon(long binaryPackedLatLon){
+        return (double)binaryPackedLatLon * 180.0 / 2147483648.0;
+    }
+
+    /**
+     * Convert binary packed heading to floating point number
+     * @param binaryPackedHeading Binary packed heading
+     * @return heading as a decimal
+     */
+    public static double binaryPackedHeadingToDouble(long binaryPackedHeading){
+        return (double)binaryPackedHeading * 360.0 / 65536.0;
+    }
+
+    /**
+     * Convert binary packed wind angle to floating point number
+     * @param binaryPackedWindAngle Binary packed wind angle
+     * @return wind angle as a decimal
+     */
+    public static double binaryPackedWindAngleToDouble(long binaryPackedWindAngle){
+        return (double)binaryPackedWindAngle*180.0/32768.0;
+    }
+
+    /**
+     * Convert a latitude or longitude to a binary packed long
+     * @param latLon A floating point latitude/longitude
+     * @return A binary packed lat/lon
+     */
+    public static long latLonToBinaryPackedLong(double latLon){
+        return (long)((536870912 * latLon) / 45);
+    }
+
+    /**
+     * Convert a heading to a binary packed long
+     * @param heading A floating point heading
+     * @return A binary packed heading
+     */
+    public static long headingToBinaryPackedLong(double heading){
+        return (long)((8192*heading)/45);
+    }
+
+    /**
+     * Convert a wind angle to a binary packed long
+     * @param windAngle Floating point wind angle
+     * @return A binary packed wind angle
+     */
+    public static long windAngleToBinaryPackedLong(double windAngle){
+        return (long)((8192*windAngle)/45);
+    }
+
     @Override
     public int getSize() {
-        return 56;
+        return MESSAGE_SIZE;
     }
+
 
     @Override
     public void send(DataOutputStream outputStream) {
