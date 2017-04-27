@@ -179,7 +179,10 @@ public class CanvasController {
                                         //System.out.println("p.toString() = " + p.toString());
                                         double heading = 360.0 / 0xffff * p.getZ();
                                         //System.out.println("heading = " + heading);
+
                                         raceObject.setDestination(p2d.getX(), p2d.getY(), heading, id);
+
+                                        //raceObject.setDestination(p2d.getX(), p2d.getY(), id);
                                     }
                                     StreamParser.boatPositions.remove((long) id);
                                 }

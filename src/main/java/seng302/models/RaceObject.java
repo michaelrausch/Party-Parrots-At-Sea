@@ -9,7 +9,7 @@ import javafx.scene.Group;
 public abstract class RaceObject extends Group {
 
     //Time between sections of race - Should be changed to 200 for actual program.
-    protected static double expectedUpdateInterval = 2000;
+    protected static double expectedUpdateInterval = 200;
 
     protected double rotationalGoal;
     protected double currentRotation;
@@ -31,6 +31,18 @@ public abstract class RaceObject extends Group {
 
     public static void setExpectedUpdateInterval(double expectedUpdateInterval) {
         RaceObject.expectedUpdateInterval = expectedUpdateInterval;
+    }
+
+    protected void calculateRotationalVelocity () {
+        if (Math.abs(rotationalGoal - currentRotation) > 180) {
+            if (rotationalGoal - currentRotation >= 0) {
+                this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
+            } else {
+                this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
+            }
+        } else {
+            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+        }
     }
 
     public abstract void setDestination (double x, double y, double rotation, int... raceIds);

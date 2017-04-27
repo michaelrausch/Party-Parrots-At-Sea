@@ -238,7 +238,7 @@ public class StreamParser extends Thread{
         long lon = bytesToLong(lonBytes);
         long heading = bytesToLong(headingBytes);
 
-        if ((int)deviceType == 1){
+        if ((int)deviceType == 1 || (int)deviceType == 4){
 //            System.out.println("boatId = " + boatId);
 //            System.out.println("deviceType = " + (long)deviceType);
 //            System.out.println("seq = " + seq);

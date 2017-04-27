@@ -114,15 +114,7 @@ public class MarkGroup extends RaceObject {
     public void setDestination (double x, double y, double rotation, int... raceIds) {
         setDestination(x, y, raceIds);
         this.rotationalGoal = rotation;
-        if (Math.abs(rotationalGoal - currentRotation) > 180) {
-            if (rotationalGoal - currentRotation >= 0) {
-                this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
-            } else {
-                this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
-            }
-        } else {
-            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
-        }
+        calculateRotationalVelocity();
     }
 
     public void setDestination (double x, double y, int... raceIds) {
