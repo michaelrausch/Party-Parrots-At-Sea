@@ -135,9 +135,7 @@ public class CanvasController {
         //    e.printStackTrace();
         //}
 
-        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
-//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
-        sr.start();
+
 
         timer = new AnimationTimer() {
             private int countdown = 60;

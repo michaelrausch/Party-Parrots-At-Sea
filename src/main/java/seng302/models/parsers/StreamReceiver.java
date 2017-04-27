@@ -39,9 +39,7 @@ public class StreamReceiver extends Thread {
         });
         packetBuffer = pq;
         connect();
-        StreamParser streamParser = new StreamParser("TestThread2");
 
-        streamParser.start();
     }
 
     public void start () {

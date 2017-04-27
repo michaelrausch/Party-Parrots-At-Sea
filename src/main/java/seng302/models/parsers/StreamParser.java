@@ -29,21 +29,25 @@ public class StreamParser extends Thread{
      private String threadName;
      private Thread t;
 
-     StreamParser(String threadName){
+     public StreamParser(String threadName){
         this.threadName = threadName;
      }
 
      public void run(){
          try {
-             while (StreamReceiver.packetBuffer.size() <= 1) {
+             System.out.println("START OF STREAM");
+             while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
-             StreamPacket packet = StreamReceiver.packetBuffer.take();
-             while (packet != null){
+             while (StreamReceiver.packetBuffer.peek() != null){
+                 StreamPacket packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
                  Thread.sleep(10);
-                 packet = StreamReceiver.packetBuffer.take();
+                 while (StreamReceiver.packetBuffer.peek() == null) {
+                     Thread.sleep(1);
+                 }
              }
+             System.out.println("END OF STREAM");
          } catch (Exception e){
              e.printStackTrace();
          }
