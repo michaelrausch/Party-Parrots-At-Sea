@@ -6,6 +6,7 @@ import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import sun.awt.UNIXToolkit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -119,6 +120,7 @@ public class StreamParser extends Thread{
         int raceStatus = payload[11];
 //        System.out.println("raceStatus = " + raceStatus);
         long expectedStartTime = extractTimeStamp(Arrays.copyOfRange(payload,12,18), 6);
+//        System.out.println("Race starting in: " + expectedStartTime);
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
         int noBoats = payload[22];
@@ -133,6 +135,7 @@ public class StreamParser extends Thread{
             boatStatus += "\nEstTimeAtNextMark: " + extractTimeStamp(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)), 6);
             boatStatus += "\nEstTimeAtFinish: " + extractTimeStamp(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)), 6);
             boatStatuses.add(boatStatus);
+//            System.out.println("boatStatus = " + boatStatus);
         }
     }
 

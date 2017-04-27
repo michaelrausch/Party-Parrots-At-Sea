@@ -594,7 +594,7 @@ public class CanvasController {
             yAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         } else if (angleFromReference < 0 && angleFromReference >= -Math.PI / 2) {
             //System.out.println("3");
-            System.out.println(distanceFromReference);
+//            System.out.println(distanceFromReference);
             angleFromReference = Math.abs(angleFromReference);
             System.out.println(Math.cos(angleFromReference) * distanceFromReference);
             xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);

@@ -39,7 +39,6 @@ public class StreamReceiver extends Thread {
         });
         packetBuffer = pq;
         connect();
-
     }
 
     public void start () {
