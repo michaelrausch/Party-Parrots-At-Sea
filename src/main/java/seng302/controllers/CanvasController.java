@@ -39,7 +39,7 @@ public class CanvasController {
     private GraphicsContext gc;
 
     private final int MARK_SIZE     = 10;
-    private final int BUFFER_SIZE   = 25;
+    private final int BUFFER_SIZE   = 100;
     private final int CANVAS_WIDTH  = 1000;
     private final int CANVAS_HEIGHT = 1000;
     private final int LHS_BUFFER    = BUFFER_SIZE;
@@ -596,7 +596,7 @@ public class CanvasController {
             //System.out.println("3");
 //            System.out.println(distanceFromReference);
             angleFromReference = Math.abs(angleFromReference);
-            System.out.println(Math.cos(angleFromReference) * distanceFromReference);
+//            System.out.println(Math.cos(angleFromReference) * distanceFromReference);
             xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
             yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
         } else {

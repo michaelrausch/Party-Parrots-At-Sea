@@ -167,7 +167,7 @@ public class MarkGroup extends RaceObject {
     public void moveGroupBy (double x, double y, double rotation) {
         super.setLayoutX(super.getLayoutX() + x);
         super.setLayoutY(super.getLayoutY() + y);
-        rotateTo(rotation + currentRotation);
+        rotateTo(rotation);
     }
 
     private void updateChildren (double timeInterval) {

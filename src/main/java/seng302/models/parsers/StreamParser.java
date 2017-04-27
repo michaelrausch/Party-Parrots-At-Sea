@@ -14,10 +14,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -29,6 +28,7 @@ public class StreamParser extends Thread{
      private static ArrayList<Long> boat_IDS = new ArrayList<>();
      private String threadName;
      private Thread t;
+     private static boolean raceStarted = false;
 
      public StreamParser(String threadName){
         this.threadName = threadName;
@@ -120,7 +120,23 @@ public class StreamParser extends Thread{
         int raceStatus = payload[11];
 //        System.out.println("raceStatus = " + raceStatus);
         long expectedStartTime = extractTimeStamp(Arrays.copyOfRange(payload,12,18), 6);
-//        System.out.println("Race starting in: " + expectedStartTime);
+        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
+        if (timeTillStart > 0 && timeTillStart % 10 == 0) {
+            System.out.println("Time till start: " + timeTillStart + " Seconds");
+        } else {
+            if (raceStatus == 4 || raceStatus == 8){
+                System.out.println("RACE HAS FINISHED");
+            } else if (!raceStarted){
+                raceStarted = true;
+                System.out.println("RACE HAS STARTED");
+            }
+            if (timeTillStart % 10 == 0){
+                System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
+
+            }
+        }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
         int noBoats = payload[22];

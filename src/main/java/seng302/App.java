@@ -22,7 +22,6 @@ public class App extends Application
         StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
         sr.start();
         StreamParser streamParser = new StreamParser("TestThread2");
-
         streamParser.start();
 
     }
