@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.zip.CRC32;
@@ -129,7 +127,7 @@ public class StreamReceiver {
             }
         });
         StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, pq);
-//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
+        //StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
         sr.connect();
     }
 }

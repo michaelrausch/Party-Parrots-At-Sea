@@ -2,6 +2,9 @@ package seng302.models.parsers;
 
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -13,6 +16,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by kre39 on 23/04/17.
@@ -127,6 +132,7 @@ public class StreamParser {
         while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
         xmlMessage += (char)currentChar;
         }
+        if (xmlMessageSubType == 6) System.out.println(xmlMessage);
 
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -134,7 +140,12 @@ public class StreamParser {
         try {
             db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
-            // TODO: 25/04/17 ajm412: Check that the object matches expected structure and return Document object.
+            switch(xmlMessageSubType) {
+                case 5: parseRegattaXML(doc);
+                case 6: parseRaceXML(doc);
+                case 7: parseBoatXML(doc);
+            }
+
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {
@@ -143,6 +154,82 @@ public class StreamParser {
             e.printStackTrace();
         }
 
+    }
+
+    private static void parseRegattaXML(Document doc) {
+        Element docEle = doc.getDocumentElement();
+        String[] regattaElements = {"RegattaID", "RegattaName", "CourseName", "CentralLatitude", "CentralLongitude",
+                                    "CentralAltitude", "UtcOffset", "MagneticVariation", "ShorelineName"};
+        Map<String, Object> outputMap = parseAtomicElements(docEle, regattaElements); // Regatta contains only atomic elements
+
+        System.out.println(outputMap);
+        //return outputMap;
+    }
+
+    private static void parseRaceXML(Document doc) {
+        Element docEle = doc.getDocumentElement();
+        String[] atomicRaceElements = {"RaceID", "RaceType", "CreationTimeDate"};
+        Map<String, Object> outputMap = parseAtomicElements(docEle, atomicRaceElements);
+
+        //Race Start Time
+        Map<String, Object> raceStartMap = new HashMap<>();
+        Node raceStartTime = docEle.getElementsByTagName("RaceStartTime").item(0);
+        raceStartMap.put("Start", getNodeNamedAttribute(raceStartTime, "Start"));
+        raceStartMap.put("Postpone", getNodeNamedAttribute(raceStartTime, "Postpone"));
+        outputMap.put("RaceStartTime", raceStartMap);
+
+        //participants
+        Map<Integer, String> participantMap = new HashMap<>();
+        NodeList participants = docEle.getElementsByTagName("Participants").item(0).getChildNodes();
+        for (int i = 0; i < participants.getLength(); i++) {
+            Integer sourceID = null;
+            String entry = null;
+            Node participant = participants.item(i);
+            if (participant.getNodeName().equals("Yacht")) {
+                //sourceID = Integer.parseInt(participant.getAttributes().getNamedItem("SourceID").getTextContent());
+                sourceID = Integer.parseInt(getNodeNamedAttribute(participant, "SourceID"));
+                if (participant.getAttributes().getLength() == 2) {
+                    entry = getNodeNamedAttribute(participant, "Entry");
+                }
+                participantMap.put(sourceID, entry);
+            }
+        }
+        outputMap.put("Participants", participantMap);
+
+        //Course
+
+        System.out.println(outputMap);
+    }
+
+    private static void parseBoatXML(Document doc) {
+        // TODO: 27/04/17 ajm412
+    }
+
+    private static String getNodeNamedAttribute(Node n, String attr) {
+        return n.getAttributes().getNamedItem(attr).getTextContent();
+    }
+
+    private static Map<String, Object> parseAtomicElements(Element docEle, String[] elements) {
+        Map <String, Object> outputMap = new HashMap<>();
+        for (String element : elements) {
+            Object elementValue = null;
+            if (docEle.getElementsByTagName(element).getLength() == 1) {
+                String elementText = docEle.getElementsByTagName(element).item(0).getTextContent();
+                // TODO: 27/04/17 ajm412: this seems messy, trying to parse values as ints/doubles to the map rather than as Strings. Possibly use RegEx.
+                try {
+                    elementValue = Integer.parseInt(elementText);
+                } catch (NumberFormatException nfe1) {
+                    try {
+                        elementValue = Double.parseDouble(elementText);
+                    } catch (NumberFormatException nfe2) {
+                        elementValue = elementText;
+                    }
+                }
+            }
+            outputMap.put(element, elementValue);
+        }
+
+        return outputMap;
     }
 
     private static void extractRaceStartStatus(StreamPacket packet){

@@ -19,7 +19,7 @@ public class StreamPacket {
         this.payload = payload;
 //        System.out.println("type = " + type);
         //switch the packet type to deal with what ever specific packet you want to deal with
-        if (this.type == PacketType.AVG_WIND){
+        if (this.type == PacketType.XML_MESSAGE){
             StreamParser.parsePacket(this);
         }
     }
