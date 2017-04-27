@@ -14,10 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by kre39 on 23/04/17.
@@ -130,7 +127,7 @@ public class StreamParser {
         //Converts XML message to string to be parsed
         int currentChar;
         while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
-        xmlMessage += (char)currentChar;
+            xmlMessage += (char)currentChar;
         }
         if (xmlMessageSubType == 6) System.out.println(xmlMessage);
 
@@ -167,6 +164,7 @@ public class StreamParser {
     }
 
     private static void parseRaceXML(Document doc) {
+        // TODO: 27/04/17 ajm412 This is an extremely long method. Needs to be broken down.
         Element docEle = doc.getDocumentElement();
         String[] atomicRaceElements = {"RaceID", "RaceType", "CreationTimeDate"};
         Map<String, Object> outputMap = parseAtomicElements(docEle, atomicRaceElements);
@@ -196,7 +194,37 @@ public class StreamParser {
         }
         outputMap.put("Participants", participantMap);
 
-        //Course
+        //Course - Order matters.
+        Map<Integer, Object> courseMap = new TreeMap<>();
+        NodeList course = docEle.getElementsByTagName("Course").item(0).getChildNodes();
+        for (int i = 0; i < course.getLength(); i++) {
+            Integer compoundMarkID = null;
+            String name = null;
+            Map<Integer, Object> compoundMarkMap = new TreeMap<>();
+            Node compoundMark = course.item(i);
+            if (compoundMark.getNodeName().equals("CompoundMark")) {
+                compoundMarkID = Integer.parseInt(getNodeNamedAttribute(compoundMark, "CompoundMarkID"));
+                name = getNodeNamedAttribute(compoundMark, "Name");
+                //get marks for compound mark
+                NodeList marks = compoundMark.getChildNodes();
+                for (int j = 0; j < marks.getLength(); j++) {
+                    Map<String, Object> markMap = new TreeMap<>();
+                    Node mark = marks.item(j);
+                    if (mark.getNodeName().equals("Mark")) {
+                        markMap.put("Name", getNodeNamedAttribute(mark, "Name"));
+                        markMap.put("TargetLat", Double.parseDouble(getNodeNamedAttribute(mark, "TargetLat")));
+                        markMap.put("TargetLng", Double.parseDouble(getNodeNamedAttribute(mark, "TargetLng")));
+                        markMap.put("SourceID", Integer.parseInt(getNodeNamedAttribute(mark, "SourceID")));
+
+                        compoundMarkMap.put(Integer.parseInt(getNodeNamedAttribute(mark, "SeqID")), markMap);
+
+                    }
+                }
+
+            }
+            courseMap.put(compoundMarkID, compoundMarkMap);
+        }
+        //outputMap.put("Course", courseMap);
 
         System.out.println(outputMap);
     }
