@@ -29,9 +29,11 @@ public class StreamParser extends Thread{
 
      public static ConcurrentHashMap<Long,Point3D> boatPositions = new ConcurrentHashMap<>();
      public static ConcurrentHashMap<Long,Double> boatSpeeds = new ConcurrentHashMap<>();
-    private String threadName;
+     private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
+     private static boolean streamStatus = false;
+     private static long timeSinceStart = 0;
 
      public StreamParser(String threadName){
         this.threadName = threadName;
@@ -44,6 +46,7 @@ public class StreamParser extends Thread{
     public void run(){
          try {
              System.out.println("START OF STREAM");
+             streamStatus = true;
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
@@ -152,7 +155,7 @@ public class StreamParser extends Thread{
             }
             if (timeTillStart % 10 == 0){
                 System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
-
+                timeSinceStart = timeTillStart;
             }
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
@@ -399,6 +402,33 @@ public class StreamParser extends Thread{
             index++;
         }
         return partialLong;
+    }
+
+    /**
+     * returns false if race not started, true otherwise
+     *
+     * @return race started status
+     */
+    public static boolean isRaceStarted() {
+        return raceStarted;
+    }
+
+    /**
+     * returns false if stream not connected, true otherwise
+     *
+     * @return stream started status
+     */
+    public static boolean isStreamStatus() {
+        return streamStatus;
+    }
+
+    /**
+     * returns race timer
+     *
+     * @return race timer in long
+     */
+    public static long getTimeSinceStart() {
+        return timeSinceStart;
     }
 }
 
