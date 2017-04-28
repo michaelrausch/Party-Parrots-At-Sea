@@ -62,11 +62,11 @@ public class Simulator extends Observable implements Runnable {
 	}
 
 	/**
-	 * Moves a boat with give time duration.
+	 * Moves a boat with given time duration.
 	 *
 	 * @param boat the boat to be moved
-	 * @param duration the moving duration in millisecond
-	 * @return 1 if boat reached final line, otherwise 0
+	 * @param duration the moving duration in milliseconds
+	 * @return 1 if the boat has reached the final line, otherwise return 0
 	 */
 	private int moveBoat(Boat boat, double duration) {
 		if (boat.getHeadingCorner() != null) {
@@ -100,6 +100,11 @@ public class Simulator extends Observable implements Runnable {
 		return 0;
 	}
 
+	/**
+	 * Link all the corners in the course list so that every corner knows its next
+	 * corner, as well as the distance and bearing to its next corner. However,
+	 * the last corner's heading is null, which means it is the final line.
+	 */
 	private void setLegs() {
 		// get the bearing from one mark to the next heading mark
 		for (int i = 0; i < course.size() - 1; i++) {

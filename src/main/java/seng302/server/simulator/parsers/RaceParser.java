@@ -9,7 +9,6 @@ import seng302.server.simulator.mark.Corner;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Parses the race xml file to get course details
@@ -26,11 +25,20 @@ public class RaceParser extends FileParser {
 		this.doc = this.parseFile();
 	}
 
+	/**
+	 * Parses race.xml file and returns a list of corner which is the race course.
+	 * @return a list of ordered corner to represent the course.
+	 */
 	public List<Corner> getCourse() {
 		CourseParser cp = new CourseParser(path);
 		return cp.getCourse();
 	}
 
+	/**
+	 * Parses race.xml file and return a list of boats which will compete in the
+	 * race.
+	 * @return a list of boats that are going to compete in the race.
+	 */
 	public List<Boat> getBoats() {
 		NodeList yachts = doc.getDocumentElement().getElementsByTagName("Yacht");
 		List<Boat> boats = new ArrayList<>();
@@ -41,6 +49,11 @@ public class RaceParser extends FileParser {
 		return boats;
 	}
 
+	/**
+	 * Parses a single boat from the given node
+	 * @param node a node within a boat tag
+	 * @return a boat instance parsed from the given node
+	 */
 	private Boat getBoat(Node node) {
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element e = (Element) node;

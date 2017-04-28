@@ -11,7 +11,6 @@ public class Boat {
 	private double speed; // in mm/sec
 	private String boatName, shortName, shorterName;
 
-	// haven't been used so far
 	private Corner lastPassedCorner, headingCorner;
 
 	public Boat(int sourceID, String boatName) {
