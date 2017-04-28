@@ -1,12 +1,10 @@
 package seng302.models.parsers;
 
 
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import sun.awt.UNIXToolkit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,14 +20,16 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * The purpose of this class is to take in the stream of divided packets so they can be read
+ * and parsed in by turning the byte arrays into useful data. There are two public static hashmaps
+ * that are threadsafe so the visualiser can always access the latest speed and position avaible
  * Created by kre39 on 23/04/17.
  */
 public class StreamParser extends Thread{
 
      public static ConcurrentHashMap<Long,Point3D> boatPositions = new ConcurrentHashMap<>();
      public static ConcurrentHashMap<Long,Double> boatSpeeds = new ConcurrentHashMap<>();
-     private static ArrayList<Long> boat_IDS = new ArrayList<>();
-     private String threadName;
+    private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
 
@@ -37,7 +37,11 @@ public class StreamParser extends Thread{
         this.threadName = threadName;
      }
 
-     public void run(){
+    /**
+     * Used to within threading so when the stream parser thread runs, it will keep looking for a packet to
+     * process until it is unable to find anymore packets
+     */
+    public void run(){
          try {
              System.out.println("START OF STREAM");
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
@@ -57,6 +61,9 @@ public class StreamParser extends Thread{
          }
      }
 
+    /**
+     * Used to start the stream parser thread when multithreading
+     */
     public void start () {
         System.out.println("Starting " +  threadName );
         if (t == null) {
@@ -65,7 +72,7 @@ public class StreamParser extends Thread{
         }
     }
 
-     static void parsePacket(StreamPacket packet) {
+     private static void parsePacket(StreamPacket packet) {
         switch (packet.getType()){
             case HEARTBEAT:
                 extractHeartBeat(packet);
@@ -109,12 +116,20 @@ public class StreamParser extends Thread{
         }
     }
 
+    /**
+     * Extracts the seq num used in the heartbeat packet
+     * @param packet Packet parsed in to use the payload
+     */
     private static void extractHeartBeat(StreamPacket packet) {
         long heartbeat = bytesToLong(packet.getPayload());
-//        System.out.println("Heartbeat: " + heartbeat);
-
     }
 
+    /**
+     * Extracts the useful race status data from race status type packets. This method will also print to the
+     * console the current state of the race (if it has started/finished or is about to start), along side
+     * this it'll also display the amount of time since the race has started or time till it starts
+     * @param packet Packet parsed in to use the payload
+     */
     private static void extractRaceStatus(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
@@ -158,6 +173,10 @@ public class StreamParser extends Thread{
         }
     }
 
+    /**
+     * Used to extract the messages passed through with the display message packet
+     * @param packet Packet parsed in to use the payload
+     */
     private static void extractDisplayMessage(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
@@ -172,7 +191,11 @@ public class StreamParser extends Thread{
         }
     }
 
-    static void extractXmlMessage(StreamPacket packet){
+    /**
+     * Used to read in the xml data. Will call the specific methods to create the course and boats
+     * @param packet Packet parsed in to use the payload
+     */
+    private static void extractXmlMessage(StreamPacket packet){
 
         byte[] payload = packet.getPayload();
         String xmlMessage = "";
@@ -200,16 +223,17 @@ public class StreamParser extends Thread{
             db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
             // TODO: 25/04/17 ajm412: Check that the object matches expected structure and return Document object.
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
 
     }
 
+    /**
+     * Extracts the race start status from the packet, currently is unused within the app but
+     * is here for potential future use
+     * @param packet Packet parsed in to use the payload
+     */
     private static void extractRaceStartStatus(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
@@ -219,6 +243,11 @@ public class StreamParser extends Thread{
         int notificationType = payload[19];
     }
 
+    /**
+     * When a yacht event occurs this will parse the byte array to retrieve the necessary info,
+     * currently unused
+     * @param packet Packet parsed in to use the payload
+     */
     private static void extractYachtEventCode(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
@@ -229,6 +258,11 @@ public class StreamParser extends Thread{
         int eventId = payload[21];
     }
 
+    /**
+     * When a yacht action occurs this will parse the parse the byte array to retrieve the necessary info,
+     * currently unused
+     * @param packet Packet parsed in to use the payload
+     */
     private static void extractYachtActionCode(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
@@ -239,6 +273,10 @@ public class StreamParser extends Thread{
 //        System.out.println("eventId = " + eventId);
     }
 
+    /**
+     * Strips the message from the chatter text type packets, currently the message is unused
+     * @param packet Packet parsed in to use the payload
+     */
     private static void extractChatterText(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
@@ -247,8 +285,12 @@ public class StreamParser extends Thread{
         String message = new String(Arrays.copyOfRange(payload,3,3 + length));
     }
 
-
-    static void extractBoatLocation(StreamPacket packet){
+    /**
+     * Used to breakdown the boatlocation packets so the boat coordinates, id and groundspeed are all used
+     * All the other extra data is still being read and translated however is unused.
+     * @param packet Packet parsed in to use the payload
+     */
+    private static void extractBoatLocation(StreamPacket packet){
         byte[] payload = packet.getPayload();
         byte deviceType = payload[15];
         byte[] seqBytes = Arrays.copyOfRange(payload,11,15);
@@ -256,7 +298,7 @@ public class StreamParser extends Thread{
         byte[] lonBytes = Arrays.copyOfRange(payload,20,24);
         byte[] boatIdBytes = Arrays.copyOfRange(payload,7,11);
         byte[] headingBytes = Arrays.copyOfRange(payload,28,30);
-        byte[] speedBytes = Arrays.copyOfRange(payload,38,40);
+        byte[] groundSpeedBytes = Arrays.copyOfRange(payload,38,40);
 
         long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
@@ -266,12 +308,8 @@ public class StreamParser extends Thread{
         long lon = bytesToLong(lonBytes);
         long heading = bytesToLong(headingBytes);
 //        long speed = extractTimeStamp(speedBytes, 2);
-        ByteBuffer bb = ByteBuffer.allocate(2);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-        bb.put(speedBytes[0]);
-        bb.put(speedBytes[1]);
-        double speed = bb.getShort(0)/1000.0;
-        short s = (short) ((speedBytes[1] & 0xFF) << 8 | (speedBytes[0] & 0xFF));
+        double groundSpeed = bytesToLong(groundSpeedBytes)/1000.0;
+        short s = (short) ((groundSpeedBytes[1] & 0xFF) << 8 | (groundSpeedBytes[0] & 0xFF));
         if ((int)deviceType == 1 || (int)deviceType == 4){
 //            System.out.println("boatId = " + boatId);
 //            System.out.println("deviceType = " + (long)deviceType);
@@ -279,9 +317,9 @@ public class StreamParser extends Thread{
             //needs to be validated
             Point3D point = new Point3D(((180d * (double)lat)/Math.pow(2,31)),((180d *(double)lon)/Math.pow(2,31)),(double)heading);
             boatPositions.putIfAbsent(boatId, point);
-            boatSpeeds.putIfAbsent(boatId, speed);
+            boatSpeeds.putIfAbsent(boatId, groundSpeed);
             boatPositions.replace(boatId, point);
-            boatSpeeds.replace(boatId, speed);
+            boatSpeeds.replace(boatId, groundSpeed);
 //            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
 //            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
         }
