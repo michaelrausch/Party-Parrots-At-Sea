@@ -156,7 +156,7 @@ public class MarkGroup extends RaceObject {
         super.getTransforms().add(new Rotate(rotation, 0 , 0));
     }
 
-    public void updatePosition (double timeInterval) {
+    public void updatePosition (long timeInterval) {
         double x = pixelVelocityX * timeInterval;
         double y = pixelVelocityY * timeInterval;
         double rotation = rotationalVelocity * timeInterval;

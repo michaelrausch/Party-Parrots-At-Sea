@@ -49,7 +49,7 @@ public abstract class RaceObject extends Group {
 
     public abstract void setDestination (double x, double y, int... raceIds);
 
-    public abstract void updatePosition (double timeInterval);
+    public abstract void updatePosition (long timeInterval);
 
     public abstract void moveTo (double x, double y, double rotation);
 
