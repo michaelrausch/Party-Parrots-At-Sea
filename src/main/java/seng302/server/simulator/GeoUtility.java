@@ -33,8 +33,14 @@ public class GeoUtility {
 	 *
 	 * @param p1 the first geographical position, start point
 	 * @param p2 the second geographical position, end point
-	 * @return the bearing in degree from p1 to p2, value range (0 ~ 360 deg.).
+	 * @return the initial bearing in degree from p1 to p2, value range (0 ~ 360 deg.).
 	 * vertical up is 0 deg. horizontal right is 90 deg.
+	 *
+	 * NOTE:
+	 * The final bearing will differ from the initial bearing by varying degrees
+	 * according to distance and latitude (if you were to go from say 35°N,45°E
+	 * (≈ Baghdad) to 35°N,135°E (≈ Osaka), you would start on a heading of 60°
+	 * and end up on a heading of 120°
 	 */
 	public static Double getBearing(Position p1, Position p2) {
 
