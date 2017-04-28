@@ -140,4 +140,5 @@ public class Boat {
     public int getId() {
         return id;
     }
+
 }

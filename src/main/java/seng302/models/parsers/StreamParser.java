@@ -14,6 +14,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -25,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StreamParser extends Thread{
 
      public static ConcurrentHashMap<Long,Point3D> boatPositions = new ConcurrentHashMap<>();
+     public static ConcurrentHashMap<Long,Double> boatSpeeds = new ConcurrentHashMap<>();
      private static ArrayList<Long> boat_IDS = new ArrayList<>();
      private String threadName;
      private Thread t;
@@ -253,6 +256,8 @@ public class StreamParser extends Thread{
         byte[] lonBytes = Arrays.copyOfRange(payload,20,24);
         byte[] boatIdBytes = Arrays.copyOfRange(payload,7,11);
         byte[] headingBytes = Arrays.copyOfRange(payload,28,30);
+        byte[] speedBytes = Arrays.copyOfRange(payload,38,40);
+
         long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
@@ -260,7 +265,13 @@ public class StreamParser extends Thread{
         long lat = bytesToLong(latBytes);
         long lon = bytesToLong(lonBytes);
         long heading = bytesToLong(headingBytes);
-
+//        long speed = extractTimeStamp(speedBytes, 2);
+        ByteBuffer bb = ByteBuffer.allocate(2);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.put(speedBytes[0]);
+        bb.put(speedBytes[1]);
+        double speed = bb.getShort(0)/1000.0;
+        short s = (short) ((speedBytes[1] & 0xFF) << 8 | (speedBytes[0] & 0xFF));
         if ((int)deviceType == 1 || (int)deviceType == 4){
 //            System.out.println("boatId = " + boatId);
 //            System.out.println("deviceType = " + (long)deviceType);
@@ -268,11 +279,14 @@ public class StreamParser extends Thread{
             //needs to be validated
             Point3D point = new Point3D(((180d * (double)lat)/Math.pow(2,31)),((180d *(double)lon)/Math.pow(2,31)),(double)heading);
             boatPositions.putIfAbsent(boatId, point);
+            boatSpeeds.putIfAbsent(boatId, speed);
             boatPositions.replace(boatId, point);
+            boatSpeeds.replace(boatId, speed);
 //            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
 //            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
         }
     }
+
 
 
     private static void extractMarkRounding(StreamPacket packet){

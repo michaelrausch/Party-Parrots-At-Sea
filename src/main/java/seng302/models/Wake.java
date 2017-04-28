@@ -29,7 +29,7 @@ class Wake extends Arc {
         super.setType(ArcType.OPEN);
         super.setFill(new Color(0, 0, 0 ,0));
         super.setStrokeWidth(2.0);
-        super.getTransforms().add(new Rotate(rotation, 5, -15));
+        super.getTransforms().add(new Rotate(rotation - 270, startingX + 20, startingY + 20));
 //        this.velocityX = -velocityX;
 //        this.velocityY = -velocityY;
         this.velocityX = 0;

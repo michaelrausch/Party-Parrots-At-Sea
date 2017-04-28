@@ -22,6 +22,7 @@ import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.StreamReceiver;
 
 import java.sql.Time;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -58,6 +59,13 @@ public class CanvasController {
     private double referencePointY;
     private double metersToPixels;
     private List<RaceObject> raceObjects = new ArrayList<>();
+
+    //FRAME RATE
+    private static final double UPDATE_TIME = 0.016666;     // 1 / 60 ie 60fps
+    private final long[] frameTimes = new long[30];
+    private int frameTimeIndex = 0;
+    private boolean arrayFilled = false;
+    private DecimalFormat decimalFormat2dp = new DecimalFormat("0.00");
 
     public AnimationTimer timer;
 
@@ -138,6 +146,8 @@ public class CanvasController {
 
 
         timer = new AnimationTimer() {
+
+
             private int countdown = 60;
             private int[] currentRaceMarker = {1, 1, 1, 1, 1, 1};
             List<Mark> marks = raceViewController.getRace().getCourse();
@@ -150,6 +160,20 @@ public class CanvasController {
                 int boatIndex = 0;
 
                 Mark nextMark;
+
+                long oldFrameTime = frameTimes[frameTimeIndex] ;
+                frameTimes[frameTimeIndex] = now ;
+                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+                if (frameTimeIndex == 0) {
+                    arrayFilled = true ;
+                }
+                if (arrayFilled) {
+                    long elapsedNanos = now - oldFrameTime ;
+                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+                    Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                    drawFps(frameRate.intValue());
+                }
+
                 //if (countdown == 0) {
                 //System.out.println("called the at");
                     for (RaceObject raceObject : raceObjects) {
@@ -163,8 +187,6 @@ public class CanvasController {
 
                             //descending = nextMark.getY() > boatGroup.getLayoutY();
                             //leftToRight = nextMark.getX() < boatGroup.getLayoutX();
-
-
                             raceObject.updatePosition(1000 / 60);
                             for (int id : raceObject.getRaceIds()) {
                                 //System.out.println("id = " + id);
@@ -285,10 +307,15 @@ public class CanvasController {
 
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
+            gc.clearRect(5,5,50,20);
             gc.setFill(Color.BLACK);
             gc.setFont(new Font(14));
             gc.setLineWidth(3);
             gc.fillText(fps + " FPS", 5, 20);
+        } else {
+            gc.clearRect(5,5,50,20);
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(4,4,51,21);
         }
     }
 
@@ -307,7 +334,7 @@ public class CanvasController {
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
             boatGroup.moveTo(startingX, startingY, 0d);
-            boatGroup.setDestination(firstMarkX, firstMarkY);
+//            boatGroup.setDestination(firstMarkX, firstMarkY);
             boatGroup.forceRotation();
             group.getChildren().add(boatGroup);
             raceObjects.add(boatGroup);
