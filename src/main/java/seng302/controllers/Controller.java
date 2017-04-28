@@ -53,6 +53,9 @@ public class Controller implements Initializable {
 
     }
 
+    /**
+     * Running a timer to update the livestream status on welcome screen. Update interval is 500 miliseconds.
+     */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
             streamButton.setVisible(false);
@@ -64,7 +67,18 @@ public class Controller implements Initializable {
                 @Override
                 public void run() {
                     Platform.runLater(() -> {
-                        if (StreamParser.getTimeSinceStart() != 0) {
+                        if (StreamParser.isRaceFinished()) {
+                            timeTillLive.setTextFill(Color.RED);
+                            timeTillLive.setText("Race finished! Waiting for new race...");
+                            switchToRaceViewButton.setDisable(true);
+                        } else if (StreamParser.getTimeSinceStart() > 0 && StreamParser.getTimeSinceStart() % 10 == 0) {
+                            timeTillLive.setTextFill(Color.RED);
+                            switchToRaceViewButton.setDisable(false);
+                            Long timerMinute = StreamParser.getTimeSinceStart() / 60;
+                            Long timerSecond = StreamParser.getTimeSinceStart() % 60;
+                            String timerString = "-" + timerMinute + "." + timerSecond + " minutes";
+                            timeTillLive.setText(timerString);
+                        } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
                             Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;

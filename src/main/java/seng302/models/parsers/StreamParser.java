@@ -32,8 +32,9 @@ public class StreamParser extends Thread{
      private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
+     private static boolean raceFinished = false;
      private static boolean streamStatus = false;
-     private static long timeSinceStart = 0;
+     private static long timeSinceStart = -1;
 
      public StreamParser(String threadName){
         this.threadName = threadName;
@@ -145,12 +146,16 @@ public class StreamParser extends Thread{
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
         if (timeTillStart > 0 && timeTillStart % 10 == 0) {
+            timeSinceStart = timeTillStart;
             System.out.println("Time till start: " + timeTillStart + " Seconds");
         } else {
             if (raceStatus == 4 || raceStatus == 8){
+                raceFinished = true;
+                raceStarted = false;
                 System.out.println("RACE HAS FINISHED");
             } else if (!raceStarted){
                 raceStarted = true;
+                raceFinished = false;
                 System.out.println("RACE HAS STARTED");
             }
             if (timeTillStart % 10 == 0){
@@ -429,6 +434,15 @@ public class StreamParser extends Thread{
      */
     public static long getTimeSinceStart() {
         return timeSinceStart;
+    }
+
+    /**
+     * return false if race not finished, true otherwise
+     *
+     * @return race finished status
+     */
+    public static boolean isRaceFinished() {
+        return raceFinished;
     }
 }
 
