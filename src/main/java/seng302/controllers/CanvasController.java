@@ -196,23 +196,12 @@ public class CanvasController {
     private void drawBoats() {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
         List<Boat> boats  = raceViewController.getStartingBoats();
-        System.out.println("raceObjects " + raceObjects);
         Double startingX  = raceObjects.get(0).getLayoutX();
         Double startingY  = raceObjects.get(0).getLayoutY();
-        Double firstMarkX = raceObjects.get(1).getLayoutX();
-        Double firstMarkY = raceObjects.get(1).getLayoutY();
-        Arc a = new Arc(300, 300, 45, 45, -90, 45);
-        a.setType(ArcType.ROUND);
-        group.getChildren().add(a);
-        a = new Arc(500, 500, 45, 45, 450, 45);
-        a.setType(ArcType.ROUND);
-        group.getChildren().add(a);
-
         Group boatAnnotations = new Group();
 
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
-            System.out.println("MADE A BOAT GROUP FOR " + boatGroup.getBoat().getShortName());
             boatGroup.moveTo(startingX, startingY, 0d);
 //            boatGroup.setDestination(firstMarkX, firstMarkY);
             boatGroup.forceRotation();
@@ -308,7 +297,6 @@ public class CanvasController {
             referencePointY += TOP_BUFFER;
             referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
         } else {
-            System.out.println("VERTICAL");
             referencePointY = CANVAS_HEIGHT - BOT_BUFFER;
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
@@ -371,7 +359,6 @@ public class CanvasController {
     }
 
     private Point2D findScaledXY (Mark unscaled) {
-        System.out.println("unscaled.getName() = " + unscaled.getName());
         return findScaledXY (minLatPoint.getLatitude(), minLatPoint.getLongitude(),
                              unscaled.getLatitude(), unscaled.getLongitude());
     }
