@@ -14,10 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import seng302.models.Boat;
-import seng302.models.Event;
-import seng302.models.Race;
-import seng302.models.TimelineInfo;
+import seng302.models.*;
 import seng302.models.parsers.ConfigParser;
 
 import java.io.IOException;
@@ -287,5 +284,12 @@ public class RaceViewController extends Thread{
 
     public ArrayList<Boat> getStartingBoats(){
         return startingBoats;
+    }
+
+    @FXML
+    private void toggleAnnotations () {
+        for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+            ro.toggleAnnotations();
+        }
     }
 }

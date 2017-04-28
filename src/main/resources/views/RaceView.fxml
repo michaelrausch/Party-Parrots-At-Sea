@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane prefHeight="1080.0" prefWidth="1920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.RaceViewController">
+<GridPane prefHeight="1080.0" prefWidth="1920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.RaceViewController">
     <columnConstraints>
         <ColumnConstraints maxWidth="246.0" minWidth="246.0" prefWidth="246.0" />
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="1034.0" />
@@ -40,7 +40,7 @@
                         <Font name="System Bold" size="13.0" />
                     </font>
                 </Text>
-                <CheckBox fx:id="toggleAnnotation" layoutX="27.0" layoutY="462.0" mnemonicParsing="false" selected="true" text="Show annotations" />
+                <CheckBox fx:id="toggleAnnotation" layoutX="27.0" layoutY="462.0" mnemonicParsing="false" onAction="#toggleAnnotations" selected="true" text="Show annotations" />
                 <CheckBox fx:id="toggleFps" layoutX="27.0" layoutY="488.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="143.0" selected="true" text="Show FPS" />
             <VBox fx:id="positionVbox" layoutX="12.0" layoutY="280.0" prefHeight="140.0" prefWidth="200.0" />
             <Pane layoutX="11.0" layoutY="30.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="51.0" prefWidth="193.0">

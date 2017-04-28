@@ -69,5 +69,4 @@ public abstract class RaceObject extends Group {
     public abstract int[] getRaceIds ();
 
     public abstract void toggleAnnotations ();
-
 }

@@ -21,6 +21,7 @@ class Wake extends Group {
     private Arc[] arcs = new Arc[numWakes];
     private double[] rotations = new double[numWakes];
     private int velocitiesIndex = 0;
+    private double sum = 0;
 
     /**
      * Create a wake at the given location.
@@ -32,14 +33,7 @@ class Wake extends Group {
         super.setLayoutY(startingY);
         Arc arc;
         for (int i = 0; i < numWakes; i++) {
-             arc = new Arc(
-                     0,
-                     0,
-                     30 + RADIUS_INCREASE * i,
-                     30 + RADIUS_INCREASE * i,
-                     -110,
-                     40
-             );
+             arc = new Arc(0,0,0,0,-110,40);
              arc.setFill(new Color(0.18, 0.7, 1.0, 0.50 + OPACITY_INCREASE * i));
              arc.setType(ArcType.ROUND);
              arcs[i] = arc;
@@ -52,9 +46,23 @@ class Wake extends Group {
      * the latest given velocity.
      * @param rotationalVelocity The rotationalVelocity the wake should move at.
      */
-    void setRotationalVelocity (double rotationalVelocity) {
+    void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocityX, double velocityY) {
+        sum -= Math.abs(velocities[velocitiesIndex]);
+        sum += Math.abs(rotationalVelocity);
+        if (sum < 0.0001)
+            rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
+                                   //This stops the wake from eventually becoming out of sync with the boat.
         velocitiesIndex = (velocitiesIndex + 1) % 14;
         velocities[velocitiesIndex] = rotationalVelocity;
+
+        double scaleFactor = Math.abs(Math.log10(Math.abs(velocityX) + Math.abs(velocityY)));
+        double baseRad = 30;
+        for (Arc arc :arcs) {
+            double rad = baseRad + 5 * scaleFactor;
+            arc.setRadiusX(rad);
+            arc.setRadiusY(rad);
+            baseRad += RADIUS_INCREASE;
+        }
     }
 
     /**

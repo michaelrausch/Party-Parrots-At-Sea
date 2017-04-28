@@ -14,10 +14,10 @@ import seng302.models.parsers.StreamParser;
  */
 public class BoatGroup extends RaceObject{
 
-    private static final double TEAMNAME_X_OFFSET = 15d;
-    private static final double TEAMNAME_Y_OFFSET = -20d;
-    private static final double VELOCITY_X_OFFSET = 15d;
-    private static final double VELOCITY_Y_OFFSET = -10d;
+    private static final double TEAMNAME_X_OFFSET = 10d;
+    private static final double TEAMNAME_Y_OFFSET = -15d;
+    private static final double VELOCITY_X_OFFSET = 10d;
+    private static final double VELOCITY_Y_OFFSET = -5d;
     private static final double VELOCITY_WAKE_RATIO = 2d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
@@ -72,9 +72,9 @@ public class BoatGroup extends RaceObject{
 
     private void initChildren (Color color) {
        initChildren(color,
-               BOAT_WIDTH / 2, 0.0,
-               BOAT_WIDTH, BOAT_HEIGHT,
-               0.0, BOAT_HEIGHT);
+               -BOAT_WIDTH / 2, BOAT_HEIGHT,
+               0.0, 0.0,
+               BOAT_WIDTH / 2, BOAT_HEIGHT);
     }
 
     /**
@@ -111,7 +111,7 @@ public class BoatGroup extends RaceObject{
         teamNameObject.setLayoutY(y);
         velocityObject.setLayoutX(x);
         velocityObject.setLayoutY(y);
-        wake.setLayoutX(x + BOAT_WIDTH / 2);
+        wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(currentRotation);
     }
@@ -158,7 +158,7 @@ public class BoatGroup extends RaceObject{
                 wake.rotate(rotationalGoal);
                 wakeGenerationDelay--;
             } else {
-                wake.setRotationalVelocity(rotationalVelocity);
+                wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, pixelVelocityX, pixelVelocityY);
             }
         }
     }
@@ -196,7 +196,7 @@ public class BoatGroup extends RaceObject{
     public void rotateTo (double rotation) {
         currentRotation = rotation;
         boatPoly.getTransforms().clear();
-        boatPoly.getTransforms().add(new Rotate(rotation, BOAT_WIDTH / 2, 0));
+        boatPoly.getTransforms().add(new Rotate(rotation));
     }
 
 
