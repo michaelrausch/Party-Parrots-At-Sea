@@ -159,7 +159,7 @@ public class StreamParser {
                                     "CentralAltitude", "UtcOffset", "MagneticVariation", "ShorelineName"};
         Map<String, Object> outputMap = parseAtomicElements(docEle, regattaElements); // Regatta contains only atomic elements
 
-        System.out.println(outputMap);
+        //System.out.println(outputMap);
         //return outputMap;
     }
 
@@ -176,30 +176,56 @@ public class StreamParser {
         raceStartMap.put("Postpone", getNodeNamedAttribute(raceStartTime, "Postpone"));
         outputMap.put("RaceStartTime", raceStartMap);
 
-        //participants
-        Map<Integer, String> participantMap = new HashMap<>();
+        //Race Participants
         NodeList participants = docEle.getElementsByTagName("Participants").item(0).getChildNodes();
+        outputMap.put("Participants", parseRaceParticipants(participants));
+
+        //Course (CompoundMarks)
+        NodeList course = docEle.getElementsByTagName("Course").item(0).getChildNodes();
+        outputMap.put("Course", parseCourse(course));
+
+        //CompoundMark Sequence
+        NodeList markSequence = docEle.getElementsByTagName("CompoundMarkSequence").item(0).getChildNodes();
+        outputMap.put("CourseMarkSequence", parseMarkSequence(markSequence));
+
+        //Course Limits
+        NodeList courseLimits = docEle.getElementsByTagName("CourseLimit").item(0).getChildNodes();
+        outputMap.put("CourseLimit", parseCourseLimits(courseLimits));
+
+        System.out.println(outputMap.get("Course"));
+//        for (Map.Entry<String, Object> entry : outputMap.entrySet()) {
+//            System.out.println(entry);
+//        }
+    }
+
+    private static ArrayList<Map> parseRaceParticipants(NodeList participants) {
+        ArrayList<Map> participantList = new ArrayList<>();
         for (int i = 0; i < participants.getLength(); i++) {
+            Map<String, Object> participantMap = new HashMap<>();
             Integer sourceID = null;
             String entry = null;
             Node participant = participants.item(i);
             if (participant.getNodeName().equals("Yacht")) {
-                //sourceID = Integer.parseInt(participant.getAttributes().getNamedItem("SourceID").getTextContent());
                 sourceID = Integer.parseInt(getNodeNamedAttribute(participant, "SourceID"));
                 if (participant.getAttributes().getLength() == 2) {
                     entry = getNodeNamedAttribute(participant, "Entry");
                 }
-                participantMap.put(sourceID, entry);
+                participantMap.put("sourceID", sourceID);
+                participantMap.put("Entry", entry);
+                participantList.add(participantMap);
             }
         }
-        outputMap.put("Participants", participantMap);
+        return participantList;
+    }
 
-        //Course - Order matters.
+    private static Map<Integer, Object> parseCourse(NodeList course) {
         Map<Integer, Object> courseMap = new TreeMap<>();
-        NodeList course = docEle.getElementsByTagName("Course").item(0).getChildNodes();
+        ArrayList<Map> courseList = new ArrayList<>();
         for (int i = 0; i < course.getLength(); i++) {
+
             Integer compoundMarkID = null;
             String name = null;
+            //map for an individual CompoundMark
             Map<Integer, Object> compoundMarkMap = new TreeMap<>();
             Node compoundMark = course.item(i);
             if (compoundMark.getNodeName().equals("CompoundMark")) {
@@ -208,6 +234,7 @@ public class StreamParser {
                 //get marks for compound mark
                 NodeList marks = compoundMark.getChildNodes();
                 for (int j = 0; j < marks.getLength(); j++) {
+                    //map for individual mark details within a compound mark
                     Map<String, Object> markMap = new TreeMap<>();
                     Node mark = marks.item(j);
                     if (mark.getNodeName().equals("Mark")) {
@@ -215,18 +242,47 @@ public class StreamParser {
                         markMap.put("TargetLat", Double.parseDouble(getNodeNamedAttribute(mark, "TargetLat")));
                         markMap.put("TargetLng", Double.parseDouble(getNodeNamedAttribute(mark, "TargetLng")));
                         markMap.put("SourceID", Integer.parseInt(getNodeNamedAttribute(mark, "SourceID")));
-
                         compoundMarkMap.put(Integer.parseInt(getNodeNamedAttribute(mark, "SeqID")), markMap);
-
                     }
                 }
-
+                courseMap.put(compoundMarkID, compoundMarkMap);
             }
-            courseMap.put(compoundMarkID, compoundMarkMap);
         }
-        //outputMap.put("Course", courseMap);
 
-        System.out.println(outputMap);
+        return courseMap;
+    }
+
+    private static Map<Integer, Object> parseMarkSequence(NodeList markSequence) {
+        Map<Integer, Object> markSequenceMap = new TreeMap<>();
+
+        for (int i = 0; i < markSequence.getLength(); i++) {
+            Map<String, Object> cornerMap = new TreeMap<>();
+            Node corner = markSequence.item(i);
+            if (corner.getNodeName().equals("Corner")) {
+                cornerMap.put("CompoundMarkID", Integer.parseInt(getNodeNamedAttribute(corner, "CompoundMarkID")));
+                cornerMap.put("Rounding", getNodeNamedAttribute(corner, "Rounding"));
+                cornerMap.put("ZoneSize", getNodeNamedAttribute(corner, "ZoneSize"));
+                markSequenceMap.put(Integer.parseInt(getNodeNamedAttribute(corner, "SeqID")), cornerMap);
+            }
+        }
+
+        return markSequenceMap;
+    }
+
+    private static Map<Integer, Object> parseCourseLimits(NodeList courseLimits) {
+        Map<Integer, Object> courseLimitMap = new TreeMap<>();
+
+        for (int i = 0; i < courseLimits.getLength(); i++) {
+            Map<String, Object> limitMap = new HashMap<>();
+            Node limit = courseLimits.item(i);
+            if (limit.getNodeName().equals("Limit")) {
+                limitMap.put("Lat", Double.parseDouble(getNodeNamedAttribute(limit,"Lat")));
+                limitMap.put("Lon", Double.parseDouble(getNodeNamedAttribute(limit,"Lon")));
+                courseLimitMap.put(Integer.parseInt(getNodeNamedAttribute(limit, "SeqID")), limitMap);
+            }
+        }
+
+        return courseLimitMap;
     }
 
     private static void parseBoatXML(Document doc) {

@@ -126,8 +126,8 @@ public class StreamReceiver {
                 return (int) (s1.getTimeStamp() - s2.getTimeStamp());
             }
         });
-        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, pq);
-        //StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
+        //StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, pq);
+        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, pq);
         sr.connect();
     }
 }
