@@ -11,6 +11,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
 import seng302.models.Boat;
@@ -22,6 +24,7 @@ import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.StreamReceiver;
 
 import java.sql.Time;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -59,6 +62,13 @@ public class CanvasController {
     private double metersToPixels;
     private List<RaceObject> raceObjects = new ArrayList<>();
 
+    //FRAME RATE
+    private static final double UPDATE_TIME = 0.016666;     // 1 / 60 ie 60fps
+    private final long[] frameTimes = new long[30];
+    private int frameTimeIndex = 0;
+    private boolean arrayFilled = false;
+    private DecimalFormat decimalFormat2dp = new DecimalFormat("0.00");
+
     public AnimationTimer timer;
 
     private enum ScaleDirection {
@@ -80,8 +90,8 @@ public class CanvasController {
         // Bind canvas size to stack pane size.
         canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_WIDTH));
         canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_HEIGHT));
-        group.minWidth(CANVAS_WIDTH);
-        group.minHeight(CANVAS_HEIGHT);
+        //group.minWidth(CANVAS_WIDTH);
+        //group.minHeight(CANVAS_HEIGHT);
     }
 
     public void initializeCanvas (){
@@ -138,6 +148,8 @@ public class CanvasController {
 
 
         timer = new AnimationTimer() {
+
+
             private int countdown = 60;
             private int[] currentRaceMarker = {1, 1, 1, 1, 1, 1};
             List<Mark> marks = raceViewController.getRace().getCourse();
@@ -150,6 +162,20 @@ public class CanvasController {
                 int boatIndex = 0;
 
                 Mark nextMark;
+
+                long oldFrameTime = frameTimes[frameTimeIndex] ;
+                frameTimes[frameTimeIndex] = now ;
+                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+                if (frameTimeIndex == 0) {
+                    arrayFilled = true ;
+                }
+                if (arrayFilled) {
+                    long elapsedNanos = now - oldFrameTime ;
+                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+                    Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                    drawFps(frameRate.intValue());
+                }
+
                 //if (countdown == 0) {
                 //System.out.println("called the at");
                     for (RaceObject raceObject : raceObjects) {
@@ -163,13 +189,10 @@ public class CanvasController {
 
                             //descending = nextMark.getY() > boatGroup.getLayoutY();
                             //leftToRight = nextMark.getX() < boatGroup.getLayoutX();
-
-
                             raceObject.updatePosition(1000 / 60);
                             for (int id : raceObject.getRaceIds()) {
                                 //System.out.println("id = " + id);
                                 if (id != 0 && StreamParser.boatPositions.size() > 0) {
-                                    boolean test = StreamParser.boatPositions.containsKey(id);
                                     if (StreamParser.boatPositions.containsKey((long) id)) {
                                         Point3D p = StreamParser.boatPositions.get((long) id);
                                         Point2D p2d = latLonToXY(p.getX(), p.getY());
@@ -285,10 +308,15 @@ public class CanvasController {
 
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
+            gc.clearRect(5,5,50,20);
             gc.setFill(Color.BLACK);
             gc.setFont(new Font(14));
             gc.setLineWidth(3);
             gc.fillText(fps + " FPS", 5, 20);
+        } else {
+            gc.clearRect(5,5,50,20);
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(4,4,51,21);
         }
     }
 
@@ -303,16 +331,28 @@ public class CanvasController {
         Double startingY  = raceObjects.get(0).getLayoutY();
         Double firstMarkX = raceObjects.get(1).getLayoutX();
         Double firstMarkY = raceObjects.get(1).getLayoutY();
+        Arc a = new Arc(300, 300, 45, 45, -90, 45);
+        a.setType(ArcType.ROUND);
+        group.getChildren().add(a);
+        a = new Arc(500, 500, 45, 45, 450, 45);
+        a.setType(ArcType.ROUND);
+        group.getChildren().add(a);
+
+        Group boatAnnotations = new Group();
 
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
+            System.out.println("MADE A BOAT GROUP FOR " + boatGroup.getBoat().getShortName());
             boatGroup.moveTo(startingX, startingY, 0d);
-            boatGroup.setDestination(firstMarkX, firstMarkY);
+//            boatGroup.setDestination(firstMarkX, firstMarkY);
             boatGroup.forceRotation();
-            group.getChildren().add(boatGroup);
+            //group.getChildren().add(boatGroup);
             raceObjects.add(boatGroup);
+            boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
 //            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
+        group.getChildren().add(boatAnnotations);
+        group.getChildren().addAll(raceObjects);
     }
 
 
@@ -555,14 +595,15 @@ public class CanvasController {
 //                gateMark.getSingleMark2().setY((int) canvasLocation.getY());
 
                     markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
-                    group.getChildren().add(markGroup);
+                    //group.getChildren().add(markGroup);
                     raceObjects.add(markGroup);
                 } else {
 //                canvasLocation = findScaledXY(mark);
 //                mark.setX((int) canvasLocation.getX());
 //                mark.setY((int) canvasLocation.getY());
                     markGroup = new MarkGroup(mark, findScaledXY(mark));
-                    group.getChildren().add(markGroup);
+                    raceObjects.add(markGroup);
+                    //group.getChildren().add(markGroup);
                 }
                 processed.add(mark);
             }

@@ -2,16 +2,12 @@ package seng302.models;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Translate;
-
-import java.util.ArrayList;
-import java.util.List;
+import seng302.models.parsers.StreamParser;
 
 /**
  * Created by CJIRWIN on 25/04/2017.
@@ -25,23 +21,23 @@ public class BoatGroup extends RaceObject{
     private static final double VELOCITY_WAKE_RATIO = 2d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
-    private static final int LINE_INTERVAL = 120;
-    //Time between sections of race - Should be changed to 200 for actual program.
+    private static final int LINE_INTERVAL = 180;
     private static double expectedUpdateInterval = 200;
     private static int WAKE_FRAME_INTERVAL = 30;
-    private double framesForNewLine = LINE_INTERVAL;
+    private double framesForNewLine = 0;
+    private boolean destinationSet;
     private Point2D lastPoint;
+    private int wakeGenerationDelay;
 
     private Boat boat;
     private int wakeCounter = WAKE_FRAME_INTERVAL;
-    private List<Wake> wakes = new ArrayList<>();
-    //private List<Line> lines = new ArrayList<>();
-    private Group lines = new Group();
+    private Group lineGroup = new Group();
+    private Group wakeGroup = new Group();
     private Polygon boatPoly;
-//    private Polygon wakePoly;
+    private Polygon wakePoly;
     private Text teamNameObject;
     private Text velocityObject;
-    private Wake2 wake;
+    private Wake wake;
 
     public BoatGroup (Boat boat, Color color){
         this.boat = boat;
@@ -56,16 +52,6 @@ public class BoatGroup extends RaceObject{
     private void initChildren (Color color, double... points) {
         boatPoly = new Polygon(points);
         boatPoly.setFill(color);
-//        boatPoly.setLayoutX(0);
-//        boatPoly.setLayoutY(0);
-//        boatPoly.relocate(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-//
-//        wakePoly = new Polygon(
-//                5.0,0.0,
-//                10.0, boat.getVelocity() * VELOCITY_WAKE_RATIO,
-//                0.0, boat.getVelocity() * VELOCITY_WAKE_RATIO
-//        );
-//        wakePoly.setFill(Color.DARKBLUE);
 
         teamNameObject = new Text(boat.getShortName());
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
@@ -77,10 +63,11 @@ public class BoatGroup extends RaceObject{
         velocityObject.setX(VELOCITY_X_OFFSET);
         velocityObject.setY(VELOCITY_Y_OFFSET);
         velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
+        destinationSet = false;
 
-        wake = new Wake2(0, 0, 0);
-//        super.getChildren().addAll(wakePoly, boatPoly, teamNameObject, velocityObject);
-        super.getChildren().addAll(lines, wake, teamNameObject, velocityObject, boatPoly);
+        wake = new Wake(0, 0);
+        wakeGenerationDelay = wake.numWakes;
+        super.getChildren().addAll(teamNameObject, velocityObject, boatPoly);
     }
 
     private void initChildren (Color color) {
@@ -102,9 +89,9 @@ public class BoatGroup extends RaceObject{
         teamNameObject.setLayoutY(teamNameObject.getLayoutY() + dy);
         velocityObject.setLayoutX(velocityObject.getLayoutX() + dx);
         velocityObject.setLayoutY(velocityObject.getLayoutY() + dy);
-//        wakePoly.setLayoutX(wakePoly.getLayoutX() + dx);
-//        wakePoly.setLayoutY(wakePoly.getLayoutY() + dy);
-        rotateTo(currentRotation);
+        wake.setLayoutX(wake.getLayoutX() + dx);
+        wake.setLayoutY(wake.getLayoutY() + dy);
+        rotateTo(rotation + currentRotation);
     }
 
     /**
@@ -124,55 +111,19 @@ public class BoatGroup extends RaceObject{
         teamNameObject.setLayoutY(y);
         velocityObject.setLayoutX(x);
         velocityObject.setLayoutY(y);
-        wake.moveTo(x, y, currentRotation);
-//        wakePoly.setLayoutX(x);
-//        wakePoly.setLayoutY(y);
+        wake.setLayoutX(x + BOAT_WIDTH / 2);
+        wake.setLayoutY(y);
+        wake.rotate(currentRotation);
     }
 
     public void updatePosition (long timeInterval) {
         double dx = pixelVelocityX * timeInterval;
         double dy = pixelVelocityY * timeInterval;
         double rotation = 0d;
-        if (rotationalGoal > currentRotation && rotationalVelocity > 0) {
-            rotation = rotationalVelocity * timeInterval;
-        } else if (rotationalGoal < currentRotation && rotationalVelocity < 0) {
-            rotation = rotationalVelocity * timeInterval;
-        }
+
         moveGroupBy(dx, dy, rotation);
-//        if (super.getChildren().size() > 3) {
-//            for (Node wake : super.getChildren().subList(4, super.getChildren().size())) {
-//                if (!((Wake) wake).updatePosition(timeInterval))
-//                    super.getChildren().remove(wake);
-//            }
-//        }
-//        for (Wake wake : wakes) {
-//            if (wake.updatePosition(timeInterval)) {
-//                super.getChildren().remove(wake);
-//            }
-//        }
-//        if (wakeCounter-- == 0) {
-////            if (boat.getShortName().equals("BAR"))
-////                System.out.println("thinking");
-//            wakeCounter = WAKE_FRAME_INTERVAL;
-//            if (pixelVelocityX > 0 && pixelVelocityY > 0) {
-////                super.getChildren().add(
-////                        new Wake(
-////                                super.getLayoutX() + BOAT_HEIGHT, super.getLayoutY() + BOAT_HEIGHT, pixelVelocityX, pixelVelocityY
-////                        )
-////                );
-//                Wake wake = new Wake(
-//                        boatPoly.getLayoutX(),
-//                        boatPoly.getLayoutY(),
-//                        pixelVelocityX,
-//                        pixelVelocityY, rotation);
-////                wake.getTransforms().clear();
-////                wake.getTransforms().add(new Rotate(rotation, 0,  0));
-//                super.getChildren().add(wake);
-//                wakes.add(wake);
-//            }
-//
-//        }
-        if (framesForNewLine == 0) {
+
+        if (framesForNewLine-- == 0) {
             framesForNewLine = LINE_INTERVAL;
             if (lastPoint != null) {
                 Line l = new Line(
@@ -183,28 +134,38 @@ public class BoatGroup extends RaceObject{
                 );
                 l.getStrokeDashArray().setAll(4d, 6d);
                 l.setStroke(boatPoly.getFill());
-                //lines.add(l);
-                lines.getChildren().add(l);
+                lineGroup.getChildren().add(l);
             }
-            lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+            if (destinationSet){
+                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+            }
+            if (lineGroup.getChildren().size() > 100)
+                lineGroup.getChildren().remove(0);
         }
-        framesForNewLine -= 1;
         wake.updatePosition(timeInterval);
     }
 
     public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
-        //System.out.println("MADE IT");
+        destinationSet = true;
+        boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
         if (hasRaceId(raceIds)) {
             this.pixelVelocityX = (newXValue - boatPoly.getLayoutX()) / expectedUpdateInterval;
             this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
             this.rotationalGoal = rotation;
             calculateRotationalVelocity();
             rotateTo(rotation);
-            wake.setRotationalVelocity(rotationalVelocity);
+            if (wakeGenerationDelay > 0) {
+                wake.rotate(rotationalGoal);
+                wakeGenerationDelay--;
+            } else {
+                wake.setRotationalVelocity(rotationalVelocity);
+            }
         }
     }
 
     public void setDestination (double newXValue, double newYValue, int... raceIDs) {
+        destinationSet = true;
+
         if (hasRaceId(raceIDs)) {
             double rotation = Math.abs(
                     Math.toDegrees(
@@ -213,41 +174,43 @@ public class BoatGroup extends RaceObject{
                             )
                     )
             );
-
-//            if (boatPoly.getLayoutY() >= newYValue && boatPoly.getLayoutX() <= newXValue)
-//                rotation = 90 - rotation;
-//            else if (boatPoly.getLayoutY() < newYValue && boatPoly.getLayoutX() <= newXValue)
-//                rotation = 90 + rotation;
-//            else if (boatPoly.getLayoutY() >= newYValue && boatPoly.getLayoutX() > newXValue)
-//                rotation = 270 + rotation;
-//            else
-//                rotation = 270 - rotation;
             setDestination(newXValue, newYValue, rotation, raceIDs);
         }
     }
 
-    public void rotateTo (double rotation) {
-        //if(rotation != 0) {
-            //rotationalGoal = rotation;
-            currentRotation = rotation;
-            boatPoly.getTransforms().clear();
-            boatPoly.getTransforms().add(new Rotate(rotation, BOAT_WIDTH / 2, 0));
-        //}
-//        wakePoly.getTransforms().clear();
-//        wakePoly.getTransforms().add(new Rotate(rotation, 0, 0));
+    void resizeWake(){
+        velocityObject.setText(String.valueOf(boat.getVelocity()));
+        super.getChildren().remove(wakePoly);
+        wakePoly = new Polygon(
+                5.0,0.0,
+                10.0, boat.getVelocity() * VELOCITY_WAKE_RATIO,
+                0.0, boat.getVelocity() * VELOCITY_WAKE_RATIO
+        );
+        wakePoly.setLayoutX(boatPoly.getLayoutX());
+        wakePoly.setLayoutY(boatPoly.getLayoutY());
+        wakePoly.setFill(Color.DARKBLUE);
+        super.getChildren().add(wakePoly);
+
     }
+
+    public void rotateTo (double rotation) {
+        currentRotation = rotation;
+        boatPoly.getTransforms().clear();
+        boatPoly.getTransforms().add(new Rotate(rotation, BOAT_WIDTH / 2, 0));
+    }
+
+
 
     public void forceRotation () {
         rotateTo (rotationalGoal);
+        wake.rotate(rotationalGoal);
     }
 
     public void toggleAnnotations () {
         teamNameObject.setVisible(!teamNameObject.isVisible());
         velocityObject.setVisible(!velocityObject.isVisible());
-        for (Wake wake : wakes) {
-            wake.setVisible(!wake.isVisible());
-        }
-        lines.setVisible(!lines.isVisible());
+        lineGroup.setVisible(!lineGroup.isVisible());
+        wake.setVisible(!wake.isVisible());
     }
 
     public Boat getBoat() {
@@ -264,5 +227,11 @@ public class BoatGroup extends RaceObject{
 
     public int[] getRaceIds () {
         return new int[] {boat.getId()};
+    }
+
+    public Group getLowPriorityAnnotations () {
+        Group group = new Group();
+        group.getChildren().addAll(wake, lineGroup);
+        return group;
     }
 }
