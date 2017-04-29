@@ -1,6 +1,9 @@
 package seng302.server.messages;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Collections;
 
 public class Header {
     // From API spec
@@ -12,6 +15,8 @@ public class Header {
     private int sourceId;
     private short messageLength;
     private static final int MESSAGE_LEN = 15;
+    private ByteBuffer buff;
+    private int buffPos;
 
     /**
      * Message Header from section 3.2 of the AC35 Streaming
@@ -25,38 +30,34 @@ public class Header {
         this.sourceId = sourceId;
         this.messageLength = messageLength;
         timeStamp = (int) (System.currentTimeMillis() / 1000L);
+        buff = ByteBuffer.allocate(MESSAGE_LEN);
+        buffPos = 0;
+    }
+
+    private void putInBuffer(byte[] bytes, long val){
+        byte[] tmp = bytes.clone();
+        Message.reverse(tmp);
+
+        buff.put(tmp);
+        buffPos += tmp.length;
+        buff.position(buffPos);
     }
 
     /**
      * @return a ByteBuffer containing the message header
      */
     public ByteBuffer getByteBuffer(){
-        ByteBuffer buff = ByteBuffer.allocate(15);
+        putInBuffer(ByteBuffer.allocate(1).put((byte)syncByte1).array(), syncByte1);
 
-        // Sync Byte 1, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)syncByte1).array());
-        buff.position(1);
+        putInBuffer(ByteBuffer.allocate(1).put((byte)syncByte2).array(), syncByte2);
 
-        // Sync Byte 2, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)syncByte2).array());
-        buff.position(2);
+        putInBuffer(ByteBuffer.allocate(1).put((byte)messageType.getCode()).array(), messageType.getCode());
 
-        // Message Type, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte)messageType.getCode()).array());
-        buff.position(3);
+        putInBuffer(Message.intToByteArray(timeStamp, 6), timeStamp);
 
-        // Timestamp, 6 bytes
-        int x = ((int) Integer.toUnsignedLong(6));
-        buff.put(ByteBuffer.allocate(6).putInt(timeStamp).array());
-        buff.position(9);
+        putInBuffer(Message.intToByteArray(sourceId, 4), sourceId);
 
-        // Source ID, 4 bytes
-        buff.put(ByteBuffer.allocate(4).putInt(sourceId).array());
-        buff.position(13);
-
-        // Message Length, 2 bytes
-        buff.put(ByteBuffer.allocate(2).putShort(messageLength).array());
-        buff.position(15);
+        putInBuffer(Message.intToByteArray(messageLength, 2), messageLength);
 
         return buff;
     }

@@ -1,8 +1,7 @@
 package seng302.server;
 
 import org.junit.Test;
-import seng302.server.messages.Header;
-import seng302.server.messages.MessageType;
+import seng302.server.messages.*;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -23,4 +22,5 @@ public class TestHeader {
         Header h = new Header(MessageType.DISPLAY_TEXT_MESSAGE, 1, (short) 1);
         assertTrue(h.getSize() == 15); // Spec specifies 15 bytes
     }
+
 }

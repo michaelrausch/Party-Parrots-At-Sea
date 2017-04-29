@@ -3,6 +3,9 @@ package seng302.server.messages;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -63,7 +66,7 @@ public class RaceStatusMessage extends Message{
      * @param outputStream The output stream to send the message
      */
     @Override
-    public void send(DataOutputStream outputStream) {
+    public void send(SocketChannel outputStream) throws IOException {
         allocateBuffer();
         writeHeaderToBuffer();
 
@@ -83,11 +86,6 @@ public class RaceStatusMessage extends Message{
 
         writeCRC();
 
-        // Send
-        try {
-            outputStream.write(getBuffer().array());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        outputStream.write(getBuffer());
     }
 }

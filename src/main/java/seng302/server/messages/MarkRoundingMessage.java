@@ -2,6 +2,9 @@ package seng302.server.messages;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 
 public class MarkRoundingMessage extends Message{
     private final long MESSAGE_VERSION_NUMBER = 1;
@@ -38,7 +41,7 @@ public class MarkRoundingMessage extends Message{
     }
 
     @Override
-    public void send(DataOutputStream outputStream) {
+    public void send(SocketChannel outputStream) throws IOException {
         allocateBuffer();
         writeHeaderToBuffer();
 
@@ -53,10 +56,6 @@ public class MarkRoundingMessage extends Message{
 
         writeCRC();
 
-        try {
-            outputStream.write(getBuffer().array());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        outputStream.write(getBuffer());
     }
 }

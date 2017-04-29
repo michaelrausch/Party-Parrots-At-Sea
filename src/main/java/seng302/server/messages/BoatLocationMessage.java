@@ -2,6 +2,9 @@ package seng302.server.messages;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 
 public class BoatLocationMessage extends Message {
     private final int MESSAGE_SIZE = 56;
@@ -11,10 +14,10 @@ public class BoatLocationMessage extends Message {
     private long sourceId;
     private long sequenceNum;
     private DeviceType deviceType;
-    private long latitude;
-    private long longitude;
+    private double latitude;
+    private double longitude;
     private long altitude;
-    private long heading;
+    private Double heading;
     private long pitch;
     private long roll;
     private long boatSpeed;
@@ -38,13 +41,13 @@ public class BoatLocationMessage extends Message {
      * @param heading The boats heading
      * @param boatSpeed The boats speed
      */
-    public BoatLocationMessage(int sourceId, int sequenceNum, long latitude, long longitude, long heading, long boatSpeed){
+    public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude, double heading, long boatSpeed){
         messageVersionNumber = 1;
         time = System.currentTimeMillis() / 1000L;
         this.sourceId = sourceId;
         this.sequenceNum = sequenceNum;
         this.deviceType = DeviceType.RACING_YACHT;
-        this.latitude = -latitude;
+        this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = 0;
         this.heading = heading;
@@ -126,19 +129,23 @@ public class BoatLocationMessage extends Message {
 
 
     @Override
-    public void send(DataOutputStream outputStream) {
+    public void send(SocketChannel outputStream) throws IOException{
         allocateBuffer();
         writeHeaderToBuffer();
 
+        heading = (heading + 180.0) % 360.0;
+
+        long headingToSend = (long)((heading/360.0)*65535.0);
+
         putByte((byte) messageVersionNumber);
-        putInt((int) time, 6);
+        putInt(time, 6);
         putInt((int) sourceId, 4);
         putUnsignedInt((int) sequenceNum, 4);
         putByte((byte) deviceType.getCode());
-        putInt((int) latitude, 4);
-        putInt((int) longitude, 4);
+        putInt((int) latLonToBinaryPackedLong(latitude), 4);
+        putInt((int) latLonToBinaryPackedLong(longitude), 4);
         putInt((int) altitude, 4);
-        putUnsignedInt((int) heading, 2);
+        putInt(headingToSend, 2);
         putInt((int) pitch, 2);
         putInt((int) roll, 2);
         putUnsignedInt((int) boatSpeed, 2);
@@ -153,12 +160,9 @@ public class BoatLocationMessage extends Message {
         putUnsignedInt((int) currentSet, 2);
         putInt((int) rudderAngle, 2);
 
-
         writeCRC();
-        try {
-            outputStream.write(getBuffer().array());
-        } catch (IOException e) {
-            System.out.print("");
-        }
+        rewind();
+
+        outputStream.write(getBuffer());
     }
 }

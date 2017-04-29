@@ -1,27 +1,42 @@
 package seng302.server;
 
 import seng302.server.messages.*;
+import seng302.server.simulator.Boat;
+import seng302.server.simulator.Simulator;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
-public class ServerThread implements Runnable{
+public class ServerThread implements Runnable, Observer {
     private Thread runner;
     private StreamingServerSocket server;
+    private long startTime;
+    boolean raceStarted =  false;
+    private List<Boat> boats;
+    private Simulator raceSimulator;
+
     private final int HEARTBEAT_PERIOD = 5000;
-    private final int RACE_STATUS_PERIOD = 1000;
+    private final int RACE_STATUS_PERIOD = 1000/2;
+    private final int RACE_START_STATUS_PERIOD = 1000/2;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
     private final int PORT_NUMBER = 8085;
+    private final int TIME_TILL_RACE_START = 10;
+    private static final int LOG_LEVEL = 1;
 
     public ServerThread(String threadName){
         runner = new Thread(this, threadName);
-        System.out.println("Spawning Server Thread");
+        serverLog("Spawning Server", 0);
+        raceSimulator = new Simulator(BOAT_LOCATION_PERIOD);
+        boats = raceSimulator.getBoats();
         runner.start();
+    }
+
+    public static void serverLog(String message, int logLevel){
+        if(logLevel <= LOG_LEVEL){
+            System.out.println("[SERVER] " + message);
+        }
     }
 
     /**
@@ -38,6 +53,9 @@ public class ServerThread implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
+        catch (NullPointerException e){
+            return null;
+        }
 
         if (fileContents != null){
             return new XMLMessage(fileContents, type, server.getSequenceNumber());
@@ -47,56 +65,113 @@ public class ServerThread implements Runnable{
     }
 
     /**
-     * @return A sample race status message
+     * @return Get a race status message for the current race
      */
-    public Message getTestRaceStatusMessage(){
-        BoatSubMessage boat1 = new BoatSubMessage(1, BoatStatus.PRESTART, 0, 0, 0,
-                10000, 10000);
+    public Message getRaceStatusMessage(){
+        List<BoatSubMessage> boatSubMessages = new ArrayList<BoatSubMessage>();
+        BoatStatus boatStatus;
+        RaceStatus raceStatus;
 
-        BoatSubMessage boat2 = new BoatSubMessage(2, BoatStatus.PRESTART, 0, 0, 0,
-                10000, 10000);
+        if (raceStarted){
+            boatStatus = BoatStatus.RACING;
+            raceStatus = RaceStatus.STARTED;
+        }
+        else{
+            boatStatus = BoatStatus.PRESTART;
+            raceStatus = RaceStatus.PRESTART;
+        }
 
-        BoatSubMessage boat3 = new BoatSubMessage(3, BoatStatus.PRESTART, 0, 0, 0,
-                10000, 10000);
+        for (Boat b : boats){
+            BoatSubMessage m = new BoatSubMessage(b.getSourceID(), boatStatus, b.getLastPassedCorner().getSeqID(), 0, 0, 0, 0);
+            boatSubMessages.add(m);
+        }
 
-
-        List<BoatSubMessage> boats = new ArrayList<BoatSubMessage>();
-        boats.add(boat1);
-        boats.add(boat2);
-        boats.add(boat3);
-
-        return new RaceStatusMessage(1, RaceStatus.PRESTART, 1000, WindDirection.EAST,
-                100, 3, RaceType.MATCH_RACE, 1, boats);
+        return new RaceStatusMessage(1, raceStatus, startTime, WindDirection.EAST,
+                100, boats.size(), RaceType.MATCH_RACE, 1, boatSubMessages);
     }
 
     /**
-     * @return A list of sample boat location messages
+     * Starts an instance of the race simulator
      */
-    public List<Message> getTestBoatLocationMessages(){
-        List<Message> messages = new ArrayList<>();
-
-        messages.add(new BoatLocationMessage(1, 1, 100, 200, 231, 23));
-        messages.add(new BoatLocationMessage(2, 2, 400, 300, 211, 13));
-
-        return messages;
+    private void startRaceSim(){
+        serverLog("Starting Race Simulator", 0);
+        raceSimulator.addObserver(this);
+        new Thread(raceSimulator).start();
     }
 
+    /**
+     * Starts sending heartbeat messages to the client
+     */
+    private void startSendingHeartbeats(){
+        serverLog("Sending Heartbeats", 0);
+        Timer t = new Timer();
 
-    public void run() {
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Message heartbeat = new Heartbeat(server.getSequenceNumber());
+
+                try {
+                    server.send(heartbeat);
+                } catch (IOException e) {
+                    System.out.print("");
+                }
+            }
+        }, 0, HEARTBEAT_PERIOD);
+    }
+
+    /**
+     * Start sending race start status messages until race starts
+     */
+    private void startSendingRaceStartStatusMessages(){
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Message raceStartStatusMessage = new RaceStartStatusMessage(server.getSequenceNumber(), startTime , 1,
+                        RaceStartNotificationType.SET_RACE_START_TIME);
+                try {
+                    if (startTime < System.currentTimeMillis()/1000 && !raceStarted){
+                        startRaceSim();
+                        raceStarted = true;
+                        serverLog("Race Started", 0);
+                    }
+                    else{
+                        server.send(raceStartStatusMessage);
+                    }
+
+                } catch (IOException e) {
+                    System.out.print("");
+                }
+            }
+        }, 0, RACE_START_STATUS_PERIOD);
+    }
+
+    private void startSendingRaceStatusMessages(){
+        serverLog("Sending Race Status Messages", 0);
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Message statusMessage = getRaceStatusMessage();
+
+                try {
+                    server.send(statusMessage);
+                } catch (IOException e) {
+                    System.out.print("");
+                }
+            }
+        }, 100, RACE_STATUS_PERIOD);
+    }
+
+    /**
+     * Sends the race, boat, and regatta XML files to the client
+     */
+    private void sendXml(){
         try{
-            server = new StreamingServerSocket(PORT_NUMBER);
-        }
-        catch (IOException e){
-            System.err.println("Failed to bind socket: " + e.getMessage());
-        }
-
-        server.start();
-
-        try {
-            // Load and send race XML data
-            Message raceData = getXmlMessage("/server_config/race.xml", XMLMessageSubType.RACE);
-            Message boatData = getXmlMessage("/server_config/boats.xml", XMLMessageSubType.BOAT);
-            Message regatta = getXmlMessage("/server_config/regatta.xml", XMLMessageSubType.REGATTA);
+            Message raceData = getXmlMessage("server_config/race.xml", XMLMessageSubType.RACE);
+            Message boatData = getXmlMessage("server_config/boats.xml", XMLMessageSubType.BOAT);
+            Message regatta = getXmlMessage("server_config/regatta.xml", XMLMessageSubType.REGATTA);
 
             if (raceData != null){
                 server.send(raceData);
@@ -106,57 +181,56 @@ public class ServerThread implements Runnable{
                 server.send(boatData);
             }
 
-            if (regatta != null){
-                server.send(regatta);
+             if (regatta != null){
+                 server.send(regatta);
             }
-
-            // Timer to send the heartbeat
-            Timer t = new Timer();
-            t.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Message hb = new Heartbeat(server.getSequenceNumber());
-                    try {
-                        server.send(hb);
-                    } catch (IOException e) {
-                        System.out.print("");
-                    }
-                }
-            }, 0, HEARTBEAT_PERIOD);
-
-            // Timer to send the race status messages
-            Timer t1 = new Timer();
-            t1.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Message statusMessage = getTestRaceStatusMessage();
-
-                    try {
-                        server.send(statusMessage);
-                    } catch (IOException e) {
-                        System.out.print("");
-                    }
-                }
-            }, 100, RACE_STATUS_PERIOD);
-
-            t1.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    List<Message> messages = getTestBoatLocationMessages();
-
-                    for (Message m : messages){
-                        try {
-                            server.send(m);
-                        } catch (IOException e) {
-                            System.out.print("");
-                        }
-                    }
-
-                }
-            }, 100, BOAT_LOCATION_PERIOD);
-
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            serverLog("Couldn't send an XML Message: " + e.getMessage(), 0);
+        }
+    }
+
+    public void run() {
+        try{
+            server = new StreamingServerSocket(PORT_NUMBER);
+        }
+        catch (IOException e){
+            serverLog("Failed to bind socket: " + e.getMessage(), 0);
+        }
+
+        startTime = (System.currentTimeMillis()/1000) + TIME_TILL_RACE_START;
+
+        // Wait for client to connect
+        server.start();
+
+        startSendingHeartbeats();
+        sendXml();
+        startSendingRaceStartStatusMessages();
+        startSendingRaceStatusMessages();
+
+    }
+
+    /**
+     * Send a boat location message when they are updated by the simulator
+     * @param o .
+     * @param arg .
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        // Only send if server started
+        if(!server.isStarted()){
+            return;
+        }
+
+        for (Boat b : ((Simulator) o).getBoats()){
+            try {
+                Message m = new BoatLocationMessage(b.getSourceID(), 1, b.getLat(),
+                        b.getLng(), b.getHeadingCorner().getBearingToNextCorner(),
+                        ((long) b.getSpeed()));
+
+                server.send(m);
+            } catch (IOException e) {
+                serverLog("Couldn't send a boat status message", 1);
+            }
         }
     }
 }

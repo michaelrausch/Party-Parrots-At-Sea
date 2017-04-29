@@ -137,50 +137,6 @@
         </BoatShape>
     </BoatShapes>
     <Boats>
-        <Boat Type="RC" SourceID="121" ShapeID="35" StoweName="PRO" ShortName="PRO" ShorterName="PRO" BoatName="REGARDLESS" HullNum="RG02" Skipper="Iain Murray" Helmsman="Iain Murray" PeliID="121" RadioIP="172.20.2.121">
-            <GPSposition Z="3.8" Y="4.15" X="0"/>
-            <FlagPosition Z="0" Y="3.77" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="122" ShapeID="34" StoweName="SL1" ShortName="SL1" ShorterName="SL1" BoatName="Start Line 1" HullNum="Mark-02" Skipper="" PeliID="122" RadioIP="172.20.2.122">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="123" ShapeID="34" StoweName="SL2" ShortName="SL2" ShorterName="SL2" BoatName="Start Line 2" HullNum="Mark-03" Skipper="" PeliID="123" RadioIP="172.20.2.123">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="124" ShapeID="34" StoweName="LG1" ShortName="LG1" ShorterName="LG1" BoatName="Lee Gate 1" HullNum="Mark-04" Skipper="" PeliID="124" RadioIP="172.20.2.124">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="125" ShapeID="34" StoweName="LG2" ShortName="LG2" ShorterName="LG2" BoatName="Lee Gate 2" HullNum="Mark-05" Skipper="" PeliID="125" RadioIP="172.20.2.125">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="126" ShapeID="34" StoweName="WG1" ShortName="WG1" ShorterName="WG1" BoatName="Wind Gate 1" HullNum="Mark-06" Skipper="" PeliID="126" RadioIP="172.20.2.126">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="127" ShapeID="34" StoweName="WG2" ShortName="WG2" ShorterName="WG2" BoatName="Wind Gate 2" HullNum="Mark-07" Skipper="" PeliID="127" RadioIP="172.20.2.127">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="128" ShapeID="34" StoweName="FL1" ShortName="FL1" ShorterName="FL1" BoatName="Finish Line 1" HullNum="Mark-08" Skipper="" PeliID="128" RadioIP="172.20.2.128">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="129" ShapeID="34" StoweName="FL2" ShortName="FL2" ShorterName="FL2" BoatName="Finish Line 2" HullNum="Mark-09" Skipper="" PeliID="129" RadioIP="172.20.2.129">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="130" ShapeID="34" StoweName="SP1" ShortName="SP1" ShorterName="Sp1" BoatName="Spare" HullNum="Mark-10" Skipper="" PeliID="130" RadioIP="172.20.2.130">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
-        <Boat Type="Mark" SourceID="131" ShapeID="34" StoweName="M1" ShortName="M1" ShorterName="M1" BoatName="Mark1" HullNum="Mark-01" Skipper="" PeliID="131" RadioIP="172.20.2.131">
-            <GPSposition Z="5.445" Y="1.12" X="0"/>
-            <FlagPosition Z="0" Y="0.74" X="0"/>
-        </Boat>
         <Boat Type="Yacht" SourceID="101" ShapeID="15" StoweName="USA" ShortName="ORACLE" ShorterName="USA" BoatName="ORACLE TEAM USA" HullNum="AC4515" Skipper="SPITHILL" Helmsman="SPITHILL" Country="USA" PeliID="101" RadioIP="172.20.2.101">
             <GPSposition Z="1.78" Y="-0.331" X="-0.006"/>
             <MastTop Z="21.496" Y="3.7" X="0"/>
@@ -211,24 +167,5 @@
             <MastTop Z="21.496" Y="3.7" X="0"/>
             <FlagPosition Z="0" Y="6.2" X="0"/>
         </Boat>
-        <Boat Type="Marshall" SourceID="109" ShapeID="24" StoweName="CAM" ShortName="CAM" ShorterName="CAM" BoatName="Cambria" HullNum="TV01" Skipper=" " Helmsman=" " PeliID="109" RadioIP="172.20.2.109">
-            <GPSposition Z="0" Y="0" X="0"/>
-            <FlagPosition Z="0" Y="0" X="0"/>
-        </Boat>
-        <Boat Type="Marshall" SourceID="110" ShapeID="18" StoweName="BYS" ShortName="BYSTANDER" ShorterName="BYS" BoatName="BYSTANDER" HullNum="XR09" Skipper="Stan Gibbs" PeliID="110" RadioIP="172.20.2.110">
-            <GPSposition Z="5.334" Y="3.804" X="0"/>
-            <FlagPosition Z="0" Y="3.426" X="0"/>
-        </Boat>
-        <Boat Type="Marshall" SourceID="111" ShapeID="18" StoweName="SHA" ShortName="SHA" ShorterName="SHA" BoatName="SHAMROCK" HullNum="XR01" Skipper="" PeliID="111" RadioIP="172.20.2.111">
-            <GPSposition Z="5.334" Y="3.804" X="0"/>
-            <FlagPosition Z="0" Y="3.426" X="0"/>
-        </Boat>
-        <Boat Type="Umpire" SourceID="113" ShapeID="18" StoweName="U1" ShortName="U1" ShorterName="U1" BoatName="VIGILENT" HullNum="XR02" Skipper="" PeliID="113" RadioIP="172.20.2.113">
-            <GPSposition Z="5.334" Y="3.804" X="0"/>
-        </Boat>
-        <Boat Type="Umpire" SourceID="114" ShapeID="18" StoweName="U2" ShortName="U2" ShorterName="U2" BoatName="RESOLUTE" HullNum="XR03" Skipper="" PeliID="114" RadioIP="172.20.2.114">
-            <GPSposition Z="5.334" Y="3.804" X="0"/>
-        </Boat>
-        <Boat Type="Helicopter" SourceID="140" ShapeID="14" StoweName="HL1" ShortName="HEL1" ShorterName="HL1" BoatName="HELICOPTER" PeliID="140" RadioIP="172.20.2.140"/>
-    </Boats>
+       </Boats>
 </BoatConfig>

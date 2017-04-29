@@ -1,7 +1,13 @@
 package seng302.server.messages;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.zip.CRC32;
 
 public abstract class Message {
@@ -33,13 +39,14 @@ public abstract class Message {
     /**
      * Send the message as through the outputStream
      */
-    public abstract void send(DataOutputStream outputStream);
+    public abstract void send(SocketChannel outputStream) throws IOException;
 
     /**
      * Allocate byte buffer to correct size
      */
     void allocateBuffer(){
         buffer = ByteBuffer.allocate(Header.getSize() + getSize() + CRC_SIZE);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
         bufferPosition = 0;
     }
 
@@ -47,7 +54,7 @@ public abstract class Message {
      * Write the set header to the byte buffer
      */
     void writeHeaderToBuffer(){
-        buffer.put(getHeader().getByteBuffer());
+        buffer.put(getHeader().getByteBuffer().array());
         bufferPosition += Header.getSize();
         buffer.position(bufferPosition);
     }
@@ -89,12 +96,15 @@ public abstract class Message {
         }
         else if (size < 4){
             // Use short
-            buffer.put(ByteBuffer.allocate(size).putShort((short) (val & 0xffff)).array());
+            byte[] tmp =  Message.intToByteArray(val, size); //ByteBuffer.allocate(size).putShort((short) (val & 0xffff)).array();
+            reverse(tmp);
+            buffer.put(tmp);
             moveBufferPositionBy(size);
         }
         else{
             // Use int
-            buffer.put(ByteBuffer.allocate(size).putInt((int) (val & 0xffffffffL)).array());
+            byte[] tmp = Message.intToByteArray(val, size);
+            reverse(tmp);
             moveBufferPositionBy(size);
         }
     }
@@ -104,12 +114,16 @@ public abstract class Message {
      * @param val The integer value to add
      * @param size The size of the integer to be added to the buffer
      */
-    void putInt(int val, int size){
+    void putInt(long val, int size){
         if (size < 4){
-            buffer.put(ByteBuffer.allocate(size).putShort((short) val).array());
+            byte[] tmp = Message.intToByteArray(val, size);
+            reverse(tmp);
+            buffer.put(tmp);
         }
         else{
-            buffer.put(ByteBuffer.allocate(size).putInt((short) val).array());
+            byte[] tmp = Message.intToByteArray(val, size);
+            reverse(tmp);
+            buffer.put(tmp);
         }
         moveBufferPositionBy(size);
     }
@@ -141,7 +155,9 @@ public abstract class Message {
         crc = new CRC32();
 
         buffer.position(0);
-        crc.update(buffer.array());
+
+        byte[] data = Arrays.copyOfRange(buffer.array(), 0, buffer.array().length-CRC_SIZE);
+        crc.update(data);
         buffer.position(bufferPosition);
 
         putInt((int) crc.getValue(), CRC_SIZE);
@@ -152,6 +168,44 @@ public abstract class Message {
      */
     public ByteBuffer getBuffer(){
         return buffer;
+    }
+
+
+    /**
+     * Rewind the buffer to the beginning
+     */
+    void rewind(){
+        buffer.flip();
+    }
+
+    /**
+     * Convert an integer to an array of bytes
+     * @param val The value to add
+     * @param len The width of the integer in the buffer
+     * @return
+     */
+    public static byte[] intToByteArray(long val, int len){
+        int index = 0;
+        byte[] data = new byte[len];
+
+        for (int i = 0; i < len; i++){
+            data[len - index - 1] = (byte) ((val >>> (8 * index)));
+            index++;
+        }
+
+        return data;
+    }
+
+    /**
+     * Reverse an array of bytes
+     * @param data The byte[] to reverse
+     */
+    public static void reverse(byte[] data) {
+        for (int left = 0, right = data.length - 1; left < right; left++, right--) {
+            byte temp = data[left];
+            data[left]  = data[right];
+            data[right] = temp;
+        }
     }
 
 }

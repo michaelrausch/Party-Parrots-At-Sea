@@ -47,7 +47,7 @@ public class Simulator extends Observable implements Runnable {
 			for (Boat boat : boats) {
 				numOfFinishedBoats += moveBoat(boat, lapse);
 			}
-			System.out.println(boats.get(0));
+			//System.out.println(boats.get(0));
 
 			setChanged();
 			notifyObservers(boats);
@@ -119,6 +119,10 @@ public class Simulator extends Observable implements Runnable {
 					GeoUtility.getBearing(course.get(i).getCompoundMark().getMark1(),
 					course.get(i + 1).getCompoundMark().getMark1()));
 		}
+	}
+
+	public List<Boat> getBoats(){
+		return boats;
 	}
 
 }
