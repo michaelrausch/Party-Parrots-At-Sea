@@ -14,13 +14,12 @@ import javafx.scene.transform.Rotate;
  * to be populated for the class to work as expected.
  */
 class Wake extends Group {
-    private final double OPACITY_INCREASE = -0.10;
-    private final double RADIUS_INCREASE = 10;
+
     final int numWakes = 5;
-    private double[] velocities = new double[numWakes * 3];
+    private double[] velocities = new double[13];
     private Arc[] arcs = new Arc[numWakes];
     private double[] rotations = new double[numWakes];
-    private int velocitiesIndex = 0;
+    private int[] velocityIndices = new int[numWakes];
     private double sum = 0;
 
     /**
@@ -33,10 +32,12 @@ class Wake extends Group {
         super.setLayoutY(startingY);
         Arc arc;
         for (int i = 0; i < numWakes; i++) {
-             arc = new Arc(0,0,0,0,-110,40);
-             arc.setFill(new Color(0.18, 0.7, 1.0, 0.50 + OPACITY_INCREASE * i));
-             arc.setType(ArcType.ROUND);
-             arcs[i] = arc;
+            //Default triangle is -110 deg out of phase with a default wake and has angle of 40 deg.
+            arc = new Arc(0,0,0,0,-110,40);
+            //Opacity increases from 0.5 -> 0 evenly over the 5 wake arcs.
+            arc.setFill(new Color(0.18, 0.7, 1.0, 0.50 + -0.1 * i));
+            arc.setType(ArcType.ROUND);
+            arcs[i] = arc;
         }
         super.getChildren().addAll(arcs);
     }
@@ -47,21 +48,27 @@ class Wake extends Group {
      * @param rotationalVelocity The rotationalVelocity the wake should move at.
      */
     void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocityX, double velocityY) {
-        sum -= Math.abs(velocities[velocitiesIndex]);
+        sum -= Math.abs(velocities[velocityIndices[0]]);
         sum += Math.abs(rotationalVelocity);
         if (sum < 0.0001)
             rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
                                    //This stops the wake from eventually becoming out of sync with the boat.
-        velocitiesIndex = (velocitiesIndex + 1) % 14;
-        velocities[velocitiesIndex] = rotationalVelocity;
 
+        //Update the index of the array of recent velocities that each wake uses. Each wake is 3 velocities behind the
+        //next smallest wake.
+        velocityIndices[0] = (13 + (velocityIndices[0] - 1) % 13) % 13;
+        velocities[velocityIndices[0]] = rotationalVelocity;
+        for (int i = 1; i < numWakes; i++)
+            velocityIndices[i] = (velocityIndices[0] + 3 * i) % 13;
+
+        //Scale wakes based on velocity. Assumes boats are always moving at a decent pace.
         double scaleFactor = Math.abs(Math.log10(Math.abs(velocityX) + Math.abs(velocityY)));
         double baseRad = 30;
         for (Arc arc :arcs) {
-            double rad = baseRad + 5 * scaleFactor;
+            double rad = Math.min(baseRad + 4 * scaleFactor, baseRad + 12);
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
-            baseRad += RADIUS_INCREASE;
+            baseRad += 10;
         }
     }
 
@@ -70,28 +77,16 @@ class Wake extends Group {
      * @param timeInterval the time interval, in microseconds, that the wake should move.
      */
     void updatePosition (long timeInterval) {
-        int temp = velocitiesIndex;
-        for (int i = 0; i < arcs.length; i++) {
-            //temp = ((temp + 3) % 14);
-            rotations[i] = rotations[i] + velocities[temp] * timeInterval;
-            int j = 0;
-            //I have no idea why I have to do this to make it work.
-            //I will buy you a block of chocolate if you can tell me why.
-            switch (i) {
-                case 4:
-                    j = 1; break;
-                case 3:
-                    j = 2; break;
-                case 2:
-                    j = 3; break;
-                case 1:
-                    j = 4; break;
-            }
-            arcs[j].getTransforms().setAll(new Rotate(rotations[i]));
-            temp = ((temp + 3) % 14);
+        for (int i = 0; i < numWakes; i++) {
+            rotations[i] = rotations[i] + velocities[velocityIndices[i]] * timeInterval;
+            arcs[i].getTransforms().setAll(new Rotate(rotations[i]));
         }
     }
 
+    /**
+     * Rotate all wakes to the given rotation.
+     * @param rotation the from north angle in degrees to rotate to.
+     */
     void rotate (double rotation) {
         for (int i = 0; i < arcs.length; i++) {
             rotations[i] = rotation;
