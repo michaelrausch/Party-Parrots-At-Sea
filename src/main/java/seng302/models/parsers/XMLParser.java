@@ -1,57 +1,135 @@
 package seng302.models.parsers;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * Class to create an XML object from the XML Packet Messages.
+ */
 class XMLParser {
 
+    /**
+     * Creates a Regatta XML Object from the data in a Regatta XML Message
+     * @param doc XML Document Object
+     * @return A new RegattaXMLObject from the input Document.
+     */
     RegattaXMLObject createRegattaXML(Document doc) {
         return new RegattaXMLObject(doc);
     }
 
+    /**
+     * Creates a Race XML Object from the data in a Regatta XML Message
+     * @param doc XML Document Object
+     * @return A new RaceXMLObject from the input Document.
+     */
     RaceXMLObject createRaceXML(Document doc) {
         return new RaceXMLObject(doc);
     }
 
+    /**
+     * Creates a Boat XML Object from the data in a Regatta XML Message
+     * @param doc XML Document Object
+     * @return A new BoatXMLObject from the input Document.
+     */
     BoatXMLObject createBoatXML(Document doc) {
         return new BoatXMLObject(doc);
     }
 
-    // TODO: 29/04/17 ajm412: Data Validation here to return null if a tag somehow doesn't actually exist.
+    /**
+     * Returns the text content of a given child element tag, assuming it exists, as an Integer.
+     * @param ele Document Element with child elements.
+     * @param tag Tag to find in document elements child elements.
+     * @return Text content from tag if found, null otherwise.
+     */
     private static Integer getElementInt(Element ele, String tag) {
-        return Integer.parseInt(ele.getElementsByTagName(tag).item(0).getTextContent());
+        NodeList tagList = ele.getElementsByTagName(tag);
+        if (tagList.getLength() > 0) {
+            return Integer.parseInt(tagList.item(0).getTextContent());
+        } else {
+            return null;
+        }
     }
 
+    /**
+     * Returns the text content of a given child element tag, assuming it exists, as an String.
+     * @param ele Document Element with child elements.
+     * @param tag Tag to find in document elements child elements.
+     * @return Text content from tag if found, null otherwise.
+     */
     private static String getElementString(Element ele, String tag) {
-        return ele.getElementsByTagName(tag).item(0).getTextContent();
+        NodeList tagList = ele.getElementsByTagName(tag);
+        if (tagList.getLength() > 0) {
+            return tagList.item(0).getTextContent();
+        } else {
+            return null;
+        }
     }
 
+    /**
+     * Returns the text content of a given child element tag, assuming it exists, as a Double.
+     * @param ele Document Element with child elements.
+     * @param tag Tag to find in document elements child elements.
+     * @return Text content from tag if found, null otherwise.
+     */
     private static Double getElementDouble(Element ele, String tag) {
-        return Double.parseDouble(ele.getElementsByTagName(tag).item(0).getTextContent());
+        NodeList tagList = ele.getElementsByTagName(tag);
+        if (tagList.getLength() > 0) {
+            return Double.parseDouble(tagList.item(0).getTextContent());
+        } else {
+            return null;
+        }
     }
 
+    /**
+     * Returns the text content of an attribute of a given Node, assuming it exists, as a String.
+     * @param n A node object that should have some attributes
+     * @param attr The attribute you want to get from the given node.
+     * @return The String representation of the text content of an attribute in the given node, else returns null.
+     */
     private static String getNodeAttributeString(Node n, String attr) {
-        return n.getAttributes().getNamedItem(attr).getTextContent();
+        Node attrItem = n.getAttributes().getNamedItem(attr);
+        if (attrItem != null) {
+            return attrItem.getTextContent();
+        } else {
+            return null;
+        }
     }
 
+    /**
+     * Returns the text content of an attribute of a given Node, assuming it exists, as an Integer.
+     * @param n A node object that should have some attributes
+     * @param attr The attribute you want to get from the given node.
+     * @return The Integer representation of the text content of an attribute in the given node, else returns null.
+     */
     private static Integer getNodeAttributeInt(Node n, String attr) {
-        return Integer.parseInt(n.getAttributes().getNamedItem(attr).getTextContent());
+        Node attrItem = n.getAttributes().getNamedItem(attr);
+        if (attrItem != null) {
+            return Integer.parseInt(attrItem.getTextContent());
+        } else {
+            return null;
+        }
     }
 
+    /**
+     * Returns the text content of an attribute of a given Node, assuming it exists, as a Double.
+     * @param n A node object that should have some attributes
+     * @param attr The attribute you want to get from the given node.
+     * @return The Double representation of the text content of an attribute in the given node, else returns null.
+     */
     private static Double getNodeAttributeDouble(Node n, String attr) {
-        return Double.parseDouble(n.getAttributes().getNamedItem(attr).getTextContent());
+        Node attrItem = n.getAttributes().getNamedItem(attr);
+        if (attrItem != null) {
+            return Double.parseDouble(attrItem.getTextContent());
+        } else {
+            return null;
+        }
     }
 
     class RegattaXMLObject {
-
         //Regatta Info
         private Integer regattaID;
         private String regattaName;
@@ -60,6 +138,11 @@ class XMLParser {
         private Double centralLng;
         private Integer utcOffset;
 
+        /**
+         * Constructor for a RegattaXMLObject.
+         * Takes the information from a Document object and creates a more usable format.
+         * @param doc XML Document Object
+         */
         RegattaXMLObject(Document doc) {
             Element docEle = doc.getDocumentElement();
 
@@ -97,6 +180,11 @@ class XMLParser {
         ArrayList<Corner> compoundMarkSequence;
         ArrayList<Limit> courseLimit;
 
+        /**
+         * Constructor for a RaceXMLObject.
+         * Takes the information from a Document object and creates a more usable format.
+         * @param doc XML Document Object
+         */
         RaceXMLObject(Document doc) {
             Element docEle = doc.getDocumentElement();
             participants = new ArrayList<>();
@@ -230,7 +318,6 @@ class XMLParser {
                 this.compoundMarkID = getNodeAttributeInt(cornerNode, "CompoundMarkID");
                 this.rounding = getNodeAttributeString(cornerNode, "Rounding");
                 this.zoneSize = getNodeAttributeInt(cornerNode, "ZoneSize");
-
             }
 
             public Integer getSeqID() { return seqID; }
@@ -273,6 +360,11 @@ class XMLParser {
         //Boats
         ArrayList<Boat> boats;
 
+        /**
+         * Constructor for a BoatXMLObject.
+         * Takes the information from a Document object and creates a more usable format.
+         * @param doc XML Document Object
+         */
         BoatXMLObject(Document doc) {
 
             Element docEle = doc.getDocumentElement();
@@ -292,6 +384,17 @@ class XMLParser {
             for (int i = 0; i < zoneLimitsList.getAttributes().getLength(); i++) {
                 String tag = String.format("Limit%d", i+1);
                 this.zoneLimits.add(getNodeAttributeDouble(zoneLimitsList, tag));
+            }
+
+            this.boats = new ArrayList<>();
+            NodeList boatsList = docEle.getElementsByTagName("Boats").item(0).getChildNodes();
+            for (int i = 0; i < boatsList.getLength(); i++) {
+                Node currentBoat = boatsList.item(i);
+                if (currentBoat.getNodeName().equals("Boat")) {
+                    Boat boat = new Boat(currentBoat);
+                    this.boats.add(boat);
+                }
+                //System.out.println(this.getBoats());
             }
 
         }
@@ -314,10 +417,14 @@ class XMLParser {
             private String shortName;
             private String boatName;
             private String country;
-            private String skipper;
 
             Boat(Node boatNode) {
-                // TODO: 29/04/17 Actually build the boats.
+                this.boatType = getNodeAttributeString(boatNode, "Type");
+                this.sourceID = getNodeAttributeInt(boatNode, "SourceID");
+                this.hullID = getNodeAttributeString(boatNode, "HullNum");
+                this.shortName = getNodeAttributeString(boatNode, "ShortName");
+                this.boatName = getNodeAttributeString(boatNode, "BoatName");
+                this.country = getNodeAttributeString(boatNode, "Country");
             }
 
             public String getBoatType() { return boatType; }
@@ -326,7 +433,6 @@ class XMLParser {
             public String getShortName() { return shortName; }
             public String getBoatName() { return boatName; }
             public String getCountry() { return country; }
-            public String getSkipper() { return skipper; }
 
         }
 

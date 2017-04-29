@@ -2,9 +2,6 @@ package seng302.models.parsers;
 
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -14,7 +11,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by kre39 on 23/04/17.
@@ -110,9 +108,9 @@ public class StreamParser {
     }
 
     static void extractXmlMessage(StreamPacket packet){
-
-        byte[] payload = packet.getPayload();
-        String xmlMessage = "";
+        
+        byte[] payload = packet.getPayload();       //Raw Binary XML Message 
+        String xmlMessage = "";                     //Empty xmlMessage String to store XML in 
 
         ByteArrayInputStream payloadStream = new ByteArrayInputStream(payload);
 
@@ -129,21 +127,19 @@ public class StreamParser {
         while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
             xmlMessage += (char)currentChar;
         }
-        if (xmlMessageSubType == 7) System.out.println(xmlMessage);
 
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
         DocumentBuilder db = null;
+        Document doc = null;
         try {
             db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
-            if (xmlMessageSubType == 7) {
-                XMLParser x = new XMLParser();
-                XMLParser.BoatXMLObject xr = x.createBoatXML(doc);
-            }
+            doc = db.parse(new InputSource(new StringReader(xmlMessage)));
         } catch (ParserConfigurationException|SAXException|IOException e) {
             e.printStackTrace();
         }
+        // TODO: 30/04/2017 (ajm412) Figure out how this will tie into the backend of the visualiser now that the parsing is done. 
     }
 
     private static void extractRaceStartStatus(StreamPacket packet){
