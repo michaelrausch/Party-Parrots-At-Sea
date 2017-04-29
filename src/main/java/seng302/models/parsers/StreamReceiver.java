@@ -1,5 +1,7 @@
 package seng302.models.parsers;
 
+import seng302.models.parsers.packets.StreamPacket;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

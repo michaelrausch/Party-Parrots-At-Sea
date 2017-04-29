@@ -146,21 +146,23 @@ public class BoatGroup extends RaceObject{
     }
 
     public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
-        destinationSet = true;
-        boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
-        if (hasRaceId(raceIds)) {
-            this.pixelVelocityX = (newXValue - boatPoly.getLayoutX()) / expectedUpdateInterval;
-            this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
-            this.rotationalGoal = rotation;
-            calculateRotationalVelocity();
-            rotateTo(rotation);
-            if (wakeGenerationDelay > 0) {
-                wake.rotate(rotationalGoal);
-                wakeGenerationDelay--;
-            } else {
-                wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, pixelVelocityX, pixelVelocityY);
-            }
-        }
+        moveGroupBy(newXValue - boatPoly.getLayoutX(), newYValue - boatPoly.getLayoutY(), rotation);
+
+//        destinationSet = true;
+//        boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
+//        if (hasRaceId(raceIds)) {
+//            this.pixelVelocityX = (newXValue - boatPoly.getLayoutX()) / expectedUpdateInterval;
+//            this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
+//            this.rotationalGoal = rotation;
+//            calculateRotationalVelocity();
+//            rotateTo(rotation);
+//            if (wakeGenerationDelay > 0) {
+//                wake.rotate(rotationalGoal);
+//                wakeGenerationDelay--;
+//            } else {
+//                wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, pixelVelocityX, pixelVelocityY);
+//            }
+//        }
     }
 
     public void setDestination (double newXValue, double newYValue, int... raceIDs) {

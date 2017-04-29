@@ -5,6 +5,8 @@ import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import seng302.models.parsers.packets.BoatPositionPacket;
+import seng302.models.parsers.packets.StreamPacket;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,12 +14,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * The purpose of this class is to take in the stream of divided packets so they can be read
@@ -27,14 +28,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StreamParser extends Thread{
 
-     public static ConcurrentHashMap<Long,Point3D> boatPositions = new ConcurrentHashMap<>();
-     public static ConcurrentHashMap<Long,Double> boatSpeeds = new ConcurrentHashMap<>();
+     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
      private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
 
+
+
+
+
      public StreamParser(String threadName){
-        this.threadName = threadName;
+         this.threadName = threadName;
      }
 
     /**
@@ -313,28 +317,31 @@ public class StreamParser extends Thread{
         byte[] headingBytes = Arrays.copyOfRange(payload,28,30);
         byte[] groundSpeedBytes = Arrays.copyOfRange(payload,38,40);
 
-        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long timeValid = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
         long boatId = bytesToLong(boatIdBytes);
-        long lat = bytesToLong(latBytes);
-        long lon = bytesToLong(lonBytes);
+        long rawLat = bytesToLong(latBytes);
+        long rawLon = bytesToLong(lonBytes);
+        double lat = ((180d * (double)rawLat)/Math.pow(2,31));
+        double lon = ((180d *(double)rawLon)/Math.pow(2,31));
         long heading = bytesToLong(headingBytes);
 //        long speed = extractTimeStamp(speedBytes, 2);
         double groundSpeed = bytesToLong(groundSpeedBytes)/1000.0;
         short s = (short) ((groundSpeedBytes[1] & 0xFF) << 8 | (groundSpeedBytes[0] & 0xFF));
-        if ((int)deviceType == 1 || (int)deviceType == 4){
-//            System.out.println("boatId = " + boatId);
-//            System.out.println("deviceType = " + (long)deviceType);
-//            System.out.println("seq = " + seq);
-            //needs to be validated
-            Point3D point = new Point3D(((180d * (double)lat)/Math.pow(2,31)),((180d *(double)lon)/Math.pow(2,31)),(double)heading);
-            boatPositions.put(boatId, point);
-            boatSpeeds.put(boatId, groundSpeed);
-//            boatPositions.replace(boatId, point);
-//            boatSpeeds.replace(boatId, groundSpeed);
-//            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
-//            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
+        if ((int)deviceType == 1){
+
+            BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
+
+            if (!boatPositions.containsKey(boatId)){
+                boatPositions.put(boatId, new PriorityBlockingQueue<BoatPositionPacket>(256, new Comparator<BoatPositionPacket>() {
+                    @Override
+                    public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
+                        return (int) (p1.getTimeValid() - p2.getTimeValid());
+                    }
+                }));
+            }
+            boatPositions.get(boatId).put(boatPacket);
         }
     }
 
