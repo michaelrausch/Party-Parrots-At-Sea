@@ -22,14 +22,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The purpose of this class is to take in the stream of divided packets so they can be read
  * and parsed in by turning the byte arrays into useful data. There are two public static hashmaps
- * that are threadsafe so the visualiser can always access the latest speed and position avaible
+ * that are threadsafe so the visualiser can always access the latest speed and position available
  * Created by kre39 on 23/04/17.
  */
 public class StreamParser extends Thread{
 
      public static ConcurrentHashMap<Long,Point3D> boatPositions = new ConcurrentHashMap<>();
      public static ConcurrentHashMap<Long,Double> boatSpeeds = new ConcurrentHashMap<>();
-    private String threadName;
+     private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
 
@@ -48,9 +48,23 @@ public class StreamParser extends Thread{
                  Thread.sleep(1);
              }
              while (StreamReceiver.packetBuffer.peek() != null){
-                 StreamPacket packet = StreamReceiver.packetBuffer.take();
+                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
+                 int delayTime = 1000;
+                 int loopTime = delayTime + 1000;
+                 long sleepTime = 0;
+                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
+                 if (transitTime < 0){
+                     transitTime = loopTime + delayTime;
+                 }
+                 if (transitTime < delayTime) {
+                     sleepTime = delayTime - (transitTime);
+                     Thread.sleep(sleepTime);
+                 }
+                 System.out.println(sleepTime);
+
+                 packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
-                 Thread.sleep(10);
+                 Thread.sleep(1);
                  while (StreamReceiver.packetBuffer.peek() == null) {
                      Thread.sleep(1);
                  }
@@ -152,7 +166,6 @@ public class StreamParser extends Thread{
             }
             if (timeTillStart % 10 == 0){
                 System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
-
             }
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
@@ -316,10 +329,10 @@ public class StreamParser extends Thread{
 //            System.out.println("seq = " + seq);
             //needs to be validated
             Point3D point = new Point3D(((180d * (double)lat)/Math.pow(2,31)),((180d *(double)lon)/Math.pow(2,31)),(double)heading);
-            boatPositions.putIfAbsent(boatId, point);
-            boatSpeeds.putIfAbsent(boatId, groundSpeed);
-            boatPositions.replace(boatId, point);
-            boatSpeeds.replace(boatId, groundSpeed);
+            boatPositions.put(boatId, point);
+            boatSpeeds.put(boatId, groundSpeed);
+//            boatPositions.replace(boatId, point);
+//            boatSpeeds.replace(boatId, groundSpeed);
 //            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
 //            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
         }
