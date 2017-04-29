@@ -14,6 +14,8 @@ public class ServerThread implements Runnable, Observer {
     private StreamingServerSocket server;
     private long startTime;
     boolean raceStarted =  false;
+    boolean raceFinished = false;
+    Map<Integer,Boolean> boatsFinished = new HashMap<>();
     private List<Boat> boats;
     private Simulator raceSimulator;
 
@@ -30,6 +32,11 @@ public class ServerThread implements Runnable, Observer {
         serverLog("Spawning Server", 0);
         raceSimulator = new Simulator(BOAT_LOCATION_PERIOD);
         boats = raceSimulator.getBoats();
+
+        for (Boat b : boats){
+            boatsFinished.put(b.getSourceID(), false);
+        }
+
         runner.start();
     }
 
@@ -71,19 +78,36 @@ public class ServerThread implements Runnable, Observer {
         List<BoatSubMessage> boatSubMessages = new ArrayList<BoatSubMessage>();
         BoatStatus boatStatus;
         RaceStatus raceStatus;
+        boolean thereAreBoatsNotFinished = false;
 
-        if (raceStarted){
-            boatStatus = BoatStatus.RACING;
-            raceStatus = RaceStatus.STARTED;
-        }
-        else{
-            boatStatus = BoatStatus.PRESTART;
-            raceStatus = RaceStatus.PRESTART;
-        }
 
         for (Boat b : boats){
+            if (raceStarted){
+                boatStatus = BoatStatus.RACING;
+                thereAreBoatsNotFinished = true;
+            }
+            else if(boatsFinished.get(b.getSourceID())){
+                boatStatus = BoatStatus.FINISHED;
+            }
+            else{
+                boatStatus = BoatStatus.PRESTART;
+                thereAreBoatsNotFinished = true;
+            }
+
             BoatSubMessage m = new BoatSubMessage(b.getSourceID(), boatStatus, b.getLastPassedCorner().getSeqID(), 0, 0, 0, 0);
             boatSubMessages.add(m);
+        }
+
+        if (thereAreBoatsNotFinished){
+            if (raceStarted){
+                raceStatus = RaceStatus.STARTED;
+            }
+            else{
+                raceStatus = RaceStatus.PRESTART;
+            }
+        }
+        else{
+            raceStatus = RaceStatus.NOTACTIVE;
         }
 
         return new RaceStatusMessage(1, raceStatus, startTime, WindDirection.EAST,
@@ -223,13 +247,18 @@ public class ServerThread implements Runnable, Observer {
 
         for (Boat b : ((Simulator) o).getBoats()){
             try {
+
                 Message m = new BoatLocationMessage(b.getSourceID(), 1, b.getLat(),
                         b.getLng(), b.getHeadingCorner().getBearingToNextCorner(),
                         ((long) b.getSpeed()));
-
                 server.send(m);
             } catch (IOException e) {
                 serverLog("Couldn't send a boat status message", 1);
+            }
+            catch (NullPointerException e){
+                //raceFinished = true;
+                serverLog("Boat " + b.getSourceID() + " finished the race", 1);
+                boatsFinished.put(b.getSourceID(), true);
             }
         }
     }
