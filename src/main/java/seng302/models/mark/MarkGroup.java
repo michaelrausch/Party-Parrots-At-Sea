@@ -39,6 +39,9 @@ public class MarkGroup extends RaceObject {
         System.out.println("HERE ARE THE CHILDREN LOL");
         if (mark.getMarkType() == MarkType.SINGLE_MARK) {
             super.getChildren().add(new Circle(0, 0, MARK_RADIUS, color));
+            nodeDestinations     = new Point2D[]{
+                    new Point2D(super.getChildren().get(0).getLayoutX()
+                            , super.getChildren().get(0).getLayoutY())};
         } else {
             marks.add(((GateMark) mark).getSingleMark1());
             marks.add(((GateMark) mark).getSingleMark2());
@@ -96,6 +99,7 @@ public class MarkGroup extends RaceObject {
                     setDestinationGroup(x, y);
             childrenIndex++;
         }
+        updateChildren();
     }
 
 
@@ -105,9 +109,13 @@ public class MarkGroup extends RaceObject {
         this.nodeDestinations[childIndex]     = new Point2D(relativeX, relativeY);
         this.nodePixelVelocitiesX[childIndex] = (relativeX - super.getChildren().get(childIndex).getLayoutX()) / expectedUpdateInterval;
         this.nodePixelVelocitiesY[childIndex] = (relativeY - super.getChildren().get(childIndex).getLayoutY()) / expectedUpdateInterval;
+
     }
 
     private void setDestinationGroup (double x, double y) {
+        double relativeX = x - super.getLayoutX();
+        double relativeY = y - super.getLayoutY();
+        this.nodeDestinations[0] = new Point2D(relativeX, relativeY);
         pixelVelocityX = (x - super.getLayoutX()) / expectedUpdateInterval;
         pixelVelocityY = (y - super.getLayoutY()) / expectedUpdateInterval;
     }
@@ -119,11 +127,11 @@ public class MarkGroup extends RaceObject {
     }
 
     public void updatePosition (long timeInterval) {
-        double x = pixelVelocityX * timeInterval;
-        double y = pixelVelocityY * timeInterval;
-        double rotation = rotationalVelocity * timeInterval;
-        moveGroupBy(x, y, rotation);
-        updateChildren(timeInterval);
+//        double x = pixelVelocityX * timeInterval;
+//        double y = pixelVelocityY * timeInterval;
+//        double rotation = rotationalVelocity * timeInterval;
+//        moveGroupBy(x, y, rotation);
+//        updateChildren(timeInterval);
     }
 
     public void moveGroupBy (double x, double y, double rotation) {
@@ -132,42 +140,59 @@ public class MarkGroup extends RaceObject {
         rotateTo(rotation);
     }
 
-    private void updateChildren (double timeInterval) {
+    private void updateChildren () {
+
         if (mainMark.getMarkType() != MarkType.SINGLE_MARK) {
+            Line line = (Line) super.getChildren().get(2);
+            for (int childIndex = 0; childIndex < 2; childIndex++){
+                Circle mark = (Circle) super.getChildren().get(childIndex);
+                Point2D dest = nodeDestinations[childIndex];
+                mark.setCenterY(dest.getY());
+                mark.setCenterX(dest.getX());
+            }
+            line.setStartX(nodeDestinations[0].getX());
+            line.setStartY(nodeDestinations[0].getY());
+            line.setEndX(nodeDestinations[1].getX());
+            line.setEndY(nodeDestinations[1].getY());
+//            Circle mark = (Circle) super.getChildren().get(0);
+//            if (nodePixelVelocitiesX[0] > 0 && mark.getLayoutX() >= nodeDestinations[0].getX()) {
+//                nodePixelVelocitiesX[0] = 0;
+//            } else if (nodePixelVelocitiesX[0] < 0 && mark.getLayoutX() <= nodeDestinations[0].getX()) {
+//                nodePixelVelocitiesX[0] = 0;
+//            } else {
+//                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[0] * timeInterval);
+//                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[0] * timeInterval);
+//            }
+//            if (nodePixelVelocitiesY[0] >= 0 && mark.getLayoutY() > nodeDestinations[0].getY()) {
+//                nodePixelVelocitiesY[0] = 0;
+//            } else if (nodePixelVelocitiesY[0] < 0 && mark.getLayoutY() <= nodeDestinations[0].getY()) {
+//                nodePixelVelocitiesY[0] = 0;
+//            } else {
+//                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[0] * timeInterval);
+//                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[0] * timeInterval);
+//            }
+//            mark = (Circle) super.getChildren().get(1);
+//            if (nodePixelVelocitiesX[1] > 0 && mark.getLayoutX() >= nodeDestinations[1].getX()) {
+//                nodePixelVelocitiesX[1] = 0;
+//            } else if (nodePixelVelocitiesX[1] < 0 && mark.getLayoutX() <= nodeDestinations[1].getX()) {
+//                nodePixelVelocitiesX[1] = 0;
+//            } else {
+//                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[1] * timeInterval);
+//                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[1] * timeInterval);
+//            }
+//            if (nodePixelVelocitiesY[1] >= 0 && mark.getLayoutY() > nodeDestinations[1].getY()) {
+//                nodePixelVelocitiesY[1] = 0;
+//            } else if (nodePixelVelocitiesY[1] < 0 && mark.getLayoutY() <= nodeDestinations[1].getY()) {
+//                nodePixelVelocitiesY[1] = 0;
+//            } else {
+//                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[1] * timeInterval);
+//                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[1] * timeInterval);
+//            }
+        } else {
             Circle mark = (Circle) super.getChildren().get(0);
-            if (nodePixelVelocitiesX[0] > 0 && mark.getLayoutX() >= nodeDestinations[0].getX()) {
-                nodePixelVelocitiesX[0] = 0;
-            } else if (nodePixelVelocitiesX[0] < 0 && mark.getLayoutX() <= nodeDestinations[0].getX()) {
-                nodePixelVelocitiesX[0] = 0;
-            } else {
-                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[0] * timeInterval);
-                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[0] * timeInterval);
-            }
-            if (nodePixelVelocitiesY[0] >= 0 && mark.getLayoutY() > nodeDestinations[0].getY()) {
-                nodePixelVelocitiesY[0] = 0;
-            } else if (nodePixelVelocitiesY[0] < 0 && mark.getLayoutY() <= nodeDestinations[0].getY()) {
-                nodePixelVelocitiesY[0] = 0;
-            } else {
-                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[0] * timeInterval);
-                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[0] * timeInterval);
-            }
-            mark = (Circle) super.getChildren().get(1);
-            if (nodePixelVelocitiesX[1] > 0 && mark.getLayoutX() >= nodeDestinations[1].getX()) {
-                nodePixelVelocitiesX[1] = 0;
-            } else if (nodePixelVelocitiesX[1] < 0 && mark.getLayoutX() <= nodeDestinations[1].getX()) {
-                nodePixelVelocitiesX[1] = 0;
-            } else {
-                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[1] * timeInterval);
-                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[1] * timeInterval);
-            }
-            if (nodePixelVelocitiesY[1] >= 0 && mark.getLayoutY() > nodeDestinations[1].getY()) {
-                nodePixelVelocitiesY[1] = 0;
-            } else if (nodePixelVelocitiesY[1] < 0 && mark.getLayoutY() <= nodeDestinations[1].getY()) {
-                nodePixelVelocitiesY[1] = 0;
-            } else {
-                mark.setLayoutX(mark.getLayoutX() + nodePixelVelocitiesX[1] * timeInterval);
-                mark.setLayoutY(mark.getLayoutY() + nodePixelVelocitiesY[1] * timeInterval);
-            }
+            Point2D dest = nodeDestinations[0];
+            mark.setCenterY(dest.getY());
+            mark.setCenterX(dest.getX());
         }
     }
 

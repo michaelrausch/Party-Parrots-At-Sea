@@ -48,21 +48,20 @@ public class StreamParser extends Thread{
                  Thread.sleep(1);
              }
              while (StreamReceiver.packetBuffer.peek() != null){
-                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
-                 int delayTime = 1000;
-                 int loopTime = delayTime + 1000;
-                 long sleepTime = 0;
-                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
-                 if (transitTime < 0){
-                     transitTime = loopTime + delayTime;
-                 }
-                 if (transitTime < delayTime) {
-                     sleepTime = delayTime - (transitTime);
-                     Thread.sleep(sleepTime);
-                 }
-                 System.out.println(sleepTime);
-
-                 packet = StreamReceiver.packetBuffer.take();
+//                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
+//                 int delayTime = 1000;
+//                 int loopTime = delayTime + 1000;
+//                 long sleepTime = 0;
+//                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
+//                 if (transitTime < 0){
+//                     transitTime = loopTime + delayTime;
+//                 }
+//                 if (transitTime < delayTime) {
+//                     sleepTime = delayTime - (transitTime);
+//                     Thread.sleep(sleepTime);
+//                 }
+//                 System.out.println(sleepTime);
+                 StreamPacket packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
                  Thread.sleep(1);
                  while (StreamReceiver.packetBuffer.peek() == null) {
@@ -228,7 +227,6 @@ public class StreamParser extends Thread{
         while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
         xmlMessage += (char)currentChar;
         }
-
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = null;
@@ -323,7 +321,7 @@ public class StreamParser extends Thread{
 //        long speed = extractTimeStamp(speedBytes, 2);
         double groundSpeed = bytesToLong(groundSpeedBytes)/1000.0;
         short s = (short) ((groundSpeedBytes[1] & 0xFF) << 8 | (groundSpeedBytes[0] & 0xFF));
-        if ((int)deviceType == 1 || (int)deviceType == 4){
+        if ((int)deviceType == 1 || (int)deviceType == 3){
 //            System.out.println("boatId = " + boatId);
 //            System.out.println("deviceType = " + (long)deviceType);
 //            System.out.println("seq = " + seq);

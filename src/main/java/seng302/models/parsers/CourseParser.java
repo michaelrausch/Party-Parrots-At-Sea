@@ -35,7 +35,8 @@ public class CourseParser extends FileParser {
 				String name = element.getElementsByTagName("name").item(0).getTextContent();
 				double lat = Double.valueOf(element.getElementsByTagName("latitude").item(0).getTextContent());
 				double lon = Double.valueOf(element.getElementsByTagName("longitude").item(0).getTextContent());
-				SingleMark singleMark = new SingleMark(name, lat, lon);
+				int id = Integer.valueOf(element.getElementsByTagName("id").item(0).getTextContent());
+				SingleMark singleMark = new SingleMark(name, lat, lon, id);
 				return singleMark;
 			} else {
 				throw new NoSuchElementException("Cannot generate a mark by given node.");

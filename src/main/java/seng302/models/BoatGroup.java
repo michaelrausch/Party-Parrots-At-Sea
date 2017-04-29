@@ -148,6 +148,7 @@ public class BoatGroup extends RaceObject{
     public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
         destinationSet = true;
         boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
+        velocityObject.setText(String.valueOf(boat.getVelocity()));
         if (hasRaceId(raceIds)) {
             this.pixelVelocityX = (newXValue - boatPoly.getLayoutX()) / expectedUpdateInterval;
             this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
