@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.zip.CRC32;
@@ -13,8 +15,8 @@ import java.util.zip.Checksum;
 public class StreamReceiver extends Thread {
     private InputStream stream;
     private Socket host;
-    private ByteArrayOutputStream crcBuffer;
-    private Thread thread;
+    private  ByteArrayOutputStream crcBuffer;
+    private Thread t;
     private String threadName;
     public static PriorityBlockingQueue<StreamPacket> packetBuffer;
 
@@ -29,20 +31,21 @@ public class StreamReceiver extends Thread {
     }
 
     public void run(){
-        packetBuffer = new PriorityBlockingQueue<>(256, new Comparator<StreamPacket>() {
+        PriorityBlockingQueue<StreamPacket> pq = new PriorityBlockingQueue<>(256, new Comparator<StreamPacket>() {
             @Override
             public int compare(StreamPacket s1, StreamPacket s2) {
                 return (int) (s1.getTimeStamp() - s2.getTimeStamp());
             }
         });
+        packetBuffer = pq;
         connect();
     }
 
     public void start () {
         System.out.println("Starting " +  threadName );
-        if (thread == null) {
-            thread = new Thread (this, threadName);
-            thread.start ();
+        if (t == null) {
+            t = new Thread (this, threadName);
+            t.start ();
         }
     }
 
@@ -137,5 +140,16 @@ public class StreamReceiver extends Thread {
             index++;
         }
         return partialLong;
+    }
+
+
+
+
+    public static void main(String[] args) {
+
+        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
+        //StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread2");
+        sr.start();
+
     }
 }

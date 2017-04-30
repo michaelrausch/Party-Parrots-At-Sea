@@ -50,13 +50,10 @@ class Wake extends Group {
     void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocityX, double velocityY) {
         sum -= Math.abs(velocities[velocityIndices[0]]);
         sum += Math.abs(rotationalVelocity);
-        if (sum < 0.0001) {
-            System.out.println("***************************************************************************");
-            System.out.println(sum);
-            System.out.println("***************************************************************************");
-            rotate(rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
-            //This stops the wake from eventually becoming out of sync with the boat.
-        }
+        if (sum < 0.00002)
+            rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
+        //This stops the wake from eventually becoming out of sync with the boat.
+
         //Update the index of the array of recent velocities that each wake uses. Each wake is 3 velocities behind the
         //next smallest wake.
         velocityIndices[0] = (13 + (velocityIndices[0] - 1) % 13) % 13;
@@ -66,9 +63,9 @@ class Wake extends Group {
 
         //Scale wakes based on velocity. Assumes boats are always moving at a decent pace.
         double scaleFactor = Math.abs(Math.log10(Math.abs(velocityX) + Math.abs(velocityY)));
-        double baseRad = 30;
+        double baseRad = 25;
         for (Arc arc :arcs) {
-            double rad = Math.min(baseRad + 4 * scaleFactor, baseRad + 12);
+            double rad = Math.min(baseRad + 5 * scaleFactor, baseRad + 15);
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
             baseRad += 10;
@@ -84,12 +81,6 @@ class Wake extends Group {
             rotations[i] = rotations[i] + velocities[velocityIndices[i]] * timeInterval;
             arcs[i].getTransforms().setAll(new Rotate(rotations[i]));
         }
-        System.out.println("rotations[0] = " + rotations[0]);
-        System.out.println("rotations[1] = " + rotations[1]);
-        System.out.println("rotations[2] = " + rotations[2]);
-        System.out.println("rotations[3] = " + rotations[3]);
-        System.out.println("rotations[4] = " + rotations[4]);
-
     }
 
     /**
