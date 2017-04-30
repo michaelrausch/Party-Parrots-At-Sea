@@ -16,7 +16,7 @@ public class App extends Application
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
 
-        primaryStage.show();
+//        primaryStage.show();
     }
 
     public static void main(String[] args) {

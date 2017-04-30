@@ -3,8 +3,11 @@ package seng302.server;
 import seng302.server.messages.*;
 import seng302.server.simulator.Boat;
 import seng302.server.simulator.Simulator;
+import sun.misc.IOUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -56,11 +59,11 @@ public class ServerThread implements Runnable, Observer {
         String fileContents = null;
 
         try {
-            fileContents = new String(Files.readAllBytes(Paths.get(this.getClass().getResource(fileName).getPath().substring(1))));
+            InputStream thisStream = this.getClass().getResourceAsStream(fileName);
+            fileContents = new String(org.apache.commons.io.IOUtils.toByteArray(thisStream));
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        catch (NullPointerException e){
+        } catch (NullPointerException e){
             return null;
         }
 
@@ -205,20 +208,23 @@ public class ServerThread implements Runnable, Observer {
      */
     private void sendXml(){
         try{
-            Message raceData = getXmlMessage("server_config/race.xml", XMLMessageSubType.RACE);
-            Message boatData = getXmlMessage("server_config/boats.xml", XMLMessageSubType.BOAT);
-            Message regatta = getXmlMessage("server_config/regatta.xml", XMLMessageSubType.REGATTA);
+            Message raceData = getXmlMessage("/server_config/race.xml", XMLMessageSubType.RACE);
+            Message boatData = getXmlMessage("/server_config/boats.xml", XMLMessageSubType.BOAT);
+            Message regatta = getXmlMessage("/server_config/regatta.xml", XMLMessageSubType.REGATTA);
 
             if (raceData != null){
                 server.send(raceData);
+                serverLog("Sending race data", 0);
             }
 
             if (boatData != null){
                 server.send(boatData);
+                serverLog("Sending boat data", 0);
             }
 
              if (regatta != null){
                  server.send(regatta);
+                 serverLog("Sending regatta data", 0);
             }
         } catch (IOException e) {
             serverLog("Couldn't send an XML Message: " + e.getMessage(), 0);
