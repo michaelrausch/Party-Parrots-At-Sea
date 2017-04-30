@@ -223,9 +223,6 @@ public class MarkGroup extends RaceObject {
                 return true;
         return false;
     }
-    public void toggleAnnotations () {
-
-    }
 
     public static int getMarkRadius() {
         return MARK_RADIUS;

@@ -76,6 +76,4 @@ public abstract class RaceObject extends Group {
     public abstract boolean hasRaceId (int... raceIds);
 
     public abstract int[] getRaceIds ();
-
-    public abstract void toggleAnnotations ();
 }

@@ -229,11 +229,20 @@ public class BoatGroup extends RaceObject{
         wake.rotate(rotationalGoal);
     }
 
-    public void toggleAnnotations () {
-        teamNameObject.setVisible(!teamNameObject.isVisible());
-        velocityObject.setVisible(!velocityObject.isVisible());
-        lineGroup.setVisible(!lineGroup.isVisible());
-        wake.setVisible(!wake.isVisible());
+    public void setTeamNameObjectVisible(Boolean visible) {
+        teamNameObject.setVisible(visible);
+    }
+
+    public void setVelocityObjectVisible(Boolean visible) {
+        velocityObject.setVisible(visible);
+    }
+
+    public void setLineGroupVisible(Boolean visible) {
+        lineGroup.setVisible(visible);
+    }
+
+    public void setWakeVisible(Boolean visible) {
+        wake.setVisible(visible);
     }
 
     public Boat getBoat() {
