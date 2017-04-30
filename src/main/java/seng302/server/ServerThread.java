@@ -17,14 +17,13 @@ public class ServerThread implements Runnable, Observer {
     private StreamingServerSocket server;
     private long startTime;
     boolean raceStarted =  false;
-    boolean raceFinished = false;
     Map<Integer,Boolean> boatsFinished = new HashMap<>();
     private List<Boat> boats;
     private Simulator raceSimulator;
 
     private final int HEARTBEAT_PERIOD = 5000;
-    private final int RACE_STATUS_PERIOD = 1000/2;
-    private final int RACE_START_STATUS_PERIOD = 1000/2;
+    private final int RACE_STATUS_PERIOD = 1000;
+    private final int RACE_START_STATUS_PERIOD = 1000;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
     private final int PORT_NUMBER = 8085;
     private final int TIME_TILL_RACE_START = 20*1000;
@@ -188,6 +187,7 @@ public class ServerThread implements Runnable, Observer {
      * Start sending race start status messages until race starts
      */
     private void startSendingRaceStatusMessages(){
+        serverLog("Sending race status messages", 0);
         Timer t = new Timer();
         t.schedule(new TimerTask() {
             @Override
@@ -248,9 +248,6 @@ public class ServerThread implements Runnable, Observer {
         sendXml();
         startSendingRaceStartStatusMessages();
         startSendingRaceStatusMessages();
-
-        //serverLog("Sending Race Status Messages", 0);
-
     }
 
     /**
@@ -267,16 +264,15 @@ public class ServerThread implements Runnable, Observer {
 
         for (Boat b : ((Simulator) o).getBoats()){
             try {
-
                 Message m = new BoatLocationMessage(b.getSourceID(), 1, b.getLat(),
                         b.getLng(), b.getHeadingCorner().getBearingToNextCorner(),
                         ((long) b.getSpeed()));
                 server.send(m);
             } catch (IOException e) {
-                serverLog("Couldn't send a boat status message", 1);
+                serverLog("Couldn't send a boat status message", 3);
+                return;
             }
             catch (NullPointerException e){
-                //raceFinished = true;
                 serverLog("Boat " + b.getSourceID() + " finished the race", 1);
                 boatsFinished.put(b.getSourceID(), true);
             }

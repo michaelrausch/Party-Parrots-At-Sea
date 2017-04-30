@@ -3,6 +3,7 @@ package seng302.server.messages;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
@@ -170,7 +171,6 @@ public abstract class Message {
         return buffer;
     }
 
-
     /**
      * Rewind the buffer to the beginning
      */
@@ -185,11 +185,13 @@ public abstract class Message {
      * @return
      */
     public static byte[] intToByteArray(long val, int len){
+        long vor = val;
         int index = 0;
         byte[] data = new byte[len];
 
         for (int i = 0; i < len; i++){
-            data[len - index - 1] = (byte) ((val >>> (8 * index)));
+            data[len - index - 1] = (byte) (val & 0xFF);
+            val >>>= 8;
             index++;
         }
 
@@ -202,9 +204,9 @@ public abstract class Message {
      */
     public static void reverse(byte[] data) {
         for (int left = 0, right = data.length - 1; left < right; left++, right--) {
-            byte temp = data[left];
-            data[left]  = data[right];
-            data[right] = temp;
+            byte temp = (byte) (data[left] & 0xff);
+            data[left]  = (byte) (data[right] & 0xff);
+            data[right] = (byte) (temp & 0xff);
         }
     }
 

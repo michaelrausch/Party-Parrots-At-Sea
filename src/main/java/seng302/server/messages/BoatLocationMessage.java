@@ -133,9 +133,7 @@ public class BoatLocationMessage extends Message {
         allocateBuffer();
         writeHeaderToBuffer();
 
-        heading = (heading + 180.0) % 360.0;
-
-        long headingToSend = (long)((heading/360.0)*49152.0);
+        long headingToSend = (long)((heading/360.0) * 65535.0);
 
         putByte((byte) messageVersionNumber);
         putInt(time, 6);

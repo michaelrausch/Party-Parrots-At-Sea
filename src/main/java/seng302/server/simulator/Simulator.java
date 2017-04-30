@@ -7,6 +7,7 @@ import seng302.server.simulator.parsers.RaceParser;
 
 import java.util.List;
 import java.util.Observable;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Simulator extends Observable implements Runnable {
 
@@ -34,7 +35,7 @@ public class Simulator extends Observable implements Runnable {
 			boat.setLng(startLng);
 			boat.setLastPassedCorner(course.get(0));
 			boat.setHeadingCorner(course.get(1));
-			boat.setSpeed(50000);
+			boat.setSpeed(ThreadLocalRandom.current().nextInt(40000, 60000 + 1));
 		}
 	}
 

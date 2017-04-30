@@ -16,14 +16,12 @@ import java.util.List;
 class StreamingServerSocket {
     private ServerSocketChannel socket;
     private SocketChannel client;
-    private List<Socket> clients;
     private short seqNum;
     private boolean isServerStarted;
 
     StreamingServerSocket(int port) throws IOException{
         socket = ServerSocketChannel.open();
         socket.socket().bind(new InetSocketAddress("localhost", port));
-        clients = new ArrayList<>();
         //socket.setSoTimeout(10000);
         seqNum = 0;
         isServerStarted = false;
@@ -50,10 +48,7 @@ class StreamingServerSocket {
             return;
         }
 
-        //DataOutputStream outputStream = new DataOutputStream(client.getOutputStream());
-        //System.out.println(client);
         message.send(client);
-
 
         seqNum++;
     }
