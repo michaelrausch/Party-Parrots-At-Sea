@@ -136,6 +136,11 @@ public class StreamParser {
         try {
             db = dbf.newDocumentBuilder();
             doc = db.parse(new InputSource(new StringReader(xmlMessage)));
+            if (xmlMessageSubType == 6) {
+                System.out.println(xmlMessage);
+                XMLParser x = new XMLParser();
+                XMLParser.RaceXMLObject y = x.createRaceXML(doc);
+            }
         } catch (ParserConfigurationException|SAXException|IOException e) {
             e.printStackTrace();
         }

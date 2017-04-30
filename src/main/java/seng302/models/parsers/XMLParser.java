@@ -166,19 +166,19 @@ class XMLParser {
     class RaceXMLObject {
 
         // Race Info
-        Integer raceID;
-        String raceType;
-        String creationTimeDate; // XML Creation Time
+        private Integer raceID;
+        private String raceType;
+        private String creationTimeDate; // XML Creation Time
 
         //Race Start Details
-        String raceStartTime;
-        Boolean postponeStatus;
+        private String raceStartTime;
+        private Boolean postponeStatus;
 
         //Non atomic race attributes
-        ArrayList<Participant> participants;
-        ArrayList<CompoundMark> course;
-        ArrayList<Corner> compoundMarkSequence;
-        ArrayList<Limit> courseLimit;
+        private ArrayList<Participant> participants;
+        private ArrayList<CompoundMark> course;
+        private ArrayList<Corner> compoundMarkSequence;
+        private ArrayList<Limit> courseLimit;
 
         /**
          * Constructor for a RaceXMLObject.
@@ -187,6 +187,17 @@ class XMLParser {
          */
         RaceXMLObject(Document doc) {
             Element docEle = doc.getDocumentElement();
+
+            //Atomic and Semi-Atomic Elements
+            this.raceID = getElementInt(docEle, "RaceID");
+            this.raceType = getElementString(docEle, "RaceType");
+            this.creationTimeDate = getElementString(docEle, "CreationTimeDate");
+
+            Node raceStart = docEle.getElementsByTagName("RaceStartTime").item(0);
+            this.raceStartTime = getNodeAttributeString(raceStart, "Start") ;
+            this.postponeStatus = Boolean.parseBoolean(getNodeAttributeString(raceStart, "Postpone"));
+
+            //Participants
             participants = new ArrayList<>();
 
             NodeList pList = docEle.getElementsByTagName("Participants").item(0).getChildNodes();
@@ -207,6 +218,7 @@ class XMLParser {
                 }
             }
 
+            //Course
             course = new ArrayList<>();
 
             NodeList cMarkList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
@@ -218,6 +230,7 @@ class XMLParser {
                 }
             }
 
+            //Course Mark Sequence
             compoundMarkSequence = new ArrayList<>();
 
             NodeList cornerList = docEle.getElementsByTagName("CompoundMarkSequence").item(0).getChildNodes();
@@ -229,6 +242,7 @@ class XMLParser {
                 }
             }
 
+            //Course Limits
             courseLimit = new ArrayList<>();
 
             NodeList limitList = docEle.getElementsByTagName("CourseLimit").item(0).getChildNodes();
@@ -240,6 +254,12 @@ class XMLParser {
                 }
             }
         }
+
+        public Integer getRaceID() { return raceID; }
+        public String getRaceType() { return raceType; }
+        public String getCreationTimeDate() { return creationTimeDate; }
+        public String getRaceStartTime() { return raceStartTime; }
+        public Boolean getPostponeStatus() { return postponeStatus; }
 
         public ArrayList<Participant> getParticipants() { return participants; }
         public ArrayList<CompoundMark> getCompoundMarks() { return course; }
