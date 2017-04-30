@@ -24,7 +24,7 @@ public class ServerThread implements Runnable, Observer {
     private final int RACE_START_STATUS_PERIOD = 1000/2;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
     private final int PORT_NUMBER = 8085;
-    private final int TIME_TILL_RACE_START = 20;
+    private final int TIME_TILL_RACE_START = 20*1000;
     private static final int LOG_LEVEL = 1;
 
     public ServerThread(String threadName){
@@ -80,10 +80,9 @@ public class ServerThread implements Runnable, Observer {
         RaceStatus raceStatus;
         boolean thereAreBoatsNotFinished = false;
 
-
         for (Boat b : boats){
-            if (raceStarted){
-                boatStatus = BoatStatus.RACING;
+            if (!raceStarted){
+                boatStatus = BoatStatus.PRESTART;
                 thereAreBoatsNotFinished = true;
             }
             else if(boatsFinished.get(b.getSourceID())){
@@ -103,7 +102,7 @@ public class ServerThread implements Runnable, Observer {
                 raceStatus = RaceStatus.STARTED;
             }
             else{
-                long currentTime = System.currentTimeMillis()/1000;
+                long currentTime = System.currentTimeMillis();
                 long timeDifference = startTime - currentTime;
 
                 if (timeDifference > 60*3){
@@ -166,7 +165,7 @@ public class ServerThread implements Runnable, Observer {
                 Message raceStartStatusMessage = new RaceStartStatusMessage(server.getSequenceNumber(), startTime , 1,
                         RaceStartNotificationType.SET_RACE_START_TIME);
                 try {
-                    if (startTime < System.currentTimeMillis()/1000 && !raceStarted){
+                    if (startTime < System.currentTimeMillis() && !raceStarted){
                         startRaceSim();
                         raceStarted = true;
                         serverLog("Race Started", 0);
@@ -237,7 +236,7 @@ public class ServerThread implements Runnable, Observer {
         // Wait for client to connect
         server.start();
 
-        startTime = (System.currentTimeMillis()/1000) + TIME_TILL_RACE_START;
+        startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
 
         startSendingHeartbeats();
         sendXml();

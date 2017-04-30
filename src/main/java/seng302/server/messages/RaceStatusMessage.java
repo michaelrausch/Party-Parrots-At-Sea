@@ -39,7 +39,7 @@ public class RaceStatusMessage extends Message{
      */
     public RaceStatusMessage(long raceId, RaceStatus raceStatus, long expectedStartTime, WindDirection raceWindDirection,
                              long windSpeed, long numBoatsInRace, RaceType raceType, long sourceId, List<BoatSubMessage> boats){
-        currentTime = System.currentTimeMillis() / 1000L;
+        currentTime = System.currentTimeMillis();
         this.raceId = raceId;
         this.raceStatus = raceStatus;
         this.expectedStartTime = expectedStartTime;
@@ -71,10 +71,10 @@ public class RaceStatusMessage extends Message{
         writeHeaderToBuffer();
 
         putByte((byte) MESSAGE_VERSION);
-        putInt((int) currentTime, 6);
+        putInt(currentTime, 6);
         putInt((int) raceId, 4);
         putByte((byte) raceStatus.getCode());
-        putInt((int) expectedStartTime, 6);
+        putInt(expectedStartTime, 6);
         putInt((int) raceWindDirection.getCode(), 2);
         putInt((int) windSpeed, 2);
         putByte((byte) numBoatsInRace);
@@ -86,7 +86,6 @@ public class RaceStatusMessage extends Message{
 
         writeCRC();
         rewind();
-
 
         outputStream.write(getBuffer());
     }
