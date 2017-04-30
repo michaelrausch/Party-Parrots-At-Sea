@@ -55,6 +55,7 @@ public class MarkRoundingMessage extends Message{
         putByte((byte) markId);
 
         writeCRC();
+        rewind();
 
         outputStream.write(getBuffer());
     }

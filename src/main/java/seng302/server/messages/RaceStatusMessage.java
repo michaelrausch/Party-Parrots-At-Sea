@@ -85,6 +85,8 @@ public class RaceStatusMessage extends Message{
         }
 
         writeCRC();
+        rewind();
+
 
         outputStream.write(getBuffer());
     }

@@ -22,6 +22,6 @@ public class App extends Application
     public static void main(String[] args) {
         new ServerThread("Racevision Test Server");
         //new Thread(new Simulator(1000)).run();
-        launch(args);
+        //launch(args);
     }
 }

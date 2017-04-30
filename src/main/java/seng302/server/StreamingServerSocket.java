@@ -54,6 +54,7 @@ class StreamingServerSocket {
         //System.out.println(client);
         message.send(client);
 
+
         seqNum++;
     }
 

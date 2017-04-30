@@ -62,6 +62,7 @@ public class XMLMessage extends Message{
         putBytes(content.getBytes());
 
         writeCRC();
+        rewind();
 
         outputStream.write(getBuffer());
     }

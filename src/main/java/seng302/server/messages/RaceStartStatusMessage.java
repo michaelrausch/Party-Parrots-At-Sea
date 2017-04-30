@@ -52,6 +52,7 @@ public class RaceStartStatusMessage extends Message {
         putUnsignedByte((byte) notificationType.getType());
 
         writeCRC();
+        rewind();
 
         outputStream.write(getBuffer());
     }

@@ -24,7 +24,7 @@ public class ServerThread implements Runnable, Observer {
     private final int RACE_START_STATUS_PERIOD = 1000/2;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
     private final int PORT_NUMBER = 8085;
-    private final int TIME_TILL_RACE_START = 10;
+    private final int TIME_TILL_RACE_START = 20;
     private static final int LOG_LEVEL = 1;
 
     public ServerThread(String threadName){
@@ -103,11 +103,22 @@ public class ServerThread implements Runnable, Observer {
                 raceStatus = RaceStatus.STARTED;
             }
             else{
-                raceStatus = RaceStatus.PRESTART;
+                long currentTime = System.currentTimeMillis()/1000;
+                long timeDifference = startTime - currentTime;
+
+                if (timeDifference > 60*3){
+                    raceStatus = RaceStatus.PRESTART;
+                }
+                else if (timeDifference > 60){
+                    raceStatus = RaceStatus.WARNING;
+                }
+                else{
+                    raceStatus = RaceStatus.PREPARATORY;
+                }
             }
         }
         else{
-            raceStatus = RaceStatus.NOTACTIVE;
+            raceStatus = RaceStatus.TERMINATED;
         }
 
         return new RaceStatusMessage(1, raceStatus, startTime, WindDirection.EAST,
@@ -171,21 +182,23 @@ public class ServerThread implements Runnable, Observer {
         }, 0, RACE_START_STATUS_PERIOD);
     }
 
+    /**
+     * Start sending race start status messages until race starts
+     */
     private void startSendingRaceStatusMessages(){
-        serverLog("Sending Race Status Messages", 0);
         Timer t = new Timer();
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                Message statusMessage = getRaceStatusMessage();
-
+                Message raceStatusMessage = getRaceStatusMessage();
                 try {
-                    server.send(statusMessage);
+                    server.send(raceStatusMessage);
+
                 } catch (IOException e) {
                     System.out.print("");
                 }
             }
-        }, 100, RACE_STATUS_PERIOD);
+        }, 0, RACE_STATUS_PERIOD);
     }
 
     /**
@@ -221,15 +234,17 @@ public class ServerThread implements Runnable, Observer {
             serverLog("Failed to bind socket: " + e.getMessage(), 0);
         }
 
-        startTime = (System.currentTimeMillis()/1000) + TIME_TILL_RACE_START;
-
         // Wait for client to connect
         server.start();
+
+        startTime = (System.currentTimeMillis()/1000) + TIME_TILL_RACE_START;
 
         startSendingHeartbeats();
         sendXml();
         startSendingRaceStartStatusMessages();
         startSendingRaceStatusMessages();
+
+        //serverLog("Sending Race Status Messages", 0);
 
     }
 

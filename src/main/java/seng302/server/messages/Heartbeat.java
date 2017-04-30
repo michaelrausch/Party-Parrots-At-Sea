@@ -35,6 +35,7 @@ public class Heartbeat extends Message {
         putUnsignedInt(seqNo, 4);
 
         writeCRC();
+        rewind();
 
         outputStream.write(getBuffer());
     }
