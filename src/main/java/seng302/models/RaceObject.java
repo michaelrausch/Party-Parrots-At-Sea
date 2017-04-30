@@ -18,6 +18,8 @@ public abstract class RaceObject extends Group {
     protected double pixelVelocityX;
     protected double pixelVelocityY;
 
+    static double max = 0;
+
     public Point2D getPosition () {
         return new Point2D(super.getLayoutX(), getLayoutY());
     }
@@ -40,6 +42,13 @@ public abstract class RaceObject extends Group {
         } else {
             this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
         }
+        //Sometimes the rotation is too large to be realistic. In that case just do it instantly.
+        if (Math.abs(rotationalVelocity) > 1) {
+            rotationalVelocity = 0;
+            rotateTo(rotationalGoal);
+        }
+//        max = Math.max(max, Math.abs(rotationalVelocity));
+//        System.out.println("max = " + max);
     }
 
     /**

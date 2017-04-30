@@ -22,7 +22,7 @@ public class BoatGroup extends RaceObject{
     private static final double VELOCITY_Y_OFFSET = -5d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
-    private static final int LINE_INTERVAL = 180;
+    private static final int LINE_INTERVAL = 30;
     private static double expectedUpdateInterval = 200;
     private double framesForNewLine = 0;
     private boolean destinationSet;
@@ -150,7 +150,6 @@ public class BoatGroup extends RaceObject{
         double dx = pixelVelocityX * timeInterval;
         double dy = pixelVelocityY * timeInterval;
         double rotation = rotationalVelocity * timeInterval;
-
         moveGroupBy(dx, dy, rotation);
 
         if (framesForNewLine-- == 0) {
@@ -176,9 +175,11 @@ public class BoatGroup extends RaceObject{
     }
 
     public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
-        destinationSet = true;
-        boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
         if (hasRaceId(raceIds)) {
+            destinationSet = true;
+            boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
+            if (currentRotation < 0)
+                currentRotation = 360 - currentRotation;
             double dx = newXValue - boatPoly.getLayoutX();
             if ((dx > 0 && pixelVelocityX < 0) || (dx < 0 && pixelVelocityX > 0)) {
                 pixelVelocityX = 0;
@@ -191,24 +192,13 @@ public class BoatGroup extends RaceObject{
             } else {
                 pixelVelocityY = dy / expectedUpdateInterval;
             }
-//            this.pixelVelocityX = (newXValue - boatPoly.getLayoutX()) / expectedUpdateInterval;
-//            this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
             rotationalGoal = rotation;
             calculateRotationalVelocity();
-            //Sometimes rotations are way too big.
-            //if (Math.abs(rotationalVelocity) > 0.00003)
-            //    rotationalVelocity = 0;
-//
             if (wakeGenerationDelay > 0) {
                 wake.rotate(rotationalGoal);
                 wakeGenerationDelay--;
             } else {
-                if (Math.abs(rotationalVelocity) > 0.1)
-//                    rotationalVelocity = 0;
-//
-                    wake.setRotationalVelocity(0, rotationalGoal, pixelVelocityX, pixelVelocityY);
-                else
-                    wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, pixelVelocityX, pixelVelocityY);
+                wake.setRotationalVelocity(rotationalVelocity, currentRotation, pixelVelocityX, pixelVelocityY);
             }
         }
     }
