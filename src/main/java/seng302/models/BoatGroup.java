@@ -10,7 +10,9 @@ import javafx.scene.transform.Rotate;
 import seng302.models.parsers.StreamParser;
 
 /**
- * Created by CJIRWIN on 25/04/2017.
+ * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2 dimensional boat.
+ * It contains a single polygon for the boat, a group of lines to show it's path, a wake object and two text labels to
+ * annotate the boat teams name and the boats velocity.
  */
 public class BoatGroup extends RaceObject{
 
@@ -18,36 +20,50 @@ public class BoatGroup extends RaceObject{
     private static final double TEAMNAME_Y_OFFSET = -15d;
     private static final double VELOCITY_X_OFFSET = 10d;
     private static final double VELOCITY_Y_OFFSET = -5d;
-    private static final double VELOCITY_WAKE_RATIO = 2d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
     private static final int LINE_INTERVAL = 180;
     private static double expectedUpdateInterval = 200;
-    private static int WAKE_FRAME_INTERVAL = 30;
     private double framesForNewLine = 0;
     private boolean destinationSet;
     private Point2D lastPoint;
     private int wakeGenerationDelay;
 
     private Boat boat;
-    private int wakeCounter = WAKE_FRAME_INTERVAL;
     private Group lineGroup = new Group();
-    private Group wakeGroup = new Group();
     private Polygon boatPoly;
     private Text teamNameObject;
     private Text velocityObject;
     private Wake wake;
 
+    /**
+     * Creates a BoatGroup with the default triangular boat polygon.
+     * @param boat The boat that the BoatGroup will represent. Must contain an ID which will be used to tell which
+     *             BoatGroup to update.
+     * @param color The colour of the boat polygon and the trailing line.
+     */
     public BoatGroup (Boat boat, Color color){
         this.boat = boat;
         initChildren(color);
     }
 
+    /**
+     * Creates a BoatGroup with the boat being the default polygon. The head of the boat should be at point (0,0).
+     * @param boat The boat that the BoatGroup will represent. Must contain an ID which will be used to tell which
+     *             BoatGroup to update.
+     * @param color The colour of the boat polygon and the trailing line.
+     * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat polygon.
+     */
     public BoatGroup (Boat boat, Color color, double... points)
     {
         initChildren(color, points);
     }
 
+    /**
+     * Creates the javafx objects that will be the in the group by default.
+     * @param color The colour of the boat polygon and the trailing line.
+     * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat polygon.
+     */
     private void initChildren (Color color, double... points) {
         boatPoly = new Polygon(points);
         boatPoly.setFill(color);
@@ -64,16 +80,20 @@ public class BoatGroup extends RaceObject{
         velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
         destinationSet = false;
 
-        wake = new Wake(0, 0);
+        wake = new Wake(0, -BOAT_HEIGHT);
         wakeGenerationDelay = wake.numWakes;
         super.getChildren().addAll(teamNameObject, velocityObject, boatPoly);
     }
 
+    /**
+     * Creates the javafx objects that will be the in the group by default.
+     * @param color The colour of the boat polygon and the trailing line.
+     */
     private void initChildren (Color color) {
-       initChildren(color,
-               -BOAT_WIDTH / 2, BOAT_HEIGHT,
-               0.0, 0.0,
-               BOAT_WIDTH / 2, BOAT_HEIGHT);
+        initChildren(color,
+                -BOAT_WIDTH / 2, BOAT_HEIGHT / 2,
+                0.0, -BOAT_HEIGHT / 2,
+                BOAT_WIDTH / 2, BOAT_HEIGHT / 2);
     }
 
     /**
@@ -97,12 +117,18 @@ public class BoatGroup extends RaceObject{
      * Moves the boat and its children annotations to coordinates specified
      * @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
+     * @param rotation The heading in degrees from north the boat should rotate to.
      */
     public void moveTo (double x, double y, double rotation) {
         rotateTo(rotation);
         moveTo(x, y);
     }
 
+    /**
+     * Moves the boat and its children annotations to coordinates specified
+     * @param x The X coordinate to move the boat to
+     * @param y The Y coordinate to move the boat to
+     */
     public void moveTo (double x, double y) {
         boatPoly.setLayoutX(x);
         boatPoly.setLayoutY(y);
@@ -115,10 +141,15 @@ public class BoatGroup extends RaceObject{
         wake.rotate(currentRotation);
     }
 
+    /**
+     * Updates the position of all graphics in the BoatGroup based off of the given time interval.
+     * @param timeInterval The interval, in microseconds, the boat should update it's position based on.
+     */
     public void updatePosition (long timeInterval) {
+        //Calculate the movement of the boat.
         double dx = pixelVelocityX * timeInterval;
         double dy = pixelVelocityY * timeInterval;
-        double rotation = 0d;
+        double rotation = rotationalVelocity * timeInterval;
 
         moveGroupBy(dx, dy, rotation);
 
@@ -138,7 +169,7 @@ public class BoatGroup extends RaceObject{
             if (destinationSet){
                 lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
             }
-            if (lineGroup.getChildren().size() > 100)
+            if (lineGroup.getChildren().size() > 60)
                 lineGroup.getChildren().remove(0);
         }
         wake.updatePosition(timeInterval);
@@ -148,11 +179,25 @@ public class BoatGroup extends RaceObject{
         destinationSet = true;
         boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
         if (hasRaceId(raceIds)) {
-            this.pixelVelocityX = (newXValue - boatPoly.getLayoutX()) / expectedUpdateInterval;
-            this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
-            this.rotationalGoal = rotation;
+            double dx = newXValue - boatPoly.getLayoutX();
+            if ((dx > 0 && pixelVelocityX < 0) || (dx < 0 && pixelVelocityX > 0)) {
+                pixelVelocityX = 0;
+            } else {
+                pixelVelocityX = dx / expectedUpdateInterval;
+            }
+            double dy = newYValue - boatPoly.getLayoutY();
+            if ((dy > 0 && pixelVelocityY < 0) || (dy < 0 && pixelVelocityY > 0)) {
+                pixelVelocityY = 0;
+            } else {
+                pixelVelocityY = dy / expectedUpdateInterval;
+            }
+//            this.pixelVelocityX = (newXValue - boatPoly.getLayoutX()) / expectedUpdateInterval;
+//            this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
+            rotationalGoal = rotation;
             calculateRotationalVelocity();
-            rotateTo(rotation);
+            if (Math.abs(rotationalVelocity) > 0.00003)
+                rotationalVelocity = 0;
+            
             if (wakeGenerationDelay > 0) {
                 wake.rotate(rotationalGoal);
                 wakeGenerationDelay--;
@@ -177,28 +222,11 @@ public class BoatGroup extends RaceObject{
         }
     }
 
-    void resizeWake(){
-        velocityObject.setText(String.valueOf(boat.getVelocity()));
-        super.getChildren().remove(wakePoly);
-        wakePoly = new Polygon(
-                5.0,0.0,
-                10.0, boat.getVelocity() * VELOCITY_WAKE_RATIO,
-                0.0, boat.getVelocity() * VELOCITY_WAKE_RATIO
-        );
-        wakePoly.setLayoutX(boatPoly.getLayoutX());
-        wakePoly.setLayoutY(boatPoly.getLayoutY());
-        wakePoly.setFill(Color.DARKBLUE);
-        super.getChildren().add(wakePoly);
-
-    }
-
     public void rotateTo (double rotation) {
         currentRotation = rotation;
         boatPoly.getTransforms().clear();
         boatPoly.getTransforms().add(new Rotate(rotation));
     }
-
-
 
     public void forceRotation () {
         rotateTo (rotationalGoal);
