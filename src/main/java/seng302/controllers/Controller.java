@@ -1,16 +1,22 @@
 package seng302.controllers;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.*;
 import javafx.scene.paint.Color;
+import seng302.models.Boat;
 import seng302.models.parsers.StreamPacket;
 import seng302.models.parsers.StreamParser;
 
@@ -33,6 +39,14 @@ public class Controller implements Initializable {
     private Button streamButton;
     @FXML
     private Button switchToRaceViewButton;
+    @FXML
+    private TableView teamList;
+    @FXML
+    private TableColumn boatNameCol;
+    @FXML
+    private TableColumn shortNameCol;
+    @FXML
+    private TableColumn countryCol;
 
     private void setContentPane(String jfxUrl){
         try{
@@ -72,6 +86,7 @@ public class Controller implements Initializable {
                             timeTillLive.setText("Race finished! Waiting for new race...");
                             switchToRaceViewButton.setDisable(true);
                         } else if (StreamParser.getTimeSinceStart() > 0 && StreamParser.getTimeSinceStart() % 10 == 0) {
+                            updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
                             Long timerMinute = StreamParser.getTimeSinceStart() / 60;
@@ -79,6 +94,7 @@ public class Controller implements Initializable {
                             String timerString = "-" + timerMinute + "." + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
                         } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
+                            updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
                             Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;
@@ -97,5 +113,22 @@ public class Controller implements Initializable {
 
     public void switchToRaceView() {
         setContentPane("/views/RaceView.fxml");
+    }
+
+    private void updateTeamList() {
+        ObservableList<Boat> data = FXCollections.observableArrayList();
+        teamList.setItems(data);
+        boatNameCol.setCellValueFactory(
+                new PropertyValueFactory<Boat,String>("boatName")
+        );
+        shortNameCol.setCellValueFactory(
+                new PropertyValueFactory<Boat,String>("shortName")
+        );
+        countryCol.setCellValueFactory(
+                new PropertyValueFactory<Boat,String>("country")
+        );
+        for (Boat boat : StreamParser.getBoats()) {
+            data.add(boat);
+        }
     }
 }

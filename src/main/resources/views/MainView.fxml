@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.canvas.*?>
@@ -14,10 +15,12 @@
         </columnConstraints>
         <rowConstraints>
           <RowConstraints maxHeight="403.0" minHeight="0.0" prefHeight="170.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="444.0" minHeight="0.0" prefHeight="47.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="432.0" minHeight="10.0" prefHeight="190.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="635.0" minHeight="10.0" prefHeight="69.0" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="599.0" minHeight="10.0" prefHeight="599.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="444.0" minHeight="0.0" prefHeight="52.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="432.0" minHeight="2.0" prefHeight="102.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="635.0" minHeight="0.0" prefHeight="60.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="635.0" minHeight="10.0" prefHeight="365.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="635.0" minHeight="10.0" prefHeight="93.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="599.0" minHeight="10.0" prefHeight="262.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label alignment="CENTER" text="Welcome to Race Vision" GridPane.halignment="CENTER" GridPane.valignment="BOTTOM">
@@ -41,7 +44,18 @@
                </font>
             </Label>
             <Button fx:id="streamButton" mnemonicParsing="false" onAction="#startStream" text="Click to stream" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-            <Button fx:id="switchToRaceViewButton" disable="true" mnemonicParsing="false" onAction="#switchToRaceView" text="Watch Race" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+            <Button fx:id="switchToRaceViewButton" disable="true" mnemonicParsing="false" onAction="#switchToRaceView" text="Watch Race" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+            <TableView fx:id="teamList" maxWidth="500.0" prefHeight="200.0" prefWidth="200.0" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+              <columns>
+                <TableColumn fx:id="boatNameCol" editable="false" prefWidth="250.0" sortable="false" text="Boat Name" />
+                <TableColumn fx:id="shortNameCol" editable="false" prefWidth="125.0" sortable="false" text="Short Name" />
+                  <TableColumn fx:id="countryCol" editable="false" prefWidth="125.0" sortable="false" text="Country" />
+              </columns>
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+            </TableView>
+            <Label text="*Team position in table do not correspond to race position" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="TOP" />
          </children>
       </GridPane>
    </children>
