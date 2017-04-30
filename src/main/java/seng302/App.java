@@ -18,8 +18,8 @@ public class App extends Application
         primaryStage.setScene(new Scene(root));
 
         primaryStage.show();
-//        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
-        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
+        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
+//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
         sr.start();
         StreamParser streamParser = new StreamParser("TestThread2");
         streamParser.start();

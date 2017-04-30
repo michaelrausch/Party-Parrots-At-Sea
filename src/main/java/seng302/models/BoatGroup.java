@@ -18,23 +18,18 @@ public class BoatGroup extends RaceObject{
     private static final double TEAMNAME_Y_OFFSET = -15d;
     private static final double VELOCITY_X_OFFSET = 10d;
     private static final double VELOCITY_Y_OFFSET = -5d;
-    private static final double VELOCITY_WAKE_RATIO = 2d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
-    private static final int LINE_INTERVAL = 180;
+    private static final int LINE_INTERVAL = 30;
     private static double expectedUpdateInterval = 200;
-    private static int WAKE_FRAME_INTERVAL = 30;
     private double framesForNewLine = 0;
     private boolean destinationSet;
     private Point2D lastPoint;
     private int wakeGenerationDelay;
 
     private Boat boat;
-    private int wakeCounter = WAKE_FRAME_INTERVAL;
     private Group lineGroup = new Group();
-    private Group wakeGroup = new Group();
     private Polygon boatPoly;
-    private Polygon wakePoly;
     private Text teamNameObject;
     private Text velocityObject;
     private Wake wake;
@@ -113,7 +108,7 @@ public class BoatGroup extends RaceObject{
         velocityObject.setLayoutY(y);
         wake.setLayoutX(x);
         wake.setLayoutY(y);
-        wake.rotate(currentRotation);
+        //wake.rotate(currentRotation);
     }
 
     public void updatePosition (long timeInterval) {
@@ -139,7 +134,7 @@ public class BoatGroup extends RaceObject{
             if (destinationSet){
                 lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
             }
-            if (lineGroup.getChildren().size() > 100)
+            if (lineGroup.getChildren().size() > 80)
                 lineGroup.getChildren().remove(0);
         }
         wake.updatePosition(timeInterval);
@@ -154,13 +149,14 @@ public class BoatGroup extends RaceObject{
             this.pixelVelocityY = (newYValue - boatPoly.getLayoutY()) / expectedUpdateInterval;
             this.rotationalGoal = rotation;
             calculateRotationalVelocity();
+            System.out.println("rotationalVelocity = " + rotationalVelocity);
             rotateTo(rotation);
-            if (wakeGenerationDelay > 0) {
-                wake.rotate(rotationalGoal);
-                wakeGenerationDelay--;
-            } else {
+//            if (wakeGenerationDelay > 0) {
+//                wake.rotate(rotationalGoal);
+//                wakeGenerationDelay--;
+//            } else {
                 wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, pixelVelocityX, pixelVelocityY);
-            }
+//            }
         }
     }
 
@@ -179,21 +175,6 @@ public class BoatGroup extends RaceObject{
         }
     }
 
-    void resizeWake(){
-        velocityObject.setText(String.valueOf(boat.getVelocity()));
-        super.getChildren().remove(wakePoly);
-        wakePoly = new Polygon(
-                5.0,0.0,
-                10.0, boat.getVelocity() * VELOCITY_WAKE_RATIO,
-                0.0, boat.getVelocity() * VELOCITY_WAKE_RATIO
-        );
-        wakePoly.setLayoutX(boatPoly.getLayoutX());
-        wakePoly.setLayoutY(boatPoly.getLayoutY());
-        wakePoly.setFill(Color.DARKBLUE);
-        super.getChildren().add(wakePoly);
-
-    }
-
     public void rotateTo (double rotation) {
         currentRotation = rotation;
         boatPoly.getTransforms().clear();
@@ -204,7 +185,7 @@ public class BoatGroup extends RaceObject{
 
     public void forceRotation () {
         rotateTo (rotationalGoal);
-        wake.rotate(rotationalGoal);
+        //wake.rotate(rotationalGoal);
     }
 
     public void toggleAnnotations () {
