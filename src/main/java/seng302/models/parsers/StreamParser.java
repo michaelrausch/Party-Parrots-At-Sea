@@ -139,11 +139,11 @@ public class StreamParser extends Thread{
     private static void extractRaceStatus(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
-        long currentTime = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long currentTime = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload,7,11));
         int raceStatus = payload[11];
 //        System.out.println("raceStatus = " + raceStatus);
-        long expectedStartTime = extractTimeStamp(Arrays.copyOfRange(payload,12,18), 6);
+        long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
