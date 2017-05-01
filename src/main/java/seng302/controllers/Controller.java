@@ -14,8 +14,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import seng302.models.Boat;
+import seng302.models.parsers.StreamParser;
 
-import java.awt.*;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
