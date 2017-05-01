@@ -18,8 +18,6 @@ public abstract class RaceObject extends Group {
     protected double pixelVelocityX;
     protected double pixelVelocityY;
 
-    static double max = 0;
-
     public Point2D getPosition () {
         return new Point2D(super.getLayoutX(), getLayoutY());
     }
@@ -28,10 +26,16 @@ public abstract class RaceObject extends Group {
         return expectedUpdateInterval;
     }
 
+    /**
+     *
+     */
     public static void setExpectedUpdateInterval(double expectedUpdateInterval) {
         RaceObject.expectedUpdateInterval = expectedUpdateInterval;
     }
 
+    /**
+     * Calculates the rotational velocity required to reach the rotationalGoal from the currentRotation.
+     */
     protected void calculateRotationalVelocity () {
         if (Math.abs(rotationalGoal - currentRotation) > 180) {
             if (rotationalGoal - currentRotation >= 0) {
@@ -47,20 +51,24 @@ public abstract class RaceObject extends Group {
             rotationalVelocity = 0;
             rotateTo(rotationalGoal);
         }
-//        max = Math.max(max, Math.abs(rotationalVelocity));
-//        System.out.println("max = " + max);
     }
 
     /**
      * Sets the destination of everything within the RaceObject that has an ID in the array raceIds. The destination is
      * set to the co-ordinates (x, y) with the given rotation.
-     * @param x
-     * @param y
-     * @param rotation
-     * @param raceIds
+     * @param x X co-ordinate to move the graphics to.
+     * @param y Y co-ordinate to move the graphics to.
+     * @param rotation Rotation to move graphics to.
+     * @param raceIds RaceID of the object to move.
      */
     public abstract void setDestination (double x, double y, double rotation, int... raceIds);
-
+    /**
+     * Sets the destination of everything within the RaceObject that has an ID in the array raceIds. The destination is
+     * set to the co-ordinates (x, y).
+     * @param x X co-ordinate to move the graphic to.
+     * @param y Y co-ordinate to move the graphic to.
+     * @param raceIds RaceID to the object to move.
+     */
     public abstract void setDestination (double x, double y, int... raceIds);
 
     public abstract void updatePosition (long timeInterval);

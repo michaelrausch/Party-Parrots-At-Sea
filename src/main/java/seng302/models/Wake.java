@@ -21,8 +21,6 @@ class Wake extends Group {
     private double[] rotations = new double[numWakes];
     private int[] velocityIndices = new int[numWakes];
     private double sum = 0;
-    static double max = 0;
-    static double min = Double.MAX_VALUE;
 
     /**
      * Create a wake at the given location.
@@ -54,17 +52,12 @@ class Wake extends Group {
             rotationalVelocity = 0;
         }
         sum -= Math.abs(velocities[(velocityIndices[0] + 10) % 13]);
-//        sum -= Math.abs(velocities[velocityIndices[0]]);
         sum += Math.abs(rotationalVelocity);
         System.out.println("sum = " + sum);
         if (sum < 0.9)
             rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
-        //This stops the wake from eventually becoming out of sync with the boat.
+                                   //This stops the wake from eventually becoming out of sync with the boat.
 
-        max = Math.max(max, sum);
-        min = Math.min(max, sum);
-        System.out.println("max = " + max);
-        System.out.println("min = " + min);
         //Update the index of the array of recent velocities that each wake uses. Each wake is 3 velocities behind the
         //next smallest wake.
         velocityIndices[0] = (13 + (velocityIndices[0] - 1) % 13) % 13;

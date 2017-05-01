@@ -23,7 +23,6 @@ public class BoatGroup extends RaceObject{
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
     private static final int LINE_INTERVAL = 30;
-    private static double expectedUpdateInterval = 200;
     private double framesForNewLine = 0;
     private boolean destinationSet;
     private Point2D lastPoint;
@@ -56,6 +55,7 @@ public class BoatGroup extends RaceObject{
      */
     public BoatGroup (Boat boat, Color color, double... points)
     {
+        this.boat = boat;
         initChildren(color, points);
     }
 
@@ -143,7 +143,7 @@ public class BoatGroup extends RaceObject{
 
     /**
      * Updates the position of all graphics in the BoatGroup based off of the given time interval.
-     * @param timeInterval The interval, in microseconds, the boat should update it's position based on.
+     * @param timeInterval The interval, in milliseconds, the boat should update it's position based on.
      */
     public void updatePosition (long timeInterval) {
         //Calculate the movement of the boat.
@@ -249,6 +249,12 @@ public class BoatGroup extends RaceObject{
         return boat;
     }
 
+    /**
+     * Returns true if this BoatGroup contains at least one of the given IDs.
+     *
+     * @param raceIds The ID's to check the BoatGroup for.
+     * @return True if the BoatGroup contains at east one of the given IDs, false otherwise.
+     */
     public boolean hasRaceId (int... raceIds) {
         for (int id : raceIds) {
             if (id == boat.getId())
@@ -257,10 +263,22 @@ public class BoatGroup extends RaceObject{
         return false;
     }
 
+    /**
+     * Returns all raceIds associated with this group. For BoatGroups the ID's are for the boat.
+     *
+     * @return An array containing all ID's associated with this RaceObject.
+     */
     public int[] getRaceIds () {
         return new int[] {boat.getId()};
     }
 
+    /**
+     * Due to javaFX limitations annotations associated with a boat that you want to appear below all boats in the
+     * Z-axis need to be pulled out of the BoatGroup and added to the parent group of the BoatGroups. This function
+     * returns these annotations as a group.
+     *
+     * @return A group containing low priority annotations.
+     */
     public Group getLowPriorityAnnotations () {
         Group group = new Group();
         group.getChildren().addAll(wake, lineGroup);
