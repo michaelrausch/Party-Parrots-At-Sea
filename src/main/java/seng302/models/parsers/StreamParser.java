@@ -1,7 +1,9 @@
 package seng302.models.parsers;
 
 
+import com.sun.deploy.util.StringUtils;
 import javafx.geometry.Point3D;
+import jdk.internal.util.xml.impl.Pair;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -33,6 +35,7 @@ public class StreamParser extends Thread{
      private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
+     public static XMLParser xmlObject;
      private static boolean raceFinished = false;
      private static boolean streamStatus = false;
      private static long timeSinceStart = -1;
@@ -50,6 +53,7 @@ public class StreamParser extends Thread{
          try {
              System.out.println("START OF STREAM");
              streamStatus = true;
+             xmlObject = new XMLParser();
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
@@ -220,41 +224,24 @@ public class StreamParser extends Thread{
     private static void extractXmlMessage(StreamPacket packet){
 
         byte[] payload = packet.getPayload();
-        String xmlMessage = "";
 
-        ByteArrayInputStream payloadStream = new ByteArrayInputStream(payload);
-
-        //Bunch of data we don't want (Message Version Number, AckNumber, Timestamp)
-        payloadStream.skip(9);
-        int xmlMessageSubType = payloadStream.read();
-        payloadStream.skip(2);
-
-        //checks the length of the xml message itself
-        int xmlMessageLength = payloadStream.read() | payloadStream.read() << 8;
-
-        //Converts XML message to string to be parsed
-        int currentChar;
-        while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
-            xmlMessage += (char)currentChar;
-        }
-
-        // Parse boat xml from server
-        if (xmlMessageSubType == 7) {
-            BoatsParser boatsParser = new BoatsParser(xmlMessage);
-            boats = boatsParser.getBoats();
-        }
+        int messageType = payload[9];
+        long messagelength = bytesToLong(Arrays.copyOfRange(payload,12,14));
+        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messagelength)))).trim();
+        //System.out.println("xmlMessage2 = " + xmlMessage);
 
         //Create XML document Object
-//        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-//        DocumentBuilder db = null;
-//        try {
-//            db = dbf.newDocumentBuilder();
-//            Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
-//            // TODO: 25/04/17 ajm412: Check that the object matches expected structure and return Document object.
-//        } catch (ParserConfigurationException | IOException | SAXException e) {
-//            e.printStackTrace();
-//        }
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = null;
+        Document doc = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            doc = db.parse(new InputSource(new StringReader(xmlMessage)));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
 
+        xmlObject.constructXML(doc, messageType);
     }
 
     /**
@@ -472,6 +459,11 @@ public class StreamParser extends Thread{
      */
     public static List<Boat> getBoats() {
         return boats;
+    }
+
+
+    public static XMLParser getXmlObject() {
+        return xmlObject;
     }
 }
 

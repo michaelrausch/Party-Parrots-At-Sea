@@ -17,10 +17,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.models.Boat;
 import seng302.models.parsers.StreamParser;
+import seng302.models.parsers.XMLParser;
 
 
+import javax.xml.crypto.dsig.XMLObject;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -70,6 +73,7 @@ public class Controller implements Initializable {
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
+            XMLParser xmlParser = StreamParser.getXmlObject();
             streamButton.setVisible(false);
             timeTillLive.setVisible(true);
             timeTillLive.setTextFill(Color.GREEN);
@@ -92,6 +96,10 @@ public class Controller implements Initializable {
                             String timerString = "-" + timerMinute + "." + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
                         } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
+//                            ArrayList<XMLParser.RaceXMLObject.Limit> courseLimits = xmlParser.getRaceXML().getCourseLimit();
+//                            for (XMLParser.RaceXMLObject.Limit courseLimit : courseLimits) {
+//                                System.out.println("Lat,Lng: " + courseLimit.getLat() +  courseLimit.getLng());
+//                            }
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
