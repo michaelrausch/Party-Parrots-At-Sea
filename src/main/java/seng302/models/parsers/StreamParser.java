@@ -181,7 +181,6 @@ public class StreamParser extends Thread{
             boatStatus += "\nEstTimeAtNextMark: " + extractTimeStamp(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)), 6);
             boatStatus += "\nEstTimeAtFinish: " + extractTimeStamp(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)), 6);
             boatStatuses.add(boatStatus);
-//            System.out.println("boatStatus = " + boatStatus);
         }
     }
 
@@ -225,19 +224,19 @@ public class StreamParser extends Thread{
         //Converts XML message to string to be parsed
         int currentChar;
         while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
-        xmlMessage += (char)currentChar;
+            xmlMessage += (char)currentChar;
         }
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = null;
+        Document doc = null;
         try {
             db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
-            // TODO: 25/04/17 ajm412: Check that the object matches expected structure and return Document object.
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
-
+        // TODO: 30/04/2017 (ajm412) Figure out how this will tie into the backend of the visualiser now that the parsing is done.
     }
 
     /**

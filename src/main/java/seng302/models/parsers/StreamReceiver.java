@@ -50,6 +50,12 @@ public class StreamReceiver extends Thread {
     }
 
 
+    public StreamReceiver(Socket host,  PriorityBlockingQueue packetBuffer){
+        this.host=host;
+        this.packetBuffer = packetBuffer;
+    }
+
+
     public void connect(){
         try {
             stream = host.getInputStream();
@@ -124,8 +130,8 @@ public class StreamReceiver extends Thread {
     }
 
     /**
-     * takes an array of up to 7 bytes and returns a positive
-     * long constructed from the input bytes
+     * takes an array of up to 7 bytes in little endian format and
+     * returns a positive long constructed from the input bytes
      *
      * @return a positive long if there is less than 7 bytes -1 otherwise
      */
@@ -141,8 +147,6 @@ public class StreamReceiver extends Thread {
         }
         return partialLong;
     }
-
-
 
 
     public static void main(String[] args) {
