@@ -179,10 +179,10 @@ public class BoatGroup extends RaceObject{
      * @param rotation Rotation to move graphics to.
      * @param raceIds RaceID of the object to move.
      */
-    public void setDestination (double newXValue, double newYValue, double rotation, double groundSpeed, int... raceIds) {
+    public void setDestination (double newXValue, double newYValue, double rotation, double speed, int... raceIds) {
         if (hasRaceId(raceIds)) {
             destinationSet = true;
-            boat.setVelocity(groundSpeed);
+            boat.setVelocity(speed);
             if (currentRotation < 0)
                 currentRotation = 360 - currentRotation;
             double dx = newXValue - boatPoly.getLayoutX();
@@ -226,22 +226,20 @@ public class BoatGroup extends RaceObject{
         }
     }
 
-    public void setDestination (double newXValue, double newYValue, int... raceIDs) {
+    public void setDestination (double newXValue, double newYValue, double speed, int... raceIDs) {
+        destinationSet = true;
+
+        if (hasRaceId(raceIDs)) {
+            double rotation = Math.abs(
+                    Math.toDegrees(
+                            Math.atan(
+                                    (newYValue - boatPoly.getLayoutY()) / (newXValue - boatPoly.getLayoutX())
+                            )
+                    )
+            );
+            setDestination(newXValue, newYValue, rotation, speed, raceIDs);
+        }
     }
-//    public void setDestination (double newXValue, double newYValue, int... raceIDs) {
-//        destinationSet = true;
-//
-//        if (hasRaceId(raceIDs)) {
-//            double rotation = Math.abs(
-//                    Math.toDegrees(
-//                            Math.atan(
-//                                    (newYValue - boatPoly.getLayoutY()) / (newXValue - boatPoly.getLayoutX())
-//                            )
-//                    )
-//            );
-//            setDestination(newXValue, newYValue, rotation, raceIDs);
-//        }
-//    }
 
     public void rotateTo (double rotation) {
         currentRotation = rotation;

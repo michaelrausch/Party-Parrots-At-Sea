@@ -33,6 +33,7 @@ public class StreamParser extends Thread{
      private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
+     public static XMLParser xmlObject;
      private static boolean raceFinished = false;
      private static boolean streamStatus = false;
      private static long timeSinceStart = -1;
@@ -50,6 +51,7 @@ public class StreamParser extends Thread{
          try {
              System.out.println("START OF STREAM");
              streamStatus = true;
+             xmlObject = new XMLParser();
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
@@ -151,15 +153,15 @@ public class StreamParser extends Thread{
     private static void extractRaceStatus(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
-        long currentTime = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long currentTime = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload,7,11));
         int raceStatus = payload[11];
 //        System.out.println("raceStatus = " + raceStatus);
-        long expectedStartTime = extractTimeStamp(Arrays.copyOfRange(payload,12,18), 6);
+        long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
-        if (timeTillStart > 0 && timeTillStart % 10 == 0) {
+        if (timeTillStart > 0) {
             timeSinceStart = timeTillStart;
             System.out.println("Time till start: " + timeTillStart + " Seconds");
         } else {
@@ -172,10 +174,8 @@ public class StreamParser extends Thread{
                 raceFinished = false;
                 System.out.println("RACE HAS STARTED");
             }
-            if (timeTillStart % 10 == 0){
-                System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
-                timeSinceStart = timeTillStart;
-            }
+            System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
+            timeSinceStart = timeTillStart;
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
@@ -188,8 +188,8 @@ public class StreamParser extends Thread{
             boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
             boatStatus += "\nPenaltiesAwarded: " + (int)payload[29 + (i * 20)];
             boatStatus += "\nPenaltiesServed: " + (int)payload[30 + (i * 20)];
-            boatStatus += "\nEstTimeAtNextMark: " + extractTimeStamp(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)), 6);
-            boatStatus += "\nEstTimeAtFinish: " + extractTimeStamp(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)), 6);
+            boatStatus += "\nEstTimeAtNextMark: " + bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
+            boatStatus += "\nEstTimeAtFinish: " + bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
             boatStatuses.add(boatStatus);
         }
     }
@@ -219,41 +219,24 @@ public class StreamParser extends Thread{
     private static void extractXmlMessage(StreamPacket packet){
 
         byte[] payload = packet.getPayload();
-        String xmlMessage = "";
 
-        ByteArrayInputStream payloadStream = new ByteArrayInputStream(payload);
-
-        //Bunch of data we don't want (Message Version Number, AckNumber, Timestamp)
-        payloadStream.skip(9);
-        int xmlMessageSubType = payloadStream.read();
-        payloadStream.skip(2);
-
-        //checks the length of the xml message itself
-        int xmlMessageLength = payloadStream.read() | payloadStream.read() << 8;
-
-        //Converts XML message to string to be parsed
-        int currentChar;
-        while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
-            xmlMessage += (char)currentChar;
-        }
-
-        // Parse boat xml from server
-        if (xmlMessageSubType == 7) {
-            BoatsParser boatsParser = new BoatsParser(xmlMessage);
-            boats = boatsParser.getBoats();
-        }
+        int messageType = payload[9];
+        long messagelength = bytesToLong(Arrays.copyOfRange(payload,12,14));
+        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messagelength)))).trim();
+        //System.out.println("xmlMessage2 = " + xmlMessage);
 
         //Create XML document Object
-//        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-//        DocumentBuilder db = null;
-//        try {
-//            db = dbf.newDocumentBuilder();
-//            Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
-//            // TODO: 25/04/17 ajm412: Check that the object matches expected structure and return Document object.
-//        } catch (ParserConfigurationException | IOException | SAXException e) {
-//            e.printStackTrace();
-//        }
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = null;
+        Document doc = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            doc = db.parse(new InputSource(new StringReader(xmlMessage)));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
 
+        xmlObject.constructXML(doc, messageType);
     }
 
     /**
@@ -264,8 +247,8 @@ public class StreamParser extends Thread{
     private static void extractRaceStartStatus(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
-        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
-        long raceStartTime = extractTimeStamp(Arrays.copyOfRange(payload,9,15), 6);
+        long timeStamp = bytesToLong(Arrays.copyOfRange(payload,1,7));
+        long raceStartTime = bytesToLong(Arrays.copyOfRange(payload,9,15));
         long raceId = bytesToLong(Arrays.copyOfRange(payload,15,19));
         int notificationType = payload[19];
     }
@@ -278,7 +261,7 @@ public class StreamParser extends Thread{
     private static void extractYachtEventCode(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
-        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long timeStamp = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload,9,13));
         long subjectId = bytesToLong(Arrays.copyOfRange(payload,13,17));
         long incidentId = bytesToLong(Arrays.copyOfRange(payload,17,21));
@@ -359,7 +342,7 @@ public class StreamParser extends Thread{
     private static void extractMarkRounding(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
-        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long timeStamp = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload,9,13));
         long subjectId = bytesToLong(Arrays.copyOfRange(payload,13,17));
         int boatStatus = payload[17];
@@ -376,7 +359,7 @@ public class StreamParser extends Thread{
         ArrayList<String> windInfo = new ArrayList<>();
         for (int i = 0; i < loopCount; i++){
             String wind = "WindId: " + payload[3 + (20 * i)];
-            wind += "\nTime: " + extractTimeStamp(Arrays.copyOfRange(payload,4 + (20 * i),10 + (20 * i)), 6);
+            wind += "\nTime: " + bytesToLong(Arrays.copyOfRange(payload,4 + (20 * i),10 + (20 * i)));
             wind += "\nRaceId: " + bytesToLong(Arrays.copyOfRange(payload,10 + (20 * i),14 + (20 * i)));
             wind += "\nWindDirection: " + bytesToLong(Arrays.copyOfRange(payload,14 + (20 * i),16 + (20 * i)));
             wind += "\nWindSpeed: " + bytesToLong(Arrays.copyOfRange(payload,16 + (20 * i),18 + (20 * i)));
@@ -390,7 +373,7 @@ public class StreamParser extends Thread{
     private static void extractAvgWind(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
-        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long timeStamp = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long rawPeriod = bytesToLong(Arrays.copyOfRange(payload,7,9));
         long rawSamplePeriod = bytesToLong(Arrays.copyOfRange(payload,9,11));
         long period2 = bytesToLong(Arrays.copyOfRange(payload,11,13));
@@ -399,16 +382,6 @@ public class StreamParser extends Thread{
         long speed3 = bytesToLong(Arrays.copyOfRange(payload,17,19));
         long period4 = bytesToLong(Arrays.copyOfRange(payload,19,21));
         long speed4 = bytesToLong(Arrays.copyOfRange(payload,21,23));
-    }
-
-    private static long extractTimeStamp(byte[] timeStampBytes, int noOfBytes){
-        long timeStamp = 0;
-        long multiplier=1;
-        for(int i = 0;i < noOfBytes;i++) {
-            timeStamp += timeStampBytes[i]*multiplier;
-            multiplier *= 256;
-        }
-        return timeStamp;
     }
 
     /**
@@ -473,6 +446,10 @@ public class StreamParser extends Thread{
      */
     public static List<Boat> getBoats() {
         return boats;
+    }
+
+    public static XMLParser getXmlObject() {
+        return xmlObject;
     }
 }
 

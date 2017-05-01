@@ -17,10 +17,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.models.Boat;
 import seng302.models.parsers.StreamParser;
+import seng302.models.parsers.XMLParser;
 
 
+import javax.xml.crypto.dsig.XMLObject;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -66,10 +69,11 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Running a timer to update the livestream status on welcome screen. Update interval is 500 miliseconds.
+     * Running a timer to update the livestream status on welcome screen. Update interval is 1 second.
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
+            XMLParser xmlParser = StreamParser.getXmlObject();
             streamButton.setVisible(false);
             timeTillLive.setVisible(true);
             timeTillLive.setTextFill(Color.GREEN);
@@ -83,26 +87,32 @@ public class Controller implements Initializable {
                             timeTillLive.setTextFill(Color.RED);
                             timeTillLive.setText("Race finished! Waiting for new race...");
                             switchToRaceViewButton.setDisable(true);
-                        } else if (StreamParser.getTimeSinceStart() > 0 && StreamParser.getTimeSinceStart() % 10 == 0) {
+                        } else if (StreamParser.getTimeSinceStart() > 0) {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
-                            Long timerMinute = StreamParser.getTimeSinceStart() / 60;
-                            Long timerSecond = StreamParser.getTimeSinceStart() % 60;
-                            String timerString = "-" + timerMinute + "." + timerSecond + " minutes";
+                            String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
+                            if (timerSecond.length() == 1) {
+                                timerSecond = "0" + timerSecond;
+                            }
+                            String timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
-                        } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
+                        } else {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
-                            Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;
-                            Long timerSecond = -1 * StreamParser.getTimeSinceStart() % 60;
-                            String timerString = timerMinute + "." + timerSecond + " minutes";
+                            String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
+                            if (timerSecond.length() == 1) {
+                                timerSecond = "0" + timerSecond;
+                            }
+                            String timerString = timerMinute + ":" + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
                         }
                     });
                 }
-            }, 0, 500);
+            }, 0, 1000);
         } else {
             timeTillLive.setText("Stream not available.");
             timeTillLive.setTextFill(Color.RED);

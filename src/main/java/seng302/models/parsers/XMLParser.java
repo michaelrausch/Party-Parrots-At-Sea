@@ -9,35 +9,51 @@ import java.util.ArrayList;
 
 /**
  * Class to create an XML object from the XML Packet Messages.
+ *
+ * Example usage:
+ *
+ *  Document doc; // some xml document
+ *  Integer xmlMessageType; // an Integer of value 5, 6, 7
+ *
+ *  xmlP = new XMLParser(doc, xmlMessageType);
+ *  RegattaXMLObject rXmlObj = xmlP.createRegattaXML(); // creates a regattaXML object.
+ *
  */
-class XMLParser {
+public class XMLParser {
 
-    /**
-     * Creates a Regatta XML Object from the data in a Regatta XML Message
-     * @param doc XML Document Object
-     * @return A new RegattaXMLObject from the input Document.
-     */
-    RegattaXMLObject createRegattaXML(Document doc) {
-        return new RegattaXMLObject(doc);
+    private Document xmlDoc;
+
+    private RaceXMLObject raceXML;
+    private RegattaXMLObject regattaXML;
+    private BoatXMLObject boatXML;
+
+    public XMLParser() {
     }
 
     /**
-     * Creates a Race XML Object from the data in a Regatta XML Message
-     * @param doc XML Document Object
-     * @return A new RaceXMLObject from the input Document.
+     * Constructor for XMLParser
+     * @param doc Document to create XML object.
+     * @param messageType Defines if a message is a RegattaXML(5), RaceXML(6), BoatXML(7).
      */
-    RaceXMLObject createRaceXML(Document doc) {
-        return new RaceXMLObject(doc);
+    public void constructXML(Document doc, Integer messageType) {
+        this.xmlDoc = doc;
+        switch (messageType) {
+            case 5:
+                regattaXML = new RegattaXMLObject(this.xmlDoc);
+                break;
+            case 6:
+                raceXML = new RaceXMLObject(this.xmlDoc);
+                break;
+            case 7:
+                boatXML = new BoatXMLObject(this.xmlDoc);
+                break;
+        }
     }
 
-    /**
-     * Creates a Boat XML Object from the data in a Regatta XML Message
-     * @param doc XML Document Object
-     * @return A new BoatXMLObject from the input Document.
-     */
-    BoatXMLObject createBoatXML(Document doc) {
-        return new BoatXMLObject(doc);
-    }
+    public RaceXMLObject getRaceXML() { return raceXML; }
+    public RegattaXMLObject getRegattaXML() { return regattaXML; }
+    public BoatXMLObject getBoatXML() { return boatXML; }
+
 
     /**
      * Returns the text content of a given child element tag, assuming it exists, as an Integer.
@@ -129,7 +145,7 @@ class XMLParser {
         }
     }
 
-    class RegattaXMLObject {
+    public class RegattaXMLObject {
         //Regatta Info
         private Integer regattaID;
         private String regattaName;
@@ -163,7 +179,7 @@ class XMLParser {
 
     }
 
-    class RaceXMLObject {
+    public class RaceXMLObject {
 
         // Race Info
         private Integer raceID;
@@ -266,7 +282,7 @@ class XMLParser {
         public ArrayList<Corner> getCompoundMarkSequence() { return compoundMarkSequence; }
         public ArrayList<Limit> getCourseLimit() { return courseLimit; }
 
-        class Participant {
+        public class Participant {
             Integer sourceID;
             String entry;
 
@@ -279,7 +295,7 @@ class XMLParser {
             public String getEntry() { return entry; }
         }
 
-        class CompoundMark {
+        public class CompoundMark {
             private Integer markID;
             private String cMarkName;
             private ArrayList<Mark> marks;
@@ -302,7 +318,7 @@ class XMLParser {
             public String getcMarkName() { return cMarkName; }
             public ArrayList<Mark> getMarks() { return marks; }
 
-            class Mark {
+            public class Mark {
                 private Integer seqID;
                 private Integer sourceID;
                 private String markName;
@@ -310,13 +326,11 @@ class XMLParser {
                 private Double targetLng;
 
                 Mark(Node markNode) {
-
                     this.seqID = getNodeAttributeInt(markNode, "SeqID");
                     this.sourceID = getNodeAttributeInt(markNode, "SourceID");
                     this.markName = getNodeAttributeString(markNode, "Name");
                     this.targetLat = getNodeAttributeDouble(markNode, "TargetLat");
                     this.targetLng = getNodeAttributeDouble(markNode, "TargetLng");
-
                 }
 
                 public Integer getSeqID() { return seqID; }
@@ -327,7 +341,7 @@ class XMLParser {
             }
         }
 
-        class Corner {
+        public class Corner {
             private Integer seqID;
             private Integer compoundMarkID;
             private String rounding;
@@ -346,7 +360,7 @@ class XMLParser {
             public Integer getZoneSize() { return zoneSize; }
         }
 
-        class Limit {
+        public class Limit {
             private Integer seqID;
             private Double lat;
             private Double lng;
@@ -364,7 +378,7 @@ class XMLParser {
 
     }
 
-    class BoatXMLObject {
+    public class BoatXMLObject {
 
         private String lastModified;
         private Integer version;
@@ -429,7 +443,7 @@ class XMLParser {
         public ArrayList<Double> getZoneLimits() { return zoneLimits; }
         public ArrayList<Boat> getBoats() { return boats; }
 
-        class Boat {
+        public class Boat {
 
             private String boatType;
             private Integer sourceID;

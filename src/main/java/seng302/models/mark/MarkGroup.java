@@ -102,21 +102,21 @@ public class MarkGroup extends RaceObject {
         //moveTo(points[0].getX(), points[0].getY());
     }
 
-    public void setDestination (double x, double y, double rotation, double groundSpeed, int... raceIds) {
-        setDestination(x, y, raceIds);
+    public void setDestination (double x, double y, double rotation, double speed, int... raceIds) {
+        setDestination(x, y, 0, raceIds);
         this.rotationalGoal = rotation;
         calculateRotationalVelocity();
     }
 
-    public void setDestination (double x, double y, int... raceIds) {
+    public void setDestination (double x, double y, double speed, int... raceIds) {
         for (int i = 0; i < marks.size(); i++)
             for (int id : raceIds)
                 if (id == marks.get(i).getId())
-                    setDestinationChild(x, y, Math.max(0, i-1));
+                    setDestinationChild(x, y, 0, Math.max(0, i-1));
     }
 
 
-    private void setDestinationChild (double x, double y, int childIndex) {
+    private void setDestinationChild (double x, double y, double speed, int childIndex) {
         //double relativeX = x - super.getLayoutX();
         //double relativeY = y - super.getLayoutY();
         Circle markCircle = (Circle) super.getChildren().get(childIndex);
