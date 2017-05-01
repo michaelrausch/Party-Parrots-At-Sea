@@ -164,7 +164,7 @@ public class StreamParser extends Thread{
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
-        if (timeTillStart > 0 && timeTillStart % 10 == 0) {
+        if (timeTillStart > 0) {
             timeSinceStart = timeTillStart;
             System.out.println("Time till start: " + timeTillStart + " Seconds");
         } else {
@@ -177,10 +177,8 @@ public class StreamParser extends Thread{
                 raceFinished = false;
                 System.out.println("RACE HAS STARTED");
             }
-            if (timeTillStart % 10 == 0){
-                System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
-                timeSinceStart = timeTillStart;
-            }
+            System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
+            timeSinceStart = timeTillStart;
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));

@@ -87,25 +87,21 @@ public class Controller implements Initializable {
                             timeTillLive.setTextFill(Color.RED);
                             timeTillLive.setText("Race finished! Waiting for new race...");
                             switchToRaceViewButton.setDisable(true);
-                        } else if (StreamParser.getTimeSinceStart() > 0 && StreamParser.getTimeSinceStart() % 10 == 0) {
+                        } else if (StreamParser.getTimeSinceStart() > 0) {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
                             Long timerMinute = StreamParser.getTimeSinceStart() / 60;
                             Long timerSecond = StreamParser.getTimeSinceStart() % 60;
-                            String timerString = "-" + timerMinute + "." + timerSecond + " minutes";
+                            String timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
-                        } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
-//                            ArrayList<XMLParser.RaceXMLObject.Limit> courseLimits = xmlParser.getRaceXML().getCourseLimit();
-//                            for (XMLParser.RaceXMLObject.Limit courseLimit : courseLimits) {
-//                                System.out.println("Lat,Lng: " + courseLimit.getLat() +  courseLimit.getLng());
-//                            }
+                        } else {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
                             Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;
                             Long timerSecond = -1 * StreamParser.getTimeSinceStart() % 60;
-                            String timerString = timerMinute + "." + timerSecond + " minutes";
+                            String timerString = timerMinute + ":" + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
                         }
                     });

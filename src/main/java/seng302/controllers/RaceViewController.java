@@ -293,14 +293,14 @@ public class RaceViewController extends Thread{
 
     private String currentTimer() {
         String timerString = "0:00 minutes";
-        if (StreamParser.getTimeSinceStart() > 0 && StreamParser.getTimeSinceStart() % 10 == 0) {
+        if (StreamParser.getTimeSinceStart() > 0) {
             Long timerMinute = StreamParser.getTimeSinceStart() / 60;
             Long timerSecond = StreamParser.getTimeSinceStart() % 60;
-            timerString = "-" + timerMinute + "." + timerSecond + " minutes";
-        } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
+            timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
+        } else {
             Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;
             Long timerSecond = -1 * StreamParser.getTimeSinceStart() % 60;
-            timerString = timerMinute + "." + timerSecond + " minutes";
+            timerString = timerMinute + ":" + timerSecond + " minutes";
         }
         return timerString;
     }
