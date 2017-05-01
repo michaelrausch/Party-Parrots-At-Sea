@@ -1,12 +1,10 @@
-package seng302.models.parsers;
+package seng302.server.simulator.parsers;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 

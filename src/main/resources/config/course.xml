@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 
-<course>
+<markers>
     <marks>
         <gate>
             <name type="start-line">Start</name>
@@ -77,4 +77,4 @@
         <five>Leeward Gate</five>
         <six>Finish</six>
     </order>
-</course>
+</markers>
