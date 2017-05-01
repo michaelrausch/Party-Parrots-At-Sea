@@ -128,13 +128,14 @@ public class CanvasController {
                 for (RaceObject raceObject : raceObjects) {
                     raceObject.updatePosition(elapsedNanos);
                     for (int id : raceObject.getRaceIds()) {
-                        if (StreamParser.boatPositions.containsKey((long) id)) {
-                            Point3D p = StreamParser.boatPositions.get((long) id);
+                        if (StreamParser.getBoatPositions().containsKey((long) id)) {
+                            Point3D p = StreamParser.getBoatPositions().get((long) id);
                             Point2D p2d = latLonToXY(p.getX(), p.getY());
+                            double speed = StreamParser.getBoatSpeeds().get((long) id);
                             double heading = 360.0 / 0xffff * p.getZ();
-                            raceObject.setDestination(p2d.getX(), p2d.getY(), heading, id);
+                            raceObject.setDestination(p2d.getX(), p2d.getY(), heading, speed, id);
                         }
-                        StreamParser.boatPositions.remove((long) id);
+                        StreamParser.getBoatPositions().remove((long) id);
                     }
                 }
             }

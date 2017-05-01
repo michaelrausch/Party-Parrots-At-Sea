@@ -179,10 +179,10 @@ public class BoatGroup extends RaceObject{
      * @param rotation Rotation to move graphics to.
      * @param raceIds RaceID of the object to move.
      */
-    public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
+    public void setDestination (double newXValue, double newYValue, double rotation, double speed, int... raceIds) {
         if (hasRaceId(raceIds)) {
             destinationSet = true;
-            boat.setVelocity(StreamParser.boatSpeeds.get((long)boat.getId()));
+            boat.setVelocity(speed);
             if (currentRotation < 0)
                 currentRotation = 360 - currentRotation;
             double dx = newXValue - boatPoly.getLayoutX();
@@ -226,7 +226,7 @@ public class BoatGroup extends RaceObject{
         }
     }
 
-    public void setDestination (double newXValue, double newYValue, int... raceIDs) {
+    public void setDestination (double newXValue, double newYValue, double speed, int... raceIDs) {
         destinationSet = true;
 
         if (hasRaceId(raceIDs)) {
@@ -237,7 +237,7 @@ public class BoatGroup extends RaceObject{
                             )
                     )
             );
-            setDestination(newXValue, newYValue, rotation, raceIDs);
+            setDestination(newXValue, newYValue, rotation, speed, raceIDs);
         }
     }
 
