@@ -125,7 +125,6 @@ public class CanvasController {
                 }
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
                 elapsedNanos = 1000 / 60;
-                System.out.println("elapsedNanos = " + elapsedNanos);
                 for (RaceObject raceObject : raceObjects) {
                     raceObject.updatePosition(elapsedNanos);
                     for (int id : raceObject.getRaceIds()) {

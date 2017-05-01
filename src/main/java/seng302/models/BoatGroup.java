@@ -22,11 +22,11 @@ public class BoatGroup extends RaceObject{
     private static final double VELOCITY_Y_OFFSET = -5d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
-    private static final int LINE_INTERVAL = 30;
-    private double framesForNewLine = 0;
+    private static double expectedUpdateInterval = 200;
     private boolean destinationSet;
     private Point2D lastPoint;
-    private int wakeGenerationDelay;
+    private int wakeGenerationDelay = 10;
+    private double distanceTravelled;
 
     private Boat boat;
     private Group lineGroup = new Group();
@@ -81,7 +81,6 @@ public class BoatGroup extends RaceObject{
         destinationSet = false;
 
         wake = new Wake(0, -BOAT_HEIGHT);
-        wakeGenerationDelay = wake.numWakes;
         super.getChildren().addAll(teamNameObject, velocityObject, boatPoly);
     }
 
@@ -150,10 +149,11 @@ public class BoatGroup extends RaceObject{
         double dx = pixelVelocityX * timeInterval;
         double dy = pixelVelocityY * timeInterval;
         double rotation = rotationalVelocity * timeInterval;
+        distanceTravelled += Math.abs(dx) + Math.abs(dy);
         moveGroupBy(dx, dy, rotation);
-
-        if (framesForNewLine-- == 0) {
-            framesForNewLine = LINE_INTERVAL;
+        //Draw a new section of the trail every 20 pixels of movement.
+        if (distanceTravelled > 20) {
+            distanceTravelled = 0;
             if (lastPoint != null) {
                 Line l = new Line(
                         lastPoint.getX(),
@@ -161,19 +161,24 @@ public class BoatGroup extends RaceObject{
                         boatPoly.getLayoutX(),
                         boatPoly.getLayoutY()
                 );
-                l.getStrokeDashArray().setAll(4d, 6d);
+                l.getStrokeDashArray().setAll(3d, 7d);
                 l.setStroke(boatPoly.getFill());
                 lineGroup.getChildren().add(l);
             }
-            if (destinationSet){
+            if (destinationSet){ //Only begin drawing after the first destination is set
                 lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
             }
-            if (lineGroup.getChildren().size() > 60)
-                lineGroup.getChildren().remove(0);
         }
         wake.updatePosition(timeInterval);
     }
 
+    /**
+     * Sets the destination of the boat and the headng it should have once it reaches
+     * @param newXValue
+     * @param newYValue
+     * @param rotation Rotation to move graphics to.
+     * @param raceIds RaceID of the object to move.
+     */
     public void setDestination (double newXValue, double newYValue, double rotation, int... raceIds) {
         if (hasRaceId(raceIds)) {
             destinationSet = true;
@@ -187,19 +192,37 @@ public class BoatGroup extends RaceObject{
                 pixelVelocityX = dx / expectedUpdateInterval;
             }
             double dy = newYValue - boatPoly.getLayoutY();
-            if ((dy > 0 && pixelVelocityY < 0) || (dy < 0 && pixelVelocityY > 0)) {
-                pixelVelocityY = 0;
-            } else {
-                pixelVelocityY = dy / expectedUpdateInterval;
+            //Check movement is reasonable. Assumes a 1000 * 1000 canvas
+            if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
+//                System.out.println("dx = " + dx);
+//                System.out.println("dy = " + dy);
+                dx = 0;
+                dy = 0;
+                moveTo(newXValue, newYValue);
             }
+            //Slight delay on changing X/Y direction that could help jitter. Disabled since there was an issue with
+            //packets that might be causing it.
+//            if ((dx > 0 && pixelVelocityX < 0) || (dx < 0 && pixelVelocityX > 0)) {
+//                pixelVelocityX = 0;
+//            } else {
+//                pixelVelocityX = dx / expectedUpdateInterval;
+//            }
+//            if ((dy > 0 && pixelVelocityY < 0) || (dy < 0 && pixelVelocityY > 0)) {
+//                pixelVelocityY = 0;
+//            } else {
+//                pixelVelocityY = dy / expectedUpdateInterval;
+//            }
+            pixelVelocityX = dx / expectedUpdateInterval;
+            pixelVelocityY = dy / expectedUpdateInterval;
             rotationalGoal = rotation;
             calculateRotationalVelocity();
             if (wakeGenerationDelay > 0) {
                 wake.rotate(rotationalGoal);
                 wakeGenerationDelay--;
             } else {
-                wake.setRotationalVelocity(rotationalVelocity, currentRotation, pixelVelocityX, pixelVelocityY);
+                wake.setRotationalVelocity(rotationalVelocity, currentRotation, boat.getVelocity());
             }
+            velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
         }
     }
 
