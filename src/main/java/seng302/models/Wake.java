@@ -15,12 +15,13 @@ import javafx.scene.transform.Rotate;
  */
 class Wake extends Group {
 
-    final int numWakes = 5;
+    private int numWakes = 5;
     private double[] velocities = new double[13];
     private Arc[] arcs = new Arc[numWakes];
     private double[] rotations = new double[numWakes];
     private int[] velocityIndices = new int[numWakes];
     private double sum = 0;
+    private static double max;
 
     /**
      * Create a wake at the given location.
@@ -46,15 +47,19 @@ class Wake extends Group {
      * Sets the rotationalVelocity of each arc. Each arc is 3 velocities behind the next smallest arc. The smallest uses
      * the latest given velocity.
      * @param rotationalVelocity The rotationalVelocity the wake should move at.
+     * @param rotationGoal Where the wake will rotate to if the wake is calculated to be on a straight section. This is
+     *                     used to prevent desynchronisation with the Boat polygon.
+     * @param velocity The real world velocity of the boat in m/s.
      */
-    void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocityX, double velocityY) {
-        if (Math.abs(rotationalVelocity) > 0.5) {
-            rotationalVelocity = 0;
-        }
+    void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocity) {
+//        if (Math.abs(rotationalVelocity) > 0.5) {
+//            rotationalVelocity = 0;
+//        }
         sum -= Math.abs(velocities[(velocityIndices[0] + 10) % 13]);
         sum += Math.abs(rotationalVelocity);
-        System.out.println("sum = " + sum);
-        if (sum < 0.9)
+//        System.out.println("sum = " + sum);
+        max = Math.max(max, rotationalVelocity);
+        if (sum < max)
             rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
                                    //This stops the wake from eventually becoming out of sync with the boat.
 
@@ -65,14 +70,14 @@ class Wake extends Group {
         for (int i = 1; i < numWakes; i++)
             velocityIndices[i] = (velocityIndices[0] + 3 * i) % 13;
 
-        //Scale wakes based on velocity. Assumes boats are always moving at a decent pace.
-        double scaleFactor = Math.abs(Math.log10(Math.abs(velocityX) + Math.abs(velocityY)));
-        double baseRad = 25;
+        //Scale wakes based on velocity.
+        double baseRad = 20;
+        double rad;
         for (Arc arc :arcs) {
-            double rad = Math.min(baseRad + 5 * scaleFactor, baseRad + 15);
+            rad = baseRad + velocity;
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
-            baseRad += 10;
+            baseRad += 5 + (velocity / 2);
         }
     }
 
