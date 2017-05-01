@@ -232,7 +232,7 @@ public class StreamParser extends Thread{
         Document doc = null;
         try {
             db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
+            doc = db.parse(new InputSource(new StringReader(xmlMessage)));
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
