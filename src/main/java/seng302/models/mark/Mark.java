@@ -17,10 +17,10 @@ public abstract class Mark {
      * @param name the name of the mark
      * @param markType the type of mark. either GATE_MARK or SINGLE_MARK.
      */
-    public Mark (String name, MarkType markType) {
+    public Mark (String name, MarkType markType, int id) {
         this.name = name;
         this.markType = markType;
-        id = 0;
+        this.id = id;
     }
 
     public Mark(String name, MarkType markType, double latitude, double longitude) {

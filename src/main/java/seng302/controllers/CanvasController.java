@@ -22,6 +22,7 @@ import seng302.models.parsers.StreamPacket;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.packets.BoatPositionPacket;
 
+import java.sql.Time;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -102,9 +103,6 @@ public class CanvasController {
         fitMarksToCanvas();
         drawBoats();
         timer = new AnimationTimer() {
-            private int countdown = 60;
-            private int[] currentRaceMarker = {1, 1, 1, 1, 1, 1};
-            List<Mark> marks = raceViewController.getRace().getCourse();
 
             @Override
             public void handle(long now) {
@@ -116,19 +114,22 @@ public class CanvasController {
                 if (frameTimeIndex == 0) {
                     arrayFilled = true ;
                 }
+                long elapsedNanos;
                 if (arrayFilled) {
-                    long elapsedNanos = now - oldFrameTime ;
+                    elapsedNanos = now - oldFrameTime ;
                     long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
                     Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     drawFps(frameRate.intValue());
                 }
 
+                // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
+                elapsedNanos = 1000 / 60;
                 updateRaceObjects();
 
             }
         };
         for (Mark m : raceViewController.getRace().getCourse()) {
-//            System.out.println(m.getName());
+            System.out.println(m.getName());
         }
         //timer.start();
     }
@@ -175,7 +176,7 @@ public class CanvasController {
 
     class ResizableCanvas extends Canvas {
 
-        public ResizableCanvas() {
+        ResizableCanvas() {
             // Redraw canvas when size changes.
             widthProperty().addListener(evt -> draw());
             heightProperty().addListener(evt -> draw());
@@ -232,37 +233,12 @@ public class CanvasController {
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
             boatGroup.moveTo(startingX, startingY, 0d);
-//            boatGroup.setDestination(firstMarkX, firstMarkY);
             boatGroup.forceRotation();
-            //group.getChildren().add(boatGroup);
             raceObjects.add(boatGroup);
             boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
-//            drawBoat(boat.getLongitude(), boat.getLatitude(), boat.getColor(), boat.getShortName(), boat.getSpeedInKnots(), boat.getHeading());
         }
         group.getChildren().add(boatAnnotations);
         group.getChildren().addAll(raceObjects);
-    }
-
-
-    /**
-     * Inner class for creating point so that you can rotate it around origin point.
-     */
-    class Point {
-
-        double x, y;
-
-        Point (double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        void rotate(double angle) {
-            double oldX = x;
-            double oldY = y;
-            this.x = oldX * Math.cos(angle) - oldY * Math.sin(angle);
-            this.y = oldX * Math.sin(angle) + oldY * Math.cos(angle);
-
-        }
     }
 
     /**

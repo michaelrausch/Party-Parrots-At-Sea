@@ -21,6 +21,10 @@ public class Boat {
     private int markLastPast;
     private String shortName;
     private int id;
+    // new attributes to boat
+    private int sourceID;
+    private String boatName;
+    private String country;
 
     public Boat(String teamName) {
         this.teamName = teamName;
@@ -43,6 +47,21 @@ public class Boat {
         this.velocity = boatVelocity;
         this.shortName = shortName;
         this.id = id;
+    }
+
+    /**
+     * New instance created by BoatsParser.
+     *
+     * @param sourceID  source ID of the boat
+     * @param boatName  full name of the boat
+     * @param shortName short name of the boat
+     * @param country   country of the boat
+     */
+    public Boat(int sourceID, String boatName, String shortName, String country) {
+        this.sourceID = sourceID;
+        this.boatName = boatName;
+        this.shortName = shortName;
+        this.country = country;
     }
 
     /**
@@ -141,4 +160,15 @@ public class Boat {
         return id;
     }
 
+    public int getSourceID() {
+        return sourceID;
+    }
+
+    public String getBoatName() {
+        return boatName;
+    }
+
+    public String getCountry() {
+        return country;
+    }
 }

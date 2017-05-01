@@ -22,7 +22,7 @@ public class StreamPacket {
 //        if (this.type == PacketType.XML_MESSAGE){
 //            //System.out.println("--------");
 //            System.out.println(new String(payload));
-//            StreamParser.parsePacket(this);
+//            //StreamParser.parsePacket(this);
 //        }
     }
 

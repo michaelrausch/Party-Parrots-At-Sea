@@ -9,13 +9,17 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import seng302.models.*;
 import seng302.models.parsers.ConfigParser;
+import seng302.models.parsers.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,7 +31,7 @@ public class RaceViewController extends Thread{
     @FXML
     private VBox positionVbox;
     @FXML
-    private CheckBox toggleAnnotation, toggleFps;
+    private CheckBox toggleFps;
     @FXML
     private Text timerLabel;
     @FXML
@@ -35,10 +39,11 @@ public class RaceViewController extends Thread{
     @FXML
     private Text windArrowText, windDirectionText;
     @FXML
+    private Slider annotationSlider;
+    @FXML
     private CanvasController includedCanvasController;
 
     private ArrayList<Boat> startingBoats = new ArrayList<>();
-    private boolean displayAnnotations;
     private boolean displayFps;
     private Timeline timerTimeline;
     private Map<Boat, TimelineInfo> timelineInfos = new HashMap<>();
@@ -62,7 +67,7 @@ public class RaceViewController extends Thread{
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
-        //initializeTimer();
+        initializeTimer();
         initializeSettings();
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
@@ -74,22 +79,50 @@ public class RaceViewController extends Thread{
 
 
 
-    private void initializeSettings(){
-        displayAnnotations = true;
+    private void initializeSettings() {
         displayFps = true;
 
-        toggleAnnotation.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                displayAnnotations = !displayAnnotations;
-            }
-        });
         toggleFps.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 displayFps = !displayFps;
             }
         });
+
+        //SLIFER STUFF BELOW
+        annotationSlider.setLabelFormatter(new StringConverter<Double>() {
+            @Override
+            public String toString(Double n) {
+                if (n == 0) return "None";
+                if (n == 1) return "Low";
+                if (n == 2) return "Medium";
+                if (n == 3) return "All";
+
+                return "All";
+            }
+
+            @Override
+            public Double fromString(String s) {
+                switch (s) {
+                    case "None":
+                        return 0d;
+                    case "Low":
+                        return 1d;
+                    case "Medium":
+                        return 2d;
+                    case "All":
+                        return 3d;
+
+                    default:
+                        return 3d;
+                }
+            }
+        });
+
+        annotationSlider.valueProperty().addListener((obs, oldval, newVal) ->
+                    setAnnotations((int)annotationSlider.getValue()));
+
+        annotationSlider.setValue(3);
     }
 
     private void initializeTimer(){
@@ -99,12 +132,11 @@ public class RaceViewController extends Thread{
         timerTimeline.getKeyFrames().add(
                 new KeyFrame(Duration.seconds(1),
                         event -> {
-                            // Stop timer if race is finished
-                            if (this.race.isRaceFinished()) {
-                                this.timerTimeline.stop();
+                            if (StreamParser.isRaceFinished()) {
+                                timerLabel.setFill(Color.RED);
+                                timerLabel.setText("Race Finished!");
                             } else {
-                                timerLabel.setText(convertTimeToMinutesSeconds(race.getRaceTime()));
-                                this.race.incrementRaceTime();
+                                timerLabel.setText(currentTimer());
                             }
                         })
         );
@@ -259,6 +291,20 @@ public class RaceViewController extends Thread{
         return String.format("%02d:%02d", time / 60, time % 60);
     }
 
+    private String currentTimer() {
+        String timerString = "0:00 minutes";
+        if (StreamParser.getTimeSinceStart() > 0 && StreamParser.getTimeSinceStart() % 10 == 0) {
+            Long timerMinute = StreamParser.getTimeSinceStart() / 60;
+            Long timerSecond = StreamParser.getTimeSinceStart() % 60;
+            timerString = "-" + timerMinute + "." + timerSecond + " minutes";
+        } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
+            Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;
+            Long timerSecond = -1 * StreamParser.getTimeSinceStart() % 60;
+            timerString = timerMinute + "." + timerSecond + " minutes";
+        }
+        return timerString;
+    }
+
     public void stopTimer() {
         timerTimeline.stop();
     }
@@ -268,10 +314,6 @@ public class RaceViewController extends Thread{
 
     public boolean isDisplayFps() {
         return displayFps;
-    }
-
-    public boolean isDisplayAnnotations() {
-        return displayAnnotations;
     }
 
     public Race getRace() {
@@ -286,10 +328,54 @@ public class RaceViewController extends Thread{
         return startingBoats;
     }
 
-    @FXML
-    private void toggleAnnotations () {
-        for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-            ro.toggleAnnotations();
+
+    private void setAnnotations(Integer annotationLevel) {
+        switch (annotationLevel) {
+            case 0:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(false);
+                        bg.setVelocityObjectVisible(false);
+                        bg.setLineGroupVisible(false);
+                        bg.setWakeVisible(false);
+                    }
+                }
+                break;
+            case 1:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(true);
+                        bg.setVelocityObjectVisible(false);
+                        bg.setLineGroupVisible(false);
+                        bg.setWakeVisible(false);
+                    }
+                }
+                break;
+            case 2:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(true);
+                        bg.setVelocityObjectVisible(false);
+                        bg.setLineGroupVisible(true);
+                        bg.setWakeVisible(false);
+                    }
+                }
+                break;
+            case 3:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(true);
+                        bg.setVelocityObjectVisible(true);
+                        bg.setLineGroupVisible(true);
+                        bg.setWakeVisible(true);
+                    }
+                }
+                break;
         }
     }
+
 }

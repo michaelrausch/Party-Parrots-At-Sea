@@ -16,8 +16,8 @@ public class MarkTest {
 
     @Before
     public void setUp() throws Exception {
-        this.singleMark1 = new SingleMark("testMark_SM1", 12.23234, -34.342);
-        this.singleMark2 = new SingleMark("testMark_SM2", 12.23239, -34.352);
+        this.singleMark1 = new SingleMark("testMark_SM1", 12.23234, -34.342, 1);
+        this.singleMark2 = new SingleMark("testMark_SM2", 12.23239, -34.352, 2);
         this.gateMark = new GateMark("testMark_GM", MarkType.OPEN_GATE, singleMark1, singleMark2, singleMark1.getLatitude(), singleMark2.getLongitude());
     }
 
