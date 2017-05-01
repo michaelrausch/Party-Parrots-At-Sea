@@ -276,7 +276,7 @@ public class StreamParser extends Thread{
     private static void extractYachtActionCode(StreamPacket packet){
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
-        long timeStamp = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long timeStamp = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long subjectId = bytesToLong(Arrays.copyOfRange(payload,9,13));
         long incidentId = bytesToLong(Arrays.copyOfRange(payload,13,17));
         int eventId = payload[17];
