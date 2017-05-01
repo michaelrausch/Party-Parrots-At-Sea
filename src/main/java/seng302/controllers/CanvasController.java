@@ -18,11 +18,14 @@ import seng302.models.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.RaceObject;
 import seng302.models.mark.*;
+import seng302.models.parsers.StreamPacket;
 import seng302.models.parsers.StreamParser;
+import seng302.models.parsers.packets.BoatPositionPacket;
 
 import java.sql.Time;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -103,13 +106,8 @@ public class CanvasController {
 
             @Override
             public void handle(long now) {
-                boolean raceFinished = true;
-                boolean descending;
-                boolean leftToRight;
-                int boatIndex = 0;
 
-                Mark nextMark;
-
+                //fps stuff
                 long oldFrameTime = frameTimes[frameTimeIndex] ;
                 frameTimes[frameTimeIndex] = now ;
                 frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
@@ -123,27 +121,57 @@ public class CanvasController {
                     Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     drawFps(frameRate.intValue());
                 }
+
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
                 elapsedNanos = 1000 / 60;
-                for (RaceObject raceObject : raceObjects) {
-                    raceObject.updatePosition(elapsedNanos);
-                    for (int id : raceObject.getRaceIds()) {
-                        if (StreamParser.getBoatPositions().containsKey((long) id)) {
-                            Point3D p = StreamParser.getBoatPositions().get((long) id);
-                            Point2D p2d = latLonToXY(p.getX(), p.getY());
-                            double speed = StreamParser.getBoatSpeeds().get((long) id);
-                            double heading = 360.0 / 0xffff * p.getZ();
-                            raceObject.setDestination(p2d.getX(), p2d.getY(), heading, speed, id);
-                        }
-                        StreamParser.getBoatPositions().remove((long) id);
-                    }
-                }
+                updateRaceObjects();
+
             }
         };
         for (Mark m : raceViewController.getRace().getCourse()) {
             System.out.println(m.getName());
         }
         //timer.start();
+    }
+
+    private void updateRaceObjects(){
+        for (RaceObject raceObject : raceObjects) {
+            raceObject.updatePosition(1000 / 60);
+            // some raceObjects will have multiply ID's (for instance gate marks)
+            for (long id : raceObject.getRaceIds()) {
+                //checking if the current "ID" has any updates associated with it
+                if (StreamParser.boatPositions.containsKey(id)) {
+                    move(id, raceObject);
+                }
+            }
+        }
+    }
+
+    private void move(long id, RaceObject raceObject){
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(id);
+        if (movementQueue.size() > 0){
+            BoatPositionPacket positionPacket = movementQueue.peek();
+
+            //this code adds a delay to reading from the movementQueue
+            //in case things being put into the movement queue are slightly
+            //out of order
+            int delayTime = 1000;
+            int loopTime = delayTime * 10;
+            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
+            if (timeDiff < 0){
+                timeDiff = loopTime + timeDiff;
+            }
+            if (timeDiff > delayTime) {
+                try {
+                    positionPacket = movementQueue.take();
+                    Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
+                    double heading = 360.0 / 0xffff * positionPacket.getHeading();
+                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), (int) id);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     class ResizableCanvas extends Canvas {

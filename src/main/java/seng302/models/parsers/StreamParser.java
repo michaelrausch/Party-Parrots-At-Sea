@@ -6,6 +6,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Boat;
+import seng302.models.parsers.packets.BoatPositionPacket;
+import seng302.models.parsers.packets.StreamPacket;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,12 +15,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * The purpose of this class is to take in the stream of divided packets so they can be read
@@ -28,8 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StreamParser extends Thread{
 
-     private static ConcurrentHashMap<Long,Point3D> boatPositions = new ConcurrentHashMap<>();
-     private static ConcurrentHashMap<Long,Double> boatSpeeds = new ConcurrentHashMap<>();
+     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
      private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
@@ -40,7 +40,7 @@ public class StreamParser extends Thread{
      private static List<Boat> boats = new ArrayList<>();
 
      public StreamParser(String threadName){
-        this.threadName = threadName;
+         this.threadName = threadName;
      }
 
     /**
@@ -55,28 +55,27 @@ public class StreamParser extends Thread{
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
-             while (StreamReceiver.packetBuffer.peek() != null){
-//                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
-//                 int delayTime = 1000;
-//                 int loopTime = delayTime + 1000;
-//                 long sleepTime = 0;
-//                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
-//                 if (transitTime < 0){
-//                     transitTime = loopTime + delayTime;
-//                 }
-//                 if (transitTime < delayTime) {
-//                     sleepTime = delayTime - (transitTime);
-//                     Thread.sleep(sleepTime);
-//                 }
-//                 System.out.println(sleepTime);
-                 StreamPacket packet = StreamReceiver.packetBuffer.take();
+             while (true){
+                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
+                 //this code adds a delay to reading from the packetBuffer so
+                 //out of order packets have time to order themselves in the queue
+                 int delayTime = 1000;
+                 int loopTime = delayTime * 10;
+                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
+                 if (transitTime < 0){
+                     transitTime = loopTime + transitTime;
+                 }
+                 if (transitTime < delayTime) {
+                     long sleepTime = delayTime - (transitTime);
+                     Thread.sleep(sleepTime);
+                 }
+                 packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
                  Thread.sleep(1);
                  while (StreamReceiver.packetBuffer.peek() == null) {
                      Thread.sleep(1);
                  }
              }
-             System.out.println("END OF STREAM");
          } catch (Exception e){
              e.printStackTrace();
          }
@@ -311,28 +310,30 @@ public class StreamParser extends Thread{
         byte[] headingBytes = Arrays.copyOfRange(payload,28,30);
         byte[] groundSpeedBytes = Arrays.copyOfRange(payload,38,40);
 
-        long timeStamp = bytesToLong(Arrays.copyOfRange(payload,1,7));
+        long timeValid = bytesToLong(Arrays.copyOfRange(payload,1,7));
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
         long boatId = bytesToLong(boatIdBytes);
-        long lat = bytesToLong(latBytes);
-        long lon = bytesToLong(lonBytes);
+        long rawLat = bytesToLong(latBytes);
+        long rawLon = bytesToLong(lonBytes);
+        double lat = ((180d * (double)rawLat)/Math.pow(2,31));
+        double lon = ((180d *(double)rawLon)/Math.pow(2,31));
         long heading = bytesToLong(headingBytes);
-//        long speed = bytesToLong(speedBytes);
         double groundSpeed = bytesToLong(groundSpeedBytes)/1000.0;
         short s = (short) ((groundSpeedBytes[1] & 0xFF) << 8 | (groundSpeedBytes[0] & 0xFF));
         if ((int)deviceType == 1 || (int)deviceType == 3){
-//            System.out.println("boatId = " + boatId);
-//            System.out.println("deviceType = " + (long)deviceType);
-//            System.out.println("seq = " + seq);
-            //needs to be validated
-            Point3D point = new Point3D(((180d * (double)lat)/Math.pow(2,31)),((180d *(double)lon)/Math.pow(2,31)),(double)heading);
-            boatPositions.put(boatId, point);
-            boatSpeeds.put(boatId, groundSpeed);
-//            boatPositions.replace(boatId, point);
-//            boatSpeeds.replace(boatId, groundSpeed);
-//            System.out.println("lon = " + ((180d * (double)lon)/Math.pow(2,31)));
-//            System.out.println("lat = " +  ((180d *(double)lat)/Math.pow(2,31)));
+
+            BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
+
+            if (!boatPositions.containsKey(boatId)){
+                boatPositions.put(boatId, new PriorityBlockingQueue<BoatPositionPacket>(256, new Comparator<BoatPositionPacket>() {
+                    @Override
+                    public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
+                        return (int) (p1.getTimeValid() - p2.getTimeValid());
+                    }
+                }));
+            }
+            boatPositions.get(boatId).put(boatPacket);
         }
     }
 
@@ -445,14 +446,6 @@ public class StreamParser extends Thread{
      */
     public static List<Boat> getBoats() {
         return boats;
-    }
-
-    public static ConcurrentHashMap<Long, Point3D> getBoatPositions() {
-        return boatPositions;
-    }
-
-    public static ConcurrentHashMap<Long, Double> getBoatSpeeds() {
-        return boatSpeeds;
     }
 
     public static XMLParser getXmlObject() {
