@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.StreamReceiver;
+import seng302.server.ServerThread;
 
 public class App extends Application
 {
@@ -22,12 +23,20 @@ public class App extends Application
     public static void main(String[] args) {
         StreamReceiver sr;
 
+        new ServerThread("Racevision Test Server");
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         if (args.length > 1){
             sr = new StreamReceiver("localhost", 8085, "TestThread1");
         }
         else{
             //StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
-            sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
+            //sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
+            sr = new StreamReceiver("localhost", 8085, "TestThread1");
         }
 
         sr.start();
