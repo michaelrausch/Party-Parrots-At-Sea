@@ -5,6 +5,7 @@ import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import seng302.models.Boat;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,6 +33,10 @@ public class StreamParser extends Thread{
      private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
+     private static boolean raceFinished = false;
+     private static boolean streamStatus = false;
+     private static long timeSinceStart = -1;
+     private static List<Boat> boats = new ArrayList<>();
 
      public StreamParser(String threadName){
         this.threadName = threadName;
@@ -44,6 +49,7 @@ public class StreamParser extends Thread{
     public void run(){
          try {
              System.out.println("START OF STREAM");
+             streamStatus = true;
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
@@ -155,16 +161,21 @@ public class StreamParser extends Thread{
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
         if (timeTillStart > 0 && timeTillStart % 10 == 0) {
+            timeSinceStart = timeTillStart;
             System.out.println("Time till start: " + timeTillStart + " Seconds");
         } else {
             if (raceStatus == 4 || raceStatus == 8){
+                raceFinished = true;
+                raceStarted = false;
                 System.out.println("RACE HAS FINISHED");
             } else if (!raceStarted){
                 raceStarted = true;
+                raceFinished = false;
                 System.out.println("RACE HAS STARTED");
             }
             if (timeTillStart % 10 == 0){
                 System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
+                timeSinceStart = timeTillStart;
             }
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
@@ -226,17 +237,24 @@ public class StreamParser extends Thread{
         while (payloadStream.available() > 0 && (currentChar = payloadStream.read()) != 0) {
             xmlMessage += (char)currentChar;
         }
-        //Create XML document Object
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = null;
-        Document doc = null;
-        try {
-            db = dbf.newDocumentBuilder();
-            doc = db.parse(new InputSource(new StringReader(xmlMessage)));
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            e.printStackTrace();
+
+        // Parse boat xml from server
+        if (xmlMessageSubType == 7) {
+            BoatsParser boatsParser = new BoatsParser(xmlMessage);
+            boats = boatsParser.getBoats();
         }
-        // TODO: 30/04/2017 (ajm412) Figure out how this will tie into the backend of the visualiser now that the parsing is done.
+
+        //Create XML document Object
+//        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+//        DocumentBuilder db = null;
+//        try {
+//            db = dbf.newDocumentBuilder();
+//            Document doc = db.parse(new InputSource(new StringReader(xmlMessage)));
+//            // TODO: 25/04/17 ajm412: Check that the object matches expected structure and return Document object.
+//        } catch (ParserConfigurationException | IOException | SAXException e) {
+//            e.printStackTrace();
+//        }
+
     }
 
     /**
@@ -409,6 +427,51 @@ public class StreamParser extends Thread{
             index++;
         }
         return partialLong;
+    }
+
+    /**
+     * returns false if race not started, true otherwise
+     *
+     * @return race started status
+     */
+    public static boolean isRaceStarted() {
+        return raceStarted;
+    }
+
+    /**
+     * returns false if stream not connected, true otherwise
+     *
+     * @return stream started status
+     */
+    public static boolean isStreamStatus() {
+        return streamStatus;
+    }
+
+    /**
+     * returns race timer
+     *
+     * @return race timer in long
+     */
+    public static long getTimeSinceStart() {
+        return timeSinceStart;
+    }
+
+    /**
+     * return false if race not finished, true otherwise
+     *
+     * @return race finished status
+     */
+    public static boolean isRaceFinished() {
+        return raceFinished;
+    }
+
+    /**
+     * return list of boats from the server
+     *
+     * @return list of boats
+     */
+    public static List<Boat> getBoats() {
+        return boats;
     }
 }
 

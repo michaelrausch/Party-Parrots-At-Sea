@@ -12,21 +12,28 @@ public class App extends Application
 {
     @Override
     public void start(Stage primaryStage) throws Exception {
-
         Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
 
         primaryStage.show();
-        StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
-//        StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
+    }
+
+    public static void main(String[] args) {
+        StreamReceiver sr;
+
+        if (args.length > 1){
+            sr = new StreamReceiver("localhost", 8085, "TestThread1");
+        }
+        else{
+            //StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
+            sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
+        }
+
         sr.start();
         StreamParser streamParser = new StreamParser("TestThread2");
         streamParser.start();
 
-    }
-
-    public static void main(String[] args) {
         launch(args);
     }
 }

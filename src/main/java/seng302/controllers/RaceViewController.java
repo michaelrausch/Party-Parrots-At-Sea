@@ -13,11 +13,13 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import seng302.models.*;
 import seng302.models.parsers.ConfigParser;
+import seng302.models.parsers.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -65,7 +67,7 @@ public class RaceViewController extends Thread{
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
-        //initializeTimer();
+        initializeTimer();
         initializeSettings();
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
@@ -130,12 +132,11 @@ public class RaceViewController extends Thread{
         timerTimeline.getKeyFrames().add(
                 new KeyFrame(Duration.seconds(1),
                         event -> {
-                            // Stop timer if race is finished
-                            if (this.race.isRaceFinished()) {
-                                this.timerTimeline.stop();
+                            if (StreamParser.isRaceFinished()) {
+                                timerLabel.setFill(Color.RED);
+                                timerLabel.setText("Race Finished!");
                             } else {
-                                timerLabel.setText(convertTimeToMinutesSeconds(race.getRaceTime()));
-                                this.race.incrementRaceTime();
+                                timerLabel.setText(currentTimer());
                             }
                         })
         );
@@ -288,6 +289,20 @@ public class RaceViewController extends Thread{
             return String.format("-%02d:%02d", (time * -1) / 60, (time * -1) % 60);
         }
         return String.format("%02d:%02d", time / 60, time % 60);
+    }
+
+    private String currentTimer() {
+        String timerString = "0:00 minutes";
+        if (StreamParser.getTimeSinceStart() > 0 && StreamParser.getTimeSinceStart() % 10 == 0) {
+            Long timerMinute = StreamParser.getTimeSinceStart() / 60;
+            Long timerSecond = StreamParser.getTimeSinceStart() % 60;
+            timerString = "-" + timerMinute + "." + timerSecond + " minutes";
+        } else if (StreamParser.getTimeSinceStart() % 10 == 0) {
+            Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;
+            Long timerSecond = -1 * StreamParser.getTimeSinceStart() % 60;
+            timerString = timerMinute + "." + timerSecond + " minutes";
+        }
+        return timerString;
     }
 
     public void stopTimer() {
