@@ -58,13 +58,13 @@ public class StreamParser extends Thread{
                  long sleepTime = 0;
                  long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
                  if (transitTime < 0){
-                     transitTime = loopTime + delayTime;
+                     transitTime = loopTime + transitTime;
                  }
                  if (transitTime < delayTime) {
                      sleepTime = delayTime - (transitTime);
                      Thread.sleep(sleepTime);
                  }
-                 System.out.println(sleepTime);
+//                 System.out.println(sleepTime);
 
                  packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
@@ -169,7 +169,7 @@ public class StreamParser extends Thread{
                 System.out.println("RACE HAS STARTED");
             }
             if (timeTillStart % 10 == 0){
-                System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
+                //System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
             }
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
@@ -332,6 +332,9 @@ public class StreamParser extends Thread{
         if ((int)deviceType == 1){
 
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
+            if (boatId == 106){
+                System.out.println("timeValid = " + timeValid);
+            }
 
             if (!boatPositions.containsKey(boatId)){
                 boatPositions.put(boatId, new PriorityBlockingQueue<BoatPositionPacket>(256, new Comparator<BoatPositionPacket>() {

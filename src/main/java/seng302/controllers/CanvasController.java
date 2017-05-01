@@ -18,10 +18,13 @@ import seng302.models.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.RaceObject;
 import seng302.models.mark.*;
+import seng302.models.parsers.StreamPacket;
 import seng302.models.parsers.StreamParser;
+import seng302.models.parsers.packets.BoatPositionPacket;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -105,12 +108,7 @@ public class CanvasController {
 
             @Override
             public void handle(long now) {
-                boolean raceFinished = true;
-                boolean descending;
-                boolean leftToRight;
-                int boatIndex = 0;
 
-                Mark nextMark;
 
                 long oldFrameTime = frameTimes[frameTimeIndex] ;
                 frameTimes[frameTimeIndex] = now ;
@@ -126,20 +124,52 @@ public class CanvasController {
                 }
                 for (RaceObject raceObject : raceObjects) {
                     raceObject.updatePosition(1000 / 60);
-                    for (int id : raceObject.getRaceIds()) {
-                        if (StreamParser.boatPositions.containsKey((long) id)) {
-                            Point3D p = StreamParser.boatPositions.get((long) id);
-                            Point2D p2d = latLonToXY(p.getX(), p.getY());
-                            double heading = 360.0 / 0xffff * p.getZ();
-                            raceObject.setDestination(p2d.getX(), p2d.getY(), heading, id);
+                    for (long id : raceObject.getRaceIds()) {
+                        if (StreamParser.boatPositions.containsKey(id)) {
+
+                            PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(id);
+                            if (movementQueue.size() > 0){
+                                BoatPositionPacket positionPacket = movementQueue.peek();
+
+                                int delayTime = 5000;
+                                int loopTime = delayTime + 1000;
+                                //System.out.println("id = " + id);
+                                long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
+                                if (timeDiff < 0){
+                                    timeDiff = loopTime + timeDiff;
+                                }
+                                if (id == 106) {
+                                    //System.out.println("timeDiff = " + timeDiff);
+                                    //System.out.println("movementQueue.size() = " + movementQueue.size());
+                                }
+                                //System.out.println("timeDiff = " + timeDiff);
+                                //System.out.println("movementQueue.size() = " + movementQueue.size());
+                                if (timeDiff > delayTime) {
+                                    if (id == 106){
+                                        //System.out.println("processing");
+                                    }
+                                    try {
+                                        positionPacket = movementQueue.take();
+
+                                        Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
+                                        double heading = 360.0 / 0xffff * positionPacket.getHeading();
+                                        raceObject.setDestination(p2d.getX(), p2d.getY(), heading, (int) id);
+
+                                    } catch (InterruptedException e){
+                                        e.printStackTrace();
+                                    }
+                                }
+
+
+                            }
                         }
-                        StreamParser.boatPositions.remove((long) id);
+                        //StreamParser.boatPositions.remove((long) id);
                     }
                 }
             }
         };
         for (Mark m : raceViewController.getRace().getCourse()) {
-            System.out.println(m.getName());
+//            System.out.println(m.getName());
         }
         //timer.start();
     }

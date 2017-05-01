@@ -78,9 +78,6 @@ public class StreamReceiver extends Thread {
                     long computedCrc = checksum.getValue();
                     long packetCrc = bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-//                        System.out.println("message type: " + type);
-//                        System.out.println("timeStamp = " + timeStamp);
-//                        System.out.println("payload length: " + payloadLength);
                         packetBuffer.add(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         System.err.println("Packet has been dropped");
@@ -126,7 +123,7 @@ public class StreamReceiver extends Thread {
      * takes an array of up to 7 bytes and returns a positive
      * long constructed from the input bytes
      *
-     * @return a positive long if there is less than 7 bytes -1 otherwise
+     * @return a positive long if there is less than 8 bytes -1 otherwise
      */
     private long bytesToLong(byte[] bytes){
         long partialLong = 0;

@@ -20,4 +20,16 @@ public class BoatPositionPacket {
     public long getTimeValid() {
         return timeValid;
     }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public double getHeading() {
+        return heading;
+    }
 }
