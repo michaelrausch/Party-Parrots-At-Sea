@@ -1,9 +1,7 @@
 package seng302.models.parsers;
 
 
-import com.sun.deploy.util.StringUtils;
 import javafx.geometry.Point3D;
-import jdk.internal.util.xml.impl.Pair;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
