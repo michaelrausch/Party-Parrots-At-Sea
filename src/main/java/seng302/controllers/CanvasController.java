@@ -109,7 +109,7 @@ public class CanvasController {
             @Override
             public void handle(long now) {
 
-
+                //fps stuff
                 long oldFrameTime = frameTimes[frameTimeIndex] ;
                 frameTimes[frameTimeIndex] = now ;
                 frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
@@ -122,56 +122,55 @@ public class CanvasController {
                     Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     drawFps(frameRate.intValue());
                 }
-                for (RaceObject raceObject : raceObjects) {
-                    raceObject.updatePosition(1000 / 60);
-                    for (long id : raceObject.getRaceIds()) {
-                        if (StreamParser.boatPositions.containsKey(id)) {
 
-                            PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(id);
-                            if (movementQueue.size() > 0){
-                                BoatPositionPacket positionPacket = movementQueue.peek();
+                updateRaceObjects();
 
-                                int delayTime = 5000;
-                                int loopTime = delayTime + 1000;
-                                //System.out.println("id = " + id);
-                                long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
-                                if (timeDiff < 0){
-                                    timeDiff = loopTime + timeDiff;
-                                }
-                                if (id == 106) {
-                                    //System.out.println("timeDiff = " + timeDiff);
-                                    //System.out.println("movementQueue.size() = " + movementQueue.size());
-                                }
-                                //System.out.println("timeDiff = " + timeDiff);
-                                //System.out.println("movementQueue.size() = " + movementQueue.size());
-                                if (timeDiff > delayTime) {
-                                    if (id == 106){
-                                        //System.out.println("processing");
-                                    }
-                                    try {
-                                        positionPacket = movementQueue.take();
-
-                                        Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
-                                        double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                                        raceObject.setDestination(p2d.getX(), p2d.getY(), heading, (int) id);
-
-                                    } catch (InterruptedException e){
-                                        e.printStackTrace();
-                                    }
-                                }
-
-
-                            }
-                        }
-                        //StreamParser.boatPositions.remove((long) id);
-                    }
-                }
             }
         };
         for (Mark m : raceViewController.getRace().getCourse()) {
 //            System.out.println(m.getName());
         }
         //timer.start();
+    }
+
+    private void updateRaceObjects(){
+        for (RaceObject raceObject : raceObjects) {
+            raceObject.updatePosition(1000 / 60);
+            // some raceObjects will have multiply ID's (for instance gate marks)
+            for (long id : raceObject.getRaceIds()) {
+                //checking if the current "ID" has any updates associated with it
+                if (StreamParser.boatPositions.containsKey(id)) {
+                    move(id, raceObject);
+                }
+            }
+        }
+    }
+
+    private void move(long id, RaceObject raceObject){
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(id);
+        if (movementQueue.size() > 0){
+            BoatPositionPacket positionPacket = movementQueue.peek();
+
+            //this code adds a delay to reading from the movementQueue
+            //in case things being put into the movement queue are slightly
+            //out of order
+            int delayTime = 1000;
+            int loopTime = delayTime * 10;
+            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
+            if (timeDiff < 0){
+                timeDiff = loopTime + timeDiff;
+            }
+            if (timeDiff > delayTime) {
+                try {
+                    positionPacket = movementQueue.take();
+                    Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
+                    double heading = 360.0 / 0xffff * positionPacket.getHeading();
+                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, (int) id);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     class ResizableCanvas extends Canvas {

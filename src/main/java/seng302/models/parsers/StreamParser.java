@@ -51,21 +51,20 @@ public class StreamParser extends Thread{
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
-             while (StreamReceiver.packetBuffer.peek() != null){
+             while (true){
                  StreamPacket packet = StreamReceiver.packetBuffer.peek();
+                 //this code adds a delay to reading from the packetBuffer so
+                 //out of order packets have time to order themselves in the queue
                  int delayTime = 1000;
-                 int loopTime = delayTime + 1000;
-                 long sleepTime = 0;
+                 int loopTime = delayTime * 10;
                  long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
                  if (transitTime < 0){
                      transitTime = loopTime + transitTime;
                  }
                  if (transitTime < delayTime) {
-                     sleepTime = delayTime - (transitTime);
+                     long sleepTime = delayTime - (transitTime);
                      Thread.sleep(sleepTime);
                  }
-//                 System.out.println(sleepTime);
-
                  packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
                  Thread.sleep(1);
@@ -73,7 +72,6 @@ public class StreamParser extends Thread{
                      Thread.sleep(1);
                  }
              }
-             System.out.println("END OF STREAM");
          } catch (Exception e){
              e.printStackTrace();
          }
@@ -317,7 +315,7 @@ public class StreamParser extends Thread{
         byte[] headingBytes = Arrays.copyOfRange(payload,28,30);
         byte[] groundSpeedBytes = Arrays.copyOfRange(payload,38,40);
 
-        long timeValid = extractTimeStamp(Arrays.copyOfRange(payload,1,7), 6);
+        long timeValid = bytesToLong(Arrays.copyOfRange(payload,1,7));
 //        int boatSeq =  ByteBuffer.wrap(seqBytes).getInt();
         long seq = bytesToLong(seqBytes);
         long boatId = bytesToLong(boatIdBytes);
@@ -326,15 +324,11 @@ public class StreamParser extends Thread{
         double lat = ((180d * (double)rawLat)/Math.pow(2,31));
         double lon = ((180d *(double)rawLon)/Math.pow(2,31));
         long heading = bytesToLong(headingBytes);
-//        long speed = extractTimeStamp(speedBytes, 2);
         double groundSpeed = bytesToLong(groundSpeedBytes)/1000.0;
         short s = (short) ((groundSpeedBytes[1] & 0xFF) << 8 | (groundSpeedBytes[0] & 0xFF));
         if ((int)deviceType == 1){
 
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
-            if (boatId == 106){
-                System.out.println("timeValid = " + timeValid);
-            }
 
             if (!boatPositions.containsKey(boatId)){
                 boatPositions.put(boatId, new PriorityBlockingQueue<BoatPositionPacket>(256, new Comparator<BoatPositionPacket>() {
