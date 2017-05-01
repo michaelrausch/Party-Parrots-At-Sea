@@ -27,8 +27,7 @@ public class XMLParser {
     private RegattaXMLObject regattaXML;
     private BoatXMLObject boatXML;
 
-    public XMLParser() {
-    }
+    public XMLParser() {}
 
     /**
      * Constructor for XMLParser
