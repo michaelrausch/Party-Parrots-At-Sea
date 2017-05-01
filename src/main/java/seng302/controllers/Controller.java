@@ -69,7 +69,7 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Running a timer to update the livestream status on welcome screen. Update interval is 500 miliseconds.
+     * Running a timer to update the livestream status on welcome screen. Update interval is 1 second.
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
@@ -91,22 +91,28 @@ public class Controller implements Initializable {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
-                            Long timerMinute = StreamParser.getTimeSinceStart() / 60;
-                            Long timerSecond = StreamParser.getTimeSinceStart() % 60;
+                            String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
+                            if (timerSecond.length() == 1) {
+                                timerSecond = "0" + timerSecond;
+                            }
                             String timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
                         } else {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
-                            Long timerMinute = -1 * StreamParser.getTimeSinceStart() / 60;
-                            Long timerSecond = -1 * StreamParser.getTimeSinceStart() % 60;
+                            String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
+                            if (timerSecond.length() == 1) {
+                                timerSecond = "0" + timerSecond;
+                            }
                             String timerString = timerMinute + ":" + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
                         }
                     });
                 }
-            }, 0, 500);
+            }, 0, 1000);
         } else {
             timeTillLive.setText("Stream not available.");
             timeTillLive.setTextFill(Color.RED);
