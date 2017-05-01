@@ -2,25 +2,24 @@ package seng302.controllers;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import seng302.models.Boat;
-import seng302.models.Event;
-import seng302.models.Race;
-import seng302.models.TimelineInfo;
+import javafx.util.StringConverter;
+import seng302.models.*;
 import seng302.models.parsers.ConfigParser;
+import seng302.models.parsers.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,11 +27,11 @@ import java.util.*;
 /**
  * Created by ptg19 on 29/03/17.
  */
-public class RaceViewController {
+public class RaceViewController extends Thread{
     @FXML
     private VBox positionVbox;
     @FXML
-    private CheckBox toggleAnnotation, toggleFps;
+    private CheckBox toggleFps;
     @FXML
     private Text timerLabel;
     @FXML
@@ -40,9 +39,11 @@ public class RaceViewController {
     @FXML
     private Text windArrowText, windDirectionText;
     @FXML
+    private Slider annotationSlider;
+    @FXML
     private CanvasController includedCanvasController;
 
-    private boolean displayAnnotations;
+    private ArrayList<Boat> startingBoats = new ArrayList<>();
     private boolean displayFps;
     private Timeline timerTimeline;
     private Map<Boat, TimelineInfo> timelineInfos = new HashMap<>();
@@ -50,42 +51,78 @@ public class RaceViewController {
     private Race race;
 
     public void initialize() {
-        includedCanvasController.setup(this);
+
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
+        for (Boat boat : race.getBoats()) {
+            startingBoats.add(boat);
+        }
+//        try{
+//            initializeTimelines();
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
 
+        includedCanvasController.setup(this);
+        includedCanvasController.initializeCanvas();
         initializeTimer();
         initializeSettings();
-        try{
-            initializeTimelines();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
 
         //set wind direction!!!!!!! can't find another place to put my code --haoming
         double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
         windDirectionText.setText(String.format("%.1f°", windDirection));
         windArrowText.setRotate(windDirection);
+        includedCanvasController.timer.start();
     }
 
-    private void initializeSettings(){
-        displayAnnotations = true;
+
+
+    private void initializeSettings() {
         displayFps = true;
 
-        toggleAnnotation.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                displayAnnotations = !displayAnnotations;
-            }
-        });
         toggleFps.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 displayFps = !displayFps;
             }
         });
+
+        //SLIFER STUFF BELOW
+        annotationSlider.setLabelFormatter(new StringConverter<Double>() {
+            @Override
+            public String toString(Double n) {
+                if (n == 0) return "None";
+                if (n == 1) return "Low";
+                if (n == 2) return "Medium";
+                if (n == 3) return "All";
+
+                return "All";
+            }
+
+            @Override
+            public Double fromString(String s) {
+                switch (s) {
+                    case "None":
+                        return 0d;
+                    case "Low":
+                        return 1d;
+                    case "Medium":
+                        return 2d;
+                    case "All":
+                        return 3d;
+
+                    default:
+                        return 3d;
+                }
+            }
+        });
+
+        annotationSlider.valueProperty().addListener((obs, oldval, newVal) ->
+                    setAnnotations((int)annotationSlider.getValue()));
+
+        annotationSlider.setValue(3);
     }
 
     private void initializeTimer(){
@@ -95,12 +132,11 @@ public class RaceViewController {
         timerTimeline.getKeyFrames().add(
                 new KeyFrame(Duration.seconds(1),
                         event -> {
-                            // Stop timer if race is finished
-                            if (this.race.isRaceFinished()) {
-                                this.timerTimeline.stop();
+                            if (StreamParser.isRaceFinished()) {
+                                timerLabel.setFill(Color.RED);
+                                timerLabel.setText("Race Finished!");
                             } else {
-                                timerLabel.setText(convertTimeToMinutesSeconds(race.getRaceTime()));
-                                this.race.incrementRaceTime();
+                                timerLabel.setText(currentTimer());
                             }
                         })
         );
@@ -114,39 +150,39 @@ public class RaceViewController {
      */
     private void initializeTimelines() {
         HashMap<Boat, List> boat_events = race.getEvents();
-
         for (Boat boat : boat_events.keySet()) {
-            // x, y are the real time coordinates
-            DoubleProperty x = new SimpleDoubleProperty();
-            DoubleProperty y = new SimpleDoubleProperty();
-
-            List<KeyFrame> keyFrames = new ArrayList<>();
-            List<Event> events = boat_events.get(boat);
-
-            // iterates all events and convert each event to keyFrame, then add them into a list
-            for (Event event : events) {
-                if (event.getIsFinishingEvent()) {
-                    keyFrames.add(
-                            new KeyFrame(Duration.seconds(event.getTime()),
-                                    onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
-                                    new KeyValue(x, event.getThisMark().getLatitude()),
-                                    new KeyValue(y, event.getThisMark().getLongitude())
-                            )
-                    );
-                } else {
-                    keyFrames.add(
-                            new KeyFrame(Duration.seconds(event.getTime()),
-                                    onFinished ->{
-                                        handleEvent(event);
-                                        boat.setHeading(event.getBoatHeading());
-                                    },
-                                    new KeyValue(x, event.getThisMark().getLatitude()),
-                                    new KeyValue(y, event.getThisMark().getLongitude())
-                            )
-                    );
-                }
-            }
-            timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
+            startingBoats.add(boat);
+//            // x, y are the real time coordinates
+//            DoubleProperty x = new SimpleDoubleProperty();
+//            DoubleProperty y = new SimpleDoubleProperty();
+//
+//            List<KeyFrame> keyFrames = new ArrayList<>();
+//            List<Event> events = boat_events.get(boat);
+//
+//            // iterates all events and convert each event to keyFrame, then add them into a list
+//            for (Event event : events) {
+//                if (event.getIsFinishingEvent()) {
+//                    keyFrames.add(
+//                            new KeyFrame(Duration.seconds(event.getTime()),
+//                                    onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
+//                                    new KeyValue(x, event.getThisMark().getLatitude()),
+//                                    new KeyValue(y, event.getThisMark().getLongitude())
+//                            )
+//                    );
+//                } else {
+//                    keyFrames.add(
+//                            new KeyFrame(Duration.seconds(event.getTime()),
+//                                    onFinished ->{
+//                                        handleEvent(event);
+//                                        boat.setHeading(event.getBoatHeading());
+//                                    },
+//                                    new KeyValue(x, event.getThisMark().getLatitude()),
+//                                    new KeyValue(y, event.getThisMark().getLongitude())
+//                            )
+//                    );
+//                }
+//            }
+//            timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
         }
         setRaceDuration();
     }
@@ -255,6 +291,26 @@ public class RaceViewController {
         return String.format("%02d:%02d", time / 60, time % 60);
     }
 
+    private String currentTimer() {
+        String timerString = "0:00 minutes";
+        if (StreamParser.getTimeSinceStart() > 0) {
+            String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
+            String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
+            if (timerSecond.length() == 1) {
+                timerSecond = "0" + timerSecond;
+            }
+            timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
+        } else {
+            String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
+            String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
+            if (timerSecond.length() == 1) {
+                timerSecond = "0" + timerSecond;
+            }
+            timerString = timerMinute + ":" + timerSecond + " minutes";
+        }
+        return timerString;
+    }
+
     public void stopTimer() {
         timerTimeline.stop();
     }
@@ -266,10 +322,6 @@ public class RaceViewController {
         return displayFps;
     }
 
-    public boolean isDisplayAnnotations() {
-        return displayAnnotations;
-    }
-
     public Race getRace() {
         return race;
     }
@@ -277,4 +329,59 @@ public class RaceViewController {
     public Map<Boat, TimelineInfo> getTimelineInfos() {
         return timelineInfos;
     }
+
+    public ArrayList<Boat> getStartingBoats(){
+        return startingBoats;
+    }
+
+
+    private void setAnnotations(Integer annotationLevel) {
+        switch (annotationLevel) {
+            case 0:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(false);
+                        bg.setVelocityObjectVisible(false);
+                        bg.setLineGroupVisible(false);
+                        bg.setWakeVisible(false);
+                    }
+                }
+                break;
+            case 1:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(true);
+                        bg.setVelocityObjectVisible(false);
+                        bg.setLineGroupVisible(false);
+                        bg.setWakeVisible(false);
+                    }
+                }
+                break;
+            case 2:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(true);
+                        bg.setVelocityObjectVisible(false);
+                        bg.setLineGroupVisible(true);
+                        bg.setWakeVisible(false);
+                    }
+                }
+                break;
+            case 3:
+                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+                    if(ro instanceof BoatGroup) {
+                        BoatGroup bg = (BoatGroup) ro;
+                        bg.setTeamNameObjectVisible(true);
+                        bg.setVelocityObjectVisible(true);
+                        bg.setLineGroupVisible(true);
+                        bg.setWakeVisible(true);
+                    }
+                }
+                break;
+        }
+    }
+
 }
