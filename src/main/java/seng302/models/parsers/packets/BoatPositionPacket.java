@@ -32,4 +32,8 @@ public class BoatPositionPacket {
     public double getHeading() {
         return heading;
     }
+
+    public double getGroundSpeed() {
+        return groundSpeed;
+    }
 }

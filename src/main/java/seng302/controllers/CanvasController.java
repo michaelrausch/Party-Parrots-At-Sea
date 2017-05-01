@@ -166,7 +166,7 @@ public class CanvasController {
                     positionPacket = movementQueue.take();
                     Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
                     double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, (int) id);
+                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), (int) id);
                 } catch (InterruptedException e){
                     e.printStackTrace();
                 }

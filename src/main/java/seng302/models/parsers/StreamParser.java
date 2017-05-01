@@ -5,6 +5,7 @@ import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import seng302.models.Boat;
 import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.packets.StreamPacket;
 
@@ -337,7 +338,7 @@ public class StreamParser extends Thread{
         long heading = bytesToLong(headingBytes);
         double groundSpeed = bytesToLong(groundSpeedBytes)/1000.0;
         short s = (short) ((groundSpeedBytes[1] & 0xFF) << 8 | (groundSpeedBytes[0] & 0xFF));
-        if ((int)deviceType == 1){
+        if ((int)deviceType == 1 || (int)deviceType == 3){
 
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
 

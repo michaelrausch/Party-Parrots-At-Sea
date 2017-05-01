@@ -59,9 +59,10 @@ public abstract class RaceObject extends Group {
      * @param x X co-ordinate to move the graphics to.
      * @param y Y co-ordinate to move the graphics to.
      * @param rotation Rotation to move graphics to.
+     * @param groundSpeed boat groundspeed.
      * @param raceIds RaceID of the object to move.
      */
-    public abstract void setDestination (double x, double y, double rotation, int... raceIds);
+    public abstract void setDestination (double x, double y, double rotation, double groundSpeed, int... raceIds);
     /**
      * Sets the destination of everything within the RaceObject that has an ID in the array raceIds. The destination is
      * set to the co-ordinates (x, y).
