@@ -39,6 +39,7 @@ public class StreamParser extends Thread{
      private static boolean streamStatus = false;
      private static long timeSinceStart = -1;
      private static List<Boat> boats = new ArrayList<>();
+     private static double windDirection = 0;
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
@@ -194,6 +195,8 @@ public class StreamParser extends Thread{
             timeSinceStart = timeTillStart;
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+        double windDirFactor = 0x4000 / 90;   //0x4000 is 90 degrees, 0x8000 is 180 degrees, etc...
+        windDirection = windDir / windDirFactor;
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
         int noBoats = payload[22];
         int raceType = payload[23];
@@ -486,6 +489,15 @@ public class StreamParser extends Thread{
      */
     public static XMLParser getXmlObject() {
         return xmlObject;
+    }
+
+    /**
+     * returns the wind direction in degrees
+     *
+     * @return a double wind direction value
+     */
+    public static double getWindDirection() {
+        return windDirection;
     }
 }
 

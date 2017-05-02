@@ -69,11 +69,11 @@ public class RaceViewController extends Thread{
         includedCanvasController.initializeCanvas();
         initializeTimer();
         initializeSettings();
-
+        initialiseWindDirection();
         //set wind direction!!!!!!! can't find another place to put my code --haoming
-        double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
-        windDirectionText.setText(String.format("%.1f°", windDirection));
-        windArrowText.setRotate(windDirection);
+//        double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
+//        windDirectionText.setText(String.format("%.1f°", windDirection));
+//        windArrowText.setRotate(windDirection);
         includedCanvasController.timer.start();
     }
 
@@ -143,6 +143,19 @@ public class RaceViewController extends Thread{
 
         // Start the timer
         timerTimeline.playFromStart();
+    }
+
+    private void initialiseWindDirection() {
+        Timeline windDirTimeline = new Timeline();
+        windDirTimeline.setCycleCount(Timeline.INDEFINITE);
+        windDirTimeline.getKeyFrames().add(
+                new KeyFrame(Duration.seconds(1),
+                        event -> {
+                            windDirectionText.setText(String.format("%.1f°", StreamParser.getWindDirection()));
+                            windArrowText.setRotate(StreamParser.getWindDirection());
+                        })
+        );
+        windDirTimeline.playFromStart();
     }
 
     /**
