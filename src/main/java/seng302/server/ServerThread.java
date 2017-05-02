@@ -32,7 +32,12 @@ public class ServerThread implements Runnable, Observer {
     public ServerThread(String threadName){
         runner = new Thread(this, threadName);
         serverLog("Spawning Server", 0);
+
         raceSimulator = new Simulator(BOAT_LOCATION_PERIOD);
+        raceSimulator.addObserver(this);
+        // run race simulator, so it can send boats' static location.
+        Thread raceSimulatorThread = new Thread(raceSimulator, "Race Simulator");
+
         boats = raceSimulator.getBoats();
 
         for (Boat b : boats){
@@ -40,6 +45,7 @@ public class ServerThread implements Runnable, Observer {
         }
 
         runner.start();
+        raceSimulatorThread.start();
     }
 
     public static void serverLog(String message, int logLevel){
@@ -130,9 +136,9 @@ public class ServerThread implements Runnable, Observer {
      * Starts an instance of the race simulator
      */
     private void startRaceSim(){
-        serverLog("Starting Race Simulator", 0);
-        raceSimulator.addObserver(this);
-        new Thread(raceSimulator).start();
+        serverLog("Starting Running Race Simulator", 0);
+        // set race started to true, so the simulator will start moving boats
+        raceSimulator.setRaceStarted(true);
     }
 
     /**
@@ -258,11 +264,12 @@ public class ServerThread implements Runnable, Observer {
     @Override
     public void update(Observable o, Object arg) {
         // Only send if server started
-        if(!server.isStarted()){
+        // TODO: I don't understand why i need to check server is null or not ... confused - haoming 2/5/17
+        if(server == null || !server.isStarted()){
             return;
         }
 
-        for (Boat b : ((Simulator) o).getBoats()){
+        for (Boat b : (List<Boat>) arg){
             try {
                 Message m = new BoatLocationMessage(b.getSourceID(), 1, b.getLat(),
                         b.getLng(), b.getLastPassedCorner().getBearingToNextCorner(),
@@ -273,6 +280,8 @@ public class ServerThread implements Runnable, Observer {
                 return;
             }
             catch (NullPointerException e){
+                //e.printStackTrace();
+                //TODO: add a method in boat to check if a boat has finished the race. - haoming 2/5/17
                 serverLog("Boat " + b.getSourceID() + " finished the race", 1);
                 boatsFinished.put(b.getSourceID(), true);
             }
