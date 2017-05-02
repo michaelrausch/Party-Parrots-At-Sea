@@ -100,24 +100,7 @@ public class CanvasController {
         gc.setFill(Color.SKYBLUE);
         gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
         gc.restore();
-//        fitMarksToCanvas();
-
-        //Wait until wer have received the XML
-        while(StreamParser.getXmlObject().getRaceXML() == null) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        findMinMaxPoint();
-        double minLonToMaxLon = scaleRaceExtremities();
-        calculateReferencePointLocation(minLonToMaxLon);
-        addRaceBorder();
-        addCourseMarks();
-        findMetersToPixels();
-
+        fitMarksToCanvas();
 
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
@@ -357,6 +340,7 @@ public class CanvasController {
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
         givePointsXY();
+        addRaceBorder();
         findMetersToPixels();
     }
 
