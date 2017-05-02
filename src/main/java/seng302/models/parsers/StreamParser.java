@@ -39,6 +39,7 @@ public class StreamParser extends Thread{
      private static long timeSinceStart = -1;
      private static List<XMLParser.BoatXMLObject.Boat> boats = new ArrayList<>();
      private static double windDirection = 0;
+     private static String currentTimeString;
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
@@ -177,6 +178,7 @@ public class StreamParser extends Thread{
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
+        currentTimeString = format.format((new Date (currentTime)).getTime());
         if (timeTillStart > 0) {
             timeSinceStart = timeTillStart;
             System.out.println("Time till start: " + timeTillStart + " Seconds");
@@ -501,6 +503,15 @@ public class StreamParser extends Thread{
      */
     public static double getWindDirection() {
         return windDirection;
+    }
+
+    /**
+     * returns stream time in formatted string format
+     *
+     * @return String of stream time
+     */
+    public static String getCurrentTimeString() {
+        return currentTimeString;
     }
 }
 

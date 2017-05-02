@@ -22,10 +22,9 @@ import seng302.models.parsers.XMLParser;
 import javax.xml.crypto.dsig.XMLObject;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by michaelrausch on 21/03/17.
@@ -47,6 +46,8 @@ public class Controller implements Initializable {
     private TableColumn shortNameCol;
     @FXML
     private TableColumn countryCol;
+    @FXML
+    private Label realTime;
 
     private void setContentPane(String jfxUrl){
         try{
@@ -64,7 +65,9 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        realTime.setText(format.format(System.currentTimeMillis()));
     }
 
     /**
@@ -74,6 +77,7 @@ public class Controller implements Initializable {
         if (StreamParser.isStreamStatus()) {
             XMLParser xmlParser = StreamParser.getXmlObject();
             streamButton.setVisible(false);
+            realTime.setVisible(true);
             timeTillLive.setVisible(true);
             timeTillLive.setTextFill(Color.GREEN);
             timeTillLive.setText("Connecting...");
@@ -83,10 +87,12 @@ public class Controller implements Initializable {
                 public void run() {
                     Platform.runLater(() -> {
                         if (StreamParser.isRaceFinished()) {
+                            realTime.setText(StreamParser.getCurrentTimeString());
                             timeTillLive.setTextFill(Color.RED);
                             timeTillLive.setText("Race finished! Waiting for new race...");
                             switchToRaceViewButton.setDisable(true);
                         } else if (StreamParser.getTimeSinceStart() > 0) {
+                            realTime.setText(StreamParser.getCurrentTimeString());
                             updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
@@ -98,6 +104,7 @@ public class Controller implements Initializable {
                             String timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
                             timeTillLive.setText(timerString);
                         } else {
+                            realTime.setText(StreamParser.getCurrentTimeString());
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);

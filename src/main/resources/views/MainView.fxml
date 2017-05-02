@@ -17,8 +17,9 @@
           <RowConstraints maxHeight="170.0" minHeight="170.0" prefHeight="170.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="52.0" minHeight="52.0" prefHeight="52.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="102.0" minHeight="102.0" prefHeight="102.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="60.0" minHeight="60.0" prefHeight="60.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="365.0" minHeight="365.0" prefHeight="365.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="28.0" minHeight="20.0" prefHeight="28.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="55.0" minHeight="55.0" prefHeight="55.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="318.0" minHeight="318.0" prefHeight="318.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="93.0" minHeight="93.0" prefHeight="93.0" vgrow="SOMETIMES" />
           <RowConstraints maxHeight="262.0" minHeight="262.0" prefHeight="262.0" vgrow="SOMETIMES" />
         </rowConstraints>
@@ -38,14 +39,14 @@
                   <Font size="28.0" />
                </font>
             </Label>
-            <Label fx:id="timeTillLive" text="0:00 minutes" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+            <Label fx:id="timeTillLive" text="0:00 minutes" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="4">
                <font>
                   <Font size="27.0" />
                </font>
             </Label>
-            <Button fx:id="streamButton" mnemonicParsing="false" onAction="#startStream" text="Click to stream" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-            <Button fx:id="switchToRaceViewButton" disable="true" mnemonicParsing="false" onAction="#switchToRaceView" text="Watch Race" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="TOP" />
-            <TableView fx:id="teamList" maxWidth="500.0" prefHeight="200.0" prefWidth="200.0" GridPane.halignment="CENTER" GridPane.rowIndex="4">
+            <Button fx:id="streamButton" mnemonicParsing="false" onAction="#startStream" text="Click to stream" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+            <Button fx:id="switchToRaceViewButton" disable="true" mnemonicParsing="false" onAction="#switchToRaceView" text="Watch Race" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="TOP" />
+            <TableView fx:id="teamList" maxWidth="500.0" prefHeight="200.0" prefWidth="200.0" GridPane.halignment="CENTER" GridPane.rowIndex="5">
               <columns>
                 <TableColumn fx:id="boatNameCol" editable="false" prefWidth="250.0" sortable="false" text="Boat Name" />
                 <TableColumn fx:id="shortNameCol" editable="false" prefWidth="125.0" sortable="false" text="Short Name" />
@@ -55,7 +56,8 @@
                   <Insets />
                </GridPane.margin>
             </TableView>
-            <Label text="*Team position in table do not correspond to race position" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="TOP" />
+            <Label text="*Team position in table do not correspond to race position" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="TOP" />
+            <Label fx:id="realTime" text="Local time" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="BOTTOM" />
          </children>
       </GridPane>
    </children>
