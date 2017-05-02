@@ -34,8 +34,8 @@ public class App extends Application
             sr = new StreamReceiver("localhost", 8085, "RaceStream");
         }
         else{
-              sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"RaceStream");
-//            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
+//              sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"RaceStream");
+            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
 //            sr = new StreamReceiver("localhost", 8085, "RaceStream");
         }
 

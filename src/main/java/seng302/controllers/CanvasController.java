@@ -209,6 +209,8 @@ public class CanvasController {
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
             gc.clearRect(5,5,50,20);
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(4,4,51,21);
             gc.setFill(Color.BLACK);
             gc.setFont(new Font(14));
             gc.setLineWidth(3);
