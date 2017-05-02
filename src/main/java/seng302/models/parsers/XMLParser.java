@@ -6,6 +6,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to create an XML object from the XML Packet Messages.
@@ -392,6 +393,8 @@ public class XMLParser {
 
         //Boats
         ArrayList<Boat> boats;
+        //Competing boats
+        List<Boat> competingBoats = new ArrayList<>();
 
         /**
          * Constructor for a BoatXMLObject.
@@ -426,6 +429,9 @@ public class XMLParser {
                 if (currentBoat.getNodeName().equals("Boat")) {
                     Boat boat = new Boat(currentBoat);
                     this.boats.add(boat);
+                    if (boat.getBoatType().equals("Yacht")) {
+                        competingBoats.add(boat);
+                    }
                 }
                 //System.out.println(this.getBoats());
             }
@@ -441,6 +447,9 @@ public class XMLParser {
         public Double getCourseZoneSize() { return courseZoneSize; }
         public ArrayList<Double> getZoneLimits() { return zoneLimits; }
         public ArrayList<Boat> getBoats() { return boats; }
+        public List<Boat> getCompetingBoats() {
+            return competingBoats;
+        }
 
         public class Boat {
 

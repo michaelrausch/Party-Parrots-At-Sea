@@ -31,16 +31,16 @@ public class App extends Application
         }
 
         if (args.length > 1){
-            sr = new StreamReceiver("localhost", 8085, "TestThread1");
+            sr = new StreamReceiver("localhost", 8085, "RaceStream");
         }
         else{
-            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
-//            sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
-//            sr = new StreamReceiver("localhost", 8085, "TestThread1");
+//              sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"RaceStream");
+            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
+//            sr = new StreamReceiver("localhost", 8085, "RaceStream");
         }
 
         sr.start();
-        StreamParser streamParser = new StreamParser("TestThread2");
+        StreamParser streamParser = new StreamParser("StreamParser");
         streamParser.start();
 
         launch(args);

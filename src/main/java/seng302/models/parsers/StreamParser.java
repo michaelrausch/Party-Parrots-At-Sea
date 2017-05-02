@@ -5,7 +5,6 @@ import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import seng302.models.Boat;
 import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.packets.StreamPacket;
 
@@ -38,7 +37,8 @@ public class StreamParser extends Thread{
      private static boolean raceFinished = false;
      private static boolean streamStatus = false;
      private static long timeSinceStart = -1;
-     private static List<Boat> boats = new ArrayList<>();
+     private static List<XMLParser.BoatXMLObject.Boat> boats = new ArrayList<>();
+     private static double windDirection = 0;
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
@@ -194,12 +194,15 @@ public class StreamParser extends Thread{
             timeSinceStart = timeTillStart;
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+        double windDirFactor = 0x4000 / 90;   //0x4000 is 90 degrees, 0x8000 is 180 degrees, etc...
+        windDirection = windDir / windDirFactor;
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
         int noBoats = payload[22];
         int raceType = payload[23];
         ArrayList<String> boatStatuses = new ArrayList<>();
         for (int i = 0; i < noBoats; i++){
-            String boatStatus = "SourceID: " + bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
+            Long boatStatusSourceID = bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
+            String boatStatus = "SourceID: " + boatStatusSourceID;
             boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
             boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
             boatStatus += "\nPenaltiesAwarded: " + (int)payload[29 + (i * 20)];
@@ -255,6 +258,9 @@ public class StreamParser extends Thread{
         }
 
         xmlObject.constructXML(doc, messageType);
+        if (messageType == 7) {   //7 is the boat XML
+            boats = xmlObject.getBoatXML().getCompetingBoats();
+        }
     }
 
     /**
@@ -474,7 +480,7 @@ public class StreamParser extends Thread{
      *
      * @return list of boats
      */
-    public static List<Boat> getBoats() {
+    public static List<XMLParser.BoatXMLObject.Boat> getBoats() {
         return boats;
     }
 
@@ -486,6 +492,15 @@ public class StreamParser extends Thread{
      */
     public static XMLParser getXmlObject() {
         return xmlObject;
+    }
+
+    /**
+     * returns the wind direction in degrees
+     *
+     * @return a double wind direction value
+     */
+    public static double getWindDirection() {
+        return windDirection;
     }
 }
 
