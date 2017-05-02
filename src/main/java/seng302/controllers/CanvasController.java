@@ -4,21 +4,17 @@ import javafx.animation.*;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
-import javafx.scene.shape.ArcType;
 import javafx.scene.text.Font;
 import seng302.models.Boat;
 import seng302.models.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.RaceObject;
 import seng302.models.mark.*;
-import seng302.models.parsers.StreamPacket;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.XMLParser;
@@ -26,7 +22,6 @@ import seng302.models.parsers.XMLParser.RaceXMLObject.CompoundMark;
 import seng302.models.parsers.XMLParser.RaceXMLObject.Limit;
 import seng302.models.mark.Mark;
 
-import java.sql.Time;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -119,7 +114,7 @@ public class CanvasController {
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
-        addBorderMarks();
+        addRaceBorder();
         addCourseMarks();
         findMetersToPixels();
 
@@ -167,14 +162,33 @@ public class CanvasController {
      * named the same as those in the model package but are, however not the same, so they do not have things such as
      * a type and must be derived from the number of marks in a compound mark etc..
      */
-    private void addBorderMarks() {
+    private void addRaceBorder() {
         XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
-        ArrayList<Limit> courselimits = raceXMLObject.getCourseLimit();
-        for (Limit courselimit : courselimits) {
-            Mark thisMark = new SingleMark("", courselimit.getLat(), courselimit.getLng(), courselimit.getSeqID());
-            RaceObject markGroup = new MarkGroup(thisMark, findScaledXY(thisMark));
-            raceObjects.add(markGroup);
+        ArrayList<Limit> courseLimits = raceXMLObject.getCourseLimit();
+        gc.setStroke(Color.DARKRED);
+        gc.setLineWidth(3);
+
+        for (int i = 0; i < courseLimits.size() - 1; i++) {
+            Limit thisPoint1 = courseLimits.get(i);
+            SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
+            Limit thisPoint2 = courseLimits.get(i+1);
+            SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
+            Point2D borderPoint1 = findScaledXY(thisMark1);
+            Point2D borderPoint2 = findScaledXY(thisMark2);
+            gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
+                    borderPoint2.getX(), borderPoint2.getY());
+
         }
+
+        Limit thisPoint1 = courseLimits.get(courseLimits.size()-1);
+        SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
+        Limit thisPoint2 = courseLimits.get(0);
+        SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
+        Point2D borderPoint1 = findScaledXY(thisMark1);
+        Point2D borderPoint2 = findScaledXY(thisMark2);
+
+        gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
+                borderPoint2.getX(), borderPoint2.getY());
     }
 
 
@@ -352,34 +366,22 @@ public class CanvasController {
      * marker, rightmost marker, southern most marker and northern most marker respectively.
      */
     private void findMinMaxPoint() {
-        List<CompoundMark.Mark> sortedPoints = new ArrayList<>();
-//        for (Mark mark : raceViewController.getRace().getCourse())
-//        for (Mark mark : raceMarks)
-//        {
-//            if (mark.getMarkType() == MarkType.SINGLE_MARK)
-//                sortedPoints.add(mark);
-//            else {
-//                sortedPoints.add(((GateMark) mark).getSingleMark1());
-//                sortedPoints.add(((GateMark) mark).getSingleMark2());
-//            }
-//        }
-        for (CompoundMark compoundMark : StreamParser.getXmlObject().getRaceXML().getCompoundMarks()) {
-            for (CompoundMark.Mark mark : compoundMark.getMarks()) {
-                sortedPoints.add(mark);
-            }
+        List<Limit> sortedPoints = new ArrayList<>();
+        for (Limit limit : StreamParser.getXmlObject().getRaceXML().getCourseLimit()) {
+            sortedPoints.add(limit);
         }
-        sortedPoints.sort(Comparator.comparingDouble(CompoundMark.Mark::getTargetLat));
-        CompoundMark.Mark minLatMark = sortedPoints.get(0);
-        CompoundMark.Mark maxLatMark = sortedPoints.get(sortedPoints.size()-1);
-        minLatPoint = new SingleMark(minLatMark.getMarkName(), minLatMark.getTargetLat(), minLatMark.getTargetLng(), minLatMark.getSourceID());
-        maxLatPoint = new SingleMark(maxLatMark.getMarkName(), maxLatMark.getTargetLat(), maxLatMark.getTargetLng(), maxLatMark.getSourceID());
+        sortedPoints.sort(Comparator.comparingDouble(Limit::getLat));
+        Limit minLatMark = sortedPoints.get(0);
+        Limit maxLatMark = sortedPoints.get(sortedPoints.size()-1);
+        minLatPoint = new SingleMark(minLatMark.toString(), minLatMark.getLat(), minLatMark.getLng(), minLatMark.getSeqID());
+        maxLatPoint = new SingleMark(maxLatMark.toString(), maxLatMark.getLat(), maxLatMark.getLng(), maxLatMark.getSeqID());
 
-        sortedPoints.sort(Comparator.comparingDouble(CompoundMark.Mark::getTargetLng));
+        sortedPoints.sort(Comparator.comparingDouble(Limit::getLng));
         //If the course is on a point on the earth where longitudes wrap around.
-        CompoundMark.Mark minLonMark = sortedPoints.get(0);
-        CompoundMark.Mark maxLonMark = sortedPoints.get(sortedPoints.size()-1);
-        SingleMark thisMinLon = new SingleMark(minLonMark.getMarkName(), minLonMark.getTargetLat(), minLonMark.getTargetLng(), minLonMark.getSourceID());
-        SingleMark thisMaxLon = new SingleMark(maxLonMark.getMarkName(), maxLonMark.getTargetLat(), maxLonMark.getTargetLng(), maxLonMark.getSourceID());
+        Limit minLonMark = sortedPoints.get(0);
+        Limit maxLonMark = sortedPoints.get(sortedPoints.size()-1);
+        SingleMark thisMinLon = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID());
+        SingleMark thisMaxLon = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID());
         // TODO: 30/03/17 cir27 - Correctly account for longitude wrapping around.
         if (thisMaxLon.getLongitude() - thisMinLon.getLongitude() > 180) {
             SingleMark temp = thisMinLon;

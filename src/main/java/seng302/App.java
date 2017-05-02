@@ -34,9 +34,9 @@ public class App extends Application
             sr = new StreamReceiver("localhost", 8085, "TestThread1");
         }
         else{
-            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
+//            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
 //            sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread1");
-//            sr = new StreamReceiver("localhost", 8085, "TestThread1");
+            sr = new StreamReceiver("localhost", 8085, "TestThread1");
         }
 
         sr.start();
