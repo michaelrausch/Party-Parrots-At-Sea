@@ -102,13 +102,13 @@ public class MarkGroup extends RaceObject {
         //moveTo(points[0].getX(), points[0].getY());
     }
 
-    public void setDestination (double x, double y, double rotation, double speed, int... raceIds) {
+    public void setDestination (double x, double y, double rotation, double groundSpeed, int... raceIds) {
         setDestination(x, y, 0, raceIds);
         this.rotationalGoal = rotation;
         calculateRotationalVelocity();
     }
 
-    public void setDestination (double x, double y, double speed, int... raceIds) {
+    public void setDestination (double x, double y, double groundSpeed, int... raceIds) {
         for (int i = 0; i < marks.size(); i++)
             for (int id : raceIds)
                 if (id == marks.get(i).getId())

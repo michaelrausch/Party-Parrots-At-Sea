@@ -265,7 +265,7 @@ public class ServerThread implements Runnable, Observer {
         for (Boat b : ((Simulator) o).getBoats()){
             try {
                 Message m = new BoatLocationMessage(b.getSourceID(), 1, b.getLat(),
-                        b.getLng(), b.getHeadingCorner().getBearingToNextCorner(),
+                        b.getLng(), b.getLastPassedCorner().getBearingToNextCorner(),
                         ((long) b.getSpeed()));
                 server.send(m);
             } catch (IOException e) {
