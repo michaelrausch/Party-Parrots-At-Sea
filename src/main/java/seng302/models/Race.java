@@ -152,7 +152,7 @@ public class Race {
 
     /**
      * Set a boat as finished
-     * @param boat The boat that has finished the race
+     * @param boat The boat that has finished the race/home/cosc/student/wmu16
      */
     public void setBoatFinished(Boat boat){
         this.finishingOrder.add(boat);
