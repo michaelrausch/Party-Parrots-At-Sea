@@ -11,10 +11,9 @@ public enum Colors {
     static Integer index = 0;
 
     public static Color getColor() {
-        index++;
-        if (index > 6) {
-            index = 1;
+        if (index == 6) {
+            index = 0;
         }
-        return Color.valueOf(values()[index-1].toString());
+        return Color.valueOf(values()[index++].toString());
     }
 }

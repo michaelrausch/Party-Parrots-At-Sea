@@ -4,6 +4,7 @@ import seng302.models.Boat;
 import seng302.models.Race;
 import seng302.models.parsers.ConfigParser;
 import seng302.models.parsers.CourseParser;
+import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.TeamsParser;
 
 import java.lang.reflect.Array;
@@ -38,7 +39,7 @@ public class RaceController {
 
     public Race createRace(String configFile, String teamsConfigFile) throws Exception {
         Race race = new Race();
-
+//        StreamParser.xmlObject
         // Read team names from file
         TeamsParser tp = new TeamsParser(teamsConfigFile);
 

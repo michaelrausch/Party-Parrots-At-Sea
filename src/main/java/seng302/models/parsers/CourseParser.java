@@ -35,7 +35,8 @@ public class CourseParser extends FileParser {
 				String name = element.getElementsByTagName("name").item(0).getTextContent();
 				double lat = Double.valueOf(element.getElementsByTagName("latitude").item(0).getTextContent());
 				double lon = Double.valueOf(element.getElementsByTagName("longitude").item(0).getTextContent());
-				SingleMark singleMark = new SingleMark(name, lat, lon);
+				int id = Integer.valueOf(element.getElementsByTagName("id").item(0).getTextContent());
+				SingleMark singleMark = new SingleMark(name, lat, lon, id);
 				return singleMark;
 			} else {
 				throw new NoSuchElementException("Cannot generate a mark by given node.");
@@ -65,7 +66,11 @@ public class CourseParser extends FileParser {
 					String name = element.getElementsByTagName("name").item(0).getTextContent();
 					SingleMark mark1 = generateSingleMark(element.getElementsByTagName("mark").item(0));
 					SingleMark mark2 = generateSingleMark(element.getElementsByTagName("mark").item(1));
-					GateMark gateMark = new GateMark(name, mark1, mark2, mark1.getLatitude(), mark1.getLongitude());
+					GateMark gateMark;
+					if (name.equals("Start") || name.equals("Finish"))
+						gateMark = new GateMark(name, MarkType.CLOSED_GATE, mark1, mark2, mark1.getLatitude(), mark1.getLongitude());
+					else
+						gateMark = new GateMark(name, MarkType.OPEN_GATE, mark1, mark2, mark1.getLatitude(), mark1.getLongitude());
 					marks.put(name, gateMark);
 				}
 			}

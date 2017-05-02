@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.control.*?>
 <?import java.lang.*?>
-<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <GridPane prefHeight="1080.0" prefWidth="1920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.RaceViewController">
     <columnConstraints>
@@ -37,18 +45,19 @@
                         <Font name="System Bold" size="13.0" />
                     </font>
                 </Text>
-                <CheckBox fx:id="toggleAnnotation" layoutX="27.0" layoutY="462.0" mnemonicParsing="false" selected="true" text="Show annotations" />
-                <CheckBox fx:id="toggleFps" layoutX="27.0" layoutY="488.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="143.0" selected="true" text="Show FPS" />
+                <CheckBox fx:id="toggleFps" layoutX="21.0" layoutY="453.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="143.0" selected="true" text="Show FPS" />
             <VBox fx:id="positionVbox" layoutX="12.0" layoutY="280.0" prefHeight="140.0" prefWidth="200.0" />
             <Pane layoutX="11.0" layoutY="30.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="51.0" prefWidth="193.0">
                <children>
-                  <Text fx:id="timerLabel" layoutX="6.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" textAlignment="CENTER" wrappingWidth="181.0">
+                  <Text fx:id="timerLabel" layoutX="-26.0" layoutY="34.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" textAlignment="CENTER" wrappingWidth="246.0">
                      <font>
-                        <Font size="34.0" />
+                        <Font size="25.0" />
                      </font>
                   </Text>
                </children>
             </Pane>
+            <Slider fx:id="annotationSlider" blockIncrement="1.0" layoutX="38.0" layoutY="527.0" majorTickUnit="1.0" max="3.0" minorTickCount="0" prefHeight="51.0" prefWidth="170.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
+            <Label layoutX="10.0" layoutY="499.0" text="Annotations" />
             </children>
         </AnchorPane>
         <AnchorPane fx:id="contentAnchorPane" prefHeight="960.0" prefWidth="1280.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowSpan="2147483647" GridPane.valignment="TOP">

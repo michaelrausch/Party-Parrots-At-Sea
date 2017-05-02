@@ -1,30 +1,39 @@
 package seng302.models;
 
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
+import javafx.scene.text.Text;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
+import javafx.util.Pair;
 
 /**
 * Represents a boat in the race.
 */
 public class Boat {
 
-    private String teamName; // The name of the team, this is also the name of the boat
-    private double velocity; // In meters/second
-    private double lat; // Boats position
-    private double lon; // -
-    private double distanceToNextMark;
-    private Color color;
-    private int markLastPast;
+    private String teamName;
+    private double velocity;
+    private double lat;
+    private double lon;
     private double heading;
+    private int markLastPast;
     private String shortName;
+    private int id;
+    // new attributes to boat
+    private int sourceID;
+    private String boatName;
+    private String country;
 
     public Boat(String teamName) {
         this.teamName = teamName;
         this.velocity = 10; // Default velocity
         this.lat = 0.0;
         this.lon = 0.0;
-        this.distanceToNextMark = 0.0;
         this.shortName = "";
     }
+
 
     /**
      * Represents a boat in the race.
@@ -33,12 +42,26 @@ public class Boat {
      * @param boatVelocity The speed of the boat in meters/second
      * @param shortName    A shorter version of the teams name
      */
-    public Boat(String teamName, double boatVelocity, String shortName) {
+    public Boat(String teamName, double boatVelocity, String shortName, int id) {
         this.teamName = teamName;
         this.velocity = boatVelocity;
-        this.distanceToNextMark = 0.0;
-        this.color = Colors.getColor();
         this.shortName = shortName;
+        this.id = id;
+    }
+
+    /**
+     * New instance created by BoatsParser.
+     *
+     * @param sourceID  source ID of the boat
+     * @param boatName  full name of the boat
+     * @param shortName short name of the boat
+     * @param country   country of the boat
+     */
+    public Boat(int sourceID, String boatName, String shortName, String country) {
+        this.sourceID = sourceID;
+        this.boatName = boatName;
+        this.shortName = shortName;
+        this.country = country;
     }
 
     /**
@@ -88,8 +111,9 @@ public class Boat {
         this.lon = lon;
     }
 
-    public void setDistanceToNextMark(double distance){
-        this.distanceToNextMark = distance;
+    public Pair<Double, Double> getLocation ()
+    {
+        return new Pair<>(this.lat, this.lon);
     }
 
     public double getLatitude(){
@@ -100,8 +124,12 @@ public class Boat {
         return this.lon;
     }
 
-    public Color getColor() {
-        return color;
+    public void setLatitude (double latitude) {
+        this.lat = latitude;
+    }
+
+    public void setlongitude (double longitude) {
+        this.lon =longitude;
     }
 
     public double getSpeedInKnots(){
@@ -116,15 +144,31 @@ public class Boat {
         return markLastPast;
     }
 
-    public void setHeading(double heading){
-        this.heading = heading;
-    }
-
     public double getHeading(){
         return this.heading;
     }
 
+    public void setHeading(double heading) {
+        this.heading = heading;
+    }
+
     public String getShortName(){
         return this.shortName;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getSourceID() {
+        return sourceID;
+    }
+
+    public String getBoatName() {
+        return boatName;
+    }
+
+    public String getCountry() {
+        return country;
     }
 }

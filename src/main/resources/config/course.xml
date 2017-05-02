@@ -1,62 +1,71 @@
 <?xml version="1.0" ?>
 
-<course>
+<markers>
     <marks>
         <gate>
             <name type="start-line">Start</name>
             <mark>
                 <name>Start1</name>
-                <latitude>32.296577</latitude>
-                <longitude>-64.854304</longitude>
+                <latitude>57.6703330</latitude>
+                <longitude>11.8278330</longitude>
+                <id>122</id>
             </mark>
             <mark>
                 <name>Start2</name>
-                <latitude>32.293771</latitude>
-                <longitude>-64.855242</longitude>
+                <latitude>57.6706330</latitude>
+                <longitude>11.8281330</longitude>
+                <id>123</id>
             </mark>
         </gate>
         <mark>
             <name>Mid Mark</name>
-            <latitude>32.293039</latitude>
-            <longitude>-64.843983</longitude>
+            <latitude>57.6675700</latitude>
+            <longitude>11.8359880</longitude>
+            <id>131</id>
         </mark>
         <gate>
             <name>Leeward Gate</name>
             <mark>
                 <name>Leeward Gate1</name>
-                <latitude>32.284680</latitude>
-                <longitude>-64.850045</longitude>
+                <latitude>57.6708220</latitude>
+                <longitude>11.8433900</longitude>
+                <id>124</id>
             </mark>
             <mark>
                 <name>Leeward Gate2</name>
-                <latitude>32.280164</latitude>
-                <longitude>-64.847591</longitude>
+                <latitude>57.6711220</latitude>
+                <longitude>11.8436900</longitude>
+                <id>125</id>
             </mark>
         </gate>
         <gate>
             <name>Windward Gate</name>
             <mark>
                 <name>Windward Gate1</name>
-                <latitude>32.309693</latitude>
-                <longitude>-64.835249</longitude>
+                <latitude>57.6650170</latitude>
+                <longitude>11.8279170</longitude>
+                <id>126</id>
             </mark>
             <mark>
                 <name>Windward Gate2</name>
-                <latitude>32.308046</latitude>
-                <longitude>-64.831785</longitude>
+                <latitude>57.6653170</latitude>
+                <longitude>11.8282170</longitude>
+                <id>127</id>
             </mark>
         </gate>
         <gate type="finish-line">
             <name>Finish</name>
             <mark>
                 <name>Finish1</name>
-                <latitude>32.317379</latitude>
-                <longitude>-64.839291</longitude>
+                <latitude>57.6715240</latitude>
+                <longitude>11.8444950</longitude>
+                <id>128</id>
             </mark>
             <mark>
                 <name>Finish2</name>
-                <latitude>32.317257</latitude>
-                <longitude>-64.836260</longitude>
+                <latitude>57.6718240</latitude>
+                <longitude>11.8447950</longitude>
+                <id>129</id>
             </mark>
         </gate>
     </marks>
@@ -68,4 +77,4 @@
         <five>Leeward Gate</five>
         <six>Finish</six>
     </order>
-</course>
+</markers>
