@@ -15,7 +15,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import seng302.models.Boat;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 
@@ -124,18 +123,18 @@ public class Controller implements Initializable {
     }
 
     private void updateTeamList() {
-        ObservableList<Boat> data = FXCollections.observableArrayList();
+        ObservableList<XMLParser.BoatXMLObject.Boat> data = FXCollections.observableArrayList();
         teamList.setItems(data);
         boatNameCol.setCellValueFactory(
-                new PropertyValueFactory<Boat,String>("boatName")
+                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("BoatName")
         );
         shortNameCol.setCellValueFactory(
-                new PropertyValueFactory<Boat,String>("shortName")
+                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("ShortName")
         );
         countryCol.setCellValueFactory(
-                new PropertyValueFactory<Boat,String>("country")
+                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("Country")
         );
-        for (Boat boat : StreamParser.getBoats()) {
+        for (XMLParser.BoatXMLObject.Boat boat : StreamParser.getBoats()) {
             data.add(boat);
         }
     }
