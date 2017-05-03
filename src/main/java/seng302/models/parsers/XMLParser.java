@@ -4,9 +4,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import seng302.models.Yacht;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class to create an XML object from the XML Packet Messages.
@@ -392,9 +395,9 @@ public class XMLParser {
         private ArrayList<Double> zoneLimits;// will only contain 5 elements. Limits 1-5
 
         //Boats
-        ArrayList<Boat> boats;
+        ArrayList<Yacht> boats;
         //Competing boats
-        List<Boat> competingBoats = new ArrayList<>();
+        Map<Integer, Yacht> competingBoats = new HashMap<>();
 
         /**
          * Constructor for a BoatXMLObject.
@@ -427,10 +430,16 @@ public class XMLParser {
             for (int i = 0; i < boatsList.getLength(); i++) {
                 Node currentBoat = boatsList.item(i);
                 if (currentBoat.getNodeName().equals("Boat")) {
-                    Boat boat = new Boat(currentBoat);
+//                    Boat boat = new Boat(currentBoat);
+                    Yacht boat = new Yacht(getNodeAttributeString(currentBoat, "Type"),
+                            getNodeAttributeInt(currentBoat, "SourceID"),
+                            getNodeAttributeString(currentBoat, "HullNum"),
+                            getNodeAttributeString(currentBoat, "ShortName"),
+                            getNodeAttributeString(currentBoat, "BoatName"),
+                            getNodeAttributeString(currentBoat, "Country"));
                     this.boats.add(boat);
                     if (boat.getBoatType().equals("Yacht")) {
-                        competingBoats.add(boat);
+                        competingBoats.put(boat.getSourceID(), boat);
                     }
                 }
                 //System.out.println(this.getBoats());
@@ -446,37 +455,37 @@ public class XMLParser {
         public Double getMarkZoneSize() { return markZoneSize; }
         public Double getCourseZoneSize() { return courseZoneSize; }
         public ArrayList<Double> getZoneLimits() { return zoneLimits; }
-        public ArrayList<Boat> getBoats() { return boats; }
-        public List<Boat> getCompetingBoats() {
+        public ArrayList<Yacht> getBoats() { return boats; }
+        public Map<Integer, Yacht> getCompetingBoats() {
             return competingBoats;
         }
 
-        public class Boat {
-
-            private String boatType;
-            private Integer sourceID;
-            private String hullID; //matches HullNum in the XML spec.
-            private String shortName;
-            private String boatName;
-            private String country;
-
-            Boat(Node boatNode) {
-                this.boatType = getNodeAttributeString(boatNode, "Type");
-                this.sourceID = getNodeAttributeInt(boatNode, "SourceID");
-                this.hullID = getNodeAttributeString(boatNode, "HullNum");
-                this.shortName = getNodeAttributeString(boatNode, "ShortName");
-                this.boatName = getNodeAttributeString(boatNode, "BoatName");
-                this.country = getNodeAttributeString(boatNode, "Country");
-            }
-
-            public String getBoatType() { return boatType; }
-            public Integer getSourceID() { return sourceID; }
-            public String getHullID() { return hullID; }
-            public String getShortName() { return shortName; }
-            public String getBoatName() { return boatName; }
-            public String getCountry() { return country; }
-
-        }
+//        public class Boat {
+//
+//            private String boatType;
+//            private Integer sourceID;
+//            private String hullID; //matches HullNum in the XML spec.
+//            private String shortName;
+//            private String boatName;
+//            private String country;
+//
+//            Boat(Node boatNode) {
+//                this.boatType = getNodeAttributeString(boatNode, "Type");
+//                this.sourceID = getNodeAttributeInt(boatNode, "SourceID");
+//                this.hullID = getNodeAttributeString(boatNode, "HullNum");
+//                this.shortName = getNodeAttributeString(boatNode, "ShortName");
+//                this.boatName = getNodeAttributeString(boatNode, "BoatName");
+//                this.country = getNodeAttributeString(boatNode, "Country");
+//            }
+//
+//            public String getBoatType() { return boatType; }
+//            public Integer getSourceID() { return sourceID; }
+//            public String getHullID() { return hullID; }
+//            public String getShortName() { return shortName; }
+//            public String getBoatName() { return boatName; }
+//            public String getCountry() { return country; }
+//
+//        }
 
     }
 

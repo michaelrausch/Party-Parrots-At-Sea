@@ -46,17 +46,17 @@
             </Label>
             <Button fx:id="streamButton" mnemonicParsing="false" onAction="#startStream" text="Click to stream" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
             <Button fx:id="switchToRaceViewButton" disable="true" mnemonicParsing="false" onAction="#switchToRaceView" text="Watch Race" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="TOP" />
-            <TableView fx:id="teamList" maxWidth="510.0" prefHeight="200.0" prefWidth="210.0" GridPane.halignment="CENTER" GridPane.rowIndex="5">
+            <TableView fx:id="teamList" maxWidth="500.0" prefHeight="200.0" prefWidth="210.0" GridPane.halignment="CENTER" GridPane.rowIndex="5">
               <columns>
-                <TableColumn fx:id="boatNameCol" editable="false" prefWidth="250.0" sortable="false" text="Boat Name" />
-                <TableColumn fx:id="shortNameCol" editable="false" prefWidth="125.0" sortable="false" text="Short Name" />
-                  <TableColumn fx:id="countryCol" editable="false" prefWidth="125.0" sortable="false" text="Country" />
+                  <TableColumn fx:id="posCol" editable="false" maxWidth="74.0" minWidth="74.0" prefWidth="74.0" resizable="false" sortable="false" text="Position" />
+                <TableColumn fx:id="boatNameCol" editable="false" maxWidth="171.0" minWidth="171.0" prefWidth="171.0" resizable="false" sortable="false" text="Boat Name" />
+                <TableColumn fx:id="shortNameCol" editable="false" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" sortable="false" text="Short Name" />
+                  <TableColumn fx:id="countryCol" editable="false" maxWidth="147.0" minWidth="147.0" prefWidth="147.0" resizable="false" sortable="false" text="Country" />
               </columns>
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
             </TableView>
-            <Label text="*Team position in table do not correspond to race position" GridPane.halignment="CENTER" GridPane.rowIndex="6" GridPane.valignment="TOP" />
             <Label fx:id="realTime" text="Local time" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="BOTTOM" />
          </children>
       </GridPane>

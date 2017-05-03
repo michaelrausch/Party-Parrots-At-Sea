@@ -14,6 +14,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import seng302.models.Yacht;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 
@@ -34,15 +35,19 @@ public class Controller implements Initializable {
     @FXML
     private Button switchToRaceViewButton;
     @FXML
-    private TableView<XMLParser.BoatXMLObject.Boat> teamList;
+    private TableView<Yacht> teamList;
     @FXML
-    private TableColumn<XMLParser.BoatXMLObject.Boat, String> boatNameCol;
+    private TableColumn<Yacht, String> boatNameCol;
     @FXML
-    private TableColumn<XMLParser.BoatXMLObject.Boat, String> shortNameCol;
+    private TableColumn<Yacht, String> shortNameCol;
     @FXML
-    private TableColumn<XMLParser.BoatXMLObject.Boat, String> countryCol;
+    private TableColumn<Yacht, String> countryCol;
+    @FXML
+    private TableColumn<Yacht, String> posCol;
     @FXML
     private Label realTime;
+
+    private XMLParser xmlParser;
 
     private void setContentPane(String jfxUrl){
         try{
@@ -70,7 +75,7 @@ public class Controller implements Initializable {
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
-            XMLParser xmlParser = StreamParser.getXmlObject();
+            xmlParser = StreamParser.getXmlObject();
             streamButton.setVisible(false);
             realTime.setVisible(true);
             timeTillLive.setVisible(true);
@@ -125,19 +130,32 @@ public class Controller implements Initializable {
     }
 
     private void updateTeamList() {
-        ObservableList<XMLParser.BoatXMLObject.Boat> data = FXCollections.observableArrayList();
+        ObservableList<Yacht> data = FXCollections.observableArrayList();
         teamList.setItems(data);
         boatNameCol.setCellValueFactory(
-                new PropertyValueFactory<>("BoatName")
+                new PropertyValueFactory<>("boatName")
         );
         shortNameCol.setCellValueFactory(
-                new PropertyValueFactory<>("ShortName")
+                new PropertyValueFactory<>("shortName")
         );
         countryCol.setCellValueFactory(
-                new PropertyValueFactory<>("Country")
+                new PropertyValueFactory<>("country")
         );
-        for (XMLParser.BoatXMLObject.Boat boat : StreamParser.getBoats()) {
-            data.add(boat);
+        posCol.setCellValueFactory(
+                new PropertyValueFactory<>("position")
+        );
+        if (StreamParser.isRaceStarted()) {
+            data.addAll(StreamParser.getBoatsPos().values());
+        } else {
+            for (Yacht boat : StreamParser.getBoats().values()) {
+                boat.setPosition("-");
+                data.add(boat);
+            }
         }
+        teamList.refresh();
+
+//        posCol.setSortType(TableColumn.SortType.ASCENDING);
+//        teamList.getSortOrder().add(posCol);
+//        posCol.setSortable(false);
     }
 }

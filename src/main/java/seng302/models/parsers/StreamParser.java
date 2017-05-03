@@ -5,6 +5,7 @@ import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import seng302.models.Yacht;
 import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.packets.StreamPacket;
 
@@ -37,7 +38,8 @@ public class StreamParser extends Thread{
      private static boolean raceFinished = false;
      private static boolean streamStatus = false;
      private static long timeSinceStart = -1;
-     private static List<XMLParser.BoatXMLObject.Boat> boats = new ArrayList<>();
+     private static Map<Integer, Yacht> boats = new HashMap<>();
+     private static Map<Long, Yacht> boatsPos = new TreeMap<>();
      private static double windDirection = 0;
      private static String currentTimeString;
 
@@ -201,17 +203,33 @@ public class StreamParser extends Thread{
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
         int noBoats = payload[22];
         int raceType = payload[23];
-        ArrayList<String> boatStatuses = new ArrayList<>();
+//        ArrayList<String> boatStatuses = new ArrayList<>();
+        boatsPos = new TreeMap<>();
         for (int i = 0; i < noBoats; i++){
             Long boatStatusSourceID = bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
-            String boatStatus = "SourceID: " + boatStatusSourceID;
-            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
-            boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
-            boatStatus += "\nPenaltiesAwarded: " + (int)payload[29 + (i * 20)];
-            boatStatus += "\nPenaltiesServed: " + (int)payload[30 + (i * 20)];
-            boatStatus += "\nEstTimeAtNextMark: " + bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
-            boatStatus += "\nEstTimeAtFinish: " + bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
-            boatStatuses.add(boatStatus);
+            Yacht boat = boats.get((int)(long) boatStatusSourceID);
+            boat.setBoatStatus((int)payload[28 + (i * 20)]);
+            boat.setLegNumber((int)payload[29 + (i * 20)]);
+            boat.setPenaltiesAwarded((int)payload[29 + (i * 20)]);
+            boat.setPenaltiesServed((int)payload[30 + (i * 20)]);
+            Long estTimeAtNextMark = bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
+            boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
+            Long estTimeAtFinish = bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
+            boat.setEstimateTimeAtFinish(estTimeAtFinish);
+            boatsPos.put(estTimeAtFinish, boat);
+//            String boatStatus = "SourceID: " + boatStatusSourceID;
+//            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
+//            boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
+//            boatStatus += "\nPenaltiesAwarded: " + (int)payload[29 + (i * 20)];
+//            boatStatus += "\nPenaltiesServed: " + (int)payload[30 + (i * 20)];
+//            boatStatus += "\nEstTimeAtNextMark: " + bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
+//            boatStatus += "\nEstTimeAtFinish: " + bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
+//            boatStatuses.add(boatStatus);
+        }
+        int pos = 1;
+        for (Yacht yacht : boatsPos.values()) {
+            yacht.setPosition(String.valueOf(pos));
+            pos++;
         }
     }
 
@@ -478,11 +496,11 @@ public class StreamParser extends Thread{
     }
 
     /**
-     * return list of boats from the server
+     * return a map of boats with sourceID and the boat
      *
-     * @return list of boats
+     * @return map of boats
      */
-    public static List<XMLParser.BoatXMLObject.Boat> getBoats() {
+    public static Map<Integer, Yacht> getBoats() {
         return boats;
     }
 
@@ -512,6 +530,15 @@ public class StreamParser extends Thread{
      */
     public static String getCurrentTimeString() {
         return currentTimeString;
+    }
+
+    /**
+     * used in boat position since tree map can sort position efficiently.
+     *
+     * @return a map of time to finish and boat.
+     */
+    public static Map<Long, Yacht> getBoatsPos() {
+        return boatsPos;
     }
 }
 
