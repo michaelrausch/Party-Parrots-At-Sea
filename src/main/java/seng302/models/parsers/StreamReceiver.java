@@ -24,6 +24,7 @@ public class StreamReceiver extends Thread {
 
     public StreamReceiver(String hostAddress, int hostPort, String threadName) {
         this.threadName = threadName;
+        this.setDaemon(true);
         try {
             host = new Socket(hostAddress, hostPort);
         } catch (IOException e) {
@@ -44,7 +45,7 @@ public class StreamReceiver extends Thread {
     }
 
     public void start () {
-        System.out.println("Starting " +  threadName );
+        System.out.println("[CLIENT] Starting " +  threadName );
         if (t == null) {
             t = new Thread (this, threadName);
             t.start ();
@@ -95,7 +96,6 @@ public class StreamReceiver extends Thread {
             } catch (Exception e) {
                 moreBytes = false;
             }
-
         }
     }
 

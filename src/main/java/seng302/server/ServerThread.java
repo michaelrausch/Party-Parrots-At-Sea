@@ -3,26 +3,22 @@ package seng302.server;
 import seng302.server.messages.*;
 import seng302.server.simulator.Boat;
 import seng302.server.simulator.Simulator;
-import sun.misc.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class ServerThread implements Runnable, Observer {
-    private Thread runner;
     private StreamingServerSocket server;
     private long startTime;
-    boolean raceStarted =  false;
-    Map<Integer,Boolean> boatsFinished = new HashMap<>();
+    private boolean raceStarted =  false;
+    private Map<Integer,Boolean> boatsFinished = new HashMap<>();
     private List<Boat> boats;
     private Simulator raceSimulator;
+    private boolean sendingRaceFinishedLocationMessages = true;
 
     private final int HEARTBEAT_PERIOD = 5000;
-    private final int RACE_STATUS_PERIOD = 1000;
+    private final int RACE_STATUS_PERIOD = 1000/2;
     private final int RACE_START_STATUS_PERIOD = 1000;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
     private final int PORT_NUMBER = 8085;
@@ -30,7 +26,9 @@ public class ServerThread implements Runnable, Observer {
     private static final int LOG_LEVEL = 1;
 
     public ServerThread(String threadName){
-        runner = new Thread(this, threadName);
+        Thread runner = new Thread(this, threadName);
+        runner.setDaemon(true);
+
         serverLog("Spawning Server", 0);
 
         raceSimulator = new Simulator(BOAT_LOCATION_PERIOD);
@@ -48,7 +46,7 @@ public class ServerThread implements Runnable, Observer {
         raceSimulatorThread.start();
     }
 
-    public static void serverLog(String message, int logLevel){
+     static void serverLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
             System.out.println("[SERVER] " + message);
         }
@@ -60,7 +58,7 @@ public class ServerThread implements Runnable, Observer {
      * @param type The XML Message type
      * @return The XML Message
      */
-    public Message getXmlMessage(String fileName, XMLMessageSubType type){
+    private Message getXmlMessage(String fileName, XMLMessageSubType type){
         String fileContents = null;
 
         try {
@@ -82,8 +80,8 @@ public class ServerThread implements Runnable, Observer {
     /**
      * @return Get a race status message for the current race
      */
-    public Message getRaceStatusMessage(){
-        List<BoatSubMessage> boatSubMessages = new ArrayList<BoatSubMessage>();
+    private Message getRaceStatusMessage(){
+        List<BoatSubMessage> boatSubMessages = new ArrayList<>();
         BoatStatus boatStatus;
         RaceStatus raceStatus;
         boolean thereAreBoatsNotFinished = false;
@@ -128,7 +126,7 @@ public class ServerThread implements Runnable, Observer {
             raceStatus = RaceStatus.TERMINATED;
         }
 
-        return new RaceStatusMessage(1, raceStatus, startTime, WindDirection.EAST,
+        return new RaceStatusMessage(1, raceStatus, startTime, WindDirection.SOUTH,
                 100, boats.size(), RaceType.MATCH_RACE, 1, boatSubMessages);
     }
 
@@ -257,11 +255,36 @@ public class ServerThread implements Runnable, Observer {
     }
 
     /**
+     * Start sending static boat position updates when race has finished
+     */
+    private void startSendingRaceFinishedBoatPostions(){
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    for (Boat b : raceSimulator.getBoats()){
+                        Message m = new BoatLocationMessage(b.getSourceID(), server.getSequenceNumber(), b.getLat(),
+                                b.getLng(), b.getLastPassedCorner().getBearingToNextCorner(),
+                                ((long) 0));
+
+                        server.send(m);
+                    }
+
+                } catch (IOException e) {
+                    System.out.print("");
+                }
+            }
+        }, 0, BOAT_LOCATION_PERIOD);
+    }
+
+    /**
      * Send a boat location message when they are updated by the simulator
      * @param o .
      * @param arg .
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void update(Observable o, Object arg) {
         // Only send if server started
         // TODO: I don't understand why i need to check server is null or not ... confused - haoming 2/5/17
@@ -269,22 +292,32 @@ public class ServerThread implements Runnable, Observer {
             return;
         }
 
-        for (Boat b : (List<Boat>) arg){
+        int numOfBoatsFinished = 0;
+        for (Boat boat : (List<Boat>) arg){
             try {
-                Message m = new BoatLocationMessage(b.getSourceID(), 1, b.getLat(),
-                        b.getLng(), b.getLastPassedCorner().getBearingToNextCorner(),
-                        ((long) b.getSpeed()));
+                if (boat.isFinished()) {
+                    numOfBoatsFinished ++;
+                    if (!boatsFinished.get(boat.getSourceID())) {
+                        boatsFinished.put(boat.getSourceID(), true);
+                        serverLog("Boat " + boat.getSourceID() + " finished the race", 1);
+                    }
+                }
+                Message m = new BoatLocationMessage(boat.getSourceID(), 1, boat.getLat(),
+                        boat.getLng(), boat.getLastPassedCorner().getBearingToNextCorner(),
+                        ((long) boat.getSpeed()));
                 server.send(m);
             } catch (IOException e) {
                 serverLog("Couldn't send a boat status message", 3);
                 return;
             }
             catch (NullPointerException e){
-                //e.printStackTrace();
-                //TODO: add a method in boat to check if a boat has finished the race. - haoming 2/5/17
-                serverLog("Boat " + b.getSourceID() + " finished the race", 1);
-                boatsFinished.put(b.getSourceID(), true);
+                e.printStackTrace();
             }
         }
+
+        if (numOfBoatsFinished == ((List<Boat>) arg).size()) {
+            startSendingRaceFinishedBoatPostions();
+        }
+
     }
 }

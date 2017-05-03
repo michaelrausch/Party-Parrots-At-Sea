@@ -3,11 +3,9 @@ package seng302.controllers;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -16,21 +14,17 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
+import seng302.models.Yacht;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 
 
-import javax.xml.crypto.dsig.XMLObject;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * Created by michaelrausch on 21/03/17.
- */
 public class Controller implements Initializable {
     @FXML
     private AnchorPane contentPane;
@@ -41,26 +35,25 @@ public class Controller implements Initializable {
     @FXML
     private Button switchToRaceViewButton;
     @FXML
-    private TableView teamList;
+    private TableView<Yacht> teamList;
     @FXML
-    private TableColumn boatNameCol;
+    private TableColumn<Yacht, String> boatNameCol;
     @FXML
-    private TableColumn shortNameCol;
+    private TableColumn<Yacht, String> shortNameCol;
     @FXML
-    private TableColumn countryCol;
+    private TableColumn<Yacht, String> countryCol;
+    @FXML
+    private TableColumn<Yacht, String> posCol;
     @FXML
     private Label realTime;
-    private Stage stage;
+
+    private XMLParser xmlParser;
 
     private void setContentPane(String jfxUrl){
         try{
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
-//            contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(jfxUrl));
-            contentPane.getChildren().addAll((Node) loader.load());
-            RaceViewController r = (RaceViewController) loader.getController();
-            //((RaceViewController) loader.getController()).setStage(stage);
+            contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
         }
         catch(javafx.fxml.LoadException e){
             System.err.println(e.getCause());
@@ -82,7 +75,7 @@ public class Controller implements Initializable {
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
-            XMLParser xmlParser = StreamParser.getXmlObject();
+            xmlParser = StreamParser.getXmlObject();
             streamButton.setVisible(false);
             realTime.setVisible(true);
             timeTillLive.setVisible(true);
@@ -108,7 +101,7 @@ public class Controller implements Initializable {
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
-                            String timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
+                            String timerString = "-" + timerMinute + ":" + timerSecond;
                             timeTillLive.setText(timerString);
                         } else {
                             realTime.setText(StreamParser.getCurrentTimeString());
@@ -120,7 +113,7 @@ public class Controller implements Initializable {
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
-                            String timerString = timerMinute + ":" + timerSecond + " minutes";
+                            String timerString = timerMinute + ":" + timerSecond;
                             timeTillLive.setText(timerString);
                         }
                     });
@@ -137,22 +130,32 @@ public class Controller implements Initializable {
     }
 
     private void updateTeamList() {
-        ObservableList<XMLParser.BoatXMLObject.Boat> data = FXCollections.observableArrayList();
+        ObservableList<Yacht> data = FXCollections.observableArrayList();
         teamList.setItems(data);
         boatNameCol.setCellValueFactory(
-                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("BoatName")
+                new PropertyValueFactory<>("boatName")
         );
         shortNameCol.setCellValueFactory(
-                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("ShortName")
+                new PropertyValueFactory<>("shortName")
         );
         countryCol.setCellValueFactory(
-                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("Country")
+                new PropertyValueFactory<>("country")
         );
-        for (XMLParser.BoatXMLObject.Boat boat : StreamParser.getBoats()) {
-            data.add(boat);
+        posCol.setCellValueFactory(
+                new PropertyValueFactory<>("position")
+        );
+        if (StreamParser.isRaceStarted()) {
+            data.addAll(StreamParser.getBoatsPos().values());
+        } else {
+            for (Yacht boat : StreamParser.getBoats().values()) {
+                boat.setPosition("-");
+                data.add(boat);
+            }
         }
-    }
-    public void setStage (Stage stage) {
-        this.stage = stage;
+        teamList.refresh();
+
+//        posCol.setSortType(TableColumn.SortType.ASCENDING);
+//        teamList.getSortOrder().add(posCol);
+//        posCol.setSortable(false);
     }
 }
