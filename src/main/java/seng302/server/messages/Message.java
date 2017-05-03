@@ -1,13 +1,9 @@
 package seng302.server.messages;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
@@ -208,9 +204,4 @@ public abstract class Message {
             data[right] = (byte) (temp & 0xff);
         }
     }
-
-    public int wat(){
-        return bufferPosition;
-    }
-
 }
