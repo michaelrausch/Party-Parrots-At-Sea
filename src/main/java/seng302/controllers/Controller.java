@@ -7,6 +7,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -15,6 +16,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 
@@ -48,12 +50,17 @@ public class Controller implements Initializable {
     private TableColumn countryCol;
     @FXML
     private Label realTime;
+    private Stage stage;
 
     private void setContentPane(String jfxUrl){
         try{
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
-            contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+//            contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(jfxUrl));
+            contentPane.getChildren().addAll((Node) loader.load());
+            RaceViewController r = (RaceViewController) loader.getController();
+            //((RaceViewController) loader.getController()).setStage(stage);
         }
         catch(javafx.fxml.LoadException e){
             System.err.println(e.getCause());
@@ -144,5 +151,8 @@ public class Controller implements Initializable {
         for (XMLParser.BoatXMLObject.Boat boat : StreamParser.getBoats()) {
             data.add(boat);
         }
+    }
+    public void setStage (Stage stage) {
+        this.stage = stage;
     }
 }

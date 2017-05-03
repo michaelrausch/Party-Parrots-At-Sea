@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import seng302.models.*;
@@ -49,6 +50,7 @@ public class RaceViewController extends Thread{
     private Map<Boat, TimelineInfo> timelineInfos = new HashMap<>();
     private ArrayList<Boat> boatOrder = new ArrayList<>();
     private Race race;
+    private Stage stage;
 
     public void initialize() {
 
@@ -397,4 +399,11 @@ public class RaceViewController extends Thread{
         }
     }
 
+    void setStage (Stage stage) {
+        this.stage = stage;
+    }
+
+    Stage getStage () {
+        return stage;
+    }
 }

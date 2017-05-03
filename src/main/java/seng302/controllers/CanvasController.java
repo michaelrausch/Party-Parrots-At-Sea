@@ -5,11 +5,14 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import seng302.models.Boat;
 import seng302.models.BoatGroup;
 import seng302.models.Colors;
@@ -326,7 +329,7 @@ public class CanvasController {
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
             boatGroup.moveTo(startingX, startingY, 0d);
-            boatGroup.forceRotation();
+            boatGroup.setStage(raceViewController.getStage());
             raceObjects.add(boatGroup);
             boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
         }

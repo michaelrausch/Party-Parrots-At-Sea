@@ -36,7 +36,7 @@ class Wake extends Group {
             //Default triangle is -110 deg out of phase with a default wake and has angle of 40 deg.
             arc = new Arc(0,0,0,0,-110,40);
             //Opacity increases from 0.5 -> 0 evenly over the 5 wake arcs.
-            arc.setFill(new Color(0.18, 0.7, 1.0, 0.50 + -0.1 * i));
+            arc.setFill(new Color(0.18, 0.7, 1.0, 1.0 + -0.175 * i));
             arc.setType(ArcType.ROUND);
             arcs[i] = arc;
         }
@@ -52,17 +52,17 @@ class Wake extends Group {
      * @param velocity The real world velocity of the boat in m/s.
      */
     void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocity) {
-//        if (Math.abs(rotationalVelocity) > 0.5) {
-//            rotationalVelocity = 0;
-//        }
         sum -= Math.abs(velocities[(velocityIndices[0] + 10) % 13]);
         sum += Math.abs(rotationalVelocity);
 //        System.out.println("sum = " + sum);
         max = Math.max(max, rotationalVelocity);
-        if (sum < max)
+//        System.out.println("max = " + max);
+        if (sum < (max / 3))
             rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
                                    //This stops the wake from eventually becoming out of sync with the boat.
-
+//        if (Math.abs(rotationalVelocity) > 0.5) {
+//            rotationalVelocity = 0;
+//        }
         //Update the index of the array of recent velocities that each wake uses. Each wake is 3 velocities behind the
         //next smallest wake.
         velocityIndices[0] = (13 + (velocityIndices[0] - 1) % 13) % 13;
