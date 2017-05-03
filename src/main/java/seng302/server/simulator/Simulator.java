@@ -65,6 +65,8 @@ public class Simulator extends Observable implements Runnable {
 				e.printStackTrace();
 			}
 		}
+
+		System.out.println("[SERVER] Race simulator has been terminated");
 	}
 
 	/**
@@ -89,7 +91,10 @@ public class Simulator extends Observable implements Runnable {
 				boat.setHeadingCorner(boat.getLastPassedCorner().getNextCorner());
 
 				// heading corner == null means boat has reached the final mark
-				if (boat.getHeadingCorner() == null) return 1;
+				if (boat.getHeadingCorner() == null) {
+					boat.setFinished(true);
+					return 1;
+				}
 
 				// move compensate distance for the mark just passed
 				Position pos = GeoUtility.getGeoCoordinate(

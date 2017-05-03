@@ -10,12 +10,14 @@ public class Boat {
 	private double lng;
 	private double speed; // in mm/sec
 	private String boatName, shortName, shorterName;
+	private boolean isFinished;
 
 	private Corner lastPassedCorner, headingCorner;
 
 	public Boat(int sourceID, String boatName) {
 		this.sourceID = sourceID;
 		this.boatName = boatName;
+		this.isFinished = false;
 	}
 
 	/**
@@ -105,5 +107,13 @@ public class Boat {
 
 	public void setHeadingCorner(Corner headingCorner) {
 		this.headingCorner = headingCorner;
+	}
+
+	public boolean isFinished() {
+		return isFinished;
+	}
+
+	public void setFinished(boolean finished) {
+		isFinished = finished;
 	}
 }
