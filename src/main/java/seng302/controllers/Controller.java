@@ -3,7 +3,6 @@ package seng302.controllers;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,16 +18,12 @@ import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 
 
-import javax.xml.crypto.dsig.XMLObject;
 import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * Created by michaelrausch on 21/03/17.
- */
 public class Controller implements Initializable {
     @FXML
     private AnchorPane contentPane;
@@ -39,13 +34,13 @@ public class Controller implements Initializable {
     @FXML
     private Button switchToRaceViewButton;
     @FXML
-    private TableView teamList;
+    private TableView<XMLParser.BoatXMLObject.Boat> teamList;
     @FXML
-    private TableColumn boatNameCol;
+    private TableColumn<XMLParser.BoatXMLObject.Boat, String> boatNameCol;
     @FXML
-    private TableColumn shortNameCol;
+    private TableColumn<XMLParser.BoatXMLObject.Boat, String> shortNameCol;
     @FXML
-    private TableColumn countryCol;
+    private TableColumn<XMLParser.BoatXMLObject.Boat, String> countryCol;
     @FXML
     private Label realTime;
 
@@ -101,7 +96,7 @@ public class Controller implements Initializable {
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
-                            String timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
+                            String timerString = "-" + timerMinute + ":" + timerSecond;
                             timeTillLive.setText(timerString);
                         } else {
                             realTime.setText(StreamParser.getCurrentTimeString());
@@ -113,7 +108,7 @@ public class Controller implements Initializable {
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
-                            String timerString = timerMinute + ":" + timerSecond + " minutes";
+                            String timerString = timerMinute + ":" + timerSecond;
                             timeTillLive.setText(timerString);
                         }
                     });
@@ -133,13 +128,13 @@ public class Controller implements Initializable {
         ObservableList<XMLParser.BoatXMLObject.Boat> data = FXCollections.observableArrayList();
         teamList.setItems(data);
         boatNameCol.setCellValueFactory(
-                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("BoatName")
+                new PropertyValueFactory<>("BoatName")
         );
         shortNameCol.setCellValueFactory(
-                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("ShortName")
+                new PropertyValueFactory<>("ShortName")
         );
         countryCol.setCellValueFactory(
-                new PropertyValueFactory<XMLParser.BoatXMLObject.Boat,String>("Country")
+                new PropertyValueFactory<>("Country")
         );
         for (XMLParser.BoatXMLObject.Boat boat : StreamParser.getBoats()) {
             data.add(boat);
