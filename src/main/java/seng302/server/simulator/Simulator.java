@@ -37,7 +37,7 @@ public class Simulator extends Observable implements Runnable {
 			boat.setLng(startLng);
 			boat.setLastPassedCorner(course.get(0));
 			boat.setHeadingCorner(course.get(1));
-			boat.setSpeed(ThreadLocalRandom.current().nextInt(400000, 600000 + 1));
+			boat.setSpeed(ThreadLocalRandom.current().nextInt(40000, 60000 + 1));
 		}
 	}
 

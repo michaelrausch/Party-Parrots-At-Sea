@@ -21,8 +21,6 @@ public class Event {
     private final double ORIGIN_LON = -64.857063;
     private final double SCALE = 16000;
 
-
-
     /**
      * Event class containing the time of specific event, related team/boat, and
      * event location such as leg.

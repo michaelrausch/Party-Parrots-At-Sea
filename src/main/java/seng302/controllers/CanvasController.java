@@ -132,7 +132,7 @@ public class CanvasController {
             }
         };
         for (Mark m : raceViewController.getRace().getCourse()) {
-            System.out.println(m.getName());
+            //System.out.println(m.getName());
         }
         //timer.start();
     }

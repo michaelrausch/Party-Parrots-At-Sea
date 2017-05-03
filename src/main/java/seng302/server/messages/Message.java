@@ -185,7 +185,6 @@ public abstract class Message {
      * @return
      */
     public static byte[] intToByteArray(long val, int len){
-        long vor = val;
         int index = 0;
         byte[] data = new byte[len];
 
@@ -208,6 +207,10 @@ public abstract class Message {
             data[left]  = (byte) (data[right] & 0xff);
             data[right] = (byte) (temp & 0xff);
         }
+    }
+
+    public int wat(){
+        return bufferPosition;
     }
 
 }

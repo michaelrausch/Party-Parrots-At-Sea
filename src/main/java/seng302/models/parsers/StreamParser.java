@@ -57,7 +57,7 @@ public class StreamParser extends Thread{
      */
     public void run(){
          try {
-             System.out.println("START OF STREAM");
+             System.out.println("[CLIENT] Start of stream");
              streamStatus = true;
              xmlObject = new XMLParser();
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
@@ -94,7 +94,7 @@ public class StreamParser extends Thread{
      *
      */
     public void start () {
-        System.out.println("Starting " +  threadName );
+        System.out.println("[CLIENT] Starting " +  threadName );
         if (t == null) {
             t = new Thread (this, threadName);
             t.start ();
@@ -181,18 +181,18 @@ public class StreamParser extends Thread{
         currentTimeString = format.format((new Date (currentTime)).getTime());
         if (timeTillStart > 0) {
             timeSinceStart = timeTillStart;
-            System.out.println("Time till start: " + timeTillStart + " Seconds");
+            //System.out.println("Time till start: " + timeTillStart + " Seconds");
         } else {
             if (raceStatus == 4 || raceStatus == 8){
                 raceFinished = true;
                 raceStarted = false;
-                System.out.println("RACE HAS FINISHED");
+                System.out.println("[CLIENT] Race has finished");
             } else if (!raceStarted){
                 raceStarted = true;
                 raceFinished = false;
-                System.out.println("RACE HAS STARTED");
+                System.out.println("[CLIENT] Race has started");
             }
-            System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
+            //System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
             timeSinceStart = timeTillStart;
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));

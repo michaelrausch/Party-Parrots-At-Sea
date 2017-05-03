@@ -42,6 +42,7 @@ public class BoatLocationMessage extends Message {
      * @param boatSpeed The boats speed
      */
     public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude, double heading, long boatSpeed){
+        boatSpeed /= 10;
         messageVersionNumber = 1;
         time = System.currentTimeMillis() / 1000L;
         this.sourceId = sourceId;
@@ -54,8 +55,8 @@ public class BoatLocationMessage extends Message {
         this.pitch = 0;
         this.roll = 0;
         this.boatSpeed = boatSpeed;
-        this.COG = 0;
-        this.SOG = 0;
+        this.COG = 2;
+        this.SOG = boatSpeed ;
         this.apparentWindSpeed = 0;
         this.apparentWindAngle = 0;
         this.trueWindSpeed = 0;
@@ -146,7 +147,7 @@ public class BoatLocationMessage extends Message {
         putInt(headingToSend, 2);
         putInt((int) pitch, 2);
         putInt((int) roll, 2);
-        putUnsignedInt((int) boatSpeed, 2);
+        putInt((int) boatSpeed, 2);
         putUnsignedInt((int) COG, 2);
         putUnsignedInt((int) SOG, 2);
         putUnsignedInt((int) apparentWindSpeed, 2);

@@ -20,9 +20,10 @@ public class ServerThread implements Runnable, Observer {
     Map<Integer,Boolean> boatsFinished = new HashMap<>();
     private List<Boat> boats;
     private Simulator raceSimulator;
+    private boolean sendingRaceFinishedLocationMessages = true;
 
     private final int HEARTBEAT_PERIOD = 5000;
-    private final int RACE_STATUS_PERIOD = 1000;
+    private final int RACE_STATUS_PERIOD = 1000/2;
     private final int RACE_START_STATUS_PERIOD = 1000;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
     private final int PORT_NUMBER = 8085;
@@ -31,6 +32,8 @@ public class ServerThread implements Runnable, Observer {
 
     public ServerThread(String threadName){
         runner = new Thread(this, threadName);
+        runner.setDaemon(true);
+
         serverLog("Spawning Server", 0);
 
         raceSimulator = new Simulator(BOAT_LOCATION_PERIOD);
@@ -128,7 +131,7 @@ public class ServerThread implements Runnable, Observer {
             raceStatus = RaceStatus.TERMINATED;
         }
 
-        return new RaceStatusMessage(1, raceStatus, startTime, WindDirection.EAST,
+        return new RaceStatusMessage(1, raceStatus, startTime, WindDirection.SOUTH,
                 100, boats.size(), RaceType.MATCH_RACE, 1, boatSubMessages);
     }
 
@@ -257,6 +260,30 @@ public class ServerThread implements Runnable, Observer {
     }
 
     /**
+     * Start sending static boat position updates when race has finished
+     */
+    private void startSendingRaceFinishedBoatPostions(){
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    for (Boat b : raceSimulator.getBoats()){
+                        Message m = new BoatLocationMessage(b.getSourceID(), server.getSequenceNumber(), b.getLat(),
+                                b.getLng(), b.getLastPassedCorner().getBearingToNextCorner(),
+                                ((long) 0));
+
+                        server.send(m);
+                    }
+
+                } catch (IOException e) {
+                    System.out.print("");
+                }
+            }
+        }, 0, BOAT_LOCATION_PERIOD);
+    }
+
+    /**
      * Send a boat location message when they are updated by the simulator
      * @param o .
      * @param arg .
@@ -271,7 +298,7 @@ public class ServerThread implements Runnable, Observer {
 
         for (Boat b : (List<Boat>) arg){
             try {
-                Message m = new BoatLocationMessage(b.getSourceID(), 1, b.getLat(),
+                Message m = new BoatLocationMessage(b.getSourceID(), server.getSequenceNumber(), b.getLat(),
                         b.getLng(), b.getLastPassedCorner().getBearingToNextCorner(),
                         ((long) b.getSpeed()));
                 server.send(m);
