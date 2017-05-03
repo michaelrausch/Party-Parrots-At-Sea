@@ -329,7 +329,7 @@ public class CanvasController {
         for (Boat boat : boats) {
             BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
             boatGroup.moveTo(startingX, startingY, 0d);
-            boatGroup.setStage(raceViewController.getStage());
+            //boatGroup.setStage(raceViewController.getStage());
             raceObjects.add(boatGroup);
             boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
         }
