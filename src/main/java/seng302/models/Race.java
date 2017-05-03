@@ -102,8 +102,8 @@ public class Race {
                         events.put(boat, new ArrayList<>(Arrays.asList(event)));
                     }
                     totalDistance += event.getDistanceBetweenMarks();
-                    System.out.println(totalDistance);
-                    System.out.println(boat.getVelocity());
+                    //System.out.println(totalDistance);
+                    //System.out.println(boat.getVelocity());
                 }
 
                 // There are no more marks after this event

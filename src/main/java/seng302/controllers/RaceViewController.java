@@ -305,21 +305,21 @@ public class RaceViewController extends Thread{
     }
 
     private String currentTimer() {
-        String timerString = "0:00 minutes";
+        String timerString = "0:00";
         if (StreamParser.getTimeSinceStart() > 0) {
             String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
             String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
             if (timerSecond.length() == 1) {
                 timerSecond = "0" + timerSecond;
             }
-            timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
+            timerString = "-" + timerMinute + ":" + timerSecond;
         } else {
             String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
             String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
             if (timerSecond.length() == 1) {
                 timerSecond = "0" + timerSecond;
             }
-            timerString = timerMinute + ":" + timerSecond + " minutes";
+            timerString = timerMinute + ":" + timerSecond;
         }
         return timerString;
     }
