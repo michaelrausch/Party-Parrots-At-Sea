@@ -27,7 +27,7 @@ public class RaceResultController implements Initializable{
         int boatPosition = this.race.getFinishedBoats().length;
 
         for (int i = this.race.getFinishedBoats().length - 1; i >= 0; i--){
-            resultsVBox.getChildren().add(0, new Text(boatPosition + ": " + this.race.getFinishedBoats()[i].getTeamName()));
+            resultsVBox.getChildren().add(0, new Text(boatPosition + ": " + this.race.getFinishedBoats()[i].getBoatName()));
             boatPosition--;
         }
 

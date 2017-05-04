@@ -19,8 +19,10 @@ public class App extends Application
         primaryStage.setMaximized(true);
 
         primaryStage.show();
-
         primaryStage.setOnCloseRequest(e -> {
+            StreamParser.appClose();
+            StreamReceiver.noMoreBytes();
+            System.out.println("[CLIENT] Exiting program");
             System.exit(0);
         });
 
@@ -39,8 +41,7 @@ public class App extends Application
 
         if (args.length == 3 && args[0].equals("-server")){
             sr = new StreamReceiver(args[1], Integer.valueOf(args[2]), "RaceStream");
-        }
-        else if(args.length == 2 && args[0].equals("-server")){
+        } else if(args.length == 2 && args[0].equals("-server")){
             switch (args[1]) {
                 case "internal":
                     sr = new StreamReceiver("localhost", 8085, "RaceStream");
@@ -56,6 +57,8 @@ public class App extends Application
         //Change the StreamReceiver in this else block to change the default data source.
         else{
             sr = new StreamReceiver("localhost", 8085, "RaceStream");
+//            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
+//            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
         }
 
         sr.start();
