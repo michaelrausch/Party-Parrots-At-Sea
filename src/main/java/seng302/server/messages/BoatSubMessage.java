@@ -1,6 +1,5 @@
 package seng302.server.messages;
 
-import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -16,6 +15,8 @@ public class BoatSubMessage{
     private long numberPenaltiesServed;
     private long estimatedTimeAtNextMark;
     private long estimatedTimeAtFinish;
+    private ByteBuffer buff = ByteBuffer.allocate(getSize());
+    private int buffPos = 0;
 
     /**
      * Boat Sub message from section 4.2 of the AC35 streaming data interface spec
@@ -45,47 +46,39 @@ public class BoatSubMessage{
         return MESSAGE_SIZE;
     }
 
+    private void putInBuffer(byte[] bytes, long val){
+        byte[] tmp = bytes.clone();
+        Message.reverse(tmp);
+
+        buff.put(tmp);
+        buffPos += tmp.length;
+        buff.position(buffPos);
+    }
+
     /**
      * @return a ByteBuffer containing this boat status message
      */
     public ByteBuffer getByteBuffer(){
-        ByteBuffer buff = ByteBuffer.allocate(getSize());
-        int buffPos = 0;
-
         // Source ID, 4 bytes
-        buff.put(ByteBuffer.allocate(4).putInt((int) sourceId).array());
-        buffPos += 4;
-        buff.position(buffPos);
+        putInBuffer(Message.intToByteArray(sourceId, 4), 4);
 
         // Boat Status, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) (boatStatus.getCode() & 0xff)).array());
-        buffPos += 1;
-        buff.position(buffPos);
+        putInBuffer(ByteBuffer.allocate(1).put((byte) (boatStatus.getCode() & 0xff)).array(), 1);
 
         // Leg number, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) (legNumber & 0xff)).array());
-        buffPos += 1;
-        buff.position(buffPos);
+        putInBuffer(ByteBuffer.allocate(1).put((byte) (legNumber & 0xff)).array(), 1);
 
         // Number of penalties awarded, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) (numberPenaltiesAwarded & 0xff)).array());
-        buffPos += 1;
-        buff.position(buffPos);
+        putInBuffer(ByteBuffer.allocate(1).put((byte) (numberPenaltiesAwarded & 0xff)).array(), 1);
 
         // Number of penalties served, 1 byte
-        buff.put(ByteBuffer.allocate(1).put((byte) (numberPenaltiesServed & 0xff)).array());
-        buffPos += 1;
-        buff.position(buffPos);
+        putInBuffer(ByteBuffer.allocate(1).put((byte) (numberPenaltiesServed & 0xff)).array(), 1);
 
         // Estimated time at next mark, 6 bytes
-        buff.put(ByteBuffer.allocate(6).putInt((int) estimatedTimeAtNextMark).array());
-        buffPos += 6;
-        buff.position(buffPos);
+        putInBuffer(Message.intToByteArray((int) estimatedTimeAtNextMark, 6),6);
 
         // Estimated time at finish, 6 bytes
-        buff.put(ByteBuffer.allocate(6).putInt((int) estimatedTimeAtFinish).array());
-        buffPos += 6;
-        buff.position(buffPos);
+        putInBuffer(Message.intToByteArray((int) estimatedTimeAtFinish, 6), 6);
 
         return buff;
     }

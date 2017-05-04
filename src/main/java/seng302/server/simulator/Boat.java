@@ -11,6 +11,7 @@ public class Boat {
 	private double speed; // in mm/sec
 	private String boatName, shortName, shorterName;
 	private boolean isFinished;
+	private long estimatedTimeTillFinish;
 
 	private Corner lastPassedCorner, headingCorner;
 
@@ -18,6 +19,7 @@ public class Boat {
 		this.sourceID = sourceID;
 		this.boatName = boatName;
 		this.isFinished = false;
+		estimatedTimeTillFinish = 0;
 	}
 
 	/**
@@ -115,5 +117,9 @@ public class Boat {
 
 	public void setFinished(boolean finished) {
 		isFinished = finished;
+	}
+
+	public long getEstimatedTimeTillFinish(){
+		return (long) (getSpeed()) + System.currentTimeMillis();
 	}
 }

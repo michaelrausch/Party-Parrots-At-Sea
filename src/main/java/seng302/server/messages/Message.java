@@ -140,7 +140,7 @@ public abstract class Message {
      * @param size number of bytes
      */
     void putBytes(ByteBuffer bytes, int size){
-        buffer.put(bytes);
+        buffer.put(bytes.array());
         moveBufferPositionBy(size);
     }
 

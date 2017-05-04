@@ -1,7 +1,6 @@
 package seng302.models.parsers;
 
 
-import javafx.geometry.Point3D;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -12,7 +11,6 @@ import seng302.models.parsers.packets.StreamPacket;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.DateFormat;
@@ -110,48 +108,53 @@ public class StreamParser extends Thread{
      * @param packet the packet to be looked at
      */
      private static void parsePacket(StreamPacket packet) {
-        switch (packet.getType()){
-            case HEARTBEAT:
-                extractHeartBeat(packet);
-                break;
-            case RACE_STATUS:
-                extractRaceStatus(packet);
-                break;
-            case DISPLAY_TEXT_MESSAGE:
-                extractDisplayMessage(packet);
-                break;
-            case XML_MESSAGE:
-                extractXmlMessage(packet);
-                break;
-            case RACE_START_STATUS:
-                extractRaceStartStatus(packet);
-                break;
-            case YACHT_EVENT_CODE:
-                extractYachtEventCode(packet);
-                break;
-            case YACHT_ACTION_CODE:
-                extractYachtActionCode(packet);
-                break;
-            case CHATTER_TEXT:
-                extractChatterText(packet);
-                break;
-            case BOAT_LOCATION:
-                extractBoatLocation(packet);
-                break;
-            case MARK_ROUNDING:
-                extractMarkRounding(packet);
-                break;
-            case COURSE_WIND:
-                extractCourseWind(packet);
-                break;
-            case AVG_WIND:
-                extractAvgWind(packet);
-                break;
-            default:
-                break;
-                //System.out.println(packet.getType().toString());
-        }
-    }
+         try{
+             switch (packet.getType()){
+                 case HEARTBEAT:
+                     extractHeartBeat(packet);
+                     break;
+                 case RACE_STATUS:
+                     extractRaceStatus(packet);
+                     break;
+                 case DISPLAY_TEXT_MESSAGE:
+                     extractDisplayMessage(packet);
+                     break;
+                 case XML_MESSAGE:
+                     extractXmlMessage(packet);
+                     break;
+                 case RACE_START_STATUS:
+                     extractRaceStartStatus(packet);
+                     break;
+                 case YACHT_EVENT_CODE:
+                     extractYachtEventCode(packet);
+                     break;
+                 case YACHT_ACTION_CODE:
+                     extractYachtActionCode(packet);
+                     break;
+                 case CHATTER_TEXT:
+                     extractChatterText(packet);
+                     break;
+                 case BOAT_LOCATION:
+                     extractBoatLocation(packet);
+                     break;
+                 case MARK_ROUNDING:
+                     extractMarkRounding(packet);
+                     break;
+                 case COURSE_WIND:
+                     extractCourseWind(packet);
+                     break;
+                 case AVG_WIND:
+                     extractAvgWind(packet);
+                     break;
+                 default:
+                     break;
+                 //System.out.println(packet.getType().toString());
+             }
+         }
+         catch (NullPointerException e){
+             System.out.println("Error parsing packet");
+         }
+     }
 
     /**
      * Extracts the seq num used in the heartbeat packet
