@@ -99,7 +99,7 @@ public class ServerThread implements Runnable, Observer {
                 thereAreBoatsNotFinished = true;
             }
 
-            BoatSubMessage m = new BoatSubMessage(b.getSourceID(), boatStatus, b.getLastPassedCorner().getSeqID(), 0, 0, 0, 0);
+            BoatSubMessage m = new BoatSubMessage(b.getSourceID(), boatStatus, b.getLastPassedCorner().getSeqID(), 0, 0, b.getEstimatedTimeTillFinish(), b.getEstimatedTimeTillFinish());
             boatSubMessages.add(m);
         }
 
