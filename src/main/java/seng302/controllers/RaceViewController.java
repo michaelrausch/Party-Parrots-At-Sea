@@ -309,7 +309,7 @@ public class RaceViewController extends Thread{
 //        }
 
         for (Yacht boat : StreamParser.getBoatsPos().values()) {
-            System.out.println(boat.getBoatStatus());
+//            System.out.println(boat.getBoatStatus());
             if (boat.getBoatStatus() == 3) {  // 3 is finish status
                 positionVbox.getChildren().add(new Text(boat.getPosition() + ". " +
                         boat.getShortName() + " (Finished)"));

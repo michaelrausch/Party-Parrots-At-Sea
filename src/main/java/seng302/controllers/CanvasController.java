@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import seng302.models.*;
 import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
+import seng302.models.parsers.StreamReceiver;
 import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.XMLParser;
 import seng302.models.parsers.XMLParser.RaceXMLObject.CompoundMark;
@@ -129,13 +130,11 @@ public class CanvasController {
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
                 elapsedNanos = 1000 / 60;
                 updateRaceObjects();
-
+                if (StreamParser.isRaceFinished()) {
+                    this.stop();
+                }
             }
         };
-        for (Mark m : raceViewController.getRace().getCourse()) {
-            //System.out.println(m.getName());
-        }
-        //timer.start();
     }
 
 
