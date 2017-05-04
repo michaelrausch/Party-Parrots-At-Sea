@@ -24,6 +24,9 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Controller implements Initializable {
     @FXML
@@ -65,7 +68,9 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        //DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        //format.setTimeZone(TimeZone.getTimeZone("GMT-8"));
+        //realTime.setText(format.format(new Date()));
     }
 
     /**
