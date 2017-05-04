@@ -1,5 +1,6 @@
 package seng302.controllers;
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -44,11 +45,11 @@ public class RaceViewController extends Thread{
     @FXML
     private CanvasController includedCanvasController;
 
-    private ArrayList<Boat> startingBoats = new ArrayList<>();
+    private ArrayList<Yacht> startingBoats = new ArrayList<>();
     private boolean displayFps;
     private Timeline timerTimeline;
-    private Map<Boat, TimelineInfo> timelineInfos = new HashMap<>();
-    private ArrayList<Boat> boatOrder = new ArrayList<>();
+    private Map<Yacht, TimelineInfo> timelineInfos = new HashMap<>();
+    private ArrayList<Yacht> boatOrder = new ArrayList<>();
     private Race race;
     private Stage stage;
 
@@ -57,7 +58,7 @@ public class RaceViewController extends Thread{
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
-        for (Boat boat : race.getBoats()) {
+        for (Yacht boat : race.getBoats()) {
             startingBoats.add(boat);
         }
 //        try{
@@ -72,6 +73,7 @@ public class RaceViewController extends Thread{
         initializeTimer();
         initializeSettings();
         initialiseWindDirection();
+        initialisePositionVBox();
         //set wind direction!!!!!!! can't find another place to put my code --haoming
 //        double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
 //        windDirectionText.setText(String.format("%.1f°", windDirection));
@@ -160,12 +162,26 @@ public class RaceViewController extends Thread{
         windDirTimeline.playFromStart();
     }
 
+    private void initialisePositionVBox() {
+
+        Timeline posVBoxTimeline = new Timeline();
+        posVBoxTimeline.setCycleCount(Timeline.INDEFINITE);
+        posVBoxTimeline.getKeyFrames().add(
+                new KeyFrame(Duration.seconds(1),
+                        event -> {
+                            showOrder();
+                        })
+        );
+        posVBoxTimeline.playFromStart();
+
+    }
+
     /**
      * Generates time line for each boat, and stores time time into timelineInfos hash map
      */
     private void initializeTimelines() {
-        HashMap<Boat, List> boat_events = race.getEvents();
-        for (Boat boat : boat_events.keySet()) {
+        HashMap<Yacht, List> boat_events = race.getEvents();
+        for (Yacht boat : boat_events.keySet()) {
             startingBoats.add(boat);
 //            // x, y are the real time coordinates
 //            DoubleProperty x = new SimpleDoubleProperty();
@@ -271,13 +287,13 @@ public class RaceViewController extends Thread{
     }
 
     public void handleEvent(Event event) {
-        Boat boat = event.getBoat();
+        Yacht boat = event.getBoat();
         boatOrder.remove(boat);
         boat.setMarkLastPast(event.getMarkPosInRace());
         boatOrder.add(boat);
-        boatOrder.sort(new Comparator<Boat>() {
+        boatOrder.sort(new Comparator<Yacht>() {
             @Override
-            public int compare(Boat b1, Boat b2) {
+            public int compare(Yacht b1, Yacht b2) {
                 return b2.getMarkLastPast() - b1.getMarkLastPast();
             }
         });
@@ -288,8 +304,20 @@ public class RaceViewController extends Thread{
         positionVbox.getChildren().clear();
         positionVbox.getChildren().removeAll();
 
-        for (Boat boat : boatOrder) {
-            positionVbox.getChildren().add(new Text(boat.getShortName() + " " + boat.getSpeedInKnots() + " Knots"));
+//        for (Boat boat : boatOrder) {
+//            positionVbox.getChildren().add(new Text(boat.getShortName() + " " + boat.getSpeedInKnots() + " Knots"));
+//        }
+
+        for (Yacht boat : StreamParser.getBoatsPos().values()) {
+            System.out.println(boat.getBoatStatus());
+            if (boat.getBoatStatus() == 3) {  // 3 is finish status
+                positionVbox.getChildren().add(new Text(boat.getPosition() + ". " +
+                        boat.getShortName() + " (Finished)"));
+            } else {
+                positionVbox.getChildren().add(new Text(boat.getPosition() + ". " +
+                        boat.getShortName() + " "));
+            }
+
         }
     }
 
@@ -341,11 +369,11 @@ public class RaceViewController extends Thread{
         return race;
     }
 
-    public Map<Boat, TimelineInfo> getTimelineInfos() {
+    public Map<Yacht, TimelineInfo> getTimelineInfos() {
         return timelineInfos;
     }
 
-    public ArrayList<Boat> getStartingBoats(){
+    public ArrayList<Yacht> getStartingBoats(){
         return startingBoats;
     }
 

@@ -1,5 +1,7 @@
 package seng302.models;
 
+import javafx.scene.paint.Color;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -10,6 +12,10 @@ import java.text.SimpleDateFormat;
  *  also done outside Boat class because some old variables are not used anymore.
  */
 public class Yacht {
+    private Color colour;
+    private double velocity;
+    private Integer markLastPast;
+
     private String boatType;
     private Integer sourceID;
     private String hullID; //matches HullNum in the XML spec.
@@ -24,6 +30,29 @@ public class Yacht {
     private Long estimateTimeAtNextMark;
     private Long estimateTimeAtFinish;
     private String position;
+
+    /**
+     * Used in EventTest and RaceTest.
+     *
+     * @param boatName Create a yacht object with name.
+     */
+    public Yacht (String boatName) {
+        this.boatName = boatName;
+    }
+
+    /**
+     * Used in BoatGroupTest.
+     *
+     * @param boatName     The name of the team sailing the boat
+     * @param boatVelocity The speed of the boat in meters/second
+     * @param shortName    A shorter version of the teams name
+     */
+    public Yacht(String boatName, double boatVelocity, String shortName, int id) {
+        this.boatName = boatName;
+        this.velocity = boatVelocity;
+        this.shortName = shortName;
+        this.sourceID = id;
+    }
 
     public Yacht(String boatType, Integer sourceID, String hullID, String shortName, String boatName, String country) {
         this.boatType = boatType;
@@ -110,5 +139,29 @@ public class Yacht {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public Color getColour() {
+        return colour;
+    }
+
+    public void setColour(Color colour) {
+        this.colour = colour;
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(double velocity) {
+        this.velocity = velocity;
+    }
+
+    public Integer getMarkLastPast() {
+        return markLastPast;
+    }
+
+    public void setMarkLastPast(Integer markLastPast) {
+        this.markLastPast = markLastPast;
     }
 }

@@ -1,15 +1,15 @@
 package seng302.controllers;
 
-import seng302.models.Boat;
 import seng302.models.Race;
+import seng302.models.Yacht;
 import seng302.models.parsers.ConfigParser;
 import seng302.models.parsers.CourseParser;
 import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.TeamsParser;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -41,23 +41,24 @@ public class RaceController {
         Race race = new Race();
 //        StreamParser.xmlObject
         // Read team names from file
-        TeamsParser tp = new TeamsParser(teamsConfigFile);
+//        TeamsParser tp = new TeamsParser(teamsConfigFile);
 
         // Read course from file
-        ConfigParser config = new ConfigParser(configFile);
+//        ConfigParser config = new ConfigParser(configFile);
 
         ArrayList<String> boatNames = new ArrayList<>();
-        ArrayList<Boat> teams = tp.getBoats();
+//        ArrayList<Boat> teams = tp.getBoats();
+        Map<Long, Yacht> teams = StreamParser.getBoatsPos();
 
         //get race size
         int numberOfBoats = teams.size();
 
         //get time scale
-        double timeScale = config.getTimeScale();
-        race.setTimeScale(timeScale);
+//        double timeScale = config.getTimeScale();
+//        race.setTimeScale(timeScale);
 
-        for (Boat boat : teams) {
-            boatNames.add(boat.getTeamName());
+        for (Yacht boat : teams.values()) {
+            boatNames.add(boat.getBoatName());
             race.addBoat(boat);
         }
 

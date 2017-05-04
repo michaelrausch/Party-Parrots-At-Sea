@@ -120,6 +120,6 @@ public class Boat {
 	}
 
 	public long getEstimatedTimeTillFinish(){
-		return (long) (getSpeed()) + System.currentTimeMillis();
+		return (long) (-getSpeed()) + System.currentTimeMillis();
 	}
 }

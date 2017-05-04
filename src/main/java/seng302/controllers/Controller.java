@@ -65,9 +65,7 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        realTime.setText(format.format(System.currentTimeMillis()));
+
     }
 
     /**
@@ -144,14 +142,14 @@ public class Controller implements Initializable {
         posCol.setCellValueFactory(
                 new PropertyValueFactory<>("position")
         );
-        if (StreamParser.isRaceStarted()) {
-            data.addAll(StreamParser.getBoatsPos().values());
-        } else {
-            for (Yacht boat : StreamParser.getBoats().values()) {
-                boat.setPosition("-");
-                data.add(boat);
-            }
-        }
+//        if (StreamParser.isRaceStarted()) {
+        data.addAll(StreamParser.getBoatsPos().values());
+//        } else {
+//            for (Yacht boat : StreamParser.getBoats().values()) {
+//                boat.setPosition("-");
+//                data.add(boat);
+//            }
+//        }
         teamList.refresh();
 
 //        posCol.setSortType(TableColumn.SortType.ASCENDING);

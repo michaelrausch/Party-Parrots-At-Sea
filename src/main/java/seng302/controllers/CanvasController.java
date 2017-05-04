@@ -14,10 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import seng302.models.Boat;
-import seng302.models.BoatGroup;
-import seng302.models.Colors;
-import seng302.models.RaceObject;
+import seng302.models.*;
 import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.packets.BoatPositionPacket;
@@ -326,13 +323,16 @@ public class CanvasController {
      */
     private void drawBoats() {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
-        List<Boat> boats  = raceViewController.getStartingBoats();
+//        List<Boat> boats  = raceViewController.getStartingBoats();
+        Map<Integer, Yacht> boats = StreamParser.getBoats();
         Double startingX  = raceObjects.get(0).getLayoutX();
         Double startingY  = raceObjects.get(0).getLayoutY();
         Group boatAnnotations = new Group();
 
-        for (Boat boat : boats) {
-            BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
+        for (Yacht boat : boats.values()) {
+//        for (Boat boat : boats) {
+            boat.setColour(Colors.getColor());
+            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
             boatGroup.moveTo(startingX, startingY, 0d);
             //boatGroup.setStage(raceViewController.getStage());
             raceObjects.add(boatGroup);

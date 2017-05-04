@@ -33,7 +33,7 @@ public class BoatGroup extends RaceObject{
     private int wakeGenerationDelay = 10;
     private double distanceTravelled;
     //Graphical objects
-    private Boat boat;
+    private Yacht boat;
     private Group lineGroup = new Group();
     private Polygon boatPoly;
     private Text teamNameObject;
@@ -54,7 +54,7 @@ public class BoatGroup extends RaceObject{
      *             BoatGroup to update.
      * @param color The colour of the boat polygon and the trailing line.
      */
-    public BoatGroup (Boat boat, Color color){
+    public BoatGroup (Yacht boat, Color color){
         this.boat = boat;
         initChildren(color);
     }
@@ -66,7 +66,7 @@ public class BoatGroup extends RaceObject{
      * @param color The colour of the boat polygon and the trailing line.
      * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat polygon.
      */
-    public BoatGroup (Boat boat, Color color, double... points)
+    public BoatGroup (Yacht boat, Color color, double... points)
     {
         this.boat = boat;
         initChildren(color, points);
@@ -295,7 +295,7 @@ public class BoatGroup extends RaceObject{
         wake.setVisible(visible);
     }
 
-    public Boat getBoat() {
+    public Yacht getBoat() {
         return boat;
     }
 
@@ -307,7 +307,7 @@ public class BoatGroup extends RaceObject{
      */
     public boolean hasRaceId (int... raceIds) {
         for (int id : raceIds) {
-            if (id == boat.getId())
+            if (id == boat.getSourceID())
                 return true;
         }
         return false;
@@ -319,7 +319,7 @@ public class BoatGroup extends RaceObject{
      * @return An array containing all ID's associated with this RaceObject.
      */
     public int[] getRaceIds () {
-        return new int[] {boat.getId()};
+        return new int[] {boat.getSourceID()};
     }
 
     /**

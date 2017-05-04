@@ -1,8 +1,8 @@
 package seng302;
 
 import org.junit.Test;
-import seng302.models.Boat;
 import seng302.models.Race;
+import seng302.models.Yacht;
 
 import java.lang.reflect.Array;
 
@@ -17,8 +17,8 @@ public class RaceTest {
      */
     @Test
     public void testAddingBoatsToRace() {
-        Boat boat1 = new Boat("Team 1");
-        Boat boat2 = new Boat("Team 2");
+        Yacht boat1 = new Yacht("Team 1");
+        Yacht boat2 = new Yacht("Team 2");
 
         Race race = new Race();
         race.addBoat(boat1);
@@ -29,8 +29,8 @@ public class RaceTest {
 
     @Test
     public void testGetShuffledBoats(){
-        Boat boat1 = new Boat("Team 1");
-        Boat boat2 = new Boat("Team 2");
+        Yacht boat1 = new Yacht("Team 1");
+        Yacht boat2 = new Yacht("Team 2");
 
         Race race = new Race();
         race.addBoat(boat1);
