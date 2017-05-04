@@ -1,7 +1,6 @@
 package seng302;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,8 +19,9 @@ public class App extends Application
         primaryStage.setMaximized(true);
 
         primaryStage.show();
+
         primaryStage.setOnCloseRequest(e -> {
-            Platform.exit();
+            System.exit(0);
         });
 
     }
