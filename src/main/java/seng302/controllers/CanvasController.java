@@ -11,6 +11,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import seng302.models.Boat;
@@ -151,9 +152,10 @@ public class CanvasController {
     private void addRaceBorder() {
         XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
         ArrayList<Limit> courseLimits = raceXMLObject.getCourseLimit();
-        gc.setStroke(Color.DARKRED);
+        gc.setStroke(Color.DARKBLUE);
         gc.setLineWidth(3);
-
+        double[] xBoundaryPoints = new double[courseLimits.size()];
+        double[] yBoundaryPoints = new double[courseLimits.size()];
         for (int i = 0; i < courseLimits.size() - 1; i++) {
             Limit thisPoint1 = courseLimits.get(i);
             SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
@@ -163,18 +165,21 @@ public class CanvasController {
             Point2D borderPoint2 = findScaledXY(thisMark2);
             gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
                     borderPoint2.getX(), borderPoint2.getY());
-
+            xBoundaryPoints[i] = borderPoint1.getX();
+            yBoundaryPoints[i] = borderPoint1.getY();
         }
-
         Limit thisPoint1 = courseLimits.get(courseLimits.size()-1);
         SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
         Limit thisPoint2 = courseLimits.get(0);
         SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
         Point2D borderPoint1 = findScaledXY(thisMark1);
         Point2D borderPoint2 = findScaledXY(thisMark2);
-
         gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
                 borderPoint2.getX(), borderPoint2.getY());
+        xBoundaryPoints[courseLimits.size()-1] = borderPoint1.getX();
+        yBoundaryPoints[courseLimits.size()-1] = borderPoint1.getY();
+        gc.setFill(Color.LIGHTBLUE);
+        gc.fillPolygon(xBoundaryPoints,yBoundaryPoints,yBoundaryPoints.length);
     }
 
 

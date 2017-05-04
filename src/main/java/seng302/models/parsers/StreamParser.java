@@ -32,7 +32,7 @@ public class StreamParser extends Thread{
      private String threadName;
      private Thread t;
      private static boolean raceStarted = false;
-     public static XMLParser xmlObject;
+     private static XMLParser xmlObject;
      private static boolean raceFinished = false;
      private static boolean streamStatus = false;
      private static long timeSinceStart = -1;
@@ -40,6 +40,7 @@ public class StreamParser extends Thread{
      private static Map<Long, Yacht> boatsPos = new TreeMap<>();
      private static double windDirection = 0;
      private static String currentTimeString;
+     private static boolean appRunning;
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
@@ -56,6 +57,7 @@ public class StreamParser extends Thread{
      *
      */
     public void run(){
+        appRunning = true;
          try {
              System.out.println("[CLIENT] Start of stream");
              streamStatus = true;
@@ -63,7 +65,7 @@ public class StreamParser extends Thread{
              while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
                  Thread.sleep(1);
              }
-             while (true){
+             while (appRunning){
                  StreamPacket packet = StreamReceiver.packetBuffer.peek();
                  //this code adds a delay to reading from the packetBuffer so
                  //out of order packets have time to order themselves in the queue
@@ -105,7 +107,7 @@ public class StreamParser extends Thread{
      * Looks at the type of the packet then sends it to the appropriate parser to extract the
      * specific data associated with that packet type
      *
-     * @param packet the packet to be looked at
+     * @param packet the packet to be looked at and processed
      */
      private static void parsePacket(StreamPacket packet) {
          try{
@@ -370,6 +372,7 @@ public class StreamParser extends Thread{
         //type 1 is a racing yacht and type 3 is a mark, needed for updating positions of the mark and boat
         if (deviceType == 1 || deviceType == 3){
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
+
             //add a new priority que to the boatPositions HashMap
             if (!boatPositions.containsKey(boatId)){
                 boatPositions.put(boatId, new PriorityBlockingQueue<BoatPositionPacket>(256, new Comparator<BoatPositionPacket>() {
@@ -379,6 +382,7 @@ public class StreamParser extends Thread{
                     }
                 }));
             }
+            //Adding the boatPacket to the priority que
             boatPositions.get(boatId).put(boatPacket);
         }
     }
@@ -542,6 +546,11 @@ public class StreamParser extends Thread{
      */
     public static Map<Long, Yacht> getBoatsPos() {
         return boatsPos;
+    }
+
+    public static void appClose(){
+        appRunning = false;
+        System.out.println("[CLIENT] Shutting down stream parser");
     }
 }
 

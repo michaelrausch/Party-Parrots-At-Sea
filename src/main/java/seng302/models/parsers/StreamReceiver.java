@@ -21,6 +21,7 @@ public class StreamReceiver extends Thread {
     private Thread t;
     private String threadName;
     public static PriorityBlockingQueue<StreamPacket> packetBuffer;
+    private static boolean moreBytes;
 
     public StreamReceiver(String hostAddress, int hostPort, String threadName) {
         this.threadName = threadName;
@@ -69,7 +70,7 @@ public class StreamReceiver extends Thread {
 
         int sync1;
         int sync2;
-        boolean moreBytes = true;
+        moreBytes = true;
         while(moreBytes) {
             try {
                 crcBuffer = new ByteArrayOutputStream();
@@ -121,7 +122,6 @@ public class StreamReceiver extends Thread {
         return bytes;
     }
 
-
     private void skipBytes(long n) throws Exception{
         for (int i=0; i < n; i++){
             readByte();
@@ -147,12 +147,16 @@ public class StreamReceiver extends Thread {
         return partialLong;
     }
 
-
     public static void main(String[] args) {
 
         StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");
         //StreamReceiver sr = new StreamReceiver("livedata.americascup.com", 4941, "TestThread2");
         sr.start();
 
+    }
+
+    public static void noMoreBytes(){
+        moreBytes = false;
+        System.out.println("[CLIENT] Shutting down stream receiver");
     }
 }
