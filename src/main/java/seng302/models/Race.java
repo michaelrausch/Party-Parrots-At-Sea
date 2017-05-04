@@ -10,9 +10,9 @@ import java.util.*;
  */
 public class Race {
 
-    private ArrayList<Boat> boats; // The boats in the race
-    private ArrayList<Boat> finishingOrder; // The order in which the boats finish the race
-    private HashMap<Boat, List> events = new HashMap<>(); // The events that occur in the race
+    private ArrayList<Yacht> boats; // The boats in the race
+    private ArrayList<Yacht> finishingOrder; // The order in which the boats finish the race
+    private HashMap<Yacht, List> events = new HashMap<>(); // The events that occur in the race
     private List<Mark> course; // Marks in the race
     private long startTime = 0;
     private double timeScale = 1;
@@ -33,7 +33,7 @@ public class Race {
      *
      * @param boat, the boat to add
      */
-    public void addBoat(Boat boat) {
+    public void addBoat(Yacht boat) {
         boats.add(boat);
     }
 
@@ -42,12 +42,12 @@ public class Race {
      *
      * @return a list of boats
      */
-    public Boat[] getShuffledBoats() {
+    public Yacht[] getShuffledBoats() {
         // Shuffle the list of boats
         long seed = System.nanoTime();
         Collections.shuffle(this.boats, new Random(seed));
 
-        return boats.toArray(new Boat[boats.size()]);
+        return boats.toArray(new Yacht[boats.size()]);
     }
 
     /**
@@ -56,8 +56,8 @@ public class Race {
      *
      * @return a list of boats
      */
-    public Boat[] getFinishedBoats() {
-        return this.finishingOrder.toArray(new Boat[this.finishingOrder.size()]);
+    public Yacht[] getFinishedBoats() {
+        return this.finishingOrder.toArray(new Yacht[this.finishingOrder.size()]);
     }
 
 
@@ -66,8 +66,8 @@ public class Race {
      *
      * @return a list of the boats competing in the race
      */
-    public Boat[] getBoats() {
-        return boats.toArray(new Boat[boats.size()]);
+    public Yacht[] getBoats() {
+        return boats.toArray(new Yacht[boats.size()]);
     }
 
     /**
@@ -84,7 +84,7 @@ public class Race {
      */
     private void generateEvents() {
 
-        for (Boat boat : this.boats) {
+        for (Yacht boat : this.boats) {
             double totalDistance = 0;
             int numberOfMarks = this.course.size();
 
@@ -146,7 +146,7 @@ public class Race {
      * Get a map of the events in the race
      * @return
      */
-    public HashMap<Boat, List> getEvents() {
+    public HashMap<Yacht, List> getEvents() {
         return events;
     }
 
@@ -154,7 +154,7 @@ public class Race {
      * Set a boat as finished
      * @param boat The boat that has finished the race/home/cosc/student/wmu16
      */
-    public void setBoatFinished(Boat boat){
+    public void setBoatFinished(Yacht boat){
         this.finishingOrder.add(boat);
     }
 

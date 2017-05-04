@@ -231,10 +231,16 @@ public class StreamParser extends Thread{
 //            boatStatus += "\nEstTimeAtFinish: " + bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
 //            boatStatuses.add(boatStatus);
         }
-        int pos = 1;
-        for (Yacht yacht : boatsPos.values()) {
-            yacht.setPosition(String.valueOf(pos));
-            pos++;
+        if (isRaceStarted()) {
+            int pos = 1;
+            for (Yacht yacht : boatsPos.values()) {
+                yacht.setPosition(String.valueOf(pos));
+                pos++;
+            }
+        } else {
+            for (Yacht yacht : boatsPos.values()) {
+                yacht.setPosition("-");
+            }
         }
     }
 

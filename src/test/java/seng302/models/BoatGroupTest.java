@@ -16,7 +16,7 @@ public class BoatGroupTest {
     BoatGroup boatGroup;
     @Before
     public void setUp () {
-        Boat b = new Boat("TEST", 0.0, "T" ,0);
+        Yacht b = new Yacht("TEST", 0.0, "T" ,0);
         boatGroup = new BoatGroup(b, Color.BLACK);
     }
 
