@@ -54,14 +54,15 @@ class Wake extends Group {
     void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocity) {
         sum -= Math.abs(velocities[(velocityIndices[0] + 10) % 13]);
         sum += Math.abs(rotationalVelocity);
-//        System.out.println("sum = " + sum);
         max = Math.max(max, rotationalVelocity);
-//        System.out.println("max = " + max);
         if (sum < (max / 3))
             rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
                                    //This stops the wake from eventually becoming out of sync with the boat.
-        if (Math.abs(rotationalVelocity) > 0.5) {
+        //This accounts for rogue rotations that are greater than what would be realistic. Value is kinda rough.
+        //Basically just for our internal mock.
+        if (Math.abs(rotationalVelocity) > 0.05) {
             rotationalVelocity = 0;
+            rotate(rotationGoal);
         }
         //Update the index of the array of recent velocities that each wake uses. Each wake is 3 velocities behind the
         //next smallest wake.

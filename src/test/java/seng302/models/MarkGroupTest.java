@@ -51,14 +51,71 @@ public class MarkGroupTest {
     }
 
     @Test
-    public void correctMovementCorrectId () {
+    public void correctMovementCorrectIdSingle () {
         double originalX = singleMG.getChildren().get(0).getLayoutX();
         double originalY = singleMG.getChildren().get(0).getLayoutY();
-        long timeinterval = 100/60;
+        long timeinterval = 1000/60;
         double expectedChange = 10 / 200 * timeinterval;
         singleMG.setDestination(originalX + 10, originalY + 10, 0, 0);
         singleMG.updatePosition(timeinterval);
-        Assert.assertTrue(originalX == singleMG.getChildren().get(0).getLayoutX());
-        Assert.assertTrue(originalY == singleMG.getChildren().get(0).getLayoutY());
+        Assert.assertTrue(originalX + expectedChange == singleMG.getChildren().get(0).getLayoutX());
+        Assert.assertTrue(originalY + expectedChange == singleMG.getChildren().get(0).getLayoutY());
+    }
+
+    @Test
+    public void correctMovementCorrectIDGate () {
+        double originalX1 = gateMG.getChildren().get(0).getLayoutX();
+        double originalY1 = gateMG.getChildren().get(0).getLayoutY();
+        double originalX2 = gateMG.getChildren().get(1).getLayoutX();
+        double originalY2 = gateMG.getChildren().get(1).getLayoutY();
+        long timeinterval = 1000/60;
+        double expectedChange = 10 / 200 * timeinterval;
+        gateMG.setDestination(originalX1 + 10, originalY1 + 10, 0, 1);
+        gateMG.setDestination(originalX2 + 10, originalY2 + 10, 0, 2);
+        gateMG.updatePosition(timeinterval);
+        Assert.assertTrue(originalX1 + expectedChange == gateMG.getChildren().get(0).getLayoutX());
+        Assert.assertTrue(originalY1 + expectedChange == gateMG.getChildren().get(0).getLayoutY());
+        Assert.assertTrue(originalX2 + expectedChange == gateMG.getChildren().get(1).getLayoutX());
+        Assert.assertTrue(originalY2 + expectedChange == gateMG.getChildren().get(1).getLayoutY());
+    }
+
+    @Test
+    public void correctMovementCorrectIDGateBothIDS () {
+        double originalX1 = gateMG.getChildren().get(0).getLayoutX();
+        double originalY1 = gateMG.getChildren().get(0).getLayoutY();
+        double originalX2 = gateMG.getChildren().get(1).getLayoutX();
+        double originalY2 = gateMG.getChildren().get(1).getLayoutY();
+        long timeinterval = 1000/60;
+        double expectedChange = 10 / 200 * timeinterval;
+        gateMG.setDestination(originalX1 + 10, originalY1 + 10, 0, 1, 2);
+        gateMG.updatePosition(timeinterval);
+        Assert.assertTrue(originalX1 + expectedChange == gateMG.getChildren().get(0).getLayoutX());
+        Assert.assertTrue(originalY1 + expectedChange == gateMG.getChildren().get(0).getLayoutY());
+        Assert.assertTrue(originalX2 + expectedChange == gateMG.getChildren().get(1).getLayoutX());
+        Assert.assertTrue(originalY2 + expectedChange == gateMG.getChildren().get(1).getLayoutY());
+    }
+
+//    @Test
+//    public void correctMovementOneCorrectIDGateBothIDS () {
+//        double originalX1 = gateMG.getChildren().get(0).getLayoutX();
+//        double originalY1 = gateMG.getChildren().get(0).getLayoutY();
+//        double originalX2 = gateMG.getChildren().get(1).getLayoutX();
+//        double originalY2 = gateMG.getChildren().get(1).getLayoutY();
+//        long timeinterval = 1000/60;
+//        double expectedChange = 10 / 200 * timeinterval;
+//        gateMG.setDestination(originalX1 + 10, originalY1 + 10, 0, 1, 3);
+//        gateMG.updatePosition(timeinterval);
+//        System.out.println("gateMG.getChildren().get(1).getLayoutX() = " + gateMG.getChildren().get(1).getLayoutX());
+//        System.out.println("gateMG.getChildren().get(0).getLayoutX() = " + gateMG.getChildren().get(0).getLayoutX());
+//        Assert.assertTrue(originalX1 + expectedChange == gateMG.getChildren().get(0).getLayoutX());
+//        Assert.assertTrue(originalY1 + expectedChange == gateMG.getChildren().get(0).getLayoutY());
+//        Assert.assertTrue(originalX2 + expectedChange != gateMG.getChildren().get(1).getLayoutX());
+//        Assert.assertTrue(originalY2 + expectedChange != gateMG.getChildren().get(1).getLayoutY());
+//    }
+
+
+    @Test
+    public void lineUpdatesCorrectly () {
+
     }
 }

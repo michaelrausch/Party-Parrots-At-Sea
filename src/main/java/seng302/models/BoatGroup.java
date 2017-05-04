@@ -214,18 +214,19 @@ public class BoatGroup extends RaceObject{
                 pixelVelocityY = dy / expectedUpdateInterval;
                 rotationalGoal = rotation;
                 calculateRotationalVelocity();
+
                 if (wakeGenerationDelay > 0) {
                     wake.rotate(rotationalGoal);
                     rotateTo(rotationalGoal); //Need to test with this removed.
                     rotationalVelocity = 0;
                     wakeGenerationDelay--;
                 } else {
-                    wake.setRotationalVelocity(rotationalVelocity, currentRotation, boat.getVelocity());
+                    wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, boat.getVelocity());
                 }
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
             } else {
                 setToInitialLocation = true;
-                rotationalGoal = rotation;;
+                rotationalGoal = rotation;
                 moveTo(newXValue, newYValue, rotation);
             }
         }
