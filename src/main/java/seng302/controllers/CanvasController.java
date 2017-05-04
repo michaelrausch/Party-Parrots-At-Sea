@@ -44,8 +44,8 @@ public class CanvasController {
 
     private final int MARK_SIZE     = 10;
     private final int BUFFER_SIZE   = 50;
-    private final int CANVAS_WIDTH  = 1000;
-    private final int CANVAS_HEIGHT = 1000;
+    private final int CANVAS_WIDTH  = 720;
+    private final int CANVAS_HEIGHT = 720;
     private final int LHS_BUFFER    = BUFFER_SIZE;
     private final int RHS_BUFFER    = BUFFER_SIZE + MARK_SIZE / 2;
     private final int TOP_BUFFER    = BUFFER_SIZE;
