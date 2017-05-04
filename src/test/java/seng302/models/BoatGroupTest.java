@@ -1,17 +1,7 @@
 package seng302.models;
-import seng302.*;
-import javafx.scene.paint.*;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-/**
+/*
  * Created by cir27 on 4/05/17.
- */
+
 public class BoatGroupTest {
     BoatGroup boatGroup;
     @Before
@@ -96,3 +86,4 @@ public class BoatGroupTest {
         Assert.assertTrue(originalY == bp.getLayoutY());
     }
 }
+ */
