@@ -1,5 +1,6 @@
 package seng302.models;
 
+import seng302.*;
 import javafx.geometry.Point2D;
 import org.junit.Assert;
 import org.junit.Before;

@@ -1,5 +1,5 @@
 package seng302.models;
-
+import seng302.*;
 import javafx.scene.paint.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
