@@ -165,6 +165,22 @@ public class StreamParser extends Thread{
         long heartbeat = bytesToLong(packet.getPayload());
     }
 
+    private static String getTimeZoneString() {
+
+        Integer offset = xmlObject.getRegattaXML().getUtcOffset();
+        StringBuilder utcOffset = new StringBuilder();
+        utcOffset.append("GMT");
+        if (offset > 0) {
+            utcOffset.append("+");
+            utcOffset.append(offset);
+        } else if (offset < 0) {
+            utcOffset.append("-");
+            utcOffset.append(offset);
+        }
+        return utcOffset.toString();
+
+    }
+
     /**
      * Extracts the useful race status data from race status type packets. This method will also print to the
      * console the current state of the race (if it has started/finished or is about to start), along side
@@ -180,10 +196,15 @@ public class StreamParser extends Thread{
         int raceStatus = payload[11];
 //        System.out.println("raceStatus = " + raceStatus);
         long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
+
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        if (xmlObject.getRegattaXML() != null) {
+            format.setTimeZone(TimeZone.getTimeZone(getTimeZoneString()));
+            currentTimeString = format.format((new Date (currentTime)).getTime());
+        }
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
-        currentTimeString = format.format((new Date (currentTime)).getTime());
+
+
         if (timeTillStart > 0) {
             timeSinceStart = timeTillStart;
             //System.out.println("Time till start: " + timeTillStart + " Seconds");
