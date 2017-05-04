@@ -202,39 +202,21 @@ public class BoatGroup extends RaceObject{
                 if (currentRotation < 0)
                     currentRotation = 360 - currentRotation;
                 double dx = newXValue - boatPoly.getLayoutX();
-//                if ((dx > 0 && pixelVelocityX < 0) || (dx < 0 && pixelVelocityX > 0)) {
-//                    pixelVelocityX = 0;
-//                } else {
-                    pixelVelocityX = dx / expectedUpdateInterval;
-//                }
                 double dy = newYValue - boatPoly.getLayoutY();
                 //Check movement is reasonable. Assumes a 1000 * 1000 canvas
                 if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
-//                System.out.println("dx = " + dx);
-//                System.out.println("dy = " + dy);
                     dx = 0;
                     dy = 0;
                     moveTo(newXValue, newYValue);
                 }
-                //Slight delay on changing X/Y direction that could help jitter. Disabled since there was an issue with
-                //packets that might be causing it.
-//            if ((dx > 0 && pixelVelocityX < 0) || (dx < 0 && pixelVelocityX > 0)) {
-//                pixelVelocityX = 0;
-//            } else {
-//                pixelVelocityX = dx / expectedUpdateInterval;
-//            }
-//            if ((dy > 0 && pixelVelocityY < 0) || (dy < 0 && pixelVelocityY > 0)) {
-//                pixelVelocityY = 0;
-//            } else {
-//                pixelVelocityY = dy / expectedUpdateInterval;
-//            }
+
                 pixelVelocityX = dx / expectedUpdateInterval;
                 pixelVelocityY = dy / expectedUpdateInterval;
                 rotationalGoal = rotation;
                 calculateRotationalVelocity();
                 if (wakeGenerationDelay > 0) {
                     wake.rotate(rotationalGoal);
-                    rotateTo(rotationalGoal);
+                    rotateTo(rotationalGoal); //Need to test with this removed.
                     rotationalVelocity = 0;
                     wakeGenerationDelay--;
                 } else {
@@ -243,7 +225,7 @@ public class BoatGroup extends RaceObject{
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
             } else {
                 setToInitialLocation = true;
-                rotationalGoal = rotation;
+                rotationalGoal = rotation;;
                 moveTo(newXValue, newYValue, rotation);
             }
         }
@@ -288,8 +270,7 @@ public class BoatGroup extends RaceObject{
 
     public void rotateTo (double rotation) {
         currentRotation = rotation;
-        boatPoly.getTransforms().clear();
-        boatPoly.getTransforms().add(new Rotate(rotation));
+        boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
     public void forceRotation () {
@@ -361,6 +342,9 @@ public class BoatGroup extends RaceObject{
      * @param stage The stage that the BoatGroup is added to.
      */
     public void setStage (Stage stage) {
+        /* TODO: 4/05/17 cir27 - Find a way to get the stage to this point. Need to pass it through multiple controllers.
+                                 App.start() -> Controller.setContentPane -> RaceViewController -> CanvasController
+         */
         this.stage = stage;
         this.stage.iconifiedProperty().addListener(e -> {
             isMaximized = !stage.isIconified();

@@ -22,6 +22,10 @@ public class Boat {
     private String shortName;
     private int id;
 
+    /**
+     * For testing only.
+     * @param teamName Boat team name.
+     */
     public Boat(String teamName) {
         this.teamName = teamName;
         this.velocity = 10; // Default velocity

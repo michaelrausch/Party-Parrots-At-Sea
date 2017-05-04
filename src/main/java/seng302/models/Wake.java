@@ -60,9 +60,9 @@ class Wake extends Group {
         if (sum < (max / 3))
             rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
                                    //This stops the wake from eventually becoming out of sync with the boat.
-//        if (Math.abs(rotationalVelocity) > 0.5) {
-//            rotationalVelocity = 0;
-//        }
+        if (Math.abs(rotationalVelocity) > 0.5) {
+            rotationalVelocity = 0;
+        }
         //Update the index of the array of recent velocities that each wake uses. Each wake is 3 velocities behind the
         //next smallest wake.
         velocityIndices[0] = (13 + (velocityIndices[0] - 1) % 13) % 13;
