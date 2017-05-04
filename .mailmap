@@ -16,10 +16,12 @@
 # https://www.kernel.org/pub/software/scm/git/docs/git-shortlog.html
 # http://stacktoheap.com/blog/2013/01/06/using-mailmap-to-fix-authors-list-in-git/
 
-Michael Rausch <mra106@uclive.ac.nz> <me@michaelrausch.nz> <michael@michaelrausch.net>
+Michael Rausch <mra106@uclive.ac.nz> <me@michaelrausch.nz>
+Michael Rausch <mra106@uclive.ac.nz> <michael@michaelrausch.net>
 Kusal Ekanayake <kre39@uclive.ac.nz> kre39 <kre39@uclive.ac.nz>
 Haoming Yin <hyi25@uclive.ac.nz> <haoming.y@icloud.com>
 Peter Galloway <ptg19@uclive.ac.nz> Peter <ptg19@uclive.ac.nz>
 Zhi You Tan <zyt10@uclive.ac.nz> zyt10 <zyt10@uclive.ac.nz>
-
-
+Zhi You Tan <zyt10@uclive.ac.nz> Ryan Tan <ryan_zhiyou@hotmail.com>
+Alistair McIntyre <ajm412@uclive.ac.nz> alistairjmcintyre <alistairjmcintyre@gmail.com>
+Calum <cir27@uclive.ac.nz> cir27 <cir27@uclive.ac.nz>
