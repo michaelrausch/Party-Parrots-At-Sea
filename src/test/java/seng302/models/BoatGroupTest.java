@@ -1,3 +1,10 @@
+// TODO: 4/05/17 cir27 - Find out why this test is causing build failures
+
+//package seng302.models;
+//
+//public class BoatGroupTest {
+//
+//}
 package seng302.models;
 import seng302.*;
 import javafx.scene.paint.*;
@@ -16,7 +23,7 @@ public class BoatGroupTest {
     BoatGroup boatGroup;
     @Before
     public void setUp () {
-        Boat b = new Boat("TEST", 0.0, "T" ,0);
+        Yacht b = new Yacht("TEST", 0.0, "T" ,0);
         boatGroup = new BoatGroup(b, Color.BLACK);
     }
 
