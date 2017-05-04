@@ -89,6 +89,10 @@ public class Controller implements Initializable {
                 @Override
                 public void run() {
                     Platform.runLater(() -> {
+                        if (StreamParser.isRaceStarted()) {
+                            switchToRaceView();
+                            timer.cancel();
+                        }
                         if (StreamParser.isRaceFinished()) {
                             realTime.setText(StreamParser.getCurrentTimeString());
                             timeTillLive.setTextFill(Color.RED);
