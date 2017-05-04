@@ -21,7 +21,7 @@ public class ServerThread implements Runnable, Observer {
     private final int RACE_STATUS_PERIOD = 1000/2;
     private final int RACE_START_STATUS_PERIOD = 1000;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
-    private final int PORT_NUMBER = 8085;
+    private final int PORT_NUMBER = 4949;
     private final int TIME_TILL_RACE_START = 20*1000;
     private static final int LOG_LEVEL = 1;
 
