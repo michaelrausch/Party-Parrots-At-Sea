@@ -1,15 +1,8 @@
 package seng302.models;
 
-import seng302.*;
-import javafx.geometry.Point2D;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import seng302.models.mark.*;
-
 /**
  * Created by cir27 on 4/05/17.
- */
+ *//*
 public class MarkGroupTest {
     private MarkGroup gateMG;
     private MarkGroup singleMG;
@@ -120,3 +113,4 @@ public class MarkGroupTest {
 
     }
 }
+*/
