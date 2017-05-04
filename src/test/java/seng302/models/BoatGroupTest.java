@@ -1,4 +1,4 @@
-// TODO: 4/05/17 cir27 - Find out why this test is causing build failures
+// TODO: 4/05/17 cir27 - Currently the CI cannot build these tests. Unsure of exact issue but believe it may be a driver issue. Find a way to make tests work.
 
 //package seng302.models;
 //
@@ -92,5 +92,4 @@ public class BoatGroupTest {
         Assert.assertTrue(originalX == bp.getLayoutX());
         Assert.assertTrue(originalY == bp.getLayoutY());
     }
-}
- */
+}*/
