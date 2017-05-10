@@ -69,6 +69,7 @@ public class CanvasController {
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
     private DecimalFormat decimalFormat2dp = new DecimalFormat("0.00");
+    private double lastPacketTime = 0;
 
     public AnimationTimer timer;
 
@@ -245,27 +246,27 @@ public class CanvasController {
     private void move(long id, RaceObject raceObject){
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(id);
         if (movementQueue.size() > 0){
-            BoatPositionPacket positionPacket = movementQueue.peek();
-
-            //this code adds a delay to reading from the movementQueue
-            //in case things being put into the movement queue are slightly
-            //out of order
-            int delayTime = 1000;
-            int loopTime = delayTime * 10;
-            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
-            if (timeDiff < 0){
-                timeDiff = loopTime + timeDiff;
+//            BoatPositionPacket positionPacket = movementQueue.peek();
+//
+//            //this code adds a delay to reading from the movementQueue
+//            //in case things being put into the movement queue are slightly
+//            //out of order
+//            int delayTime = 1000;
+//            int loopTime = delayTime * 10;
+//            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
+//            if (timeDiff < 0){
+//                timeDiff = loopTime + timeDiff;
+//            }
+//            if (timeDiff > delayTime) {
+            try {
+                BoatPositionPacket positionPacket = movementQueue.take();
+                Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
+                double heading = 360.0 / 0xffff * positionPacket.getHeading();
+                raceObject.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), (int) id);
+            } catch (InterruptedException e){
+                e.printStackTrace();
             }
-            if (timeDiff > delayTime) {
-                try {
-                    positionPacket = movementQueue.take();
-                    Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
-                    double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), (int) id);
-                } catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-            }
+//            }
         }
     }
 
