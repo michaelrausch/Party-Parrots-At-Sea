@@ -1,30 +1,31 @@
 package seng302.controllers;
 
-import javafx.animation.*;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
-import seng302.models.*;
+import seng302.models.BoatGroup;
+import seng302.models.Colors;
+import seng302.models.RaceObject;
+import seng302.models.Yacht;
 import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.XMLParser;
 import seng302.models.parsers.XMLParser.RaceXMLObject.CompoundMark;
 import seng302.models.parsers.XMLParser.RaceXMLObject.Limit;
-import seng302.models.mark.Mark;
+import seng302.models.parsers.packets.BoatPositionPacket;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
@@ -43,8 +44,8 @@ public class CanvasController {
 
     private final int MARK_SIZE     = 10;
     private final int BUFFER_SIZE   = 50;
-    private final int CANVAS_WIDTH  = 1000;
-    private final int CANVAS_HEIGHT = 1000;
+    private final int CANVAS_WIDTH  = 720;
+    private final int CANVAS_HEIGHT = 720;
     private final int LHS_BUFFER    = BUFFER_SIZE;
     private final int RHS_BUFFER    = BUFFER_SIZE + MARK_SIZE / 2;
     private final int TOP_BUFFER    = BUFFER_SIZE;
@@ -129,13 +130,11 @@ public class CanvasController {
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
                 elapsedNanos = 1000 / 60;
                 updateRaceObjects();
-
+                if (StreamParser.isRaceFinished()) {
+                    this.stop();
+                }
             }
         };
-        for (Mark m : raceViewController.getRace().getCourse()) {
-            //System.out.println(m.getName());
-        }
-        //timer.start();
     }
 
 
