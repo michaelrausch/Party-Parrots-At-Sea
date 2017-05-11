@@ -240,6 +240,17 @@ public class CanvasController {
                 }
             }
         }
+        checkForCourseChanges();
+    }
+
+    private void checkForCourseChanges() {
+        if (StreamParser.isNewXmlRecieved()){
+            System.out.println("New Canvas found");
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            gc.restore();
+            addRaceBorder();
+        }
     }
 
     private void move(long id, RaceObject raceObject){
@@ -345,6 +356,7 @@ public class CanvasController {
      * Calculates x and y location for every marker that fits it to the canvas the race will be drawn on.
      */
     private void fitMarksToCanvas() {
+        StreamParser.isNewXmlRecieved();
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);

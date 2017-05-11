@@ -31,6 +31,7 @@ public class StreamParser extends Thread{
      public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
      private String threadName;
      private Thread t;
+     private static boolean newXmlRecieved = false;
      private static boolean raceStarted = false;
      private static XMLParser xmlObject;
      private static boolean raceFinished = false;
@@ -122,6 +123,8 @@ public class StreamParser extends Thread{
                      extractDisplayMessage(packet);
                      break;
                  case XML_MESSAGE:
+                     System.out.println("XML MESSAGE GOT");
+                     newXmlRecieved = true;
                      extractXmlMessage(packet);
                      break;
                  case RACE_START_STATUS:
@@ -312,6 +315,9 @@ public class StreamParser extends Thread{
         xmlObject.constructXML(doc, messageType);
         if (messageType == 7) {   //7 is the boat XML
             boats = xmlObject.getBoatXML().getCompetingBoats();
+        }
+        if (messageType == 6) { //6 is race info xml
+            newXmlRecieved = true;
         }
     }
 
@@ -578,6 +584,15 @@ public class StreamParser extends Thread{
     public static void appClose(){
         appRunning = false;
         System.out.println("[CLIENT] Shutting down stream parser");
+    }
+
+    public static boolean isNewXmlRecieved(){
+        if (newXmlRecieved){
+            newXmlRecieved = false;
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
