@@ -1,13 +1,9 @@
 package seng302.server.messages;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
@@ -144,7 +140,7 @@ public abstract class Message {
      * @param size number of bytes
      */
     void putBytes(ByteBuffer bytes, int size){
-        buffer.put(bytes);
+        buffer.put(bytes.array());
         moveBufferPositionBy(size);
     }
 
@@ -185,7 +181,6 @@ public abstract class Message {
      * @return
      */
     public static byte[] intToByteArray(long val, int len){
-        long vor = val;
         int index = 0;
         byte[] data = new byte[len];
 
@@ -209,5 +204,4 @@ public abstract class Message {
             data[right] = (byte) (temp & 0xff);
         }
     }
-
 }

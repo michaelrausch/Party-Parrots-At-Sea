@@ -3,7 +3,6 @@ package seng302.controllers;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -15,22 +14,20 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import seng302.models.Boat;
+import seng302.models.Yacht;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 
 
-import javax.xml.crypto.dsig.XMLObject;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by michaelrausch on 21/03/17.
- */
 public class Controller implements Initializable {
     @FXML
     private AnchorPane contentPane;
@@ -41,13 +38,19 @@ public class Controller implements Initializable {
     @FXML
     private Button switchToRaceViewButton;
     @FXML
-    private TableView teamList;
+    private TableView<Yacht> teamList;
     @FXML
-    private TableColumn boatNameCol;
+    private TableColumn<Yacht, String> boatNameCol;
     @FXML
-    private TableColumn shortNameCol;
+    private TableColumn<Yacht, String> shortNameCol;
     @FXML
-    private TableColumn countryCol;
+    private TableColumn<Yacht, String> countryCol;
+    @FXML
+    private TableColumn<Yacht, String> posCol;
+    @FXML
+    private Label realTime;
+
+    private XMLParser xmlParser;
 
     private void setContentPane(String jfxUrl){
         try{
@@ -65,7 +68,9 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        //DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        //format.setTimeZone(TimeZone.getTimeZone("GMT-8"));
+        //realTime.setText(format.format(new Date()));
     }
 
     /**
@@ -73,8 +78,9 @@ public class Controller implements Initializable {
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
-            XMLParser xmlParser = StreamParser.getXmlObject();
+            xmlParser = StreamParser.getXmlObject();
             streamButton.setVisible(false);
+            realTime.setVisible(true);
             timeTillLive.setVisible(true);
             timeTillLive.setTextFill(Color.GREEN);
             timeTillLive.setText("Connecting...");
@@ -83,11 +89,17 @@ public class Controller implements Initializable {
                 @Override
                 public void run() {
                     Platform.runLater(() -> {
+                        if (StreamParser.isRaceStarted()) {
+                            switchToRaceView();
+                            timer.cancel();
+                        }
                         if (StreamParser.isRaceFinished()) {
+                            realTime.setText(StreamParser.getCurrentTimeString());
                             timeTillLive.setTextFill(Color.RED);
                             timeTillLive.setText("Race finished! Waiting for new race...");
                             switchToRaceViewButton.setDisable(true);
                         } else if (StreamParser.getTimeSinceStart() > 0) {
+                            realTime.setText(StreamParser.getCurrentTimeString());
                             updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
@@ -96,9 +108,10 @@ public class Controller implements Initializable {
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
-                            String timerString = "-" + timerMinute + ":" + timerSecond + " minutes";
+                            String timerString = "-" + timerMinute + ":" + timerSecond;
                             timeTillLive.setText(timerString);
                         } else {
+                            realTime.setText(StreamParser.getCurrentTimeString());
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
@@ -107,7 +120,7 @@ public class Controller implements Initializable {
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
-                            String timerString = timerMinute + ":" + timerSecond + " minutes";
+                            String timerString = timerMinute + ":" + timerSecond;
                             timeTillLive.setText(timerString);
                         }
                     });
@@ -124,19 +137,32 @@ public class Controller implements Initializable {
     }
 
     private void updateTeamList() {
-        ObservableList<Boat> data = FXCollections.observableArrayList();
+        ObservableList<Yacht> data = FXCollections.observableArrayList();
         teamList.setItems(data);
         boatNameCol.setCellValueFactory(
-                new PropertyValueFactory<Boat,String>("boatName")
+                new PropertyValueFactory<>("boatName")
         );
         shortNameCol.setCellValueFactory(
-                new PropertyValueFactory<Boat,String>("shortName")
+                new PropertyValueFactory<>("shortName")
         );
         countryCol.setCellValueFactory(
-                new PropertyValueFactory<Boat,String>("country")
+                new PropertyValueFactory<>("country")
         );
-        for (Boat boat : StreamParser.getBoats()) {
-            data.add(boat);
-        }
+        posCol.setCellValueFactory(
+                new PropertyValueFactory<>("position")
+        );
+//        if (StreamParser.isRaceStarted()) {
+        data.addAll(StreamParser.getBoatsPos().values());
+//        } else {
+//            for (Yacht boat : StreamParser.getBoats().values()) {
+//                boat.setPosition("-");
+//                data.add(boat);
+//            }
+//        }
+        teamList.refresh();
+
+//        posCol.setSortType(TableColumn.SortType.ASCENDING);
+//        teamList.getSortOrder().add(posCol);
+//        posCol.setSortable(false);
     }
 }

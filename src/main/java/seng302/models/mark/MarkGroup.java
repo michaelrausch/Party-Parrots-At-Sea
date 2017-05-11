@@ -58,12 +58,7 @@ public class MarkGroup extends RaceObject {
             nodePixelVelocitiesX = new double[]{0d,0d};
             nodePixelVelocitiesY = new double[]{0d,0d};
             nodeDestinations     = new Point2D[2];
-//            markCircle = new Circle(
-//                    (points[1].getX() - points[0].getX()) / 2d,
-//                    (points[1].getY() - points[0].getY()) / 2d,
-//                    MARK_RADIUS,
-//                    color
-//
+
             markCircle = new Circle(
                     points[0].getX(),
                     points[0].getY(),
@@ -72,12 +67,7 @@ public class MarkGroup extends RaceObject {
             );
             nodeDestinations[0] = new Point2D(markCircle.getCenterX(), markCircle.getCenterY());
             super.getChildren().add(markCircle);
-//            markCircle = new Circle(
-//                    -(points[1].getX() - points[0].getX()) / 2d,
-//                    -(points[1].getY() - points[0].getY()) / 2d,
-//                    MARK_RADIUS,
-//                    color
-//            );
+
             markCircle = new Circle(
                     points[1].getX(),
                     points[1].getY(),
@@ -99,7 +89,6 @@ public class MarkGroup extends RaceObject {
             }
             super.getChildren().add(line);
         }
-        //moveTo(points[0].getX(), points[0].getY());
     }
 
     public void setDestination (double x, double y, double rotation, double groundSpeed, int... raceIds) {

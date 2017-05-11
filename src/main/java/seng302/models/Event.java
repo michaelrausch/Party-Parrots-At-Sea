@@ -11,7 +11,7 @@ import java.util.Date;
 */
 public class Event {
     private Double time; // Time the event occurs
-    private Boat boat;
+    private Yacht boat;
     private boolean isFinishingEvent = false; // This event occurs when a boat finishes the race
     private Mark mark1; // This mark
     private Mark mark2; // Next mark
@@ -21,8 +21,6 @@ public class Event {
     private final double ORIGIN_LON = -64.857063;
     private final double SCALE = 16000;
 
-
-
     /**
      * Event class containing the time of specific event, related team/boat, and
      * event location such as leg.
@@ -30,7 +28,7 @@ public class Event {
      * @param eventTime, what time the event happens
      * @param eventBoat, the boat that the event belongs to
      */
-    public Event(Double eventTime, Boat eventBoat, Mark mark1, Mark mark2, int markPosInRace) {
+    public Event(Double eventTime, Yacht eventBoat, Mark mark1, Mark mark2, int markPosInRace) {
         this.time = eventTime;
         this.boat = eventBoat;
         this.mark1 = mark1;
@@ -47,7 +45,7 @@ public class Event {
      * @param eventTime, what time the event happens
      * @param eventBoat, the boat that the event belongs to
      */
-    public Event(Double eventTime, Boat eventBoat, Mark mark1, int markPosInRace) {
+    public Event(Double eventTime, Yacht eventBoat, Mark mark1, int markPosInRace) {
         this.time = eventTime;
         this.boat = eventBoat;
         this.mark1 = mark1;
@@ -72,11 +70,11 @@ public class Event {
         return (new SimpleDateFormat("mm:ss:SSS")).format(new Date(time.longValue()));
     }
 
-    public Boat getBoat() {
+    public Yacht getBoat() {
         return this.boat;
     }
 
-    public void setBoat(Boat eventBoat) {
+    public void setBoat(Yacht eventBoat) {
         this.boat = eventBoat;
     }
 
@@ -92,10 +90,10 @@ public class Event {
     public String getEventString() {
         // This event is a boat finishing the race
         if (this.isFinishingEvent) {
-            return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " finished the race");
+            return (this.getTimeString() + ", " + this.getBoat().getBoatName() + " finished the race");
         }
 //        System.out.println(this.getDistanceBetweenMarks());
-        return (this.getTimeString() + ", " + this.getBoat().getTeamName() + " passed " + this.mark1.getName() + " going heading " + this.getBoatHeading() + "°");
+        return (this.getTimeString() + ", " + this.getBoat().getBoatName() + " passed " + this.mark1.getName() + " going heading " + this.getBoatHeading() + "°");
     }
 
     /**

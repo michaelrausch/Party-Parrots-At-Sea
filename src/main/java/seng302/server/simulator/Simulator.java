@@ -14,6 +14,7 @@ public class Simulator extends Observable implements Runnable {
 	private List<Corner> course;
 	private List<Boat> boats;
 	private long lapse;
+	private boolean isRaceStarted;
 
 	/**
 	 * Creates a simulator instance with given time lapse.
@@ -24,6 +25,7 @@ public class Simulator extends Observable implements Runnable {
 		course = rp.getCourse();
 		boats = rp.getBoats();
 		this.lapse = lapse;
+		isRaceStarted = false;
 
 		setLegs();
 
@@ -45,26 +47,30 @@ public class Simulator extends Observable implements Runnable {
 		int numOfFinishedBoats = 0;
 
 		while (numOfFinishedBoats < boats.size()) {
-			for (Boat boat : boats) {
-				numOfFinishedBoats += moveBoat(boat, lapse);
+
+			// if race has started, then boat should start to move.
+			if (isRaceStarted) {
+				for (Boat boat : boats) {
+					numOfFinishedBoats += moveBoat(boat, lapse);
+				}
 			}
 			//System.out.println(boats.get(0));
 
 			setChanged();
 			notifyObservers(boats);
 
-			// sleep for 1 second.
 			try {
 				Thread.sleep(lapse);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+
+		System.out.println("[SERVER] Race simulator has been terminated");
 	}
 
 	/**
 	 * Moves a boat with given time duration.
-	 *
 	 * @param boat the boat to be moved
 	 * @param duration the moving duration in milliseconds
 	 * @return 1 if the boat has reached the final line, otherwise return 0
@@ -85,7 +91,10 @@ public class Simulator extends Observable implements Runnable {
 				boat.setHeadingCorner(boat.getLastPassedCorner().getNextCorner());
 
 				// heading corner == null means boat has reached the final mark
-				if (boat.getHeadingCorner() == null) return 1;
+				if (boat.getHeadingCorner() == null) {
+					boat.setFinished(true);
+					return 1;
+				}
 
 				// move compensate distance for the mark just passed
 				Position pos = GeoUtility.getGeoCoordinate(
@@ -126,4 +135,7 @@ public class Simulator extends Observable implements Runnable {
 		return boats;
 	}
 
+	public void setRaceStarted(boolean raceStarted) {
+		isRaceStarted = raceStarted;
+	}
 }

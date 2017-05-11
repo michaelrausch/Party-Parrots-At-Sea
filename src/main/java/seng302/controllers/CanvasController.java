@@ -5,17 +5,19 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
-import seng302.models.Boat;
-import seng302.models.BoatGroup;
-import seng302.models.Colors;
-import seng302.models.RaceObject;
+import javafx.stage.Stage;
+import seng302.models.*;
 import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
+import seng302.models.parsers.StreamReceiver;
 import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.XMLParser;
 import seng302.models.parsers.XMLParser.RaceXMLObject.CompoundMark;
@@ -41,9 +43,9 @@ public class CanvasController {
     private GraphicsContext gc;
 
     private final int MARK_SIZE     = 10;
-    private final int BUFFER_SIZE   = 150;
-    private final int CANVAS_WIDTH  = 1000;
-    private final int CANVAS_HEIGHT = 1000;
+    private final int BUFFER_SIZE   = 50;
+    private final int CANVAS_WIDTH  = 720;
+    private final int CANVAS_HEIGHT = 720;
     private final int LHS_BUFFER    = BUFFER_SIZE;
     private final int RHS_BUFFER    = BUFFER_SIZE + MARK_SIZE / 2;
     private final int TOP_BUFFER    = BUFFER_SIZE;
@@ -128,13 +130,11 @@ public class CanvasController {
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
                 elapsedNanos = 1000 / 60;
                 updateRaceObjects();
-
+                if (StreamParser.isRaceFinished()) {
+                    this.stop();
+                }
             }
         };
-        for (Mark m : raceViewController.getRace().getCourse()) {
-            System.out.println(m.getName());
-        }
-        //timer.start();
     }
 
 
@@ -148,9 +148,10 @@ public class CanvasController {
     private void addRaceBorder() {
         XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
         ArrayList<Limit> courseLimits = raceXMLObject.getCourseLimit();
-        gc.setStroke(Color.DARKRED);
+        gc.setStroke(Color.DARKBLUE);
         gc.setLineWidth(3);
-
+        double[] xBoundaryPoints = new double[courseLimits.size()];
+        double[] yBoundaryPoints = new double[courseLimits.size()];
         for (int i = 0; i < courseLimits.size() - 1; i++) {
             Limit thisPoint1 = courseLimits.get(i);
             SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
@@ -160,18 +161,21 @@ public class CanvasController {
             Point2D borderPoint2 = findScaledXY(thisMark2);
             gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
                     borderPoint2.getX(), borderPoint2.getY());
-
+            xBoundaryPoints[i] = borderPoint1.getX();
+            yBoundaryPoints[i] = borderPoint1.getY();
         }
-
         Limit thisPoint1 = courseLimits.get(courseLimits.size()-1);
         SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
         Limit thisPoint2 = courseLimits.get(0);
         SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
         Point2D borderPoint1 = findScaledXY(thisMark1);
         Point2D borderPoint2 = findScaledXY(thisMark2);
-
         gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
                 borderPoint2.getX(), borderPoint2.getY());
+        xBoundaryPoints[courseLimits.size()-1] = borderPoint1.getX();
+        yBoundaryPoints[courseLimits.size()-1] = borderPoint1.getY();
+        gc.setFill(Color.LIGHTBLUE);
+        gc.fillPolygon(xBoundaryPoints,yBoundaryPoints,yBoundaryPoints.length);
     }
 
 
@@ -300,6 +304,8 @@ public class CanvasController {
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
             gc.clearRect(5,5,50,20);
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(4,4,51,21);
             gc.setFill(Color.BLACK);
             gc.setFont(new Font(14));
             gc.setLineWidth(3);
@@ -316,15 +322,18 @@ public class CanvasController {
      */
     private void drawBoats() {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
-        List<Boat> boats  = raceViewController.getStartingBoats();
+//        List<Boat> boats  = raceViewController.getStartingBoats();
+        Map<Integer, Yacht> boats = StreamParser.getBoats();
         Double startingX  = raceObjects.get(0).getLayoutX();
         Double startingY  = raceObjects.get(0).getLayoutY();
         Group boatAnnotations = new Group();
 
-        for (Boat boat : boats) {
-            BoatGroup boatGroup = new BoatGroup(boat, Colors.getColor());
+        for (Yacht boat : boats.values()) {
+//        for (Boat boat : boats) {
+            boat.setColour(Colors.getColor());
+            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
             boatGroup.moveTo(startingX, startingY, 0d);
-            boatGroup.forceRotation();
+            //boatGroup.setStage(raceViewController.getStage());
             raceObjects.add(boatGroup);
             boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
         }

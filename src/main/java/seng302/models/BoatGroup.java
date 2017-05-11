@@ -7,33 +7,46 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
-import seng302.models.parsers.StreamParser;
+import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2 dimensional boat.
  * It contains a single polygon for the boat, a group of lines to show it's path, a wake object and two text labels to
- * annotate the boat teams name and the boats velocity.
+ * annotate the boat teams name and the boats velocity. The boat will update it's position onscreen everytime
+ * UpdatePosition is called unless the window is minimized in which case it attempts to store animations and apply them
+ * when the window is maximised.
  */
 public class BoatGroup extends RaceObject{
 
+    //Constants for drawing
     private static final double TEAMNAME_X_OFFSET = 10d;
     private static final double TEAMNAME_Y_OFFSET = -15d;
     private static final double VELOCITY_X_OFFSET = 10d;
     private static final double VELOCITY_Y_OFFSET = -5d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
-    private static double expectedUpdateInterval = 200;
-    private boolean destinationSet;
+    //Variables for boat logic.
     private Point2D lastPoint;
     private int wakeGenerationDelay = 10;
     private double distanceTravelled;
-
-    private Boat boat;
+    //Graphical objects
+    private Yacht boat;
     private Group lineGroup = new Group();
     private Polygon boatPoly;
     private Text teamNameObject;
     private Text velocityObject;
     private Wake wake;
+    //Handles boat moving when connecting to a stream
+    private boolean setToInitialLocation = false;
+    private boolean destinationSet;
+    //Variables for handling minimization
+    private Stage stage;
+    private boolean isMaximized= true;
+    private List<Line> lineStorage = new ArrayList<>();
+    private int setCallCount = 5;
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
@@ -41,7 +54,7 @@ public class BoatGroup extends RaceObject{
      *             BoatGroup to update.
      * @param color The colour of the boat polygon and the trailing line.
      */
-    public BoatGroup (Boat boat, Color color){
+    public BoatGroup (Yacht boat, Color color){
         this.boat = boat;
         initChildren(color);
     }
@@ -53,7 +66,7 @@ public class BoatGroup extends RaceObject{
      * @param color The colour of the boat polygon and the trailing line.
      * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat polygon.
      */
-    public BoatGroup (Boat boat, Color color, double... points)
+    public BoatGroup (Yacht boat, Color color, double... points)
     {
         this.boat = boat;
         initChildren(color, points);
@@ -146,83 +159,98 @@ public class BoatGroup extends RaceObject{
      */
     public void updatePosition (long timeInterval) {
         //Calculate the movement of the boat.
-        double dx = pixelVelocityX * timeInterval;
-        double dy = pixelVelocityY * timeInterval;
-        double rotation = rotationalVelocity * timeInterval;
-        distanceTravelled += Math.abs(dx) + Math.abs(dy);
-        moveGroupBy(dx, dy, rotation);
-        //Draw a new section of the trail every 20 pixels of movement.
-        if (distanceTravelled > 20) {
-            distanceTravelled = 0;
-            if (lastPoint != null) {
-                Line l = new Line(
-                        lastPoint.getX(),
-                        lastPoint.getY(),
-                        boatPoly.getLayoutX(),
-                        boatPoly.getLayoutY()
-                );
-                l.getStrokeDashArray().setAll(3d, 7d);
-                l.setStroke(boatPoly.getFill());
-                lineGroup.getChildren().add(l);
+        if (isMaximized) {
+            double dx = pixelVelocityX * timeInterval;
+            double dy = pixelVelocityY * timeInterval;
+            double rotation = rotationalVelocity * timeInterval;
+            distanceTravelled += Math.abs(dx) + Math.abs(dy);
+            moveGroupBy(dx, dy, rotation);
+            //Draw a new section of the trail every 20 pixels of movement.
+            if (distanceTravelled > 20) {
+                distanceTravelled = 0;
+                if (lastPoint != null) {
+                    Line l = new Line(
+                            lastPoint.getX(),
+                            lastPoint.getY(),
+                            boatPoly.getLayoutX(),
+                            boatPoly.getLayoutY()
+                    );
+                    l.getStrokeDashArray().setAll(3d, 7d);
+                    l.setStroke(boatPoly.getFill());
+                    lineGroup.getChildren().add(l);
+                }
+                if (destinationSet) { //Only begin drawing after the first destination is set
+                    lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+                }
             }
-            if (destinationSet){ //Only begin drawing after the first destination is set
-                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-            }
+            wake.updatePosition(timeInterval);
         }
-        wake.updatePosition(timeInterval);
     }
 
     /**
      * Sets the destination of the boat and the headng it should have once it reaches
-     * @param newXValue
-     * @param newYValue
+     * @param newXValue The X co-ordinate the boat needs to move to.
+     * @param newYValue The Y co-ordinate the boat needs to move to.
      * @param rotation Rotation to move graphics to.
      * @param raceIds RaceID of the object to move.
      */
     public void setDestination (double newXValue, double newYValue, double rotation, double groundSpeed, int... raceIds) {
         if (hasRaceId(raceIds)) {
-            destinationSet = true;
-            boat.setVelocity(groundSpeed);
-            if (currentRotation < 0)
-                currentRotation = 360 - currentRotation;
-            double dx = newXValue - boatPoly.getLayoutX();
-            if ((dx > 0 && pixelVelocityX < 0) || (dx < 0 && pixelVelocityX > 0)) {
-                pixelVelocityX = 0;
-            } else {
+            if (setToInitialLocation) {
+                destinationSet = true;
+                boat.setVelocity(groundSpeed);
+                if (currentRotation < 0)
+                    currentRotation = 360 - currentRotation;
+                double dx = newXValue - boatPoly.getLayoutX();
+                double dy = newYValue - boatPoly.getLayoutY();
+                //Check movement is reasonable. Assumes a 1000 * 1000 canvas
+                if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
+                    dx = 0;
+                    dy = 0;
+                    moveTo(newXValue, newYValue);
+                }
+
                 pixelVelocityX = dx / expectedUpdateInterval;
-            }
-            double dy = newYValue - boatPoly.getLayoutY();
-            //Check movement is reasonable. Assumes a 1000 * 1000 canvas
-            if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
-//                System.out.println("dx = " + dx);
-//                System.out.println("dy = " + dy);
-                dx = 0;
-                dy = 0;
-                moveTo(newXValue, newYValue);
-            }
-            //Slight delay on changing X/Y direction that could help jitter. Disabled since there was an issue with
-            //packets that might be causing it.
-//            if ((dx > 0 && pixelVelocityX < 0) || (dx < 0 && pixelVelocityX > 0)) {
-//                pixelVelocityX = 0;
-//            } else {
-//                pixelVelocityX = dx / expectedUpdateInterval;
-//            }
-//            if ((dy > 0 && pixelVelocityY < 0) || (dy < 0 && pixelVelocityY > 0)) {
-//                pixelVelocityY = 0;
-//            } else {
-//                pixelVelocityY = dy / expectedUpdateInterval;
-//            }
-            pixelVelocityX = dx / expectedUpdateInterval;
-            pixelVelocityY = dy / expectedUpdateInterval;
-            rotationalGoal = rotation;
-            calculateRotationalVelocity();
-            if (wakeGenerationDelay > 0) {
-                wake.rotate(rotationalGoal);
-                wakeGenerationDelay--;
+                pixelVelocityY = dy / expectedUpdateInterval;
+                rotationalGoal = rotation;
+                calculateRotationalVelocity();
+
+                if (wakeGenerationDelay > 0) {
+                    wake.rotate(rotationalGoal);
+                    rotateTo(rotationalGoal); //Need to test with this removed.
+                    rotationalVelocity = 0;
+                    wakeGenerationDelay--;
+                } else {
+                    wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, boat.getVelocity());
+                }
+                velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
             } else {
-                wake.setRotationalVelocity(rotationalVelocity, currentRotation, boat.getVelocity());
+                setToInitialLocation = true;
+                rotationalGoal = rotation;
+                moveTo(newXValue, newYValue, rotation);
             }
-            velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
+        }
+        //If minimized generate lines every 5 calls to set destination.
+        if (!isMaximized) {
+            setToInitialLocation = false;
+            wakeGenerationDelay = 2;
+            if(setCallCount-- == 0) {
+                setCallCount = 5;
+                if (lastPoint != null) {
+                    Line l = new Line(
+                            lastPoint.getX(),
+                            lastPoint.getY(),
+                            newXValue,
+                            newYValue
+                    );
+                    l.getStrokeDashArray().setAll(3d, 7d);
+                    l.setStroke(boatPoly.getFill());
+                    lineStorage.add(l);
+                }
+                if (destinationSet) { //Only begin drawing after the first destination is set
+                    lastPoint = new Point2D(newXValue, newYValue);
+                }
+            }
         }
     }
 
@@ -243,8 +271,7 @@ public class BoatGroup extends RaceObject{
 
     public void rotateTo (double rotation) {
         currentRotation = rotation;
-        boatPoly.getTransforms().clear();
-        boatPoly.getTransforms().add(new Rotate(rotation));
+        boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
     public void forceRotation () {
@@ -268,7 +295,7 @@ public class BoatGroup extends RaceObject{
         wake.setVisible(visible);
     }
 
-    public Boat getBoat() {
+    public Yacht getBoat() {
         return boat;
     }
 
@@ -280,7 +307,7 @@ public class BoatGroup extends RaceObject{
      */
     public boolean hasRaceId (int... raceIds) {
         for (int id : raceIds) {
-            if (id == boat.getId())
+            if (id == boat.getSourceID())
                 return true;
         }
         return false;
@@ -292,7 +319,7 @@ public class BoatGroup extends RaceObject{
      * @return An array containing all ID's associated with this RaceObject.
      */
     public int[] getRaceIds () {
-        return new int[] {boat.getId()};
+        return new int[] {boat.getSourceID()};
     }
 
     /**
@@ -306,5 +333,26 @@ public class BoatGroup extends RaceObject{
         Group group = new Group();
         group.getChildren().addAll(wake, lineGroup);
         return group;
+    }
+
+    /**
+     * Use this function to let the BoatGroup know about the stage it is in. If it knows about it's stage then it will
+     * listen to the iconified property of that stage and change it's behaviour upon minimization. Without setting the
+     * Stage there is guarantee that the BoatGroup will draw properly when the stage is minimized.
+     *
+     * @param stage The stage that the BoatGroup is added to.
+     */
+    public void setStage (Stage stage) {
+        /* TODO: 4/05/17 cir27 - Find a way to get the stage to this point. Need to pass it through multiple controllers.
+                                 App.start() -> Controller.setContentPane -> RaceViewController -> CanvasController
+         */
+        this.stage = stage;
+        this.stage.iconifiedProperty().addListener(e -> {
+            isMaximized = !stage.isIconified();
+            if (!lineStorage.isEmpty()) {
+                lineGroup.getChildren().addAll(lineStorage);
+                lineStorage.clear();
+            }
+        });
     }
 }
