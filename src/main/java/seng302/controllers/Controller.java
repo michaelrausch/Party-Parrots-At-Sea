@@ -18,12 +18,8 @@ import seng302.models.Yacht;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 
-
 import java.io.IOException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,6 +52,7 @@ public class Controller implements Initializable {
         try{
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
+            contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
         }
         catch(javafx.fxml.LoadException e){
@@ -71,6 +68,8 @@ public class Controller implements Initializable {
         //DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         //format.setTimeZone(TimeZone.getTimeZone("GMT-8"));
         //realTime.setText(format.format(new Date()));
+        contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+        teamList.getStylesheets().add(getClass().getResource("/css/master.css").toString());
     }
 
     /**
@@ -138,7 +137,9 @@ public class Controller implements Initializable {
 
     private void updateTeamList() {
         ObservableList<Yacht> data = FXCollections.observableArrayList();
+
         teamList.setItems(data);
+
         boatNameCol.setCellValueFactory(
                 new PropertyValueFactory<>("boatName")
         );
