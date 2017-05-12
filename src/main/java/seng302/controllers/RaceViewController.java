@@ -315,6 +315,7 @@ public class RaceViewController extends Thread{
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(false);
                         bg.setVelocityObjectVisible(false);
+                        bg.setEstTimeToNextMarkVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
                     }
@@ -326,6 +327,7 @@ public class RaceViewController extends Thread{
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(false);
+                        bg.setEstTimeToNextMarkVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
                     }
@@ -348,7 +350,14 @@ public class RaceViewController extends Thread{
                             bg.setVelocityObjectVisible(true);
                         }
                         else{
-                            bg.setTeamNameObjectVisible(false);
+                            bg.setVelocityObjectVisible(false);
+                        }
+
+                        if (importantAnnotations.containsKey("BoatEstTimeToNextMark") && importantAnnotations.get("BoatEstTimeToNextMark")) {
+                            bg.setEstTimeToNextMarkVisible(true);
+                        }
+                        else{
+                            bg.setEstTimeToNextMarkVisible(false);
                         }
 
                         if (importantAnnotations.containsKey("BoatTrack") && importantAnnotations.get("BoatTrack")){
@@ -373,6 +382,7 @@ public class RaceViewController extends Thread{
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(true);
+                        bg.setEstTimeToNextMarkVisible(true);
                         bg.setLineGroupVisible(true);
                         bg.setWakeVisible(true);
                     }
