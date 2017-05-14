@@ -126,42 +126,42 @@ public class MarkGroup extends RaceObject {
     }
 
     public void updatePosition (long timeInterval) {
-        Circle markCircle = (Circle) super.getChildren().get(0);
-
-        if (nodePixelVelocitiesX[0] > 0 && markCircle.getCenterX() > nodeDestinations[0].getX() ||
-                nodePixelVelocitiesX[0] < 0 && markCircle.getCenterX() < nodeDestinations[0].getY())
-            nodePixelVelocitiesX[0] = 0;
-        else if (nodePixelVelocitiesX[0] != 0)
-            markCircle.setCenterX(markCircle.getCenterX() + nodePixelVelocitiesX[0] * timeInterval);
-
-        if (nodePixelVelocitiesY[0] > 0 && markCircle.getCenterY() > nodeDestinations[0].getY() ||
-                nodePixelVelocitiesY[0] < 0 && markCircle.getCenterY() < nodeDestinations[0].getY())
-            nodePixelVelocitiesY[0] = 0;
-        else if (nodePixelVelocitiesY[0] != 0)
-            markCircle.setCenterY(markCircle.getCenterY() + nodePixelVelocitiesY[0] * timeInterval);
-
-        if (mainMark.getMarkType() != MarkType.SINGLE_MARK) {
-
-            Line line = (Line) super.getChildren().get(2);
-            line.setStartX(markCircle.getCenterX());
-            line.setStartY(markCircle.getCenterY());
-
-            markCircle = (Circle) super.getChildren().get(1);
-
-            if (nodePixelVelocitiesX[1] > 0 && markCircle.getCenterX() >= nodeDestinations[1].getX() ||
-                    nodePixelVelocitiesX[1] < 0 && markCircle.getCenterX() <= nodeDestinations[1].getX())
-                nodePixelVelocitiesX[1] = 0;
-            else if (nodePixelVelocitiesX[1] != 0)
-                markCircle.setCenterX(markCircle.getCenterX() + nodePixelVelocitiesX[1] * timeInterval);
-
-            if (nodePixelVelocitiesY[1] > 0 && markCircle.getCenterY() > nodeDestinations[1].getY() ||
-                    nodePixelVelocitiesY[1] < 0 && markCircle.getCenterY() < nodeDestinations[1].getY())
-                nodePixelVelocitiesY[1] = 0;
-            else if (nodePixelVelocitiesY[1] != 0)
-                markCircle.setCenterY(markCircle.getCenterY() + nodePixelVelocitiesY[1] * timeInterval);
-            line.setEndX(markCircle.getCenterX());
-            line.setEndY(markCircle.getCenterY());
-        }
+//        Circle markCircle = (Circle) super.getChildren().get(0);
+//
+//        if (nodePixelVelocitiesX[0] > 0 && markCircle.getCenterX() > nodeDestinations[0].getX() ||
+//                nodePixelVelocitiesX[0] < 0 && markCircle.getCenterX() < nodeDestinations[0].getY())
+//            nodePixelVelocitiesX[0] = 0;
+//        else if (nodePixelVelocitiesX[0] != 0)
+//            markCircle.setCenterX(markCircle.getCenterX() + nodePixelVelocitiesX[0] * timeInterval);
+//
+//        if (nodePixelVelocitiesY[0] > 0 && markCircle.getCenterY() > nodeDestinations[0].getY() ||
+//                nodePixelVelocitiesY[0] < 0 && markCircle.getCenterY() < nodeDestinations[0].getY())
+//            nodePixelVelocitiesY[0] = 0;
+//        else if (nodePixelVelocitiesY[0] != 0)
+//            markCircle.setCenterY(markCircle.getCenterY() + nodePixelVelocitiesY[0] * timeInterval);
+//
+//        if (mainMark.getMarkType() != MarkType.SINGLE_MARK) {
+//
+//            Line line = (Line) super.getChildren().get(2);
+//            line.setStartX(markCircle.getCenterX());
+//            line.setStartY(markCircle.getCenterY());
+//
+//            markCircle = (Circle) super.getChildren().get(1);
+//
+//            if (nodePixelVelocitiesX[1] > 0 && markCircle.getCenterX() >= nodeDestinations[1].getX() ||
+//                    nodePixelVelocitiesX[1] < 0 && markCircle.getCenterX() <= nodeDestinations[1].getX())
+//                nodePixelVelocitiesX[1] = 0;
+//            else if (nodePixelVelocitiesX[1] != 0)
+//                markCircle.setCenterX(markCircle.getCenterX() + nodePixelVelocitiesX[1] * timeInterval);
+//
+//            if (nodePixelVelocitiesY[1] > 0 && markCircle.getCenterY() > nodeDestinations[1].getY() ||
+//                    nodePixelVelocitiesY[1] < 0 && markCircle.getCenterY() < nodeDestinations[1].getY())
+//                nodePixelVelocitiesY[1] = 0;
+//            else if (nodePixelVelocitiesY[1] != 0)
+//                markCircle.setCenterY(markCircle.getCenterY() + nodePixelVelocitiesY[1] * timeInterval);
+//            line.setEndX(markCircle.getCenterX());
+//            line.setEndY(markCircle.getCenterY());
+//        }
     }
 
     public void moveGroupBy (double x, double y, double rotation) {

@@ -204,25 +204,23 @@ public class BoatGroup extends RaceObject{
                 double dx = newXValue - boatPoly.getLayoutX();
                 double dy = newYValue - boatPoly.getLayoutY();
                 //Check movement is reasonable. Assumes a 1000 * 1000 canvas
-                if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
-                    dx = 0;
-                    dy = 0;
-                    moveTo(newXValue, newYValue);
-                }
+//                if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
+//                    dx = 0;
+//                    dy = 0;
+//                    moveTo(newXValue, newYValue);
+//                }
 
                 pixelVelocityX = dx / expectedUpdateInterval;
                 pixelVelocityY = dy / expectedUpdateInterval;
                 rotationalGoal = rotation;
                 calculateRotationalVelocity();
-
-                if (wakeGenerationDelay > 0) {
-                    wake.rotate(rotationalGoal);
-                    rotateTo(rotationalGoal); //Need to test with this removed.
+                if (Math.abs(rotationalVelocity) > 0.075) {
+                    System.out.println("rotationalVelocity = " + rotationalVelocity);
                     rotationalVelocity = 0;
-                    wakeGenerationDelay--;
-                } else {
-                    wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, boat.getVelocity());
+                    rotateTo(rotationalGoal);
+                    wake.rotate(rotationalGoal);
                 }
+                wake.setRotationalVelocity(rotationalVelocity, boat.getVelocity());
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
             } else {
                 setToInitialLocation = true;
@@ -347,7 +345,7 @@ public class BoatGroup extends RaceObject{
                                  App.start() -> Controller.setContentPane -> RaceViewController -> CanvasController
          */
         this.stage = stage;
-        this.stage.iconifiedProperty().addListener(e -> {
+        this.stage.iconifiedProperty().addListener( e -> {
             isMaximized = !stage.isIconified();
             if (!lineStorage.isEmpty()) {
                 lineGroup.getChildren().addAll(lineStorage);

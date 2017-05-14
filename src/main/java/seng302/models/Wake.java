@@ -4,6 +4,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.transform.Rotate;
 
 /**
@@ -15,13 +16,22 @@ import javafx.scene.transform.Rotate;
  */
 class Wake extends Group {
 
-    private int numWakes = 5;
-    private double[] velocities = new double[13];
+    //Wake Settings. Should probably be hard coded in when the final values are decided upon.
+    private enum functionType {LINEAR, LOGARITHMIC, POWER, ROOT, POWOUT_LOGIN}
+    private functionType wakeFunction = functionType.LOGARITHMIC;
+    private ArcType arcType = ArcType.OPEN;
+    private int numWakes = 10;
+    private double offSet = 0;
+    private final double MAX_DIFF = 75.0;
+    private final int UNIFICATION_SPEED = 500;
+    private final int POWER = 2;
+
     private Arc[] arcs = new Arc[numWakes];
+    private double[] rotationalVelocities = new double[numWakes];
     private double[] rotations = new double[numWakes];
-    private int[] velocityIndices = new int[numWakes];
-    private double sum = 0;
-    private static double max;
+    private double baseRad;
+    private boolean spawnNewWake = false;
+    private int count = 10;
 
     /**
      * Create a wake at the given location.
@@ -34,11 +44,22 @@ class Wake extends Group {
         Arc arc;
         for (int i = 0; i < numWakes; i++) {
             //Default triangle is -110 deg out of phase with a default wake and has angle of 40 deg.
-            arc = new Arc(0,0,0,0,-110,40);
-            //Opacity increases from 0.5 -> 0 evenly over the 5 wake arcs.
-            arc.setFill(new Color(0.18, 0.7, 1.0, 1.0 + -0.175 * i));
+            arc = new Arc(0, 0, 0, 0, -110, 40);
+
+            if (arcType == ArcType.ROUND) {
+            arc.setFill(new Color(0.18, 0.7, 1.0, 0.4 + (-0.35 / numWakes * i)));
             arc.setType(ArcType.ROUND);
-            arcs[i] = arc;
+            baseRad = 10;
+
+            } else if (arcType == ArcType.OPEN) {
+                arc.setType(ArcType.OPEN);
+                arc.setStroke(new Color(0.18, 0.7, 1.0, 1.0 + (-0.99 / numWakes * i)));
+                arc.setStrokeWidth(3.0);
+                arc.setStrokeLineCap(StrokeLineCap.ROUND);
+                arc.setFill(new Color(0.0, 0.0, 0.0, 0.0));
+                baseRad = (20 / numWakes);
+                arcs[i] = arc;
+            }
         }
         super.getChildren().addAll(arcs);
     }
@@ -47,38 +68,91 @@ class Wake extends Group {
      * Sets the rotationalVelocity of each arc. Each arc is 3 velocities behind the next smallest arc. The smallest uses
      * the latest given velocity.
      * @param rotationalVelocity The rotationalVelocity the wake should move at.
-     * @param rotationGoal Where the wake will rotate to if the wake is calculated to be on a straight section. This is
-     *                     used to prevent desynchronisation with the Boat polygon.
      * @param velocity The real world velocity of the boat in m/s.
      */
-    void setRotationalVelocity (double rotationalVelocity, double rotationGoal, double velocity) {
-        sum -= Math.abs(velocities[(velocityIndices[0] + 10) % 13]);
-        sum += Math.abs(rotationalVelocity);
-        max = Math.max(max, rotationalVelocity);
-        if (sum < (max / 3))
-            rotate (rotationGoal); //In relatively straight segments the wake snaps to match the boats current position.
-                                   //This stops the wake from eventually becoming out of sync with the boat.
-        //This accounts for rogue rotations that are greater than what would be realistic. Value is kinda rough.
-        //Basically just for our internal mock.
-        if (Math.abs(rotationalVelocity) > 0.05) {
-            rotationalVelocity = 0;
-            rotate(rotationGoal);
+    void setRotationalVelocity (double rotationalVelocity, double velocity) {
+        rotationalVelocities[0] = rotationalVelocity;
+        for (int i = 1; i < numWakes; i++) {
+            double difference = Math.atan2(
+                    Math.sin(
+                            Math.toRadians(
+                                    rotations[i - 1] - rotations[i]
+                            )
+                    ),
+                    Math.cos(
+                            Math.toRadians(
+                                    rotations[i - 1] - rotations[i]
+                            )
+                    )
+            );
+            difference = Math.toDegrees(difference);
+
+            if (wakeFunction == functionType.LOGARITHMIC) {
+                if (rotationalVelocities[i-1] < 0.01 && rotationalVelocities[i-1] > -0.01) {
+                    rotationalVelocities[i] = (MAX_DIFF / numWakes) / UNIFICATION_SPEED * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes) * 1.5;
+                    if (difference < 0)
+                    {
+                        rotationalVelocities[i] = -rotationalVelocities[i];
+                    }
+                } else {
+                        rotationalVelocities[i] = rotationalVelocities[i-1] * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes);
+                }
+
+            } else if (wakeFunction == functionType.LINEAR) {
+                if (rotationalVelocities[i - 1] < 0.01 && rotationalVelocities[i - 1] > -0.01) {
+                    rotationalVelocities[i] = difference / UNIFICATION_SPEED * 2;
+                } else {
+                    if (difference < (MAX_DIFF / numWakes))
+                        rotationalVelocities[i] = rotationalVelocities[i - 1] * difference / (MAX_DIFF / numWakes);
+                    else
+                        rotationalVelocities[i] = rotationalVelocities[i - 1];
+                }
+            } else if (wakeFunction == functionType.POWER) {
+                if (rotationalVelocities[i - 1] < 0.01 && rotationalVelocities[i - 1] > -0.01) {
+                    rotationalVelocities[i] = difference / UNIFICATION_SPEED * Math.pow(difference, POWER) / Math.pow((MAX_DIFF / numWakes), POWER);
+                } else {
+                    if (difference < (MAX_DIFF / numWakes))
+                        rotationalVelocities[i] = rotationalVelocities[i - 1] * Math.pow(difference, POWER) / Math.pow((MAX_DIFF / numWakes), POWER);
+                    else
+                        rotationalVelocities[i] = rotationalVelocities[i - 1];
+                }
+            } else if (wakeFunction == functionType.ROOT) {
+                if (rotationalVelocities[i - 1] < 0.01 && rotationalVelocities[i - 1] > -0.01) {
+                    rotationalVelocities[i] = (MAX_DIFF / numWakes) / UNIFICATION_SPEED * Math.sqrt(Math.abs(difference)) / Math.sqrt(MAX_DIFF / numWakes);
+                } else {
+                    if (difference < (MAX_DIFF / numWakes))
+                        rotationalVelocities[i] = rotationalVelocities[i - 1] * Math.sqrt(Math.abs(difference)) / Math.sqrt(MAX_DIFF / numWakes);
+                    else
+                        rotationalVelocities[i] = rotationalVelocities[i - 1];
+                }
+                if (difference < 0)
+                    rotationalVelocities[i] = -rotationalVelocities[i];
+            } else if (wakeFunction == functionType.POWOUT_LOGIN) {
+                if (rotationalVelocities[i - 1] < 0.01 && rotationalVelocities[i - 1] > -0.01) {
+                    rotationalVelocities[i] = difference / UNIFICATION_SPEED * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes);
+                } else {
+                    if (difference < (MAX_DIFF / numWakes))
+                        rotationalVelocities[i] = rotationalVelocities[i - 1] * Math.pow(difference, POWER) / Math.pow((MAX_DIFF / numWakes), POWER);
+                    else
+                        rotationalVelocities[i] = rotationalVelocities[i - 1];
+                }
+            }
+
         }
-        //Update the index of the array of recent velocities that each wake uses. Each wake is 3 velocities behind the
-        //next smallest wake.
-        velocityIndices[0] = (13 + (velocityIndices[0] - 1) % 13) % 13;
-        velocities[velocityIndices[0]] = rotationalVelocity;
-        for (int i = 1; i < numWakes; i++)
-            velocityIndices[i] = (velocityIndices[0] + 3 * i) % 13;
 
         //Scale wakes based on velocity.
-        double baseRad = 20;
-        double rad;
+//        if (count--  == 0)
+//        {
+//            count = 10;
+//            offSet = 0;
+//        } else {
+//            offSet += baseRad / 5;
+//        }
+        double rad = baseRad + velocity + offSet;
         for (Arc arc :arcs) {
-            rad = baseRad + velocity;
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
-            baseRad += 5 + (velocity / 2);
+            rad += (20 / numWakes) + (velocity / 2);
         }
     }
 
@@ -88,7 +162,7 @@ class Wake extends Group {
      */
     void updatePosition (long timeInterval) {
         for (int i = 0; i < numWakes; i++) {
-            rotations[i] = rotations[i] + velocities[velocityIndices[i]] * timeInterval;
+            rotations[i] = rotations[i] + rotationalVelocities[i] * timeInterval;
             arcs[i].getTransforms().setAll(new Rotate(rotations[i]));
         }
     }
@@ -100,6 +174,7 @@ class Wake extends Group {
     void rotate (double rotation) {
         for (int i = 0; i < arcs.length; i++) {
             rotations[i] = rotation;
+            rotationalVelocities[i] = 0;
             arcs[i].getTransforms().setAll(new Rotate(rotation));
         }
     }
