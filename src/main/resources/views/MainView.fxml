@@ -57,7 +57,7 @@
                   <Insets top="10.0" />
                </GridPane.margin>
             </TableView>
-            <Label fx:id="realTime" text="Local time" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="BOTTOM" />
+            <Label fx:id="realTime" text="Local time" textFill="WHITE" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="BOTTOM" />
          </children>
       </GridPane>
    </children>

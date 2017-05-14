@@ -21,6 +21,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import seng302.controllers.annotations.Annotation;
+import seng302.controllers.annotations.ImportantAnnotationController;
+import seng302.controllers.annotations.ImportantAnnotationDelegate;
+import seng302.controllers.annotations.ImportantAnnotationsState;
 import seng302.models.*;
 import seng302.models.parsers.StreamParser;
 
@@ -30,7 +34,7 @@ import java.util.*;
 /**
  * Created by ptg19 on 29/03/17.
  */
-public class RaceViewController extends Thread{
+public class RaceViewController extends Thread implements ImportantAnnotationDelegate{
     @FXML
     private VBox positionVbox;
     @FXML
@@ -53,14 +57,16 @@ public class RaceViewController extends Thread{
     private Timeline timerTimeline;
     private Race race;
     private Stage stage;
-    private Integer annotationLevel;
-    private Map<String, Boolean> importantAnnotations = new HashMap<>();
+    private ImportantAnnotationsState importantAnnotations;
 
     public void initialize() {
+        // Load a default important annotation state
+        importantAnnotations = new ImportantAnnotationsState();
 
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
+
         for (Yacht boat : race.getBoats()) {
             startingBoats.add(boat);
         }
@@ -79,13 +85,12 @@ public class RaceViewController extends Thread{
     }
 
     /**
-     * Important annotations have been changed, update this view
-     * @param newImportantAnnotations HashMap containing whether or not annotations
-     *                                are important
+     * The important annotations have been changed, update this view
+     * @param importantAnnotationsState The current state of the selected annotations
      */
-    void importantAnnotationsChanged(Map<String, Boolean> newImportantAnnotations){
-        this.importantAnnotations = newImportantAnnotations;
-        setAnnotations((int)annotationSlider.getValue());
+    public void importantAnnotationsChanged(ImportantAnnotationsState importantAnnotationsState){
+        this.importantAnnotations = importantAnnotationsState;
+        setAnnotations((int)annotationSlider.getValue()); // Refresh the displayed annotations
     }
 
     /**
@@ -114,10 +119,6 @@ public class RaceViewController extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    Map<String, Boolean> getImportantAnnotations(){
-        return importantAnnotations;
     }
 
     private void initializeSettings() {
@@ -307,8 +308,43 @@ public class RaceViewController extends Thread{
         return startingBoats;
     }
 
+    /**
+     * Display the important annotations for a specific BoatGroup
+     * @param bg The boat group to set the annotations for
+     */
+    private void setBoatGroupImportantAnnotations(BoatGroup bg){
+        if (importantAnnotations.getAnnotationState(Annotation.NAME)){
+            bg.setTeamNameObjectVisible(true);
+        }
+        else{
+            bg.setTeamNameObjectVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.SPEED)){
+            bg.setVelocityObjectVisible(true);
+        }
+        else{
+            bg.setVelocityObjectVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.TRACK)){
+            bg.setLineGroupVisible(true);
+        }
+        else{
+            bg.setLineGroupVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.WAKE)){
+            bg.setWakeVisible(true);
+        }
+        else{
+            bg.setWakeVisible(false);
+        }
+    }
+
     private void setAnnotations(Integer annotationLevel) {
         switch (annotationLevel) {
+            // No Annotations
             case 0:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
@@ -321,6 +357,7 @@ public class RaceViewController extends Thread{
                     }
                 }
                 break;
+            // Low Annotations
             case 1:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
@@ -338,44 +375,11 @@ public class RaceViewController extends Thread{
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
                         BoatGroup bg = (BoatGroup) ro;
-
-                        if (importantAnnotations.containsKey("BoatName") && importantAnnotations.get("BoatName")){
-                            bg.setTeamNameObjectVisible(true);
-                        }
-                        else{
-                            bg.setTeamNameObjectVisible(false);
-                        }
-
-                        if (importantAnnotations.containsKey("BoatSpeed") && importantAnnotations.get("BoatSpeed")){
-                            bg.setVelocityObjectVisible(true);
-                        }
-                        else{
-                            bg.setVelocityObjectVisible(false);
-                        }
-
-                        if (importantAnnotations.containsKey("BoatEstTimeToNextMark") && importantAnnotations.get("BoatEstTimeToNextMark")) {
-                            bg.setEstTimeToNextMarkVisible(true);
-                        }
-                        else{
-                            bg.setEstTimeToNextMarkVisible(false);
-                        }
-
-                        if (importantAnnotations.containsKey("BoatTrack") && importantAnnotations.get("BoatTrack")){
-                            bg.setLineGroupVisible(true);
-                        }
-                        else{
-                            bg.setLineGroupVisible(false);
-                        }
-
-                        if (importantAnnotations.containsKey("BoatWake") && importantAnnotations.get("BoatWake")){
-                            bg.setWakeVisible(true);
-                        }
-                        else{
-                            bg.setWakeVisible(false);
-                        }
+                        setBoatGroupImportantAnnotations(bg);
                     }
                 }
                 break;
+            // All Annotations
             case 3:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
