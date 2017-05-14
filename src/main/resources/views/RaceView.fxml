@@ -7,7 +7,6 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -29,36 +28,37 @@
         <RowConstraints />
     </rowConstraints>
     <children>
-        <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowSpan="3">
+        <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #2C2c36;" GridPane.rowSpan="3">
             <children>
-                <Label layoutX="11.0" layoutY="259.0" text="Team Position" />
-                <Label layoutX="13.0" layoutY="432.0" text="Settings" />
-                <Label layoutX="11.0" layoutY="14.0" text="Timer" />
-                <Label layoutX="11.0" layoutY="88.0" text="Wind direction" />
-                <Circle fx:id="windBackgroundCircle" blendMode="DARKEN" fill="#76baf8" layoutX="110.0" layoutY="166.0" radius="35.0" stroke="#686868" strokeType="INSIDE" strokeWidth="3.0" />
-                <Text fx:id="windArrowText" fill="#686868" layoutX="96.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↑" wrappingWidth="27.5">
+                <Label layoutX="11.0" layoutY="259.0" text="Team Position" textFill="WHITE" />
+                <Label layoutX="13.0" layoutY="432.0" text="Settings" textFill="WHITE" />
+                <Label layoutX="11.0" layoutY="14.0" text="Timer" textFill="WHITE" />
+                <Label layoutX="11.0" layoutY="88.0" text="Wind direction" textFill="WHITE" />
+                <Circle fx:id="windBackgroundCircle" blendMode="DARKEN" fill="#3dcdc8" layoutX="110.0" layoutY="166.0" radius="35.0" stroke="#d7d7d7" strokeType="INSIDE" strokeWidth="3.0" />
+                <Text fx:id="windArrowText" fill="#a8a8a8" layoutX="86.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↑">
                     <font>
-                        <Font name="Arial Black" size="55.0" />
+                        <Font name="AdobeArabic-Regular" size="55.0" />
                     </font>
                 </Text>
-                <Text fx:id="windDirectionText" fill="#a8a7a7" layoutX="171.0" layoutY="214.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0°" textAlignment="RIGHT">
+                <Text fx:id="windDirectionText" fill="#d3d3d3" layoutX="171.0" layoutY="214.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0°" textAlignment="RIGHT">
                     <font>
                         <Font name="System Bold" size="13.0" />
                     </font>
                 </Text>
-                <CheckBox fx:id="toggleFps" layoutX="21.0" layoutY="453.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="143.0" selected="true" text="Show FPS" />
-            <VBox fx:id="positionVbox" layoutX="12.0" layoutY="280.0" prefHeight="140.0" prefWidth="200.0" />
+                <CheckBox fx:id="toggleFps" graphicTextGap="0.0" layoutX="21.0" layoutY="453.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="143.0" selected="true" styleClass="ui-checkbox" text="Show FPS" textFill="WHITE" />
+            <VBox fx:id="positionVbox" layoutX="12.0" layoutY="280.0" prefHeight="140.0" prefWidth="200.0" styleClass="text-white" />
             <Pane layoutX="11.0" layoutY="30.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="51.0" prefWidth="193.0">
                <children>
-                  <Text fx:id="timerLabel" layoutX="-26.0" layoutY="34.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" textAlignment="CENTER" wrappingWidth="246.0">
+                  <Text fx:id="timerLabel" fill="#f8f8f8" layoutX="-26.0" layoutY="34.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" textAlignment="CENTER" wrappingWidth="246.0">
                      <font>
                         <Font size="25.0" />
                      </font>
                   </Text>
                </children>
             </Pane>
-            <Slider fx:id="annotationSlider" blockIncrement="1.0" layoutX="38.0" layoutY="527.0" majorTickUnit="1.0" max="3.0" minorTickCount="0" prefHeight="51.0" prefWidth="170.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" />
-            <Label layoutX="10.0" layoutY="499.0" text="Annotations" />
+            <Slider fx:id="annotationSlider" blockIncrement="1.0" layoutX="38.0" layoutY="527.0" majorTickUnit="1.0" max="3.0" minorTickCount="0" prefHeight="51.0" prefWidth="170.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" styleClass="ui-slider" />
+            <Label layoutX="10.0" layoutY="499.0" text="Annotations" textFill="WHITE" />
+            <Button fx:id="selectAnnotationBtn" layoutX="35.0" layoutY="578.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="170.0" styleClass="blue-ui-btn" text="Select Annotations" textFill="WHITE" />
             </children>
         </AnchorPane>
         <AnchorPane fx:id="contentAnchorPane" prefHeight="960.0" prefWidth="1280.0" style="-fx-background-color: skyblue;" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowSpan="2147483647" GridPane.valignment="TOP">

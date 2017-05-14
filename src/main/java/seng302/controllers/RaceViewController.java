@@ -1,26 +1,31 @@
 package seng302.controllers;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import seng302.controllers.annotations.Annotation;
+import seng302.controllers.annotations.ImportantAnnotationController;
+import seng302.controllers.annotations.ImportantAnnotationDelegate;
+import seng302.controllers.annotations.ImportantAnnotationsState;
 import seng302.models.*;
-import seng302.models.parsers.ConfigParser;
 import seng302.models.parsers.StreamParser;
 
 import java.io.IOException;
@@ -29,7 +34,7 @@ import java.util.*;
 /**
  * Created by ptg19 on 29/03/17.
  */
-public class RaceViewController extends Thread{
+public class RaceViewController extends Thread implements ImportantAnnotationDelegate{
     @FXML
     private VBox positionVbox;
     @FXML
@@ -43,6 +48,8 @@ public class RaceViewController extends Thread{
     @FXML
     private Slider annotationSlider;
     @FXML
+    private Button selectAnnotationBtn;
+    @FXML
     private CanvasController includedCanvasController;
 
     private ArrayList<Yacht> startingBoats = new ArrayList<>();
@@ -52,21 +59,19 @@ public class RaceViewController extends Thread{
     private ArrayList<Yacht> boatOrder = new ArrayList<>();
     private Race race;
     private Stage stage;
+    private ImportantAnnotationsState importantAnnotations;
 
     public void initialize() {
+        // Load a default important annotation state
+        importantAnnotations = new ImportantAnnotationsState();
 
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
+
         for (Yacht boat : race.getBoats()) {
             startingBoats.add(boat);
         }
-//        try{
-//            initializeTimelines();
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//        }
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
@@ -79,9 +84,48 @@ public class RaceViewController extends Thread{
 //        windDirectionText.setText(String.format("%.1f°", windDirection));
 //        windArrowText.setRotate(windDirection);
         includedCanvasController.timer.start();
+
+        selectAnnotationBtn.setOnAction(event -> {
+            loadSelectAnnotationView();
+        });
     }
 
+    /**
+     * The important annotations have been changed, update this view
+     * @param importantAnnotationsState The current state of the selected annotations
+     */
+    public void importantAnnotationsChanged(ImportantAnnotationsState importantAnnotationsState){
+        this.importantAnnotations = importantAnnotationsState;
+        setAnnotations((int)annotationSlider.getValue()); // Refresh the displayed annotations
+    }
 
+    /**
+     * Loads the "select annotations" view in a new window
+     */
+    private void loadSelectAnnotationView() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            Stage stage = new Stage();
+
+            // Set controller
+            ImportantAnnotationController controller = new ImportantAnnotationController(this, stage);
+            fxmlLoader.setController(controller);
+
+            // Load FXML and set CSS
+            fxmlLoader.setLocation(getClass().getResource("/views/importantAnnotationSelectView.fxml"));
+            Scene scene = new Scene(fxmlLoader.load(), 469, 248);
+            scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+            stage.initStyle(StageStyle.UNDECORATED);
+
+            stage.setScene(scene);
+            stage.show();
+
+            controller.loadState(importantAnnotations);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void initializeSettings() {
         displayFps = true;
@@ -93,13 +137,13 @@ public class RaceViewController extends Thread{
             }
         });
 
-        //SLIFER STUFF BELOW
+        //SLIDER STUFF BELOW
         annotationSlider.setLabelFormatter(new StringConverter<Double>() {
             @Override
             public String toString(Double n) {
                 if (n == 0) return "None";
                 if (n == 1) return "Low";
-                if (n == 2) return "Medium";
+                if (n == 2) return "Important";
                 if (n == 3) return "All";
 
                 return "All";
@@ -112,7 +156,7 @@ public class RaceViewController extends Thread{
                         return 0d;
                     case "Low":
                         return 1d;
-                    case "Medium":
+                    case "Important":
                         return 2d;
                     case "All":
                         return 3d;
@@ -303,6 +347,7 @@ public class RaceViewController extends Thread{
     private void showOrder() {
         positionVbox.getChildren().clear();
         positionVbox.getChildren().removeAll();
+        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
 //        for (Boat boat : boatOrder) {
 //            positionVbox.getChildren().add(new Text(boat.getShortName() + " " + boat.getSpeedInKnots() + " Knots"));
@@ -310,11 +355,17 @@ public class RaceViewController extends Thread{
 
         for (Yacht boat : StreamParser.getBoatsPos().values()) {
             if (boat.getBoatStatus() == 3) {  // 3 is finish status
-                positionVbox.getChildren().add(new Text(boat.getPosition() + ". " +
-                        boat.getShortName() + " (Finished)"));
+                Text textToAdd = new Text(boat.getPosition() + ". " +
+                        boat.getShortName() + " (Finished)");
+                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                positionVbox.getChildren().add(textToAdd);
+
             } else {
-                positionVbox.getChildren().add(new Text(boat.getPosition() + ". " +
-                        boat.getShortName() + " "));
+                Text textToAdd = new Text(boat.getPosition() + ". " +
+                        boat.getShortName() + " ");
+                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                textToAdd.setStyle("");
+                positionVbox.getChildren().add(textToAdd);
             }
 
         }
@@ -376,9 +427,43 @@ public class RaceViewController extends Thread{
         return startingBoats;
     }
 
+    /**
+     * Display the important annotations for a specific BoatGroup
+     * @param bg The boat group to set the annotations for
+     */
+    private void setBoatGroupImportantAnnotations(BoatGroup bg){
+        if (importantAnnotations.getAnnotationState(Annotation.NAME)){
+            bg.setTeamNameObjectVisible(true);
+        }
+        else{
+            bg.setTeamNameObjectVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.SPEED)){
+            bg.setVelocityObjectVisible(true);
+        }
+        else{
+            bg.setVelocityObjectVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.TRACK)){
+            bg.setLineGroupVisible(true);
+        }
+        else{
+            bg.setLineGroupVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.WAKE)){
+            bg.setWakeVisible(true);
+        }
+        else{
+            bg.setWakeVisible(false);
+        }
+    }
 
     private void setAnnotations(Integer annotationLevel) {
         switch (annotationLevel) {
+            // No Annotations
             case 0:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
@@ -390,6 +475,7 @@ public class RaceViewController extends Thread{
                     }
                 }
                 break;
+            // Low Annotations
             case 1:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
@@ -401,17 +487,16 @@ public class RaceViewController extends Thread{
                     }
                 }
                 break;
+            // Important Annotations
             case 2:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
                         BoatGroup bg = (BoatGroup) ro;
-                        bg.setTeamNameObjectVisible(true);
-                        bg.setVelocityObjectVisible(false);
-                        bg.setLineGroupVisible(true);
-                        bg.setWakeVisible(false);
+                        setBoatGroupImportantAnnotations(bg);
                     }
                 }
                 break;
+            // All Annotations
             case 3:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
