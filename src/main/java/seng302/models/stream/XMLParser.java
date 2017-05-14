@@ -1,4 +1,4 @@
-package seng302.models.parsers;
+package seng302.models.stream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -9,7 +9,6 @@ import seng302.models.mark.MarkType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

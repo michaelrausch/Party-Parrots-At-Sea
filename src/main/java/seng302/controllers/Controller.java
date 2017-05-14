@@ -5,7 +5,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -15,16 +14,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.models.Yacht;
-import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.XMLParser;
+import seng302.models.stream.StreamParser;
+import seng302.models.stream.XMLParser;
 
 
 import java.io.IOException;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 

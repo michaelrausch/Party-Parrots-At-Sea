@@ -1,4 +1,4 @@
-package seng302.models.parsers;
+package seng302.models.stream;
 
 import org.junit.Before;
 import org.junit.Test;

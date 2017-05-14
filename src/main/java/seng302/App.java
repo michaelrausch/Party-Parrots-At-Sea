@@ -5,8 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.StreamReceiver;
+import seng302.models.stream.StreamParser;
+import seng302.models.stream.StreamReceiver;
 import seng302.server.ServerThread;
 
 public class App extends Application
