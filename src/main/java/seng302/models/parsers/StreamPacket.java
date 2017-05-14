@@ -1,5 +1,7 @@
 package seng302.models.parsers;
 
+import seng302.models.parsers.packets.PacketType;
+
 /**
  * Created by kre39 on 23/04/17.
  */

@@ -48,6 +48,4 @@ public enum PacketType {
         }
         return OTHER;
     }
-
-
 }
