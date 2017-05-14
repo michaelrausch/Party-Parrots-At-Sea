@@ -1,31 +1,31 @@
 package seng302.controllers;
 
-import javafx.animation.*;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
-import seng302.models.*;
+import seng302.models.BoatGroup;
+import seng302.models.Colors;
+import seng302.models.RaceObject;
+import seng302.models.Yacht;
 import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.StreamReceiver;
-import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.XMLParser;
 import seng302.models.parsers.XMLParser.RaceXMLObject.CompoundMark;
 import seng302.models.parsers.XMLParser.RaceXMLObject.Limit;
-import seng302.models.mark.Mark;
+import seng302.models.parsers.packets.BoatPositionPacket;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
