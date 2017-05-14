@@ -53,8 +53,8 @@ public class MarkGroup extends RaceObject {
             };
             super.getChildren().add(markCircle);
         } else {
-            marks.add(((GateMark) mark).getSingleMark1());
-            marks.add(((GateMark) mark).getSingleMark2());
+//            marks.add(((GateMark) mark).getSingleMark1());
+//            marks.add(((GateMark) mark).getSingleMark2());
             nodePixelVelocitiesX = new double[]{0d,0d};
             nodePixelVelocitiesY = new double[]{0d,0d};
             nodeDestinations     = new Point2D[2];

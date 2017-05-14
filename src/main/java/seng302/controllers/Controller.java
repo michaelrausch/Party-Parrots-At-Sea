@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Controller implements Initializable {
+public class Controller {
     @FXML
     private AnchorPane contentPane;
     @FXML
@@ -64,13 +64,6 @@ public class Controller implements Initializable {
         catch(IOException e){
             System.err.println(e);
         }
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        //DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        //format.setTimeZone(TimeZone.getTimeZone("GMT-8"));
-        //realTime.setText(format.format(new Date()));
     }
 
     /**
@@ -147,18 +140,9 @@ public class Controller implements Initializable {
         posCol.setCellValueFactory(
                 new PropertyValueFactory<>("position")
         );
-//        if (StreamParser.isRaceStarted()) {
         data.addAll(StreamParser.getBoatsPos().values());
-//        } else {
-//            for (Yacht boat : StreamParser.getBoats().values()) {
-//                boat.setPosition("-");
-//                data.add(boat);
-//            }
-//        }
+
         teamList.refresh();
 
-//        posCol.setSortType(TableColumn.SortType.ASCENDING);
-//        teamList.getSortOrder().add(posCol);
-//        posCol.setSortable(false);
     }
 }

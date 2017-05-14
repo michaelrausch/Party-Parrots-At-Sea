@@ -5,6 +5,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import seng302.models.Yacht;
+import seng302.models.mark.MarkType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -301,6 +302,7 @@ public class XMLParser {
         public class CompoundMark {
             private Integer markID;
             private String cMarkName;
+            private MarkType markType;
             private ArrayList<Mark> marks;
 
             CompoundMark(Node compoundMark) {
@@ -308,6 +310,12 @@ public class XMLParser {
                 this.markID = getNodeAttributeInt(compoundMark, "CompoundMarkID");
                 this.cMarkName = getNodeAttributeString(compoundMark, "Name");
                 NodeList childMarks = compoundMark.getChildNodes();
+                if (childMarks.getLength() > 1){
+                    markType = MarkType.OPEN_GATE;
+                } else {
+                    markType = MarkType.SINGLE_MARK;
+                }
+
                 for (int i = 0; i < childMarks.getLength(); i++) {
                     Node markNode = childMarks.item(i);
                     if (markNode.getNodeName().equals("Mark")) {

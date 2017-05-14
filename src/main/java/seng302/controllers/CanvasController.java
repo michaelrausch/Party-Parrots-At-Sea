@@ -59,7 +59,6 @@ public class CanvasController {
     private Mark maxLonPoint;
     private double referencePointX;
     private double referencePointY;
-    private double metersToPixels;
     private List<RaceObject> raceObjects = new ArrayList<>();
     private List<Mark> raceMarks = new ArrayList<>();
 
@@ -179,57 +178,6 @@ public class CanvasController {
         gc.fillPolygon(xBoundaryPoints,yBoundaryPoints,yBoundaryPoints.length);
     }
 
-
-    /**
-     * Adds the course marks to the canvas, taken from the XMl file
-     *
-     * NOTE: This is quite confusing as objects are grabbed from the XMLParser such as Mark and CompoundMark which are
-     * named the same as those in the model package but are, however not the same, so they do not have things such as
-     * a type and must be derived from the number of marks in a compound mark etc..
-     */
-    private void addCourseMarks() {
-        XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
-        ArrayList<CompoundMark> compoundMarks = raceXMLObject.getCompoundMarks();
-        RaceObject markGroup;
-
-        for (CompoundMark compoundMark : compoundMarks) {
-
-            //If the compound mark has 2 marks then its a gate mark
-            if (compoundMark.getMarks().size() == 2) {
-                CompoundMark.Mark mark1 = compoundMark.getMarks().get(0);
-                CompoundMark.Mark mark2 = compoundMark.getMarks().get(1);
-                SingleMark singleMark1 = new SingleMark(mark1.getMarkName(), mark1.getTargetLat(), mark1.getTargetLng(), mark1.getSourceID());
-                SingleMark singleMark2 = new SingleMark(mark1.getMarkName(), mark2.getTargetLat(), mark2.getTargetLng(), mark2.getSourceID());
-                GateMark thisGateMark = new GateMark(compoundMark.getcMarkName(),
-                        (compoundMark.getMarkID().equals(1)) ? MarkType.OPEN_GATE : MarkType.CLOSED_GATE,
-                        singleMark1,
-                        singleMark2,
-                        singleMark1.getLatitude(),
-                        singleMark1.getLongitude());
-
-                markGroup = new MarkGroup(thisGateMark,
-                        findScaledXY(thisGateMark.getSingleMark1()),
-                        findScaledXY(thisGateMark.getSingleMark2()));
-
-                raceObjects.add(markGroup);
-                raceMarks.add(thisGateMark);
-
-                //Otherwise its a single mark
-            } else {
-                CompoundMark.Mark singleMark = compoundMark.getMarks().get(0);
-                Mark thisSingleMark = new SingleMark(singleMark.getMarkName(),
-                        singleMark.getTargetLat(),
-                        singleMark.getTargetLng(),
-                        singleMark.getSourceID());
-
-                markGroup = new MarkGroup(thisSingleMark, findScaledXY(thisSingleMark));
-                raceObjects.add(markGroup);
-                raceMarks.add(thisSingleMark);
-
-            }
-        }
-    }
-
     private void updateRaceObjects(){
         for (RaceObject raceObject : raceObjects) {
             raceObject.updatePosition(1000 / 60);
@@ -325,15 +273,15 @@ public class CanvasController {
 //        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
 //        List<Boat> boats  = raceViewController.getStartingBoats();
         Map<Integer, Yacht> boats = StreamParser.getBoats();
-        Double startingX  = raceObjects.get(0).getLayoutX();
-        Double startingY  = raceObjects.get(0).getLayoutY();
+//        Double startingX  = raceObjects.get(0).getLayoutX();
+//        Double startingY  = raceObjects.get(0).getLayoutY();
         Group boatAnnotations = new Group();
 
         for (Yacht boat : boats.values()) {
 //        for (Boat boat : boats) {
             boat.setColour(Colors.getColor());
             BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-            boatGroup.moveTo(startingX, startingY, 0d);
+//            boatGroup.moveTo(startingX, startingY, 0d);
             //boatGroup.setStage(raceViewController.getStage());
             raceObjects.add(boatGroup);
             boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
@@ -349,9 +297,8 @@ public class CanvasController {
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
-        givePointsXY();
+        //givePointsXY();
         addRaceBorder();
-        findMetersToPixels();
     }
 
 
@@ -448,25 +395,25 @@ public class CanvasController {
      * Give all markers in the course an x,y location relative to a given reference with a known x,y location. Distances
      * are scaled according to the distanceScaleFactor variable.
      */
-    private void givePointsXY() {
-        List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
-        List<Mark> processed = new ArrayList<>();
-        RaceObject markGroup;
-
-        for (Mark mark : allPoints) {
-            if (!processed.contains(mark)) {
-                if (mark.getMarkType() != MarkType.SINGLE_MARK) {
-                    GateMark gateMark = (GateMark) mark;
-                    markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
-                    raceObjects.add(markGroup);
-                } else {
-                    markGroup = new MarkGroup(mark, findScaledXY(mark));
-                    raceObjects.add(markGroup);
-                }
-                processed.add(mark);
-            }
-        }
-    }
+//    private void givePointsXY() {
+//    List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
+//    List<Mark> processed = new ArrayList<>();
+//    RaceObject markGroup;
+//
+//        for (Mark mark : allPoints) {
+//        if (!processed.contains(mark)) {
+//            if (mark.getMarkType() != MarkType.SINGLE_MARK) {
+//                GateMark gateMark = (GateMark) mark;
+//                markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
+//                raceObjects.add(markGroup);
+//                } else {
+//                    markGroup = new MarkGroup(mark, findScaledXY(mark));
+//                    raceObjects.add(markGroup);
+//                }
+//                processed.add(mark);
+//            }
+//        }
+//    }
 
     private Point2D findScaledXY (Mark unscaled) {
         return findScaledXY (minLatPoint.getLatitude(), minLatPoint.getLongitude(),
@@ -500,35 +447,6 @@ public class CanvasController {
         return new Point2D(xAxisLocation, yAxisLocation);
     }
 
-
-
-    /**
-     * Find the number of meters per pixel.
-     */
-    private void findMetersToPixels () {
-        Double angularDistance;
-        Double angle;
-        Double straightLineDistance;
-        if (scaleDirection == ScaleDirection.HORIZONTAL) {
-            angularDistance = Mark.calculateDistance(minLonPoint, maxLonPoint);
-            angle = Mark.calculateHeadingRad(minLonPoint, maxLonPoint);
-            if (angle > Math.PI / 2) {
-                straightLineDistance = Math.cos(angle - Math.PI) * angularDistance;
-            } else {
-                straightLineDistance = Math.cos(angle) * angularDistance;
-            }
-            metersToPixels = (CANVAS_WIDTH - RHS_BUFFER - LHS_BUFFER) / straightLineDistance;
-        } else {
-            angularDistance = Mark.calculateDistance(minLatPoint, maxLatPoint);
-            angle = Mark.calculateHeadingRad(minLatPoint, maxLatPoint);
-            if (angle < Math.PI / 2) {
-                straightLineDistance = Math.cos(angle) * angularDistance;
-            } else {
-                straightLineDistance = Math.cos(-angle + Math.PI * 2) * angularDistance;
-            }
-            metersToPixels = (CANVAS_HEIGHT - TOP_BUFFER - BOT_BUFFER) / straightLineDistance;
-        }
-    }
 
     private Point2D latLonToXY (double latitude, double longitude) {
         return findScaledXY(minLatPoint.getLatitude(), minLatPoint.getLongitude(), latitude, longitude);
