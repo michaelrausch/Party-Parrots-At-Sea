@@ -236,6 +236,7 @@ public class BoatGroup extends RaceObject{
                     wake.setRotationalVelocity(rotationalVelocity, rotationalGoal, boat.getVelocity());
                 }
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
+                estTimeToNextMarkObject.setText(String.valueOf(boat.getEstimateTimeAtNextMark()));
             } else {
                 setToInitialLocation = true;
                 rotationalGoal = rotation;
