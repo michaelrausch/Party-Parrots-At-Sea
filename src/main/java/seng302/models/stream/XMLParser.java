@@ -326,6 +326,7 @@ public class XMLParser {
 
             public Integer getMarkID() { return markID; }
             public String getcMarkName() { return cMarkName; }
+            public MarkType getMarkType() { return markType; }
             public ArrayList<Mark> getMarks() { return marks; }
 
             public class Mark {

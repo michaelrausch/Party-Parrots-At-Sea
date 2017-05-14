@@ -389,25 +389,24 @@ public class CanvasController {
      * Give all markers in the course an x,y location relative to a given reference with a known x,y location. Distances
      * are scaled according to the distanceScaleFactor variable.
      */
-//    private void givePointsXY() {
-//    List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
-//    List<Mark> processed = new ArrayList<>();
-//    RaceObject markGroup;
-//
-//        for (Mark mark : allPoints) {
-//        if (!processed.contains(mark)) {
-//            if (mark.getMarkType() != MarkType.SINGLE_MARK) {
-//                GateMark gateMark = (GateMark) mark;
-//                markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
-//                raceObjects.add(markGroup);
-//                } else {
-//                    markGroup = new MarkGroup(mark, findScaledXY(mark));
-//                    raceObjects.add(markGroup);
-//                }
-//                processed.add(mark);
-//            }
-//        }
-//    }
+    private void givePointsXY() {
+    List<XMLParser.RaceXMLObject.CompoundMark> allPoints = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
+    List<XMLParser.RaceXMLObject.CompoundMark> processed = new ArrayList<>();
+    RaceObject markGroup;
+
+        for (XMLParser.RaceXMLObject.CompoundMark mark : allPoints) {
+        if (!processed.contains(mark)) {
+            if (mark.getMarkType() != MarkType.SINGLE_MARK) {
+                markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)), findScaledXY(mark.getMarks().get(1)));
+                raceObjects.add(markGroup);
+                } else {
+                    markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)));
+                    raceObjects.add(markGroup);
+                }
+                processed.add(mark);
+            }
+        }
+    }
 
     private Point2D findScaledXY (Mark unscaled) {
         return findScaledXY (minLatPoint.getLatitude(), minLatPoint.getLongitude(),
