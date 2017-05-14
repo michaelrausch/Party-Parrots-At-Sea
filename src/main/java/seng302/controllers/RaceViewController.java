@@ -340,6 +340,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         else{
             bg.setWakeVisible(false);
         }
+
+        if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
+            bg.setEstTimeToNextMarkVisible(true);
+        }
+        else {
+            bg.setEstTimeToNextMarkVisible(false);
+        }
     }
 
     private void setAnnotations(Integer annotationLevel) {
