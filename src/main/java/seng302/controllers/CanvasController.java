@@ -250,6 +250,7 @@ public class CanvasController {
             gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
             gc.restore();
             addRaceBorder();
+            canvas.toBack();
         }
     }
 
