@@ -245,7 +245,6 @@ public class CanvasController {
 
     private void checkForCourseChanges() {
         if (StreamParser.isNewRaceXmlReceived()){
-            System.out.println("New Canvas found");
             gc.setFill(Color.SKYBLUE);
             gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
             gc.restore();
