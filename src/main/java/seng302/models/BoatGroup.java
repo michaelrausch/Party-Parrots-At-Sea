@@ -8,7 +8,10 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
+import seng302.models.parsers.StreamParser;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,6 +94,9 @@ public class BoatGroup extends RaceObject{
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
         estTimeToNextMarkObject = new Text(String.valueOf(boat.getEstimateTimeAtNextMark()));
         legTimeObject = new Text(String.valueOf(boat.getMarkRoundingTime()));
+        DateFormat format = new SimpleDateFormat("mm:ss");
+        String timeToNextMark = format.format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+        estTimeToNextMarkObject = new Text("Next mark: " + timeToNextMark);
 
         teamNameObject.setX(TEAMNAME_X_OFFSET);
         teamNameObject.setY(TEAMNAME_Y_OFFSET);
@@ -250,6 +256,9 @@ public class BoatGroup extends RaceObject{
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
                 estTimeToNextMarkObject.setText(String.valueOf(boat.getEstimateTimeAtNextMark()));
                 legTimeObject.setText(String.valueOf(boat.getMarkRoundingTime()));
+                DateFormat format = new SimpleDateFormat("mm:ss");
+                String timeToNextMark = format.format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+                estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
             } else {
                 setToInitialLocation = true;
                 rotationalGoal = rotation;

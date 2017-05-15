@@ -238,11 +238,11 @@ public class StreamParser extends Thread{
             Yacht boat = boats.get((int)(long) boatStatusSourceID);
             boat.setBoatStatus((int)payload[28 + (i * 20)]);
             boat.setLegNumber((int)payload[29 + (i * 20)]);
-            boat.setPenaltiesAwarded((int)payload[29 + (i * 20)]);
-            boat.setPenaltiesServed((int)payload[30 + (i * 20)]);
-            Long estTimeAtNextMark = bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
+            boat.setPenaltiesAwarded((int)payload[30 + (i * 20)]);
+            boat.setPenaltiesServed((int)payload[31 + (i * 20)]);
+            Long estTimeAtNextMark = bytesToLong(Arrays.copyOfRange(payload,32 + (i * 20),38+ (i * 20)));
             boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
-            Long estTimeAtFinish = bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
+            Long estTimeAtFinish = bytesToLong(Arrays.copyOfRange(payload,38 + (i * 20),44+ (i * 20)));
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
             boatsPos.put(estTimeAtFinish, boat);
 //            String boatStatus = "SourceID: " + boatStatusSourceID;
@@ -578,6 +578,15 @@ public class StreamParser extends Thread{
      */
     public static Map<Long, Yacht> getBoatsPos() {
         return boatsPos;
+    }
+
+    /**
+     * returns current time in stream in long
+     *
+     * @return a long value of current time
+     */
+    public static Long getCurrentTimeLong() {
+        return currentTimeLong;
     }
 
     public static void appClose(){
