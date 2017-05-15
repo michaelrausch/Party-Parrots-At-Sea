@@ -297,9 +297,9 @@ public class StreamParser extends Thread{
         byte[] payload = packet.getPayload();
 
         int messageType = payload[9];
-        long messagelength = bytesToLong(Arrays.copyOfRange(payload,12,14));
-        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messagelength)))).trim();
-        //System.out.println("xmlMessage2 = " + xmlMessage);
+        long messageLength = bytesToLong(Arrays.copyOfRange(payload,12,14));
+        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messageLength)))).trim();
+        System.out.println("xmlMessage = " + xmlMessage);
 
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

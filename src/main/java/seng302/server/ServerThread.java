@@ -235,6 +235,27 @@ public class ServerThread implements Runnable, Observer {
         }
     }
 
+    /**
+     * Send the post-start race course information
+     */
+    private void sendPostStartCourseXml(){
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Message raceData = getXmlMessage("/server_config/courseLimits.xml", XMLMessageSubType.RACE);
+                    if (raceData != null) {
+                        server.send(raceData);
+                        serverLog("Sending race data", 0);
+                    }
+                }catch (IOException e) {
+                    serverLog("Couldn't send an XML Message: " + e.getMessage(), 0);
+                }
+            }
+        },25000);
+    }
+
     public void run() {
         try{
             server = new StreamingServerSocket(PORT_NUMBER);
@@ -252,12 +273,13 @@ public class ServerThread implements Runnable, Observer {
         sendXml();
         startSendingRaceStartStatusMessages();
         startSendingRaceStatusMessages();
+        sendPostStartCourseXml();
     }
 
     /**
      * Start sending static boat position updates when race has finished
      */
-    private void startSendingRaceFinishedBoatPostions(){
+    private void startSendingRaceFinishedBoatPositions(){
         Timer t = new Timer();
         t.schedule(new TimerTask() {
             @Override
@@ -316,7 +338,7 @@ public class ServerThread implements Runnable, Observer {
         }
 
         if (numOfBoatsFinished == ((List<Boat>) arg).size()) {
-            startSendingRaceFinishedBoatPostions();
+            startSendingRaceFinishedBoatPositions();
         }
 
     }
