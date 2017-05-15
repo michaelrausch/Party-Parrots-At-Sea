@@ -56,11 +56,11 @@
                   </Text>
                </children>
             </Pane>
-            <Slider fx:id="annotationSlider" blockIncrement="1.0" layoutX="38.0" layoutY="527.0" majorTickUnit="1.0" max="3.0" minorTickCount="0" prefHeight="51.0" prefWidth="170.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" styleClass="ui-slider" />
+            <Slider fx:id="annotationSlider" blockIncrement="1.0" layoutX="38.0" layoutY="527.0" majorTickUnit="1.0" max="2.0" minorTickCount="0" prefHeight="51.0" prefWidth="170.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" styleClass="ui-slider" />
             <Label layoutX="10.0" layoutY="499.0" text="Annotations" textFill="WHITE" />
             <Button fx:id="selectAnnotationBtn" layoutX="35.0" layoutY="578.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="170.0" styleClass="blue-ui-btn" text="Select Annotations" textFill="WHITE" />
             <Text fill="WHITE" layoutX="11.0" layoutY="649.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Boat Selection" />
-            <ComboBox fx:id="boatSelectionComboBox" layoutX="37.0" layoutY="664.0" prefHeight="25.0" prefWidth="170.0" promptText="Select Boat" styleClass="blue" />
+            <ComboBox fx:id="boatSelectionComboBox" layoutX="37.0" layoutY="664.0" prefHeight="25.0" prefWidth="170.0" promptText="Select Boat" styleClass="combo-box-base" />
             </children>
         </AnchorPane>
         <AnchorPane fx:id="contentAnchorPane" prefHeight="960.0" prefWidth="1280.0" style="-fx-background-color: skyblue;" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowSpan="2147483647" GridPane.valignment="TOP">

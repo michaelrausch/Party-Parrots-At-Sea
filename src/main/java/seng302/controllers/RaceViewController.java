@@ -75,9 +75,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceController.initializeRace();
         race = raceController.getRace();
 
-        for (Yacht boat : race.getBoats()) {
-            startingBoats.add(boat);
-        }
+        startingBoats = new ArrayList<>(Arrays.asList(race.getBoats()));
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
@@ -149,9 +147,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             @Override
             public String toString(Double n) {
                 if (n == 0) return "None";
-                if (n == 1) return "Low";
-                if (n == 2) return "Important";
-                if (n == 3) return "All";
+                if (n == 1) return "Important";
+                if (n == 2) return "All";
 
                 return "All";
             }
@@ -161,15 +158,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 switch (s) {
                     case "None":
                         return 0d;
-                    case "Low":
-                        return 1d;
                     case "Important":
-                        return 2d;
+                        return 1d;
                     case "All":
-                        return 3d;
+                        return 2d;
 
                     default:
-                        return 3d;
+                        return 2d;
                 }
             }
         });
@@ -177,7 +172,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         annotationSlider.valueProperty().addListener((obs, oldval, newVal) ->
                     setAnnotations((int)annotationSlider.getValue()));
 
-        annotationSlider.setValue(3);
+        annotationSlider.setValue(2);
     }
 
     private void initializeTimer(){
@@ -492,20 +487,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     }
                 }
                 break;
-            // Low Annotations
-            case 1:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
-                        bg.setTeamNameObjectVisible(true);
-                        bg.setVelocityObjectVisible(false);
-                        bg.setLineGroupVisible(false);
-                        bg.setWakeVisible(false);
-                    }
-                }
-                break;
             // Important Annotations
-            case 2:
+            case 1:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
                         BoatGroup bg = (BoatGroup) ro;
@@ -514,7 +497,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
                 break;
             // All Annotations
-            case 3:
+            case 2:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
                     if(ro instanceof BoatGroup) {
                         BoatGroup bg = (BoatGroup) ro;
