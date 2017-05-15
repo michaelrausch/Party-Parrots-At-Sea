@@ -114,10 +114,10 @@ public class Yacht {
         this.penaltiesServed = penaltiesServed;
     }
 
-    public String getEstimateTimeAtNextMark() {
-        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        return format.format(estimateTimeAtNextMark);
-//        return estimateTimeAtNextMark;
+    public Long getEstimateTimeAtNextMark() {
+//        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//        return format.format(estimateTimeAtNextMark);
+        return estimateTimeAtNextMark;
     }
 
     public void setEstimateTimeAtNextMark(Long estimateTimeAtNextMark) {

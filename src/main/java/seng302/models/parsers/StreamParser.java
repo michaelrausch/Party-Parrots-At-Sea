@@ -39,6 +39,7 @@ public class StreamParser extends Thread{
      private static Map<Integer, Yacht> boats = new HashMap<>();
      private static Map<Long, Yacht> boatsPos = new TreeMap<>();
      private static double windDirection = 0;
+     private static Long currentTimeLong;
      private static String currentTimeString;
      private static boolean appRunning;
 
@@ -199,6 +200,7 @@ public class StreamParser extends Thread{
 //        System.out.println("raceStatus = " + raceStatus);
         long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
 
+        currentTimeLong = currentTime;
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         if (xmlObject.getRegattaXML() != null) {
             format.setTimeZone(TimeZone.getTimeZone(getTimeZoneString()));
@@ -573,6 +575,15 @@ public class StreamParser extends Thread{
      */
     public static Map<Long, Yacht> getBoatsPos() {
         return boatsPos;
+    }
+
+    /**
+     * returns current time in stream in long
+     *
+     * @return a long value of current time
+     */
+    public static Long getCurrentTimeLong() {
+        return currentTimeLong;
     }
 
     public static void appClose(){
