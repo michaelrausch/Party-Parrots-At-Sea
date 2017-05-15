@@ -8,5 +8,6 @@ public enum Annotation {
     WAKE,
     TRACK,
     NAME,
-    ESTTIMETONEXTMARK
+    ESTTIMETONEXTMARK,
+    LEGTIME
 }
