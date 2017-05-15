@@ -15,14 +15,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.models.Yacht;
-import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.XMLParser;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
+import seng302.models.stream.StreamParser;
 
 public class Controller implements Initializable {
     @FXML

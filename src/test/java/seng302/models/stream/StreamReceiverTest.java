@@ -2,13 +2,13 @@ package seng302.models.stream;
 
 import org.junit.Before;
 import org.junit.Test;
-import seng302.models.parsers.packets.StreamPacket;
 
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
+import seng302.models.stream.packets.StreamPacket;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

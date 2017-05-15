@@ -205,7 +205,6 @@ public class StreamParser extends Thread{
                 raceFinished = false;
                 System.out.println("[CLIENT] Race has started");
             }
-            //System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
             timeSinceStart = timeTillStart;
         }
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
@@ -214,11 +213,10 @@ public class StreamParser extends Thread{
         long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
         int noBoats = payload[22];
         int raceType = payload[23];
-//        ArrayList<String> boatStatuses = new ArrayList<>();
         boatsPos = new TreeMap<>();
         for (int i = 0; i < noBoats; i++){
-            Long boatStatusSourceID = bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
-            Yacht boat = boats.get((int)(long) boatStatusSourceID);
+            long boatStatusSourceID = bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
+            Yacht boat = boats.get((int) boatStatusSourceID);
             boat.setBoatStatus((int)payload[28 + (i * 20)]);
             boat.setLegNumber((int)payload[29 + (i * 20)]);
             boat.setPenaltiesAwarded((int)payload[29 + (i * 20)]);
@@ -281,7 +279,6 @@ public class StreamParser extends Thread{
         int messageType = payload[9];
         long messagelength = bytesToLong(Arrays.copyOfRange(payload,12,14));
         String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messagelength)))).trim();
-        //System.out.println("xmlMessage2 = " + xmlMessage);
 
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -344,7 +341,6 @@ public class StreamParser extends Thread{
         long subjectId = bytesToLong(Arrays.copyOfRange(payload,9,13));
         long incidentId = bytesToLong(Arrays.copyOfRange(payload,13,17));
         int eventId = payload[17];
-//        System.out.println("eventId = " + eventId);
     }
 
     /**
@@ -382,19 +378,18 @@ public class StreamParser extends Thread{
         double groundSpeed = bytesToLong(Arrays.copyOfRange(payload,38,40))/1000.0;
 
         //type 1 is a racing yacht and type 3 is a mark, needed for updating positions of the mark and boat
-        if (deviceType == 1 || deviceType == 3){
+        if (deviceType == 1){
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
 
             //add a new priority que to the boatPositions HashMap
             if (!boatPositions.containsKey(boatId)){
-                boatPositions.put(boatId, new PriorityBlockingQueue<BoatPositionPacket>(256, new Comparator<BoatPositionPacket>() {
+                boatPositions.put(boatId, new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
                     @Override
                     public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
                         return (int) (p1.getTimeValid() - p2.getTimeValid());
                     }
                 }));
             }
-            //Adding the boatPacket to the priority que
             boatPositions.get(boatId).put(boatPacket);
         }
     }
