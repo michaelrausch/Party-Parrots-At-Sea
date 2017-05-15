@@ -5,7 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="annotationSelectWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="248.0" prefWidth="469.0" styleClass="background-blue" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="annotationSelectWindow" maxHeight="270.0" maxWidth="469.0" minHeight="270.0" minWidth="469.0" prefHeight="270.0" prefWidth="469.0" styleClass="background-blue" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Text fill="WHITE" layoutX="26.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select important annotations">
          <font>
@@ -26,5 +26,6 @@
             <String fx:value="clearExitButton" />
          </styleClass>
       </Button>
+      <CheckBox fx:id="boatElapsedTimeSelect" layoutX="26.0" layoutY="235.0" mnemonicParsing="false" text="Boat Elapsed Time Since Last Mark" textFill="#e7e7e7" />
    </children>
 </AnchorPane>
