@@ -254,6 +254,7 @@ public class ServerThread implements Runnable, Observer {
                 }
             }
         },25000);
+        //Delays the new course xml data for 25 seconds so the boats are able to pass the starting line
     }
 
     public void run() {
