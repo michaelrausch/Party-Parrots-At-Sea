@@ -61,7 +61,7 @@ public class App extends Application {
             }
         }
         //Change the StreamReceiver in this else block to change the default data source.
-        else {
+        else{
             sr = new StreamReceiver("localhost", 4949, "RaceStream");
         }
 
@@ -70,7 +70,6 @@ public class App extends Application {
         streamParser.start();
 
         launch(args);
-
 
     }
 }

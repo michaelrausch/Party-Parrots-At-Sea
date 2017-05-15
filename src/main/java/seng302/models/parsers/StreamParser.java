@@ -40,6 +40,7 @@ public class StreamParser extends Thread{
      private static Map<Integer, Yacht> boats = new HashMap<>();
      private static Map<Long, Yacht> boatsPos = new TreeMap<>();
      private static double windDirection = 0;
+     private static Long currentTimeLong;
      private static String currentTimeString;
      private static boolean appRunning;
 
@@ -199,16 +200,17 @@ public class StreamParser extends Thread{
         long currentTime = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload,7,11));
         int raceStatus = payload[11];
-//        System.out.println("raceStatus = " + raceStatus);
         long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
+        long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+        long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
 
+        currentTimeLong = currentTime;
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         if (xmlObject.getRegattaXML() != null) {
             format.setTimeZone(TimeZone.getTimeZone(getTimeZoneString()));
             currentTimeString = format.format((new Date (currentTime)).getTime());
         }
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
-
 
         if (timeTillStart > 0) {
             timeSinceStart = timeTillStart;
@@ -226,10 +228,10 @@ public class StreamParser extends Thread{
             //System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
             timeSinceStart = timeTillStart;
         }
-        long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+
         double windDirFactor = 0x4000 / 90;   //0x4000 is 90 degrees, 0x8000 is 180 degrees, etc...
         windDirection = windDir / windDirFactor;
-        long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
+
         int noBoats = payload[22];
         int raceType = payload[23];
 //        ArrayList<String> boatStatuses = new ArrayList<>();
@@ -239,11 +241,11 @@ public class StreamParser extends Thread{
             Yacht boat = boats.get((int)(long) boatStatusSourceID);
             boat.setBoatStatus((int)payload[28 + (i * 20)]);
             boat.setLegNumber((int)payload[29 + (i * 20)]);
-            boat.setPenaltiesAwarded((int)payload[29 + (i * 20)]);
-            boat.setPenaltiesServed((int)payload[30 + (i * 20)]);
-            Long estTimeAtNextMark = bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
+            boat.setPenaltiesAwarded((int)payload[30 + (i * 20)]);
+            boat.setPenaltiesServed((int)payload[31 + (i * 20)]);
+            Long estTimeAtNextMark = bytesToLong(Arrays.copyOfRange(payload,32 + (i * 20),38+ (i * 20)));
             boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
-            Long estTimeAtFinish = bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
+            Long estTimeAtFinish = bytesToLong(Arrays.copyOfRange(payload,38 + (i * 20),44+ (i * 20)));
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
             boatsPos.put(estTimeAtFinish, boat);
 //            String boatStatus = "SourceID: " + boatStatusSourceID;
@@ -434,6 +436,9 @@ public class StreamParser extends Thread{
         int roundingSide = payload[18];
         int markType = payload[19];
         int markId = payload[20];
+
+        // assign mark rounding time to boat
+        boats.get((int)subjectId).setMarkRoundingTime(timeStamp);
     }
 
     /**
@@ -578,6 +583,15 @@ public class StreamParser extends Thread{
      */
     public static Map<Long, Yacht> getBoatsPos() {
         return boatsPos;
+    }
+
+    /**
+     * returns current time in stream in long
+     *
+     * @return a long value of current time
+     */
+    public static Long getCurrentTimeLong() {
+        return currentTimeLong;
     }
 
     public static void appClose(){
