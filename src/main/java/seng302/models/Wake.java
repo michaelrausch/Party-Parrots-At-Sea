@@ -8,30 +8,29 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.transform.Rotate;
 
 /**
- * By default wake is a group containing 5 arcs. Each arc starts from the same point. Each arc is larger and more
- * transparent than the last. On calling updatePositions() arcs rotate at velocities given by setRotationalVelocity().
- * The larger and more transparent an arc is the longer the delay before it rotates at the latest velocity. It is
- * assumed that rotationalVelocities() are set regularly as wakes do not stop rotating and an array of velocities needs
- * to be populated for the class to work as expected.
+ * A group containing objects used to represent wakes onscreen. Contains functionality for their animation.
  */
 class Wake extends Group {
 
-    //Wake Settings. Should probably be hard coded in when the final values are decided upon.
+    //Wake Settings.
+    //Changes the relationship between separation of wakes and velocity. Only logarithmic is guaranteed to work always since it's my favourite :/.
     private enum functionType {LINEAR, LOGARITHMIC, POWER, ROOT, POWOUT_LOGIN}
     private functionType wakeFunction = functionType.LOGARITHMIC;
+    //Change the wake style. Currently can be ArcType.OPEN or ArcType.ROUND
     private ArcType arcType = ArcType.OPEN;
+    //The number of wakes
     private int numWakes = 10;
-    private double offSet = 0;
-    private final double MAX_DIFF = 75.0;
+    //The total possible difference between the first wake and the last. Increasing/Decreasing this will make wakes fan out more/less.
+    private final double MAX_DIFF = 75;
+    //Increasing/decreasing this will alter the speed that wakes converge when the heading stop changing. Anything over about 1500 may cause oscillation.
     private final int UNIFICATION_SPEED = 500;
+    //The power used for the power function. Changing this will probably break stuff in a cool way.
     private final int POWER = 2;
 
     private Arc[] arcs = new Arc[numWakes];
     private double[] rotationalVelocities = new double[numWakes];
     private double[] rotations = new double[numWakes];
     private double baseRad;
-    private boolean spawnNewWake = false;
-    private int count = 10;
 
     /**
      * Create a wake at the given location.
@@ -65,8 +64,8 @@ class Wake extends Group {
     }
 
     /**
-     * Sets the rotationalVelocity of each arc. Each arc is 3 velocities behind the next smallest arc. The smallest uses
-     * the latest given velocity.
+     * Sets the rotationalVelocity of each arc.
+     *
      * @param rotationalVelocity The rotationalVelocity the wake should move at.
      * @param velocity The real world velocity of the boat in m/s.
      */
@@ -89,11 +88,11 @@ class Wake extends Group {
 
             if (wakeFunction == functionType.LOGARITHMIC) {
                 if (rotationalVelocities[i-1] < 0.01 && rotationalVelocities[i-1] > -0.01) {
-                    rotationalVelocities[i] = (MAX_DIFF / numWakes) / UNIFICATION_SPEED * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes) * 1.5;
-                    if (difference < 0)
-                    {
-                        rotationalVelocities[i] = -rotationalVelocities[i];
-                    }
+                    rotationalVelocities[i] = difference / UNIFICATION_SPEED * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes) * 1.5;
+//                    if (difference < 0)
+//                    {
+//                        rotationalVelocities[i] = -rotationalVelocities[i];
+//                    }
                 } else {
                         rotationalVelocities[i] = rotationalVelocities[i-1] * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes);
                 }
@@ -148,7 +147,7 @@ class Wake extends Group {
 //        } else {
 //            offSet += baseRad / 5;
 //        }
-        double rad = baseRad + velocity + offSet;
+        double rad = baseRad + velocity;
         for (Arc arc :arcs) {
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
