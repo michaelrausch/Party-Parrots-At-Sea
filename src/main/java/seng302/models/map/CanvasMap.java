@@ -13,7 +13,6 @@ public class CanvasMap {
 	private double width, height;  // desired image size
 	private int zoom;
 
-	private int MERCATOR_RANGE = 256;
 	private String KEY = "AIzaSyC-5oOShMCY5Oy_9L7guYMPUPFHDMr37wE";
 
 	public CanvasMap(Boundary bound, double width, double height) {
@@ -45,5 +44,24 @@ public class CanvasMap {
 		sb.append("&style=feature:all|element:labels|visibility:off"); // hide all labels on map
 //		sb.append(String.format("&key=%s", KEY));
 		return sb.toString();
+	}
+
+	private MapSize getMapSize(int zoom, Boundary boundary) {
+		double scale = Math.pow(2, zoom);
+		MapGeo geoSW = new MapGeo(boundary.getSouthLat(), boundary.getWestLng());
+		MapGeo geoNE = new MapGeo(boundary.getNorthLat(), boundary.getEastLng());
+		MapPoint pointSW = MercatorProjection.toMapPoint(geoSW);
+		MapPoint pointNE = MercatorProjection.toMapPoint(geoNE);
+		return new MapSize(Math.abs(pointNE.getX() - pointSW.getX()),
+				Math.abs(pointNE.getY() - pointSW.getY()));
+	}
+
+	class MapSize {
+		long width, height;
+
+		MapSize(double width, double height) {
+			this.width = (long) width;
+			this.height = (long) height;
+		}
 	}
 }
