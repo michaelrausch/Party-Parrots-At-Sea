@@ -9,36 +9,36 @@ package seng302.models.map;
  */
 public class Boundary {
 
-	private double north, east, south, west;
+	private double northLat, eastLng, southLat, westLng;
 
-	public Boundary(double north, double east, double south, double west) {
-		this.north = north;
-		this.east = east;
-		this.south = south;
-		this.west = west;
+	public Boundary(double northLat, double eastLng, double southLat, double westLng) {
+		this.northLat = northLat;
+		this.eastLng = eastLng;
+		this.southLat = southLat;
+		this.westLng = westLng;
 	}
 
 	public double getCentreLat() {
-		return (north + south) / 2;
+		return (northLat + southLat) / 2;
 	}
 
 	public double getCentreLng() {
-		return (east + west) / 2;
+		return (eastLng + westLng) / 2;
 	}
 
-	public double getNorth() {
-		return north;
+	public double getNorthLat() {
+		return northLat;
 	}
 
-	public double getEast() {
-		return east;
+	public double getEastLng() {
+		return eastLng;
 	}
 
-	public double getSouth() {
-		return south;
+	public double getSouthLat() {
+		return southLat;
 	}
 
-	public double getWest() {
-		return west;
+	public double getWestLng() {
+		return westLng;
 	}
 }
