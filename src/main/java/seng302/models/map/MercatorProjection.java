@@ -1,5 +1,10 @@
 package seng302.models.map;
 
+/**
+ * An utility class useful to convert between Geo locations and Mercator projection
+ * planar coordinates.
+ * Created by Haoming on 15/5/2017
+ */
 public class MercatorProjection {
 
 	private static final double MERCATOR_RANGE = 256;

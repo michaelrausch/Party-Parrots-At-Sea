@@ -1,9 +1,9 @@
 package seng302.models.map;
 
 /**
- * The Boundary class represents a square territorial bound on a map. It contains
- * four extremity double values(N, E, S, W). N and S are represented as latitudes
- * in radians. E and W are represented as longitudes in radians.
+ * The Boundary class represents a rectangle territorial boundary on a map. It
+ * contains four extremity double values(N, E, S, W). N and S are represented as
+ * latitudes in radians. E and W are represented as longitudes in radians.
  *
  * Created by Haoming on 10/5/17
  */
@@ -18,27 +18,27 @@ public class Boundary {
 		this.westLng = westLng;
 	}
 
-	public double getCentreLat() {
+	double getCentreLat() {
 		return (northLat + southLat) / 2;
 	}
 
-	public double getCentreLng() {
+	double getCentreLng() {
 		return (eastLng + westLng) / 2;
 	}
 
-	public double getNorthLat() {
+	double getNorthLat() {
 		return northLat;
 	}
 
-	public double getEastLng() {
+	double getEastLng() {
 		return eastLng;
 	}
 
-	public double getSouthLat() {
+	double getSouthLat() {
 		return southLat;
 	}
 
-	public double getWestLng() {
+	double getWestLng() {
 		return westLng;
 	}
 }
