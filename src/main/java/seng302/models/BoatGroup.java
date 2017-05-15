@@ -122,7 +122,8 @@ public class BoatGroup extends RaceObject{
         velocityObject.setLayoutY(velocityObject.getLayoutY() + dy);
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
-        rotateTo(rotation + currentRotation);
+        currentRotation = rotation + currentRotation;
+        boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
     /**
@@ -132,16 +133,8 @@ public class BoatGroup extends RaceObject{
      * @param rotation The heading in degrees from north the boat should rotate to.
      */
     public void moveTo (double x, double y, double rotation) {
-        rotateTo(rotation);
-        moveTo(x, y);
-    }
-
-    /**
-     * Moves the boat and its children annotations to coordinates specified
-     * @param x The X coordinate to move the boat to
-     * @param y The Y coordinate to move the boat to
-     */
-    public void moveTo (double x, double y) {
+        currentRotation = rotation;
+        boatPoly.getTransforms().setAll(new Rotate(rotation));
         boatPoly.setLayoutX(x);
         boatPoly.setLayoutY(y);
         teamNameObject.setLayoutX(x);
@@ -165,6 +158,7 @@ public class BoatGroup extends RaceObject{
             double rotation = rotationalVelocity * timeInterval;
             distanceTravelled += Math.abs(dx) + Math.abs(dy);
             moveGroupBy(dx, dy, rotation);
+
             //Draw a new section of the trail every 20 pixels of movement.
             if (distanceTravelled > 20) {
                 distanceTravelled = 0;
@@ -203,12 +197,6 @@ public class BoatGroup extends RaceObject{
                     currentRotation = 360 - currentRotation;
                 double dx = newXValue - boatPoly.getLayoutX();
                 double dy = newYValue - boatPoly.getLayoutY();
-                //Check movement is reasonable. Assumes a 1000 * 1000 canvas
-                if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
-                    dx = 0;
-                    dy = 0;
-                    moveTo(newXValue, newYValue);
-                }
 
                 pixelVelocityX = dx / expectedUpdateInterval;
                 pixelVelocityY = dy / expectedUpdateInterval;
@@ -217,7 +205,6 @@ public class BoatGroup extends RaceObject{
 
                 if (wakeGenerationDelay > 0) {
                     wake.rotate(rotationalGoal);
-                    rotateTo(rotationalGoal); //Need to test with this removed.
                     rotationalVelocity = 0;
                     wakeGenerationDelay--;
                 } else {
@@ -252,31 +239,6 @@ public class BoatGroup extends RaceObject{
                 }
             }
         }
-    }
-
-    public void setDestination (double newXValue, double newYValue, double groundSpeed, int... raceIDs) {
-        destinationSet = true;
-
-        if (hasRaceId(raceIDs)) {
-            double rotation = Math.abs(
-                    Math.toDegrees(
-                            Math.atan(
-                                    (newYValue - boatPoly.getLayoutY()) / (newXValue - boatPoly.getLayoutX())
-                            )
-                    )
-            );
-            setDestination(newXValue, newYValue, rotation, groundSpeed, raceIDs);
-        }
-    }
-
-    public void rotateTo (double rotation) {
-        currentRotation = rotation;
-        boatPoly.getTransforms().setAll(new Rotate(rotation));
-    }
-
-    public void forceRotation () {
-        rotateTo (rotationalGoal);
-        wake.rotate(rotationalGoal);
     }
 
     public void setTeamNameObjectVisible(Boolean visible) {

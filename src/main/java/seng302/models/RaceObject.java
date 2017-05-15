@@ -47,10 +47,10 @@ public abstract class RaceObject extends Group {
             this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
         }
         //Sometimes the rotation is too large to be realistic. In that case just do it instantly.
-        if (Math.abs(rotationalVelocity) > 1) {
-            rotationalVelocity = 0;
-            rotateTo(rotationalGoal);
-        }
+//        if (Math.abs(rotationalVelocity) > 1) {
+//            rotationalVelocity = 0;
+//            rotateTo(rotationalGoal);
+//        }
     }
 
     /**
@@ -62,24 +62,12 @@ public abstract class RaceObject extends Group {
      * @param raceIds RaceID of the object to move.
      */
     public abstract void setDestination (double x, double y, double rotation, double groundSpeed, int... raceIds);
-    /**
-     * Sets the destination of everything within the RaceObject that has an ID in the array raceIds. The destination is
-     * set to the co-ordinates (x, y).
-     * @param x X co-ordinate to move the graphic to.
-     * @param y Y co-ordinate to move the graphic to.
-     * @param raceIds RaceID to the object to move.
-     */
-    public abstract void setDestination (double x, double y, double groundSpeed, int... raceIds);
 
     public abstract void updatePosition (long timeInterval);
 
     public abstract void moveTo (double x, double y, double rotation);
 
-    public abstract void moveTo (double x, double y);
-
     public abstract void moveGroupBy(double x, double y, double rotation);
-
-    public abstract void rotateTo (double rotation);
 
     public abstract boolean hasRaceId (int... raceIds);
 

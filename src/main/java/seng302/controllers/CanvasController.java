@@ -106,7 +106,7 @@ public class CanvasController {
 
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
-        drawBoats();
+        initializeBoats();
         timer = new AnimationTimer() {
 
             @Override
@@ -157,8 +157,8 @@ public class CanvasController {
             SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
             Limit thisPoint2 = courseLimits.get(i+1);
             SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
-            Point2D borderPoint1 = findScaledXY(thisMark1);
-            Point2D borderPoint2 = findScaledXY(thisMark2);
+            Point2D borderPoint1 = latLonToXY(thisMark1.getLatitude(), thisMark1.getLongitude());
+            Point2D borderPoint2 = latLonToXY(thisMark2.getLatitude(), thisMark2.getLongitude());
             gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
                     borderPoint2.getX(), borderPoint2.getY());
             xBoundaryPoints[i] = borderPoint1.getX();
@@ -168,8 +168,8 @@ public class CanvasController {
         SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
         Limit thisPoint2 = courseLimits.get(0);
         SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
-        Point2D borderPoint1 = findScaledXY(thisMark1);
-        Point2D borderPoint2 = findScaledXY(thisMark2);
+        Point2D borderPoint1 = latLonToXY(thisMark1.getLatitude(), thisMark1.getLongitude());
+        Point2D borderPoint2 = latLonToXY(thisMark2.getLatitude(), thisMark2.getLongitude());
         gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
                 borderPoint2.getX(), borderPoint2.getY());
         xBoundaryPoints[courseLimits.size()-1] = borderPoint1.getX();
@@ -207,8 +207,8 @@ public class CanvasController {
                         singleMark1.getLongitude());
 
                 markGroup = new MarkGroup(thisGateMark,
-                        findScaledXY(thisGateMark.getSingleMark1()),
-                        findScaledXY(thisGateMark.getSingleMark2()));
+                        latLonToXY(thisGateMark.getSingleMark1().getLatitude(), thisGateMark.getSingleMark1().getLongitude()),
+                        latLonToXY(thisGateMark.getSingleMark2().getLatitude(), thisGateMark.getSingleMark2().getLongitude()));
 
                 raceObjects.add(markGroup);
                 raceMarks.add(thisGateMark);
@@ -221,7 +221,7 @@ public class CanvasController {
                         singleMark.getTargetLng(),
                         singleMark.getSourceID());
 
-                markGroup = new MarkGroup(thisSingleMark, findScaledXY(thisSingleMark));
+                markGroup = new MarkGroup(thisSingleMark, latLonToXY(thisSingleMark.getLatitude(), thisSingleMark.getLongitude()));
                 raceObjects.add(markGroup);
                 raceMarks.add(thisSingleMark);
 
@@ -245,27 +245,30 @@ public class CanvasController {
     private void move(long id, RaceObject raceObject){
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(id);
         if (movementQueue.size() > 0){
-            BoatPositionPacket positionPacket = movementQueue.peek();
+//            BoatPositionPacket positionPacket = movementQueue.peek();
 
             //this code adds a delay to reading from the movementQueue
             //in case things being put into the movement queue are slightly
             //out of order
-            int delayTime = 1000;
-            int loopTime = delayTime * 10;
-            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
-            if (timeDiff < 0){
-                timeDiff = loopTime + timeDiff;
-            }
-            if (timeDiff > delayTime) {
-                try {
-                    positionPacket = movementQueue.take();
-                    Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
-                    double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                    raceObject.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), (int) id);
-                } catch (InterruptedException e){
-                    e.printStackTrace();
+//            int delayTime = 1000;
+//            int loopTime = delayTime * 10;
+//            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
+//            if (timeDiff < 0){
+//                timeDiff = loopTime + timeDiff;
+//            }
+//            if (timeDiff > delayTime) {
+            try {
+                BoatPositionPacket positionPacket = movementQueue.take();
+                if (id == 104){
+                    System.out.println(positionPacket.getTimeValid());
                 }
+                Point2D p2d = latLonToXY(positionPacket.getLat(), positionPacket.getLon());
+                double heading = 360.0 / 0xffff * positionPacket.getHeading();
+                raceObject.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), (int) id);
+            } catch (InterruptedException e){
+                e.printStackTrace();
             }
+//            }
         }
     }
 
@@ -320,20 +323,13 @@ public class CanvasController {
     /**
      * Draws all the boats.
      */
-    private void drawBoats() {
-//        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
-//        List<Boat> boats  = raceViewController.getStartingBoats();
+    private void initializeBoats() {
         Map<Integer, Yacht> boats = StreamParser.getBoats();
-        Double startingX  = raceObjects.get(0).getLayoutX();
-        Double startingY  = raceObjects.get(0).getLayoutY();
         Group boatAnnotations = new Group();
 
         for (Yacht boat : boats.values()) {
-//        for (Boat boat : boats) {
             boat.setColour(Colors.getColor());
             BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-            boatGroup.moveTo(startingX, startingY, 0d);
-            //boatGroup.setStage(raceViewController.getStage());
             raceObjects.add(boatGroup);
             boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
         }
@@ -456,10 +452,12 @@ public class CanvasController {
             if (!processed.contains(mark)) {
                 if (mark.getMarkType() != MarkType.SINGLE_MARK) {
                     GateMark gateMark = (GateMark) mark;
-                    markGroup = new MarkGroup(mark, findScaledXY(gateMark.getSingleMark1()), findScaledXY(gateMark.getSingleMark2()));
+                    markGroup = new MarkGroup(mark,
+                        latLonToXY(gateMark.getSingleMark1().getLatitude(), gateMark.getSingleMark1().getLongitude()),
+                        latLonToXY(gateMark.getSingleMark2().getLatitude(), gateMark.getSingleMark2().getLongitude()));
                     raceObjects.add(markGroup);
                 } else {
-                    markGroup = new MarkGroup(mark, findScaledXY(mark));
+                    markGroup = new MarkGroup(mark, latLonToXY(mark.getLatitude(), mark.getLongitude()));
                     raceObjects.add(markGroup);
                 }
                 processed.add(mark);
@@ -467,19 +465,18 @@ public class CanvasController {
         }
     }
 
-    private Point2D findScaledXY (Mark unscaled) {
-        return findScaledXY (minLatPoint.getLatitude(), minLatPoint.getLongitude(),
-                             unscaled.getLatitude(), unscaled.getLongitude());
-    }
 
-    private Point2D findScaledXY (double latA, double lonA, double latB, double lonB) {
+
+    private Point2D latLonToXY (double latitude, double longitude){
         double distanceFromReference;
         double angleFromReference;
         int xAxisLocation = (int) referencePointX;
         int yAxisLocation = (int) referencePointY;
 
-        angleFromReference = Mark.calculateHeadingRad(latA, lonA, latB, lonB);
-        distanceFromReference = Mark.calculateDistance(latA, lonA, latB, lonB);
+        double minLat = minLatPoint.getLatitude();
+        double minLon = minLatPoint.getLongitude();
+        angleFromReference = Mark.calculateHeadingRad(minLat, minLon, latitude, longitude);
+        distanceFromReference = Mark.calculateDistance(minLat, minLon, latitude, longitude);
         if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
             xAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
             yAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
@@ -527,10 +524,6 @@ public class CanvasController {
             }
             metersToPixels = (CANVAS_HEIGHT - TOP_BUFFER - BOT_BUFFER) / straightLineDistance;
         }
-    }
-
-    private Point2D latLonToXY (double latitude, double longitude) {
-        return findScaledXY(minLatPoint.getLatitude(), minLatPoint.getLongitude(), latitude, longitude);
     }
 
     List<RaceObject> getRaceObjects() {

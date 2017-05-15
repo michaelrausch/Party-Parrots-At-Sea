@@ -66,20 +66,20 @@ public class StreamParser extends Thread{
                  Thread.sleep(1);
              }
              while (appRunning){
-                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
+//                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
                  //this code adds a delay to reading from the packetBuffer so
                  //out of order packets have time to order themselves in the queue
-                 int delayTime = 1000;
-                 int loopTime = delayTime * 10;
-                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
-                 if (transitTime < 0){
-                     transitTime = loopTime + transitTime;
-                 }
-                 if (transitTime < delayTime) {
-                     long sleepTime = delayTime - (transitTime);
-                     Thread.sleep(sleepTime);
-                 }
-                 packet = StreamReceiver.packetBuffer.take();
+//                 int delayTime = 1000;
+//                 int loopTime = delayTime * 10;
+//                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
+//                 if (transitTime < 0){
+//                     transitTime = loopTime + transitTime;
+//                 }
+//                 if (transitTime < delayTime) {
+//                     long sleepTime = delayTime - (transitTime);
+//                     Thread.sleep(sleepTime);
+//                 }
+                 StreamPacket packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
                  Thread.sleep(1);
                  while (StreamReceiver.packetBuffer.peek() == null) {

@@ -92,16 +92,12 @@ public class MarkGroup extends RaceObject {
     }
 
     public void setDestination (double x, double y, double rotation, double groundSpeed, int... raceIds) {
-        setDestination(x, y, 0, raceIds);
-        this.rotationalGoal = rotation;
-        calculateRotationalVelocity();
-    }
-
-    public void setDestination (double x, double y, double groundSpeed, int... raceIds) {
         for (int i = 0; i < marks.size(); i++)
             for (int id : raceIds)
                 if (id == marks.get(i).getId())
                     setDestinationChild(x, y, 0, Math.max(0, i-1));
+        this.rotationalGoal = rotation;
+        calculateRotationalVelocity();
     }
 
 
