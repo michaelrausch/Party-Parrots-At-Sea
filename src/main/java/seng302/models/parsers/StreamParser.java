@@ -31,6 +31,7 @@ public class StreamParser extends Thread{
      public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
      private String threadName;
      private Thread t;
+     private static boolean newRaceXmlReceived = false;
      private static boolean raceStarted = false;
      private static XMLParser xmlObject;
      private static boolean raceFinished = false;
@@ -123,6 +124,7 @@ public class StreamParser extends Thread{
                      extractDisplayMessage(packet);
                      break;
                  case XML_MESSAGE:
+                     newRaceXmlReceived = true;
                      extractXmlMessage(packet);
                      break;
                  case RACE_START_STATUS:
@@ -296,9 +298,8 @@ public class StreamParser extends Thread{
         byte[] payload = packet.getPayload();
 
         int messageType = payload[9];
-        long messagelength = bytesToLong(Arrays.copyOfRange(payload,12,14));
-        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messagelength)))).trim();
-        //System.out.println("xmlMessage2 = " + xmlMessage);
+        long messageLength = bytesToLong(Arrays.copyOfRange(payload,12,14));
+        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messageLength)))).trim();
 
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -314,6 +315,9 @@ public class StreamParser extends Thread{
         xmlObject.constructXML(doc, messageType);
         if (messageType == 7) {   //7 is the boat XML
             boats = xmlObject.getBoatXML().getCompetingBoats();
+        }
+        if (messageType == 6) { //6 is race info xml
+            newRaceXmlReceived = true;
         }
     }
 
@@ -592,6 +596,21 @@ public class StreamParser extends Thread{
     public static void appClose(){
         appRunning = false;
         System.out.println("[CLIENT] Shutting down stream parser");
+    }
+
+    /**
+     * Used to check if a new un-processed xml has been found, if so will return true before
+     * toggling off so that the next check will return false.
+     *
+     * @return the status of if new xml has been received
+     */
+    public static boolean isNewRaceXmlReceived(){
+        if (newRaceXmlReceived){
+            newRaceXmlReceived = false;
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
