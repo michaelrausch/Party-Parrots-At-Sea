@@ -124,7 +124,6 @@ public class StreamParser extends Thread{
                      extractDisplayMessage(packet);
                      break;
                  case XML_MESSAGE:
-                     System.out.println("XML MESSAGE GOT");
                      newRaceXmlReceived = true;
                      extractXmlMessage(packet);
                      break;
