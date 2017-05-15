@@ -1,17 +1,17 @@
 package seng302.models.map;
 
 /**
- * The Bound class is to represent square territorial bounds on a map. It contains
+ * The Boundary class represents a square territorial bound on a map. It contains
  * four extremity double values(N, E, S, W). N and S are represented as latitudes
  * in radians. E and W are represented as longitudes in radians.
  *
  * Created by Haoming on 10/5/17
  */
-public class Bound {
+public class Boundary {
 
 	private double north, east, south, west;
 
-	public Bound(double north, double east, double south, double west) {
+	public Boundary(double north, double east, double south, double west) {
 		this.north = north;
 		this.east = east;
 		this.south = south;
