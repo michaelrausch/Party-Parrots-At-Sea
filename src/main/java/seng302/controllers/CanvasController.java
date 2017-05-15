@@ -357,6 +357,7 @@ public class CanvasController {
         }
     }
 
+
     /**
      * Finds the scale factor necessary to fit all race markers within the onscreen map and assigns it to distanceScaleFactor
      * Returns the max horizontal distance of the map.
