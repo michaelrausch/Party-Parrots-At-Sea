@@ -1,5 +1,9 @@
 package seng302.models.map;
 
+/**
+ * A class represent Geo location (latitude, longitude).
+ * Created by Haoming on 15/5/2017
+ */
 class MapGeo {
 
 	private double lat, lng;

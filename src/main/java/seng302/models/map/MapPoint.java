@@ -1,5 +1,9 @@
 package seng302.models.map;
 
+/**
+ * A class represent euclidean planar point (x, y)
+ * Created by Haoming on 15/5/2017
+ */
 class MapPoint {
 
 	private double x, y;
