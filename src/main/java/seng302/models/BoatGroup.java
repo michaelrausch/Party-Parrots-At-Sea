@@ -19,7 +19,7 @@ import java.util.List;
  * UpdatePosition is called unless the window is minimized in which case it attempts to store animations and apply them
  * when the window is maximised.
  */
-public class BoatGroup extends RaceObject{
+public class BoatGroup extends Group{
 
     //Constants for drawing
     private static final double TEAMNAME_X_OFFSET = 10d;
@@ -32,6 +32,12 @@ public class BoatGroup extends RaceObject{
     private Point2D lastPoint;
     private int wakeGenerationDelay = 10;
     private double distanceTravelled;
+    private double pixelVelocityX;
+    private double pixelVelocityY;
+    private double currentRotation;
+    private double rotationalGoal;
+    private double rotationalVelocity;
+    private static final int expectedUpdateInterval = 200;
     //Graphical objects
     private Yacht boat;
     private Group lineGroup = new Group();
@@ -194,7 +200,7 @@ public class BoatGroup extends RaceObject{
      * @param rotation Rotation to move graphics to.
      * @param raceIds RaceID of the object to move.
      */
-    public void setDestination (double newXValue, double newYValue, double rotation, double groundSpeed, int... raceIds) {
+    public void setDestination (double newXValue, double newYValue, double rotation, double groundSpeed, int raceIds) {
         if (hasRaceId(raceIds)) {
             if (setToInitialLocation) {
                 destinationSet = true;
@@ -254,7 +260,7 @@ public class BoatGroup extends RaceObject{
         }
     }
 
-    public void setDestination (double newXValue, double newYValue, double groundSpeed, int... raceIDs) {
+    public void setDestination (double newXValue, double newYValue, double groundSpeed, int raceIDs) {
         destinationSet = true;
 
         if (hasRaceId(raceIDs)) {
@@ -318,8 +324,8 @@ public class BoatGroup extends RaceObject{
      *
      * @return An array containing all ID's associated with this RaceObject.
      */
-    public int[] getRaceIds () {
-        return new int[] {boat.getSourceID()};
+    public int getRaceId() {
+        return boat.getSourceID();
     }
 
     /**
@@ -354,5 +360,25 @@ public class BoatGroup extends RaceObject{
                 lineStorage.clear();
             }
         });
+    }
+
+    /**
+     * Calculates the rotational velocity required to reach the rotationalGoal from the currentRotation.
+     */
+    protected void calculateRotationalVelocity () {
+        if (Math.abs(rotationalGoal - currentRotation) > 180) {
+            if (rotationalGoal - currentRotation >= 0) {
+                this.rotationalVelocity = ((rotationalGoal - currentRotation) - 360) / expectedUpdateInterval;
+            } else {
+                this.rotationalVelocity = (360 + (rotationalGoal - currentRotation)) / expectedUpdateInterval;
+            }
+        } else {
+            this.rotationalVelocity = (rotationalGoal - currentRotation) / expectedUpdateInterval;
+        }
+        //Sometimes the rotation is too large to be realistic. In that case just do it instantly.
+        if (Math.abs(rotationalVelocity) > 1) {
+            rotationalVelocity = 0;
+            rotateTo(rotationalGoal);
+        }
     }
 }

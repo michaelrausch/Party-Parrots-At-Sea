@@ -201,47 +201,35 @@ public class RaceViewController extends Thread{
     private void setAnnotations(Integer annotationLevel) {
         switch (annotationLevel) {
             case 0:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
                         bg.setTeamNameObjectVisible(false);
                         bg.setVelocityObjectVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
-                    }
                 }
                 break;
             case 1:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
-                    }
                 }
                 break;
             case 2:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(false);
                         bg.setLineGroupVisible(true);
                         bg.setWakeVisible(false);
-                    }
                 }
                 break;
             case 3:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(true);
                         bg.setLineGroupVisible(true);
                         bg.setWakeVisible(true);
-                    }
                 }
                 break;
         }
