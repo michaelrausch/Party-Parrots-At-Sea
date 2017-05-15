@@ -1,4 +1,4 @@
-package seng302.models.parsers;
+package seng302.models.stream.packets;
 
 /**
  * Created by Kusal on 4/24/2017.
@@ -18,7 +18,7 @@ public enum PacketType {
     AVG_WIND,
     OTHER;
 
-    static PacketType assignPacketType(int packetType){
+    public static PacketType assignPacketType(int packetType){
         switch(packetType){
             case 1:
                 return HEARTBEAT;
@@ -48,6 +48,4 @@ public enum PacketType {
         }
         return OTHER;
     }
-
-
 }

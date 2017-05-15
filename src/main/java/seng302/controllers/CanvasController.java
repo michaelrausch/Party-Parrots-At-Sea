@@ -1,6 +1,6 @@
 package seng302.controllers;
 
-import javafx.animation.AnimationTimer;
+import javafx.animation.*;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -14,18 +14,21 @@ import seng302.models.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.RaceObject;
 import seng302.models.Yacht;
+import seng302.models.*;
 import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.XMLParser;
 import seng302.models.parsers.XMLParser.RaceXMLObject.CompoundMark;
 import seng302.models.parsers.XMLParser.RaceXMLObject.Limit;
 import seng302.models.parsers.packets.BoatPositionPacket;
+import seng302.models.stream.StreamParser;
+import seng302.models.stream.packets.BoatPositionPacket;
+import seng302.models.stream.XMLParser;
+import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
+import seng302.models.mark.Mark;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
@@ -59,7 +62,6 @@ public class CanvasController {
     private Mark maxLonPoint;
     private double referencePointX;
     private double referencePointY;
-    private double metersToPixels;
     private List<RaceObject> raceObjects = new ArrayList<>();
     private List<Mark> raceMarks = new ArrayList<>();
 
@@ -69,6 +71,7 @@ public class CanvasController {
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
     private DecimalFormat decimalFormat2dp = new DecimalFormat("0.00");
+    private double lastPacketTime = 0;
 
     public AnimationTimer timer;
 
@@ -178,57 +181,6 @@ public class CanvasController {
         gc.fillPolygon(xBoundaryPoints,yBoundaryPoints,yBoundaryPoints.length);
     }
 
-
-    /**
-     * Adds the course marks to the canvas, taken from the XMl file
-     *
-     * NOTE: This is quite confusing as objects are grabbed from the XMLParser such as Mark and CompoundMark which are
-     * named the same as those in the model package but are, however not the same, so they do not have things such as
-     * a type and must be derived from the number of marks in a compound mark etc..
-     */
-    private void addCourseMarks() {
-        XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
-        ArrayList<CompoundMark> compoundMarks = raceXMLObject.getCompoundMarks();
-        RaceObject markGroup;
-
-        for (CompoundMark compoundMark : compoundMarks) {
-
-            //If the compound mark has 2 marks then its a gate mark
-            if (compoundMark.getMarks().size() == 2) {
-                CompoundMark.Mark mark1 = compoundMark.getMarks().get(0);
-                CompoundMark.Mark mark2 = compoundMark.getMarks().get(1);
-                SingleMark singleMark1 = new SingleMark(mark1.getMarkName(), mark1.getTargetLat(), mark1.getTargetLng(), mark1.getSourceID());
-                SingleMark singleMark2 = new SingleMark(mark1.getMarkName(), mark2.getTargetLat(), mark2.getTargetLng(), mark2.getSourceID());
-                GateMark thisGateMark = new GateMark(compoundMark.getcMarkName(),
-                        (compoundMark.getMarkID().equals(1)) ? MarkType.OPEN_GATE : MarkType.CLOSED_GATE,
-                        singleMark1,
-                        singleMark2,
-                        singleMark1.getLatitude(),
-                        singleMark1.getLongitude());
-
-                markGroup = new MarkGroup(thisGateMark,
-                        latLonToXY(thisGateMark.getSingleMark1().getLatitude(), thisGateMark.getSingleMark1().getLongitude()),
-                        latLonToXY(thisGateMark.getSingleMark2().getLatitude(), thisGateMark.getSingleMark2().getLongitude()));
-
-                raceObjects.add(markGroup);
-                raceMarks.add(thisGateMark);
-
-                //Otherwise its a single mark
-            } else {
-                CompoundMark.Mark singleMark = compoundMark.getMarks().get(0);
-                Mark thisSingleMark = new SingleMark(singleMark.getMarkName(),
-                        singleMark.getTargetLat(),
-                        singleMark.getTargetLng(),
-                        singleMark.getSourceID());
-
-                markGroup = new MarkGroup(thisSingleMark, latLonToXY(thisSingleMark.getLatitude(), thisSingleMark.getLongitude()));
-                raceObjects.add(markGroup);
-                raceMarks.add(thisSingleMark);
-
-            }
-        }
-    }
-
     private void updateRaceObjects(){
         for (RaceObject raceObject : raceObjects) {
             raceObject.updatePosition(1000 / 60);
@@ -246,10 +198,10 @@ public class CanvasController {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(id);
         if (movementQueue.size() > 0){
 //            BoatPositionPacket positionPacket = movementQueue.peek();
-
-            //this code adds a delay to reading from the movementQueue
-            //in case things being put into the movement queue are slightly
-            //out of order
+//
+//            //this code adds a delay to reading from the movementQueue
+//            //in case things being put into the movement queue are slightly
+//            //out of order
 //            int delayTime = 1000;
 //            int loopTime = delayTime * 10;
 //            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
@@ -344,9 +296,8 @@ public class CanvasController {
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
-        givePointsXY();
+        //givePointsXY();
         addRaceBorder();
-        findMetersToPixels();
     }
 
 
@@ -444,20 +395,17 @@ public class CanvasController {
      * are scaled according to the distanceScaleFactor variable.
      */
     private void givePointsXY() {
-        List<Mark> allPoints = new ArrayList<>(raceViewController.getRace().getCourse());
-        List<Mark> processed = new ArrayList<>();
-        RaceObject markGroup;
+    List<XMLParser.RaceXMLObject.CompoundMark> allPoints = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
+    List<XMLParser.RaceXMLObject.CompoundMark> processed = new ArrayList<>();
+    RaceObject markGroup;
 
-        for (Mark mark : allPoints) {
-            if (!processed.contains(mark)) {
-                if (mark.getMarkType() != MarkType.SINGLE_MARK) {
-                    GateMark gateMark = (GateMark) mark;
-                    markGroup = new MarkGroup(mark,
-                        latLonToXY(gateMark.getSingleMark1().getLatitude(), gateMark.getSingleMark1().getLongitude()),
-                        latLonToXY(gateMark.getSingleMark2().getLatitude(), gateMark.getSingleMark2().getLongitude()));
-                    raceObjects.add(markGroup);
+        for (XMLParser.RaceXMLObject.CompoundMark mark : allPoints) {
+        if (!processed.contains(mark)) {
+            if (mark.getMarkType() != MarkType.SINGLE_MARK) {
+                markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)), findScaledXY(mark.getMarks().get(1)));
+                raceObjects.add(markGroup);
                 } else {
-                    markGroup = new MarkGroup(mark, latLonToXY(mark.getLatitude(), mark.getLongitude()));
+                    markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)));
                     raceObjects.add(markGroup);
                 }
                 processed.add(mark);
@@ -497,33 +445,8 @@ public class CanvasController {
     }
 
 
-
-    /**
-     * Find the number of meters per pixel.
-     */
-    private void findMetersToPixels () {
-        Double angularDistance;
-        Double angle;
-        Double straightLineDistance;
-        if (scaleDirection == ScaleDirection.HORIZONTAL) {
-            angularDistance = Mark.calculateDistance(minLonPoint, maxLonPoint);
-            angle = Mark.calculateHeadingRad(minLonPoint, maxLonPoint);
-            if (angle > Math.PI / 2) {
-                straightLineDistance = Math.cos(angle - Math.PI) * angularDistance;
-            } else {
-                straightLineDistance = Math.cos(angle) * angularDistance;
-            }
-            metersToPixels = (CANVAS_WIDTH - RHS_BUFFER - LHS_BUFFER) / straightLineDistance;
-        } else {
-            angularDistance = Mark.calculateDistance(minLatPoint, maxLatPoint);
-            angle = Mark.calculateHeadingRad(minLatPoint, maxLatPoint);
-            if (angle < Math.PI / 2) {
-                straightLineDistance = Math.cos(angle) * angularDistance;
-            } else {
-                straightLineDistance = Math.cos(-angle + Math.PI * 2) * angularDistance;
-            }
-            metersToPixels = (CANVAS_HEIGHT - TOP_BUFFER - BOT_BUFFER) / straightLineDistance;
-        }
+    private Point2D latLonToXY (double latitude, double longitude) {
+        return findScaledXY(minLatPoint.getLatitude(), minLatPoint.getLongitude(), latitude, longitude);
     }
 
     List<RaceObject> getRaceObjects() {

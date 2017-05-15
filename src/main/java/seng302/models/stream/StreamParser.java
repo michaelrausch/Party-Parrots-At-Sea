@@ -1,12 +1,12 @@
-package seng302.models.parsers;
+package seng302.models.stream;
 
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
-import seng302.models.parsers.packets.BoatPositionPacket;
-import seng302.models.parsers.packets.StreamPacket;
+import seng302.models.stream.packets.BoatPositionPacket;
+import seng302.models.stream.packets.StreamPacket;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -66,24 +66,9 @@ public class StreamParser extends Thread{
                  Thread.sleep(1);
              }
              while (appRunning){
-//                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
-                 //this code adds a delay to reading from the packetBuffer so
-                 //out of order packets have time to order themselves in the queue
-//                 int delayTime = 1000;
-//                 int loopTime = delayTime * 10;
-//                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
-//                 if (transitTime < 0){
-//                     transitTime = loopTime + transitTime;
-//                 }
-//                 if (transitTime < delayTime) {
-//                     long sleepTime = delayTime - (transitTime);
-//                     Thread.sleep(sleepTime);
-//                 }
                  StreamPacket packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
-                 Thread.sleep(1);
                  while (StreamReceiver.packetBuffer.peek() == null) {
-                     Thread.sleep(1);
                  }
              }
          } catch (Exception e){
