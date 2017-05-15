@@ -5,11 +5,15 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableArray;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -50,6 +54,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Button selectAnnotationBtn;
     @FXML
+    private ComboBox boatSelectionComboBox;
+    @FXML
     private CanvasController includedCanvasController;
 
     private ArrayList<Yacht> startingBoats = new ArrayList<>();
@@ -79,6 +85,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initializeSettings();
         initialiseWindDirection();
         initialisePositionVBox();
+        initialiseBoatSelectionComboBox();
         //set wind direction!!!!!!! can't find another place to put my code --haoming
 //        double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
 //        windDirectionText.setText(String.format("%.1f°", windDirection));
@@ -218,6 +225,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         );
         posVBoxTimeline.playFromStart();
 
+    }
+
+    private void initialiseBoatSelectionComboBox() {
+
+        ObservableList<Yacht> observableBoats =  FXCollections.observableArrayList(startingBoats);
+        boatSelectionComboBox.setItems(observableBoats);
+        boatSelectionComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            Yacht thisYacht = (Yacht) newValue;
+            setSelectedBoat(thisYacht);
+        });
     }
 
     /**
@@ -508,6 +525,26 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     }
                 }
                 break;
+        }
+    }
+
+
+    /**
+     * Sets all the annotations of the selected boat to be visible and all others to be hidden
+     * @param yacht The yacht for which we want to view all annotations
+     */
+    private void setSelectedBoat(Yacht yacht) {
+        for (RaceObject ro : includedCanvasController.getRaceObjects()) {
+            if (ro instanceof BoatGroup) {
+                BoatGroup bg = (BoatGroup) ro;
+                //We need to iterate over all race groups to get the matching boat group belonging to this boat if we
+                //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
+                if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
+                    bg.setIsSelected(true);
+                } else {
+                    bg.setIsSelected(false);
+                }
+            }
         }
     }
 

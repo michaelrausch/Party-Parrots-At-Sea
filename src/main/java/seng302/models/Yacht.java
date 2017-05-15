@@ -164,4 +164,9 @@ public class Yacht {
     public void setMarkLastPast(Integer markLastPast) {
         this.markLastPast = markLastPast;
     }
+
+    @Override
+    public String toString() {
+        return boatName;
+    }
 }
