@@ -5,7 +5,6 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.transform.Rotate;
 
 import java.util.ArrayList;
 import java.util.List;

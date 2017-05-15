@@ -260,29 +260,9 @@ public class BoatGroup extends Group{
         }
     }
 
-    public void setDestination (double newXValue, double newYValue, double groundSpeed, int raceIDs) {
-        destinationSet = true;
-
-        if (hasRaceId(raceIDs)) {
-            double rotation = Math.abs(
-                    Math.toDegrees(
-                            Math.atan(
-                                    (newYValue - boatPoly.getLayoutY()) / (newXValue - boatPoly.getLayoutX())
-                            )
-                    )
-            );
-            setDestination(newXValue, newYValue, rotation, groundSpeed, raceIDs);
-        }
-    }
-
     public void rotateTo (double rotation) {
         currentRotation = rotation;
         boatPoly.getTransforms().setAll(new Rotate(rotation));
-    }
-
-    public void forceRotation () {
-        rotateTo (rotationalGoal);
-        wake.rotate(rotationalGoal);
     }
 
     public void setTeamNameObjectVisible(Boolean visible) {
