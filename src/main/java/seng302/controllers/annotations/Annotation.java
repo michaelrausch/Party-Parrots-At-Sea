@@ -7,5 +7,6 @@ public enum Annotation {
     SPEED,
     WAKE,
     TRACK,
-    NAME
+    NAME,
+    ESTTIMETONEXTMARK
 }

@@ -31,6 +31,9 @@ public class ImportantAnnotationController implements Initializable {
     private CheckBox boatNameSelect;
 
     @FXML
+    private CheckBox boatEstTimeToNextMarkSelect;
+
+    @FXML
     private AnchorPane annotationSelectWindow;
 
     @FXML
@@ -91,6 +94,10 @@ public class ImportantAnnotationController implements Initializable {
                     boatNameSelect.setSelected(importantAnnotationsState.getAnnotationState(annotation));
                     break;
 
+                case ESTTIMETONEXTMARK:
+                    boatEstTimeToNextMarkSelect.setSelected(importantAnnotationsState.getAnnotationState(annotation));
+                    break;
+
                 default:
                     break;
             }
@@ -108,6 +115,7 @@ public class ImportantAnnotationController implements Initializable {
         boatSpeedSelect.setOnAction(event -> setAnnotation(Annotation.SPEED, boatSpeedSelect.isSelected()));
         boatTrackSelect.setOnAction(event -> setAnnotation(Annotation.TRACK, boatTrackSelect.isSelected()));
         boatNameSelect.setOnAction(event -> setAnnotation(Annotation.NAME, boatNameSelect.isSelected()));
+        boatEstTimeToNextMarkSelect.setOnAction(event -> setAnnotation(Annotation.ESTTIMETONEXTMARK, boatEstTimeToNextMarkSelect.isSelected()));
 
         closeButton.setOnAction(event -> stage.close());
     }

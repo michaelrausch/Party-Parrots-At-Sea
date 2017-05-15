@@ -55,8 +55,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ArrayList<Yacht> startingBoats = new ArrayList<>();
     private boolean displayFps;
     private Timeline timerTimeline;
-    private Map<Yacht, TimelineInfo> timelineInfos = new HashMap<>();
-    private ArrayList<Yacht> boatOrder = new ArrayList<>();
     private Race race;
     private Stage stage;
     private ImportantAnnotationsState importantAnnotations;
@@ -79,10 +77,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initializeSettings();
         initialiseWindDirection();
         initialisePositionVBox();
-        //set wind direction!!!!!!! can't find another place to put my code --haoming
-//        double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
-//        windDirectionText.setText(String.format("%.1f°", windDirection));
-//        windArrowText.setRotate(windDirection);
         includedCanvasController.timer.start();
 
         selectAnnotationBtn.setOnAction(event -> {
@@ -221,97 +215,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     /**
-     * Generates time line for each boat, and stores time time into timelineInfos hash map
-     */
-    private void initializeTimelines() {
-        HashMap<Yacht, List> boat_events = race.getEvents();
-        for (Yacht boat : boat_events.keySet()) {
-            startingBoats.add(boat);
-//            // x, y are the real time coordinates
-//            DoubleProperty x = new SimpleDoubleProperty();
-//            DoubleProperty y = new SimpleDoubleProperty();
-//
-//            List<KeyFrame> keyFrames = new ArrayList<>();
-//            List<Event> events = boat_events.get(boat);
-//
-//            // iterates all events and convert each event to keyFrame, then add them into a list
-//            for (Event event : events) {
-//                if (event.getIsFinishingEvent()) {
-//                    keyFrames.add(
-//                            new KeyFrame(Duration.seconds(event.getTime()),
-//                                    onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
-//                                    new KeyValue(x, event.getThisMark().getLatitude()),
-//                                    new KeyValue(y, event.getThisMark().getLongitude())
-//                            )
-//                    );
-//                } else {
-//                    keyFrames.add(
-//                            new KeyFrame(Duration.seconds(event.getTime()),
-//                                    onFinished ->{
-//                                        handleEvent(event);
-//                                        boat.setHeading(event.getBoatHeading());
-//                                    },
-//                                    new KeyValue(x, event.getThisMark().getLatitude()),
-//                                    new KeyValue(y, event.getThisMark().getLongitude())
-//                            )
-//                    );
-//                }
-//            }
-//            timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
-        }
-        setRaceDuration();
-    }
-
-    private void setRaceDuration(){
-        Double maxDuration = 0.0;
-        Timeline maxTimeline = null;
-
-        for (TimelineInfo timelineInfo : timelineInfos.values()) {
-
-            Timeline timeline = timelineInfo.getTimeline();
-            if (timeline.getTotalDuration().toMillis() >= maxDuration) {
-                maxDuration = timeline.getTotalDuration().toMillis();
-                maxTimeline = timeline;
-            }
-
-            // Timelines are paused by default
-            timeline.play();
-            timeline.pause();
-        }
-
-        maxTimeline.setOnFinished(event -> {
-            race.setRaceFinished();
-            loadRaceResultView();
-        });
-    }
-
-    /**
-     * Play each boats timerTimeline
-     */
-    public void playTimelines(){
-        for (TimelineInfo timelineInfo : timelineInfos.values()){
-            Timeline timeline = timelineInfo.getTimeline();
-
-            if (timeline.getStatus() == Animation.Status.PAUSED){
-                timeline.play();
-            }
-        }
-    }
-
-    /**
-     * Pause each boats timerTimeline
-     */
-    public void pauseTimelines(){
-        for (TimelineInfo timelineInfo : timelineInfos.values()){
-            Timeline timeline = timelineInfo.getTimeline();
-
-            if (timeline.getStatus() == Animation.Status.RUNNING){
-                timeline.pause();
-            }
-        }
-    }
-
-    /**
      * Display the list of boats in the order they finished the race
      */
     private void loadRaceResultView() {
@@ -330,28 +233,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
-    public void handleEvent(Event event) {
-        Yacht boat = event.getBoat();
-        boatOrder.remove(boat);
-        boat.setMarkLastPast(event.getMarkPosInRace());
-        boatOrder.add(boat);
-        boatOrder.sort(new Comparator<Yacht>() {
-            @Override
-            public int compare(Yacht b1, Yacht b2) {
-                return b2.getMarkLastPast() - b1.getMarkLastPast();
-            }
-        });
-        showOrder();
-    }
-
     private void showOrder() {
         positionVbox.getChildren().clear();
         positionVbox.getChildren().removeAll();
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-
-//        for (Boat boat : boatOrder) {
-//            positionVbox.getChildren().add(new Text(boat.getShortName() + " " + boat.getSpeedInKnots() + " Knots"));
-//        }
 
         for (Yacht boat : StreamParser.getBoatsPos().values()) {
             if (boat.getBoatStatus() == 3) {  // 3 is finish status
@@ -419,10 +304,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return race;
     }
 
-    public Map<Yacht, TimelineInfo> getTimelineInfos() {
-        return timelineInfos;
-    }
-
     public ArrayList<Yacht> getStartingBoats(){
         return startingBoats;
     }
@@ -459,6 +340,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         else{
             bg.setWakeVisible(false);
         }
+
+        if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
+            bg.setEstTimeToNextMarkVisible(true);
+        }
+        else {
+            bg.setEstTimeToNextMarkVisible(false);
+        }
     }
 
     private void setAnnotations(Integer annotationLevel) {
@@ -470,6 +358,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(false);
                         bg.setVelocityObjectVisible(false);
+                        bg.setEstTimeToNextMarkVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
                     }
@@ -482,6 +371,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(false);
+                        bg.setEstTimeToNextMarkVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
                     }
@@ -503,6 +393,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(true);
+                        bg.setEstTimeToNextMarkVisible(true);
                         bg.setLineGroupVisible(true);
                         bg.setWakeVisible(true);
                     }
