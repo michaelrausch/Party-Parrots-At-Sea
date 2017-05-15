@@ -28,6 +28,8 @@ public class BoatGroup extends RaceObject{
     private static final double VELOCITY_Y_OFFSET = -17d;
     private static final double ESTTIMETONEXTMARK_X_OFFSET = 10d;
     private static final double ESTTIMETONEXTMARK_Y_OFFSET = -5d;
+    private static final double LEGTIME_X_OFFSET = 10d;
+    private static final double LEGTIME_Y_OFFSET = 7d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
     //Variables for boat logic.
@@ -41,6 +43,7 @@ public class BoatGroup extends RaceObject{
     private Text teamNameObject;
     private Text velocityObject;
     private Text estTimeToNextMarkObject;
+    private Text legTimeObject;
     private Wake wake;
     //Handles boat moving when connecting to a stream
     private boolean setToInitialLocation = false;
@@ -87,6 +90,7 @@ public class BoatGroup extends RaceObject{
         teamNameObject = new Text(boat.getShortName());
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
         estTimeToNextMarkObject = new Text(String.valueOf(boat.getEstimateTimeAtNextMark()));
+        legTimeObject = new Text(String.valueOf(boat.getMarkRoundingTime()));
 
         teamNameObject.setX(TEAMNAME_X_OFFSET);
         teamNameObject.setY(TEAMNAME_Y_OFFSET);
@@ -101,8 +105,12 @@ public class BoatGroup extends RaceObject{
         estTimeToNextMarkObject.setY(ESTTIMETONEXTMARK_Y_OFFSET);
         estTimeToNextMarkObject.relocate(estTimeToNextMarkObject.getX(), estTimeToNextMarkObject.getY());
 
+        legTimeObject.setX(LEGTIME_X_OFFSET);
+        legTimeObject.setY(LEGTIME_Y_OFFSET);
+        legTimeObject.relocate(legTimeObject.getX(), legTimeObject.getY());
+
         wake = new Wake(0, -BOAT_HEIGHT);
-        super.getChildren().addAll(teamNameObject, velocityObject, boatPoly, estTimeToNextMarkObject);
+        super.getChildren().addAll(teamNameObject, velocityObject, boatPoly, estTimeToNextMarkObject, legTimeObject);
     }
 
     /**
@@ -130,6 +138,8 @@ public class BoatGroup extends RaceObject{
         velocityObject.setLayoutY(velocityObject.getLayoutY() + dy);
         estTimeToNextMarkObject.setLayoutX(estTimeToNextMarkObject.getLayoutX() + dx);
         estTimeToNextMarkObject.setLayoutY(estTimeToNextMarkObject.getLayoutY() + dy);
+        legTimeObject.setLayoutX(legTimeObject.getLayoutX() + dx);
+        legTimeObject.setLayoutY(legTimeObject.getLayoutY() + dy);
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
         rotateTo(rotation + currentRotation);
@@ -160,6 +170,8 @@ public class BoatGroup extends RaceObject{
         velocityObject.setLayoutY(y);
         estTimeToNextMarkObject.setLayoutX(x);
         estTimeToNextMarkObject.setLayoutY(y);
+        legTimeObject.setLayoutX(x);
+        legTimeObject.setLayoutY(y);
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(currentRotation);
@@ -237,6 +249,7 @@ public class BoatGroup extends RaceObject{
                 }
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
                 estTimeToNextMarkObject.setText(String.valueOf(boat.getEstimateTimeAtNextMark()));
+                legTimeObject.setText(String.valueOf(boat.getMarkRoundingTime()));
             } else {
                 setToInitialLocation = true;
                 rotationalGoal = rotation;
@@ -300,8 +313,12 @@ public class BoatGroup extends RaceObject{
         velocityObject.setVisible(visible);
     }
 
-    public void setEstTimeToNextMarkVisible(Boolean visible) {
+    public void setEstTimeToNextMarkObjectVisible(Boolean visible) {
         estTimeToNextMarkObject.setVisible(visible);
+    }
+
+    public void setLegObjectTime(Boolean visible) {
+        legTimeObject.setVisible(visible);
     }
 
     public void setLineGroupVisible(Boolean visible) {

@@ -1,6 +1,5 @@
 package seng302.controllers;
 
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
@@ -342,10 +341,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
 
         if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
-            bg.setEstTimeToNextMarkVisible(true);
+            bg.setEstTimeToNextMarkObjectVisible(true);
         }
         else {
-            bg.setEstTimeToNextMarkVisible(false);
+            bg.setEstTimeToNextMarkObjectVisible(false);
         }
     }
 
@@ -358,7 +357,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(false);
                         bg.setVelocityObjectVisible(false);
-                        bg.setEstTimeToNextMarkVisible(false);
+                        bg.setEstTimeToNextMarkObjectVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
                     }
@@ -371,7 +370,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(false);
-                        bg.setEstTimeToNextMarkVisible(false);
+                        bg.setEstTimeToNextMarkObjectVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
                     }
@@ -393,7 +392,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(true);
-                        bg.setEstTimeToNextMarkVisible(true);
+                        bg.setEstTimeToNextMarkObjectVisible(true);
                         bg.setLineGroupVisible(true);
                         bg.setWakeVisible(true);
                     }
