@@ -34,7 +34,8 @@ import java.util.*;
 /**
  * Created by ptg19 on 29/03/17.
  */
-public class RaceViewController extends Thread implements ImportantAnnotationDelegate{
+public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
+
     @FXML
     private VBox positionVbox;
     @FXML
@@ -90,11 +91,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * The important annotations have been changed, update this view
+     *
      * @param importantAnnotationsState The current state of the selected annotations
      */
-    public void importantAnnotationsChanged(ImportantAnnotationsState importantAnnotationsState){
+    public void importantAnnotationsChanged(ImportantAnnotationsState importantAnnotationsState) {
         this.importantAnnotations = importantAnnotationsState;
-        setAnnotations((int)annotationSlider.getValue()); // Refresh the displayed annotations
+        setAnnotations((int) annotationSlider.getValue()); // Refresh the displayed annotations
     }
 
     /**
@@ -106,11 +108,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             Stage stage = new Stage();
 
             // Set controller
-            ImportantAnnotationController controller = new ImportantAnnotationController(this, stage);
+            ImportantAnnotationController controller = new ImportantAnnotationController(this,
+                stage);
             fxmlLoader.setController(controller);
 
             // Load FXML and set CSS
-            fxmlLoader.setLocation(getClass().getResource("/views/importantAnnotationSelectView.fxml"));
+            fxmlLoader
+                .setLocation(getClass().getResource("/views/importantAnnotationSelectView.fxml"));
             Scene scene = new Scene(fxmlLoader.load(), 469, 248);
             scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             stage.initStyle(StageStyle.UNDECORATED);
@@ -136,9 +140,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         annotationSlider.setLabelFormatter(new StringConverter<Double>() {
             @Override
             public String toString(Double n) {
-                if (n == 0) return "None";
-                if (n == 1) return "Important";
-                if (n == 2) return "All";
+                if (n == 0) {
+                    return "None";
+                }
+                if (n == 1) {
+                    return "Important";
+                }
+                if (n == 2) {
+                    return "All";
+                }
 
                 return "All";
             }
@@ -160,7 +170,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         });
 
         annotationSlider.valueProperty().addListener((obs, oldval, newVal) ->
-                    setAnnotations((int)annotationSlider.getValue()));
+            setAnnotations((int) annotationSlider.getValue()));
 
         annotationSlider.setValue(2);
     }
@@ -171,19 +181,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * orderings etc.. which are dependent on the info from the stream parser constantly.
      * Updates of each of these attributes are called ONCE EACH SECOND
      */
-    private void initializeUpdateTimer(){
+    private void initializeUpdateTimer() {
         timerTimeline = new Timeline();
         timerTimeline.setCycleCount(Timeline.INDEFINITE);
         // Run timer update every second
         timerTimeline.getKeyFrames().add(
-                new KeyFrame(Duration.seconds(1),
-                        event -> {
-                            updateRaceTime();
-                            updateWindDirection();
-                            updateOrder();
-                            updateBoatSelectionComboBox();
+            new KeyFrame(Duration.seconds(1),
+                event -> {
+                    updateRaceTime();
+                    updateWindDirection();
+                    updateOrder();
+                    updateBoatSelectionComboBox();
 
-                        })
+                })
         );
 
         // Start the timer
@@ -218,13 +228,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * in the boat selection combo box
      */
     private void updateBoatSelectionComboBox() {
-        ObservableList<Yacht> observableBoats =  FXCollections.observableArrayList(StreamParser.getBoatsPos().values());
+        ObservableList<Yacht> observableBoats = FXCollections
+            .observableArrayList(StreamParser.getBoatsPos().values());
         boatSelectionComboBox.setItems(observableBoats);
     }
 
 
     /**
-     * Updates the order of the boats as from the StreamParser and sets them in the boat order section
+     * Updates the order of the boats as from the StreamParser and sets them in the boat order
+     * section
      */
     private void updateOrder() {
         positionVbox.getChildren().clear();
@@ -332,34 +344,31 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * Display the important annotations for a specific BoatGroup
+     *
      * @param bg The boat group to set the annotations for
      */
-    private void setBoatGroupImportantAnnotations(BoatGroup bg){
-        if (importantAnnotations.getAnnotationState(Annotation.NAME)){
+    private void setBoatGroupImportantAnnotations(BoatGroup bg) {
+        if (importantAnnotations.getAnnotationState(Annotation.NAME)) {
             bg.setTeamNameObjectVisible(true);
-        }
-        else{
+        } else {
             bg.setTeamNameObjectVisible(false);
         }
 
-        if (importantAnnotations.getAnnotationState(Annotation.SPEED)){
+        if (importantAnnotations.getAnnotationState(Annotation.SPEED)) {
             bg.setVelocityObjectVisible(true);
-        }
-        else{
+        } else {
             bg.setVelocityObjectVisible(false);
         }
 
-        if (importantAnnotations.getAnnotationState(Annotation.TRACK)){
+        if (importantAnnotations.getAnnotationState(Annotation.TRACK)) {
             bg.setLineGroupVisible(true);
-        }
-        else{
+        } else {
             bg.setLineGroupVisible(false);
         }
 
-        if (importantAnnotations.getAnnotationState(Annotation.WAKE)){
+        if (importantAnnotations.getAnnotationState(Annotation.WAKE)) {
             bg.setWakeVisible(true);
-        }
-        else{
+        } else {
             bg.setWakeVisible(false);
         }
     }
@@ -369,7 +378,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             // No Annotations
             case 0:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
+                    if (ro instanceof BoatGroup) {
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(false);
                         bg.setVelocityObjectVisible(false);
@@ -381,7 +390,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             // Important Annotations
             case 1:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
+                    if (ro instanceof BoatGroup) {
                         BoatGroup bg = (BoatGroup) ro;
                         setBoatGroupImportantAnnotations(bg);
                     }
@@ -390,7 +399,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             // All Annotations
             case 2:
                 for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if(ro instanceof BoatGroup) {
+                    if (ro instanceof BoatGroup) {
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(true);
@@ -405,6 +414,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * Sets all the annotations of the selected boat to be visible and all others to be hidden
+     *
      * @param yacht The yacht for which we want to view all annotations
      */
     private void setSelectedBoat(Yacht yacht) {
@@ -423,11 +433,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
-    void setStage (Stage stage) {
+    void setStage(Stage stage) {
         this.stage = stage;
     }
 
-    Stage getStage () {
+    Stage getStage() {
         return stage;
     }
 }
