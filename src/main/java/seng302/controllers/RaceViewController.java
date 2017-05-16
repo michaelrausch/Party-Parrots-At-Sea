@@ -58,7 +58,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ArrayList<Yacht> startingBoats = new ArrayList<>();
     private boolean displayFps;
     private Timeline timerTimeline;
-    private Map<Yacht, TimelineInfo> timelineInfos = new HashMap<>();
     private Race race;
     private Stage stage;
 
@@ -91,7 +90,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * The important annotations have been changed, update this view
-     *
      * @param importantAnnotationsState The current state of the selected annotations
      */
     public void importantAnnotationsChanged(ImportantAnnotationsState importantAnnotationsState) {
@@ -344,7 +342,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * Display the important annotations for a specific BoatGroup
-     *
      * @param bg The boat group to set the annotations for
      */
     private void setBoatGroupImportantAnnotations(BoatGroup bg) {
@@ -371,6 +368,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         } else {
             bg.setWakeVisible(false);
         }
+
+        if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
+            bg.setEstTimeToNextMarkObjectVisible(true);
+        } else {
+            bg.setEstTimeToNextMarkObjectVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.LEGTIME)) {
+            bg.setLegTimeObjectVisible(true);
+        } else {
+            bg.setLegTimeObjectVisible(false);
+        }
     }
 
     private void setAnnotations(Integer annotationLevel) {
@@ -382,6 +391,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(false);
                         bg.setVelocityObjectVisible(false);
+                        bg.setEstTimeToNextMarkObjectVisible(false);
+                        bg.setLegTimeObjectVisible(false);
                         bg.setLineGroupVisible(false);
                         bg.setWakeVisible(false);
                     }
@@ -403,6 +414,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         BoatGroup bg = (BoatGroup) ro;
                         bg.setTeamNameObjectVisible(true);
                         bg.setVelocityObjectVisible(true);
+                        bg.setEstTimeToNextMarkObjectVisible(true);
+                        bg.setLegTimeObjectVisible(true);
                         bg.setLineGroupVisible(true);
                         bg.setWakeVisible(true);
                     }

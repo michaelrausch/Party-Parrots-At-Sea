@@ -12,9 +12,9 @@ import java.text.SimpleDateFormat;
  *  also done outside Boat class because some old variables are not used anymore.
  */
 public class Yacht {
+    // Used in boat group
     private Color colour;
     private double velocity;
-    private Integer markLastPast;
 
     private String boatType;
     private Integer sourceID;
@@ -30,6 +30,8 @@ public class Yacht {
     private Long estimateTimeAtNextMark;
     private Long estimateTimeAtFinish;
     private String position;
+    // Mark rounding
+    private Long markRoundingTime;
 
     /**
      * Used in EventTest and RaceTest.
@@ -157,12 +159,12 @@ public class Yacht {
         this.velocity = velocity;
     }
 
-    public Integer getMarkLastPast() {
-        return markLastPast;
+    public Long getMarkRoundingTime() {
+        return markRoundingTime;
     }
 
-    public void setMarkLastPast(Integer markLastPast) {
-        this.markLastPast = markLastPast;
+    public void setMarkRoundingTime(Long markRoundingTime) {
+        this.markRoundingTime = markRoundingTime;
     }
 
     @Override

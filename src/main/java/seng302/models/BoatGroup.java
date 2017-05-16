@@ -1,17 +1,17 @@
 package seng302.models;
 
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
-import seng302.controllers.RaceViewController;
+import seng302.models.parsers.StreamParser;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,9 +27,13 @@ public class BoatGroup extends RaceObject {
 
     //Constants for drawing
     private static final double TEAMNAME_X_OFFSET = 10d;
-    private static final double TEAMNAME_Y_OFFSET = -15d;
+    private static final double TEAMNAME_Y_OFFSET = -29d;
     private static final double VELOCITY_X_OFFSET = 10d;
-    private static final double VELOCITY_Y_OFFSET = -5d;
+    private static final double VELOCITY_Y_OFFSET = -17d;
+    private static final double ESTTIMETONEXTMARK_X_OFFSET = 10d;
+    private static final double ESTTIMETONEXTMARK_Y_OFFSET = -5d;
+    private static final double LEGTIME_X_OFFSET = 10d;
+    private static final double LEGTIME_Y_OFFSET = 7d;
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
     //Variables for boat logic.
@@ -42,8 +46,9 @@ public class BoatGroup extends RaceObject {
     private Polygon boatPoly;
     private Text teamNameObject;
     private Text velocityObject;
+    private Text estTimeToNextMarkObject;
+    private Text legTimeObject;
     private Wake wake;
-    private boolean isSelected = true;  //Boats annotations are visible by default at the start
     //Handles boat moving when connecting to a stream
     private boolean setToInitialLocation = false;
     private boolean destinationSet;
@@ -90,12 +95,20 @@ public class BoatGroup extends RaceObject {
     private void initChildren(Color color, double... points) {
         boatPoly = new Polygon(points);
         boatPoly.setFill(color);
-        boatPoly.setOnMouseEntered(event -> boatPoly.setFill(Color.FLORALWHITE));
-        boatPoly.setOnMouseExited(event -> boatPoly.setFill(color));
-        boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
 
         teamNameObject = new Text(boat.getShortName());
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
+        DateFormat format = new SimpleDateFormat("mm:ss");
+        String timeToNextMark = format
+            .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+        estTimeToNextMarkObject = new Text("Next mark: " + timeToNextMark);
+        if (boat.getMarkRoundingTime() != null) {
+            String elapsedTime = format
+                .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
+            legTimeObject = new Text("Last mark: " + elapsedTime);
+        } else {
+            legTimeObject = new Text("Last mark: -");
+        }
 
         teamNameObject.setX(TEAMNAME_X_OFFSET);
         teamNameObject.setY(TEAMNAME_Y_OFFSET);
@@ -106,8 +119,19 @@ public class BoatGroup extends RaceObject {
         velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
         destinationSet = false;
 
+        estTimeToNextMarkObject.setX(ESTTIMETONEXTMARK_X_OFFSET);
+        estTimeToNextMarkObject.setY(ESTTIMETONEXTMARK_Y_OFFSET);
+        estTimeToNextMarkObject
+            .relocate(estTimeToNextMarkObject.getX(), estTimeToNextMarkObject.getY());
+
+        legTimeObject.setX(LEGTIME_X_OFFSET);
+        legTimeObject.setY(LEGTIME_Y_OFFSET);
+        legTimeObject.relocate(legTimeObject.getX(), legTimeObject.getY());
+
         wake = new Wake(0, -BOAT_HEIGHT);
-        super.getChildren().addAll(teamNameObject, velocityObject, boatPoly);
+        super.getChildren()
+            .addAll(teamNameObject, velocityObject, boatPoly, estTimeToNextMarkObject,
+                legTimeObject);
     }
 
     /**
@@ -136,6 +160,10 @@ public class BoatGroup extends RaceObject {
         teamNameObject.setLayoutY(teamNameObject.getLayoutY() + dy);
         velocityObject.setLayoutX(velocityObject.getLayoutX() + dx);
         velocityObject.setLayoutY(velocityObject.getLayoutY() + dy);
+        estTimeToNextMarkObject.setLayoutX(estTimeToNextMarkObject.getLayoutX() + dx);
+        estTimeToNextMarkObject.setLayoutY(estTimeToNextMarkObject.getLayoutY() + dy);
+        legTimeObject.setLayoutX(legTimeObject.getLayoutX() + dx);
+        legTimeObject.setLayoutY(legTimeObject.getLayoutY() + dy);
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
         rotateTo(rotation + currentRotation);
@@ -166,6 +194,10 @@ public class BoatGroup extends RaceObject {
         teamNameObject.setLayoutY(y);
         velocityObject.setLayoutX(x);
         velocityObject.setLayoutY(y);
+        estTimeToNextMarkObject.setLayoutX(x);
+        estTimeToNextMarkObject.setLayoutY(y);
+        legTimeObject.setLayoutX(x);
+        legTimeObject.setLayoutY(y);
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(currentRotation);
@@ -196,7 +228,7 @@ public class BoatGroup extends RaceObject {
                         boatPoly.getLayoutY()
                     );
                     l.getStrokeDashArray().setAll(3d, 7d);
-                    l.setStroke(boat.getColour());
+                    l.setStroke(boatPoly.getFill());
                     lineGroup.getChildren().add(l);
                 }
                 if (destinationSet) { //Only begin drawing after the first destination is set
@@ -248,6 +280,19 @@ public class BoatGroup extends RaceObject {
                         boat.getVelocity());
                 }
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
+                DateFormat format = new SimpleDateFormat("mm:ss");
+                // estimate time to next mark
+                String timeToNextMark = format
+                    .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+                estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
+                // elapsed time
+                if (boat.getMarkRoundingTime() != null) {
+                    String elapsedTime = format
+                        .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
+                    legTimeObject.setText("Last mark: " + elapsedTime);
+                } else {
+                    legTimeObject.setText("Last mark: -");
+                }
             } else {
                 setToInitialLocation = true;
                 rotationalGoal = rotation;
@@ -304,16 +349,20 @@ public class BoatGroup extends RaceObject {
         wake.rotate(rotationalGoal);
     }
 
-    public void paintBoat(Color color) {
-        boatPoly.setFill(color);
-    }
-
     public void setTeamNameObjectVisible(Boolean visible) {
         teamNameObject.setVisible(visible);
     }
 
     public void setVelocityObjectVisible(Boolean visible) {
         velocityObject.setVisible(visible);
+    }
+
+    public void setEstTimeToNextMarkObjectVisible(Boolean visible) {
+        estTimeToNextMarkObject.setVisible(visible);
+    }
+
+    public void setLegTimeObjectVisible(Boolean visible) {
+        legTimeObject.setVisible(visible);
     }
 
     public void setLineGroupVisible(Boolean visible) {
@@ -326,21 +375,6 @@ public class BoatGroup extends RaceObject {
 
     public Yacht getBoat() {
         return boat;
-    }
-
-    /**
-     * This function sets the boats isSelected property AS WELL as actually acting upon the value of
-     * that selection. (Painting or not painting annotations)
-     *
-     * @param isSelected A Boolean indicating whether or not the boat is selected
-     */
-    public void setIsSelected(Boolean isSelected) {
-        this.isSelected = isSelected;
-        setTeamNameObjectVisible(isSelected);
-        setVelocityObjectVisible(isSelected);
-        setLineGroupVisible(isSelected);
-        setWakeVisible(isSelected);
-        paintBoat((isSelected) ? Color.WHITE : boat.getColour());
     }
 
     /**
@@ -376,7 +410,7 @@ public class BoatGroup extends RaceObject {
      */
     public Group getLowPriorityAnnotations() {
         Group group = new Group();
-        group.getChildren().addAll(wake, lineGroup, teamNameObject, velocityObject);
+        group.getChildren().addAll(wake, lineGroup);
         return group;
     }
 
@@ -400,10 +434,5 @@ public class BoatGroup extends RaceObject {
                 lineStorage.clear();
             }
         });
-    }
-
-    @Override
-    public String toString() {
-        return boat.toString();
     }
 }

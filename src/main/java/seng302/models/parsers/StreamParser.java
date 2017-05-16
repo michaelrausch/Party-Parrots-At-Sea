@@ -30,6 +30,7 @@ public class StreamParser extends Thread{
      public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
      private String threadName;
      private Thread t;
+     private static boolean newRaceXmlReceived = false;
      private static boolean raceStarted = false;
      private static XMLParser xmlObject;
      private static boolean raceFinished = false;
@@ -38,6 +39,7 @@ public class StreamParser extends Thread{
      private static Map<Integer, Yacht> boats = new HashMap<>();
      private static Map<Long, Yacht> boatsPos = new TreeMap<>();
      private static double windDirection = 0;
+     private static Long currentTimeLong;
      private static String currentTimeString;
      private static boolean appRunning;
 
@@ -121,6 +123,7 @@ public class StreamParser extends Thread{
                      extractDisplayMessage(packet);
                      break;
                  case XML_MESSAGE:
+                     newRaceXmlReceived = true;
                      extractXmlMessage(packet);
                      break;
                  case RACE_START_STATUS:
@@ -195,16 +198,17 @@ public class StreamParser extends Thread{
         long currentTime = bytesToLong(Arrays.copyOfRange(payload,1,7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload,7,11));
         int raceStatus = payload[11];
-//        System.out.println("raceStatus = " + raceStatus);
         long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
+        long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+        long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
 
+        currentTimeLong = currentTime;
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         if (xmlObject.getRegattaXML() != null) {
             format.setTimeZone(TimeZone.getTimeZone(getTimeZoneString()));
             currentTimeString = format.format((new Date (currentTime)).getTime());
         }
         long timeTillStart = ((new Date (expectedStartTime)).getTime() - (new Date (currentTime)).getTime())/1000;
-
 
         if (timeTillStart > 0) {
             timeSinceStart = timeTillStart;
@@ -222,10 +226,10 @@ public class StreamParser extends Thread{
             //System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
             timeSinceStart = timeTillStart;
         }
-        long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+
         double windDirFactor = 0x4000 / 90;   //0x4000 is 90 degrees, 0x8000 is 180 degrees, etc...
         windDirection = windDir / windDirFactor;
-        long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
+
         int noBoats = payload[22];
         int raceType = payload[23];
 //        ArrayList<String> boatStatuses = new ArrayList<>();
@@ -235,11 +239,11 @@ public class StreamParser extends Thread{
             Yacht boat = boats.get((int)(long) boatStatusSourceID);
             boat.setBoatStatus((int)payload[28 + (i * 20)]);
             boat.setLegNumber((int)payload[29 + (i * 20)]);
-            boat.setPenaltiesAwarded((int)payload[29 + (i * 20)]);
-            boat.setPenaltiesServed((int)payload[30 + (i * 20)]);
-            Long estTimeAtNextMark = bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
+            boat.setPenaltiesAwarded((int)payload[30 + (i * 20)]);
+            boat.setPenaltiesServed((int)payload[31 + (i * 20)]);
+            Long estTimeAtNextMark = bytesToLong(Arrays.copyOfRange(payload,32 + (i * 20),38+ (i * 20)));
             boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
-            Long estTimeAtFinish = bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
+            Long estTimeAtFinish = bytesToLong(Arrays.copyOfRange(payload,38 + (i * 20),44+ (i * 20)));
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
             boatsPos.put(estTimeAtFinish, boat);
 //            String boatStatus = "SourceID: " + boatStatusSourceID;
@@ -293,9 +297,8 @@ public class StreamParser extends Thread{
         byte[] payload = packet.getPayload();
 
         int messageType = payload[9];
-        long messagelength = bytesToLong(Arrays.copyOfRange(payload,12,14));
-        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messagelength)))).trim();
-        //System.out.println("xmlMessage2 = " + xmlMessage);
+        long messageLength = bytesToLong(Arrays.copyOfRange(payload,12,14));
+        String xmlMessage = new String((Arrays.copyOfRange(payload,14,(int) (14 + messageLength)))).trim();
 
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -311,6 +314,9 @@ public class StreamParser extends Thread{
         xmlObject.constructXML(doc, messageType);
         if (messageType == 7) {   //7 is the boat XML
             boats = xmlObject.getBoatXML().getCompetingBoats();
+        }
+        if (messageType == 6) { //6 is race info xml
+            newRaceXmlReceived = true;
         }
     }
 
@@ -428,6 +434,9 @@ public class StreamParser extends Thread{
         int roundingSide = payload[18];
         int markType = payload[19];
         int markId = payload[20];
+
+        // assign mark rounding time to boat
+        boats.get((int)subjectId).setMarkRoundingTime(timeStamp);
     }
 
     /**
@@ -574,9 +583,33 @@ public class StreamParser extends Thread{
         return boatsPos;
     }
 
+    /**
+     * returns current time in stream in long
+     *
+     * @return a long value of current time
+     */
+    public static Long getCurrentTimeLong() {
+        return currentTimeLong;
+    }
+
     public static void appClose(){
         appRunning = false;
         System.out.println("[CLIENT] Shutting down stream parser");
+    }
+
+    /**
+     * Used to check if a new un-processed xml has been found, if so will return true before
+     * toggling off so that the next check will return false.
+     *
+     * @return the status of if new xml has been received
+     */
+    public static boolean isNewRaceXmlReceived(){
+        if (newRaceXmlReceived){
+            newRaceXmlReceived = false;
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
