@@ -64,7 +64,6 @@ public class App extends Application {
         else{
 //            sr = new StreamReceiver("localhost", 4949, "RaceStream");
             sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
-
         }
 
         sr.start();

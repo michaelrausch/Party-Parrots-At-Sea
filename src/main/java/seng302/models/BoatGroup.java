@@ -1,5 +1,6 @@
 package seng302.models;
 
+import com.sun.xml.internal.bind.v2.TODO;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -49,6 +50,7 @@ public class BoatGroup extends RaceObject {
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
     private Wake wake;
+    private boolean isSelected = true;  //Boats annotations are visible by default at the start
     //Handles boat moving when connecting to a stream
     private boolean setToInitialLocation = false;
     private boolean destinationSet;
@@ -95,6 +97,9 @@ public class BoatGroup extends RaceObject {
     private void initChildren(Color color, double... points) {
         boatPoly = new Polygon(points);
         boatPoly.setFill(color);
+        boatPoly.setOnMouseEntered(event -> boatPoly.setFill(Color.FLORALWHITE));
+        boatPoly.setOnMouseExited(event -> boatPoly.setFill(color));
+        boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
 
         teamNameObject = new Text(boat.getShortName());
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
@@ -228,7 +233,7 @@ public class BoatGroup extends RaceObject {
                         boatPoly.getLayoutY()
                     );
                     l.getStrokeDashArray().setAll(3d, 7d);
-                    l.setStroke(boatPoly.getFill());
+                    l.setStroke(boat.getColour());
                     lineGroup.getChildren().add(l);
                 }
                 if (destinationSet) { //Only begin drawing after the first destination is set
@@ -349,6 +354,10 @@ public class BoatGroup extends RaceObject {
         wake.rotate(rotationalGoal);
     }
 
+    public void paintBoat(Color color) {
+        boatPoly.setFill(color);
+    }
+
     public void setTeamNameObjectVisible(Boolean visible) {
         teamNameObject.setVisible(visible);
     }
@@ -375,6 +384,24 @@ public class BoatGroup extends RaceObject {
 
     public Yacht getBoat() {
         return boat;
+    }
+
+    /**
+     * This function sets the boats isSelected property AS WELL as actually acting upon the value of
+     * that selection. (Painting or not painting annotations)
+     *
+     * @param isSelected A Boolean indicating whether or not the boat is selected
+     */
+    public void setIsSelected(Boolean isSelected) {
+        this.isSelected = isSelected;
+        setTeamNameObjectVisible(isSelected);
+        setVelocityObjectVisible(isSelected);
+        setLineGroupVisible(isSelected);
+        setWakeVisible(isSelected);
+        setEstTimeToNextMarkObjectVisible(isSelected);
+        setLegTimeObjectVisible(isSelected);
+        // TODO: 17/05/17 wmu16 - this should iterate over some list of annotations which we should make to easily make extensible
+//        paintBoat((isSelected) ? Color.WHITE : boat.getColour());
     }
 
     /**
@@ -434,5 +461,10 @@ public class BoatGroup extends RaceObject {
                 lineStorage.clear();
             }
         });
+    }
+
+    @Override
+    public String toString() {
+        return boat.toString();
     }
 }
