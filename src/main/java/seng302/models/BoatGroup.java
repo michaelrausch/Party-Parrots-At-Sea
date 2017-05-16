@@ -1,6 +1,5 @@
 package seng302.models;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
