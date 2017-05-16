@@ -24,7 +24,6 @@ import java.util.concurrent.PriorityBlockingQueue;
  * and parsed in by turning the byte arrays into useful data. There are two public static hashmaps
  * that are threadsafe so the visualiser can always access the latest speed and position available
  * Created by kre39 on 23/04/17.
- *
  */
 public class StreamParser extends Thread{
 

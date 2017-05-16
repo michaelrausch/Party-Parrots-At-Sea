@@ -1,12 +1,8 @@
 package seng302.controllers;
 
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -62,15 +58,17 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private boolean displayFps;
     private Timeline timerTimeline;
     private Map<Yacht, TimelineInfo> timelineInfos = new HashMap<>();
-    private ArrayList<Yacht> boatOrder = new ArrayList<>();
     private Race race;
     private Stage stage;
+
     private ImportantAnnotationsState importantAnnotations;
+    private Yacht selectedBoat;
 
     public void initialize() {
         // Load a default important annotation state
         importantAnnotations = new ImportantAnnotationsState();
 
+        //Initialise race controller
         RaceController raceController = new RaceController();
         raceController.initializeRace();
         race = raceController.getRace();
@@ -79,15 +77,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
-        initializeTimer();
-        initializeSettings();
-        initialiseWindDirection();
-        initialisePositionVBox();
+        initializeUpdateTimer();
+        initialiseFPSCheckBox();
+        initialiseAnnotationSlider();
         initialiseBoatSelectionComboBox();
-        //set wind direction!!!!!!! can't find another place to put my code --haoming
-//        double windDirection = new ConfigParser("/config/config.xml").getWindDirection();
-//        windDirectionText.setText(String.format("%.1f°", windDirection));
-//        windArrowText.setRotate(windDirection);
         includedCanvasController.timer.start();
 
         selectAnnotationBtn.setOnAction(event -> {
@@ -132,17 +125,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
-    private void initializeSettings() {
+
+    private void initialiseFPSCheckBox() {
         displayFps = true;
+        toggleFps.selectedProperty().addListener(
+            (observable, oldValue, newValue) -> displayFps = !displayFps);
+    }
 
-        toggleFps.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                displayFps = !displayFps;
-            }
-        });
-
-        //SLIDER STUFF BELOW
+    private void initialiseAnnotationSlider() {
         annotationSlider.setLabelFormatter(new StringConverter<Double>() {
             @Override
             public String toString(Double n) {
@@ -175,19 +165,24 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         annotationSlider.setValue(2);
     }
 
-    private void initializeTimer(){
+
+    /**
+     * Initalises a timer which updates elements of the RaceView such as wind direction, boat
+     * orderings etc.. which are dependent on the info from the stream parser constantly.
+     * Updates of each of these attributes are called ONCE EACH SECOND
+     */
+    private void initializeUpdateTimer(){
         timerTimeline = new Timeline();
         timerTimeline.setCycleCount(Timeline.INDEFINITE);
         // Run timer update every second
         timerTimeline.getKeyFrames().add(
                 new KeyFrame(Duration.seconds(1),
                         event -> {
-                            if (StreamParser.isRaceFinished()) {
-                                timerLabel.setFill(Color.RED);
-                                timerLabel.setText("Race Finished!");
-                            } else {
-                                timerLabel.setText(currentTimer());
-                            }
+                            updateRaceTime();
+                            updateWindDirection();
+                            updateOrder();
+                            updateBoatSelectionComboBox();
+
                         })
         );
 
@@ -195,133 +190,82 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         timerTimeline.playFromStart();
     }
 
-    private void initialiseWindDirection() {
-        Timeline windDirTimeline = new Timeline();
-        windDirTimeline.setCycleCount(Timeline.INDEFINITE);
-        windDirTimeline.getKeyFrames().add(
-                new KeyFrame(Duration.seconds(1),
-                        event -> {
-                            windDirectionText.setText(String.format("%.1f°", StreamParser.getWindDirection()));
-                            windArrowText.setRotate(StreamParser.getWindDirection());
-                        })
-        );
-        windDirTimeline.playFromStart();
+
+    /**
+     * Updates the wind direction arrow and text as from info from the StreamParser
+     */
+    private void updateWindDirection() {
+        windDirectionText.setText(String.format("%.1f°", StreamParser.getWindDirection()));
+        windArrowText.setRotate(StreamParser.getWindDirection());
     }
 
-    private void initialisePositionVBox() {
 
-        Timeline posVBoxTimeline = new Timeline();
-        posVBoxTimeline.setCycleCount(Timeline.INDEFINITE);
-        posVBoxTimeline.getKeyFrames().add(
-                new KeyFrame(Duration.seconds(1),
-                        event -> {
-                            showOrder();
-                        })
-        );
-        posVBoxTimeline.playFromStart();
-
+    /**
+     * Updates the clock for the race
+     */
+    private void updateRaceTime() {
+        if (StreamParser.isRaceFinished()) {
+            timerLabel.setFill(Color.RED);
+            timerLabel.setText("Race Finished!");
+        } else {
+            timerLabel.setText(getTimeSinceStartOfRace());
+        }
     }
 
-    private void initialiseBoatSelectionComboBox() {
 
-        ObservableList<Yacht> observableBoats =  FXCollections.observableArrayList(startingBoats);
+    /**
+     * Grabs the boats currently in the race as from the StreamParser and sets them to be selectable
+     * in the boat selection combo box
+     */
+    private void updateBoatSelectionComboBox() {
+        ObservableList<Yacht> observableBoats =  FXCollections.observableArrayList(StreamParser.getBoatsPos().values());
         boatSelectionComboBox.setItems(observableBoats);
+    }
+
+
+    /**
+     * Updates the order of the boats as from the StreamParser and sets them in the boat order section
+     */
+    private void updateOrder() {
+        positionVbox.getChildren().clear();
+        positionVbox.getChildren().removeAll();
+        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+
+        for (Yacht boat : StreamParser.getBoatsPos().values()) {
+            if (boat.getBoatStatus() == 3) {  // 3 is finish status
+                Text textToAdd = new Text(boat.getPosition() + ". " +
+                    boat.getShortName() + " (Finished)");
+                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                positionVbox.getChildren().add(textToAdd);
+
+            } else {
+                Text textToAdd = new Text(boat.getPosition() + ". " +
+                    boat.getShortName() + " ");
+                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                textToAdd.setStyle("");
+                positionVbox.getChildren().add(textToAdd);
+            }
+
+        }
+    }
+
+
+    /**
+     * Initialised the combo box with any boats currently in the race and adds the required listener
+     * for the combobox to take action upon selection
+     */
+    private void initialiseBoatSelectionComboBox() {
+        updateBoatSelectionComboBox();
         boatSelectionComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            Yacht thisYacht = (Yacht) newValue;
-            setSelectedBoat(thisYacht);
+            //This listener is fired whenever the combo box changes. This means when the values are updated
+            //We dont want to set the selected value if the values are updated but nothing clicked (null)
+            if (newValue != null && newValue != selectedBoat) {
+                Yacht thisYacht = (Yacht) newValue;
+                setSelectedBoat(thisYacht);
+            }
         });
     }
 
-    /**
-     * Generates time line for each boat, and stores time time into timelineInfos hash map
-     */
-    private void initializeTimelines() {
-        HashMap<Yacht, List> boat_events = race.getEvents();
-        for (Yacht boat : boat_events.keySet()) {
-            startingBoats.add(boat);
-//            // x, y are the real time coordinates
-//            DoubleProperty x = new SimpleDoubleProperty();
-//            DoubleProperty y = new SimpleDoubleProperty();
-//
-//            List<KeyFrame> keyFrames = new ArrayList<>();
-//            List<Event> events = boat_events.get(boat);
-//
-//            // iterates all events and convert each event to keyFrame, then add them into a list
-//            for (Event event : events) {
-//                if (event.getIsFinishingEvent()) {
-//                    keyFrames.add(
-//                            new KeyFrame(Duration.seconds(event.getTime()),
-//                                    onFinished -> {race.setBoatFinished(boat); handleEvent(event);},
-//                                    new KeyValue(x, event.getThisMark().getLatitude()),
-//                                    new KeyValue(y, event.getThisMark().getLongitude())
-//                            )
-//                    );
-//                } else {
-//                    keyFrames.add(
-//                            new KeyFrame(Duration.seconds(event.getTime()),
-//                                    onFinished ->{
-//                                        handleEvent(event);
-//                                        boat.setHeading(event.getBoatHeading());
-//                                    },
-//                                    new KeyValue(x, event.getThisMark().getLatitude()),
-//                                    new KeyValue(y, event.getThisMark().getLongitude())
-//                            )
-//                    );
-//                }
-//            }
-//            timelineInfos.put(boat, new TimelineInfo(new Timeline(keyFrames.toArray(new KeyFrame[keyFrames.size()])), x, y));
-        }
-        setRaceDuration();
-    }
-
-    private void setRaceDuration(){
-        Double maxDuration = 0.0;
-        Timeline maxTimeline = null;
-
-        for (TimelineInfo timelineInfo : timelineInfos.values()) {
-
-            Timeline timeline = timelineInfo.getTimeline();
-            if (timeline.getTotalDuration().toMillis() >= maxDuration) {
-                maxDuration = timeline.getTotalDuration().toMillis();
-                maxTimeline = timeline;
-            }
-
-            // Timelines are paused by default
-            timeline.play();
-            timeline.pause();
-        }
-
-        maxTimeline.setOnFinished(event -> {
-            race.setRaceFinished();
-            loadRaceResultView();
-        });
-    }
-
-    /**
-     * Play each boats timerTimeline
-     */
-    public void playTimelines(){
-        for (TimelineInfo timelineInfo : timelineInfos.values()){
-            Timeline timeline = timelineInfo.getTimeline();
-
-            if (timeline.getStatus() == Animation.Status.PAUSED){
-                timeline.play();
-            }
-        }
-    }
-
-    /**
-     * Pause each boats timerTimeline
-     */
-    public void pauseTimelines(){
-        for (TimelineInfo timelineInfo : timelineInfos.values()){
-            Timeline timeline = timelineInfo.getTimeline();
-
-            if (timeline.getStatus() == Animation.Status.RUNNING){
-                timeline.pause();
-            }
-        }
-    }
 
     /**
      * Display the list of boats in the order they finished the race
@@ -342,46 +286,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
-    public void handleEvent(Event event) {
-        Yacht boat = event.getBoat();
-        boatOrder.remove(boat);
-        boat.setMarkLastPast(event.getMarkPosInRace());
-        boatOrder.add(boat);
-        boatOrder.sort(new Comparator<Yacht>() {
-            @Override
-            public int compare(Yacht b1, Yacht b2) {
-                return b2.getMarkLastPast() - b1.getMarkLastPast();
-            }
-        });
-        showOrder();
-    }
-
-    private void showOrder() {
-        positionVbox.getChildren().clear();
-        positionVbox.getChildren().removeAll();
-        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-
-//        for (Boat boat : boatOrder) {
-//            positionVbox.getChildren().add(new Text(boat.getShortName() + " " + boat.getSpeedInKnots() + " Knots"));
-//        }
-
-        for (Yacht boat : StreamParser.getBoatsPos().values()) {
-            if (boat.getBoatStatus() == 3) {  // 3 is finish status
-                Text textToAdd = new Text(boat.getPosition() + ". " +
-                        boat.getShortName() + " (Finished)");
-                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                positionVbox.getChildren().add(textToAdd);
-
-            } else {
-                Text textToAdd = new Text(boat.getPosition() + ". " +
-                        boat.getShortName() + " ");
-                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                textToAdd.setStyle("");
-                positionVbox.getChildren().add(textToAdd);
-            }
-
-        }
-    }
 
     /**
      * Convert seconds to a string of the format mm:ss
@@ -396,7 +300,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return String.format("%02d:%02d", time / 60, time % 60);
     }
 
-    private String currentTimer() {
+    private String getTimeSinceStartOfRace() {
         String timerString = "0:00";
         if (StreamParser.getTimeSinceStart() > 0) {
             String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
@@ -416,12 +320,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return timerString;
     }
 
-    public void stopTimer() {
-        timerTimeline.stop();
-    }
-    public void startTimer() {
-        timerTimeline.play();
-    }
 
     public boolean isDisplayFps() {
         return displayFps;
@@ -431,13 +329,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return race;
     }
 
-    public Map<Yacht, TimelineInfo> getTimelineInfos() {
-        return timelineInfos;
-    }
-
-    public ArrayList<Yacht> getStartingBoats(){
-        return startingBoats;
-    }
 
     /**
      * Display the important annotations for a specific BoatGroup
@@ -524,6 +415,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
                 if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
                     bg.setIsSelected(true);
+                    selectedBoat = yacht;
                 } else {
                     bg.setIsSelected(false);
                 }
