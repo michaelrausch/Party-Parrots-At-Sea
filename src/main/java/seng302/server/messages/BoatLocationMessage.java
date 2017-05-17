@@ -1,10 +1,7 @@
 package seng302.server.messages;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
 
 public class BoatLocationMessage extends Message {
     private final int MESSAGE_SIZE = 56;
@@ -44,7 +41,7 @@ public class BoatLocationMessage extends Message {
     public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude, double heading, long boatSpeed){
         boatSpeed /= 10;
         messageVersionNumber = 1;
-        time = System.currentTimeMillis() / 1000L;
+        time = System.currentTimeMillis();
         this.sourceId = sourceId;
         this.sequenceNum = sequenceNum;
         this.deviceType = DeviceType.RACING_YACHT;
