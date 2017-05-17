@@ -48,10 +48,6 @@ public class BoatGroup extends RaceObject{
     private boolean isMaximized= true;
     private List<Line> lineStorage = new ArrayList<>();
     private int setCallCount = 5;
-    private int frameCount = 90;
-    
-    private double lastX;
-    private double lastY;
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
@@ -126,8 +122,8 @@ public class BoatGroup extends RaceObject{
      * @param dy The amount to move the Y coordinate by
      */
     public void moveGroupBy(double dx, double dy, double rotation) {
-        boatPoly.setLayoutX(lastX + dx);
-        boatPoly.setLayoutY(lastY + dy);
+        boatPoly.setLayoutX(boatPoly.getLayoutX() + dx);
+        boatPoly.setLayoutY(boatPoly.getLayoutY() + dy);
         teamNameObject.setLayoutX(teamNameObject.getLayoutX() + dx);
         teamNameObject.setLayoutY(teamNameObject.getLayoutY() + dy);
         velocityObject.setLayoutX(velocityObject.getLayoutX() + dx);
@@ -178,21 +174,26 @@ public class BoatGroup extends RaceObject{
             distanceTravelled += Math.abs(dx) + Math.abs(dy);
             moveGroupBy(dx, dy, rotation);
             //Draw a new section of the trail every 20 pixels of movement.
-            if (frameCount-- == 0) {
-                frameCount = (int) (300 - boat.getVelocity() * 10);
+            if (distanceTravelled > 20) {
+                distanceTravelled = 0;
                 if (lastPoint != null) {
                     Line l = new Line(
-                            lastPoint.getX(),
-                            lastPoint.getY(),
-                            lastX,
-                            lastY
+                            lastPoint.getX() * 3 - 1000,
+                            lastPoint.getY() * 3 - 1000,
+                            boatPoly.getLayoutX() * 3 - 1000,
+                            boatPoly.getLayoutY() * 3 - 1000
                     );
                     l.getStrokeDashArray().setAll(3d, 7d);
                     l.setStroke(boatPoly.getFill());
+                    if (lastPoint.getX() * 3 - 1000 < 0 || lastPoint.getY() * 3 - 1000 < 0 || boatPoly.getLayoutX() * 3 - 1000 < 0 || boatPoly.getLayoutY() * 3 - 1000 < 0)
+                        l.setVisible(false);
+                    else
+                        l.setVisible(true);
+
                     lineGroup.getChildren().add(l);
                 }
                 if (destinationSet) { //Only begin drawing after the first destination is set
-                    lastPoint = new Point2D(lastX, lastY);
+                    lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
                 }
             }
             wake.updatePosition(timeInterval);
@@ -213,8 +214,8 @@ public class BoatGroup extends RaceObject{
                 boat.setVelocity(groundSpeed);
                 if (currentRotation < 0)
                     currentRotation = 360 - currentRotation;
-                double dx = newXValue - lastX;
-                double dy = newYValue - lastY;
+                double dx = newXValue - boatPoly.getLayoutX();
+                double dy = newYValue - boatPoly.getLayoutY();
                 //Check movement is reasonable. Assumes a 1000 * 1000 canvas
 //                if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
 //                    dx = 0;
@@ -224,8 +225,6 @@ public class BoatGroup extends RaceObject{
 
                 pixelVelocityX = dx / expectedUpdateInterval;
                 pixelVelocityY = dy / expectedUpdateInterval;
-                lastX = newXValue;
-                lastY = newYValue;
                 rotationalGoal = rotation;
                 calculateRotationalVelocity();
                 if (Math.abs(rotationalVelocity) > 0.075) {
@@ -250,10 +249,10 @@ public class BoatGroup extends RaceObject{
                 setCallCount = 5;
                 if (lastPoint != null) {
                     Line l = new Line(
-                            lastPoint.getX(),
-                            lastPoint.getY(),
-                            newXValue,
-                            newYValue
+                            lastPoint.getX() * 1.5,
+                            lastPoint.getY() * 1.5,
+                            newXValue * 1.5,
+                            newYValue * 1.5
                     );
                     l.getStrokeDashArray().setAll(3d, 7d);
                     l.setStroke(boatPoly.getFill());
@@ -273,7 +272,7 @@ public class BoatGroup extends RaceObject{
             double rotation = Math.abs(
                     Math.toDegrees(
                             Math.atan(
-                                    (newYValue - lastY) / (newXValue - lastX)
+                                    (newYValue - boatPoly.getLayoutY()) / (newXValue - boatPoly.getLayoutX())
                             )
                     )
             );

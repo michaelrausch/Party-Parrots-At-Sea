@@ -18,7 +18,7 @@ class Wake extends Group {
     //The total possible difference between the first wake and the last. Increasing/Decreasing this will make wakes fan out more/less.
     private final double MAX_DIFF = 75;
     //Increasing/decreasing this will alter the speed that wakes converge when the heading stop changing. Anything over about 1500 may cause oscillation.
-    private final int UNIFICATION_SPEED = 500;
+    private final int UNIFICATION_SPEED = 750;
 
 
     private Arc[] arcs = new Arc[numWakes];
