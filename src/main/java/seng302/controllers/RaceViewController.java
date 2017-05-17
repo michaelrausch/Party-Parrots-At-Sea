@@ -25,7 +25,6 @@ import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.controllers.annotations.ImportantAnnotationsState;
 import seng302.models.BoatGroup;
-import seng302.models.RaceObject;
 import seng302.models.Yacht;
 import seng302.models.stream.StreamParser;
 

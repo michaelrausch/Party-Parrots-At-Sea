@@ -133,7 +133,6 @@ public class Controller implements Initializable {
     public void switchToRaceView() {
         switchedToRaceView = true;
         setContentPane("/views/RaceView.fxml");
-        System.out.println("boatPositions.size()1 = " + boatPositions.size());
         StreamParser.boatPositions.clear();
     }
 

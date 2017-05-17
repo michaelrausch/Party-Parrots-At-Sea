@@ -1,16 +1,10 @@
 package seng302.models;
 
-import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
-import javafx.stage.Stage;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2 dimensional boat.
@@ -34,14 +28,6 @@ public class BoatGroup extends Group{
     private double yIncrement;
     private long lastTimeValid = 0;
     private long framesToMove;
-    private Point2D lastPoint;
-    double oldTime;
-    double newTime;
-    double lastYValue = 0;
-    double lastXValue = 0;
-    private double pixelVelocityX;
-    private double pixelVelocityY;
-    private static final int expectedUpdateInterval = 200;
     //Graphical objects
     private Yacht boat;
     private Group lineGroup = new Group();
@@ -163,30 +149,17 @@ public class BoatGroup extends Group{
             lastTimeValid = timeValid - 200;
             moveTo(newXValue, newYValue, rotation);
         }
-
-
-        rotateTo(rotation);
         framesToMove = Math.round((frameRate/(1000.0f/(timeValid-lastTimeValid))));
-
         double dx = newXValue - boatPoly.getLayoutX();
         double dy = newYValue - boatPoly.getLayoutY();
-
         xIncrement = dx/framesToMove;
         yIncrement = dy/framesToMove;
-
-        if (id == 106){
-            System.out.println(framesToMove);
-            System.out.println("xIncrement = " + xIncrement);
-        }
+        rotateTo(rotation);
 
         velocityObject.setText(String.format("%.2f m/s", groundSpeed));
         lastTimeValid = timeValid;
         isStopped = false;
     }
-
-
-
-
 
 
 
@@ -209,20 +182,6 @@ public class BoatGroup extends Group{
     public Yacht getBoat() {
         return boat;
     }
-
-//    /**
-//     * Returns true if this BoatGroup contains at least one of the given IDs.
-//     *
-//     * @param raceIds The ID's to check the BoatGroup for.
-//     * @return True if the BoatGroup contains at east one of the given IDs, false otherwise.
-//     */
-//    public boolean hasRaceId (long... raceIds) {
-//        for (long id : raceIds) {
-//            if (id == boat.getSourceID())
-//                return true;
-//        }
-//        return false;
-//    }
 
     /**
      * Returns all raceIds associated with this group. For BoatGroups the ID's are for the boat.

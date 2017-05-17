@@ -188,18 +188,12 @@ public class CanvasController {
     }
 
     private void updateBoatGroup(BoatGroup boatGroup) {
-        System.out.println("StreamParser.boatPositions.size()2 = " + StreamParser.boatPositions.size());
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(boatGroup.getRaceId());
         // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
-        if (movementQueue.size() > 5){
+        if (movementQueue.size() > 0){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
-                if (boatGroup.getRaceId() == 106){
-//                    System.out.println("p2d.getX() = " + p2d.getX());
-//                    System.out.println("p2d.getY() = " + p2d.getY());
-//                    System.out.println("positionPacket.getTimeValid() = " + positionPacket.getTimeValid());
-                }
                 double heading = 360.0 / 0xffff * positionPacket.getHeading();
                 boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), positionPacket.getTimeValid(), frameRate, boatGroup.getRaceId());
             } catch (InterruptedException e){
@@ -387,31 +381,6 @@ public class CanvasController {
             scaleDirection = ScaleDirection.VERTICAL;
         }
         return horiDistance;
-    }
-
-    /**
-     * Give all markers in the course an x,y location relative to a given reference with a known x,y location. Distances
-     * are scaled according to the distanceScaleFactor variable.
-     */
-    // DEPRECATED create an initialize marks method like the initialize boats method
-    private void givePointsXY() {
-//        List<XMLParser.RaceXMLObject.CompoundMark> allPoints = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
-//        List<XMLParser.RaceXMLObject.CompoundMark> processed = new ArrayList<>();
-//        MarkGroup markGroup;
-//
-//        for (XMLParser.RaceXMLObject.CompoundMark mark : allPoints) {
-//            if (!processed.contains(mark)) {
-//                if (mark.getMarkType() != MarkType.SINGLE_MARK) {
-//                    markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)), findScaledXY(mark.getMarks().get(1)));
-//                    markGroups.add(markGroup);
-//                } else {
-//                    markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)));
-//                    markGroups.add(markGroup);
-//                }
-//                processed.add(mark);
-//            }
-//        }
-        group.getChildren().addAll(boatGroups);
     }
 
     private Point2D findScaledXY (Mark unscaled) {
