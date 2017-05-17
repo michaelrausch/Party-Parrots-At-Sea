@@ -56,38 +56,31 @@ class Wake extends Group {
      * Sets the rotationalVelocity of each arc.
      *
      * @param rotationalVelocity The rotationalVelocity the wake should move at.
-     * @param velocity The real world velocity of the boat in m/s.
+     * @param velocity           The real world velocity of the boat in m/s.
      */
-    void setRotationalVelocity (double rotationalVelocity, double velocity) {
+    void setRotationalVelocity(double rotationalVelocity, double velocity) {
         rotationalVelocities[0] = rotationalVelocity;
         for (int i = 1; i < numWakes; i++) {
-            double difference = Math.atan2(
-                    Math.sin(
-                            Math.toRadians(
-                                    rotations[i - 1] - rotations[i]
-                            )
-                    ),
-                    Math.cos(
-                            Math.toRadians(
-                                    rotations[i - 1] - rotations[i]
-                            )
-                    )
+            double wakeSeparationRad = Math.toRadians(rotations[i - 1] - rotations[i]);
+            double shortestDistance = Math.atan2(
+                    Math.sin(wakeSeparationRad),
+                    Math.cos(wakeSeparationRad)
             );
-            difference = Math.toDegrees(difference);
+            double distDeg = Math.toDegrees(shortestDistance);
 
-            if (rotationalVelocities[i-1] < 0.01 && rotationalVelocities[i-1] > -0.01) {
-                rotationalVelocities[i] = difference / UNIFICATION_SPEED * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes) * 1.5;
+            if (rotationalVelocities[i - 1] < 0.01 && rotationalVelocities[i - 1] > -0.01) {
+                rotationalVelocities[i] = distDeg / UNIFICATION_SPEED * Math.log(Math.abs(distDeg) + 1) / Math.log(MAX_DIFF / numWakes);
 
             } else {
-                if (difference < (MAX_DIFF / numWakes))
-                    rotationalVelocities[i] = rotationalVelocities[i-1] * Math.log(Math.abs(difference) + 1) / Math.log(MAX_DIFF / numWakes);
+                if (distDeg < (MAX_DIFF / numWakes))
+                    rotationalVelocities[i] = rotationalVelocities[i - 1] * Math.log(Math.abs(distDeg) + 1) / Math.log(MAX_DIFF / numWakes);
                 else
                     rotationalVelocities[i] = rotationalVelocities[i - 1];
             }
         }
 
         double rad = baseRad + velocity;
-        for (Arc arc :arcs) {
+        for (Arc arc : arcs) {
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
             rad += (20 / numWakes) + (velocity / 2);
@@ -96,9 +89,10 @@ class Wake extends Group {
 
     /**
      * Arcs rotate based on the distance they would have travelled over the supplied time interval.
+     *
      * @param timeInterval the time interval, in microseconds, that the wake should move.
      */
-    void updatePosition (long timeInterval) {
+    void updatePosition(long timeInterval) {
         for (int i = 0; i < numWakes; i++) {
             rotations[i] = rotations[i] + rotationalVelocities[i] * timeInterval;
             arcs[i].getTransforms().setAll(new Rotate(rotations[i]));
@@ -107,9 +101,10 @@ class Wake extends Group {
 
     /**
      * Rotate all wakes to the given rotation.
+     *
      * @param rotation the from north angle in degrees to rotate to.
      */
-    void rotate (double rotation) {
+    void rotate(double rotation) {
         for (int i = 0; i < arcs.length; i++) {
             rotations[i] = rotation;
             rotationalVelocities[i] = 0;
