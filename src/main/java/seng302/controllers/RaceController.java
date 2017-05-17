@@ -25,7 +25,7 @@ public class RaceController {
         String teamsConfigFile = "/config/teams.xml";
 
         try {
-            race = createRace(raceConfigFile, teamsConfigFile);
+            race = createRace(raceConfigFile, teamsConfigFile);     //These config files arent actually used
         } catch (Exception e) {
             System.out.println("There was an error creating the race.");
         }

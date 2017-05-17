@@ -9,8 +9,8 @@ import seng302.models.parsers.StreamParser;
 import seng302.models.parsers.StreamReceiver;
 import seng302.server.ServerThread;
 
-public class App extends Application
-{
+public class App extends Application {
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
@@ -39,15 +39,15 @@ public class App extends Application
             e.printStackTrace();
         }
 
-        if (args.length == 1 && args[0].equals("-standalone")){
+        if (args.length == 1 && args[0].equals("-standalone")) {
             return;
         }
 
-        if (args.length == 3 && args[0].equals("-server")){
+        if (args.length == 3 && args[0].equals("-server")) {
 
             sr = new StreamReceiver(args[1], Integer.valueOf(args[2]), "RaceStream");
 
-        } else if(args.length == 2 && args[0].equals("-server")){
+        } else if (args.length == 2 && args[0].equals("-server")) {
             switch (args[1]) {
                 case "internal":
                     sr = new StreamReceiver("localhost", 4949, "RaceStream");
@@ -63,7 +63,7 @@ public class App extends Application
         //Change the StreamReceiver in this else block to change the default data source.
         else{
 //            sr = new StreamReceiver("localhost", 4949, "RaceStream");
-            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
+            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
         }
 
         sr.start();
@@ -71,8 +71,6 @@ public class App extends Application
         streamParser.start();
 
         launch(args);
-
-
 
     }
 }

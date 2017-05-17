@@ -1,31 +1,31 @@
 package seng302.controllers;
 
-import javafx.animation.*;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
-import seng302.models.*;
+import seng302.models.BoatGroup;
+import seng302.models.Colors;
+import seng302.models.RaceObject;
+import seng302.models.Yacht;
 import seng302.models.mark.*;
 import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.StreamReceiver;
-import seng302.models.parsers.packets.BoatPositionPacket;
 import seng302.models.parsers.XMLParser;
 import seng302.models.parsers.XMLParser.RaceXMLObject.CompoundMark;
 import seng302.models.parsers.XMLParser.RaceXMLObject.Limit;
-import seng302.models.mark.Mark;
+import seng302.models.parsers.packets.BoatPositionPacket;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
@@ -240,6 +240,17 @@ public class CanvasController {
                 }
             }
         }
+        checkForCourseChanges();
+    }
+
+    private void checkForCourseChanges() {
+        if (StreamParser.isNewRaceXmlReceived()){
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            gc.restore();
+            addRaceBorder();
+            canvas.toBack();
+        }
     }
 
     private void move(long id, RaceObject raceObject){
@@ -345,6 +356,8 @@ public class CanvasController {
      * Calculates x and y location for every marker that fits it to the canvas the race will be drawn on.
      */
     private void fitMarksToCanvas() {
+        //Check is called once to avoid unnecessarily change the course limits once the race is running
+        StreamParser.isNewRaceXmlReceived();
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);

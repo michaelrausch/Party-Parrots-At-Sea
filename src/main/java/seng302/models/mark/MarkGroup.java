@@ -1,6 +1,7 @@
 package seng302.models.mark;
 
 import javafx.geometry.Point2D;
+import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
