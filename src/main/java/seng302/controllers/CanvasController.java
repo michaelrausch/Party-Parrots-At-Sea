@@ -188,6 +188,7 @@ public class CanvasController {
     }
 
     private void updateBoatGroup(BoatGroup boatGroup) {
+        System.out.println("StreamParser.boatPositions.size()2 = " + StreamParser.boatPositions.size());
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(boatGroup.getRaceId());
         // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
         if (movementQueue.size() > 5){

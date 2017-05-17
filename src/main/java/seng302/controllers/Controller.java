@@ -1,5 +1,7 @@
 package seng302.controllers;
 
+import static seng302.models.stream.StreamParser.boatPositions;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -131,6 +133,8 @@ public class Controller implements Initializable {
     public void switchToRaceView() {
         switchedToRaceView = true;
         setContentPane("/views/RaceView.fxml");
+        System.out.println("boatPositions.size()1 = " + boatPositions.size());
+        StreamParser.boatPositions.clear();
     }
 
     private void updateTeamList() {
