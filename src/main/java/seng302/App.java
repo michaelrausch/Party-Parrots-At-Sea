@@ -62,8 +62,8 @@ public class App extends Application {
         }
         //Change the StreamReceiver in this else block to change the default data source.
         else{
-            sr = new StreamReceiver("localhost", 4949, "RaceStream");
-//            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
+            //sr = new StreamReceiver("localhost", 4949, "RaceStream");
+            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
         }
 
         sr.start();

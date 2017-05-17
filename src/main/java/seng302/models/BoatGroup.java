@@ -272,7 +272,6 @@ public class BoatGroup extends RaceObject {
                 calculateRotationalVelocity();
 
                 if (Math.abs(rotationalVelocity) > 0.075) {
-                    System.out.println("rotationalVelocity = " + rotationalVelocity);
                     rotationalVelocity = 0;
                     rotateTo(rotationalGoal);
                     wake.rotate(rotationalGoal);
