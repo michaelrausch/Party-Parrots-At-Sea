@@ -185,6 +185,17 @@ public class CanvasController {
                 }
             }
         }
+        checkForCourseChanges();
+    }
+
+    private void checkForCourseChanges() {
+        if (StreamParser.isNewRaceXmlReceived()){
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            gc.restore();
+            addRaceBorder();
+            canvas.toBack();
+        }
     }
 
     private void updateBoatGroup(BoatGroup boatGroup) {
@@ -285,6 +296,8 @@ public class CanvasController {
      * Calculates x and y location for every marker that fits it to the canvas the race will be drawn on.
      */
     private void fitMarksToCanvas() {
+        //Check is called once to avoid unnecessarily change the course limits once the race is running
+        StreamParser.isNewRaceXmlReceived();
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ImportantAnnotationController implements Initializable {
+
     /*
      * JavaFX Outlets
      */
@@ -31,6 +32,12 @@ public class ImportantAnnotationController implements Initializable {
     private CheckBox boatNameSelect;
 
     @FXML
+    private CheckBox boatEstTimeToNextMarkSelect;
+
+    @FXML
+    private CheckBox boatElapsedTimeSelect;
+
+    @FXML
     private AnchorPane annotationSelectWindow;
 
     @FXML
@@ -40,7 +47,7 @@ public class ImportantAnnotationController implements Initializable {
     private ImportantAnnotationsState importantAnnotationsState;
     private Stage stage;
 
-    public ImportantAnnotationController(ImportantAnnotationDelegate delegate, Stage stage){
+    public ImportantAnnotationController(ImportantAnnotationDelegate delegate, Stage stage) {
         this.delegate = delegate;
         importantAnnotationsState = new ImportantAnnotationsState();
         this.stage = stage;
@@ -49,10 +56,11 @@ public class ImportantAnnotationController implements Initializable {
     /**
      * Sets whether or not an annotation is considered important, then
      * sends an update to the delegate
+     *
      * @param annotation The annotation
      * @param isSet True if annotation is important
      */
-    private void setAnnotation(Annotation annotation, Boolean isSet){
+    private void setAnnotation(Annotation annotation, Boolean isSet) {
         importantAnnotationsState.setAnnotationState(annotation, isSet);
         sendUpdate();
     }
@@ -61,35 +69,49 @@ public class ImportantAnnotationController implements Initializable {
      * Sends an update to the delegate when the important
      * annotations have changed
      */
-    private void sendUpdate(){
+    private void sendUpdate() {
         this.delegate.importantAnnotationsChanged(importantAnnotationsState);
     }
 
     /**
      * Load the current state of the 'important annotations'
+     *
      * @param currentState hashmap containing the states of each annotation
      */
-    public void loadState(ImportantAnnotationsState currentState){
+    public void loadState(ImportantAnnotationsState currentState) {
         this.importantAnnotationsState = currentState;
 
         // Initialise checkboxes
-        for (Annotation annotation : importantAnnotationsState.getAnnotations()){
-            switch (annotation){
+        for (Annotation annotation : importantAnnotationsState.getAnnotations()) {
+            switch (annotation) {
                 case WAKE:
-                    boatWakeSelect.setSelected(importantAnnotationsState.getAnnotationState(annotation));
+                    boatWakeSelect
+                        .setSelected(importantAnnotationsState.getAnnotationState(annotation));
                     break;
 
                 case SPEED:
-                    boatSpeedSelect.setSelected(importantAnnotationsState.getAnnotationState(annotation));
+                    boatSpeedSelect
+                        .setSelected(importantAnnotationsState.getAnnotationState(annotation));
                     break;
 
                 case TRACK:
-                    boatTrackSelect.setSelected(importantAnnotationsState.getAnnotationState(annotation));
+                    boatTrackSelect
+                        .setSelected(importantAnnotationsState.getAnnotationState(annotation));
                     break;
 
                 case NAME:
-                    boatNameSelect.setSelected(importantAnnotationsState.getAnnotationState(annotation));
+                    boatNameSelect
+                        .setSelected(importantAnnotationsState.getAnnotationState(annotation));
                     break;
+
+                case ESTTIMETONEXTMARK:
+                    boatEstTimeToNextMarkSelect
+                        .setSelected(importantAnnotationsState.getAnnotationState(annotation));
+                    break;
+
+                case LEGTIME:
+                    boatElapsedTimeSelect
+                        .setSelected(importantAnnotationsState.getAnnotationState(annotation));
 
                 default:
                     break;
@@ -99,15 +121,24 @@ public class ImportantAnnotationController implements Initializable {
 
     /**
      * View did load
+     *
      * @param location .
      * @param resources .
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        boatWakeSelect.setOnAction(event -> setAnnotation(Annotation.WAKE, boatWakeSelect.isSelected()));
-        boatSpeedSelect.setOnAction(event -> setAnnotation(Annotation.SPEED, boatSpeedSelect.isSelected()));
-        boatTrackSelect.setOnAction(event -> setAnnotation(Annotation.TRACK, boatTrackSelect.isSelected()));
-        boatNameSelect.setOnAction(event -> setAnnotation(Annotation.NAME, boatNameSelect.isSelected()));
+        boatWakeSelect
+            .setOnAction(event -> setAnnotation(Annotation.WAKE, boatWakeSelect.isSelected()));
+        boatSpeedSelect
+            .setOnAction(event -> setAnnotation(Annotation.SPEED, boatSpeedSelect.isSelected()));
+        boatTrackSelect
+            .setOnAction(event -> setAnnotation(Annotation.TRACK, boatTrackSelect.isSelected()));
+        boatNameSelect
+            .setOnAction(event -> setAnnotation(Annotation.NAME, boatNameSelect.isSelected()));
+        boatEstTimeToNextMarkSelect.setOnAction(event -> setAnnotation(Annotation.ESTTIMETONEXTMARK,
+            boatEstTimeToNextMarkSelect.isSelected()));
+        boatElapsedTimeSelect.setOnAction(
+            event -> setAnnotation(Annotation.LEGTIME, boatElapsedTimeSelect.isSelected()));
 
         closeButton.setOnAction(event -> stage.close());
     }

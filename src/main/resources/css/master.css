@@ -128,6 +128,24 @@ Table
     -fx-border-style: none;
 }
 
+
+/**
+Combo Box
+ */
+
+.combo-box-base {
+    -fx-background-color: #119796;
+    -fx-text-fill: white;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-text-fill: white;
+}
+
+.combo-box .cell:selected {
+    -fx-text-fill: white;
+}
+
 /**
 Remove scroll bars
  */
