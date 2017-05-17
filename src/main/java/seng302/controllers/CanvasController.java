@@ -125,7 +125,7 @@ public class CanvasController {
 
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
                 elapsedNanos = 1000 / 60;
-                updateRaceObjects();
+                //updateRaceObjects();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
                 }
@@ -423,23 +423,29 @@ public class CanvasController {
      * are scaled according to the distanceScaleFactor variable.
      */
     private void givePointsXY() {
-    List<XMLParser.RaceXMLObject.CompoundMark> allPoints = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
-    List<XMLParser.RaceXMLObject.CompoundMark> processed = new ArrayList<>();
-    MarkGroup markGroup;
+        Map<Integer, Mark> allPoints = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
+        List<Mark> processed = new ArrayList<>();
+        MarkGroup markGroup;
 
-        for (XMLParser.RaceXMLObject.CompoundMark mark : allPoints) {
-        if (!processed.contains(mark)) {
-            if (mark.getMarkType() != MarkType.SINGLE_MARK) {
-                markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)), findScaledXY(mark.getMarks().get(1)));
-                markGroups.add(markGroup);
-                } else {
-                    markGroup = new MarkGroup(mark, findScaledXY(mark.getMarks().get(0)));
-                    markGroups.add(markGroup);
+            for (Map.Entry<Integer, Mark> cMark : allPoints) {
+                Integer cMarkId = cMark.getKey();
+                Mark mark = cMark.getValue();
+                if (!processed.contains(mark)) {
+                    if (mark.getMarkType() != MarkType.SINGLE_MARK) {
+                        GateMark gMark = (GateMark) mark;
+
+                        markGroup = new MarkGroup(mark, findScaledXY(gMark.getSingleMark1()), findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
+                        markGroups.add(markGroup);
+                    } else {
+                        SingleMark sMark = (SingleMark) mark;
+
+                        markGroup = new MarkGroup(mark, findScaledXY(sMark));
+                        markGroups.add(markGroup);
+                    }
+                    processed.add((mark));
                 }
-                processed.add(mark);
             }
-        }
-        group.getChildren().addAll(boatGroups);
+            group.getChildren().addAll(boatGroups);
     }
 
     private Point2D findScaledXY (Mark unscaled) {

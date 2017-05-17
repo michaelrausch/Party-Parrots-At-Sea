@@ -132,5 +132,4 @@ public abstract class Mark {
     public void setId(int id) {
         this.id = id;
     }
-
 }
