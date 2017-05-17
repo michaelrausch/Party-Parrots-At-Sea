@@ -286,8 +286,7 @@ public class BoatGroup extends RaceObject {
                     rotationalVelocity = 0;
                     wakeGenerationDelay--;
                 } else {
-                    wake.setRotationalVelocity(rotationalVelocity, rotationalGoal,
-                            boat.getVelocity());
+                    wake.setRotationalVelocity(rotationalVelocity, boat.getVelocity());
                     rotateTo(rotationalGoal);
                     wake.rotate(rotationalGoal);
                 }
