@@ -22,7 +22,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.models.Yacht;
-import seng302.models.parsers.StreamParser;
+import seng302.models.stream.StreamParser;
 
 public class StartScreenController implements Initializable {
     @FXML

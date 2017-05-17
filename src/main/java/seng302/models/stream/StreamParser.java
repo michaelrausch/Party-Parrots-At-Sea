@@ -1,12 +1,12 @@
-package seng302.models.parsers;
+package seng302.models.stream;
 
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
-import seng302.models.parsers.packets.BoatPositionPacket;
-import seng302.models.parsers.packets.StreamPacket;
+import seng302.models.stream.packets.BoatPositionPacket;
+import seng302.models.stream.packets.StreamPacket;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.PriorityBlockingQueue;
+import seng302.models.stream.XMLParser;
 
 /**
  * The purpose of this class is to take in the stream of divided packets so they can be read
