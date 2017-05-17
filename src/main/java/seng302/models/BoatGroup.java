@@ -29,13 +29,16 @@ public class BoatGroup extends Group{
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
     //Variables for boat logic.
+    private boolean isStopped = true;
+    private double xIncrement;
+    private double yIncrement;
+    private long lastTimeValid = 0;
+    private long framesToMove;
     private Point2D lastPoint;
     double oldTime;
     double newTime;
     double lastYValue = 0;
     double lastXValue = 0;
-    private double dx;
-    private double dy;
     private double pixelVelocityX;
     private double pixelVelocityY;
     private static final int expectedUpdateInterval = 200;
@@ -118,8 +121,6 @@ public class BoatGroup extends Group{
         teamNameObject.setLayoutY(teamNameObject.getLayoutY() + dy);
         velocityObject.setLayoutX(velocityObject.getLayoutX() + dx);
         velocityObject.setLayoutY(velocityObject.getLayoutY() + dy);
-        wake.setLayoutX(wake.getLayoutX() + dx);
-        wake.setLayoutY(wake.getLayoutY() + dy);
     }
 
 
@@ -136,16 +137,18 @@ public class BoatGroup extends Group{
         teamNameObject.setLayoutY(y);
         velocityObject.setLayoutX(x);
         velocityObject.setLayoutY(y);
-        wake.setLayoutX(x);
-        wake.setLayoutY(y);
     }
 
     public void rotateTo (double rotation) {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
-    public void updatePosition () {
-        moveGroupBy(dx, dy);
+    public void move() {
+        moveGroupBy(xIncrement, yIncrement);
+        framesToMove = framesToMove - 1;
+        if (framesToMove <= 0){
+            isStopped = true;
+        }
     }
 
     /**
@@ -153,20 +156,32 @@ public class BoatGroup extends Group{
      * @param newXValue The X co-ordinate the boat needs to move to.
      * @param newYValue The Y co-ordinate the boat needs to move to.
      * @param rotation Rotation to move graphics to.
-     * @param raceIds RaceID of the object to move.
+     * @param timeValid the time the position values are valid for
      */
-    public void setDestination (double newXValue, double newYValue, double rotation, double groundSpeed, long raceIds) {
-        System.currentTimeMillis();
-        moveTo(lastXValue, lastYValue, rotation);
+    public void setDestination (double newXValue, double newYValue, double rotation, double groundSpeed, long timeValid, double frameRate, long id) {
+        if (lastTimeValid == 0){
+            lastTimeValid = timeValid - 200;
+            moveTo(newXValue, newYValue, rotation);
+        }
 
-        dx = (newXValue - lastXValue)/12;
-        dy = (newYValue - lastYValue)/12;
 
-        lastXValue = newXValue;
-        lastYValue = newYValue;
+        rotateTo(rotation);
+        framesToMove = Math.round((frameRate/(1000.0f/(timeValid-lastTimeValid))));
 
-        boat.setVelocity(groundSpeed);
-        velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
+        double dx = newXValue - boatPoly.getLayoutX();
+        double dy = newYValue - boatPoly.getLayoutY();
+
+        xIncrement = dx/framesToMove;
+        yIncrement = dy/framesToMove;
+
+        if (id == 106){
+            System.out.println(framesToMove);
+            System.out.println("xIncrement = " + xIncrement);
+        }
+
+        velocityObject.setText(String.format("%.2f m/s", groundSpeed));
+        lastTimeValid = timeValid;
+        isStopped = false;
     }
 
 
@@ -229,5 +244,9 @@ public class BoatGroup extends Group{
         Group group = new Group();
         group.getChildren().addAll(wake, lineGroup);
         return group;
+    }
+
+    public boolean isStopped() {
+        return isStopped;
     }
 }

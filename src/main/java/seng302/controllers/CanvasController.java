@@ -51,10 +51,12 @@ public class CanvasController {
     private Mark maxLonPoint;
     private double referencePointX;
     private double referencePointY;
+
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
 
     //FRAME RATE
+    private Double frameRate = 60.0;
     private final long[] frameTimes = new long[30];
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
@@ -93,7 +95,7 @@ public class CanvasController {
 
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
-        drawBoats();
+        initializeBoats();
         timer = new AnimationTimer() {
 
             @Override
@@ -110,7 +112,7 @@ public class CanvasController {
                 if (arrayFilled) {
                     elapsedNanos = now - oldFrameTime ;
                     long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                    Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                    frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     drawFps(frameRate.intValue());
                 }
 
@@ -167,30 +169,38 @@ public class CanvasController {
 
     private void updateGroups(){
         for (BoatGroup boatGroup : boatGroups) {
-            boatGroup.updatePosition();
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it
             if (StreamParser.boatPositions.containsKey(boatGroup.getRaceId())) {
-                moveBoatGroup(boatGroup);
+                if (boatGroup.isStopped()) {
+                    updateBoatGroup(boatGroup);
+                }
             }
+            boatGroup.move();
         }
         for (MarkGroup markGroup : markGroups) {
             for (int id : markGroup.getRaceIds()) {
                 if (StreamParser.boatPositions.containsKey(id)) {
-                    moveMarkGroup(id, markGroup);
+                    UpdateMarkGroup(id, markGroup);
                 }
             }
         }
     }
 
-    private void moveBoatGroup(BoatGroup boatGroup) {
+    private void updateBoatGroup(BoatGroup boatGroup) {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(boatGroup.getRaceId());
-        if (movementQueue.size() > 0){
+        // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
+        if (movementQueue.size() > 5){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
+                if (boatGroup.getRaceId() == 106){
+//                    System.out.println("p2d.getX() = " + p2d.getX());
+//                    System.out.println("p2d.getY() = " + p2d.getY());
+//                    System.out.println("positionPacket.getTimeValid() = " + positionPacket.getTimeValid());
+                }
                 double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), boatGroup.getRaceId());
+                boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), positionPacket.getTimeValid(), frameRate, boatGroup.getRaceId());
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -198,7 +208,7 @@ public class CanvasController {
         }
     }
 
-    void moveMarkGroup (int raceId, MarkGroup markGroup) {
+    void UpdateMarkGroup (int raceId, MarkGroup markGroup) {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(raceId);
         if (movementQueue.size() > 0){
             try {
@@ -209,6 +219,23 @@ public class CanvasController {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Draws all the boats.
+     */
+    private void initializeBoats() {
+        Map<Integer, Yacht> boats = StreamParser.getBoats();
+        Group boatAnnotations = new Group();
+
+        for (Yacht boat : boats.values()) {
+            boat.setColour(Colors.getColor());
+            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
+            boatGroups.add(boatGroup);
+            boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+        }
+        group.getChildren().add(boatAnnotations);
+        group.getChildren().addAll(boatGroups);
     }
 
     class ResizableCanvas extends Canvas {
@@ -236,11 +263,11 @@ public class CanvasController {
         public double prefWidth(double height) {
             return getWidth();
         }
-
         @Override
         public double prefHeight(double width) {
             return getHeight();
         }
+
     }
 
     private void drawFps(int fps){
@@ -257,23 +284,6 @@ public class CanvasController {
             gc.setFill(Color.SKYBLUE);
             gc.fillRect(4,4,51,21);
         }
-    }
-
-    /**
-     * Draws all the boats.
-     */
-    private void drawBoats() {
-        Map<Integer, Yacht> boats = StreamParser.getBoats();
-        Group boatAnnotations = new Group();
-
-        for (Yacht boat : boats.values()) {
-            boat.setColour(Colors.getColor());
-            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-            boatGroups.add(boatGroup);
-            boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
-        }
-        group.getChildren().add(boatAnnotations);
-        group.getChildren().addAll(boatGroups);
     }
 
     /**
@@ -382,6 +392,7 @@ public class CanvasController {
      * Give all markers in the course an x,y location relative to a given reference with a known x,y location. Distances
      * are scaled according to the distanceScaleFactor variable.
      */
+    // DEPRECATED create an initialize marks method like the initialize boats method
     private void givePointsXY() {
 //        List<XMLParser.RaceXMLObject.CompoundMark> allPoints = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
 //        List<XMLParser.RaceXMLObject.CompoundMark> processed = new ArrayList<>();

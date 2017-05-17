@@ -44,7 +44,7 @@ public class BoatLocationMessage extends Message {
     public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude, double heading, long boatSpeed){
         boatSpeed /= 10;
         messageVersionNumber = 1;
-        time = System.currentTimeMillis() / 1000L;
+        time = System.currentTimeMillis();
         this.sourceId = sourceId;
         this.sequenceNum = sequenceNum;
         this.deviceType = DeviceType.RACING_YACHT;
