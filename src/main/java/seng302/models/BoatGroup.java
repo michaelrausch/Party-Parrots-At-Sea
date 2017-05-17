@@ -1,6 +1,7 @@
 package seng302.models;
 
 import javafx.geometry.Point2D;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -99,8 +100,13 @@ public class BoatGroup extends RaceObject {
         boatPoly.setOnMouseEntered(event -> boatPoly.setFill(Color.FLORALWHITE));
         boatPoly.setOnMouseExited(event -> boatPoly.setFill(color));
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
+        boatPoly.setCache(true);
+        boatPoly.setCacheHint(CacheHint.SPEED);
+
 
         teamNameObject = new Text(boat.getShortName());
+        teamNameObject.setCache(true);
+        teamNameObject.setCacheHint(CacheHint.SPEED);
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
         DateFormat format = new SimpleDateFormat("mm:ss");
         String timeToNextMark = format
@@ -113,6 +119,8 @@ public class BoatGroup extends RaceObject {
         } else {
             legTimeObject = new Text("Last mark: -");
         }
+        velocityObject.setCache(true);
+        velocityObject.setCacheHint(CacheHint.SPEED);
 
         teamNameObject.setX(TEAMNAME_X_OFFSET);
         teamNameObject.setY(TEAMNAME_Y_OFFSET);
@@ -214,33 +222,30 @@ public class BoatGroup extends RaceObject {
      *                     on.
      */
     public void updatePosition(long timeInterval) {
-        //Calculate the movement of the boat.
-        if (isMaximized) {
-            double dx = pixelVelocityX * timeInterval;
-            double dy = pixelVelocityY * timeInterval;
-            double rotation = rotationalVelocity * timeInterval;
-            distanceTravelled += Math.abs(dx) + Math.abs(dy);
-            moveGroupBy(dx, dy, rotation);
-            //Draw a new section of the trail every 20 pixels of movement.
-            if (distanceTravelled > 20) {
-                distanceTravelled = 0;
-                if (lastPoint != null) {
-                    Line l = new Line(
-                            lastPoint.getX(),
-                            lastPoint.getY(),
-                            boatPoly.getLayoutX(),
-                            boatPoly.getLayoutY()
-                    );
-                    l.getStrokeDashArray().setAll(3d, 7d);
-                    l.setStroke(boat.getColour());
-                    lineGroup.getChildren().add(l);
-                }
-                if (destinationSet) { //Only begin drawing after the first destination is set
-                    lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-                }
+        double dx = pixelVelocityX * timeInterval;
+        double dy = pixelVelocityY * timeInterval;
+        double rotation = rotationalVelocity * timeInterval;
+        distanceTravelled += Math.abs(dx) + Math.abs(dy);
+        moveGroupBy(dx, dy, rotation);
+        //Draw a new section of the trail every 20 pixels of movement.
+        if (distanceTravelled > 20) {
+            distanceTravelled = 0;
+            if (lastPoint != null) {
+                Line l = new Line(
+                        lastPoint.getX(),
+                        lastPoint.getY(),
+                        boatPoly.getLayoutX(),
+                        boatPoly.getLayoutY()
+                );
+                l.getStrokeDashArray().setAll(3d, 7d);
+                l.setStroke(boat.getColour());
+                lineGroup.getChildren().add(l);
             }
-            wake.updatePosition(timeInterval);
+            if (destinationSet) { //Only begin drawing after the first destination is set
+                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+            }
         }
+        wake.updatePosition(timeInterval);
     }
 
     /**
@@ -257,32 +262,21 @@ public class BoatGroup extends RaceObject {
             if (setToInitialLocation) {
                 destinationSet = true;
                 boat.setVelocity(groundSpeed);
-                if (currentRotation < 0) {
-                    currentRotation = 360 - currentRotation;
-                }
                 double dx = newXValue - boatPoly.getLayoutX();
                 double dy = newYValue - boatPoly.getLayoutY();
-                //Check movement is reasonable. Assumes a 1000 * 1000 canvas
-                if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
-                    dx = 0;
-                    dy = 0;
-                    moveTo(newXValue, newYValue);
-                }
+
 
                 pixelVelocityX = dx / expectedUpdateInterval;
                 pixelVelocityY = dy / expectedUpdateInterval;
                 rotationalGoal = rotation;
                 calculateRotationalVelocity();
 
-                if (wakeGenerationDelay > 0) {
-                    wake.rotate(rotationalGoal);
-                    rotateTo(rotationalGoal); //Need to test with this removed.
+                if (Math.abs(rotationalVelocity) > 0.075) {
                     rotationalVelocity = 0;
-                    wakeGenerationDelay--;
-                } else {
-                    wake.setRotationalVelocity(rotationalVelocity, rotationalGoal,
-                            boat.getVelocity());
+                    rotateTo(rotationalGoal);
+                    wake.rotate(rotationalGoal);
                 }
+                wake.setRotationalVelocity(rotationalVelocity, boat.getVelocity());
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
                 DateFormat format = new SimpleDateFormat("mm:ss");
                 // estimate time to next mark
@@ -304,27 +298,6 @@ public class BoatGroup extends RaceObject {
             }
         }
         //If minimized generate lines every 5 calls to set destination.
-        if (!isMaximized) {
-            setToInitialLocation = false;
-            wakeGenerationDelay = 2;
-            if (setCallCount-- == 0) {
-                setCallCount = 5;
-                if (lastPoint != null) {
-                    Line l = new Line(
-                            lastPoint.getX(),
-                            lastPoint.getY(),
-                            newXValue,
-                            newYValue
-                    );
-                    l.getStrokeDashArray().setAll(3d, 7d);
-                    l.setStroke(boatPoly.getFill());
-                    lineStorage.add(l);
-                }
-                if (destinationSet) { //Only begin drawing after the first destination is set
-                    lastPoint = new Point2D(newXValue, newYValue);
-                }
-            }
-        }
     }
 
     public void setDestination(double newXValue, double newYValue, double groundSpeed,
