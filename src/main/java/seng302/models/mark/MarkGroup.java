@@ -21,7 +21,12 @@ public class MarkGroup extends Group {
     private List<Mark> marks = new ArrayList<>();
     private Mark mainMark;
 
-    public MarkGroup (Mark mark, Point2D... points) {
+    /**
+     * Constructor for singleMark groups
+     * @param mark
+     * @param points
+     */
+    public MarkGroup (SingleMark mark, Point2D points) {
         marks.add(mark);
         mainMark = mark;
         Color color = Color.BLACK;
@@ -31,43 +36,54 @@ public class MarkGroup extends Group {
             color = Color.RED;
         }
         Circle markCircle;
-        if (mark.getMarkType() == MarkType.SINGLE_MARK) {
-            markCircle = new Circle(
-                points[0].getX(),
-                points[0].getY(),
-                MARK_RADIUS,
-                color
-            );
-            super.getChildren().add(markCircle);
-        } else {
-            markCircle = new Circle(
-                points[0].getX(),
-                points[0].getY(),
-                MARK_RADIUS,
-                color
-            );
-            super.getChildren().add(markCircle);
+        markCircle = new Circle(
+            points.getX(),
+            points.getY(),
+            MARK_RADIUS,
+            color
+        );
+        super.getChildren().add(markCircle);
+    }
 
-            markCircle = new Circle(
-                points[1].getX(),
-                points[1].getY(),
-                MARK_RADIUS,
-                color
-            );
-            super.getChildren().add(markCircle);
-            Line line = new Line(
-                points[0].getX(),
-                points[0].getY(),
-                points[1].getX(),
-                points[1].getY()
-            );
-            line.setStrokeWidth(LINE_THICKNESS);
-            line.setStroke(color);
-            if (mark.getMarkType() == MarkType.OPEN_GATE) {
-                line.getStrokeDashArray().addAll(DASHED_GAP_LEN, DASHED_LINE_LEN);
-            }
-            super.getChildren().add(line);
+    public MarkGroup(GateMark mark, Point2D points1, Point2D points2) {
+        marks.add(mark.getSingleMark1());
+        marks.add(mark.getSingleMark2());
+        mainMark = mark;
+        Color color = Color.BLACK;
+        if (mark.getName().equals("Start")){
+            color = Color.GREEN;
+        } else if (mark.getName().equals("Finish")){
+            color = Color.RED;
         }
+        Circle markCircle;
+        markCircle = new Circle(
+            points1.getX(),
+            points1.getY(),
+            MARK_RADIUS,
+            color
+        );
+        super.getChildren().add(markCircle);
+
+        markCircle = new Circle(
+            points2.getX(),
+            points2.getY(),
+            MARK_RADIUS,
+            color
+        );
+        super.getChildren().add(markCircle);
+        Line line = new Line(
+            points1.getX(),
+            points1.getY(),
+            points2.getX(),
+            points2.getY()
+        );
+        line.setStrokeWidth(LINE_THICKNESS);
+        line.setStroke(color);
+        if (mark.getMarkType() == MarkType.OPEN_GATE) {
+            line.getStrokeDashArray().addAll(DASHED_GAP_LEN, DASHED_LINE_LEN);
+        }
+        super.getChildren().add(line);
+
     }
 
     public void moveMarkTo (double x, double y, long raceId)
@@ -80,12 +96,12 @@ public class MarkGroup extends Group {
             Circle markCircle1 = (Circle) super.getChildren().get(0);
             Circle markCircle2 = (Circle) super.getChildren().get(1);
             Line connectingLine = (Line) super.getChildren().get(2);
-            if (marks.get(1).getId() == raceId) {
+            if (marks.get(0).getId() == raceId) {
                 markCircle1.setCenterX(x);
                 markCircle1.setCenterY(y);
                 connectingLine.setStartX(markCircle1.getCenterX());
                 connectingLine.setStartY(markCircle1.getCenterY());
-            } else if (marks.get(2).getId() == raceId) {
+            } else if (marks.get(1).getId() == raceId) {
                 markCircle2.setCenterX(x);
                 markCircle2.setCenterY(y);
                 connectingLine.setEndX(markCircle2.getCenterX());

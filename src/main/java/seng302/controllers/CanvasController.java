@@ -223,7 +223,7 @@ public class CanvasController {
         }
     }
 
-    void UpdateMarkGroup (long raceId, MarkGroup markGroup) {
+    private void UpdateMarkGroup (long raceId, MarkGroup markGroup) {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markPositions.get(raceId);
         if (movementQueue.size() > 0){
             try {
@@ -260,13 +260,12 @@ public class CanvasController {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 SingleMark sMark = (SingleMark) mark;
 
-                MarkGroup markGroup = new MarkGroup(mark, findScaledXY(sMark));
+                MarkGroup markGroup = new MarkGroup(sMark, findScaledXY(sMark));
                 markGroups.add(markGroup);
             } else {
                 GateMark gMark = (GateMark) mark;
 
-                MarkGroup markGroup = new MarkGroup(mark, findScaledXY(gMark.getSingleMark1()),
-                    findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
+                MarkGroup markGroup = new MarkGroup(gMark, findScaledXY(gMark.getSingleMark1()), findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
                 markGroups.add(markGroup);
             }
         }
