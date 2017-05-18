@@ -1,5 +1,6 @@
 package seng302.controllers;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -7,6 +8,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -36,6 +41,8 @@ import java.util.*;
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+
+    public LineChart raceSparkLine;
     @FXML
     private VBox positionVbox;
     @FXML
@@ -61,6 +68,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Race race;
     private Stage stage;
 
+    private int index = 0;
+
     private ImportantAnnotationsState importantAnnotations;
     private Yacht selectedBoat;
 
@@ -82,7 +91,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseAnnotationSlider();
         initialiseBoatSelectionComboBox();
         includedCanvasController.timer.start();
-
+        initializeSparkline();
         selectAnnotationBtn.setOnAction(event -> {
             loadSelectAnnotationView();
         });
@@ -173,6 +182,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         annotationSlider.setValue(2);
     }
 
+    private void initializeSparkline(){
+        raceSparkLine.setTitle("Boat Positions");
+        for (Yacht yacht: startingBoats){
+            if (raceSparkLine.getData().contains(yacht.getSparklinePosition())) {
+                raceSparkLine.getData().remove(yacht.getSparklinePosition());
+            }
+            raceSparkLine.getData().add(yacht.getSparklinePosition());
+            System.out.println("Here");
+        }
+    }
 
     /**
      * Initalises a timer which updates elements of the RaceView such as wind direction, boat
