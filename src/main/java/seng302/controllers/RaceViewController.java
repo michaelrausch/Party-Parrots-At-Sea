@@ -251,21 +251,31 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         positionVbox.getChildren().removeAll();
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
-        for (Yacht boat : StreamParser.getBoatsPos().values()) {
-            if (boat.getBoatStatus() == 3) {  // 3 is finish status
-                Text textToAdd = new Text(boat.getPosition() + ". " +
-                    boat.getShortName() + " (Finished)");
-                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                positionVbox.getChildren().add(textToAdd);
+        if (StreamParser.isRaceStarted()) {
+            for (Yacht boat : StreamParser.getBoatsPos().values()) {
+                if (boat.getBoatStatus() == 3) {  // 3 is finish status
+                    Text textToAdd = new Text(boat.getPosition() + ". " +
+                        boat.getShortName() + " (Finished)");
+                    textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                    positionVbox.getChildren().add(textToAdd);
 
-            } else {
+                } else {
+                    Text textToAdd = new Text(boat.getPosition() + ". " +
+                        boat.getShortName() + " ");
+                    textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                    textToAdd.setStyle("");
+                    positionVbox.getChildren().add(textToAdd);
+                }
+
+            }
+        } else {
+            for (Yacht boat : StreamParser.getBoats().values()) {
                 Text textToAdd = new Text(boat.getPosition() + ". " +
                     boat.getShortName() + " ");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 textToAdd.setStyle("");
                 positionVbox.getChildren().add(textToAdd);
             }
-
         }
     }
 

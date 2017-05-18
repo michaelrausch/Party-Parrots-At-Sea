@@ -2,7 +2,6 @@ package seng302.controllers;
 
 import seng302.models.Race;
 import seng302.models.Yacht;
-import seng302.models.parsers.ConfigParser;
 import seng302.models.parsers.CourseParser;
 import seng302.models.parsers.StreamParser;
 
@@ -18,6 +17,7 @@ import java.util.Random;
  * the CanvasController then uses the event data to make the animations
  */
 public class RaceController {
+
     Race race = null;
 
     public void initializeRace() {
@@ -39,23 +39,12 @@ public class RaceController {
 
     public Race createRace(String configFile, String teamsConfigFile) throws Exception {
         Race race = new Race();
-//        StreamParser.xmlObject
-        // Read team names from file
-//        TeamsParser tp = new TeamsParser(teamsConfigFile);
-
-        // Read course from file
-//        ConfigParser config = new ConfigParser(configFile);
 
         ArrayList<String> boatNames = new ArrayList<>();
-//        ArrayList<Boat> teams = tp.getBoats();
         Map<Long, Yacht> teams = StreamParser.getBoatsPos();
 
         //get race size
         int numberOfBoats = teams.size();
-
-        //get time scale
-//        double timeScale = config.getTimeScale();
-//        race.setTimeScale(timeScale);
 
         for (Yacht boat : teams.values()) {
             boatNames.add(boat.getBoatName());

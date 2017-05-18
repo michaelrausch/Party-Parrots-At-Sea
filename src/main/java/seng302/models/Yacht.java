@@ -9,9 +9,10 @@ import java.text.SimpleDateFormat;
  * Yacht class for the racing boat.
  *
  * Class created to store more variables (eg. boat statuses) compared to the XMLParser boat class,
- *  also done outside Boat class because some old variables are not used anymore.
+ * also done outside Boat class because some old variables are not used anymore.
  */
 public class Yacht {
+
     // Used in boat group
     private Color colour;
     private double velocity;
@@ -38,25 +39,27 @@ public class Yacht {
      *
      * @param boatName Create a yacht object with name.
      */
-    public Yacht (String boatName) {
+    public Yacht(String boatName) {
         this.boatName = boatName;
     }
 
     /**
      * Used in BoatGroupTest.
      *
-     * @param boatName     The name of the team sailing the boat
+     * @param boatName The name of the team sailing the boat
      * @param boatVelocity The speed of the boat in meters/second
-     * @param shortName    A shorter version of the teams name
+     * @param shortName A shorter version of the teams name
      */
     public Yacht(String boatName, double boatVelocity, String shortName, int id) {
         this.boatName = boatName;
         this.velocity = boatVelocity;
         this.shortName = shortName;
         this.sourceID = id;
+        this.position = "-";
     }
 
-    public Yacht(String boatType, Integer sourceID, String hullID, String shortName, String boatName, String country) {
+    public Yacht(String boatType, Integer sourceID, String hullID, String shortName,
+        String boatName, String country) {
         this.boatType = boatType;
         this.sourceID = sourceID;
         this.hullID = hullID;
@@ -68,18 +71,23 @@ public class Yacht {
     public String getBoatType() {
         return boatType;
     }
+
     public Integer getSourceID() {
         return sourceID;
     }
+
     public String getHullID() {
         return hullID;
     }
+
     public String getShortName() {
         return shortName;
     }
+
     public String getBoatName() {
         return boatName;
     }
+
     public String getCountry() {
         return country;
     }

@@ -25,6 +25,7 @@ import seng302.models.Yacht;
 import seng302.models.parsers.StreamParser;
 
 public class StartScreenController implements Initializable {
+
     @FXML
     private GridPane gridPane;
     @FXML
@@ -48,19 +49,18 @@ public class StartScreenController implements Initializable {
 
     private boolean switchedToRaceView = false;
 
-    private void setContentPane(String jfxUrl){
-        try{
+    private void setContentPane(String jfxUrl) {
+        try {
             // get the main controller anchor pane (MainView.fxml)
             AnchorPane contentPane = (AnchorPane) gridPane.getParent();
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-            contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
-        }
-        catch(javafx.fxml.LoadException e){
+            contentPane.getChildren()
+                .addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+        } catch (javafx.fxml.LoadException e) {
             System.err.println(e.getCause());
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             System.err.println(e);
         }
     }
@@ -72,7 +72,8 @@ public class StartScreenController implements Initializable {
     }
 
     /**
-     * Running a timer to update the livestream status on welcome screen. Update interval is 1 second.
+     * Running a timer to update the livestream status on welcome screen. Update interval is 1
+     * second.
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
@@ -102,8 +103,10 @@ public class StartScreenController implements Initializable {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
-                            String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
-                            String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
+                            String timerMinute = Long
+                                .toString(StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long
+                                .toString(StreamParser.getTimeSinceStart() % 60);
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
@@ -114,8 +117,10 @@ public class StartScreenController implements Initializable {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
-                            String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
-                            String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
+                            String timerMinute = Long
+                                .toString(-1 * StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long
+                                .toString(-1 * StreamParser.getTimeSinceStart() % 60);
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
@@ -142,19 +147,23 @@ public class StartScreenController implements Initializable {
         teamList.setItems(data);
 
         boatNameCol.setCellValueFactory(
-                new PropertyValueFactory<>("boatName")
+            new PropertyValueFactory<>("boatName")
         );
         shortNameCol.setCellValueFactory(
-                new PropertyValueFactory<>("shortName")
+            new PropertyValueFactory<>("shortName")
         );
         countryCol.setCellValueFactory(
-                new PropertyValueFactory<>("country")
+            new PropertyValueFactory<>("country")
         );
         posCol.setCellValueFactory(
-                new PropertyValueFactory<>("position")
+            new PropertyValueFactory<>("position")
         );
 
-        data.addAll(StreamParser.getBoatsPos().values());
+        if (StreamParser.isRaceStarted()) {
+            data.addAll(StreamParser.getBoatsPos().values());
+        } else {
+            data.addAll(StreamParser.getBoats().values());
+        }
         teamList.refresh();
     }
 }
