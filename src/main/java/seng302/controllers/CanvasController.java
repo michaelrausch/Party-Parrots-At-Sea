@@ -17,9 +17,6 @@ import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
 import seng302.models.mark.Mark;
-import seng302.server.simulator.Boat;
-
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -54,17 +51,15 @@ public class CanvasController {
     private Mark maxLonPoint;
     private double referencePointX;
     private double referencePointY;
+
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
-    private List<Mark> raceMarks = new ArrayList<>();
 
     //FRAME RATE
-    private static final double UPDATE_TIME = 0.016666;     // 1 / 60 ie 60fps
+    private Double frameRate = 60.0;
     private final long[] frameTimes = new long[30];
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
-    private DecimalFormat decimalFormat2dp = new DecimalFormat("0.00");
-    private double lastPacketTime = 0;
 
     public AnimationTimer timer;
 
@@ -87,8 +82,6 @@ public class CanvasController {
         // Bind canvas size to stack pane size.
         canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_WIDTH));
         canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_HEIGHT));
-        //group.minWidth(CANVAS_WIDTH);
-        //group.minHeight(CANVAS_HEIGHT);
     }
 
     public void initializeCanvas (){
@@ -102,7 +95,7 @@ public class CanvasController {
 
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
-        drawBoats();
+        initializeBoats();
         timer = new AnimationTimer() {
 
             @Override
@@ -119,13 +112,13 @@ public class CanvasController {
                 if (arrayFilled) {
                     elapsedNanos = now - oldFrameTime ;
                     long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                    Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                    frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     drawFps(frameRate.intValue());
                 }
 
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
                 elapsedNanos = 1000 / 60;
-                //updateRaceObjects();
+                updateGroups();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
                 }
@@ -156,7 +149,7 @@ public class CanvasController {
             Point2D borderPoint1 = findScaledXY(thisMark1);
             Point2D borderPoint2 = findScaledXY(thisMark2);
             gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
-                    borderPoint2.getX(), borderPoint2.getY());
+                borderPoint2.getX(), borderPoint2.getY());
             xBoundaryPoints[i] = borderPoint1.getX();
             yBoundaryPoints[i] = borderPoint1.getY();
         }
@@ -167,7 +160,7 @@ public class CanvasController {
         Point2D borderPoint1 = findScaledXY(thisMark1);
         Point2D borderPoint2 = findScaledXY(thisMark2);
         gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
-                borderPoint2.getX(), borderPoint2.getY());
+            borderPoint2.getX(), borderPoint2.getY());
         xBoundaryPoints[courseLimits.size()-1] = borderPoint1.getX();
         yBoundaryPoints[courseLimits.size()-1] = borderPoint1.getY();
         gc.setFill(Color.LIGHTBLUE);
@@ -176,42 +169,44 @@ public class CanvasController {
 
     private void updateGroups(){
         for (BoatGroup boatGroup : boatGroups) {
-            boatGroup.updatePosition(1000 / 60);
-            // some raceObjects will have multiply ID's (for instance gate marks)
-                //checking if the current "ID" has any updates associated with it
-                if (StreamParser.boatPositions.containsKey(boatGroup.getRaceId())) {
-                    moveBoatGroup(boatGroup);
+            // some raceObjects will have multiple ID's (for instance gate marks)
+            //checking if the current "ID" has any updates associated with it
+            if (StreamParser.boatPositions.containsKey(boatGroup.getRaceId())) {
+                if (boatGroup.isStopped()) {
+                    updateBoatGroup(boatGroup);
+                }
             }
+            boatGroup.move();
         }
         for (MarkGroup markGroup : markGroups) {
             for (int id : markGroup.getRaceIds()) {
                 if (StreamParser.boatPositions.containsKey(id)) {
-                    moveMarkGroup(id, markGroup);
+                    UpdateMarkGroup(id, markGroup);
                 }
             }
         }
+        checkForCourseChanges();
     }
 
-    private void moveBoatGroup(BoatGroup boatGroup) {
+    private void checkForCourseChanges() {
+        if (StreamParser.isNewRaceXmlReceived()){
+            gc.setFill(Color.SKYBLUE);
+            gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            gc.restore();
+            addRaceBorder();
+            canvas.toBack();
+        }
+    }
+
+    private void updateBoatGroup(BoatGroup boatGroup) {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(boatGroup.getRaceId());
+        // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
         if (movementQueue.size() > 0){
-//            BoatPositionPacket positionPacket = movementQueue.peek();
-//
-//            //this code adds a delay to reading from the movementQueue
-//            //in case things being put into the movement queue are slightly
-//            //out of order
-//            int delayTime = 1000;
-//            int loopTime = delayTime * 10;
-//            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
-//            if (timeDiff < 0){
-//                timeDiff = loopTime + timeDiff;
-//            }
-//            if (timeDiff > delayTime) {
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
                 double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), boatGroup.getRaceId());
+                boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), positionPacket.getTimeValid(), frameRate, boatGroup.getRaceId());
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -219,21 +214,9 @@ public class CanvasController {
         }
     }
 
-    void moveMarkGroup (int raceId, MarkGroup markGroup) {
+    void UpdateMarkGroup (int raceId, MarkGroup markGroup) {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(raceId);
         if (movementQueue.size() > 0){
-//            BoatPositionPacket positionPacket = movementQueue.peek();
-//
-//            //this code adds a delay to reading from the movementQueue
-//            //in case things being put into the movement queue are slightly
-//            //out of order
-//            int delayTime = 1000;
-//            int loopTime = delayTime * 10;
-//            long timeDiff = (System.currentTimeMillis()%loopTime - positionPacket.getTimeValid()%loopTime);
-//            if (timeDiff < 0){
-//                timeDiff = loopTime + timeDiff;
-//            }
-//            if (timeDiff > delayTime) {
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
@@ -242,6 +225,23 @@ public class CanvasController {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Draws all the boats.
+     */
+    private void initializeBoats() {
+        Map<Integer, Yacht> boats = StreamParser.getBoats();
+        Group boatAnnotations = new Group();
+
+        for (Yacht boat : boats.values()) {
+            boat.setColour(Colors.getColor());
+            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
+            boatGroups.add(boatGroup);
+            boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+        }
+        group.getChildren().add(boatAnnotations);
+        group.getChildren().addAll(boatGroups);
     }
 
     class ResizableCanvas extends Canvas {
@@ -269,11 +269,11 @@ public class CanvasController {
         public double prefWidth(double height) {
             return getWidth();
         }
-
         @Override
         public double prefHeight(double width) {
             return getHeight();
         }
+
     }
 
     private void drawFps(int fps){
@@ -293,33 +293,11 @@ public class CanvasController {
     }
 
     /**
-     * Draws all the boats.
-     */
-    private void drawBoats() {
-//        Map<Boat, TimelineInfo> timelineInfos = raceViewController.getTimelineInfos();
-//        List<Boat> boats  = raceViewController.getStartingBoats();
-        Map<Integer, Yacht> boats = StreamParser.getBoats();
-//        Double startingX  = raceObjects.get(0).getLayoutX();
-//        Double startingY  = raceObjects.get(0).getLayoutY();
-        Group boatAnnotations = new Group();
-
-        for (Yacht boat : boats.values()) {
-//        for (Boat boat : boats) {
-            boat.setColour(Colors.getColor());
-            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-//            boatGroup.moveTo(startingX, startingY, 0d);
-            //boatGroup.setStage(raceViewController.getStage());
-            boatGroups.add(boatGroup);
-            boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
-        }
-        group.getChildren().add(boatAnnotations);
-        group.getChildren().addAll(boatGroups);
-    }
-
-    /**
      * Calculates x and y location for every marker that fits it to the canvas the race will be drawn on.
      */
     private void fitMarksToCanvas() {
+        //Check is called once to avoid unnecessarily change the course limits once the race is running
+        StreamParser.isNewRaceXmlReceived();
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
@@ -416,36 +394,6 @@ public class CanvasController {
             scaleDirection = ScaleDirection.VERTICAL;
         }
         return horiDistance;
-    }
-
-    /**
-     * Give all markers in the course an x,y location relative to a given reference with a known x,y location. Distances
-     * are scaled according to the distanceScaleFactor variable.
-     */
-    private void givePointsXY() {
-        Map<Integer, Mark> allPoints = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
-        List<Mark> processed = new ArrayList<>();
-        MarkGroup markGroup;
-
-            for (Map.Entry<Integer, Mark> cMark : allPoints) {
-                Integer cMarkId = cMark.getKey();
-                Mark mark = cMark.getValue();
-                if (!processed.contains(mark)) {
-                    if (mark.getMarkType() != MarkType.SINGLE_MARK) {
-                        GateMark gMark = (GateMark) mark;
-
-                        markGroup = new MarkGroup(mark, findScaledXY(gMark.getSingleMark1()), findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
-                        markGroups.add(markGroup);
-                    } else {
-                        SingleMark sMark = (SingleMark) mark;
-
-                        markGroup = new MarkGroup(mark, findScaledXY(sMark));
-                        markGroups.add(markGroup);
-                    }
-                    processed.add((mark));
-                }
-            }
-            group.getChildren().addAll(boatGroups);
     }
 
     private Point2D findScaledXY (Mark unscaled) {

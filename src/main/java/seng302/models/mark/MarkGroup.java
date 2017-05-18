@@ -5,6 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.transform.Rotate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,33 +35,33 @@ public class MarkGroup extends Group {
         Circle markCircle;
         if (mark.getMarkType() == MarkType.SINGLE_MARK) {
             markCircle = new Circle(
-                    points[0].getX(),
-                    points[0].getY(),
-                    MARK_RADIUS,
-                    color
+                points[0].getX(),
+                points[0].getY(),
+                MARK_RADIUS,
+                color
             );
             super.getChildren().add(markCircle);
         } else {
             markCircle = new Circle(
-                    points[0].getX(),
-                    points[0].getY(),
-                    MARK_RADIUS,
-                    color
+                points[0].getX(),
+                points[0].getY(),
+                MARK_RADIUS,
+                color
             );
             super.getChildren().add(markCircle);
 
             markCircle = new Circle(
-                    points[1].getX(),
-                    points[1].getY(),
-                    MARK_RADIUS,
-                    color
+                points[1].getX(),
+                points[1].getY(),
+                MARK_RADIUS,
+                color
             );
             super.getChildren().add(markCircle);
             Line line = new Line(
-                    points[0].getX(),
-                    points[0].getY(),
-                    points[1].getX(),
-                    points[1].getY()
+                points[0].getX(),
+                points[0].getY(),
+                points[1].getX(),
+                points[1].getY()
             );
             line.setStrokeWidth(LINE_THICKNESS);
             line.setStroke(color);
@@ -98,8 +99,8 @@ public class MarkGroup extends Group {
     public boolean hasRaceId (int... raceIds) {
         for (int id : raceIds)
             for (Mark mark : marks)
-            if (id == mark.getId())
-                return true;
+                if (id == mark.getId())
+                    return true;
         return false;
     }
 

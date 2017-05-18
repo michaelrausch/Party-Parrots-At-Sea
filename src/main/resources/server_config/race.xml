@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Race>
-    <CreationTimeDate>2015-08-29T13:12:40+02:00</CreationTimeDate>
+    <CreationTimeDate>2015-08-29T11:27:15+02:00</CreationTimeDate>
     <RaceStartTime Start="2015-08-29T13:10:00+02:00" Postpone="False" />
     <RaceID>15082901</RaceID>
     <RaceType>Fleet</RaceType>
@@ -80,6 +80,8 @@
         <Limit SeqID="7" Lat="57.6629430" Lon="11.8332030" />
         <Limit SeqID="8" Lat="57.6629480" Lon="11.8249660" />
         <Limit SeqID="9" Lat="57.6686890" Lon="11.8250920" />
-        <Limit SeqID="10" Lat="57.6708220" Lon="11.8321340" />
+        <Limit SeqID="10" Lat="57.6692230" Lon="11.8231430" />
+        <Limit SeqID="11" Lat="57.6725370" Lon="11.8272480" />
+        <Limit SeqID="12" Lat="57.6708220" Lon="11.8321340" />
     </CourseLimit>
 </Race>
