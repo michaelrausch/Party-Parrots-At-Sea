@@ -174,4 +174,9 @@ public class Yacht {
     public void setMarkRoundingTime(Long markRoundingTime) {
         this.markRoundingTime = markRoundingTime;
     }
+
+    @Override
+    public String toString() {
+        return boatName;
+    }
 }

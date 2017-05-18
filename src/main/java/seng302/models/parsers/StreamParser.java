@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
@@ -24,7 +25,6 @@ import java.util.concurrent.PriorityBlockingQueue;
  * and parsed in by turning the byte arrays into useful data. There are two public static hashmaps
  * that are threadsafe so the visualiser can always access the latest speed and position available
  * Created by kre39 on 23/04/17.
- *
  */
 public class StreamParser extends Thread{
 
@@ -37,8 +37,8 @@ public class StreamParser extends Thread{
      private static boolean raceFinished = false;
      private static boolean streamStatus = false;
      private static long timeSinceStart = -1;
-     private static Map<Integer, Yacht> boats = new HashMap<>();
-     private static Map<Long, Yacht> boatsPos = new TreeMap<>();
+     private static Map<Integer, Yacht> boats = new ConcurrentHashMap<>();
+     private static Map<Long, Yacht> boatsPos = new ConcurrentSkipListMap<>();
      private static double windDirection = 0;
      private static Long currentTimeLong;
      private static String currentTimeString;

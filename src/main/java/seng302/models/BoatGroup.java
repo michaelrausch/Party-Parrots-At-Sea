@@ -1,6 +1,7 @@
 package seng302.models;
 
 import javafx.geometry.Point2D;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -49,6 +50,7 @@ public class BoatGroup extends RaceObject {
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
     private Wake wake;
+    private boolean isSelected = true;  //Boats annotations are visible by default at the start
     //Handles boat moving when connecting to a stream
     private boolean setToInitialLocation = false;
     private boolean destinationSet;
@@ -61,8 +63,8 @@ public class BoatGroup extends RaceObject {
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
      *
-     * @param boat The boat that the BoatGroup will represent. Must contain an ID which will be used
-     * to tell which BoatGroup to update.
+     * @param boat  The boat that the BoatGroup will represent. Must contain an ID which will be used
+     *              to tell which BoatGroup to update.
      * @param color The colour of the boat polygon and the trailing line.
      */
     public BoatGroup(Yacht boat, Color color) {
@@ -74,11 +76,11 @@ public class BoatGroup extends RaceObject {
      * Creates a BoatGroup with the boat being the default polygon. The head of the boat should be
      * at point (0,0).
      *
-     * @param boat The boat that the BoatGroup will represent. Must contain an ID which will be used
-     * to tell which BoatGroup to update.
-     * @param color The colour of the boat polygon and the trailing line.
+     * @param boat   The boat that the BoatGroup will represent. Must contain an ID which will be used
+     *               to tell which BoatGroup to update.
+     * @param color  The colour of the boat polygon and the trailing line.
      * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat
-     * polygon.
+     *               polygon.
      */
     public BoatGroup(Yacht boat, Color color, double... points) {
         this.boat = boat;
@@ -88,27 +90,37 @@ public class BoatGroup extends RaceObject {
     /**
      * Creates the javafx objects that will be the in the group by default.
      *
-     * @param color The colour of the boat polygon and the trailing line.
+     * @param color  The colour of the boat polygon and the trailing line.
      * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat
-     * polygon.
+     *               polygon.
      */
     private void initChildren(Color color, double... points) {
         boatPoly = new Polygon(points);
         boatPoly.setFill(color);
+        boatPoly.setOnMouseEntered(event -> boatPoly.setFill(Color.FLORALWHITE));
+        boatPoly.setOnMouseExited(event -> boatPoly.setFill(color));
+        boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
+        boatPoly.setCache(true);
+        boatPoly.setCacheHint(CacheHint.SPEED);
+
 
         teamNameObject = new Text(boat.getShortName());
+        teamNameObject.setCache(true);
+        teamNameObject.setCacheHint(CacheHint.SPEED);
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
         DateFormat format = new SimpleDateFormat("mm:ss");
         String timeToNextMark = format
-            .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+                .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
         estTimeToNextMarkObject = new Text("Next mark: " + timeToNextMark);
         if (boat.getMarkRoundingTime() != null) {
             String elapsedTime = format
-                .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
+                    .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
             legTimeObject = new Text("Last mark: " + elapsedTime);
         } else {
             legTimeObject = new Text("Last mark: -");
         }
+        velocityObject.setCache(true);
+        velocityObject.setCacheHint(CacheHint.SPEED);
 
         teamNameObject.setX(TEAMNAME_X_OFFSET);
         teamNameObject.setY(TEAMNAME_Y_OFFSET);
@@ -122,7 +134,7 @@ public class BoatGroup extends RaceObject {
         estTimeToNextMarkObject.setX(ESTTIMETONEXTMARK_X_OFFSET);
         estTimeToNextMarkObject.setY(ESTTIMETONEXTMARK_Y_OFFSET);
         estTimeToNextMarkObject
-            .relocate(estTimeToNextMarkObject.getX(), estTimeToNextMarkObject.getY());
+                .relocate(estTimeToNextMarkObject.getX(), estTimeToNextMarkObject.getY());
 
         legTimeObject.setX(LEGTIME_X_OFFSET);
         legTimeObject.setY(LEGTIME_Y_OFFSET);
@@ -130,8 +142,8 @@ public class BoatGroup extends RaceObject {
 
         wake = new Wake(0, -BOAT_HEIGHT);
         super.getChildren()
-            .addAll(teamNameObject, velocityObject, boatPoly, estTimeToNextMarkObject,
-                legTimeObject);
+                .addAll(teamNameObject, velocityObject, boatPoly, estTimeToNextMarkObject,
+                        legTimeObject);
     }
 
     /**
@@ -141,9 +153,9 @@ public class BoatGroup extends RaceObject {
      */
     private void initChildren(Color color) {
         initChildren(color,
-            -BOAT_WIDTH / 2, BOAT_HEIGHT / 2,
-            0.0, -BOAT_HEIGHT / 2,
-            BOAT_WIDTH / 2, BOAT_HEIGHT / 2);
+                -BOAT_WIDTH / 2, BOAT_HEIGHT / 2,
+                0.0, -BOAT_HEIGHT / 2,
+                BOAT_WIDTH / 2, BOAT_HEIGHT / 2);
     }
 
     /**
@@ -172,8 +184,8 @@ public class BoatGroup extends RaceObject {
     /**
      * Moves the boat and its children annotations to coordinates specified
      *
-     * @param x The X coordinate to move the boat to
-     * @param y The Y coordinate to move the boat to
+     * @param x        The X coordinate to move the boat to
+     * @param y        The Y coordinate to move the boat to
      * @param rotation The heading in degrees from north the boat should rotate to.
      */
     public void moveTo(double x, double y, double rotation) {
@@ -207,36 +219,33 @@ public class BoatGroup extends RaceObject {
      * Updates the position of all graphics in the BoatGroup based off of the given time interval.
      *
      * @param timeInterval The interval, in milliseconds, the boat should update it's position based
-     * on.
+     *                     on.
      */
     public void updatePosition(long timeInterval) {
-        //Calculate the movement of the boat.
-        if (isMaximized) {
-            double dx = pixelVelocityX * timeInterval;
-            double dy = pixelVelocityY * timeInterval;
-            double rotation = rotationalVelocity * timeInterval;
-            distanceTravelled += Math.abs(dx) + Math.abs(dy);
-            moveGroupBy(dx, dy, rotation);
-            //Draw a new section of the trail every 20 pixels of movement.
-            if (distanceTravelled > 20) {
-                distanceTravelled = 0;
-                if (lastPoint != null) {
-                    Line l = new Line(
+        double dx = pixelVelocityX * timeInterval;
+        double dy = pixelVelocityY * timeInterval;
+        double rotation = rotationalVelocity * timeInterval;
+        distanceTravelled += Math.abs(dx) + Math.abs(dy);
+        moveGroupBy(dx, dy, rotation);
+        //Draw a new section of the trail every 20 pixels of movement.
+        if (distanceTravelled > 20) {
+            distanceTravelled = 0;
+            if (lastPoint != null) {
+                Line l = new Line(
                         lastPoint.getX(),
                         lastPoint.getY(),
                         boatPoly.getLayoutX(),
                         boatPoly.getLayoutY()
-                    );
-                    l.getStrokeDashArray().setAll(3d, 7d);
-                    l.setStroke(boatPoly.getFill());
-                    lineGroup.getChildren().add(l);
-                }
-                if (destinationSet) { //Only begin drawing after the first destination is set
-                    lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-                }
+                );
+                l.getStrokeDashArray().setAll(3d, 7d);
+                l.setStroke(boat.getColour());
+                lineGroup.getChildren().add(l);
             }
-            wake.updatePosition(timeInterval);
+            if (destinationSet) { //Only begin drawing after the first destination is set
+                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+            }
         }
+        wake.updatePosition(timeInterval);
     }
 
     /**
@@ -244,51 +253,40 @@ public class BoatGroup extends RaceObject {
      *
      * @param newXValue The X co-ordinate the boat needs to move to.
      * @param newYValue The Y co-ordinate the boat needs to move to.
-     * @param rotation Rotation to move graphics to.
-     * @param raceIds RaceID of the object to move.
+     * @param rotation  Rotation to move graphics to.
+     * @param raceIds   RaceID of the object to move.
      */
     public void setDestination(double newXValue, double newYValue, double rotation,
-        double groundSpeed, int... raceIds) {
+                               double groundSpeed, int... raceIds) {
         if (hasRaceId(raceIds)) {
             if (setToInitialLocation) {
                 destinationSet = true;
                 boat.setVelocity(groundSpeed);
-                if (currentRotation < 0) {
-                    currentRotation = 360 - currentRotation;
-                }
                 double dx = newXValue - boatPoly.getLayoutX();
                 double dy = newYValue - boatPoly.getLayoutY();
-                //Check movement is reasonable. Assumes a 1000 * 1000 canvas
-                if (Math.abs(dx) > 50 || Math.abs(dy) > 50) {
-                    dx = 0;
-                    dy = 0;
-                    moveTo(newXValue, newYValue);
-                }
+
 
                 pixelVelocityX = dx / expectedUpdateInterval;
                 pixelVelocityY = dy / expectedUpdateInterval;
                 rotationalGoal = rotation;
                 calculateRotationalVelocity();
 
-                if (wakeGenerationDelay > 0) {
-                    wake.rotate(rotationalGoal);
-                    rotateTo(rotationalGoal); //Need to test with this removed.
+                if (Math.abs(rotationalVelocity) > 0.075) {
                     rotationalVelocity = 0;
-                    wakeGenerationDelay--;
-                } else {
-                    wake.setRotationalVelocity(rotationalVelocity, rotationalGoal,
-                        boat.getVelocity());
+                    rotateTo(rotationalGoal);
+                    wake.rotate(rotationalGoal);
                 }
+                wake.setRotationalVelocity(rotationalVelocity, boat.getVelocity());
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
                 DateFormat format = new SimpleDateFormat("mm:ss");
                 // estimate time to next mark
                 String timeToNextMark = format
-                    .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+                        .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
                 estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
                 // elapsed time
                 if (boat.getMarkRoundingTime() != null) {
                     String elapsedTime = format
-                        .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
+                            .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
                     legTimeObject.setText("Last mark: " + elapsedTime);
                 } else {
                     legTimeObject.setText("Last mark: -");
@@ -300,40 +298,19 @@ public class BoatGroup extends RaceObject {
             }
         }
         //If minimized generate lines every 5 calls to set destination.
-        if (!isMaximized) {
-            setToInitialLocation = false;
-            wakeGenerationDelay = 2;
-            if (setCallCount-- == 0) {
-                setCallCount = 5;
-                if (lastPoint != null) {
-                    Line l = new Line(
-                        lastPoint.getX(),
-                        lastPoint.getY(),
-                        newXValue,
-                        newYValue
-                    );
-                    l.getStrokeDashArray().setAll(3d, 7d);
-                    l.setStroke(boatPoly.getFill());
-                    lineStorage.add(l);
-                }
-                if (destinationSet) { //Only begin drawing after the first destination is set
-                    lastPoint = new Point2D(newXValue, newYValue);
-                }
-            }
-        }
     }
 
     public void setDestination(double newXValue, double newYValue, double groundSpeed,
-        int... raceIDs) {
+                               int... raceIDs) {
         destinationSet = true;
 
         if (hasRaceId(raceIDs)) {
             double rotation = Math.abs(
-                Math.toDegrees(
-                    Math.atan(
-                        (newYValue - boatPoly.getLayoutY()) / (newXValue - boatPoly.getLayoutX())
+                    Math.toDegrees(
+                            Math.atan(
+                                    (newYValue - boatPoly.getLayoutY()) / (newXValue - boatPoly.getLayoutX())
+                            )
                     )
-                )
             );
             setDestination(newXValue, newYValue, rotation, groundSpeed, raceIDs);
         }
@@ -347,6 +324,10 @@ public class BoatGroup extends RaceObject {
     public void forceRotation() {
         rotateTo(rotationalGoal);
         wake.rotate(rotationalGoal);
+    }
+
+    public void paintBoat(Color color) {
+        boatPoly.setFill(color);
     }
 
     public void setTeamNameObjectVisible(Boolean visible) {
@@ -375,6 +356,24 @@ public class BoatGroup extends RaceObject {
 
     public Yacht getBoat() {
         return boat;
+    }
+
+    /**
+     * This function sets the boats isSelected property AS WELL as actually acting upon the value of
+     * that selection. (Painting or not painting annotations)
+     *
+     * @param isSelected A Boolean indicating whether or not the boat is selected
+     */
+    public void setIsSelected(Boolean isSelected) {
+        this.isSelected = isSelected;
+        setTeamNameObjectVisible(isSelected);
+        setVelocityObjectVisible(isSelected);
+        setLineGroupVisible(isSelected);
+        setWakeVisible(isSelected);
+        setEstTimeToNextMarkObjectVisible(isSelected);
+        setLegTimeObjectVisible(isSelected);
+        // TODO: 17/05/17 wmu16 - this should iterate over some list of annotations which we should make to easily make extensible
+//        paintBoat((isSelected) ? Color.WHITE : boat.getColour());
     }
 
     /**
@@ -434,5 +433,10 @@ public class BoatGroup extends RaceObject {
                 lineStorage.clear();
             }
         });
+    }
+
+    @Override
+    public String toString() {
+        return boat.toString();
     }
 }
