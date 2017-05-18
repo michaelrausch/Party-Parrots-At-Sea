@@ -22,10 +22,7 @@ import seng302.models.parsers.XMLParser.RaceXMLObject.Limit;
 import seng302.models.parsers.packets.BoatPositionPacket;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
@@ -104,7 +101,13 @@ public class CanvasController {
         gc.restore();
         fitMarksToCanvas();
 
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
 
+            }
+        },1000);
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
         drawBoats();
         timer = new AnimationTimer() {
@@ -125,6 +128,10 @@ public class CanvasController {
                     long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
                     Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     drawFps(frameRate.intValue());
+                    System.out.println(elapsedNanos);
+                    if (elapsedNanos % 10 == 0) {
+                        raceViewController.updateSparkLine();
+                    }
                 }
 
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.

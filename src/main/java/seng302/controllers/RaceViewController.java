@@ -67,6 +67,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timeline timerTimeline;
     private Race race;
     private Stage stage;
+    private ArrayList<XYChart.Series<String, Double>> sparklineData = new ArrayList<>();
+    private int time;
 
     private int index = 0;
 
@@ -95,6 +97,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         selectAnnotationBtn.setOnAction(event -> {
             loadSelectAnnotationView();
         });
+        time = 0;
     }
 
     /**
@@ -185,12 +188,24 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private void initializeSparkline(){
         raceSparkLine.setTitle("Boat Positions");
         for (Yacht yacht: startingBoats){
-            if (raceSparkLine.getData().contains(yacht.getSparklinePosition())) {
-                raceSparkLine.getData().remove(yacht.getSparklinePosition());
-            }
-            raceSparkLine.getData().add(yacht.getSparklinePosition());
+            XYChart.Series<String, Double> yachtData = new XYChart.Series<>();
+            yachtData.getData().add(new XYChart.Data<>(Integer.toString(time), Double.parseDouble(yacht.getPosition())));
+            sparklineData.add(yachtData);
             System.out.println("Here");
         }
+        for (Series<String, Double> spark:
+        sparklineData){
+            raceSparkLine.getData().add(spark);
+
+        }
+    }
+
+    public void updateSparkLine(){
+        for (int i = 0; i < startingBoats.size();i++){
+            sparklineData.get(i).getData().add(new XYChart.Data<>(Integer.toString(time),Double.parseDouble(startingBoats.get(i).getPosition())));
+            System.out.println("Here");
+        }
+        time++;
     }
 
     /**

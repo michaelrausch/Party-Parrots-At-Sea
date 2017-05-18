@@ -2,7 +2,6 @@ package seng302.models;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.paint.Color;
 
@@ -40,8 +39,6 @@ public class Yacht {
     // Mark rounding
     private Long markRoundingTime;
 
-    // Used for sparkline
-    private XYChart.Series<Number, Number> sparklinePosition;
 
     /**
      * Used in EventTest and RaceTest.
@@ -64,8 +61,6 @@ public class Yacht {
         this.velocity = boatVelocity;
         this.shortName = shortName;
         this.sourceID = id;
-        this.sparklinePosition = new XYChart.Series<>();
-        this.sparklinePosition.setName(boatName);
         index = 0;
         dataQ1 = new ConcurrentLinkedQueue<>();
 
@@ -78,8 +73,6 @@ public class Yacht {
         this.shortName = shortName;
         this.boatName = boatName;
         this.country = country;
-        this.sparklinePosition = new XYChart.Series<>();
-        this.sparklinePosition.setName(boatName);
         index = 0;
         dataQ1 = new ConcurrentLinkedQueue<>();
     }
@@ -162,7 +155,6 @@ public class Yacht {
             try {
                 if (Integer.parseInt(position) != Integer.parseInt(this.position)){
                 dataQ1.add(Integer.parseInt(position));
-                sparklinePosition.getData().add(new XYChart.Data<>(index++, dataQ1.remove()));
                 System.out.println("new position found for " + boatName + " in position " + position + " old(" + this.position + ")");
                 }
             } catch (NumberFormatException e) {
@@ -193,10 +185,6 @@ public class Yacht {
 
     public void setMarkRoundingTime(Long markRoundingTime) {
         this.markRoundingTime = markRoundingTime;
-    }
-
-    public Series<Number, Number> getSparklinePosition() {
-        return sparklinePosition;
     }
 
     @Override
