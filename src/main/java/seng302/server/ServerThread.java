@@ -1,5 +1,7 @@
 package seng302.server;
 
+import seng302.server.simulator.mark.CompoundMark;
+import seng302.server.simulator.mark.Mark;
 import seng302.server.messages.*;
 import seng302.server.simulator.Boat;
 import seng302.server.simulator.Simulator;
@@ -257,6 +259,53 @@ public class ServerThread implements Runnable, Observer {
         //Delays the new course xml data for 25 seconds so the boats are able to pass the starting line
     }
 
+    /**
+     * Starts sending boat location messages containing the mark positions
+     * Marks are flipped by 90 degrees from their original position
+     */
+    private void startUpdatingMarkPositions(){
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+
+            /**
+             * Send the mark location message
+             * @param m The mark to send
+             * @param offset How far to move the marks from their original position
+             */
+            private void sendMark(Mark m, Double offset){
+                Message markLocation = new BoatLocationMessage(m.getSourceID(), server.getSequenceNumber(),
+                        m.getLat()-offset, m.getLng()+offset*2, 0, 0);
+
+                try {
+                    server.send(markLocation);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void run() {
+                for (CompoundMark m : raceSimulator.getMarks()){
+                    if (m == null){
+                        continue;
+                    }
+
+                    Mark mark1 = m.getMark1();
+                    Mark mark2 = m.getMark2();
+
+                    if (mark1 != null){
+                        sendMark(mark1, 0.0002);
+                    }
+
+                    if (mark2 != null){
+                        sendMark(mark2, 0.0005);
+                    }
+
+                }
+            }
+        }, 21000, 1000);
+    }
+
     public void run() {
         try{
             server = new StreamingServerSocket(PORT_NUMBER);
@@ -275,6 +324,7 @@ public class ServerThread implements Runnable, Observer {
         startSendingRaceStartStatusMessages();
         startSendingRaceStatusMessages();
         sendPostStartCourseXml();
+        startUpdatingMarkPositions();
     }
 
     /**

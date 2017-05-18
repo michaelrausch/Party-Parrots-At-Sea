@@ -1,12 +1,15 @@
 package seng302.server.simulator;
 
+import seng302.server.simulator.mark.CompoundMark;
 import seng302.server.simulator.mark.Corner;
 import seng302.server.simulator.mark.Mark;
 import seng302.server.simulator.mark.Position;
 import seng302.server.simulator.parsers.RaceParser;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Simulator extends Observable implements Runnable {
@@ -137,5 +140,19 @@ public class Simulator extends Observable implements Runnable {
 
 	public void setRaceStarted(boolean raceStarted) {
 		isRaceStarted = raceStarted;
+	}
+
+	/**
+	 * @return A list of marks in the race
+	 */
+	public Set<CompoundMark> getMarks(){
+		Set<CompoundMark> marks =  new HashSet<>();
+
+		for (Corner c : course){
+			marks.add(c.getCompoundMark());
+			marks.add(c.getCompoundMark());
+		}
+
+		return marks;
 	}
 }
