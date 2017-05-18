@@ -355,17 +355,17 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             bg.setWakeVisible(false);
         }
         //TODO fix boat annotations with new boatgroup
-//        if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
-//            bg.setEstTimeToNextMarkObjectVisible(true);
-//        } else {
-//            bg.setEstTimeToNextMarkObjectVisible(false);
-//        }
-//
-//        if (importantAnnotations.getAnnotationState(Annotation.LEGTIME)) {
-//            bg.setLegTimeObjectVisible(true);
-//        } else {
-//            bg.setLegTimeObjectVisible(false);
-//        }
+        if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
+            bg.setEstTimeToNextMarkObjectVisible(true);
+        } else {
+            bg.setEstTimeToNextMarkObjectVisible(false);
+        }
+
+        if (importantAnnotations.getAnnotationState(Annotation.LEGTIME)) {
+            bg.setLegTimeObjectVisible(true);
+        } else {
+            bg.setLegTimeObjectVisible(false);
+        }
     }
 
     private void setAnnotations(Integer annotationLevel) {
@@ -375,8 +375,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
                     bg.setTeamNameObjectVisible(false);
                     bg.setVelocityObjectVisible(false);
-//                    bg.setEstTimeToNextMarkObjectVisible(false);
-//                    bg.setLegTimeObjectVisible(false);
+                    bg.setEstTimeToNextMarkObjectVisible(false);
+                    bg.setLegTimeObjectVisible(false);
                     bg.setLineGroupVisible(false);
                     bg.setWakeVisible(false);
                 }
@@ -392,8 +392,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
                     bg.setTeamNameObjectVisible(true);
                     bg.setVelocityObjectVisible(true);
-//                    bg.setEstTimeToNextMarkObjectVisible(true);
-//                    bg.setLegTimeObjectVisible(true);
+                    bg.setEstTimeToNextMarkObjectVisible(true);
+                    bg.setLegTimeObjectVisible(true);
                     bg.setLineGroupVisible(true);
                     bg.setWakeVisible(true);
                 }
@@ -411,13 +411,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
             //We need to iterate over all race groups to get the matching boat group belonging to this boat if we
             //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
-            //TODO fix boat selection with new boatgroup
-//            if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
-//                bg.setIsSelected(true);
-//                selectedBoat = yacht;
-//            } else {
-//                bg.setIsSelected(false);
-//            }
+            if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
+                bg.setIsSelected(true);
+                selectedBoat = yacht;
+            } else {
+                bg.setIsSelected(false);
+            }
         }
     }
 
