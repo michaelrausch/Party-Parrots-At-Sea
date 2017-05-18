@@ -1,25 +1,29 @@
 package seng302.models.stream;
 
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.PriorityBlockingQueue;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.packets.StreamPacket;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.PriorityBlockingQueue;
-import seng302.models.stream.XMLParser;
 
 /**
  * The purpose of this class is to take in the stream of divided packets so they can be read
@@ -29,6 +33,7 @@ import seng302.models.stream.XMLParser;
  */
 public class StreamParser extends Thread{
 
+     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markPositions = new ConcurrentHashMap<>();
      public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
      private String threadName;
      private Thread t;
@@ -400,6 +405,20 @@ public class StreamParser extends Thread{
                 }));
             }
             boatPositions.get(boatId).put(boatPacket);
+        } else if (deviceType == 3){
+            BoatPositionPacket markPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
+
+            //add a new priority que to the boatPositions HashMap
+            if (!markPositions.containsKey(boatId)) {
+                markPositions.put(boatId,
+                    new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
+                        @Override
+                        public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
+                            return (int) (p1.getTimeValid() - p2.getTimeValid());
+                        }
+                    }));
+            }
+            markPositions.get(boatId).put(markPacket);
         }
     }
 

@@ -1,6 +1,11 @@
 package seng302.controllers;
 
-import javafx.animation.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.PriorityBlockingQueue;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -10,15 +15,18 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import seng302.models.*;
-import seng302.models.mark.*;
+import seng302.models.BoatGroup;
+import seng302.models.Colors;
+import seng302.models.Yacht;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.models.mark.MarkGroup;
+import seng302.models.mark.MarkType;
+import seng302.models.mark.SingleMark;
 import seng302.models.stream.StreamParser;
-import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
-import seng302.models.mark.Mark;
-import java.util.*;
-import java.util.concurrent.PriorityBlockingQueue;
+import seng302.models.stream.packets.BoatPositionPacket;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -96,6 +104,7 @@ public class CanvasController {
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
         initializeBoats();
+        initializeMarks();
         timer = new AnimationTimer() {
 
             @Override
@@ -179,8 +188,8 @@ public class CanvasController {
             boatGroup.move();
         }
         for (MarkGroup markGroup : markGroups) {
-            for (int id : markGroup.getRaceIds()) {
-                if (StreamParser.boatPositions.containsKey(id)) {
+            for (long id : markGroup.getRaceIds()) {
+                if (StreamParser.markPositions.containsKey(id)) {
                     UpdateMarkGroup(id, markGroup);
                 }
             }
@@ -214,8 +223,8 @@ public class CanvasController {
         }
     }
 
-    void UpdateMarkGroup (int raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(raceId);
+    void UpdateMarkGroup (long raceId, MarkGroup markGroup) {
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markPositions.get(raceId);
         if (movementQueue.size() > 0){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
@@ -242,6 +251,26 @@ public class CanvasController {
         }
         group.getChildren().add(boatAnnotations);
         group.getChildren().addAll(boatGroups);
+    }
+
+    private void initializeMarks() {
+        Map<Integer, Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
+
+        for (Mark mark : allMarks.values()) {
+            if (mark.getMarkType() == MarkType.SINGLE_MARK) {
+                SingleMark sMark = (SingleMark) mark;
+
+                MarkGroup markGroup = new MarkGroup(mark, findScaledXY(sMark));
+                markGroups.add(markGroup);
+            } else {
+                GateMark gMark = (GateMark) mark;
+
+                MarkGroup markGroup = new MarkGroup(mark, findScaledXY(gMark.getSingleMark1()),
+                    findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
+                markGroups.add(markGroup);
+            }
+        }
+        group.getChildren().addAll(markGroups);
     }
 
     class ResizableCanvas extends Canvas {

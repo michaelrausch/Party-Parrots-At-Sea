@@ -1,6 +1,9 @@
 package seng302.models.stream;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -9,10 +12,6 @@ import seng302.models.Yacht;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import seng302.models.mark.SingleMark;
 
 /**
@@ -349,7 +348,6 @@ public class XMLParser {
                 }
             }
 
-            System.out.println(marksList.size());
             if (marksList.size() == 1) {
                 return marksList.get(0);
             } else if (marksList.size() == 2) {

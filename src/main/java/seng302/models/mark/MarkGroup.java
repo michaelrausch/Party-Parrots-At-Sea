@@ -1,14 +1,12 @@
 package seng302.models.mark;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.transform.Rotate;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by CJIRWIN on 26/04/2017.
@@ -72,7 +70,7 @@ public class MarkGroup extends Group {
         }
     }
 
-    public void moveMarkTo (double x, double y, int raceId)
+    public void moveMarkTo (double x, double y, long raceId)
     {
         if (mainMark.getMarkType() == MarkType.SINGLE_MARK) {
             Circle markCircle = (Circle) super.getChildren().get(0);
@@ -104,8 +102,8 @@ public class MarkGroup extends Group {
         return false;
     }
 
-    public int[] getRaceIds () {
-        int[] idArray = new int[marks.size()];
+    public long[] getRaceIds () {
+        long[] idArray = new long[marks.size()];
         int i = 0;
         for (Mark mark : marks)
             idArray[i++] = mark.getId();

@@ -10,7 +10,7 @@ public abstract class Mark {
     private MarkType markType;
     private double latitude;
     private double longitude;
-    private int id;
+    private long id;
 
     /**
      * Create a mark instance by passing its name and type
@@ -125,7 +125,7 @@ public abstract class Mark {
         return longitude;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
