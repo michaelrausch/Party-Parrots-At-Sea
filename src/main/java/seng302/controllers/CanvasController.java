@@ -181,7 +181,7 @@ public class CanvasController {
         for (MarkGroup markGroup : markGroups) {
             for (int id : markGroup.getRaceIds()) {
                 if (StreamParser.boatPositions.containsKey(id)) {
-                    UpdateMarkGroup(id, markGroup);
+                    updateMarkGroup(id, markGroup);
                 }
             }
         }
@@ -214,7 +214,7 @@ public class CanvasController {
         }
     }
 
-    void UpdateMarkGroup (int raceId, MarkGroup markGroup) {
+    void updateMarkGroup (int raceId, MarkGroup markGroup) {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(raceId);
         if (movementQueue.size() > 0){
             try {

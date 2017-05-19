@@ -1,11 +1,14 @@
 package seng302.models;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
@@ -50,6 +53,10 @@ public class BoatGroup extends Group{
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
     private Wake wake;
+    private Double distanceTravelled = 0.0;
+    private Point2D lastPoint;
+    private boolean destinationSet;
+    private Color textColor = Color.RED;
 
     private Boolean isSelected = true;  //All boats are initalised as selected
 
@@ -62,6 +69,7 @@ public class BoatGroup extends Group{
     public BoatGroup (Yacht boat, Color color){
         this.boat = boat;
         initChildren(color);
+        this.textColor = color;
     }
 
     /**
@@ -78,11 +86,30 @@ public class BoatGroup extends Group{
     }
 
     /**
+     * Return a text object with caching and a color applied
+     * @param defaultText The default text to display
+     * @param fill The text fill color
+     * @return The text object
+     */
+    private Text getTextObject(String defaultText, Color fill){
+        Text text = new Text(defaultText);
+
+        text.setFill(fill);
+        text.setCacheHint(CacheHint.SPEED);
+        text.setCache(true);
+
+        return text;
+    }
+
+    /**
      * Creates the javafx objects that will be the in the group by default.
      * @param color The colour of the boat polygon and the trailing line.
      * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat polygon.
      */
     private void initChildren (Color color, double... points) {
+        textColor = color;
+        destinationSet = false;
+
         boatPoly = new Polygon(points);
         boatPoly.setFill(color);
         boatPoly.setOnMouseEntered(event -> boatPoly.setFill(Color.FLORALWHITE));
@@ -91,24 +118,8 @@ public class BoatGroup extends Group{
         boatPoly.setCache(true);
         boatPoly.setCacheHint(CacheHint.SPEED);
 
-
-        teamNameObject = new Text(boat.getShortName());
-        teamNameObject.setCache(true);
-        teamNameObject.setCacheHint(CacheHint.SPEED);
-        velocityObject = new Text(String.valueOf(boat.getVelocity()));
-        DateFormat format = new SimpleDateFormat("mm:ss");
-        String timeToNextMark = format
-                .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
-        estTimeToNextMarkObject = new Text("Next mark: " + timeToNextMark);
-        if (boat.getMarkRoundingTime() != null) {
-            String elapsedTime = format
-                    .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
-            legTimeObject = new Text("Last mark: " + elapsedTime);
-        } else {
-            legTimeObject = new Text("Last mark: -");
-        }
-        velocityObject.setCache(true);
-        velocityObject.setCacheHint(CacheHint.SPEED);
+        teamNameObject = getTextObject(boat.getShortName(), textColor);
+        velocityObject = getTextObject(boat.getVelocity().toString(), textColor);
 
         teamNameObject.setX(TEAMNAME_X_OFFSET);
         teamNameObject.setY(TEAMNAME_Y_OFFSET);
@@ -118,14 +129,22 @@ public class BoatGroup extends Group{
         velocityObject.setY(VELOCITY_Y_OFFSET);
         velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
 
-        estTimeToNextMarkObject.setX(ESTTIMETONEXTMARK_X_OFFSET);
-        estTimeToNextMarkObject.setY(ESTTIMETONEXTMARK_Y_OFFSET);
-        estTimeToNextMarkObject
-                .relocate(estTimeToNextMarkObject.getX(), estTimeToNextMarkObject.getY());
+        updateLastMarkRoundingTime();
+        updateTimeTillNextMark();
 
-        legTimeObject.setX(LEGTIME_X_OFFSET);
-        legTimeObject.setY(LEGTIME_Y_OFFSET);
-        legTimeObject.relocate(legTimeObject.getX(), legTimeObject.getY());
+        if (estTimeToNextMarkObject != null){
+            estTimeToNextMarkObject.setX(ESTTIMETONEXTMARK_X_OFFSET);
+            estTimeToNextMarkObject.setY(ESTTIMETONEXTMARK_Y_OFFSET);
+            estTimeToNextMarkObject
+                    .relocate(estTimeToNextMarkObject.getX(), estTimeToNextMarkObject.getY());
+        }
+
+        if (legTimeObject != null){
+            legTimeObject.setX(LEGTIME_X_OFFSET);
+            legTimeObject.setY(LEGTIME_Y_OFFSET);
+            legTimeObject.relocate(legTimeObject.getX(), legTimeObject.getY());
+
+        }
 
         wake = new Wake(0, -BOAT_HEIGHT);
         super.getChildren()
@@ -149,7 +168,7 @@ public class BoatGroup extends Group{
      * @param dx The amount to move the X coordinate by
      * @param dy The amount to move the Y coordinate by
      */
-    public void moveGroupBy(double dx, double dy) {
+    private void moveGroupBy(double dx, double dy) {
         boatPoly.setLayoutX(boatPoly.getLayoutX() + dx);
         boatPoly.setLayoutY(boatPoly.getLayoutY() + dy);
         teamNameObject.setLayoutX(teamNameObject.getLayoutX() + dx);
@@ -160,7 +179,6 @@ public class BoatGroup extends Group{
         estTimeToNextMarkObject.setLayoutY(estTimeToNextMarkObject.getLayoutY() + dy);
         legTimeObject.setLayoutX(legTimeObject.getLayoutX() + dx);
         legTimeObject.setLayoutY(legTimeObject.getLayoutY() + dy);
-        ////////
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
     }
@@ -171,7 +189,7 @@ public class BoatGroup extends Group{
      * @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
      */
-    public void moveTo (double x, double y, double rotation) {
+    private void moveTo(double x, double y, double rotation) {
         rotateTo(rotation);
         boatPoly.setLayoutX(x);
         boatPoly.setLayoutY(y);
@@ -183,28 +201,86 @@ public class BoatGroup extends Group{
         estTimeToNextMarkObject.setLayoutY(y);
         legTimeObject.setLayoutX(x);
         legTimeObject.setLayoutY(y);
-        /////////
-      wake.setLayoutX(x);
-      wake.setLayoutY(y);
-      wake.rotate(rotation);
-
+        wake.setLayoutX(x);
+        wake.setLayoutY(y);
+        wake.rotate(rotation);
     }
 
-    public void rotateTo (double rotation) {
+    private void rotateTo(double rotation) {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
+    /**
+     * Updates the time until next mark label, will create a label if one doesn't exist
+     */
+    private void updateTimeTillNextMark(){
+        if (estTimeToNextMarkObject == null){
+            estTimeToNextMarkObject = getTextObject("", textColor);
+        }
+
+        DateFormat format = new SimpleDateFormat("mm:ss");
+        String timeToNextMark = format
+                .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+        estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
+    }
+
+    /**
+     * Updates the time since last mark rounding, will create a label if one doesn't exist
+     */
+    private void updateLastMarkRoundingTime(){
+        if (legTimeObject == null){
+            legTimeObject = getTextObject("", textColor);
+        }
+
+        if (boat.getMarkRoundingTime() != null){
+            DateFormat format = new SimpleDateFormat("mm:ss");
+            String elapsedTime = format
+                    .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
+            legTimeObject.setText("Last mark: " + elapsedTime);
+        }
+        else{
+            legTimeObject.setText("Last mark: -");
+
+        }
+    }
+
     public void move() {
+        double dx = xIncrement * framesToMove;
+        double dy = yIncrement * framesToMove;
+
+        distanceTravelled += Math.abs(dx) + Math.abs(dy);
         moveGroupBy(xIncrement, yIncrement);
         framesToMove = framesToMove - 1;
+
         if (framesToMove <= 0){
             isStopped = true;
         }
-        ////////////
+
+        if (distanceTravelled > 70){
+            distanceTravelled = 0d;
+
+            if (lastPoint != null){
+                Line l = new Line(
+                        lastPoint.getX(),
+                        lastPoint.getY(),
+                        boatPoly.getLayoutX(),
+                        boatPoly.getLayoutY()
+                );
+                l.getStrokeDashArray().setAll(3d, 7d);
+                l.setStroke(boat.getColour());
+                l.setCache(true);
+                l.setCacheHint(CacheHint.SPEED);
+                lineGroup.getChildren().add(l);
+            }
+
+            if (destinationSet){
+                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+            }
+        }
+
         wake.updatePosition(1000/60);
     }
 
-    ///////////
   /**
    * Calculates the rotational velocity required to reach the rotationalGoal from the currentRotation.
    */
@@ -248,7 +324,12 @@ public class BoatGroup extends Group{
         xIncrement = dx/framesToMove;
         yIncrement = dy/framesToMove;
 
+        destinationSet = true;
+
         Double rotationalVelocity = calculateRotationalVelocity(rotation);
+
+        updateTimeTillNextMark();
+        updateLastMarkRoundingTime();
 
         if (Math.abs(rotationalVelocity) > 0.075) {
           rotationalVelocity = 0.0;
