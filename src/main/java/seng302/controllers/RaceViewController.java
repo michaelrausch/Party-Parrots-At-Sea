@@ -70,7 +70,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timeline timerTimeline;
     private Race race;
     private Stage stage;
-    private ArrayList<XYChart.Series<String, Double>> sparklineData = new ArrayList<>();
+    private static HashMap<Integer, Series<String, Double>> sparklineData = new HashMap<>();
     private ArrayList<String> positions;
     private int time;
 
@@ -193,25 +193,39 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         for (Yacht yacht: startingBoats){
             XYChart.Series<String, Double> yachtData = new XYChart.Series<>();
             yachtData.setName(yacht.getBoatName());
-            yachtData.getData().add(new XYChart.Data<>(Integer.toString(time), 1 + startingBoats.size() - Double.parseDouble(yacht.getPosition())));
-            sparklineData.add(yachtData);
+            yachtData.getData().add(new XYChart.Data<>(Integer.toString(yacht.getLegNumber()), Double.parseDouble(yacht.getPosition())));
+            sparklineData.put(yacht.getSourceID(),yachtData);
         }
-        for (Series<String, Double> spark: sparklineData){
+        List<XYChart.Series<String, Double>> positions = new ArrayList<XYChart.Series<String, Double>>(sparklineData.values());
+
+        Collections.sort(positions, new Comparator<XYChart.Series>() {
+            @Override
+            public int compare(Series o1, Series o2) {
+                Integer leg1 =  Integer.parseInt( ((XYChart.Data<String, Double>) o1.getData().get(o1.getData().size()-1)).getXValue());
+                Integer leg2 =  Integer.parseInt( ((XYChart.Data<String, Double>) o2.getData().get(o2.getData().size()-1)).getXValue());
+                if (leg2 < leg1){
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        });
+        for (Series<String, Double> spark: positions){
             raceSparkLine.getData().add(spark);
         }
-        Set<Node> nodes = raceSparkLine.lookupAll(".series");
-        for (Node n : nodes) {
-            StringBuilder style = new StringBuilder();
-            style.append("-fx-stroke: red; -fx-background-color: red, white; ");
-            n.setStyle(style.toString());
-        }
-        time++;
+
+    }
+
+
+    public static void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
+        XYChart.Series<String, Double> positionData =  sparklineData.get(yacht.getSourceID());
+        positionData.getData().add(new XYChart.Data<>(Integer.toString(legNumber), Double.parseDouble(yacht.getPosition())));
     }
 
 
     public void checkForPositionChange(){
         // initialize position array
-        if (positions.size() == 0 && startingBoats.size() == 6){
+        if (startingBoats.size() == 6 && raceSparkLine.getData().size() != 6){
             Boolean positionsAssigned = true;
             for (Yacht yacht: startingBoats){
                 if (Objects.equals(yacht.getPosition(), "-")) {
@@ -220,28 +234,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             }
             if (positionsAssigned){
                 initializeSparkline();
-                positions.addAll(startingBoats.stream().map(Yacht::getPosition).collect(Collectors.toList()));
             }
-        } else {
-            ArrayList<String> currentPositions = startingBoats.stream().map(Yacht::getPosition).collect(Collectors.toCollection(ArrayList::new));
-            if (!positions.equals(currentPositions)){
-                updateSparkLine();
-            }
-            positions.clear();
-            positions.addAll(startingBoats.stream().map(Yacht::getPosition).collect(Collectors.toList()));
         }
     }
 
 
 
-    public void updateSparkLine(){
-        for (int i = 0; i < startingBoats.size();i++){
-            if (!Objects.equals(startingBoats.get(i).getPosition(), "-")) {
-                sparklineData.get(i).getData().add(new XYChart.Data<>(Integer.toString(time), 1 + startingBoats.size() - Double.parseDouble(startingBoats.get(i).getPosition())));
-            }
-        }
-        time++;
-    }
 
     /**
      * Initalises a timer which updates elements of the RaceView such as wind direction, boat

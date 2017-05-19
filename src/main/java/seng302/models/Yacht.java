@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.paint.Color;
+import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,7 +21,6 @@ public class Yacht {
     private double velocity;
 
     private int index;
-    private ConcurrentLinkedQueue<Number> dataQ1;
 
     private String boatType;
     private Integer sourceID;
@@ -62,7 +62,6 @@ public class Yacht {
         this.shortName = shortName;
         this.sourceID = id;
         index = 0;
-        dataQ1 = new ConcurrentLinkedQueue<>();
 
     }
 
@@ -74,7 +73,6 @@ public class Yacht {
         this.boatName = boatName;
         this.country = country;
         index = 0;
-        dataQ1 = new ConcurrentLinkedQueue<>();
     }
 
     public String getBoatType() {
@@ -109,7 +107,11 @@ public class Yacht {
     }
 
     public void setLegNumber(Integer legNumber) {
+        if (legNumber != this.legNumber && colour != null && position != "-") {
+            RaceViewController.updateYachtPositionSparkline(this, legNumber);
+        }
         this.legNumber = legNumber;
+
     }
 
     public Integer getPenaltiesAwarded() {
@@ -152,14 +154,6 @@ public class Yacht {
     }
 
     public void setPosition(String position) {
-            try {
-                if (Integer.parseInt(position) != Integer.parseInt(this.position)){
-                dataQ1.add(Integer.parseInt(position));
-                System.out.println("new position found for " + boatName + " in position " + position + " old(" + this.position + ")");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("No position found");
-            }
         this.position = position;
     }
 
