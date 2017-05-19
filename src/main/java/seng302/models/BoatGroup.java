@@ -39,6 +39,7 @@ public class BoatGroup extends Group{
     private double xIncrement;
     private double yIncrement;
     private long lastTimeValid = 0;
+    private Double lastRotation = 0.0;
     private long framesToMove;
     //Graphical objects
     private Yacht boat;
@@ -159,6 +160,9 @@ public class BoatGroup extends Group{
         estTimeToNextMarkObject.setLayoutY(estTimeToNextMarkObject.getLayoutY() + dy);
         legTimeObject.setLayoutX(legTimeObject.getLayoutX() + dx);
         legTimeObject.setLayoutY(legTimeObject.getLayoutY() + dy);
+        ////////
+        wake.setLayoutX(wake.getLayoutX() + dx);
+        wake.setLayoutY(wake.getLayoutY() + dy);
     }
 
 
@@ -179,6 +183,11 @@ public class BoatGroup extends Group{
         estTimeToNextMarkObject.setLayoutY(y);
         legTimeObject.setLayoutX(x);
         legTimeObject.setLayoutY(y);
+        /////////
+      wake.setLayoutX(x);
+      wake.setLayoutY(y);
+      wake.rotate(rotation);
+
     }
 
     public void rotateTo (double rotation) {
@@ -191,7 +200,34 @@ public class BoatGroup extends Group{
         if (framesToMove <= 0){
             isStopped = true;
         }
+        ////////////
+        wake.updatePosition(1000/60);
     }
+
+    ///////////
+  /**
+   * Calculates the rotational velocity required to reach the rotationalGoal from the currentRotation.
+   */
+  protected Double calculateRotationalVelocity (Double rotationalGoal) {
+    Double rotationalVelocity = 0.0;
+
+    if (Math.abs(rotationalGoal - lastRotation) > 180) {
+      if (rotationalGoal - lastRotation >= 0.0) {
+        rotationalVelocity = ((rotationalGoal - lastRotation) - 360) / 200;
+      } else {
+        rotationalVelocity = (360 + (rotationalGoal - lastRotation)) / 200;
+      }
+    } else {
+      rotationalVelocity = (rotationalGoal - lastRotation) / 200;
+    }
+
+    //Sometimes the rotation is too large to be realistic. In that case just do it instantly.
+    if (Math.abs(rotationalVelocity) > 1) {
+      rotationalVelocity = 0.0;
+    }
+
+    return rotationalVelocity;
+  }
 
     /**
      * Sets the destination of the boat and the headng it should have once it reaches
@@ -208,13 +244,25 @@ public class BoatGroup extends Group{
         framesToMove = Math.round((frameRate/(1000.0f/(timeValid-lastTimeValid))));
         double dx = newXValue - boatPoly.getLayoutX();
         double dy = newYValue - boatPoly.getLayoutY();
+
         xIncrement = dx/framesToMove;
         yIncrement = dy/framesToMove;
+
+        Double rotationalVelocity = calculateRotationalVelocity(rotation);
+
+        if (Math.abs(rotationalVelocity) > 0.075) {
+          rotationalVelocity = 0.0;
+          wake.rotate(rotation);
+        }
+
         rotateTo(rotation);
+        wake.setRotationalVelocity(rotationalVelocity, groundSpeed);
 
         velocityObject.setText(String.format("%.2f m/s", groundSpeed));
         lastTimeValid = timeValid;
         isStopped = false;
+
+        lastRotation = rotation;
     }
 
 

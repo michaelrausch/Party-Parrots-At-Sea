@@ -132,6 +132,7 @@ public class StartScreenController implements Initializable {
     }
 
     public void switchToRaceView() {
+        StreamParser.boatPositions.clear();
         switchedToRaceView = true;
         setContentPane("/views/RaceView.fxml");
     }

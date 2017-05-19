@@ -17,6 +17,9 @@ public class App extends Application {
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
         primaryStage.setMaximized(true);
+        primaryStage.setFullScreenExitHint("");
+        primaryStage.setFullScreen(true);
+
 
         primaryStage.show();
         primaryStage.setOnCloseRequest(e -> {

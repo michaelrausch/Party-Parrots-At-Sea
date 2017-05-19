@@ -105,7 +105,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             // Load FXML and set CSS
             fxmlLoader
                 .setLocation(getClass().getResource("/views/importantAnnotationSelectView.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 469, 248);
+            Scene scene = new Scene(fxmlLoader.load(), 469, 298);
             scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             stage.initStyle(StageStyle.UNDECORATED);
 
