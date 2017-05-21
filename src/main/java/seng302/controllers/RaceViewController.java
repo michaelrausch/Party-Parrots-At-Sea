@@ -1,17 +1,13 @@
 package seng302.controllers;
 
-import java.time.Year;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
@@ -37,7 +33,6 @@ import seng302.models.parsers.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by ptg19 on 29/03/17.
@@ -70,7 +65,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timeline timerTimeline;
     private Race race;
     private Stage stage;
-    private static HashMap<Integer, Series<String, Double>> sparklineData = new HashMap<>();
+    private static HashMap<Integer, Series<String, Double>> sparkLineData = new HashMap<>();
     private ArrayList<String> positions;
     private int time;
 
@@ -188,54 +183,57 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         annotationSlider.setValue(2);
     }
 
-    private void initializeSparkline(){
-        raceSparkLine.setTitle("Boat Positions");
+    public void updateSparkLine(){
+        ArrayList<Yacht> sparkLineCandidates = new ArrayList<>();
         for (Yacht yacht: startingBoats){
+            if (!sparkLineData.containsKey(yacht.getSourceID()) && yacht.getPosition() != "-") {
+                sparkLineCandidates.add(yacht);
+            }
+        }
+        for (Yacht yacht: sparkLineCandidates){
             XYChart.Series<String, Double> yachtData = new XYChart.Series<>();
             yachtData.setName(yacht.getBoatName());
-            yachtData.getData().add(new XYChart.Data<>(Integer.toString(yacht.getLegNumber()), Double.parseDouble(yacht.getPosition())));
-            sparklineData.put(yacht.getSourceID(),yachtData);
-        }
-        List<XYChart.Series<String, Double>> positions = new ArrayList<XYChart.Series<String, Double>>(sparklineData.values());
+            yachtData.getData().add(new XYChart.Data<>(Integer.toString(yacht.getLegNumber()),1 + sparkLineCandidates.size() - Double.parseDouble(yacht.getPosition())));
+            sparkLineData.put(yacht.getSourceID(), yachtData);
+       }
 
-        Collections.sort(positions, new Comparator<XYChart.Series>() {
-            @Override
-            public int compare(Series o1, Series o2) {
-                Integer leg1 =  Integer.parseInt( ((XYChart.Data<String, Double>) o1.getData().get(o1.getData().size()-1)).getXValue());
-                Integer leg2 =  Integer.parseInt( ((XYChart.Data<String, Double>) o2.getData().get(o2.getData().size()-1)).getXValue());
-                if (leg2 < leg1){
-                    return 1;
-                } else {
-                    return -1;
-                }
+        // Lambda function to sort the series in order of leg (later legs shown more to the right)
+        List<XYChart.Series<String, Double>> positions = new ArrayList<>(sparkLineData.values());
+        Collections.sort(positions, (o1, o2) -> {
+            Integer leg1 =  Integer.parseInt( ((XYChart.Data<String, Double>) o1.getData().get(o1.getData().size()-1)).getXValue());
+            Integer leg2 =  Integer.parseInt( ((XYChart.Data<String, Double>) o2.getData().get(o2.getData().size()-1)).getXValue());
+            if (leg2 < leg1){
+                return 1;
+            } else {
+                return -1;
             }
         });
+        raceSparkLine.setCreateSymbols(false);
         for (Series<String, Double> spark: positions){
-            raceSparkLine.getData().add(spark);
+            if (!raceSparkLine.getData().contains(spark)) {
+                raceSparkLine.getData().add(spark);
+                spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()).toString());
+            }
         }
-
     }
 
 
     public static void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
-        XYChart.Series<String, Double> positionData =  sparklineData.get(yacht.getSourceID());
-        positionData.getData().add(new XYChart.Data<>(Integer.toString(legNumber), Double.parseDouble(yacht.getPosition())));
+        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceID());
+        positionData.getData().add(new XYChart.Data<>(Integer.toString(legNumber), 1 + sparkLineData.size() - Double.parseDouble(yacht.getPosition())));
     }
 
-
-    public void checkForPositionChange(){
-        // initialize position array
-        if (startingBoats.size() == 6 && raceSparkLine.getData().size() != 6){
-            Boolean positionsAssigned = true;
-            for (Yacht yacht: startingBoats){
-                if (Objects.equals(yacht.getPosition(), "-")) {
-                    positionsAssigned = false;
-                }
-            }
-            if (positionsAssigned){
-                initializeSparkline();
+    private String getBoatColorAsRGB(String boatName){
+        Color color = Color.WHITE;
+        for (Yacht yacht: startingBoats){
+            if (yacht.getBoatName() == boatName){
+                color = yacht.getColour();
             }
         }
+        return String.format( "#%02X%02X%02X",
+            (int)( color.getRed() * 255 ),
+            (int)( color.getGreen() * 255 ),
+            (int)( color.getBlue() * 255 ) );
     }
 
 
@@ -524,7 +522,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public static boolean sparkLineStatus(Integer yachtId) {
-        if (sparklineData.containsKey(yachtId)){
+        if (sparkLineData.containsKey(yachtId)){
             return true;
         }
         return false;

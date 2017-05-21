@@ -107,9 +107,9 @@ public class Yacht {
     }
 
     public void setLegNumber(Integer legNumber) {
-//        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(sourceID)) {
-//            RaceViewController.updateYachtPositionSparkline(this, legNumber);
-//        }
+        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(sourceID)) {
+            RaceViewController.updateYachtPositionSparkline(this, legNumber);
+        }
         this.legNumber = legNumber;
 
     }

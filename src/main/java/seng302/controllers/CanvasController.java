@@ -128,7 +128,7 @@ public class CanvasController {
                     long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
                     Double frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
                     drawFps(frameRate.intValue());
-//                    raceViewController.checkForPositionChange();
+                    raceViewController.updateSparkLine();
                 }
 
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
