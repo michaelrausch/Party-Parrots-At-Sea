@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="annotationSelectWindow" maxHeight="270.0" maxWidth="469.0" minHeight="270.0" minWidth="469.0" prefHeight="270.0" prefWidth="469.0" styleClass="background-blue" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text fill="WHITE" layoutX="26.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select important annotations">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Text>
+      <CheckBox fx:id="boatWakeSelect" layoutX="26.0" layoutY="80.0" mnemonicParsing="false" style="-fx-border-width: 0; -fx-background-insets: 0;" text="Boat Wakes" textFill="#e7e7e7" />
+      <CheckBox fx:id="boatSpeedSelect" layoutX="26.0" layoutY="111.0" mnemonicParsing="false" text="Boat Speed" textFill="#e7e7e7" />
+      <CheckBox fx:id="boatTrackSelect" layoutX="26.0" layoutY="142.0" mnemonicParsing="false" text="Boat Tracks" textFill="#e7e7e7" />
+      <CheckBox fx:id="boatNameSelect" layoutX="26.0" layoutY="173.0" mnemonicParsing="false" text="Boat Name" textFill="#e7e7e7" />
+      <CheckBox fx:id="boatEstTimeToNextMarkSelect" layoutX="26.0" layoutY="204.0" mnemonicParsing="false" text="Boat Estimated Time To Next Mark" textFill="#e7e7e7" />
+      <Button fx:id="closeButton" layoutX="424.0" layoutY="-1.0" mnemonicParsing="false" prefHeight="11.0" prefWidth="49.0" style=": 0;" text="X" textFill="#ffffff4e">
+         <font>
+            <Font size="24.0" />
+         </font>
+         <styleClass>
+            <String fx:value="background-blue" />
+            <String fx:value="clearExitButton" />
+         </styleClass>
+      </Button>
+      <CheckBox fx:id="boatElapsedTimeSelect" layoutX="26.0" layoutY="235.0" mnemonicParsing="false" text="Boat Elapsed Time Since Last Mark" textFill="#e7e7e7" />
+   </children>
+</AnchorPane>
