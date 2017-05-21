@@ -522,4 +522,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     Stage getStage() {
         return stage;
     }
+
+    public static boolean sparkLineStatus(Integer yachtId) {
+        if (sparklineData.containsKey(yachtId)){
+            return true;
+        }
+        return false;
+    }
 }
