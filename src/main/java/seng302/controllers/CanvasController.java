@@ -154,9 +154,9 @@ public class CanvasController {
         double[] yBoundaryPoints = new double[courseLimits.size()];
         for (int i = 0; i < courseLimits.size() - 1; i++) {
             Limit thisPoint1 = courseLimits.get(i);
-            SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
+            SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID(), thisPoint1.getSeqID());
             Limit thisPoint2 = courseLimits.get(i+1);
-            SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
+            SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID(), thisPoint2.getSeqID());
             Point2D borderPoint1 = findScaledXY(thisMark1);
             Point2D borderPoint2 = findScaledXY(thisMark2);
             gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
@@ -165,9 +165,9 @@ public class CanvasController {
             yBoundaryPoints[i] = borderPoint1.getY();
         }
         Limit thisPoint1 = courseLimits.get(courseLimits.size()-1);
-        SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
+        SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID(), thisPoint1.getSeqID());
         Limit thisPoint2 = courseLimits.get(0);
-        SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
+        SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID(), thisPoint2.getSeqID());
         Point2D borderPoint1 = findScaledXY(thisMark1);
         Point2D borderPoint2 = findScaledXY(thisMark2);
         gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
@@ -355,15 +355,15 @@ public class CanvasController {
         sortedPoints.sort(Comparator.comparingDouble(Limit::getLat));
         Limit minLatMark = sortedPoints.get(0);
         Limit maxLatMark = sortedPoints.get(sortedPoints.size()-1);
-        minLatPoint = new SingleMark(minLatMark.toString(), minLatMark.getLat(), minLatMark.getLng(), minLatMark.getSeqID());
-        maxLatPoint = new SingleMark(maxLatMark.toString(), maxLatMark.getLat(), maxLatMark.getLng(), maxLatMark.getSeqID());
+        minLatPoint = new SingleMark(minLatMark.toString(), minLatMark.getLat(), minLatMark.getLng(), minLatMark.getSeqID(), minLatMark.getSeqID());
+        maxLatPoint = new SingleMark(maxLatMark.toString(), maxLatMark.getLat(), maxLatMark.getLng(), maxLatMark.getSeqID(), minLatMark.getSeqID());
 
         sortedPoints.sort(Comparator.comparingDouble(Limit::getLng));
         //If the course is on a point on the earth where longitudes wrap around.
         Limit minLonMark = sortedPoints.get(0);
         Limit maxLonMark = sortedPoints.get(sortedPoints.size()-1);
-        minLonPoint = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID());
-        maxLonPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID());
+        minLonPoint = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID(), minLonMark.getSeqID());
+        maxLonPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID(), minLonMark.getSeqID());
         if (maxLonPoint.getLongitude() - minLonPoint.getLongitude() > 180) {
             horizontalInversion = true;
         }

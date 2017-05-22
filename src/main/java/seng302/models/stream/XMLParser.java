@@ -333,6 +333,7 @@ public class XMLParser {
         private Mark createMark(Node compoundMark) {
 
             List<SingleMark> marksList = new ArrayList<>();
+            Integer compoundMarkID = getNodeAttributeInt(compoundMark, "CompoundMarkID");
             String cMarkName = getNodeAttributeString(compoundMark, "Name");
 
             NodeList childMarks = compoundMark.getChildNodes();
@@ -346,7 +347,7 @@ public class XMLParser {
                     Double targetLat = getNodeAttributeDouble(markNode, "TargetLat");
                     Double targetLng = getNodeAttributeDouble(markNode, "TargetLng");
 
-                    SingleMark mark = new SingleMark(markName, targetLat, targetLng, sourceID);
+                    SingleMark mark = new SingleMark(markName, targetLat, targetLng, sourceID, compoundMarkID);
                     marksList.add(mark);
                 }
             }
@@ -364,7 +365,7 @@ public class XMLParser {
             } else if (marksList.size() == 2) {
                 return new GateMark(cMarkName, MarkType.OPEN_GATE, marksList.get(0),
                     marksList.get(1), marksList.get(0).getLatitude(),
-                    marksList.get(0).getLongitude());
+                    marksList.get(0).getLongitude(), compoundMarkID);
             } else {
                 return null;
             }

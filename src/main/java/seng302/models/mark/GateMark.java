@@ -16,8 +16,8 @@ public class GateMark extends Mark {
      * @param singleMark1 one single mark inside of the gate mark
      * @param singleMark2 the second mark inside of the gate mark
      */
-    public GateMark(String name, MarkType type, SingleMark singleMark1, SingleMark singleMark2, double latitude, double longitude) {
-        super(name, type, latitude, longitude);
+    public GateMark(String name, MarkType type, SingleMark singleMark1, SingleMark singleMark2, double latitude, double longitude, int compoundMarkID) {
+        super(name, type, latitude, longitude, compoundMarkID);
         this.singleMark1 = singleMark1;
         this.singleMark2 = singleMark2;
     }

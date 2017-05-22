@@ -1,6 +1,7 @@
 package seng302.models;
 
 import javafx.scene.paint.Color;
+import seng302.models.mark.Mark;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ public class Yacht {
     private String position;
     // Mark rounding
     private Long markRoundingTime;
+    private Mark lastMarkRounded;
 
     /**
      * Used in EventTest and RaceTest.
@@ -165,6 +167,14 @@ public class Yacht {
 
     public void setMarkRoundingTime(Long markRoundingTime) {
         this.markRoundingTime = markRoundingTime;
+    }
+
+    public Mark getLastMarkRounded() {
+        return lastMarkRounded;
+    }
+
+    public void setLastMarkRounded(Mark lastMarkRounded) {
+        this.lastMarkRounded = lastMarkRounded;
     }
 
     @Override

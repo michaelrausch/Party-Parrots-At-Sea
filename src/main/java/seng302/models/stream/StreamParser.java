@@ -22,6 +22,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
+import seng302.models.mark.Mark;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.packets.StreamPacket;
 
@@ -441,6 +442,12 @@ public class StreamParser extends Thread{
 
         // assign mark rounding time to boat
         boats.get((int)subjectId).setMarkRoundingTime(timeStamp);
+
+        for (Mark mark : xmlObject.getRaceXML().getCompoundMarks()) {
+            if (mark.getCompoundMarkID() == markId) {
+                boats.get((int)subjectId).setLastMarkRounded(mark);
+            }
+        }
     }
 
     /**
