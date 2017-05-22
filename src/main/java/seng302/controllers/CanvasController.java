@@ -189,8 +189,8 @@ public class CanvasController {
             boatGroup.move();
         }
         for (MarkGroup markGroup : markGroups) {
-            for (int id : markGroup.getRaceIds()) {
-                if (StreamParser.boatPositions.containsKey(id)) {
+            for (Long id : markGroup.getRaceIds()) {
+                if (StreamParser.markPositions.containsKey(id)) {
                     updateMarkGroup(id, markGroup);
                 }
             }
@@ -224,8 +224,8 @@ public class CanvasController {
         }
     }
 
-    void updateMarkGroup (int raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(raceId);
+    void updateMarkGroup (long raceId, MarkGroup markGroup) {
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markPositions.get(raceId);
         if (movementQueue.size() > 0){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
@@ -256,7 +256,6 @@ public class CanvasController {
 
     private void initializeMarks() {
         ArrayList<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
-        System.out.println(allMarks);
         for (Mark mark : allMarks) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 SingleMark sMark = (SingleMark) mark;
