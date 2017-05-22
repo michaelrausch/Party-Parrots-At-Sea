@@ -307,6 +307,7 @@ public class StreamParser extends Thread{
             boats = xmlObject.getBoatXML().getCompetingBoats();
         }
         if (messageType == 6) { //6 is race info xml
+
             newRaceXmlReceived = true;
         }
     }

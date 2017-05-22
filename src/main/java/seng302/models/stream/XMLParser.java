@@ -326,10 +326,6 @@ public class XMLParser {
                 }
             }
 
-            // This is awful but it works.
-            cMarks.get(0).setName("Start");
-            cMarks.get(cMarks.size()-1).setName("Finish");
-
             return cMarks;
         }
 

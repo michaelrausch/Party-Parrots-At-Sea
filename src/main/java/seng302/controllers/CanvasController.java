@@ -26,6 +26,7 @@ import seng302.models.mark.SingleMark;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
+import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 import seng302.models.stream.packets.BoatPositionPacket;
 
 /**
@@ -244,11 +245,19 @@ public class CanvasController {
         Map<Integer, Yacht> boats = StreamParser.getBoats();
         Group boatAnnotations = new Group();
 
+        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML().getParticipants();
+        ArrayList<Integer> participantIDs = new ArrayList<>();
+        for (Participant p : participants) {
+            participantIDs.add(p.getsourceID());
+        }
+
         for (Yacht boat : boats.values()) {
-            boat.setColour(Colors.getColor());
-            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-            boatGroups.add(boatGroup);
-            boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+            if (participantIDs.contains(boat.getSourceID())) {
+                boat.setColour(Colors.getColor());
+                BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
+                boatGroups.add(boatGroup);
+                boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+            }
         }
         group.getChildren().add(boatAnnotations);
         group.getChildren().addAll(boatGroups);
