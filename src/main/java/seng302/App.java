@@ -18,7 +18,6 @@ public class App extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.setMaximized(true);
 
-
         primaryStage.show();
         primaryStage.setOnCloseRequest(e -> {
             StreamParser.appClose();
@@ -65,7 +64,6 @@ public class App extends Application {
         else{
 //            sr = new StreamReceiver("localhost", 4949, "RaceStream");
             sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
-//            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
         }
 
         sr.start();

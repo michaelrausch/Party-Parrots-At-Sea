@@ -1,6 +1,11 @@
 package seng302.controllers;
 
-import javafx.animation.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.PriorityBlockingQueue;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -10,15 +15,19 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import seng302.models.*;
-import seng302.models.mark.*;
+import seng302.models.BoatGroup;
+import seng302.models.Colors;
+import seng302.models.Yacht;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.models.mark.MarkGroup;
+import seng302.models.mark.MarkType;
+import seng302.models.mark.SingleMark;
 import seng302.models.stream.StreamParser;
-import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
-import seng302.models.mark.Mark;
-import java.util.*;
-import java.util.concurrent.PriorityBlockingQueue;
+import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
+import seng302.models.stream.packets.BoatPositionPacket;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -97,6 +106,7 @@ public class CanvasController {
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
         initializeBoats();
+        initializeMarks();
         timer = new AnimationTimer() {
 
             @Override
@@ -118,6 +128,7 @@ public class CanvasController {
                 }
 
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
+                elapsedNanos = 1000 / 60;
                 updateGroups();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
@@ -179,8 +190,8 @@ public class CanvasController {
             boatGroup.move();
         }
         for (MarkGroup markGroup : markGroups) {
-            for (int id : markGroup.getRaceIds()) {
-                if (StreamParser.boatPositions.containsKey(id)) {
+            for (Long id : markGroup.getRaceIds()) {
+                if (StreamParser.markPositions.containsKey(id)) {
                     updateMarkGroup(id, markGroup);
                 }
             }
@@ -214,8 +225,8 @@ public class CanvasController {
         }
     }
 
-    void updateMarkGroup (int raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(raceId);
+    void updateMarkGroup (long raceId, MarkGroup markGroup) {
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markPositions.get(raceId);
         if (movementQueue.size() > 0){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
@@ -234,14 +245,40 @@ public class CanvasController {
         Map<Integer, Yacht> boats = StreamParser.getBoats();
         Group boatAnnotations = new Group();
 
+        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML().getParticipants();
+        ArrayList<Integer> participantIDs = new ArrayList<>();
+        for (Participant p : participants) {
+            participantIDs.add(p.getsourceID());
+        }
+
         for (Yacht boat : boats.values()) {
-            boat.setColour(Colors.getColor());
-            BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-            boatGroups.add(boatGroup);
-            boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+            if (participantIDs.contains(boat.getSourceID())) {
+                boat.setColour(Colors.getColor());
+                BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
+                boatGroups.add(boatGroup);
+                boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+            }
         }
         group.getChildren().add(boatAnnotations);
         group.getChildren().addAll(boatGroups);
+    }
+
+    private void initializeMarks() {
+        ArrayList<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
+        for (Mark mark : allMarks) {
+            if (mark.getMarkType() == MarkType.SINGLE_MARK) {
+                SingleMark sMark = (SingleMark) mark;
+
+                MarkGroup markGroup = new MarkGroup(sMark, findScaledXY(sMark));
+                markGroups.add(markGroup);
+            } else {
+                GateMark gMark = (GateMark) mark;
+
+                MarkGroup markGroup = new MarkGroup(gMark, findScaledXY(gMark.getSingleMark1()), findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
+                markGroups.add(markGroup);
+            }
+        }
+        group.getChildren().addAll(markGroups);
     }
 
     class ResizableCanvas extends Canvas {
