@@ -55,7 +55,6 @@ public class Yacht {
         this.velocity = boatVelocity;
         this.shortName = shortName;
         this.sourceID = id;
-        this.position = "-";
     }
 
     public Yacht(String boatType, Integer sourceID, String hullID, String shortName,
@@ -66,6 +65,7 @@ public class Yacht {
         this.shortName = shortName;
         this.boatName = boatName;
         this.country = country;
+        this.position = "-";
     }
 
     public String getBoatType() {
