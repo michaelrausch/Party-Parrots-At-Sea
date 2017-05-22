@@ -5,8 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import seng302.models.parsers.StreamParser;
-import seng302.models.parsers.StreamReceiver;
+import seng302.models.stream.StreamParser;
+import seng302.models.stream.StreamReceiver;
 import seng302.server.ServerThread;
 
 public class App extends Application {
@@ -17,6 +17,7 @@ public class App extends Application {
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root));
         primaryStage.setMaximized(true);
+
 
         primaryStage.show();
         primaryStage.setOnCloseRequest(e -> {
@@ -64,6 +65,7 @@ public class App extends Application {
         else{
 //            sr = new StreamReceiver("localhost", 4949, "RaceStream");
             sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
+//            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
         }
 
         sr.start();

@@ -1,4 +1,4 @@
-package seng302.models.parsers.packets;
+package seng302.models.stream.packets;
 
 /**
  * Created by Kusal on 4/24/2017.
@@ -48,6 +48,4 @@ public enum PacketType {
         }
         return OTHER;
     }
-
-
 }

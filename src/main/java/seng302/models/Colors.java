@@ -6,7 +6,7 @@ import javafx.scene.paint.Color;
  * Created by ryan_ on 16/03/2017.
  */
 public enum Colors {
-    RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE;
+    RED, PERU, SEAGREEN, GREEN, BLUE, PURPLE;
 
     static Integer index = 0;
 

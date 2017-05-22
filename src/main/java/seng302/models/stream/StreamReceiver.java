@@ -1,13 +1,11 @@
-package seng302.models.parsers;
+package seng302.models.stream;
 
-import seng302.models.parsers.packets.StreamPacket;
+import seng302.models.stream.packets.StreamPacket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.zip.CRC32;

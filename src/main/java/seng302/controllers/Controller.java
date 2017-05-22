@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import seng302.models.stream.StreamParser;
 
 public class Controller implements Initializable {
 
@@ -33,5 +34,6 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
         setContentPane("/views/StartScreenView.fxml");
+        StreamParser.boatPositions.clear();
     }
 }
