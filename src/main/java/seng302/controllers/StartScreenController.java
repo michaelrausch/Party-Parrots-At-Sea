@@ -58,10 +58,10 @@ public class StartScreenController implements Initializable {
             contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
         }
         catch(javafx.fxml.LoadException e){
-            System.err.println(e.getCause());
+            e.printStackTrace();
         }
         catch(IOException e){
-            System.err.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -132,6 +132,7 @@ public class StartScreenController implements Initializable {
     }
 
     public void switchToRaceView() {
+        StreamParser.boatPositions.clear();
         switchedToRaceView = true;
         setContentPane("/views/RaceView.fxml");
     }
