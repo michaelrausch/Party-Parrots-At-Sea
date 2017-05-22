@@ -63,8 +63,8 @@ class Wake extends Group {
         for (int i = 1; i < numWakes; i++) {
             double wakeSeparationRad = Math.toRadians(rotations[i - 1] - rotations[i]);
             double shortestDistance = Math.atan2(
-                    Math.sin(wakeSeparationRad),
-                    Math.cos(wakeSeparationRad)
+                Math.sin(wakeSeparationRad),
+                Math.cos(wakeSeparationRad)
             );
             double distDeg = Math.toDegrees(shortestDistance);
 

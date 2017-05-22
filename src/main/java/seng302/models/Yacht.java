@@ -159,7 +159,7 @@ public class Yacht {
         this.colour = colour;
     }
 
-    public double getVelocity() {
+    public Double getVelocity() {
         return velocity;
     }
 
