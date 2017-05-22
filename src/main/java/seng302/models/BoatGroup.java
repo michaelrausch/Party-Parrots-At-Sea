@@ -109,9 +109,13 @@ public class BoatGroup extends RaceObject {
         teamNameObject.setCacheHint(CacheHint.SPEED);
         velocityObject = new Text(String.valueOf(boat.getVelocity()));
         DateFormat format = new SimpleDateFormat("mm:ss");
-        String timeToNextMark = format
+        // TODO: 21/05/17 make a nice way of checking for this to be null
+        estTimeToNextMarkObject = new Text("Next mark: null");
+        if (boat.getEstimateTimeAtNextMark() != null) {
+            String timeToNextMark = format
                 .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
-        estTimeToNextMarkObject = new Text("Next mark: " + timeToNextMark);
+            estTimeToNextMarkObject = new Text("Next mark: " + timeToNextMark);
+        }
         if (boat.getMarkRoundingTime() != null) {
             String elapsedTime = format
                     .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundingTime());
@@ -280,9 +284,14 @@ public class BoatGroup extends RaceObject {
                 velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
                 DateFormat format = new SimpleDateFormat("mm:ss");
                 // estimate time to next mark
-                String timeToNextMark = format
-                        .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
-                estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
+                // TODO: 21/05/17 make a nice way of checking for this to be null
+                estTimeToNextMarkObject.setText("Next mark: null");
+                if (boat.getEstimateTimeAtNextMark() != null) {
+                    String timeToNextMark = format
+                        .format(
+                            boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
+                    estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
+                }
                 // elapsed time
                 if (boat.getMarkRoundingTime() != null) {
                     String elapsedTime = format
