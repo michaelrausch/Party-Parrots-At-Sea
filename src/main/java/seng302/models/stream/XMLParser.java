@@ -235,7 +235,7 @@ public class XMLParser {
 
         //Non atomic race attributes
         private ArrayList<Participant> participants;
-        private Map<Integer, Mark> course;
+        private ArrayList<Mark> course;
         private ArrayList<Corner> compoundMarkSequence;
         private ArrayList<Limit> courseLimit;
 
@@ -312,22 +312,24 @@ public class XMLParser {
         }
 
 
-        private Map<Integer, Mark> createCompoundMarks(Element docEle) {
-            Map<Integer, Mark> cMarks = new HashMap<>();
-
+        private ArrayList<Mark> createCompoundMarks(Element docEle) {
+            ArrayList<Mark> cMarks = new ArrayList<>();
 
             NodeList cMarkList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
             for (int i = 0; i < cMarkList.getLength(); i++) {
                 Node cMarkNode = cMarkList.item(i);
-
                 if (cMarkNode.getNodeName().equals("CompoundMark")) {
-                    Integer markID = getNodeAttributeInt(cMarkNode, "CompoundMarkID");
                     Mark mark = createMark(cMarkNode);
                     if (mark != null) {
-                        cMarks.put(markID, mark);
+                        cMarks.add(mark);
                     }
                 }
             }
+
+            // This is awful but it works.
+            cMarks.get(0).setName("Start");
+            cMarks.get(cMarks.size()-1).setName("Finish");
+
             return cMarks;
         }
 
@@ -397,7 +399,7 @@ public class XMLParser {
             return participants;
         }
 
-        public Map<Integer, Mark> getCompoundMarks() {
+        public ArrayList<Mark> getCompoundMarks() {
             return course;
         }
 
