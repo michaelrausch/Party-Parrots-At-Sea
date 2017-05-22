@@ -42,6 +42,7 @@ public class CanvasController {
     private final int RHS_BUFFER    = BUFFER_SIZE + MARK_SIZE / 2;
     private final int TOP_BUFFER    = BUFFER_SIZE;
     private final int BOT_BUFFER    = TOP_BUFFER + MARK_SIZE / 2;
+    private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
     private ScaleDirection scaleDirection;
@@ -117,7 +118,6 @@ public class CanvasController {
                 }
 
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
-                elapsedNanos = 1000 / 60;
                 updateGroups();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
@@ -325,16 +325,11 @@ public class CanvasController {
         //If the course is on a point on the earth where longitudes wrap around.
         Limit minLonMark = sortedPoints.get(0);
         Limit maxLonMark = sortedPoints.get(sortedPoints.size()-1);
-        SingleMark thisMinLon = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID());
-        SingleMark thisMaxLon = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID());
-        // TODO: 30/03/17 cir27 - Correctly account for longitude wrapping around.
-        if (thisMaxLon.getLongitude() - thisMinLon.getLongitude() > 180) {
-            SingleMark temp = thisMinLon;
-            thisMinLon = thisMaxLon;
-            thisMaxLon = temp;
+        minLonPoint = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID());
+        maxLonPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID());
+        if (maxLonPoint.getLongitude() - minLonPoint.getLongitude() > 180) {
+            horizontalInversion = true;
         }
-        minLonPoint = thisMinLon;
-        maxLonPoint = thisMaxLon;
     }
 
     /**
@@ -364,6 +359,9 @@ public class CanvasController {
             referencePointX  = LHS_BUFFER;
             referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
             referencePointX += ((CANVAS_WIDTH - (LHS_BUFFER + RHS_BUFFER)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
+        }
+        if(horizontalInversion) {
+            referencePointX = CANVAS_WIDTH - RHS_BUFFER - (referencePointX - LHS_BUFFER);
         }
     }
 
@@ -423,6 +421,9 @@ public class CanvasController {
             angleFromReference = Math.abs(angleFromReference) - Math.PI / 2;
             xAxisLocation -= (int) Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
             yAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+        }
+        if(horizontalInversion) {
+            xAxisLocation = CANVAS_WIDTH - RHS_BUFFER - (xAxisLocation - LHS_BUFFER);
         }
         return new Point2D(xAxisLocation, yAxisLocation);
     }
