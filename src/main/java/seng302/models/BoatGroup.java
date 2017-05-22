@@ -217,11 +217,14 @@ public class BoatGroup extends Group{
         if (estTimeToNextMarkObject == null){
             estTimeToNextMarkObject = getTextObject("", textColor);
         }
-
-        DateFormat format = new SimpleDateFormat("mm:ss");
-        String timeToNextMark = format
+        if (boat.getEstimateTimeAtNextMark() != null){
+            DateFormat format = new SimpleDateFormat("mm:ss");
+            String timeToNextMark = format
                 .format(boat.getEstimateTimeAtNextMark() - StreamParser.getCurrentTimeLong());
-        estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
+            estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
+        } else {
+            estTimeToNextMarkObject.setText("Next mark: -");
+        }
     }
 
     /**
