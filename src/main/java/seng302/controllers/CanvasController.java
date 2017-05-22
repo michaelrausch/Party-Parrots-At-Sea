@@ -255,7 +255,7 @@ public class CanvasController {
 
     private void initializeMarks() {
         Map<Integer, Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
-
+        System.out.println(allMarks);
         for (Mark mark : allMarks.values()) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 SingleMark sMark = (SingleMark) mark;
@@ -270,6 +270,7 @@ public class CanvasController {
             }
         }
         group.getChildren().addAll(markGroups);
+        System.out.println(group.getChildren());
     }
 
     class ResizableCanvas extends Canvas {

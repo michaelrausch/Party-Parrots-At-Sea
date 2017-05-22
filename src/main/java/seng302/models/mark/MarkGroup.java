@@ -90,6 +90,7 @@ public class MarkGroup extends Group {
     {
         if (mainMark.getMarkType() == MarkType.SINGLE_MARK) {
             Circle markCircle = (Circle) super.getChildren().get(0);
+
             markCircle.setCenterX(x);
             markCircle.setCenterY(y);
         } else {

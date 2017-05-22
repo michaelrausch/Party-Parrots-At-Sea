@@ -239,6 +239,9 @@ public class XMLParser {
         private ArrayList<Corner> compoundMarkSequence;
         private ArrayList<Limit> courseLimit;
 
+        // ensures there's no duplicate marks.
+        private List<Long> seenSourceIDs = new ArrayList<Long>();
+
         /**
          * Constructor for a RaceXMLObject.
          * Takes the information from a Document object and creates a more usable format.
@@ -312,6 +315,7 @@ public class XMLParser {
         private Map<Integer, Mark> createCompoundMarks(Element docEle) {
             Map<Integer, Mark> cMarks = new HashMap<>();
 
+
             NodeList cMarkList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
             for (int i = 0; i < cMarkList.getLength(); i++) {
                 Node cMarkNode = cMarkList.item(i);
@@ -319,13 +323,14 @@ public class XMLParser {
                 if (cMarkNode.getNodeName().equals("CompoundMark")) {
                     Integer markID = getNodeAttributeInt(cMarkNode, "CompoundMarkID");
                     Mark mark = createMark(cMarkNode);
-
-                    cMarks.put(markID, mark);
+                    if (mark != null) {
+                        cMarks.put(markID, mark);
+                    }
                 }
             }
-
             return cMarks;
         }
+
 
         private Mark createMark(Node compoundMark) {
 
@@ -345,6 +350,14 @@ public class XMLParser {
 
                     SingleMark mark = new SingleMark(markName, targetLat, targetLng, sourceID);
                     marksList.add(mark);
+                }
+            }
+
+            for (SingleMark mark : marksList) {
+                if (seenSourceIDs.contains(mark.getId())) {
+                    return null;
+                } else {
+                    seenSourceIDs.add(mark.getId());
                 }
             }
 

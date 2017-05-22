@@ -11,7 +11,6 @@ public class SingleMark extends Mark {
     private String name;
     private int id;
 
-
     /**
      * Represents a marker
      *
