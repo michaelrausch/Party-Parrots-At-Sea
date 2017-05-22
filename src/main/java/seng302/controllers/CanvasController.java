@@ -387,7 +387,7 @@ public class CanvasController {
         Limit minLonMark = sortedPoints.get(0);
         Limit maxLonMark = sortedPoints.get(sortedPoints.size()-1);
         minLonPoint = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID());
-        minLatPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID());
+        maxLonPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID());
         if (maxLonPoint.getLongitude() - minLonPoint.getLongitude() > 180) {
             horizontalInversion = true;
         }
