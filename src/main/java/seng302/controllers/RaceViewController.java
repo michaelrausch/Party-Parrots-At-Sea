@@ -25,6 +25,7 @@ import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.controllers.annotations.ImportantAnnotationsState;
+import seng302.fxObjects.BoatGroup;
 import seng302.models.*;
 import seng302.models.stream.StreamParser;
 

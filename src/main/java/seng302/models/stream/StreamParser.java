@@ -149,7 +149,7 @@ public class StreamParser extends Thread{
              }
          }
          catch (NullPointerException e){
-             System.out.println("Error parsing packet");
+             System.out.println("Error parsing packet of type " + packet.getType());
          }
      }
 

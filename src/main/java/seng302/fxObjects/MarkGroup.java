@@ -1,4 +1,4 @@
-package seng302.models.mark;
+package seng302.fxObjects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,10 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.models.mark.MarkType;
+import seng302.models.mark.SingleMark;
 
 /**
  * Created by CJIRWIN on 26/04/2017.
@@ -90,23 +94,28 @@ public class MarkGroup extends Group {
     {
         if (mainMark.getMarkType() == MarkType.SINGLE_MARK) {
             Circle markCircle = (Circle) super.getChildren().get(0);
-
-            markCircle.setCenterX(x);
-            markCircle.setCenterY(y);
+            if (Math.abs(markCircle.getCenterX() - x) > 5 || Math.abs(markCircle.getCenterY() - y) > 5) {
+                markCircle.setCenterX(x);
+                markCircle.setCenterY(y);
+            }
         } else {
             Circle markCircle1 = (Circle) super.getChildren().get(0);
             Circle markCircle2 = (Circle) super.getChildren().get(1);
             Line connectingLine = (Line) super.getChildren().get(2);
             if (marks.get(0).getId() == raceId) {
-                markCircle1.setCenterX(x);
-                markCircle1.setCenterY(y);
-                connectingLine.setStartX(markCircle1.getCenterX());
-                connectingLine.setStartY(markCircle1.getCenterY());
+                if (Math.abs(markCircle1.getCenterX() - x) > 5 || Math.abs(markCircle1.getCenterY() - y) > 5) {
+                    markCircle1.setCenterX(x);
+                    markCircle1.setCenterY(y);
+                    connectingLine.setStartX(markCircle1.getCenterX());
+                    connectingLine.setStartY(markCircle1.getCenterY());
+                }
             } else if (marks.get(1).getId() == raceId) {
-                markCircle2.setCenterX(x);
-                markCircle2.setCenterY(y);
-                connectingLine.setEndX(markCircle2.getCenterX());
-                connectingLine.setEndY(markCircle2.getCenterY());
+                if (Math.abs(markCircle2.getCenterX() - x) > 5 || Math.abs(markCircle2.getCenterY() - y) > 5) {
+                    markCircle2.setCenterX(x);
+                    markCircle2.setCenterY(y);
+                    connectingLine.setEndX(markCircle2.getCenterX());
+                    connectingLine.setEndY(markCircle2.getCenterY());
+                }
             }
         }
     }
