@@ -14,7 +14,7 @@ import javafx.scene.transform.Rotate;
 class Wake extends Group {
 
     //The number of wakes
-    private int numWakes = 6;
+    private int numWakes = 8;
     //The total possible difference between the first wake and the last. Increasing/Decreasing this will make wakes fan out more/less.
     private final double MAX_DIFF = 75;
     //Increasing/decreasing this will alter the speed that wakes converge when the heading stop changing. Anything over about 1500 may cause oscillation.
@@ -83,7 +83,7 @@ class Wake extends Group {
         for (Arc arc : arcs) {
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
-            rad += (12 / numWakes) + (velocity / 2);
+            rad += (10 / numWakes) + (velocity / 2);
         }
     }
 

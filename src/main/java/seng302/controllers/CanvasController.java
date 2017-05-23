@@ -15,7 +15,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import seng302.fxObjects.AnnotationsThingThatNeedsABetterName;
 import seng302.fxObjects.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.Yacht;

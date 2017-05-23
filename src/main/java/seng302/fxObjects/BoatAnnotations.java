@@ -2,9 +2,7 @@ package seng302.fxObjects;
 
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import seng302.models.Yacht;
@@ -12,8 +10,6 @@ import seng302.models.stream.StreamParser;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by cir27 on 23/05/17.
@@ -29,28 +25,26 @@ public class BoatAnnotations extends Group{
     private static final double LEGTIME_X_OFFSET = 18d;
     private static final double LEGTIME_Y_OFFSET = 7d;
 
-//    private Rectangle background = new Rectangle();
+    private Rectangle background = new Rectangle();
     private Text teamNameObject;
     private Text velocityObject;
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
-    private List<Node> kids;
-
-    private boolean visible = true;
+    private Long lastMarkTime;
 
     BoatAnnotations (Yacht boat, Color theme) {
         super.setCache(true);
-//        background.setX(15d);
-//        background.setY(-32d);
-//        background.setWidth(150);
-//        background.setHeight(55);
-//        background.setArcHeight(10);
-//        background.setArcWidth(10);
-//        background.setFill(new Color(1, 1, 1, 0.75));
-//        background.setStroke(theme);
-//        background.setStrokeWidth(2);
-//        background.setCache(true);
-//        background.setCacheHint(CacheHint.SPEED);
+        background.setX(15d);
+        background.setY(-32d);
+        background.setWidth(150);
+        background.setHeight(55);
+        background.setArcHeight(10);
+        background.setArcWidth(10);
+        background.setFill(new Color(1, 1, 1, 0.25));
+        background.setStroke(theme);
+        background.setStrokeWidth(2);
+        background.setCache(true);
+        background.setCacheHint(CacheHint.SPEED);
 
         teamNameObject = getTextObject(boat.getShortName(), theme);
         teamNameObject.relocate(TEAMNAME_X_OFFSET, TEAMNAME_Y_OFFSET);
@@ -81,23 +75,13 @@ public class BoatAnnotations extends Group{
         legTimeObject = getTextObject("Last mark: -", theme);
         legTimeObject.relocate(LEGTIME_X_OFFSET, LEGTIME_Y_OFFSET);
         boat.getReadOnlyMarkRoundingProperty().addListener((obs, oldTime, newTime) -> {
-            DateFormat format = new SimpleDateFormat("mm:ss");
-            String elapsedTime = format
-                    .format(StreamParser.getCurrentTimeLong() - newTime.longValue());
-            legTimeObject.setText("Last mark: " + elapsedTime);
+            lastMarkTime = newTime.longValue();
         });
         boat.getReadOnlyMarkRoundingProperty().addListener(obs ->
             legTimeObject.setText("Last mark: - ")
         );
 
-        kids = new ArrayList<>();
-//        kids.add(background);
-        kids.add(velocityObject);
-        kids.add(teamNameObject);
-        kids.add(estTimeToNextMarkObject);
-        kids.add(legTimeObject);
-
-//        super.getChildren().addAll(background, teamNameObject, velocityObject, estTimeToNextMarkObject, legTimeObject);
+        super.getChildren().addAll(background, teamNameObject, velocityObject, estTimeToNextMarkObject, legTimeObject);
     }
 
     /**
@@ -110,7 +94,7 @@ public class BoatAnnotations extends Group{
     private Text getTextObject(String defaultText, Color fill) {
         Text text = new Text(defaultText);
         text.setFill(fill);
-//        text.setCacheHint(CacheHint.SPEED);
+        text.setCacheHint(CacheHint.SPEED);
         text.setCache(true);
         return text;
     }
@@ -131,12 +115,14 @@ public class BoatAnnotations extends Group{
         legTimeObject.setVisible(visible);
     }
 
-    public void toggleVisible() {
-        visible = !visible;
-        this.setVisible(visible);
-    }
-
-    public List<Node> getkiddies () {
-        return kids;
+    public void update () {
+        if (lastMarkTime != null) {
+            DateFormat format = new SimpleDateFormat("mm:ss");
+            String elapsedTime = format
+                    .format(StreamParser.getCurrentTimeLong() - lastMarkTime);
+            legTimeObject.setText("Last mark: " + elapsedTime);
+        }else {
+            legTimeObject.setText("Last mark: - ");
+        }
     }
 }

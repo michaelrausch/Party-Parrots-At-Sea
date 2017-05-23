@@ -154,8 +154,7 @@ public class BoatGroup extends Group {
         boatAnnotations = new BoatAnnotations(boat, color);
 
         wake = new Wake(0, -BOAT_HEIGHT);
-        super.getChildren().addAll(boatPoly);
-        super.getChildren().addAll(boatAnnotations.getkiddies());
+        super.getChildren().addAll(boatPoly, boatAnnotations);
     }
 
     /**
@@ -180,12 +179,12 @@ public class BoatGroup extends Group {
     private void moveGroupBy(double dx, double dy) {
         boatPoly.setLayoutX(boatPoly.getLayoutX() + dx);
         boatPoly.setLayoutY(boatPoly.getLayoutY() + dy);
-//        boatAnnotations.setLayoutX(boatAnnotations.getLayoutX() + dx);
-//        boatAnnotations.setLayoutY(boatAnnotations.getLayoutY() + dy);
-        for (Node node : boatAnnotations.getkiddies()) {
-            node.setLayoutX(node.getLayoutX() + dx);
-            node.setLayoutY(node.getLayoutY() + dy);
-        }
+        boatAnnotations.setLayoutX(boatAnnotations.getLayoutX() + dx);
+        boatAnnotations.setLayoutY(boatAnnotations.getLayoutY() + dy);
+//        for (Node node : boatAnnotations.getkiddies()) {
+//            node.setLayoutX(node.getLayoutX() + dx);
+//            node.setLayoutY(node.getLayoutY() + dy);
+//        }
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
     }
@@ -201,14 +200,14 @@ public class BoatGroup extends Group {
         rotateTo(rotation);
         boatPoly.setLayoutX(x);
         boatPoly.setLayoutY(y);
-//        boatAnnotations.setLayoutX(x);
-//        boatAnnotations.setLayoutY(y);
-        int i = 0;
-        for (Node n : boatAnnotations.getkiddies()) {
-            n.setLayoutX(x + 10 + i);
-            n.setLayoutY(y + 10 + i);
-            i += 10;
-        }
+        boatAnnotations.setLayoutX(x);
+        boatAnnotations.setLayoutY(y);
+//        int i = 0;
+//        for (Node n : boatAnnotations.getkiddies()) {
+//            n.setLayoutX(x + 10 + i);
+//            n.setLayoutY(y + 10 + i);
+//            i += 10;
+//        }
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(rotation);
@@ -355,6 +354,7 @@ public class BoatGroup extends Group {
         lastTimeValid = timeValid;
         isStopped = false;
         lastRotation = rotation;
+        boatAnnotations.update();
     }
 
 
