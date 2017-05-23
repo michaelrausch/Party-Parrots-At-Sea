@@ -29,7 +29,7 @@ import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.controllers.annotations.ImportantAnnotationsState;
 import seng302.models.*;
-import seng302.models.parsers.StreamParser;
+import seng302.models.stream.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -63,7 +63,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ArrayList<Yacht> startingBoats = new ArrayList<>();
     private boolean displayFps;
     private Timeline timerTimeline;
-    private Race race;
     private Stage stage;
     private static HashMap<Integer, Series<String, Double>> sparkLineData = new HashMap<>();
     private ArrayList<String> positions;
@@ -123,7 +122,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             // Load FXML and set CSS
             fxmlLoader
                 .setLocation(getClass().getResource("/views/importantAnnotationSelectView.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 469, 248);
+            Scene scene = new Scene(fxmlLoader.load(), 469, 298);
             scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             stage.initStyle(StageStyle.UNDECORATED);
 
@@ -347,7 +346,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     private void loadRaceResultView() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/FinishView.fxml"));
-        loader.setController(new RaceResultController(race));
 
         try {
             contentAnchorPane.getChildren().removeAll();
@@ -396,16 +394,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
 
-
-
     public boolean isDisplayFps() {
         return displayFps;
     }
-
-    public Race getRace() {
-        return race;
-    }
-
 
     /**
      * Display the important annotations for a specific BoatGroup
@@ -435,7 +426,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         } else {
             bg.setWakeVisible(false);
         }
-
+        //TODO fix boat annotations with new boatgroup
         if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
             bg.setEstTimeToNextMarkObjectVisible(true);
         } else {
@@ -453,39 +444,30 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         switch (annotationLevel) {
             // No Annotations
             case 0:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if (ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
-                        bg.setTeamNameObjectVisible(false);
-                        bg.setVelocityObjectVisible(false);
-                        bg.setEstTimeToNextMarkObjectVisible(false);
-                        bg.setLegTimeObjectVisible(false);
-                        bg.setLineGroupVisible(false);
-                        bg.setWakeVisible(false);
-                    }
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                    bg.setTeamNameObjectVisible(false);
+                    bg.setVelocityObjectVisible(false);
+                    bg.setEstTimeToNextMarkObjectVisible(false);
+                    bg.setLegTimeObjectVisible(false);
+                    bg.setLineGroupVisible(false);
+                    bg.setWakeVisible(false);
                 }
                 break;
             // Important Annotations
             case 1:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if (ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
-                        setBoatGroupImportantAnnotations(bg);
-                    }
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                    setBoatGroupImportantAnnotations(bg);
                 }
                 break;
             // All Annotations
             case 2:
-                for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-                    if (ro instanceof BoatGroup) {
-                        BoatGroup bg = (BoatGroup) ro;
-                        bg.setTeamNameObjectVisible(true);
-                        bg.setVelocityObjectVisible(true);
-                        bg.setEstTimeToNextMarkObjectVisible(true);
-                        bg.setLegTimeObjectVisible(true);
-                        bg.setLineGroupVisible(true);
-                        bg.setWakeVisible(true);
-                    }
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                    bg.setTeamNameObjectVisible(true);
+                    bg.setVelocityObjectVisible(true);
+                    bg.setEstTimeToNextMarkObjectVisible(true);
+                    bg.setLegTimeObjectVisible(true);
+                    bg.setLineGroupVisible(true);
+                    bg.setWakeVisible(true);
                 }
                 break;
         }
@@ -498,17 +480,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param yacht The yacht for which we want to view all annotations
      */
     private void setSelectedBoat(Yacht yacht) {
-        for (RaceObject ro : includedCanvasController.getRaceObjects()) {
-            if (ro instanceof BoatGroup) {
-                BoatGroup bg = (BoatGroup) ro;
-                //We need to iterate over all race groups to get the matching boat group belonging to this boat if we
-                //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
-                if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
-                    bg.setIsSelected(true);
-                    selectedBoat = yacht;
-                } else {
-                    bg.setIsSelected(false);
-                }
+        for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+            //We need to iterate over all race groups to get the matching boat group belonging to this boat if we
+            //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
+            if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
+                bg.setIsSelected(true);
+                selectedBoat = yacht;
+            } else {
+                bg.setIsSelected(false);
             }
         }
     }

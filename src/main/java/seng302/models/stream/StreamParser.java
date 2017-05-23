@@ -1,24 +1,29 @@
-package seng302.models.parsers;
+package seng302.models.stream;
 
 
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import seng302.models.Yacht;
-import seng302.models.parsers.packets.BoatPositionPacket;
-import seng302.models.parsers.packets.StreamPacket;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.PriorityBlockingQueue;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import seng302.models.Yacht;
+import seng302.models.stream.packets.BoatPositionPacket;
+import seng302.models.stream.packets.StreamPacket;
 
 /**
  * The purpose of this class is to take in the stream of divided packets so they can be read
@@ -28,6 +33,7 @@ import java.util.concurrent.PriorityBlockingQueue;
  */
 public class StreamParser extends Thread{
 
+     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markPositions = new ConcurrentHashMap<>();
      public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
      private String threadName;
      private Thread t;
@@ -68,24 +74,10 @@ public class StreamParser extends Thread{
                  Thread.sleep(1);
              }
              while (appRunning){
-                 StreamPacket packet = StreamReceiver.packetBuffer.peek();
-                 //this code adds a delay to reading from the packetBuffer so
-                 //out of order packets have time to order themselves in the queue
-                 int delayTime = 1000;
-                 int loopTime = delayTime * 10;
-                 long transitTime = (System.currentTimeMillis()%loopTime - packet.getTimeStamp()%loopTime);
-                 if (transitTime < 0){
-                     transitTime = loopTime + transitTime;
-                 }
-                 if (transitTime < delayTime) {
-                     long sleepTime = delayTime - (transitTime);
-                     Thread.sleep(sleepTime);
-                 }
-                 packet = StreamReceiver.packetBuffer.take();
+                 StreamPacket packet = StreamReceiver.packetBuffer.take();
                  parsePacket(packet);
                  Thread.sleep(1);
                  while (StreamReceiver.packetBuffer.peek() == null) {
-                     Thread.sleep(1);
                  }
              }
          } catch (Exception e){
@@ -224,7 +216,6 @@ public class StreamParser extends Thread{
                 raceFinished = false;
                 System.out.println("[CLIENT] Race has started");
             }
-            //System.out.println("Time since start: " + -1 * timeTillStart + " Seconds");
             timeSinceStart = timeTillStart;
         }
 
@@ -233,11 +224,10 @@ public class StreamParser extends Thread{
 
         int noBoats = payload[22];
         int raceType = payload[23];
-//        ArrayList<String> boatStatuses = new ArrayList<>();
         boatsPos = new TreeMap<>();
         for (int i = 0; i < noBoats; i++){
-            Long boatStatusSourceID = bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
-            Yacht boat = boats.get((int)(long) boatStatusSourceID);
+            long boatStatusSourceID = bytesToLong(Arrays.copyOfRange(payload,24 + (i * 20),28+ (i * 20)));
+            Yacht boat = boats.get((int) boatStatusSourceID);
             boat.setBoatStatus((int)payload[28 + (i * 20)]);
             boat.setLegNumber((int)payload[29 + (i * 20)]);
             boat.setPenaltiesAwarded((int)payload[30 + (i * 20)]);
@@ -317,6 +307,7 @@ public class StreamParser extends Thread{
             boats = xmlObject.getBoatXML().getCompetingBoats();
         }
         if (messageType == 6) { //6 is race info xml
+
             newRaceXmlReceived = true;
         }
     }
@@ -365,7 +356,6 @@ public class StreamParser extends Thread{
         long subjectId = bytesToLong(Arrays.copyOfRange(payload,9,13));
         long incidentId = bytesToLong(Arrays.copyOfRange(payload,13,17));
         int eventId = payload[17];
-//        System.out.println("eventId = " + eventId);
     }
 
     /**
@@ -403,20 +393,33 @@ public class StreamParser extends Thread{
         double groundSpeed = bytesToLong(Arrays.copyOfRange(payload,38,40))/1000.0;
 
         //type 1 is a racing yacht and type 3 is a mark, needed for updating positions of the mark and boat
-        if (deviceType == 1 || deviceType == 3){
+        if (deviceType == 1){
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
 
             //add a new priority que to the boatPositions HashMap
             if (!boatPositions.containsKey(boatId)){
-                boatPositions.put(boatId, new PriorityBlockingQueue<BoatPositionPacket>(256, new Comparator<BoatPositionPacket>() {
+                boatPositions.put(boatId, new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
                     @Override
                     public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
                         return (int) (p1.getTimeValid() - p2.getTimeValid());
                     }
                 }));
             }
-            //Adding the boatPacket to the priority que
             boatPositions.get(boatId).put(boatPacket);
+        } else if (deviceType == 3){
+            BoatPositionPacket markPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
+
+            //add a new priority que to the boatPositions HashMap
+            if (!markPositions.containsKey(boatId)) {
+                markPositions.put(boatId,
+                    new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
+                        @Override
+                        public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
+                            return (int) (p1.getTimeValid() - p2.getTimeValid());
+                        }
+                    }));
+            }
+            markPositions.get(boatId).put(markPacket);
         }
     }
 
