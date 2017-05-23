@@ -5,6 +5,7 @@ import seng302.models.mark.Mark;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import seng302.models.stream.XMLParser.RaceXMLObject.Corner;
 
 /**
  * Yacht class for the racing boat.
@@ -34,6 +35,7 @@ public class Yacht {
     // Mark rounding
     private Long markRoundingTime;
     private Mark lastMarkRounded;
+    private Mark nextMark;
 
     /**
      * Used in EventTest and RaceTest.
@@ -181,4 +183,12 @@ public class Yacht {
     public String toString() {
         return boatName;
     }
+
+      public void setNextMark(Mark nextMark) {
+            this.nextMark = nextMark;
+      }
+
+      public Mark getNextMark(){
+        return nextMark;
+      }
 }

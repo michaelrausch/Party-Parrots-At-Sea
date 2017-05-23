@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -23,6 +24,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
 import seng302.models.mark.Mark;
+import seng302.models.stream.XMLParser.RaceXMLObject.Corner;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.packets.StreamPacket;
 
@@ -446,7 +448,22 @@ public class StreamParser extends Thread{
         for (Mark mark : xmlObject.getRaceXML().getCompoundMarks()) {
             if (mark.getCompoundMarkID() == markId) {
                 boats.get((int)subjectId).setLastMarkRounded(mark);
-            }
+
+                List<Corner> markSequence = xmlObject.getRaceXML().getCompoundMarkSequence();
+
+                for (int i = 0; i < markSequence.size() - 1; i++){
+                    Corner corner = markSequence.get(i);
+
+                    if (corner.getCompoundMarkID().equals(mark.getCompoundMarkID()) && (i + 1) < markSequence.size()){
+                        Corner nextCorner = markSequence.get(i+1);
+                        for (Mark m : xmlObject.getRaceXML().getCompoundMarks()){
+                            if (m.getCompoundMarkID() == nextCorner.getCompoundMarkID()){
+                                boats.get((int)subjectId).setNextMark(m);
+                            }
+                        }
+                    }
+                }
+                }
         }
     }
 
