@@ -184,17 +184,17 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     updateBoatSelectionComboBox();
 
                     for (Yacht yacht : StreamParser.getBoatsPos().values()) {
-                        System.out.println("\n\nyacht.getBoatName() = " + yacht.getBoatName());
-                        System.out.println("yacht.getLastMarkRounded() = " + yacht.getLastMarkRounded());
-                        System.out.println("yacht.getNextMark() = " + yacht.getNextMark());
 
                         if (yacht.getLastMarkRounded() != null) {
-                            System.out.println(yacht.getLastMarkRounded().getName());
-                        } else {
-                            System.out.println("sup");
+                            System.out.println("\n\nboat: " + yacht.getBoatName());
+                            System.out.println("last Mark: " + yacht.getLastMarkRounded().getName());
                         }
                         if (yacht.getNextMark() != null){
-                            System.out.println("yacht = " + yacht.getNextMark().getName());
+                            System.out.println("next Mark: " + yacht.getNextMark().getName());
+                            for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                                bg.calculateLegDirection();
+                            }
+
                         }
                     }
 

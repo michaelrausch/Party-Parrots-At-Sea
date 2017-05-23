@@ -114,6 +114,9 @@ public class MarkGroup extends Group {
         }
         super.getChildren().add(line);
 
+        //Laylines
+//        if (mark.)
+
         addLayLine(points1, 12.0, 90.0);
         addLayLine(points2, 12.0, 90.0);
     }

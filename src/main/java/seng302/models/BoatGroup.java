@@ -12,6 +12,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import seng302.models.mark.Mark;
 import seng302.models.stream.StreamParser;
 
 import java.text.DateFormat;
@@ -360,6 +361,36 @@ public class BoatGroup extends Group {
         isStopped = false;
 
         lastRotation = rotation;
+    }
+
+
+    public void calculateLegDirection() {
+        Mark lastMark = boat.getLastMarkRounded();
+        Mark nextMark = boat.getNextMark();
+        if (lastMark == null || nextMark == null) {
+            return;
+        }
+
+        Double windDirection = StreamParser.getWindDirection();
+        Double arbitraryDistance = 10d;
+
+        Point2D lastMarkMidPoint = new Point2D(lastMark.getLatitude(), lastMark.getLongitude());
+        Point2D nextMarkMidPoint = new Point2D(nextMark.getLatitude(), nextMark.getLongitude());
+
+        Double windDirX = lastMarkMidPoint.getX() + (lastMarkMidPoint.getX() + arbitraryDistance -lastMarkMidPoint.getX())*Math.cos(windDirection) - (lastMarkMidPoint.getY() + arbitraryDistance -lastMarkMidPoint.getY())*Math.sin(windDirection);
+        Double windDirY = lastMarkMidPoint.getY() + (lastMarkMidPoint.getX() + arbitraryDistance -lastMarkMidPoint.getX())*Math.sin(windDirection) + (lastMarkMidPoint.getY() + arbitraryDistance -lastMarkMidPoint.getY())*Math.cos(windDirection);
+        Point2D windDirPoint = new Point2D(windDirX, windDirY);
+
+        Double angle = lastMarkMidPoint.angle(nextMarkMidPoint, windDirPoint);
+
+        if (angle <= 90) {
+            System.out.println(lastMark.getName() + " is downwind");
+            System.out.println(nextMark.getName() + " is upwind");
+        }
+
+//        if (lastMarkMidPoint.angle(nextMarkMidPoint, windDirPoint) <= 90) {
+//            boat.getNextMark().s
+//        }
     }
 
 
