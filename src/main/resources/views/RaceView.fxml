@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<GridPane prefHeight="1080.0" prefWidth="1920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.RaceViewController">
+<GridPane maxHeight="960.0" maxWidth="1530.0" prefHeight="960.0" prefWidth="1530.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.RaceViewController">
     <columnConstraints>
         <ColumnConstraints maxWidth="246.0" minWidth="246.0" prefWidth="246.0" />
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="1034.0" />
@@ -16,7 +17,7 @@
         <RowConstraints />
     </rowConstraints>
     <children>
-        <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #2C2c36;" GridPane.rowSpan="3">
+        <AnchorPane maxHeight="960.0" maxWidth="250.0" minHeight="960.0" minWidth="250.0" prefHeight="960.0" prefWidth="250.0" style="-fx-background-color: #2C2c36;" GridPane.rowSpan="3">
             <children>
                 <Label layoutX="11.0" layoutY="259.0" text="Team Position" textFill="WHITE" />
                 <Label layoutX="13.0" layoutY="432.0" text="Settings" textFill="WHITE" />
@@ -51,7 +52,7 @@
             <ComboBox fx:id="boatSelectionComboBox" layoutX="37.0" layoutY="664.0" prefHeight="25.0" prefWidth="170.0" promptText="Select Boat" styleClass="combo-box-base" />
             </children>
         </AnchorPane>
-        <AnchorPane fx:id="contentAnchorPane" prefHeight="960.0" prefWidth="1280.0" style="-fx-background-color: skyblue;" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowSpan="2147483647" GridPane.valignment="TOP">
+        <AnchorPane fx:id="contentAnchorPane" maxHeight="960.0" maxWidth="1280.0" prefHeight="960.0" prefWidth="1280.0" style="-fx-background-color: skyblue;" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowSpan="2147483647" GridPane.valignment="TOP">
          <children>
             <fx:include fx:id="includedCanvas" source="CanvasView.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
          </children></AnchorPane>
