@@ -282,7 +282,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     updateWindDirection();
                     updateOrder();
                     updateBoatSelectionComboBox();
-                    updateLaylines();
                 })
         );
 
@@ -410,59 +409,57 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
 
-    private void updateLaylines() {
+    private void updateLaylines(BoatGroup bg) {
 
-        for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
-            System.out.println("========" + bg.getBoat().getBoatName() + "=========");
-            Mark nextMark = getNextMark(bg);
-            Boolean isUpwind = null;
-            // Can only calc leg direction if there is a next mark and it is a gate mark
-            if (nextMark != null) {
-                System.out.println("Next Mark: " + nextMark.getName());
-                if (nextMark instanceof GateMark) {
-                    if (bg.isUpwindLeg(includedCanvasController, nextMark)) {
-                        isUpwind = true;
-                        System.out.println(bg.getBoat().getBoatName() + " is on an upwind leg");
-                    } else {
-                        isUpwind = false;
-                        System.out.println(bg.getBoat().getBoatName() + " is on a downwind leg");
-                    }
+        System.out.println("========" + bg.getBoat().getBoatName() + "=========");
+        Mark nextMark = getNextMark(bg);
+        Boolean isUpwind = null;
+        // Can only calc leg direction if there is a next mark and it is a gate mark
+        if (nextMark != null) {
+            System.out.println("Next Mark: " + nextMark.getName());
+            if (nextMark instanceof GateMark) {
+                if (bg.isUpwindLeg(includedCanvasController, nextMark)) {
+                    isUpwind = true;
+                    System.out.println(bg.getBoat().getBoatName() + " is on an upwind leg");
+                } else {
+                    isUpwind = false;
+                    System.out.println(bg.getBoat().getBoatName() + " is on a downwind leg");
+                }
 
-                    for(MarkGroup mg : includedCanvasController.getMarkGroups()) {
-                        if (mg.getMainMark().getId() == nextMark.getId()) {
+                for(MarkGroup mg : includedCanvasController.getMarkGroups()) {
+                    if (mg.getMainMark().getId() == nextMark.getId()) {
 
-                            SingleMark singleMark1 = ((GateMark) nextMark).getSingleMark1();
-                            SingleMark singleMark2 = ((GateMark) nextMark).getSingleMark2();
-                            Point2D markPoint1 = includedCanvasController.findScaledXY(singleMark1.getLatitude(), singleMark1.getLongitude());
-                            Point2D markPoint2 = includedCanvasController.findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
-                            HashMap<Double, Double> angleAndSpeed;
-                            if (isUpwind) {
-                                angleAndSpeed = PolarTable.getOptimalUpwindVMG(StreamParser.getWindSpeed());
-                            } else {
-                                angleAndSpeed = PolarTable.getOptimalDownwindVMG(StreamParser.getWindSpeed());
-                            }
-
-                            Double resultingAngle = angleAndSpeed.keySet().iterator().next();
-
-
-                            Point2D boatCurrentPos = new Point2D(bg.getLayoutX(), bg.getLayoutY());
-                            Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
-                            Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
-                            if (lineFuncResult == 1) {
-                                mg.addRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
-                                mg.addLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
-                            } else if (lineFuncResult == -1) {
-                                mg.addRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
-                                mg.addLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
-                            }
-
+                        SingleMark singleMark1 = ((GateMark) nextMark).getSingleMark1();
+                        SingleMark singleMark2 = ((GateMark) nextMark).getSingleMark2();
+                        Point2D markPoint1 = includedCanvasController.findScaledXY(singleMark1.getLatitude(), singleMark1.getLongitude());
+                        Point2D markPoint2 = includedCanvasController.findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
+                        HashMap<Double, Double> angleAndSpeed;
+                        if (isUpwind) {
+                            angleAndSpeed = PolarTable.getOptimalUpwindVMG(StreamParser.getWindSpeed());
+                        } else {
+                            angleAndSpeed = PolarTable.getOptimalDownwindVMG(StreamParser.getWindSpeed());
                         }
+
+                        Double resultingAngle = angleAndSpeed.keySet().iterator().next();
+
+
+                        Point2D boatCurrentPos = new Point2D(bg.getBoatLayoutX(), bg.getBoatLayoutY());
+                        Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
+                        Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
+                        if (lineFuncResult == 1) {
+                            mg.addRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                            mg.addLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                        } else if (lineFuncResult == -1) {
+                            mg.addRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            mg.addLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                        }
+
                     }
                 }
             }
-
-            System.out.println();
         }
+
+        System.out.println();
     }
 
 
@@ -628,6 +625,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
                 bg.setIsSelected(true);
                 selectedBoat = yacht;
+                updateLaylines(bg);
             } else {
                 bg.setIsSelected(false);
             }

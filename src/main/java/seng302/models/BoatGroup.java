@@ -59,6 +59,8 @@ public class BoatGroup extends Group {
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
     private Wake wake;
+    private Line leftLayLine;
+    private Line rightLayline;
     private Double distanceTravelled = 0.0;
     private Point2D lastPoint;
     private boolean destinationSet;
@@ -158,10 +160,13 @@ public class BoatGroup extends Group {
 
         }
 
+        leftLayLine = new Line();
+        rightLayline = new Line();
+
         wake = new Wake(0, -BOAT_HEIGHT);
         super.getChildren()
             .addAll(teamNameObject, velocityObject, boatPoly, estTimeToNextMarkObject,
-                legTimeObject);
+                legTimeObject, leftLayLine, rightLayline);
     }
 
     /**
@@ -414,6 +419,7 @@ public class BoatGroup extends Group {
         setWakeVisible(isSelected);
         setEstTimeToNextMarkObjectVisible(isSelected);
         setLegTimeObjectVisible(isSelected);
+        setLayLinesVisible(isSelected);
     }
 
 
@@ -441,6 +447,11 @@ public class BoatGroup extends Group {
         wake.setVisible(visible);
     }
 
+    public void setLayLinesVisible(Boolean visible) {
+        leftLayLine.setVisible(visible);
+        rightLayline.setVisible(visible);
+    }
+
     public Yacht getBoat() {
         return boat;
     }
@@ -465,6 +476,16 @@ public class BoatGroup extends Group {
         Group group = new Group();
         group.getChildren().addAll(wake, lineGroup);
         return group;
+    }
+
+
+    public Double getBoatLayoutX() {
+        return boatPoly.getLayoutX();
+    }
+
+
+    public Double getBoatLayoutY() {
+        return boatPoly.getLayoutY();
     }
 
     public boolean isStopped() {
