@@ -15,8 +15,10 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
         primaryStage.setTitle("RaceVision");
-        primaryStage.setScene(new Scene(root));
-        primaryStage.setMaximized(true);
+        primaryStage.setScene(new Scene(root, 1530, 960));
+        primaryStage.setMaxWidth(1530);
+        primaryStage.setMaxHeight(960);
+//        primaryStage.setMaximized(true);
 
         primaryStage.show();
         primaryStage.setOnCloseRequest(e -> {
@@ -64,6 +66,7 @@ public class App extends Application {
         else{
 //            sr = new StreamReceiver("localhost", 4949, "RaceStream");
             sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
+//            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
         }
 
         sr.start();
