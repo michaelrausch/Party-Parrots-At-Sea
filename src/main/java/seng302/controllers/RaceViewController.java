@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import seng302.GeometryUtils;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
@@ -213,7 +214,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         if (legNumber == 0) {
             System.out.println("PreStart");
             return null;
-        } else if (legNumber == markSequence.size() - 2) {
+        } else if (legNumber == markSequence.size() - 1) {
             System.out.println("Finishing");
             return null;
         }
@@ -329,8 +330,17 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
                             Double resultingAngle = angleAndSpeed.keySet().iterator().next();
 
-                            mg.addLayLine(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
-                            mg.addLayLine(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+
+                            Point2D boatCurrentPos = new Point2D(bg.getLayoutX(), bg.getLayoutY());
+                            Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
+                            Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
+                            if (lineFuncResult == 1) {
+                                mg.addRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                                mg.addLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            } else if (lineFuncResult == -1) {
+                                mg.addRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                                mg.addLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                            }
 
                         }
                     }

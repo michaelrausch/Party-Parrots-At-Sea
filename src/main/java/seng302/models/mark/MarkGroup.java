@@ -7,6 +7,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import seng302.GeometryUtils;
 
 /**
  * Created by CJIRWIN on 26/04/2017.
@@ -52,27 +53,27 @@ public class MarkGroup extends Group {
         return new Point2D(newX, newY);
     }
 
-    /**
-     * Adds a lay-line to the MarkGroup
-     * @param startPoint The mark where the lay line starts
-     * @param layLineAngle The angle the laylines point
-     * @param baseAngle The reference angle
-     */
-    public void addLayLine(Point2D startPoint, Double layLineAngle, Double baseAngle){
 
-        Point2D ep1 = getPointRotation(startPoint, 50.0, baseAngle + -layLineAngle);
-        Point2D ep2 = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
+    public void addLeftLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
 
-        Line line1 = new Line(startPoint.getX(), startPoint.getY(), ep1.getX(), ep1.getY());
-        Line line2 = new Line(startPoint.getX(), startPoint.getY(), ep2.getX(), ep2.getY());
+        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
+        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
+        line.setStrokeWidth(1);
+        line.setStroke(Color.GREEN);
 
-        line1.setStrokeWidth(0.5);
-        line1.setStroke(Color.GREEN);
+        super.getChildren().addAll(line);
 
-        line2.setStrokeWidth(0.5);
-        line2.setStroke(Color.GREEN);
+    }
 
-        super.getChildren().addAll(line1, line2);
+    public void addRightLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
+
+        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle - layLineAngle);
+        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
+        line.setStrokeWidth(1);
+        line.setStroke(Color.GREEN);
+
+        super.getChildren().addAll(line);
+
     }
 
     public MarkGroup(GateMark mark, Point2D points1, Point2D points2) {

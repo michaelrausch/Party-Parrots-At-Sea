@@ -427,6 +427,8 @@ public class StreamParser extends Thread{
                     }));
             }
             markPositions.get(boatId).put(markPacket);
+
+
         }
     }
 
