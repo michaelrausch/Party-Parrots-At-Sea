@@ -509,8 +509,8 @@ public class CanvasController {
         Point2D p1, p2;
         Mark m1, m2;
         double theta, distance, dx, dy, dHorizontal, dVertical;
-        m1 = new SingleMark("m1", maxLatPoint.getLatitude(), minLonPoint.getLongitude(), 1);
-        m2 = new SingleMark("m2", minLatPoint.getLatitude(), maxLonPoint.getLongitude(), 2);
+        m1 = new SingleMark("m1", maxLatPoint.getLatitude(), minLonPoint.getLongitude(), 1, 0);
+        m2 = new SingleMark("m2", minLatPoint.getLatitude(), maxLonPoint.getLongitude(), 2, 0);
         p1 = findScaledXY(m1);
         p2 = findScaledXY(m2);
         theta = Mark.calculateHeadingRad(m1, m2);
