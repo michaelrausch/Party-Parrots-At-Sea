@@ -30,7 +30,6 @@ public class CanvasMap {
 
 	public Image getMapImage() {
 		try {
-			System.out.println(getRequest());
 			URL url = new URL(getRequest());
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 

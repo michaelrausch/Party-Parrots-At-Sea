@@ -1,10 +1,5 @@
 package seng302.controllers;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.PriorityBlockingQueue;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
@@ -21,11 +16,7 @@ import seng302.models.Colors;
 import seng302.models.Yacht;
 import seng302.models.map.Boundary;
 import seng302.models.map.CanvasMap;
-import seng302.models.mark.GateMark;
-import seng302.models.mark.Mark;
-import seng302.models.mark.MarkGroup;
-import seng302.models.mark.MarkType;
-import seng302.models.mark.SingleMark;
+import seng302.models.mark.*;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
@@ -33,6 +24,12 @@ import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.server.simulator.GeoUtility;
 import seng302.server.simulator.mark.Position;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -113,10 +110,6 @@ public class CanvasController {
     public void initializeCanvas (){
 
         gc = canvas.getGraphicsContext2D();
-//        gc.save();
-//        gc.setFill(Color.SKYBLUE);
-//        gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
-//        gc.restore();
         gc.setGlobalAlpha(0.5);
         fitMarksToCanvas();
         drawGoogleMap();
@@ -243,13 +236,9 @@ public class CanvasController {
 
     private void checkForCourseChanges() {
         if (StreamParser.isNewRaceXmlReceived()){
-//            gc.setFill(Color.SKYBLUE);
-//            gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
-//            gc.restore();
             gc.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             drawGoogleMap();
             addRaceBorder();
-//            canvas.toBack();
         }
     }
 
