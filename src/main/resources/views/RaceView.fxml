@@ -17,7 +17,7 @@
         <RowConstraints />
     </rowConstraints>
     <children>
-        <AnchorPane maxHeight="960.0" maxWidth="250.0" minHeight="960.0" minWidth="250.0" prefHeight="960.0" prefWidth="250.0" style="-fx-background-color: #2C2c36;" GridPane.rowSpan="3">
+        <AnchorPane prefHeight="960.0" prefWidth="250.0" style="-fx-background-color: #2C2c36;" GridPane.rowSpan="3">
             <children>
                 <Label layoutX="11.0" layoutY="259.0" text="Team Position" textFill="WHITE" />
                 <Label layoutX="13.0" layoutY="432.0" text="Settings" textFill="WHITE" />
