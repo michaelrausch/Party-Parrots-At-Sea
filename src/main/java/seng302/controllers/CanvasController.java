@@ -142,6 +142,7 @@ public class CanvasController {
                         updateFPMCounter = 0;
                         drawFps(frameRate.intValue());
                     }
+                    raceViewController.updateSparkLine();
                 }
 
                 // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.

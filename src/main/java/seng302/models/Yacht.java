@@ -1,6 +1,8 @@
 package seng302.models;
 
+
 import javafx.scene.paint.Color;
+import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -33,6 +35,7 @@ public class Yacht {
     private String position;
     // Mark rounding
     private Long markRoundingTime;
+
 
     /**
      * Used in EventTest and RaceTest.
@@ -105,6 +108,9 @@ public class Yacht {
     }
 
     public void setLegNumber(Integer legNumber) {
+        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(sourceID)) {
+            RaceViewController.updateYachtPositionSparkline(this, legNumber);
+        }
         this.legNumber = legNumber;
     }
 

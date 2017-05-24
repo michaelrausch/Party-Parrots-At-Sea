@@ -6,7 +6,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -31,12 +36,18 @@ import seng302.models.stream.StreamParser;
 import java.io.IOException;
 import java.util.*;
 import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
+import java.util.stream.Collectors;
 
 /**
+ *
  * Created by ptg19 on 29/03/17.
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+    @FXML
+    private LineChart raceSparkLine;
+    @FXML
+    private NumberAxis sparklineYAxis;
     @FXML
     private VBox positionVbox;
     @FXML
@@ -60,13 +71,22 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private boolean displayFps;
     private Timeline timerTimeline;
     private Stage stage;
-
+    private static HashMap<Integer, Series<String, Double>> sparkLineData = new HashMap<>();
+    private static ArrayList<Yacht> racingBoats = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
     private Yacht selectedBoat;
 
     public void initialize() {
         // Load a default important annotation state
         importantAnnotations = new ImportantAnnotationsState();
+
+        //Formatting the y axis of the sparkline
+        raceSparkLine.getYAxis().setRotate(180);
+        raceSparkLine.getYAxis().setTickLabelRotation(180);
+        raceSparkLine.getYAxis().setTranslateX(15);
+        raceSparkLine.getYAxis().setAutoRanging(false);
+
+        startingBoats = new ArrayList<>(StreamParser.getBoats().values());
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
@@ -75,11 +95,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseAnnotationSlider();
         initialiseBoatSelectionComboBox();
         includedCanvasController.timer.start();
-
-        selectAnnotationBtn.setOnAction(event -> {
-            loadSelectAnnotationView();
-        });
+        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
     }
+
 
     /**
      * The important annotations have been changed, update this view
@@ -90,6 +108,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.importantAnnotations = importantAnnotationsState;
         setAnnotations((int) annotationSlider.getValue()); // Refresh the displayed annotations
     }
+
 
     /**
      * Loads the "select annotations" view in a new window
@@ -127,6 +146,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         toggleFps.selectedProperty().addListener(
             (observable, oldValue, newValue) -> displayFps = !displayFps);
     }
+
 
     private void initialiseAnnotationSlider() {
         annotationSlider.setLabelFormatter(new StringConverter<Double>() {
@@ -169,6 +189,79 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
+     * Used to add any new boats into the race that may have started late or not have had data received yet
+     */
+    void updateSparkLine(){
+        // Collect the racing boats that aren't already in the chart
+        ArrayList<Yacht> sparkLineCandidates = startingBoats.stream().filter(yacht -> !sparkLineData.containsKey(yacht.getSourceID())
+                && yacht.getPosition() != null & yacht.getPosition() != "-").collect(Collectors.toCollection(ArrayList::new));
+
+        // Obtain the qualifying boats to set the max on the Y axis
+        racingBoats = startingBoats.stream().filter(yacht ->
+        yacht.getPosition() != null & yacht.getPosition() != "-").collect(Collectors.toCollection(ArrayList::new));
+        sparklineYAxis.setUpperBound(racingBoats.size() + 1);
+
+        // Create a new data series for new boats
+        sparkLineCandidates.stream().filter(yacht -> yacht.getPosition() != null).forEach(yacht -> {
+            Series<String, Double> yachtData = new Series<>();
+            yachtData.setName(yacht.getBoatName());
+            yachtData.getData().add(new XYChart.Data<>(Integer.toString(yacht.getLegNumber()), 1 + racingBoats.size() - Double.parseDouble(yacht.getPosition())));
+            sparkLineData.put(yacht.getSourceID(), yachtData);
+        });
+
+        // Lambda function to sort the series in order of leg (later legs shown more to the right)
+        List<XYChart.Series<String, Double>> positions = new ArrayList<>(sparkLineData.values());
+        Collections.sort(positions, (o1, o2) -> {
+            Integer leg1 =  Integer.parseInt(o1.getData().get(o1.getData().size()-1).getXValue());
+            Integer leg2 =  Integer.parseInt(o2.getData().get(o2.getData().size()-1).getXValue());
+            if (leg2 < leg1){
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+
+
+        // Adds the new data series to the sparkline (and set the colour of the series)
+        raceSparkLine.setCreateSymbols(false);
+        positions.stream().filter(spark -> !raceSparkLine.getData().contains(spark)).forEach(spark -> {
+            raceSparkLine.getData().add(spark);
+            spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
+        });
+    }
+
+
+    /**
+     * Updates the yachts sparkline of the desired boat and using the new leg number
+     * @param yacht The yacht to be updated on the sparkline
+     * @param legNumber the leg number that the position will be assigned to
+     */
+    public static void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
+        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceID());
+        positionData.getData().add(new XYChart.Data<>(Integer.toString(legNumber), 1 + racingBoats.size() - Double.parseDouble(yacht.getPosition())));
+    }
+
+
+    /**
+     * gets the rgb string of the boats colour to use for the chart via css
+     * @param boatName boat passed in to get the boats colour
+     * @return the colour as an rgb string
+     */
+    private String getBoatColorAsRGB(String boatName){
+        Color color = Color.WHITE;
+        for (Yacht yacht: startingBoats){
+            if (Objects.equals(yacht.getBoatName(), boatName)){
+                color = yacht.getColour();
+            }
+        }
+        return String.format( "#%02X%02X%02X",
+            (int)( color.getRed() * 255 ),
+            (int)( color.getGreen() * 255 ),
+            (int)( color.getBlue() * 255 ) );
+    }
+
+
+    /**
      * Initalises a timer which updates elements of the RaceView such as wind direction, boat
      * orderings etc.. which are dependent on the info from the stream parser constantly.
      * Updates of each of these attributes are called ONCE EACH SECOND
@@ -184,7 +277,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     updateWindDirection();
                     updateOrder();
                     updateBoatSelectionComboBox();
-
                 })
         );
 
@@ -345,7 +437,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
 
-    public boolean isDisplayFps() {
+    boolean isDisplayFps() {
         return displayFps;
     }
 
@@ -450,5 +542,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     Stage getStage() {
         return stage;
+    }
+
+    /**
+     * Used for when the boat attempts to add data to the sparkline (first checks if the sparkline contains info on it)
+     * @param yachtId
+     * @return
+     */
+    public static boolean sparkLineStatus(Integer yachtId) {
+        return sparkLineData.containsKey(yachtId);
     }
 }
