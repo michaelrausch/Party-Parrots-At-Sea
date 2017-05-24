@@ -32,6 +32,13 @@ public class BoatAnnotations extends Group{
     private Text legTimeObject;
     private Long lastMarkTime;
 
+    public enum Annotations {
+        TEAM_NAME,
+        VELOCITY_OBJECT,
+        TTNEXT,
+        LEG_TIME,
+    }
+
     BoatAnnotations (Yacht boat, Color theme) {
         super.setCache(true);
         background.setX(15d);
@@ -40,7 +47,7 @@ public class BoatAnnotations extends Group{
         background.setHeight(55);
         background.setArcHeight(10);
         background.setArcWidth(10);
-        background.setFill(new Color(1, 1, 1, 0.25));
+        background.setFill(new Color(1, 1, 1, 0.35));
         background.setStroke(theme);
         background.setStrokeWidth(2);
         background.setCache(true);

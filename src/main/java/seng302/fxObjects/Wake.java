@@ -40,7 +40,7 @@ class Wake extends Group {
             //Default triangle is -110 deg out of phase with a default wake and has angle of 40 deg.
             arc = new Arc(0, 0, 0, 0, -110, 40);
             arc.setCache(true);
-            arc.setCacheHint(CacheHint.SPEED);
+            arc.setCacheHint(CacheHint.SCALE_AND_ROTATE);
             arc.setType(ArcType.OPEN);
             arc.setStroke(new Color(0.18, 0.7, 1.0, 1.0 + (-0.99 / numWakes * i)));
             arc.setStrokeWidth(3.0);

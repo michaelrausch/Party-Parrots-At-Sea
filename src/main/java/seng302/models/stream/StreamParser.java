@@ -394,6 +394,8 @@ public class StreamParser extends Thread{
 
         //type 1 is a racing yacht and type 3 is a mark, needed for updating positions of the mark and boat
         if (deviceType == 1){
+            Yacht boat = boats.get((int) boatId);
+            boat.setVelocity(groundSpeed);
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon, heading, groundSpeed);
 
             //add a new priority que to the boatPositions HashMap

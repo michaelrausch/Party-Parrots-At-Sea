@@ -14,7 +14,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import seng302.fxObjects.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.Yacht;
@@ -64,6 +64,7 @@ public class CanvasController {
 
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
+    private Text FPSdisplay = new Text();
 
     //FRAME RATE
     private Double frameRate = 60.0;
@@ -102,6 +103,10 @@ public class CanvasController {
         gc.fillRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT);
         gc.restore();
         fitMarksToCanvas();
+        FPSdisplay.setLayoutX(5);
+        FPSdisplay.setLayoutY(20);
+        FPSdisplay.setStrokeWidth(2);
+        group.getChildren().add(FPSdisplay);
 
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
@@ -315,17 +320,10 @@ public class CanvasController {
 
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
-            gc.clearRect(5,5,50,20);
-            gc.setFill(Color.SKYBLUE);
-            gc.fillRect(4,4,51,21);
-            gc.setFill(Color.BLACK);
-            gc.setFont(new Font(14));
-            gc.setLineWidth(3);
-            gc.fillText(fps + " FPS", 5, 20);
+            FPSdisplay.setVisible(true);
+            FPSdisplay.setText(String.format("%d FPS", fps));
         } else {
-            gc.clearRect(5,5,50,20);
-            gc.setFill(Color.SKYBLUE);
-            gc.fillRect(4,4,51,21);
+            FPSdisplay.setVisible(false);
         }
     }
 

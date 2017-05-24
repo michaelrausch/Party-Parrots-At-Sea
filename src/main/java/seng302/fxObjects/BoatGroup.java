@@ -48,6 +48,8 @@ public class BoatGroup extends Group {
     private Point2D lastPoint;
     private boolean destinationSet;
     private Color textColor = Color.RED;
+    private double rotationalVelocity;
+    private double rotation;
 
     private BoatAnnotations boatAnnotations;
 
@@ -122,35 +124,6 @@ public class BoatGroup extends Group {
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
         boatPoly.setCache(true);
         boatPoly.setCacheHint(CacheHint.SPEED);
-
-//        teamNameObject = getTextObject(boat.getShortName(), textColor);
-//        velocityObject = getTextObject(boat.getVelocity().toString(), textColor);
-//
-//        teamNameObject.setX(TEAMNAME_X_OFFSET);
-//        teamNameObject.setY(TEAMNAME_Y_OFFSET);
-//        teamNameObject.relocate(teamNameObject.getX(), teamNameObject.getY());
-//
-//        velocityObject.setX(VELOCITY_X_OFFSET);
-//        velocityObject.setY(VELOCITY_Y_OFFSET);
-//        velocityObject.relocate(velocityObject.getX(), velocityObject.getY());
-////
-////        updateLastMarkRoundingTime();
-////        updateTimeTillNextMark();
-//
-//        if (estTimeToNextMarkObject != null) {
-//            estTimeToNextMarkObject.setX(ESTTIMETONEXTMARK_X_OFFSET);
-//            estTimeToNextMarkObject.setY(ESTTIMETONEXTMARK_Y_OFFSET);
-//            estTimeToNextMarkObject
-//                .relocate(estTimeToNextMarkObject.getX(), estTimeToNextMarkObject.getY());
-//        }
-//
-//        if (legTimeObject != null) {
-//            legTimeObject.setX(LEGTIME_X_OFFSET);
-//            legTimeObject.setY(LEGTIME_Y_OFFSET);
-//            legTimeObject.relocate(legTimeObject.getX(), legTimeObject.getY());
-//
-//        }
-
         boatAnnotations = new BoatAnnotations(boat, color);
 
         wake = new Wake(0, -BOAT_HEIGHT);
@@ -181,10 +154,6 @@ public class BoatGroup extends Group {
         boatPoly.setLayoutY(boatPoly.getLayoutY() + dy);
         boatAnnotations.setLayoutX(boatAnnotations.getLayoutX() + dx);
         boatAnnotations.setLayoutY(boatAnnotations.getLayoutY() + dy);
-//        for (Node node : boatAnnotations.getkiddies()) {
-//            node.setLayoutX(node.getLayoutX() + dx);
-//            node.setLayoutY(node.getLayoutY() + dy);
-//        }
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
     }
@@ -214,6 +183,7 @@ public class BoatGroup extends Group {
     }
 
     private void rotateTo(double rotation) {
+        this.rotation = rotation;
         boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
@@ -286,7 +256,7 @@ public class BoatGroup extends Group {
                 lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
             }
         }
-
+        rotateTo(rotation + rotationalVelocity * 1000 / 60);
         wake.updatePosition(1000 / 60);
     }
 
@@ -295,7 +265,7 @@ public class BoatGroup extends Group {
      * currentRotation.
      */
     private Double calculateRotationalVelocity(Double rotationalGoal) {
-        Double rotationalVelocity = 0.0;
+        Double rotationalVelocity;
 
         if (Math.abs(rotationalGoal - lastRotation) > 180) {
             if (rotationalGoal - lastRotation >= 0.0) {
@@ -306,12 +276,6 @@ public class BoatGroup extends Group {
         } else {
             rotationalVelocity = (rotationalGoal - lastRotation) / 200;
         }
-
-        //Sometimes the rotation is too large to be realistic. In that case just do it instantly.
-        if (Math.abs(rotationalVelocity) > 1) {
-            rotationalVelocity = 0.0;
-        }
-
         return rotationalVelocity;
     }
 
@@ -338,7 +302,7 @@ public class BoatGroup extends Group {
 
         destinationSet = true;
 
-        Double rotationalVelocity = calculateRotationalVelocity(rotation);
+        rotationalVelocity = calculateRotationalVelocity(rotation);
 
 //        updateTimeTillNextMark();
 //        updateLastMarkRoundingTime();
@@ -348,7 +312,7 @@ public class BoatGroup extends Group {
             wake.rotate(rotation);
         }
 
-        rotateTo(rotation);
+        //rotateTo(rotation);
         boat.setVelocity(groundSpeed);
         wake.setRotationalVelocity(rotationalVelocity, groundSpeed);
         lastTimeValid = timeValid;
