@@ -1,8 +1,6 @@
 package seng302.models;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
+
 import javafx.scene.paint.Color;
 import seng302.controllers.RaceViewController;
 
@@ -20,8 +18,6 @@ public class Yacht {
     // Used in boat group
     private Color colour;
     private double velocity;
-
-    private int index;
 
     private String boatType;
     private Integer sourceID;
