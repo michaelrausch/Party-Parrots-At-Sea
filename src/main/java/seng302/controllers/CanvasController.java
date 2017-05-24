@@ -120,6 +120,9 @@ public class CanvasController {
         initializeMarks();
         timer = new AnimationTimer() {
 
+            private int UPDATE_FPM_PERIOD = 50; // update FPM label every 50 frames
+            private int updateFPMCounter = 100;
+
             @Override
             public void handle(long now) {
 
@@ -135,7 +138,10 @@ public class CanvasController {
                     elapsedNanos = now - oldFrameTime ;
                     long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
                     frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-                    drawFps(frameRate.intValue());
+                    if (updateFPMCounter++ > UPDATE_FPM_PERIOD) {
+                        updateFPMCounter = 0;
+                        drawFps(frameRate.intValue());
+                    }
                     raceViewController.updateSparkLine();
                 }
 
@@ -349,17 +355,14 @@ public class CanvasController {
 
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
-            gc.clearRect(5,5,50,20);
-            gc.setFill(Color.SKYBLUE);
-            gc.fillRect(4,4,51,21);
-            gc.setFill(Color.BLACK);
-            gc.setFont(new Font(14));
-            gc.setLineWidth(3);
+            gc.clearRect(5, 5, 60, 30);
+            gc.setFont(new Font(16));
+            gc.setLineWidth(4);
+            gc.setGlobalAlpha(0.75);
             gc.fillText(fps + " FPS", 5, 20);
+            gc.setGlobalAlpha(0.5);
         } else {
-            gc.clearRect(5,5,50,20);
-            gc.setFill(Color.SKYBLUE);
-            gc.fillRect(4,4,51,21);
+            gc.clearRect(5,5,60,30);
         }
     }
 
