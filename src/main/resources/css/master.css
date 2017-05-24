@@ -183,20 +183,6 @@ Remove scroll bars
     -fx-padding: 0;
 }
 
-/**
-SparkLine elements
- */
-
-
-/*.spark-line-yaxis{*/
-    /*-fx-font-color: white;*/
-    /*-fx-tick-label-fill: #ffffff;}*/
-
-/*.spark-line-xaxis{*/
-    /*-fx-font-color: white;*/
-    /*-fx-tick-label-fill: #ffffff;*/
-/*}*/
-
 .chart{
     -fx-background-color: #ffffff;
 }
