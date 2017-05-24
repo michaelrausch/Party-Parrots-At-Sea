@@ -35,6 +35,7 @@ import seng302.models.stream.StreamParser;
 
 import java.io.IOException;
 import java.util.*;
+import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 import java.util.stream.Collectors;
 
 /**
@@ -100,6 +101,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * The important annotations have been changed, update this view
+     *
      * @param importantAnnotationsState The current state of the selected annotations
      */
     public void importantAnnotationsChanged(ImportantAnnotationsState importantAnnotationsState) {
@@ -325,21 +327,42 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         positionVbox.getChildren().removeAll();
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
-        for (Yacht boat : StreamParser.getBoatsPos().values()) {
-            if (boat.getBoatStatus() == 3) {  // 3 is finish status
-                Text textToAdd = new Text(boat.getPosition() + ". " +
-                    boat.getShortName() + " (Finished)");
-                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                positionVbox.getChildren().add(textToAdd);
+        // list of racing boat id
+        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+            .getParticipants();
+        ArrayList<Integer> participantIDs = new ArrayList<>();
+        for (Participant p : participants) {
+            participantIDs.add(p.getsourceID());
+        }
 
-            } else {
-                Text textToAdd = new Text(boat.getPosition() + ". " +
-                    boat.getShortName() + " ");
-                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                textToAdd.setStyle("");
-                positionVbox.getChildren().add(textToAdd);
+        if (StreamParser.isRaceStarted()) {
+            for (Yacht boat : StreamParser.getBoatsPos().values()) {
+                if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
+                    if (boat.getBoatStatus() == 3) {  // 3 is finish status
+                        Text textToAdd = new Text(boat.getPosition() + ". " +
+                            boat.getShortName() + " (Finished)");
+                        textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                        positionVbox.getChildren().add(textToAdd);
+
+                    } else {
+                        Text textToAdd = new Text(boat.getPosition() + ". " +
+                            boat.getShortName() + " ");
+                        textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                        textToAdd.setStyle("");
+                        positionVbox.getChildren().add(textToAdd);
+                    }
+                }
             }
-
+        } else {
+            for (Yacht boat : StreamParser.getBoats().values()) {
+                if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
+                    Text textToAdd = new Text(boat.getPosition() + ". " +
+                        boat.getShortName() + " ");
+                    textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+                    textToAdd.setStyle("");
+                    positionVbox.getChildren().add(textToAdd);
+                }
+            }
         }
     }
 
@@ -420,6 +443,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * Display the important annotations for a specific BoatGroup
+     *
      * @param bg The boat group to set the annotations for
      */
     private void setBoatGroupImportantAnnotations(BoatGroup bg) {
@@ -475,7 +499,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 break;
             // Important Annotations
             case 1:
-                includedCanvasController.getBoatGroups().forEach(this::setBoatGroupImportantAnnotations);
+                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                    setBoatGroupImportantAnnotations(bg);
+                }
                 break;
             // All Annotations
             case 2:
