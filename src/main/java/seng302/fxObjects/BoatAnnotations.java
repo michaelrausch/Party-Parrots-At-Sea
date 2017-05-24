@@ -45,7 +45,7 @@ class BoatAnnotations extends Group{
         background.setHeight(Math.abs(BACKGROUND_X) + TEXT_BUFFER + BACKGROUND_H_PER_TEXT * 4);
         background.setArcHeight(BACKGROUND_ARC_SIZE);
         background.setArcWidth(BACKGROUND_ARC_SIZE);
-        background.setFill(new Color(1, 1, 1, 0.5));
+        background.setFill(new Color(1, 1, 1, 0.75));
         background.setStroke(theme);
         background.setStrokeWidth(2);
         background.setCache(true);
@@ -76,6 +76,7 @@ class BoatAnnotations extends Group{
     private Text getTextObject(String defaultText, Color fill) {
         Text text = new Text(defaultText);
         text.setFill(fill);
+        text.setStrokeWidth(2);
         text.setCacheHint(CacheHint.SPEED);
         text.setCache(true);
         return text;
