@@ -26,6 +26,9 @@ import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.controllers.annotations.ImportantAnnotationsState;
 import seng302.models.*;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.models.mark.MarkGroup;
 import seng302.models.stream.StreamParser;
 
 import java.io.IOException;
@@ -185,14 +188,29 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
                     for (Yacht yacht : StreamParser.getBoatsPos().values()) {
 
-                        if (yacht.getLastMarkRounded() != null) {
-                            System.out.println("\n\nboat: " + yacht.getBoatName());
-                            System.out.println("last Mark: " + yacht.getLastMarkRounded().getName());
-                        }
                         if (yacht.getNextMark() != null){
                             System.out.println("next Mark: " + yacht.getNextMark().getName());
                             for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
-                                bg.calculateLegDirection();
+
+                                Boolean isUpwindLeg = null;
+                                // Can only calc leg direction if there is a next mark and it is a gate mark
+                                Mark nextMark = bg.getBoat().getNextMark();
+                                if (!(nextMark == null || !(nextMark instanceof GateMark))) {
+                                    isUpwindLeg = bg.isUpwindLeg(includedCanvasController);
+                                }
+
+                                for (MarkGroup mg : includedCanvasController.getMarkGroups()) {
+                                    if (mg.getMainMark().equals(nextMark)) {
+
+                                    }
+                                }
+                                if (isUpwindLeg != null) {
+                                    if (isUpwindLeg) {
+
+                                    }
+                                }
+
+
                             }
 
                         }

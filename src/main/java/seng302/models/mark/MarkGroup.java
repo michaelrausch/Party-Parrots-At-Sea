@@ -161,4 +161,8 @@ public class MarkGroup extends Group {
             idArray[i++] = mark.getId();
         return idArray;
     }
+
+    public Mark getMainMark() {
+        return mainMark;
+    }
 }

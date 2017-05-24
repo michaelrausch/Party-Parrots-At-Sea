@@ -435,7 +435,7 @@ public class CanvasController {
         return findScaledXY (unscaled.getLatitude(), unscaled.getLongitude());
     }
 
-    private Point2D findScaledXY (double unscaledLat, double unscaledLon) {
+    public Point2D findScaledXY (double unscaledLat, double unscaledLon) {
         double distanceFromReference;
         double angleFromReference;
         int xAxisLocation = (int) referencePointX;
@@ -467,5 +467,9 @@ public class CanvasController {
 
     List<BoatGroup> getBoatGroups() {
         return boatGroups;
+    }
+
+    List<MarkGroup> getMarkGroups() {
+        return  markGroups;
     }
 }
