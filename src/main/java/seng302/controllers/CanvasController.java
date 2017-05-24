@@ -264,7 +264,7 @@ public class CanvasController {
     }
 
     private void initializeMarks() {
-        ArrayList<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
+        List<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getNonDupCompoundMarks();
         for (Mark mark : allMarks) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 SingleMark sMark = (SingleMark) mark;

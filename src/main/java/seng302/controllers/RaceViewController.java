@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -29,7 +30,9 @@ import seng302.models.*;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkGroup;
+import seng302.models.mark.SingleMark;
 import seng302.models.stream.StreamParser;
+import seng302.models.stream.XMLParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -185,42 +188,49 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     updateWindDirection();
                     updateOrder();
                     updateBoatSelectionComboBox();
-
-                    for (Yacht yacht : StreamParser.getBoatsPos().values()) {
-
-                        if (yacht.getNextMark() != null){
-                            System.out.println("next Mark: " + yacht.getNextMark().getName());
-                            for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
-
-                                Boolean isUpwindLeg = null;
-                                // Can only calc leg direction if there is a next mark and it is a gate mark
-                                Mark nextMark = bg.getBoat().getNextMark();
-                                if (!(nextMark == null || !(nextMark instanceof GateMark))) {
-                                    isUpwindLeg = bg.isUpwindLeg(includedCanvasController);
-                                }
-
-                                for (MarkGroup mg : includedCanvasController.getMarkGroups()) {
-                                    if (mg.getMainMark().equals(nextMark)) {
-
-                                    }
-                                }
-                                if (isUpwindLeg != null) {
-                                    if (isUpwindLeg) {
-
-                                    }
-                                }
-
-
-                            }
-
-                        }
-                    }
-
+                    updateLaylines();
                 })
         );
 
         // Start the timer
         timerTimeline.playFromStart();
+    }
+
+
+    /**
+     * Iterates over all corners until ones SeqID matches with the boats current leg number.
+     * Then it gets the compoundMarkID of that corner and uses it to fetch the appropriate mark
+     * Returns null if no next mark found.
+     * @param bg The BoatGroup to find the next mark of
+     * @return The next Mark or null if none found
+     */
+    private Mark getNextMark(BoatGroup bg) {
+        Integer legNumber = bg.getBoat().getLegNumber();
+
+        System.out.println("Leg Number: " + legNumber);
+        List<XMLParser.RaceXMLObject.Corner> markSequence = StreamParser.getXmlObject().getRaceXML().getCompoundMarkSequence();
+
+        if (legNumber == 0) {
+            System.out.println("PreStart");
+            return null;
+        } else if (legNumber == markSequence.size() - 2) {
+            System.out.println("Finishing");
+            return null;
+        }
+
+        for (XMLParser.RaceXMLObject.Corner corner : markSequence) {
+            if (legNumber + 2 == corner.getSeqID()) {
+                Integer thisCompoundMarkID = corner.getCompoundMarkID();
+
+                for (Mark mark : StreamParser.getXmlObject().getRaceXML().getAllCompoundMarks()) {
+                    if (mark.getCompoundMarkID() == thisCompoundMarkID) {
+                        return mark;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
 
@@ -281,6 +291,53 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 positionVbox.getChildren().add(textToAdd);
             }
 
+        }
+    }
+
+
+    private void updateLaylines() {
+
+        for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+            System.out.println("========" + bg.getBoat().getBoatName() + "=========");
+            Mark nextMark = getNextMark(bg);
+            Boolean isUpwind = null;
+            // Can only calc leg direction if there is a next mark and it is a gate mark
+            if (nextMark != null) {
+                System.out.println("Next Mark: " + nextMark.getName());
+                if (nextMark instanceof GateMark) {
+                    if (bg.isUpwindLeg(includedCanvasController, nextMark)) {
+                        isUpwind = true;
+                        System.out.println(bg.getBoat().getBoatName() + " is on an upwind leg");
+                    } else {
+                        isUpwind = false;
+                        System.out.println(bg.getBoat().getBoatName() + " is on a downwind leg");
+                    }
+
+                    for(MarkGroup mg : includedCanvasController.getMarkGroups()) {
+                        if (mg.getMainMark().getId() == nextMark.getId()) {
+
+                            SingleMark singleMark1 = ((GateMark) nextMark).getSingleMark1();
+                            SingleMark singleMark2 = ((GateMark) nextMark).getSingleMark2();
+                            Point2D markPoint1 = includedCanvasController.findScaledXY(singleMark1.getLatitude(), singleMark1.getLongitude());
+                            Point2D markPoint2 = includedCanvasController.findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
+                            HashMap<Double, Double> angleAndSpeed;
+                            if (isUpwind) {
+                                angleAndSpeed = PolarTable.getOptimalUpwindVMG(StreamParser.getWindSpeed());
+                            } else {
+                                angleAndSpeed = PolarTable.getOptimalDownwindVMG(StreamParser.getWindSpeed());
+                            }
+
+                            Double resultingAngle = angleAndSpeed.keySet().iterator().next();
+
+                            mg.addLayLine(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            mg.addLayLine(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+
+                        }
+                    }
+                }
+            }
+
+            System.out.println();
         }
     }
 

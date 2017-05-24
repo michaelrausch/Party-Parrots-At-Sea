@@ -56,7 +56,7 @@ public class App extends Application {
                     sr = new StreamReceiver("localhost", 4949, "RaceStream");
                     break;
                 case "staffserver":
-                    sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
+                    sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4942, "RaceStream");
                     break;
                 case "official":
                     sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
@@ -67,7 +67,7 @@ public class App extends Application {
         else {
 //            sr = new StreamReceiver("localhost", 4949, "RaceStream");
             sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
-//            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
+//            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4942, "RaceStream");
         }
 
         sr.start();

@@ -58,7 +58,7 @@ public class MarkGroup extends Group {
      * @param layLineAngle The angle the laylines point
      * @param baseAngle The reference angle
      */
-    private void addLayLine(Point2D startPoint, Double layLineAngle, Double baseAngle){
+    public void addLayLine(Point2D startPoint, Double layLineAngle, Double baseAngle){
 
         Point2D ep1 = getPointRotation(startPoint, 50.0, baseAngle + -layLineAngle);
         Point2D ep2 = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
@@ -117,8 +117,8 @@ public class MarkGroup extends Group {
         //Laylines
 //        if (mark.)
 
-        addLayLine(points1, 12.0, 90.0);
-        addLayLine(points2, 12.0, 90.0);
+//        addLayLine(points1, 12.0, 90.0);
+//        addLayLine(points2, 12.0, 90.0);
     }
 
     public void moveMarkTo (double x, double y, long raceId)

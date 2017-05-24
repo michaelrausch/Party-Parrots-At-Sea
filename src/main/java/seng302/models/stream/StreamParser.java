@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -24,7 +23,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
 import seng302.models.mark.Mark;
-import seng302.models.stream.XMLParser.RaceXMLObject.Corner;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.packets.StreamPacket;
 
@@ -49,9 +47,14 @@ public class StreamParser extends Thread{
      private static Map<Integer, Yacht> boats = new ConcurrentHashMap<>();
      private static Map<Long, Yacht> boatsPos = new ConcurrentSkipListMap<>();
      private static double windDirection = 0;
+     private static Double windSpeed = 0d;
      private static Long currentTimeLong;
      private static String currentTimeString;
      private static boolean appRunning;
+
+
+     //CONVERSION CONSTANTS
+    private static final Double MS_TO_KNOTS = 1.94384;
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
@@ -196,7 +199,7 @@ public class StreamParser extends Thread{
         int raceStatus = payload[11];
         long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
-        long windSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
+        long rawWindSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
 
         currentTimeLong = currentTime;
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -224,6 +227,7 @@ public class StreamParser extends Thread{
 
         double windDirFactor = 0x4000 / 90;   //0x4000 is 90 degrees, 0x8000 is 180 degrees, etc...
         windDirection = windDir / windDirFactor;
+        windSpeed = rawWindSpeed / 1000 * MS_TO_KNOTS;
 
         int noBoats = payload[22];
         int raceType = payload[23];
@@ -445,25 +449,10 @@ public class StreamParser extends Thread{
         // assign mark rounding time to boat
         boats.get((int)subjectId).setMarkRoundingTime(timeStamp);
 
-        for (Mark mark : xmlObject.getRaceXML().getCompoundMarks()) {
+        for (Mark mark : xmlObject.getRaceXML().getAllCompoundMarks()) {
             if (mark.getCompoundMarkID() == markId) {
                 boats.get((int)subjectId).setLastMarkRounded(mark);
-
-                List<Corner> markSequence = xmlObject.getRaceXML().getCompoundMarkSequence();
-
-                for (int i = 0; i < markSequence.size() - 1; i++){
-                    Corner corner = markSequence.get(i);
-
-                    if (corner.getCompoundMarkID().equals(mark.getCompoundMarkID()) && (i + 1) < markSequence.size()){
-                        Corner nextCorner = markSequence.get(i+1);
-                        for (Mark m : xmlObject.getRaceXML().getCompoundMarks()){
-                            if (m.getCompoundMarkID() == nextCorner.getCompoundMarkID()){
-                                boats.get((int)subjectId).setNextMark(m);
-                            }
-                        }
-                    }
-                }
-                }
+            }
         }
     }
 
@@ -591,6 +580,15 @@ public class StreamParser extends Thread{
      */
     public static double getWindDirection() {
         return windDirection;
+    }
+
+
+    /**
+     * Returns the wind speed in knots
+     * @return A double indicating the wind speed in knots
+     */
+    public static Double getWindSpeed() {
+        return windSpeed;
     }
 
     /**

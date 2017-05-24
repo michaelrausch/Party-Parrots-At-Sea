@@ -375,8 +375,7 @@ public class BoatGroup extends Group {
      * going up wind, if they are on different sides of the gate, then the boat is going downwind
      * @param canvasController
      */
-    public Boolean isUpwindLeg(CanvasController canvasController) {
-        Mark nextMark = boat.getNextMark();
+    public Boolean isUpwindLeg(CanvasController canvasController, Mark nextMark) {
 
         Double windAngle = StreamParser.getWindDirection();
         GateMark thisGateMark = (GateMark) nextMark;
@@ -398,8 +397,6 @@ public class BoatGroup extends Group {
         boat is travelling into the wind. thus upwind. Otherwise if they are on different sides, then the boat is going
         with the wind.
          */
-        System.out.println("Boat Line func result: " + boatLineFuncResult);
-        System.out.println("Wind Line func result: " + windLineFuncResult);
         if (boatLineFuncResult == windLineFuncResult) {
             return true;
         } else {

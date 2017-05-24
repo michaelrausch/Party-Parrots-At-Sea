@@ -1,6 +1,7 @@
 package seng302.models;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -111,6 +112,52 @@ public final class PolarTable {
      */
     public static HashMap<Double, HashMap<Double, Double>> getDownwindOptimal() {
         return downwindOptimal;
+    }
+
+
+    /**
+     * Will raise an exception if a polar table has just one row of data
+     * @param thisWindSpeed The current wind speed
+     * @return HashMap containing just the optimal upwind angle and resulting boat speed
+     */
+    public static HashMap<Double, Double> getOptimalUpwindVMG(Double thisWindSpeed) {
+
+        Double polarWindSpeed = getClosestMatch(thisWindSpeed);
+        return upwindOptimal.get(polarWindSpeed);
+    }
+
+
+    /**
+     * Will raise an exception if a polar table has just one row of data
+     * @param thisWindSpeed The current wind speed
+     * @return HashMap containing just the optimal downwind angle and resulting boat speed
+     */
+    public static HashMap<Double, Double> getOptimalDownwindVMG(Double thisWindSpeed) {
+
+        Double polarWindSpeed = getClosestMatch(thisWindSpeed);
+        return downwindOptimal.get(polarWindSpeed);
+    }
+
+
+    private static Double getClosestMatch(Double thisWindSpeed) {
+
+        ArrayList<Double> windValues = new ArrayList<>(polarTable.keySet());
+
+        Double lowerVal = windValues.get(0);
+        Double upperVal = windValues.get(1);
+
+        for(int i = 0; i < windValues.size() - 1; i++) {
+            lowerVal = windValues.get(i);
+            upperVal = windValues.get(i+1);
+            if (thisWindSpeed <= upperVal) {
+                break;
+            }
+        }
+
+        Double lowerDiff = Math.abs(lowerVal - thisWindSpeed);
+        Double upperDiff = Math.abs(upperVal - thisWindSpeed);
+
+        return (lowerDiff <= upperDiff) ? lowerVal : upperVal;
     }
 
 }
