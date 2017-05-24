@@ -79,7 +79,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         // Load a default important annotation state
         importantAnnotations = new ImportantAnnotationsState();
 
-        //Format the yaxis of the sparkline
+        //Formatting the y axis of the sparkline
         raceSparkLine.getYAxis().setRotate(180);
         raceSparkLine.getYAxis().setTickLabelRotation(180);
         raceSparkLine.getYAxis().setTranslateX(15);
@@ -185,15 +185,21 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         annotationSlider.setValue(2);
     }
 
+
+    /**
+     * Used to add any new boats into the race that may have started late or not have had data received yet
+     */
     void updateSparkLine(){
-        // Goes through and collects the racing boats that aren't already in the chart
+        // Collect the racing boats that aren't already in the chart
         ArrayList<Yacht> sparkLineCandidates = startingBoats.stream().filter(yacht -> !sparkLineData.containsKey(yacht.getSourceID())
                 && yacht.getPosition() != null & yacht.getPosition() != "-").collect(Collectors.toCollection(ArrayList::new));
 
+        // Obtain the qualifying boats to set the max on the Y axis
         racingBoats = startingBoats.stream().filter(yacht ->
         yacht.getPosition() != null & yacht.getPosition() != "-").collect(Collectors.toCollection(ArrayList::new));
+        sparklineYAxis.setUpperBound(racingBoats.size() + 1);
 
-        // Creates new data series for boats to the data series on the line chart
+        // Create a new data series for new boats
         sparkLineCandidates.stream().filter(yacht -> yacht.getPosition() != null).forEach(yacht -> {
             Series<String, Double> yachtData = new Series<>();
             yachtData.setName(yacht.getBoatName());
@@ -214,8 +220,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         });
 
 
-        sparklineYAxis.setUpperBound(racingBoats.size() + 1);
-        // Adds the new data series to the sparkline
+        // Adds the new data series to the sparkline (and set the colour of the series)
         raceSparkLine.setCreateSymbols(false);
         positions.stream().filter(spark -> !raceSparkLine.getData().contains(spark)).forEach(spark -> {
             raceSparkLine.getData().add(spark);
@@ -225,9 +230,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
-     * UUpdates the yachts sparkline of the desired boat and using the new leg number
-     * @param yacht
-     * @param legNumber
+     * Updates the yachts sparkline of the desired boat and using the new leg number
+     * @param yacht The yacht to be updated on the sparkline
+     * @param legNumber the leg number that the position will be assigned to
      */
     public static void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
         XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceID());
@@ -238,7 +243,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     /**
      * gets the rgb string of the boats colour to use for the chart via css
      * @param boatName boat passed in to get the boats colour
-     * @return
+     * @return the colour as an rgb string
      */
     private String getBoatColorAsRGB(String boatName){
         Color color = Color.WHITE;
@@ -252,8 +257,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             (int)( color.getGreen() * 255 ),
             (int)( color.getBlue() * 255 ) );
     }
-
-
 
 
     /**
@@ -272,7 +275,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     updateWindDirection();
                     updateOrder();
                     updateBoatSelectionComboBox();
-
                 })
         );
 
@@ -516,6 +518,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return stage;
     }
 
+    /**
+     * Used for when the boat attempts to add data to the sparkline (first checks if the sparkline contains info on it)
+     * @param yachtId
+     * @return
+     */
     public static boolean sparkLineStatus(Integer yachtId) {
         return sparkLineData.containsKey(yachtId);
     }
