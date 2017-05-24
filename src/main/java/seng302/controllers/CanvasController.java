@@ -137,9 +137,6 @@ public class CanvasController {
                     }
                     raceViewController.updateSparkLine();
                 }
-
-                // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
-                elapsedNanos = 1000 / 60;
                 updateGroups();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
