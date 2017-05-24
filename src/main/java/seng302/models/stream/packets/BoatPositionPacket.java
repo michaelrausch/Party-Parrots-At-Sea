@@ -1,4 +1,4 @@
-package seng302.models.parsers.packets;
+package seng302.models.stream.packets;
 
 public class BoatPositionPacket {
     private long boatId;

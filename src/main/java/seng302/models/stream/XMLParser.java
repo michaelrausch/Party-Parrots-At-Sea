@@ -1,27 +1,29 @@
-package seng302.models.parsers;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import seng302.models.Yacht;
+package seng302.models.stream;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import seng302.models.Yacht;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.models.mark.MarkType;
+import seng302.models.mark.SingleMark;
 
 /**
  * Class to create an XML object from the XML Packet Messages.
  *
  * Example usage:
  *
- *  Document doc; // some xml document
- *  Integer xmlMessageType; // an Integer of value 5, 6, 7
+ * Document doc; // some xml document
+ * Integer xmlMessageType; // an Integer of value 5, 6, 7
  *
- *  xmlP = new XMLParser(doc, xmlMessageType);
- *  RegattaXMLObject rXmlObj = xmlP.createRegattaXML(); // creates a regattaXML object.
- *
+ * xmlP = new XMLParser(doc, xmlMessageType);
+ * RegattaXMLObject rXmlObj = xmlP.createRegattaXML(); // creates a regattaXML object.
  */
 public class XMLParser {
 
@@ -31,10 +33,12 @@ public class XMLParser {
     private RegattaXMLObject regattaXML;
     private BoatXMLObject boatXML;
 
-    public XMLParser() {}
+    public XMLParser() {
+    }
 
     /**
      * Constructor for XMLParser
+     *
      * @param doc Document to create XML object.
      * @param messageType Defines if a message is a RegattaXML(5), RaceXML(6), BoatXML(7).
      */
@@ -53,13 +57,22 @@ public class XMLParser {
         }
     }
 
-    public RaceXMLObject getRaceXML() { return raceXML; }
-    public RegattaXMLObject getRegattaXML() { return regattaXML; }
-    public BoatXMLObject getBoatXML() { return boatXML; }
+    public RaceXMLObject getRaceXML() {
+        return raceXML;
+    }
+
+    public RegattaXMLObject getRegattaXML() {
+        return regattaXML;
+    }
+
+    public BoatXMLObject getBoatXML() {
+        return boatXML;
+    }
 
 
     /**
      * Returns the text content of a given child element tag, assuming it exists, as an Integer.
+     *
      * @param ele Document Element with child elements.
      * @param tag Tag to find in document elements child elements.
      * @return Text content from tag if found, null otherwise.
@@ -75,6 +88,7 @@ public class XMLParser {
 
     /**
      * Returns the text content of a given child element tag, assuming it exists, as an String.
+     *
      * @param ele Document Element with child elements.
      * @param tag Tag to find in document elements child elements.
      * @return Text content from tag if found, null otherwise.
@@ -90,6 +104,7 @@ public class XMLParser {
 
     /**
      * Returns the text content of a given child element tag, assuming it exists, as a Double.
+     *
      * @param ele Document Element with child elements.
      * @param tag Tag to find in document elements child elements.
      * @return Text content from tag if found, null otherwise.
@@ -105,9 +120,11 @@ public class XMLParser {
 
     /**
      * Returns the text content of an attribute of a given Node, assuming it exists, as a String.
+     *
      * @param n A node object that should have some attributes
      * @param attr The attribute you want to get from the given node.
-     * @return The String representation of the text content of an attribute in the given node, else returns null.
+     * @return The String representation of the text content of an attribute in the given node, else
+     * returns null.
      */
     private static String getNodeAttributeString(Node n, String attr) {
         Node attrItem = n.getAttributes().getNamedItem(attr);
@@ -120,9 +137,11 @@ public class XMLParser {
 
     /**
      * Returns the text content of an attribute of a given Node, assuming it exists, as an Integer.
+     *
      * @param n A node object that should have some attributes
      * @param attr The attribute you want to get from the given node.
-     * @return The Integer representation of the text content of an attribute in the given node, else returns null.
+     * @return The Integer representation of the text content of an attribute in the given node,
+     * else returns null.
      */
     private static Integer getNodeAttributeInt(Node n, String attr) {
         Node attrItem = n.getAttributes().getNamedItem(attr);
@@ -135,9 +154,11 @@ public class XMLParser {
 
     /**
      * Returns the text content of an attribute of a given Node, assuming it exists, as a Double.
+     *
      * @param n A node object that should have some attributes
      * @param attr The attribute you want to get from the given node.
-     * @return The Double representation of the text content of an attribute in the given node, else returns null.
+     * @return The Double representation of the text content of an attribute in the given node, else
+     * returns null.
      */
     private static Double getNodeAttributeDouble(Node n, String attr) {
         Node attrItem = n.getAttributes().getNamedItem(attr);
@@ -149,6 +170,7 @@ public class XMLParser {
     }
 
     public class RegattaXMLObject {
+
         //Regatta Info
         private Integer regattaID;
         private String regattaName;
@@ -160,6 +182,7 @@ public class XMLParser {
         /**
          * Constructor for a RegattaXMLObject.
          * Takes the information from a Document object and creates a more usable format.
+         *
          * @param doc XML Document Object
          */
         RegattaXMLObject(Document doc) {
@@ -173,12 +196,29 @@ public class XMLParser {
             this.utcOffset = getElementInt(docEle, "UtcOffset");
         }
 
-        public Integer getRegattaID() { return regattaID; }
-        public String getRegattaName() { return regattaName; }
-        public String getCourseName() { return courseName; }
-        public Double getCentralLat() { return centralLat; }
-        public Double getCentralLng() { return centralLng; }
-        public Integer getUtcOffset() { return utcOffset; }
+        public Integer getRegattaID() {
+            return regattaID;
+        }
+
+        public String getRegattaName() {
+            return regattaName;
+        }
+
+        public String getCourseName() {
+            return courseName;
+        }
+
+        public Double getCentralLat() {
+            return centralLat;
+        }
+
+        public Double getCentralLng() {
+            return centralLng;
+        }
+
+        public Integer getUtcOffset() {
+            return utcOffset;
+        }
 
     }
 
@@ -195,13 +235,17 @@ public class XMLParser {
 
         //Non atomic race attributes
         private ArrayList<Participant> participants;
-        private ArrayList<CompoundMark> course;
+        private ArrayList<Mark> course;
         private ArrayList<Corner> compoundMarkSequence;
         private ArrayList<Limit> courseLimit;
+
+        // ensures there's no duplicate marks.
+        private List<Long> seenSourceIDs = new ArrayList<Long>();
 
         /**
          * Constructor for a RaceXMLObject.
          * Takes the information from a Document object and creates a more usable format.
+         *
          * @param doc XML Document Object
          */
         RaceXMLObject(Document doc) {
@@ -213,8 +257,9 @@ public class XMLParser {
             this.creationTimeDate = getElementString(docEle, "CreationTimeDate");
 
             Node raceStart = docEle.getElementsByTagName("RaceStartTime").item(0);
-            this.raceStartTime = getNodeAttributeString(raceStart, "Start") ;
-            this.postponeStatus = Boolean.parseBoolean(getNodeAttributeString(raceStart, "Postpone"));
+            this.raceStartTime = getNodeAttributeString(raceStart, "Start");
+            this.postponeStatus = Boolean
+                .parseBoolean(getNodeAttributeString(raceStart, "Postpone"));
 
             //Participants
             participants = new ArrayList<>();
@@ -238,21 +283,13 @@ public class XMLParser {
             }
 
             //Course
-            course = new ArrayList<>();
-
-            NodeList cMarkList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
-            for (int i = 0; i < cMarkList.getLength(); i++) {
-                Node cMarkNode = cMarkList.item(i);
-                if (cMarkNode.getNodeName().equals("CompoundMark")) {
-                    CompoundMark cMark = new CompoundMark(cMarkNode);
-                    course.add(cMark);
-                }
-            }
+            course = createCompoundMarks(docEle);
 
             //Course Mark Sequence
             compoundMarkSequence = new ArrayList<>();
 
-            NodeList cornerList = docEle.getElementsByTagName("CompoundMarkSequence").item(0).getChildNodes();
+            NodeList cornerList = docEle.getElementsByTagName("CompoundMarkSequence").item(0)
+                .getChildNodes();
             for (int i = 0; i < cornerList.getLength(); i++) {
                 Node cornerNode = cornerList.item(i);
                 if (cornerNode.getNodeName().equals("Corner")) {
@@ -274,18 +311,104 @@ public class XMLParser {
             }
         }
 
-        public Integer getRaceID() { return raceID; }
-        public String getRaceType() { return raceType; }
-        public String getCreationTimeDate() { return creationTimeDate; }
-        public String getRaceStartTime() { return raceStartTime; }
-        public Boolean getPostponeStatus() { return postponeStatus; }
 
-        public ArrayList<Participant> getParticipants() { return participants; }
-        public ArrayList<CompoundMark> getCompoundMarks() { return course; }
-        public ArrayList<Corner> getCompoundMarkSequence() { return compoundMarkSequence; }
-        public ArrayList<Limit> getCourseLimit() { return courseLimit; }
+        private ArrayList<Mark> createCompoundMarks(Element docEle) {
+            ArrayList<Mark> cMarks = new ArrayList<>();
+
+            NodeList cMarkList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
+            for (int i = 0; i < cMarkList.getLength(); i++) {
+                Node cMarkNode = cMarkList.item(i);
+                if (cMarkNode.getNodeName().equals("CompoundMark")) {
+                    Mark mark = createMark(cMarkNode);
+                    if (mark != null) {
+                        cMarks.add(mark);
+                    }
+                }
+            }
+
+            return cMarks;
+        }
+
+
+        private Mark createMark(Node compoundMark) {
+
+            List<SingleMark> marksList = new ArrayList<>();
+            String cMarkName = getNodeAttributeString(compoundMark, "Name");
+
+            NodeList childMarks = compoundMark.getChildNodes();
+
+            for (int i = 0; i < childMarks.getLength(); i++) {
+                Node markNode = childMarks.item(i);
+                if (markNode.getNodeName().equals("Mark")) {
+
+                    Integer sourceID = getNodeAttributeInt(markNode, "SourceID");
+                    String markName = getNodeAttributeString(markNode, "Name");
+                    Double targetLat = getNodeAttributeDouble(markNode, "TargetLat");
+                    Double targetLng = getNodeAttributeDouble(markNode, "TargetLng");
+
+                    SingleMark mark = new SingleMark(markName, targetLat, targetLng, sourceID);
+                    marksList.add(mark);
+                }
+            }
+
+            for (SingleMark mark : marksList) {
+                if (seenSourceIDs.contains(mark.getId())) {
+                    return null;
+                } else {
+                    seenSourceIDs.add(mark.getId());
+                }
+            }
+
+            if (marksList.size() == 1) {
+                return marksList.get(0);
+            } else if (marksList.size() == 2) {
+                return new GateMark(cMarkName, MarkType.OPEN_GATE, marksList.get(0),
+                    marksList.get(1), marksList.get(0).getLatitude(),
+                    marksList.get(0).getLongitude());
+            } else {
+                return null;
+            }
+
+        }
+
+        public Integer getRaceID() {
+            return raceID;
+        }
+
+        public String getRaceType() {
+            return raceType;
+        }
+
+        public String getCreationTimeDate() {
+            return creationTimeDate;
+        }
+
+        public String getRaceStartTime() {
+            return raceStartTime;
+        }
+
+        public Boolean getPostponeStatus() {
+            return postponeStatus;
+        }
+
+        public ArrayList<Participant> getParticipants() {
+            return participants;
+        }
+
+        public ArrayList<Mark> getCompoundMarks() {
+            return course;
+        }
+
+        public ArrayList<Corner> getCompoundMarkSequence() {
+            return compoundMarkSequence;
+        }
+
+        public ArrayList<Limit> getCourseLimit() {
+            return courseLimit;
+        }
 
         public class Participant {
+
             Integer sourceID;
             String entry;
 
@@ -294,57 +417,17 @@ public class XMLParser {
                 this.entry = entry;
             }
 
-            public Integer getsourceID() { return sourceID; }
-            public String getEntry() { return entry; }
-        }
-
-        public class CompoundMark {
-            private Integer markID;
-            private String cMarkName;
-            private ArrayList<Mark> marks;
-
-            CompoundMark(Node compoundMark) {
-                marks = new ArrayList<>();
-                this.markID = getNodeAttributeInt(compoundMark, "CompoundMarkID");
-                this.cMarkName = getNodeAttributeString(compoundMark, "Name");
-                NodeList childMarks = compoundMark.getChildNodes();
-                for (int i = 0; i < childMarks.getLength(); i++) {
-                    Node markNode = childMarks.item(i);
-                    if (markNode.getNodeName().equals("Mark")) {
-                        Mark mark = new Mark(markNode);
-                        marks.add(mark);
-                    }
-                }
+            public Integer getsourceID() {
+                return sourceID;
             }
 
-            public Integer getMarkID() { return markID; }
-            public String getcMarkName() { return cMarkName; }
-            public ArrayList<Mark> getMarks() { return marks; }
-
-            public class Mark {
-                private Integer seqID;
-                private Integer sourceID;
-                private String markName;
-                private Double targetLat;
-                private Double targetLng;
-
-                Mark(Node markNode) {
-                    this.seqID = getNodeAttributeInt(markNode, "SeqID");
-                    this.sourceID = getNodeAttributeInt(markNode, "SourceID");
-                    this.markName = getNodeAttributeString(markNode, "Name");
-                    this.targetLat = getNodeAttributeDouble(markNode, "TargetLat");
-                    this.targetLng = getNodeAttributeDouble(markNode, "TargetLng");
-                }
-
-                public Integer getSeqID() { return seqID; }
-                public Integer getSourceID() { return sourceID; }
-                public String getMarkName() { return markName; }
-                public Double getTargetLat() { return targetLat; }
-                public Double getTargetLng() { return targetLng; }
+            public String getEntry() {
+                return entry;
             }
         }
 
         public class Corner {
+
             private Integer seqID;
             private Integer compoundMarkID;
             private String rounding;
@@ -357,13 +440,25 @@ public class XMLParser {
                 this.zoneSize = getNodeAttributeInt(cornerNode, "ZoneSize");
             }
 
-            public Integer getSeqID() { return seqID; }
-            public Integer getCompoundMarkID() { return compoundMarkID; }
-            public String getRounding() { return rounding; }
-            public Integer getZoneSize() { return zoneSize; }
+            public Integer getSeqID() {
+                return seqID;
+            }
+
+            public Integer getCompoundMarkID() {
+                return compoundMarkID;
+            }
+
+            public String getRounding() {
+                return rounding;
+            }
+
+            public Integer getZoneSize() {
+                return zoneSize;
+            }
         }
 
         public class Limit {
+
             private Integer seqID;
             private Double lat;
             private Double lng;
@@ -374,9 +469,17 @@ public class XMLParser {
                 this.lng = getNodeAttributeDouble(limitNode, "Lon");
             }
 
-            public Integer getSeqID() { return seqID; }
-            public Double getLat() { return lat; }
-            public Double getLng() { return lng; }
+            public Integer getSeqID() {
+                return seqID;
+            }
+
+            public Double getLat() {
+                return lat;
+            }
+
+            public Double getLng() {
+                return lng;
+            }
         }
 
     }
@@ -402,6 +505,7 @@ public class XMLParser {
         /**
          * Constructor for a BoatXMLObject.
          * Takes the information from a Document object and creates a more usable format.
+         *
          * @param doc XML Document Object
          */
         BoatXMLObject(Document doc) {
@@ -421,7 +525,7 @@ public class XMLParser {
             Node zoneLimitsList = settingsList.item(7);
             this.zoneLimits = new ArrayList<>();
             for (int i = 0; i < zoneLimitsList.getAttributes().getLength(); i++) {
-                String tag = String.format("Limit%d", i+1);
+                String tag = String.format("Limit%d", i + 1);
                 this.zoneLimits.add(getNodeAttributeDouble(zoneLimitsList, tag));
             }
 
@@ -432,60 +536,59 @@ public class XMLParser {
                 if (currentBoat.getNodeName().equals("Boat")) {
 //                    Boat boat = new Boat(currentBoat);
                     Yacht boat = new Yacht(getNodeAttributeString(currentBoat, "Type"),
-                            getNodeAttributeInt(currentBoat, "SourceID"),
-                            getNodeAttributeString(currentBoat, "HullNum"),
-                            getNodeAttributeString(currentBoat, "ShortName"),
-                            getNodeAttributeString(currentBoat, "BoatName"),
-                            getNodeAttributeString(currentBoat, "Country"));
+                        getNodeAttributeInt(currentBoat, "SourceID"),
+                        getNodeAttributeString(currentBoat, "HullNum"),
+                        getNodeAttributeString(currentBoat, "ShortName"),
+                        getNodeAttributeString(currentBoat, "BoatName"),
+                        getNodeAttributeString(currentBoat, "Country"));
                     this.boats.add(boat);
                     if (boat.getBoatType().equals("Yacht")) {
                         competingBoats.put(boat.getSourceID(), boat);
                     }
                 }
-                //System.out.println(this.getBoats());
             }
 
         }
 
-        public String getLastModified() { return lastModified; }
-        public Integer getVersion() { return version; }
-        public String getBoatType() { return boatType; }
-        public Double getBoatLength() { return boatLength; }
-        public Double getHullLength() { return hullLength; }
-        public Double getMarkZoneSize() { return markZoneSize; }
-        public Double getCourseZoneSize() { return courseZoneSize; }
-        public ArrayList<Double> getZoneLimits() { return zoneLimits; }
-        public ArrayList<Yacht> getBoats() { return boats; }
+        public String getLastModified() {
+            return lastModified;
+        }
+
+        public Integer getVersion() {
+            return version;
+        }
+
+        public String getBoatType() {
+            return boatType;
+        }
+
+        public Double getBoatLength() {
+            return boatLength;
+        }
+
+        public Double getHullLength() {
+            return hullLength;
+        }
+
+        public Double getMarkZoneSize() {
+            return markZoneSize;
+        }
+
+        public Double getCourseZoneSize() {
+            return courseZoneSize;
+        }
+
+        public ArrayList<Double> getZoneLimits() {
+            return zoneLimits;
+        }
+
+        public ArrayList<Yacht> getBoats() {
+            return boats;
+        }
+
         public Map<Integer, Yacht> getCompetingBoats() {
             return competingBoats;
         }
-
-//        public class Boat {
-//
-//            private String boatType;
-//            private Integer sourceID;
-//            private String hullID; //matches HullNum in the XML spec.
-//            private String shortName;
-//            private String boatName;
-//            private String country;
-//
-//            Boat(Node boatNode) {
-//                this.boatType = getNodeAttributeString(boatNode, "Type");
-//                this.sourceID = getNodeAttributeInt(boatNode, "SourceID");
-//                this.hullID = getNodeAttributeString(boatNode, "HullNum");
-//                this.shortName = getNodeAttributeString(boatNode, "ShortName");
-//                this.boatName = getNodeAttributeString(boatNode, "BoatName");
-//                this.country = getNodeAttributeString(boatNode, "Country");
-//            }
-//
-//            public String getBoatType() { return boatType; }
-//            public Integer getSourceID() { return sourceID; }
-//            public String getHullID() { return hullID; }
-//            public String getShortName() { return shortName; }
-//            public String getBoatName() { return boatName; }
-//            public String getCountry() { return country; }
-//
-//        }
 
     }
 
