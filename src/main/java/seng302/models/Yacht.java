@@ -1,19 +1,10 @@
 package seng302.models;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.fxml.Initializable;
-
 import javafx.scene.paint.Color;
 import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Year;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Yacht class for the racing boat.

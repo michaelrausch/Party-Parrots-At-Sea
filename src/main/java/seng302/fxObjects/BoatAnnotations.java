@@ -5,7 +5,6 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import seng302.controllers.annotations.Annotation;
 import seng302.models.Yacht;
 import seng302.models.stream.StreamParser;
 

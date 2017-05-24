@@ -6,7 +6,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -440,49 +439,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     boolean isDisplayFps() {
         return displayFps;
-    }
-
-    /**
-     * Display the important annotations for a specific BoatGroup
-     *
-     * @param bg The boat group to set the annotations for
-     */
-    private void setBoatGroupImportantAnnotations(BoatGroup bg) {
-        if (importantAnnotations.getAnnotationState(Annotation.NAME)) {
-            bg.setTeamNameObjectVisible(true);
-        } else {
-            bg.setTeamNameObjectVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.SPEED)) {
-            bg.setVelocityObjectVisible(true);
-        } else {
-            bg.setVelocityObjectVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.TRACK)) {
-            bg.setLineGroupVisible(true);
-        } else {
-            bg.setLineGroupVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.WAKE)) {
-            bg.setWakeVisible(true);
-        } else {
-            bg.setWakeVisible(false);
-        }
-        //TODO fix boat annotations with new boatgroup
-        if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
-            bg.setEstTimeToNextMarkObjectVisible(true);
-        } else {
-            bg.setEstTimeToNextMarkObjectVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.LEGTIME)) {
-            bg.setLegTimeObjectVisible(true);
-        } else {
-            bg.setLegTimeObjectVisible(false);
-        }
     }
 
     private void setAnnotations(Integer annotationLevel) {

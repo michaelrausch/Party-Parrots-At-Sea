@@ -22,7 +22,6 @@ import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
 import seng302.models.map.Boundary;
 import seng302.models.map.CanvasMap;
-import seng302.models.mark.*;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
@@ -132,61 +131,36 @@ public class CanvasController {
         initializeBoats();
         initializeMarks();
         timer = new AnimationTimer() {
-
-            private int UPDATE_FPM_PERIOD = 50; // update FPM label every 50 frames
-            private int updateFPMCounter = 100;
-
             private long lastTime = 0;
 
             @Override
             public void handle(long now) {
-                //fps stuff
-                long oldFrameTime = frameTimes[frameTimeIndex] ;
-                frameTimes[frameTimeIndex] = now ;
-                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
-                if (frameTimeIndex == 0) {
-                    arrayFilled = true ;
-                }
-                long elapsedNanos;
-                if (arrayFilled) {
-                    elapsedNanos = now - oldFrameTime ;
-                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                    frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-                    if (updateFPMCounter++ > UPDATE_FPM_PERIOD) {
-                        updateFPMCounter = 0;
-                        drawFps(frameRate.intValue());
+                    if (lastTime == 0) {
+                        lastTime = now;
+                    } else {
+                        if (now - lastTime >= (1e8 / 60)) { //Fix for framerate going above 60 when minimized
+                            long oldFrameTime = frameTimes[frameTimeIndex];
+                            frameTimes[frameTimeIndex] = now;
+                            frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length;
+                            if (frameTimeIndex == 0) {
+                                arrayFilled = true;
+                            }
+                            long elapsedNanos;
+                            if (arrayFilled) {
+                                elapsedNanos = now - oldFrameTime;
+                                long elapsedNanosPerFrame = elapsedNanos / frameTimes.length;
+                                frameRate = 1_000_000_000.0 / elapsedNanosPerFrame;
+                                drawFps(frameRate.intValue());
+                            }
+                            updateGroups();
+                            if (StreamParser.isRaceFinished()) {
+                                this.stop();
+                            }
+                            lastTime = now;
+                        }
                     }
-                    raceViewController.updateSparkLine();
-                }
-
-                // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
-                elapsedNanos = 1000 / 60;
-                updateGroups();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
-                if (lastTime == 0) {
-                   lastTime = now;
-                } else {
-                    if (now - lastTime >= (1e8 / 60)) { //Fix for framerate going above 60 when minimized
-                        long oldFrameTime = frameTimes[frameTimeIndex] ;
-                        frameTimes[frameTimeIndex] = now ;
-                        frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
-                        if (frameTimeIndex == 0) {
-                            arrayFilled = true ;
-                        }
-                        long elapsedNanos;
-                        if (arrayFilled) {
-                            elapsedNanos = now - oldFrameTime ;
-                            long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                            frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-                            drawFps(frameRate.intValue());
-                        }
-                        updateGroups(frameRate);
-                        if (StreamParser.isRaceFinished()) {
-                            this.stop();
-                        }
-                        lastTime = now;
-                    }
                 }
             }
         };
@@ -239,7 +213,7 @@ public class CanvasController {
         raceBorder.getPoints().setAll(boundaryPoints);
     }
 
-    private void updateGroups(double frameRate){
+    private void updateGroups(){
         for (BoatGroup boatGroup : boatGroups) {
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it
@@ -262,8 +236,6 @@ public class CanvasController {
 
     private void checkForCourseChanges() {
         if (StreamParser.isNewRaceXmlReceived()){
-            gc.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            drawGoogleMap();
             addRaceBorder();
         }
     }
