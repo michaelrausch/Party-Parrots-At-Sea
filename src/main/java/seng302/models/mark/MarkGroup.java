@@ -9,7 +9,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
 /**
- * Created by CJIRWIN on 26/04/2017.
+ * Grouping of javaFX objects needed to represent a Mark on screen.
  */
 public class MarkGroup extends Group {
 

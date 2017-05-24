@@ -24,7 +24,6 @@ public class App extends Application {
         primaryStage.setOnCloseRequest(e -> {
             StreamParser.appClose();
             StreamReceiver.noMoreBytes();
-            System.out.println("[CLIENT] Exiting program");
             System.exit(0);
         });
 
