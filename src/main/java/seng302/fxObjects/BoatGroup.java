@@ -1,14 +1,9 @@
 package seng302.fxObjects;
 
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.input.MouseDragEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
@@ -147,7 +142,6 @@ public class BoatGroup extends Group {
         boatPoly.setLayoutY(y);
         boatAnnotations.setLayoutX(x);
         boatAnnotations.setLayoutY(y);
-
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(rotation);

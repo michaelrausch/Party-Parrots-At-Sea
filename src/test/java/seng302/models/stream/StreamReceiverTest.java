@@ -99,7 +99,7 @@ public class StreamReceiverTest {
             byte[] emptyArray = {};
             assert bytesToLong.invoke(streamReceiver, emptyArray).equals(0L);
         } catch (Exception e){
-            System.out.println("");
+            e.printStackTrace();
         }
     }
 

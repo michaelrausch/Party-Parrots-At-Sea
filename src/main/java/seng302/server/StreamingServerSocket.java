@@ -28,7 +28,6 @@ class StreamingServerSocket {
     }
 
     void start(){
-        ServerThread.serverLog("Listening For Connections",0);
         try {
             client = socket.accept();
         } catch (IOException e) {
@@ -39,7 +38,6 @@ class StreamingServerSocket {
         }
         else{
             isServerStarted = true;
-            ServerThread.serverLog("client connected from " + client.socket().getInetAddress(),0);
         }
     }
 

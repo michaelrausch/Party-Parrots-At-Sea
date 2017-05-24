@@ -13,7 +13,7 @@ import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
 
 /**
- * Created by CJIRWIN on 26/04/2017.
+ * Grouping of javaFX objects needed to represent a Mark on screen.
  */
 public class MarkGroup extends Group {
 

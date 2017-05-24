@@ -51,16 +51,11 @@ public class CanvasController {
     private GraphicsContext gc;
     private ImageView mapImage;
 
-    private final int MARK_SIZE     = 10;
     private final int BUFFER_SIZE   = 50;
-    private final int PANEL_WIDTH = 1260; // it should be 1280 but, minors 40 to cancel the bias.
-    private final int PANEL_HEIGHT = 960;
+    private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private final int PANEL_HEIGHT  = 960;
     private final int CANVAS_WIDTH  = 720;
     private final int CANVAS_HEIGHT = 720;
-    private final int LHS_BUFFER    = BUFFER_SIZE;
-    private final int RHS_BUFFER    = BUFFER_SIZE;
-    private final int TOP_BUFFER    = BUFFER_SIZE;
-    private final int BOT_BUFFER    = TOP_BUFFER;
     private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
@@ -405,24 +400,24 @@ public class CanvasController {
 
         if (scaleDirection == ScaleDirection.HORIZONTAL) {
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
-            referencePointX = LHS_BUFFER + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
+            referencePointX = BUFFER_SIZE + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, maxLatPoint));
-            referencePointY  = CANVAS_HEIGHT - (TOP_BUFFER + BOT_BUFFER);
+            referencePointY  = CANVAS_HEIGHT - (BUFFER_SIZE + BUFFER_SIZE);
             referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
             referencePointY  = referencePointY / 2;
-            referencePointY += TOP_BUFFER;
+            referencePointY += BUFFER_SIZE;
             referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
         } else {
-            referencePointY = CANVAS_HEIGHT - BOT_BUFFER;
+            referencePointY = CANVAS_HEIGHT - BUFFER_SIZE;
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
-            referencePointX  = LHS_BUFFER;
+            referencePointX  = BUFFER_SIZE;
             referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
-            referencePointX += ((CANVAS_WIDTH - (LHS_BUFFER + RHS_BUFFER)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
+            referencePointX += ((CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
         }
         if(horizontalInversion) {
-            referencePointX = CANVAS_WIDTH - RHS_BUFFER - (referencePointX - LHS_BUFFER);
+            referencePointX = CANVAS_WIDTH - BUFFER_SIZE - (referencePointX - BUFFER_SIZE);
         }
     }
 
@@ -443,10 +438,10 @@ public class CanvasController {
             horiAngle = horiAngle - (Math.PI / 2);
         double horiDistance = Math.cos(horiAngle) * Mark.calculateDistance(minLonPoint, maxLonPoint);
 
-        double vertScale = (CANVAS_HEIGHT - (TOP_BUFFER + BOT_BUFFER)) / vertDistance;
+        double vertScale = (CANVAS_HEIGHT - (BUFFER_SIZE + BUFFER_SIZE)) / vertDistance;
 
-        if ((horiDistance * vertScale) > (CANVAS_WIDTH - (RHS_BUFFER + LHS_BUFFER))) {
-            distanceScaleFactor = (CANVAS_WIDTH - (RHS_BUFFER + LHS_BUFFER)) / horiDistance;
+        if ((horiDistance * vertScale) > (CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE))) {
+            distanceScaleFactor = (CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE)) / horiDistance;
             scaleDirection = ScaleDirection.HORIZONTAL;
         } else {
             distanceScaleFactor = vertScale;
@@ -484,7 +479,7 @@ public class CanvasController {
             yAxisLocation += (int) Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         }
         if(horizontalInversion) {
-            xAxisLocation = CANVAS_WIDTH - RHS_BUFFER - (xAxisLocation - LHS_BUFFER);
+            xAxisLocation = CANVAS_WIDTH - BUFFER_SIZE - (xAxisLocation - BUFFER_SIZE);
         }
         return new Point2D(xAxisLocation, yAxisLocation);
     }
