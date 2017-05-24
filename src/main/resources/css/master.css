@@ -182,3 +182,7 @@ Remove scroll bars
     -fx-background-insets: 0;
     -fx-padding: 0;
 }
+
+.chart{
+    -fx-background-color: #ffffff;
+}
