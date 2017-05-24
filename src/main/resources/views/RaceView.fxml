@@ -56,7 +56,7 @@
                 <CategoryAxis label="Leg Number" side="BOTTOM" styleClass="spark-line-xaxis" />
               </xAxis>
               <yAxis>
-                <NumberAxis label="Position" minorTickCount="1" minorTickLength="1.0" side="LEFT" styleClass="spark-line-yaxis" tickLabelGap="1.0" tickUnit="1.0" upperBound="7.0" />
+                <NumberAxis fx:id="sparklineYAxis" minorTickCount="1" minorTickLength="1.0" side="LEFT" styleClass="spark-line-yaxis" tickLabelGap="1.0" tickUnit="1.0" upperBound="7.0" />
               </yAxis>
             </LineChart>
             </children>
