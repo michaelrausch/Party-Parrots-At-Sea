@@ -5,6 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import seng302.controllers.annotations.Annotation;
 import seng302.models.Yacht;
 import seng302.models.stream.StreamParser;
 
@@ -12,81 +13,56 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 /**
- * Created by cir27 on 23/05/17.
+ * Collection of annotations for boats.
  */
-public class BoatAnnotations extends Group{
+class BoatAnnotations extends Group{
 
-    private static final double TEAMNAME_X_OFFSET = 18d;
-    private static final double TEAMNAME_Y_OFFSET = -29d;
-    private static final double VELOCITY_X_OFFSET = 18d;
-    private static final double VELOCITY_Y_OFFSET = -17d;
-    private static final double ESTTIMETONEXTMARK_X_OFFSET = 18d;
-    private static final double ESTTIMETONEXTMARK_Y_OFFSET = -5d;
-    private static final double LEGTIME_X_OFFSET = 18d;
-    private static final double LEGTIME_Y_OFFSET = 7d;
+    //Text offset constants
+    private static final double X_OFFSET_TEXT = 18d;
+    private static final double Y_OFFSET_TEXT_INIT = -29d;
+    private static final double Y_OFFSET_PER_TEXT = 12d;
+    //Background constants
+    private static final double TEXT_BUFFER = 3;
+    private static final double BACKGROUND_X = X_OFFSET_TEXT - TEXT_BUFFER;
+    private static final double BACKGROUND_Y = Y_OFFSET_TEXT_INIT - TEXT_BUFFER;
+    private static final double BACKGROUND_H_PER_TEXT = 9.5d;
+    private static final double BACKGROUND_W = 125d;
+    private static final double BACKGROUND_ARC_SIZE = 10;
 
     private Rectangle background = new Rectangle();
     private Text teamNameObject;
     private Text velocityObject;
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
-    private Long lastMarkTime;
 
-    public enum Annotations {
-        TEAM_NAME,
-        VELOCITY_OBJECT,
-        TTNEXT,
-        LEG_TIME,
-    }
+    private Yacht boat;
 
     BoatAnnotations (Yacht boat, Color theme) {
         super.setCache(true);
-        background.setX(15d);
-        background.setY(-32d);
-        background.setWidth(150);
-        background.setHeight(55);
-        background.setArcHeight(10);
-        background.setArcWidth(10);
-        background.setFill(new Color(1, 1, 1, 0.35));
+        this.boat = boat;
+        background.setX(BACKGROUND_X);
+        background.setY(BACKGROUND_Y);
+        background.setWidth(BACKGROUND_W);
+        background.setHeight(Math.abs(BACKGROUND_X) + TEXT_BUFFER + BACKGROUND_H_PER_TEXT * 4);
+        background.setArcHeight(BACKGROUND_ARC_SIZE);
+        background.setArcWidth(BACKGROUND_ARC_SIZE);
+        background.setFill(new Color(1, 1, 1, 0.5));
         background.setStroke(theme);
         background.setStrokeWidth(2);
         background.setCache(true);
         background.setCacheHint(CacheHint.SPEED);
 
         teamNameObject = getTextObject(boat.getShortName(), theme);
-        teamNameObject.relocate(TEAMNAME_X_OFFSET, TEAMNAME_Y_OFFSET);
+        teamNameObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT);
 
-        velocityObject = getTextObject("", theme);
-        velocityObject.relocate(VELOCITY_X_OFFSET, VELOCITY_Y_OFFSET);
-        //On change listener
-        boat.getReadOnlyVelocityProperty().addListener((obs, oldVal, newVal) ->
-                velocityObject.setText(String.format("%.2f m/s", newVal.doubleValue()))
-        );
-        //Invalidation listener
-        boat.getReadOnlyVelocityProperty().addListener(obs ->
-            velocityObject.setText("")
-        );
+        velocityObject = getTextObject("0 m/s", theme);
+        velocityObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * 2);
 
         estTimeToNextMarkObject = getTextObject("Next mark: ", theme);
-        estTimeToNextMarkObject.relocate(ESTTIMETONEXTMARK_X_OFFSET, ESTTIMETONEXTMARK_Y_OFFSET);
-        boat.getReadOnlyNextMarkProperty().addListener((obs, oldVal, newVal) -> {
-            DateFormat format = new SimpleDateFormat("mm:ss");
-            String timeToNextMark = format
-                    .format(newVal.longValue() - StreamParser.getCurrentTimeLong());
-            estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
-        });
-        boat.getReadOnlyNextMarkProperty().addListener(obs ->
-            estTimeToNextMarkObject.setText("Next mark: - ")
-        );
+        estTimeToNextMarkObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * 3);
 
         legTimeObject = getTextObject("Last mark: -", theme);
-        legTimeObject.relocate(LEGTIME_X_OFFSET, LEGTIME_Y_OFFSET);
-        boat.getReadOnlyMarkRoundingProperty().addListener((obs, oldTime, newTime) -> {
-            lastMarkTime = newTime.longValue();
-        });
-        boat.getReadOnlyMarkRoundingProperty().addListener(obs ->
-            legTimeObject.setText("Last mark: - ")
-        );
+        legTimeObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * 4);
 
         super.getChildren().addAll(background, teamNameObject, velocityObject, estTimeToNextMarkObject, legTimeObject);
     }
@@ -106,30 +82,52 @@ public class BoatAnnotations extends Group{
         return text;
     }
 
-    public void setTeamNameObjectVisible(Boolean visible) {
-        teamNameObject.setVisible(visible);
-    }
+    void update () {
+        velocityObject.setText(String.format(String.format("%.2f m/s", boat.getVelocity())));
 
-    public void setVelocityObjectVisible(Boolean visible) {
-        velocityObject.setVisible(visible);
-    }
+        if (boat.getTimeTillNext() != null) {
+            DateFormat format = new SimpleDateFormat("mm:ss");
+            String timeToNextMark = format
+                    .format(boat.getTimeTillNext() - StreamParser.getCurrentTimeLong());
+            estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
+        } else {
+            estTimeToNextMarkObject.setText("Next mark: -");
+        }
 
-    public void setEstTimeToNextMarkObjectVisible(Boolean visible) {
-        estTimeToNextMarkObject.setVisible(visible);
-    }
-
-    public void setLegTimeObjectVisible(Boolean visible) {
-        legTimeObject.setVisible(visible);
-    }
-
-    public void update () {
-        if (lastMarkTime != null) {
+        if (boat.getMarkRoundTime() != null) {
             DateFormat format = new SimpleDateFormat("mm:ss");
             String elapsedTime = format
-                    .format(StreamParser.getCurrentTimeLong() - lastMarkTime);
+                    .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundTime());
             legTimeObject.setText("Last mark: " + elapsedTime);
         }else {
             legTimeObject.setText("Last mark: - ");
         }
+    }
+
+    void setVisibile (boolean nameVisibility, boolean speedVisibility,
+                             boolean estTimeVisibility, boolean lastMarkVisibility) {
+        int totalVisible = 0;
+        totalVisible = updateVisibility(nameVisibility, teamNameObject, totalVisible);
+        totalVisible = updateVisibility(speedVisibility, velocityObject, totalVisible);
+        totalVisible = updateVisibility(estTimeVisibility, estTimeToNextMarkObject, totalVisible);
+        totalVisible = updateVisibility(lastMarkVisibility, legTimeObject, totalVisible);
+        if (totalVisible != 0) {
+            background.setVisible(true);
+            background.setHeight(Math.abs(BACKGROUND_X) + TEXT_BUFFER + BACKGROUND_H_PER_TEXT * totalVisible);
+        } else {
+            background.setVisible(false);
+        }
+    }
+
+    private int updateVisibility (boolean visibility, Text text, int totalVisible) {
+        if (visibility){
+            totalVisible ++;
+            text.setVisible(true);
+            text.setLayoutX(X_OFFSET_TEXT);
+            text.setLayoutY(Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * totalVisible);
+        } else {
+            text.setVisible(false);
+        }
+        return totalVisible;
     }
 }

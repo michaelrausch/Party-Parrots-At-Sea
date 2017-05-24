@@ -327,76 +327,31 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return displayFps;
     }
 
-    /**
-     * Display the important annotations for a specific BoatGroup
-     * @param bg The boat group to set the annotations for
-     */
-    private void setBoatGroupImportantAnnotations(BoatGroup bg) {
-        if (importantAnnotations.getAnnotationState(Annotation.NAME)) {
-            bg.setTeamNameObjectVisible(true);
-        } else {
-            bg.setTeamNameObjectVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.SPEED)) {
-            bg.setVelocityObjectVisible(true);
-        } else {
-            bg.setVelocityObjectVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.TRACK)) {
-            bg.setLineGroupVisible(true);
-        } else {
-            bg.setLineGroupVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.WAKE)) {
-            bg.setWakeVisible(true);
-        } else {
-            bg.setWakeVisible(false);
-        }
-        //TODO fix boat annotations with new boatgroup
-        if (importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK)) {
-            bg.setEstTimeToNextMarkObjectVisible(true);
-        } else {
-            bg.setEstTimeToNextMarkObjectVisible(false);
-        }
-
-        if (importantAnnotations.getAnnotationState(Annotation.LEGTIME)) {
-            bg.setLegTimeObjectVisible(true);
-        } else {
-            bg.setLegTimeObjectVisible(false);
-        }
-    }
-
     private void setAnnotations(Integer annotationLevel) {
         switch (annotationLevel) {
             // No Annotations
             case 0:
                 for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
-                    bg.setTeamNameObjectVisible(false);
-                    bg.setVelocityObjectVisible(false);
-                    bg.setEstTimeToNextMarkObjectVisible(false);
-                    bg.setLegTimeObjectVisible(false);
-                    bg.setLineGroupVisible(false);
-                    bg.setWakeVisible(false);
+                    bg.setVisibility(false, false, false, false, false, false);
                 }
                 break;
             // Important Annotations
             case 1:
                 for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
-                    setBoatGroupImportantAnnotations(bg);
+                    bg.setVisibility(
+                            importantAnnotations.getAnnotationState(Annotation.NAME),
+                            importantAnnotations.getAnnotationState(Annotation.SPEED),
+                            importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK),
+                            importantAnnotations.getAnnotationState(Annotation.LEGTIME),
+                            importantAnnotations.getAnnotationState(Annotation.TRACK),
+                            importantAnnotations.getAnnotationState(Annotation.WAKE)
+                    );
                 }
                 break;
             // All Annotations
             case 2:
                 for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
-                    bg.setTeamNameObjectVisible(true);
-                    bg.setVelocityObjectVisible(true);
-                    bg.setEstTimeToNextMarkObjectVisible(true);
-                    bg.setLegTimeObjectVisible(true);
-                    bg.setLineGroupVisible(true);
-                    bg.setWakeVisible(true);
+                    bg.setVisibility(true, true, true, true, true, true);
                 }
                 break;
         }

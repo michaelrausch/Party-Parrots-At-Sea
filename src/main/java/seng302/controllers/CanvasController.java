@@ -14,6 +14,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import seng302.fxObjects.BoatGroup;
 import seng302.models.Colors;
@@ -65,6 +66,7 @@ public class CanvasController {
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
     private Text FPSdisplay = new Text();
+    private Polygon raceBorder = new Polygon();
 
     //FRAME RATE
     private Double frameRate = 60.0;
@@ -107,6 +109,7 @@ public class CanvasController {
         FPSdisplay.setLayoutY(20);
         FPSdisplay.setStrokeWidth(2);
         group.getChildren().add(FPSdisplay);
+        group.getChildren().add(raceBorder);
 
 
         // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
@@ -114,29 +117,34 @@ public class CanvasController {
         initializeMarks();
         timer = new AnimationTimer() {
 
+            private long lastTime = 0;
+
             @Override
             public void handle(long now) {
-
                 //fps stuff
-                long oldFrameTime = frameTimes[frameTimeIndex] ;
-                frameTimes[frameTimeIndex] = now ;
-                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
-                if (frameTimeIndex == 0) {
-                    arrayFilled = true ;
-                }
-                long elapsedNanos;
-                if (arrayFilled) {
-                    elapsedNanos = now - oldFrameTime ;
-                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                    frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-                    drawFps(frameRate.intValue());
-                }
-
-                // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
-                elapsedNanos = 1000 / 60;
-                updateGroups();
-                if (StreamParser.isRaceFinished()) {
-                    this.stop();
+                if (lastTime == 0) {
+                   lastTime = now;
+                } else {
+                    if (now - lastTime >= (1e8 / 60)) { //Fix for framerate going above 60 when minimized
+                        long oldFrameTime = frameTimes[frameTimeIndex] ;
+                        frameTimes[frameTimeIndex] = now ;
+                        frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
+                        if (frameTimeIndex == 0) {
+                            arrayFilled = true ;
+                        }
+                        long elapsedNanos;
+                        if (arrayFilled) {
+                            elapsedNanos = now - oldFrameTime ;
+                            long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+                            frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                            drawFps(frameRate.intValue());
+                        }
+                        updateGroups(frameRate);
+                        if (StreamParser.isRaceFinished()) {
+                            this.stop();
+                        }
+                        lastTime = now;
+                    }
                 }
             }
         };
@@ -153,37 +161,19 @@ public class CanvasController {
     private void addRaceBorder() {
         XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
         ArrayList<Limit> courseLimits = raceXMLObject.getCourseLimit();
-        gc.setStroke(Color.DARKBLUE);
-        gc.setLineWidth(3);
-        double[] xBoundaryPoints = new double[courseLimits.size()];
-        double[] yBoundaryPoints = new double[courseLimits.size()];
-        for (int i = 0; i < courseLimits.size() - 1; i++) {
-            Limit thisPoint1 = courseLimits.get(i);
-            SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
-            Limit thisPoint2 = courseLimits.get(i+1);
-            SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
-            Point2D borderPoint1 = findScaledXY(thisMark1);
-            Point2D borderPoint2 = findScaledXY(thisMark2);
-            gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
-                borderPoint2.getX(), borderPoint2.getY());
-            xBoundaryPoints[i] = borderPoint1.getX();
-            yBoundaryPoints[i] = borderPoint1.getY();
+        raceBorder.setStroke(new Color(0.0f, 0.0f, 0.74509807f, 1));
+        raceBorder.setStrokeWidth(3);
+        raceBorder.setFill(new Color(0,0,0,0));
+        List<Double> boundaryPoints = new ArrayList<>();
+        for (Limit limit : courseLimits) {
+            Point2D location = findScaledXY(limit.getLat(), limit.getLng());
+            boundaryPoints.add(location.getX());
+            boundaryPoints.add(location.getY());
         }
-        Limit thisPoint1 = courseLimits.get(courseLimits.size()-1);
-        SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
-        Limit thisPoint2 = courseLimits.get(0);
-        SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
-        Point2D borderPoint1 = findScaledXY(thisMark1);
-        Point2D borderPoint2 = findScaledXY(thisMark2);
-        gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
-            borderPoint2.getX(), borderPoint2.getY());
-        xBoundaryPoints[courseLimits.size()-1] = borderPoint1.getX();
-        yBoundaryPoints[courseLimits.size()-1] = borderPoint1.getY();
-        gc.setFill(Color.LIGHTBLUE);
-        gc.fillPolygon(xBoundaryPoints,yBoundaryPoints,yBoundaryPoints.length);
+        raceBorder.getPoints().setAll(boundaryPoints);
     }
 
-    private void updateGroups(){
+    private void updateGroups(double frameRate){
         for (BoatGroup boatGroup : boatGroups) {
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it

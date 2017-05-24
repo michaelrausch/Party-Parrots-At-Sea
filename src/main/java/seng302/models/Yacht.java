@@ -23,237 +23,6 @@ public class Yacht {
     // Used in boat group
     private Color colour;
 
-    private DoubleProperty velocityProperty = new DoubleProperty() {
-
-        private ObservableValue<? extends  Number> boundValue;
-        private List<ChangeListener> changeListeners = new ArrayList<>();
-        private List<InvalidationListener> invalidationListeners = new ArrayList<>();
-        private double velocity;
-
-        @Override
-        public void bind(ObservableValue<? extends Number> observable) {
-            boundValue = observable;
-        }
-
-        @Override
-        public void unbind() {
-            boundValue = null;
-        }
-
-        @Override
-        public boolean isBound() {
-            if (boundValue == null) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-
-        @Override
-        public Object getBean() {
-            return Yacht.this;
-        }
-
-        @Override
-        public String getName() {
-            return "velocity property of " + boatName;
-        }
-
-        @Override
-        public double get() {
-            return velocity;
-        }
-
-        @Override
-        public void addListener(ChangeListener<? super Number> listener) {
-            changeListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(ChangeListener<? super Number> listener) {
-            changeListeners.remove(listener);
-        }
-
-        @Override
-        public void addListener(InvalidationListener listener) {
-            invalidationListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(InvalidationListener listener) {
-            invalidationListeners.remove(listener);
-        }
-
-        @Override
-        public void set (double newVelocity) {
-            double oldVelocity = velocity;
-            velocity = newVelocity;
-            if (newVelocity >= 0)
-                for (ChangeListener cl : changeListeners) {
-                    cl.changed(this, oldVelocity, newVelocity);
-                }
-            else
-                for (InvalidationListener il : invalidationListeners) {
-                    il.invalidated(this);
-                }
-            if (isBound())
-                boundValue.notify();
-        }
-    };
-    private LongProperty timeAtNextProperty = new LongProperty() {
-
-        private ObservableValue<? extends  Number> boundValue;
-        private List<ChangeListener> changeListeners = new ArrayList<>();
-        private List<InvalidationListener> invalidationListeners = new ArrayList<>();
-        private long estimate;
-
-        @Override
-        public void bind(ObservableValue<? extends Number> observable) {
-            boundValue = observable;
-        }
-
-        @Override
-        public void unbind() {
-            boundValue = null;
-        }
-
-        @Override
-        public boolean isBound() {
-            if (boundValue == null) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-
-        @Override
-        public Object getBean() {
-            return Yacht.this;
-        }
-
-        @Override
-        public String getName() {
-            return "estimated time to next mark property of " + boatName;
-        }
-
-        @Override
-        public long get() {
-            return estimate;
-        }
-
-        @Override
-        public void addListener(ChangeListener<? super Number> listener) {
-            changeListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(ChangeListener<? super Number> listener) {
-            changeListeners.remove(listener);
-        }
-
-        @Override
-        public void addListener(InvalidationListener listener) {
-            invalidationListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(InvalidationListener listener) {
-            invalidationListeners.remove(listener);
-        }
-
-        @Override
-        public void set (long newEstimate) {
-            long oldEstimate = estimate;
-            estimate = newEstimate;
-            if (newEstimate >= 0)
-                for (ChangeListener cl : changeListeners) {
-                    cl.changed(this, oldEstimate, newEstimate);
-                }
-            else
-                for (InvalidationListener il : invalidationListeners) {
-                    il.invalidated(this);
-                }
-            if (isBound())
-                boundValue.notify();
-        }
-    };
-    private LongProperty markRoundingTimeProperty = new LongProperty() {
-        private ObservableValue<? extends  Number> boundValue;
-        private List<ChangeListener> changeListeners = new ArrayList<>();
-        private List<InvalidationListener> invalidationListeners = new ArrayList<>();
-        private long roundingTime;
-
-        @Override
-        public void bind(ObservableValue<? extends Number> observable) {
-            boundValue = observable;
-        }
-
-        @Override
-        public void unbind() {
-            boundValue = null;
-        }
-
-        @Override
-        public boolean isBound() {
-            if (boundValue == null) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-
-        @Override
-        public Object getBean() {
-            return Yacht.this;
-        }
-
-        @Override
-        public String getName() {
-            return "time from last mark property of " + boatName;
-        }
-
-        @Override
-        public long get() {
-            return roundingTime;
-        }
-
-        @Override
-        public void addListener(ChangeListener<? super Number> listener) {
-            changeListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(ChangeListener<? super Number> listener) {
-            changeListeners.remove(listener);
-        }
-
-        @Override
-        public void addListener(InvalidationListener listener) {
-            invalidationListeners.add(listener);
-        }
-
-        @Override
-        public void removeListener(InvalidationListener listener) {
-            invalidationListeners.remove(listener);
-        }
-
-        @Override
-        public void set (long newTime) {
-            long oldTime = newTime;
-            roundingTime = newTime;
-            if (newTime >= 0)
-                for (ChangeListener cl : changeListeners) {
-                    cl.changed(this, oldTime, newTime);
-                }
-            else
-                for (InvalidationListener il : invalidationListeners) {
-                    il.invalidated(this);
-                }
-            if (isBound())
-                boundValue.notify();
-        }
-    };
-
     private String boatType;
     private Integer sourceID;
     private String hullID; //matches HullNum in the XML spec.
@@ -267,6 +36,10 @@ public class Yacht {
     private Integer penaltiesServed;
     private Long estimateTimeAtFinish;
     private String position;
+    private double velocity;
+    private Long timeTillNext;
+    private Long markRoundTime;
+
 
     /**
      * Used in EventTest and RaceTest.
@@ -286,7 +59,7 @@ public class Yacht {
      */
     public Yacht(String boatName, double boatVelocity, String shortName, int id) {
         this.boatName = boatName;
-        this.velocityProperty.set(boatVelocity);
+        this.velocity = boatVelocity;
         this.shortName = shortName;
         this.sourceID = id;
     }
@@ -352,7 +125,7 @@ public class Yacht {
     }
 
     public void setEstimateTimeAtNextMark(Long estimateTimeAtNextMark) {
-        timeAtNextProperty.set(estimateTimeAtNextMark);
+        timeTillNext = estimateTimeAtNextMark;
     }
 
     public String getEstimateTimeAtFinish() {
@@ -381,12 +154,24 @@ public class Yacht {
     }
 
     public void setVelocity(double velocity) {
-        velocityProperty.set(velocity);
+        this.velocity = velocity;
     }
 
 
     public void setMarkRoundingTime(Long markRoundingTime) {
-        markRoundingTimeProperty.set(markRoundingTime);
+        this.markRoundTime = markRoundingTime;
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
+
+    public Long getTimeTillNext() {
+        return timeTillNext;
+    }
+
+    public Long getMarkRoundTime() {
+        return markRoundTime;
     }
 
     @Override
@@ -394,15 +179,4 @@ public class Yacht {
         return boatName;
     }
 
-    public ReadOnlyDoubleProperty getReadOnlyVelocityProperty () {
-        return velocityProperty;
-    }
-
-    public ReadOnlyLongProperty getReadOnlyNextMarkProperty() {
-        return timeAtNextProperty;
-    }
-
-    public ReadOnlyLongProperty getReadOnlyMarkRoundingProperty() {
-        return markRoundingTimeProperty;
-    }
 }

@@ -94,6 +94,7 @@ public class MarkGroup extends Group {
     {
         if (mainMark.getMarkType() == MarkType.SINGLE_MARK) {
             Circle markCircle = (Circle) super.getChildren().get(0);
+            //One of the test streams produced frequent, jittery movements. Added this as a fix.
             if (Math.abs(markCircle.getCenterX() - x) > 5 || Math.abs(markCircle.getCenterY() - y) > 5) {
                 markCircle.setCenterX(x);
                 markCircle.setCenterY(y);
