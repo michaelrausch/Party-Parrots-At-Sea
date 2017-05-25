@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import seng302.models.PolarTable;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.StreamReceiver;
 import seng302.server.ServerThread;
@@ -13,6 +14,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        PolarTable.parsePolarFile(getClass().getResource("/config/acc_polars.csv").getFile());
+
         Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
         primaryStage.setTitle("RaceVision");
         primaryStage.setScene(new Scene(root, 1530, 960));
@@ -26,6 +29,8 @@ public class App extends Application {
             StreamReceiver.noMoreBytes();
             System.exit(0);
         });
+
+
 
     }
 
@@ -63,10 +68,10 @@ public class App extends Application {
         }
         //Change the StreamReceiver in this else block to change the default data source.
         else{
-            sr = new StreamReceiver("localhost", 4949, "RaceStream");
+//            sr = new StreamReceiver("localhost", 4949, "RaceStream");
 //            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941, "RaceStream");
 //            sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4942, "RaceStream");
-//            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
+            sr = new StreamReceiver("livedata.americascup.com", 4941, "RaceStream");
         }
 
         sr.start();
