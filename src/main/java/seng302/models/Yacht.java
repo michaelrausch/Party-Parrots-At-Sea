@@ -6,6 +6,7 @@ import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Corner;
 
 /**
