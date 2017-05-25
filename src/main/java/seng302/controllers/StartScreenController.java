@@ -77,6 +77,9 @@ public class StartScreenController implements Initializable {
      * second.
      */
     public void startStream() {
+        // reset boolean for switch to race view
+        switchedToRaceView = false;
+
         if (StreamParser.isStreamStatus()) {
             streamButton.setVisible(false);
             realTime.setVisible(true);
