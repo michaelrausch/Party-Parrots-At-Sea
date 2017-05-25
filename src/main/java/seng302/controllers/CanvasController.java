@@ -12,7 +12,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import seng302.fxObjects.BoatAnnotations;
 import seng302.fxObjects.BoatGroup;
+import seng302.fxObjects.Wake;
 import seng302.models.Colors;
 import seng302.models.Yacht;
 import seng302.models.mark.GateMark;
@@ -120,13 +122,12 @@ public class CanvasController {
         FPSdisplay.setStrokeWidth(2);
         group.getChildren().add(FPSdisplay);
         group.getChildren().add(raceBorder);
-
-
-        // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
-        initializeBoats();
         initializeMarks();
+        initializeBoats();
+
         timer = new AnimationTimer() {
             private long lastTime = 0;
+            private int FPSCount = 30;
 
             @Override
             public void handle(long now) {
@@ -145,7 +146,11 @@ public class CanvasController {
                                 elapsedNanos = now - oldFrameTime;
                                 long elapsedNanosPerFrame = elapsedNanos / frameTimes.length;
                                 frameRate = 1_000_000_000.0 / elapsedNanosPerFrame;
-                                drawFps(frameRate.intValue());
+                                if (FPSCount-- == 0) {
+                                    FPSCount = 30;
+                                    drawFps(frameRate.intValue());
+                                }
+                                raceViewController.updateSparkLine();
                             }
                             updateGroups();
                             if (StreamParser.isRaceFinished()) {
@@ -243,7 +248,9 @@ public class CanvasController {
                 BoatPositionPacket positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
                 double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), positionPacket.getTimeValid(), frameRate, boatGroup.getRaceId());
+                boatGroup.setDestination(
+                    p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(),
+                    positionPacket.getTimeValid(), frameRate);
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -269,7 +276,9 @@ public class CanvasController {
      */
     private void initializeBoats() {
         Map<Integer, Yacht> boats = StreamParser.getBoats();
-        Group boatAnnotations = new Group();
+        Group wakes = new Group();
+        Group trails = new Group();
+        Group annotations = new Group();
 
         ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML().getParticipants();
         ArrayList<Integer> participantIDs = new ArrayList<>();
@@ -282,10 +291,14 @@ public class CanvasController {
                 boat.setColour(Colors.getColor());
                 BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
                 boatGroups.add(boatGroup);
-                boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+                trails.getChildren().add(boatGroup.getTrail());
+                wakes.getChildren().add(boatGroup.getWake());
+                annotations.getChildren().add(boatGroup.getAnnotations());
             }
         }
-        group.getChildren().add(boatAnnotations);
+        group.getChildren().addAll(trails);
+        group.getChildren().addAll(wakes);
+        group.getChildren().addAll(annotations);
         group.getChildren().addAll(boatGroups);
     }
 

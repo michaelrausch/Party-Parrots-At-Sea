@@ -51,7 +51,7 @@ public class BoatGroup extends Group {
     private Double distanceTravelled = 0.0;
     private Point2D lastPoint;
     private boolean destinationSet;
-    private BoatAnnotations boatAnnotations;;
+    private BoatAnnotations boatAnnotations;
 
     private Boolean isSelected = true;  //All boats are initialised as selected
 
@@ -106,6 +106,10 @@ public class BoatGroup extends Group {
         boatPoly.setCache(true);
         boatPoly.setCacheHint(CacheHint.SPEED);
         boatAnnotations = new BoatAnnotations(boat, color);
+
+        leftLayLine = new Line();
+        rightLayline = new Line();
+
         wake = new Wake(0, -BOAT_HEIGHT);
         super.getChildren().addAll(boatPoly, boatAnnotations);
     }
@@ -197,25 +201,6 @@ public class BoatGroup extends Group {
     }
 
     /**
-     * Calculates the rotational velocity required to reach the rotationalGoal from the
-     * currentRotation.
-     */
-    private Double calculateRotationalVelocity(Double rotationalGoal) {
-        Double rotationalVelocity;
-
-        if (Math.abs(rotationalGoal - lastRotation) > 180) {
-            if (rotationalGoal - lastRotation >= 0.0) {
-                rotationalVelocity = ((rotationalGoal - lastRotation) - 360) / 200;
-            } else {
-                rotationalVelocity = (360 + (rotationalGoal - lastRotation)) / 200;
-            }
-        } else {
-            rotationalVelocity = (rotationalGoal - lastRotation) / 200;
-        }
-        return rotationalVelocity;
-    }
-
-    /**
      * Sets the destination of the boat and the headng it should have once it reaches
      *
      * @param newXValue The X co-ordinate the boat needs to move to.
@@ -224,7 +209,7 @@ public class BoatGroup extends Group {
      * @param timeValid the time the position values are valid for
      */
     public void setDestination(double newXValue, double newYValue, double rotation,
-        double groundSpeed, long timeValid, double frameRate, long id) {
+        double groundSpeed, long timeValid, double frameRate) {
         if (lastTimeValid == 0) {
             lastTimeValid = timeValid - 200;
             moveTo(newXValue, newYValue, rotation);
@@ -338,19 +323,17 @@ public class BoatGroup extends Group {
         return boat.getSourceID();
     }
 
-    /**
-     * Due to javaFX limitations annotations associated with a boat that you want to appear below
-     * all boats in the Z-axis need to be pulled out of the BoatGroup and added to the parent group
-     * of the BoatGroups. This function returns these annotations as a group.
-     *
-     * @return A group containing low priority annotations.
-     */
-    public Group getLowPriorityAnnotations() {
-        Group group = new Group();
-        group.getChildren().addAll(wake, lineGroup);
-        return group;
+    public Wake getWake () {
+        return wake;
     }
 
+    public Group getTrail() {
+        return lineGroup;
+    }
+
+    public BoatAnnotations getAnnotations() {
+        return boatAnnotations;
+    }
 
     public Double getBoatLayoutX() {
         return boatPoly.getLayoutX();
@@ -369,4 +352,5 @@ public class BoatGroup extends Group {
     public String toString() {
         return boat.toString();
     }
+
 }

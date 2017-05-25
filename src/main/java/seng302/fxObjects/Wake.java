@@ -12,7 +12,7 @@ import javafx.scene.transform.Scale;
 /**
  * A group containing objects used to represent wakes onscreen. Contains functionality for their animation.
  */
-class Wake extends Group {
+public class Wake extends Group {
 
     //The number of wakes
     private int numWakes = 8;
@@ -79,11 +79,11 @@ class Wake extends Group {
             }
         }
 
-        double rad = (12 / numWakes) + velocity;
+        double rad = (14 / numWakes) + velocity;
         for (Arc arc : arcs) {
             arc.setRadiusX(rad);
             arc.setRadiusY(rad);
-            rad += (12 / numWakes) + (velocity / 2);
+            rad += (14 / numWakes) + (velocity / 2.5);
         }
     }
 

@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 /**
  * Collection of annotations for boats.
  */
-class BoatAnnotations extends Group{
+public class BoatAnnotations extends Group{
 
     //Text offset constants
     private static final double X_OFFSET_TEXT = 18d;

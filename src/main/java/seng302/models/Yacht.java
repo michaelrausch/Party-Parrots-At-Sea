@@ -6,8 +6,6 @@ import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import seng302.models.stream.StreamParser;
-import seng302.models.stream.XMLParser.RaceXMLObject.Corner;
 
 /**
  * Yacht class for the racing boat.
@@ -38,7 +36,6 @@ public class Yacht {
     private Long markRoundTime;
 
     // Mark rounding
-    private Long markRoundingTime;
     private Mark lastMarkRounded;
     private Mark nextMark;
 
