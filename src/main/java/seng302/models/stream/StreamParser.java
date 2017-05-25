@@ -233,6 +233,7 @@ public class StreamParser extends Thread {
             Long estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
+            boatsPos.put(estTimeAtFinish, boat);
 //            String boatStatus = "SourceID: " + boatStatusSourceID;
 //            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
 //            boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
