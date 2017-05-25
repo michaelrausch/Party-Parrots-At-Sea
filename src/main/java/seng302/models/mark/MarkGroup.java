@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import seng302.GeometryUtils;
 
 /**
  * Grouping of javaFX objects needed to represent a Mark on screen.
@@ -43,6 +45,29 @@ public class MarkGroup extends Group {
             color
         );
         super.getChildren().add(markCircle);
+    }
+
+    public void addLaylines(Line line1, Line line2) {
+
+        super.getChildren().addAll(line1, line2);
+    }
+
+
+    public void removeLaylines() {
+        ArrayList<Node> toRemove = new ArrayList<>();
+        for(Node node : super.getChildren()) {
+            if (node instanceof Line) {
+                Line layLine = (Line) node;
+
+                /***
+                 * OOHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhh
+                 */
+                if (layLine.getStrokeWidth() == 0.5){
+                    toRemove.add(layLine);
+                }
+            }
+        }
+        super.getChildren().removeAll(toRemove);
     }
 
     public MarkGroup(GateMark mark, Point2D points1, Point2D points2) {
@@ -84,6 +109,11 @@ public class MarkGroup extends Group {
         }
         super.getChildren().add(line);
 
+        //Laylines
+//        if (mark.)
+
+//        addLayLine(points1, 12.0, 90.0);
+//        addLayLine(points2, 12.0, 90.0);
     }
 
     public void moveMarkTo (double x, double y, long raceId)
@@ -125,5 +155,9 @@ public class MarkGroup extends Group {
         for (Mark mark : marks)
             idArray[i++] = mark.getId();
         return idArray;
+    }
+
+    public Mark getMainMark() {
+        return mainMark;
     }
 }

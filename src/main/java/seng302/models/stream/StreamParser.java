@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -23,6 +22,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
+import seng302.models.mark.Mark;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.packets.StreamPacket;
 
@@ -34,8 +34,8 @@ import seng302.models.stream.packets.StreamPacket;
  */
 public class StreamParser extends Thread {
 
-    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markPositions = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markLocations = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
     private String threadName;
     private Thread t;
     private static boolean newRaceXmlReceived = false;
@@ -45,11 +45,16 @@ public class StreamParser extends Thread {
     private static boolean streamStatus = false;
     private static long timeSinceStart = -1;
     private static Map<Integer, Yacht> boats = new ConcurrentHashMap<>();
-    private static Map<Long, Yacht> boatsPos = new ConcurrentSkipListMap<>();
+    private static Map<Integer, Yacht> boatsPos = new ConcurrentSkipListMap<>();
     private static double windDirection = 0;
-    private static Long currentTimeLong;
+    private static Double windSpeed = 0d;
+     private static Long currentTimeLong;
     private static String currentTimeString;
     private static boolean appRunning;
+
+
+     //CONVERSION CONSTANTS
+    private static final Double MS_TO_KNOTS = 1.94384;
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
@@ -145,6 +150,7 @@ public class StreamParser extends Thread {
             }
         } catch (NullPointerException e) {
             System.out.println("Error parsing packet");
+            e.printStackTrace();
         }
     }
 
@@ -187,9 +193,9 @@ public class StreamParser extends Thread {
         long currentTime = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload, 7, 11));
         int raceStatus = payload[11];
-        long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload, 12, 18));
-        long windDir = bytesToLong(Arrays.copyOfRange(payload, 18, 20));
-        long windSpeed = bytesToLong(Arrays.copyOfRange(payload, 20, 22));
+        long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
+        long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
+        long rawWindSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
 
         currentTimeLong = currentTime;
         DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -215,16 +221,16 @@ public class StreamParser extends Thread {
 
         double windDirFactor = 0x4000 / 90;   //0x4000 is 90 degrees, 0x8000 is 180 degrees, etc...
         windDirection = windDir / windDirFactor;
+        windSpeed = rawWindSpeed / 1000 * MS_TO_KNOTS;
 
         int noBoats = payload[22];
         int raceType = payload[23];
-        boatsPos = new TreeMap<>();
         for (int i = 0; i < noBoats; i++) {
             long boatStatusSourceID = bytesToLong(
                 Arrays.copyOfRange(payload, 24 + (i * 20), 28 + (i * 20)));
             Yacht boat = boats.get((int) boatStatusSourceID);
             boat.setBoatStatus((int) payload[28 + (i * 20)]);
-            boat.setLegNumber((int) payload[29 + (i * 20)]);
+            setBoatLegPosition(boat, (int) payload[29 + (i * 20)]);
             boat.setPenaltiesAwarded((int) payload[30 + (i * 20)]);
             boat.setPenaltiesServed((int) payload[31 + (i * 20)]);
             Long estTimeAtNextMark = bytesToLong(
@@ -233,7 +239,7 @@ public class StreamParser extends Thread {
             Long estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
-            boatsPos.put(estTimeAtFinish, boat);
+//            boatsPos.put(estTimeAtFinish, boat);
 //            String boatStatus = "SourceID: " + boatStatusSourceID;
 //            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
 //            boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
@@ -243,12 +249,34 @@ public class StreamParser extends Thread {
 //            boatStatus += "\nEstTimeAtFinish: " + bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
 //            boatStatuses.add(boatStatus);
         }
-        if (isRaceStarted()) {
-            int pos = 1;
-            for (Yacht yacht : boatsPos.values()) {
-                yacht.setPosition(String.valueOf(pos));
-                pos++;
+//        if (isRaceStarted()) {
+//            int pos = 1;
+//            for (Yacht yacht : boatsPos.values()) {
+//                yacht.setPosition(String.valueOf(pos));
+//                pos++;
+//            }
+//        } else {
+//            for (Yacht yacht : boatsPos.values()) {
+//                yacht.setPosition("-");
+//            }
+//        }
+    }
+
+    private static void setBoatLegPosition(Yacht updatingBoat, Integer leg){
+        Integer placing = 1;
+        if (leg != updatingBoat.getLegNumber() && (raceStarted || raceFinished)) {
+            for (Yacht boat : boats.values()) {
+                if (boat.getLegNumber() != null && leg <= boat.getLegNumber()){
+                    placing += 1;
+                }
             }
+            updatingBoat.setPosition(placing.toString());
+            updatingBoat.setLegNumber(leg);
+            boatsPos.putIfAbsent(placing, updatingBoat);
+            boatsPos.replace(placing, updatingBoat);
+        } else if(updatingBoat.getLegNumber() == null){
+            updatingBoat.setPosition("1");
+            updatingBoat.setLegNumber(leg);
         }
     }
 
@@ -392,9 +420,9 @@ public class StreamParser extends Thread {
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon,
                 heading, groundSpeed);
 
-            //add a new priority que to the boatPositions HashMap
-            if (!boatPositions.containsKey(boatId)) {
-                boatPositions.put(boatId,
+            //add a new priority que to the boatLocations HashMap
+            if (!boatLocations.containsKey(boatId)) {
+                boatLocations.put(boatId,
                     new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
                         @Override
                         public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
@@ -402,14 +430,14 @@ public class StreamParser extends Thread {
                         }
                     }));
             }
-            boatPositions.get(boatId).put(boatPacket);
+            boatLocations.get(boatId).put(boatPacket);
         } else if (deviceType == 3) {
             BoatPositionPacket markPacket = new BoatPositionPacket(boatId, timeValid, lat, lon,
                 heading, groundSpeed);
 
-            //add a new priority que to the boatPositions HashMap
-            if (!markPositions.containsKey(boatId)) {
-                markPositions.put(boatId,
+            //add a new priority que to the boatLocations HashMap
+            if (!markLocations.containsKey(boatId)) {
+                markLocations.put(boatId,
                     new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
                         @Override
                         public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
@@ -417,7 +445,7 @@ public class StreamParser extends Thread {
                         }
                     }));
             }
-            markPositions.get(boatId).put(markPacket);
+            markLocations.get(boatId).put(markPacket);
         }
     }
 
@@ -438,7 +466,13 @@ public class StreamParser extends Thread {
         int markId = payload[20];
 
         // assign mark rounding time to boat
-        boats.get((int) subjectId).setMarkRoundingTime(timeStamp);
+        boats.get((int)subjectId).setMarkRoundingTime(timeStamp);
+
+        for (Mark mark : xmlObject.getRaceXML().getAllCompoundMarks()) {
+            if (mark.getCompoundMarkID() == markId) {
+                boats.get((int)subjectId).setLastMarkRounded(mark);
+            }
+        }
     }
 
     /**
@@ -575,6 +609,15 @@ public class StreamParser extends Thread {
         return windDirection;
     }
 
+
+    /**
+     * Returns the wind speed in knots
+     * @return A double indicating the wind speed in knots
+     */
+    public static Double getWindSpeed() {
+        return windSpeed;
+    }
+
     /**
      * returns stream time in formatted string format
      *
@@ -589,7 +632,8 @@ public class StreamParser extends Thread {
      *
      * @return a map of time to finish and boat.
      */
-    public static Map<Long, Yacht> getBoatsPos() {
+    public static Map<Integer, Yacht> getBoatsPos() {
+
         return boatsPos;
     }
 

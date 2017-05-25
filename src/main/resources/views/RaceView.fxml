@@ -25,7 +25,7 @@
                 <Label layoutX="11.0" layoutY="14.0" text="Timer" textFill="WHITE" />
                 <Label layoutX="11.0" layoutY="88.0" text="Wind direction" textFill="WHITE" />
                 <Circle fx:id="windBackgroundCircle" blendMode="DARKEN" fill="#3dcdc8" layoutX="110.0" layoutY="166.0" radius="35.0" stroke="#d7d7d7" strokeType="INSIDE" strokeWidth="3.0" />
-                <Text fx:id="windArrowText" fill="#a8a8a8" layoutX="86.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↑">
+                <Text fx:id="windArrowText" fill="#a8a8a8" layoutX="86.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↓">
                     <font>
                         <Font name="AdobeArabic-Regular" size="55.0" />
                     </font>
@@ -51,7 +51,7 @@
             <Button fx:id="selectAnnotationBtn" layoutX="35.0" layoutY="578.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="170.0" styleClass="blue-ui-btn" text="Select Annotations" textFill="WHITE" />
             <Text fill="WHITE" layoutX="11.0" layoutY="649.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Boat Selection" />
             <ComboBox fx:id="boatSelectionComboBox" layoutX="37.0" layoutY="664.0" prefHeight="25.0" prefWidth="170.0" promptText="Select Boat" styleClass="combo-box-base" />
-            <LineChart fx:id="raceSparkLine" layoutX="-15.0" layoutY="719.0" legendVisible="false" prefHeight="277.0" prefWidth="260.0" title="Boat Positions">
+            <LineChart fx:id="raceSparkLine" layoutX="-1.0" layoutY="719.0" legendVisible="false" prefHeight="277.0" prefWidth="246.0" title="Boat Positions">
               <xAxis>
                 <CategoryAxis label="Leg Number" side="BOTTOM" styleClass="spark-line-xaxis" />
               </xAxis>

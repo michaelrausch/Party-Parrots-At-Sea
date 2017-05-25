@@ -11,25 +11,27 @@ public abstract class Mark {
     private double latitude;
     private double longitude;
     private long id;
+    private int compoundMarkID;
 
     /**
      * Create a mark instance by passing its name and type
-     *
      * @param name the name of the mark
      * @param markType the type of mark. either GATE_MARK or SINGLE_MARK.
      */
-    public Mark(String name, MarkType markType, int id) {
+    public Mark (String name, MarkType markType, int sourceID, int compoundMarkID) {
         this.name = name;
         this.markType = markType;
-        this.id = id;
+        this.id = sourceID;
+        this.compoundMarkID = compoundMarkID;
     }
 
-    public Mark(String name, MarkType markType, double latitude, double longitude) {
+    public Mark(String name, MarkType markType, double latitude, double longitude, int compoundMarkID) {
         this.name = name;
         this.markType = markType;
         this.latitude = latitude;
         this.longitude = longitude;
-        id = 0;
+        this.id = 0;
+        this.compoundMarkID = compoundMarkID;
     }
 
     /**
@@ -138,5 +140,9 @@ public abstract class Mark {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getCompoundMarkID() {
+        return compoundMarkID;
     }
 }
