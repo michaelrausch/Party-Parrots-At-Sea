@@ -6,8 +6,6 @@ import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import seng302.models.stream.StreamParser;
-import seng302.models.stream.XMLParser.RaceXMLObject.Corner;
 
 /**
  * Yacht class for the racing boat.
@@ -19,7 +17,6 @@ public class Yacht {
 
     // Used in boat group
     private Color colour;
-    private double velocity;
 
     private String boatType;
     private Integer sourceID;
@@ -32,11 +29,13 @@ public class Yacht {
     private Integer legNumber;
     private Integer penaltiesAwarded;
     private Integer penaltiesServed;
-    private Long estimateTimeAtNextMark;
     private Long estimateTimeAtFinish;
     private String position;
+    private double velocity;
+    private Long timeTillNext;
+    private Long markRoundTime;
+
     // Mark rounding
-    private Long markRoundingTime;
     private Mark lastMarkRounded;
     private Mark nextMark;
 
@@ -134,14 +133,8 @@ public class Yacht {
         this.penaltiesServed = penaltiesServed;
     }
 
-    public Long getEstimateTimeAtNextMark() {
-//        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-//        return format.format(estimateTimeAtNextMark);
-        return estimateTimeAtNextMark;
-    }
-
     public void setEstimateTimeAtNextMark(Long estimateTimeAtNextMark) {
-        this.estimateTimeAtNextMark = estimateTimeAtNextMark;
+        timeTillNext = estimateTimeAtNextMark;
     }
 
     public String getEstimateTimeAtFinish() {
@@ -169,20 +162,25 @@ public class Yacht {
         this.colour = colour;
     }
 
-    public Double getVelocity() {
-        return velocity;
-    }
-
     public void setVelocity(double velocity) {
         this.velocity = velocity;
     }
 
-    public Long getMarkRoundingTime() {
-        return markRoundingTime;
-    }
 
     public void setMarkRoundingTime(Long markRoundingTime) {
-        this.markRoundingTime = markRoundingTime;
+        this.markRoundTime = markRoundingTime;
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
+
+    public Long getTimeTillNext() {
+        return timeTillNext;
+    }
+
+    public Long getMarkRoundTime() {
+        return markRoundTime;
     }
 
     public Mark getLastMarkRounded() {
@@ -205,4 +203,5 @@ public class Yacht {
       public Mark getNextMark(){
         return nextMark;
       }
+
 }
