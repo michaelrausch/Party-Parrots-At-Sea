@@ -323,7 +323,7 @@ public class BoatGroup extends Group {
         return boat.getSourceID();
     }
 
-    public Wake getWake () {
+    public Group getWake () {
         return wake;
     }
 
@@ -331,7 +331,7 @@ public class BoatGroup extends Group {
         return lineGroup;
     }
 
-    public BoatAnnotations getAnnotations() {
+    public Group getAnnotations() {
         return boatAnnotations;
     }
 
