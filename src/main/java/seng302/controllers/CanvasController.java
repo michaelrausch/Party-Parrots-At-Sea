@@ -186,9 +186,9 @@ public class CanvasController {
         double[] yBoundaryPoints = new double[courseLimits.size()];
         for (int i = 0; i < courseLimits.size() - 1; i++) {
             Limit thisPoint1 = courseLimits.get(i);
-            SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
+            SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID(), thisPoint1.getSeqID());
             Limit thisPoint2 = courseLimits.get(i+1);
-            SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
+            SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID(), thisPoint2.getSeqID());
             Point2D borderPoint1 = findScaledXY(thisMark1);
             Point2D borderPoint2 = findScaledXY(thisMark2);
             gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
@@ -197,9 +197,9 @@ public class CanvasController {
             yBoundaryPoints[i] = borderPoint1.getY();
         }
         Limit thisPoint1 = courseLimits.get(courseLimits.size()-1);
-        SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID());
+        SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID(), thisPoint1.getSeqID());
         Limit thisPoint2 = courseLimits.get(0);
-        SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID());
+        SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID(), thisPoint2.getSeqID());
         Point2D borderPoint1 = findScaledXY(thisMark1);
         Point2D borderPoint2 = findScaledXY(thisMark2);
         gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
@@ -214,7 +214,7 @@ public class CanvasController {
         for (BoatGroup boatGroup : boatGroups) {
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it
-            if (StreamParser.boatPositions.containsKey(boatGroup.getRaceId())) {
+            if (StreamParser.boatLocations.containsKey(boatGroup.getRaceId())) {
                 if (boatGroup.isStopped()) {
                     updateBoatGroup(boatGroup);
                 }
@@ -223,7 +223,7 @@ public class CanvasController {
         }
         for (MarkGroup markGroup : markGroups) {
             for (Long id : markGroup.getRaceIds()) {
-                if (StreamParser.markPositions.containsKey(id)) {
+                if (StreamParser.markLocations.containsKey(id)) {
                     updateMarkGroup(id, markGroup);
                 }
             }
@@ -240,7 +240,7 @@ public class CanvasController {
     }
 
     private void updateBoatGroup(BoatGroup boatGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(boatGroup.getRaceId());
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
         // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
         if (movementQueue.size() > 0){
             try {
@@ -256,7 +256,7 @@ public class CanvasController {
     }
 
     void updateMarkGroup (long raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markPositions.get(raceId);
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markLocations.get(raceId);
         if (movementQueue.size() > 0){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
@@ -294,7 +294,7 @@ public class CanvasController {
     }
 
     private void initializeMarks() {
-        ArrayList<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getCompoundMarks();
+        List<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getNonDupCompoundMarks();
         for (Mark mark : allMarks) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 SingleMark sMark = (SingleMark) mark;
@@ -382,15 +382,15 @@ public class CanvasController {
         sortedPoints.sort(Comparator.comparingDouble(Limit::getLat));
         Limit minLatMark = sortedPoints.get(0);
         Limit maxLatMark = sortedPoints.get(sortedPoints.size()-1);
-        minLatPoint = new SingleMark(minLatMark.toString(), minLatMark.getLat(), minLatMark.getLng(), minLatMark.getSeqID());
-        maxLatPoint = new SingleMark(maxLatMark.toString(), maxLatMark.getLat(), maxLatMark.getLng(), maxLatMark.getSeqID());
+        minLatPoint = new SingleMark(minLatMark.toString(), minLatMark.getLat(), minLatMark.getLng(), minLatMark.getSeqID(), minLatMark.getSeqID());
+        maxLatPoint = new SingleMark(maxLatMark.toString(), maxLatMark.getLat(), maxLatMark.getLng(), maxLatMark.getSeqID(), minLatMark.getSeqID());
 
         sortedPoints.sort(Comparator.comparingDouble(Limit::getLng));
         //If the course is on a point on the earth where longitudes wrap around.
         Limit minLonMark = sortedPoints.get(0);
         Limit maxLonMark = sortedPoints.get(sortedPoints.size()-1);
-        minLonPoint = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID());
-        maxLonPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID());
+        minLonPoint = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID(), minLonMark.getSeqID());
+        maxLonPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID(), minLonMark.getSeqID());
         if (maxLonPoint.getLongitude() - minLonPoint.getLongitude() > 180) {
             horizontalInversion = true;
         }
@@ -462,7 +462,7 @@ public class CanvasController {
         return findScaledXY (unscaled.getLatitude(), unscaled.getLongitude());
     }
 
-    private Point2D findScaledXY (double unscaledLat, double unscaledLon) {
+    public Point2D findScaledXY (double unscaledLat, double unscaledLon) {
         double distanceFromReference;
         double angleFromReference;
         int xAxisLocation = (int) referencePointX;
@@ -499,8 +499,8 @@ public class CanvasController {
         Point2D p1, p2;
         Mark m1, m2;
         double theta, distance, dx, dy, dHorizontal, dVertical;
-        m1 = new SingleMark("m1", maxLatPoint.getLatitude(), minLonPoint.getLongitude(), 1);
-        m2 = new SingleMark("m2", minLatPoint.getLatitude(), maxLonPoint.getLongitude(), 2);
+        m1 = new SingleMark("m1", maxLatPoint.getLatitude(), minLonPoint.getLongitude(), 1, 0);
+        m2 = new SingleMark("m2", minLatPoint.getLatitude(), maxLonPoint.getLongitude(), 2, 0);
         p1 = findScaledXY(m1);
         p2 = findScaledXY(m2);
         theta = Mark.calculateHeadingRad(m1, m2);
@@ -515,5 +515,9 @@ public class CanvasController {
 
     List<BoatGroup> getBoatGroups() {
         return boatGroups;
+    }
+
+    List<MarkGroup> getMarkGroups() {
+        return  markGroups;
     }
 }

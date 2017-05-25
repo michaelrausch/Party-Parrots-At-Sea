@@ -235,7 +235,8 @@ public class XMLParser {
 
         //Non atomic race attributes
         private ArrayList<Participant> participants;
-        private ArrayList<Mark> course;
+        private ArrayList<Mark> allMarks;
+        private ArrayList<Mark> nonDuplicateMarks;
         private ArrayList<Corner> compoundMarkSequence;
         private ArrayList<Limit> courseLimit;
 
@@ -283,7 +284,9 @@ public class XMLParser {
             }
 
             //Course
-            course = createCompoundMarks(docEle);
+            allMarks = new ArrayList<>();
+            nonDuplicateMarks = new ArrayList<>();
+            createCompoundMarks(docEle);
 
             //Course Mark Sequence
             compoundMarkSequence = new ArrayList<>();
@@ -312,27 +315,23 @@ public class XMLParser {
         }
 
 
-        private ArrayList<Mark> createCompoundMarks(Element docEle) {
-            ArrayList<Mark> cMarks = new ArrayList<>();
+        private void createCompoundMarks(Element docEle) {
 
             NodeList cMarkList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
             for (int i = 0; i < cMarkList.getLength(); i++) {
                 Node cMarkNode = cMarkList.item(i);
                 if (cMarkNode.getNodeName().equals("CompoundMark")) {
-                    Mark mark = createMark(cMarkNode);
-                    if (mark != null) {
-                        cMarks.add(mark);
-                    }
+                    createAndAddMark(cMarkNode);
                 }
             }
-
-            return cMarks;
         }
 
 
-        private Mark createMark(Node compoundMark) {
+        private void createAndAddMark(Node compoundMark) {
 
+            Boolean markSeen = false;
             List<SingleMark> marksList = new ArrayList<>();
+            Integer compoundMarkID = getNodeAttributeInt(compoundMark, "CompoundMarkID");
             String cMarkName = getNodeAttributeString(compoundMark, "Name");
 
             NodeList childMarks = compoundMark.getChildNodes();
@@ -346,27 +345,33 @@ public class XMLParser {
                     Double targetLat = getNodeAttributeDouble(markNode, "TargetLat");
                     Double targetLng = getNodeAttributeDouble(markNode, "TargetLng");
 
-                    SingleMark mark = new SingleMark(markName, targetLat, targetLng, sourceID);
+                    SingleMark mark = new SingleMark(markName, targetLat, targetLng, sourceID, compoundMarkID);
                     marksList.add(mark);
                 }
             }
 
             for (SingleMark mark : marksList) {
                 if (seenSourceIDs.contains(mark.getId())) {
-                    return null;
+                    markSeen = true;
                 } else {
                     seenSourceIDs.add(mark.getId());
                 }
             }
 
+
             if (marksList.size() == 1) {
-                return marksList.get(0);
+                if (!markSeen) {
+                    nonDuplicateMarks.add(marksList.get(0));
+                }
+                allMarks.add(marksList.get(0));
             } else if (marksList.size() == 2) {
-                return new GateMark(cMarkName, MarkType.OPEN_GATE, marksList.get(0),
+                GateMark thisGateMark =  new GateMark(cMarkName, MarkType.OPEN_GATE, marksList.get(0),
                     marksList.get(1), marksList.get(0).getLatitude(),
-                    marksList.get(0).getLongitude());
-            } else {
-                return null;
+                    marksList.get(0).getLongitude(), compoundMarkID);
+                if(!markSeen) {
+                    nonDuplicateMarks.add(thisGateMark);
+                }
+                allMarks.add(thisGateMark);
             }
 
         }
@@ -395,8 +400,18 @@ public class XMLParser {
             return participants;
         }
 
-        public ArrayList<Mark> getCompoundMarks() {
-            return course;
+        /**
+         * @return Returns ALL compound marks as stated in the RaceXML (INCLUDING DUPLICATE MARKS)
+         */
+        public List<Mark> getAllCompoundMarks() {
+            return allMarks;
+        }
+
+        /**
+         * @return Returns Marks from the race XML without any duplicates
+         */
+        public List<Mark> getNonDupCompoundMarks() {
+            return nonDuplicateMarks;
         }
 
         public ArrayList<Corner> getCompoundMarkSequence() {

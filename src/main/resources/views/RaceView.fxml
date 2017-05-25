@@ -25,7 +25,7 @@
                 <Label layoutX="11.0" layoutY="14.0" text="Timer" textFill="WHITE" />
                 <Label layoutX="11.0" layoutY="88.0" text="Wind direction" textFill="WHITE" />
                 <Circle fx:id="windBackgroundCircle" blendMode="DARKEN" fill="#3dcdc8" layoutX="110.0" layoutY="166.0" radius="35.0" stroke="#d7d7d7" strokeType="INSIDE" strokeWidth="3.0" />
-                <Text fx:id="windArrowText" fill="#a8a8a8" layoutX="86.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↑">
+                <Text fx:id="windArrowText" fill="#a8a8a8" layoutX="86.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↓">
                     <font>
                         <Font name="AdobeArabic-Regular" size="55.0" />
                     </font>
