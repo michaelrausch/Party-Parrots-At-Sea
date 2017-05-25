@@ -2,6 +2,7 @@ package seng302.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import seng302.models.Yacht;
 import seng302.models.stream.StreamParser;
+import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 
 public class FinishScreenViewController implements Initializable {
 
@@ -56,8 +58,21 @@ public class FinishScreenViewController implements Initializable {
             new PropertyValueFactory<>("country")
         );
 
+        // check if the boat is racing
+        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+            .getParticipants();
+        ArrayList<Integer> participantIDs = new ArrayList<>();
+        for (Participant p : participants) {
+            participantIDs.add(p.getsourceID());
+        }
+
         // add data to table
-        data.addAll(StreamParser.getBoatsPos().values());
+        for (Yacht boat : StreamParser.getBoatsPos().values()) {
+            if (participantIDs.contains(boat.getSourceID())) {
+                data.add(boat);
+                System.out.println(boat.getBoatName() + ": " + boat.getPosition());
+            }
+        }
         finishOrderTable.refresh();
     }
 

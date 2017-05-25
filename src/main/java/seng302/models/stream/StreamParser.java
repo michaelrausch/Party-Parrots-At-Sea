@@ -252,10 +252,6 @@ public class StreamParser extends Thread{
                 yacht.setPosition(String.valueOf(pos));
                 pos++;
             }
-        } else {
-            for (Yacht yacht : boatsPos.values()) {
-                yacht.setPosition("-");
-            }
         }
     }
 
