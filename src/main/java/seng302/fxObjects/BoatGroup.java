@@ -1,5 +1,7 @@
 package seng302.fxObjects;
 
+import java.util.ArrayList;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
@@ -9,6 +11,11 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import seng302.models.Yacht;
+import seng302.GeometryUtils;
+import seng302.controllers.CanvasController;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.models.mark.SingleMark;
 import seng302.models.stream.StreamParser;
 
 import java.text.DateFormat;
@@ -39,6 +46,8 @@ public class BoatGroup extends Group {
     private Group lineGroup = new Group();
     private Polygon boatPoly;
     private Wake wake;
+    private Line leftLayLine;
+    private Line rightLayline;
     private Double distanceTravelled = 0.0;
     private Point2D lastPoint;
     private boolean destinationSet;
@@ -239,11 +248,50 @@ public class BoatGroup extends Group {
     }
 
 
+    /**
+     * This function works out if a boat is going upwind or down wind. It looks at the boats current position, the next
+     * gates position and the current wind
+     * If bot the wind vector from the next gate and the boat from the next gate lay on the same side, then the boat is
+     * going up wind, if they are on different sides of the gate, then the boat is going downwind
+     * @param canvasController
+     */
+    public Boolean isUpwindLeg(CanvasController canvasController, Mark nextMark) {
+
+        Double windAngle = StreamParser.getWindDirection();
+        GateMark thisGateMark = (GateMark) nextMark;
+        SingleMark nextMark1 = thisGateMark.getSingleMark1();
+        SingleMark nextMark2 = thisGateMark.getSingleMark2();
+        Point2D nextMarkPoint1 = canvasController.findScaledXY(nextMark1.getLatitude(), nextMark1.getLongitude());
+        Point2D nextMarkPoint2 = canvasController.findScaledXY(nextMark2.getLatitude(), nextMark2.getLongitude());
+
+        Point2D boatCurrentPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+        Point2D windTestPoint = GeometryUtils.makeArbitraryVectorPoint(nextMarkPoint1, windAngle, 10d);
+
+
+        Integer boatLineFuncResult = GeometryUtils.lineFunction(nextMarkPoint1, nextMarkPoint2, boatCurrentPoint);
+        Integer windLineFuncResult = GeometryUtils.lineFunction(nextMarkPoint1, nextMarkPoint2, windTestPoint);
+
+
+        /*
+        If both the wind vector from the gate and the boat from the gate are on the same side of that gate, then the
+        boat is travelling into the wind. thus upwind. Otherwise if they are on different sides, then the boat is going
+        with the wind.
+         */
+        if (boatLineFuncResult == windLineFuncResult) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+
     public void setIsSelected(Boolean isSelected) {
         this.isSelected = isSelected;
         setLineGroupVisible(isSelected);
         setWakeVisible(isSelected);
         boatAnnotations.setVisible(isSelected);
+        setLayLinesVisible(isSelected);
     }
 
     public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime, boolean trail, boolean wake) {
@@ -258,6 +306,23 @@ public class BoatGroup extends Group {
 
     public void setWakeVisible(Boolean visible) {
         wake.setVisible(visible);
+    }
+
+    public void setLayLinesVisible(Boolean visible) {
+        leftLayLine.setVisible(visible);
+        rightLayline.setVisible(visible);
+    }
+
+    public void setLaylines(Line line1, Line line2) {
+        this.leftLayLine = line1;
+        this.rightLayline = line2;
+    }
+
+    public ArrayList<Line> getLaylines() {
+        ArrayList<Line> laylines = new ArrayList<>();
+        laylines.add(leftLayLine);
+        laylines.add(rightLayline);
+        return laylines;
     }
 
     public Yacht getBoat() {
@@ -284,6 +349,16 @@ public class BoatGroup extends Group {
         Group group = new Group();
         group.getChildren().addAll(wake, lineGroup);
         return group;
+    }
+
+
+    public Double getBoatLayoutX() {
+        return boatPoly.getLayoutX();
+    }
+
+
+    public Double getBoatLayoutY() {
+        return boatPoly.getLayoutY();
     }
 
     public boolean isStopped() {

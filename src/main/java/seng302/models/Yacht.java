@@ -1,10 +1,13 @@
 package seng302.models;
 
 import javafx.scene.paint.Color;
+import seng302.models.mark.Mark;
 import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import seng302.models.stream.StreamParser;
+import seng302.models.stream.XMLParser.RaceXMLObject.Corner;
 
 /**
  * Yacht class for the racing boat.
@@ -34,6 +37,10 @@ public class Yacht {
     private Long timeTillNext;
     private Long markRoundTime;
 
+    // Mark rounding
+    private Long markRoundingTime;
+    private Mark lastMarkRounded;
+    private Mark nextMark;
 
 
     /**
@@ -179,9 +186,25 @@ public class Yacht {
         return markRoundTime;
     }
 
+    public Mark getLastMarkRounded() {
+        return lastMarkRounded;
+    }
+
+    public void setLastMarkRounded(Mark lastMarkRounded) {
+        this.lastMarkRounded = lastMarkRounded;
+    }
+
     @Override
     public String toString() {
         return boatName;
     }
+
+      public void setNextMark(Mark nextMark) {
+            this.nextMark = nextMark;
+      }
+
+      public Mark getNextMark(){
+        return nextMark;
+      }
 
 }

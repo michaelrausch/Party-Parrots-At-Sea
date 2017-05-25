@@ -6,6 +6,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -20,18 +22,25 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import seng302.GeometryUtils;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.controllers.annotations.ImportantAnnotationsState;
 import seng302.fxObjects.BoatGroup;
 import seng302.models.*;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.models.mark.MarkGroup;
+import seng302.models.mark.SingleMark;
 import seng302.models.stream.StreamParser;
+import seng302.models.stream.XMLParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,7 +48,6 @@ import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 import java.util.stream.Collectors;
 
 /**
- *
  * Created by ptg19 on 29/03/17.
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
@@ -67,7 +75,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private CanvasController includedCanvasController;
 
-    private ArrayList<Yacht> startingBoats = new ArrayList<>();
+    private static ArrayList<Yacht> startingBoats = new ArrayList<>();
     private boolean displayFps;
     private Timeline timerTimeline;
     private Stage stage;
@@ -147,7 +155,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             (observable, oldValue, newValue) -> displayFps = !displayFps);
     }
 
-
     private void initialiseAnnotationSlider() {
         annotationSlider.setLabelFormatter(new StringConverter<Double>() {
             @Override
@@ -221,7 +228,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             }
         });
 
-
         // Adds the new data series to the sparkline (and set the colour of the series)
         raceSparkLine.setCreateSymbols(false);
         positions.stream().filter(spark -> !raceSparkLine.getData().contains(spark)).forEach(spark -> {
@@ -254,6 +260,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 color = yacht.getColour();
             }
         }
+        if (color == null){
+            return String.format( "#%02X%02X%02X",255,255,255);
+        }
         return String.format( "#%02X%02X%02X",
             (int)( color.getRed() * 255 ),
             (int)( color.getGreen() * 255 ),
@@ -282,6 +291,40 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
         // Start the timer
         timerTimeline.playFromStart();
+    }
+
+
+    /**
+     * Iterates over all corners until ones SeqID matches with the boats current leg number.
+     * Then it gets the compoundMarkID of that corner and uses it to fetch the appropriate mark
+     * Returns null if no next mark found.
+     * @param bg The BoatGroup to find the next mark of
+     * @return The next Mark or null if none found
+     */
+    private Mark getNextMark(BoatGroup bg) {
+        Integer legNumber = bg.getBoat().getLegNumber();
+
+        List<XMLParser.RaceXMLObject.Corner> markSequence = StreamParser.getXmlObject().getRaceXML().getCompoundMarkSequence();
+
+        if (legNumber == 0) {
+            return null;
+        } else if (legNumber == markSequence.size() - 1) {
+            return null;
+        }
+
+        for (XMLParser.RaceXMLObject.Corner corner : markSequence) {
+            if (legNumber + 2 == corner.getSeqID()) {
+                Integer thisCompoundMarkID = corner.getCompoundMarkID();
+
+                for (Mark mark : StreamParser.getXmlObject().getRaceXML().getAllCompoundMarks()) {
+                    if (mark.getCompoundMarkID() == thisCompoundMarkID) {
+                        return mark;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
 
@@ -364,6 +407,94 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
             }
         }
+    }
+
+
+    private void updateLaylines(BoatGroup bg) {
+
+        Mark nextMark = getNextMark(bg);
+        Boolean isUpwind = null;
+        // Can only calc leg direction if there is a next mark and it is a gate mark
+        if (nextMark != null) {
+            if (nextMark instanceof GateMark) {
+                if (bg.isUpwindLeg(includedCanvasController, nextMark)) {
+                    isUpwind = true;
+                } else {
+                    isUpwind = false;
+                }
+
+                for(MarkGroup mg : includedCanvasController.getMarkGroups()) {
+
+                    mg.removeLaylines();
+
+                    if (mg.getMainMark().getId() == nextMark.getId()) {
+
+                        SingleMark singleMark1 = ((GateMark) nextMark).getSingleMark1();
+                        SingleMark singleMark2 = ((GateMark) nextMark).getSingleMark2();
+                        Point2D markPoint1 = includedCanvasController.findScaledXY(singleMark1.getLatitude(), singleMark1.getLongitude());
+                        Point2D markPoint2 = includedCanvasController.findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
+                        HashMap<Double, Double> angleAndSpeed;
+                        if (isUpwind) {
+                            angleAndSpeed = PolarTable.getOptimalUpwindVMG(StreamParser.getWindSpeed());
+                        } else {
+                            angleAndSpeed = PolarTable.getOptimalDownwindVMG(StreamParser.getWindSpeed());
+                        }
+
+                        Double resultingAngle = angleAndSpeed.keySet().iterator().next();
+
+
+                        Point2D boatCurrentPos = new Point2D(bg.getBoatLayoutX(), bg.getBoatLayoutY());
+                        Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
+                        Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
+                        Line rightLayline = new Line();
+                        Line leftLayline = new Line();
+                        if (lineFuncResult == 1) {
+                            rightLayline = makeRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                        } else if (lineFuncResult == -1) {
+                            rightLayline = makeRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                        }
+
+                        leftLayline.setStrokeWidth(0.5);
+                        leftLayline.setStroke(bg.getBoat().getColour());
+
+                        rightLayline.setStrokeWidth(0.5);
+                        rightLayline.setStroke(bg.getBoat().getColour());
+
+                        bg.setLaylines(leftLayline, rightLayline);
+                        mg.addLaylines(leftLayline, rightLayline);
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    private Point2D getPointRotation(Point2D ref, Double distance, Double angle){
+        Double newX = ref.getX() + (ref.getX() + distance -ref.getX())*Math.cos(angle) - (ref.getY() + distance -ref.getY())*Math.sin(angle);
+        Double newY = ref.getY() + (ref.getX() + distance -ref.getX())*Math.sin(angle) + (ref.getY() + distance -ref.getY())*Math.cos(angle);
+
+        return new Point2D(newX, newY);
+    }
+
+
+    public Line  makeLeftLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
+
+        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
+        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
+        return line;
+
+    }
+
+
+    public Line makeRightLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
+
+        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle - layLineAngle);
+        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
+        return line;
+
     }
 
 
@@ -482,6 +613,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             //We need to iterate over all race groups to get the matching boat group belonging to this boat if we
             //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
             if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
+                updateLaylines(bg);
                 bg.setIsSelected(true);
                 selectedBoat = yacht;
             } else {
