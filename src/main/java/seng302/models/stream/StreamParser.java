@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -34,8 +33,8 @@ import seng302.models.stream.packets.StreamPacket;
  */
 public class StreamParser extends Thread {
 
-    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markPositions = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatPositions = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markLocations = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
     private String threadName;
     private Thread t;
     private static boolean newRaceXmlReceived = false;
@@ -45,7 +44,7 @@ public class StreamParser extends Thread {
     private static boolean streamStatus = false;
     private static long timeSinceStart = -1;
     private static Map<Integer, Yacht> boats = new ConcurrentHashMap<>();
-    private static Map<Long, Yacht> boatsPos = new ConcurrentSkipListMap<>();
+    private static Map<Integer, Yacht> boatsPos = new ConcurrentSkipListMap<>();
     private static double windDirection = 0;
     private static Long currentTimeLong;
     private static String currentTimeString;
@@ -145,6 +144,7 @@ public class StreamParser extends Thread {
             }
         } catch (NullPointerException e) {
             System.out.println("Error parsing packet");
+            e.printStackTrace();
         }
     }
 
@@ -218,13 +218,12 @@ public class StreamParser extends Thread {
 
         int noBoats = payload[22];
         int raceType = payload[23];
-        boatsPos = new TreeMap<>();
         for (int i = 0; i < noBoats; i++) {
             long boatStatusSourceID = bytesToLong(
                 Arrays.copyOfRange(payload, 24 + (i * 20), 28 + (i * 20)));
             Yacht boat = boats.get((int) boatStatusSourceID);
             boat.setBoatStatus((int) payload[28 + (i * 20)]);
-            boat.setLegNumber((int) payload[29 + (i * 20)]);
+            setBoatLegPosition(boat, (int) payload[29 + (i * 20)]);
             boat.setPenaltiesAwarded((int) payload[30 + (i * 20)]);
             boat.setPenaltiesServed((int) payload[31 + (i * 20)]);
             Long estTimeAtNextMark = bytesToLong(
@@ -233,6 +232,7 @@ public class StreamParser extends Thread {
             Long estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
+//            boatsPos.put(estTimeAtFinish, boat);
 //            String boatStatus = "SourceID: " + boatStatusSourceID;
 //            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
 //            boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
@@ -242,16 +242,35 @@ public class StreamParser extends Thread {
 //            boatStatus += "\nEstTimeAtFinish: " + bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
 //            boatStatuses.add(boatStatus);
         }
-        if (isRaceStarted()) {
-            int pos = 1;
-            for (Yacht yacht : boatsPos.values()) {
-                yacht.setPosition(String.valueOf(pos));
-                pos++;
+//        if (isRaceStarted()) {
+//            int pos = 1;
+//            for (Yacht yacht : boatsPos.values()) {
+//                yacht.setPosition(String.valueOf(pos));
+//                pos++;
+//            }
+//        } else {
+//            for (Yacht yacht : boatsPos.values()) {
+//                yacht.setPosition("-");
+//            }
+//        }
+    }
+
+    private static void setBoatLegPosition(Yacht updatingBoat, Integer leg){
+        Integer placing = 1;
+        if (leg != updatingBoat.getLegNumber() && (raceStarted || raceFinished)) {
+            for (Yacht boat : boats.values()) {
+                if (boat.getLegNumber() != null && leg <= boat.getLegNumber()){
+                    placing += 1;
+                }
             }
-        } else {
-            for (Yacht yacht : boatsPos.values()) {
-                yacht.setPosition("-");
-            }
+            System.out.println("updatingBoat.getBoatName() +  = " + updatingBoat.getBoatName() +  " " + placing);
+            updatingBoat.setPosition(placing.toString());
+            updatingBoat.setLegNumber(leg);
+            boatsPos.putIfAbsent(placing, updatingBoat);
+            boatsPos.replace(placing, updatingBoat);
+        } else if(updatingBoat.getLegNumber() == null){
+            updatingBoat.setPosition("1");
+            updatingBoat.setLegNumber(leg);
         }
     }
 
@@ -395,9 +414,9 @@ public class StreamParser extends Thread {
             BoatPositionPacket boatPacket = new BoatPositionPacket(boatId, timeValid, lat, lon,
                 heading, groundSpeed);
 
-            //add a new priority que to the boatPositions HashMap
-            if (!boatPositions.containsKey(boatId)) {
-                boatPositions.put(boatId,
+            //add a new priority que to the boatLocations HashMap
+            if (!boatLocations.containsKey(boatId)) {
+                boatLocations.put(boatId,
                     new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
                         @Override
                         public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
@@ -405,14 +424,14 @@ public class StreamParser extends Thread {
                         }
                     }));
             }
-            boatPositions.get(boatId).put(boatPacket);
+            boatLocations.get(boatId).put(boatPacket);
         } else if (deviceType == 3) {
             BoatPositionPacket markPacket = new BoatPositionPacket(boatId, timeValid, lat, lon,
                 heading, groundSpeed);
 
-            //add a new priority que to the boatPositions HashMap
-            if (!markPositions.containsKey(boatId)) {
-                markPositions.put(boatId,
+            //add a new priority que to the boatLocations HashMap
+            if (!markLocations.containsKey(boatId)) {
+                markLocations.put(boatId,
                     new PriorityBlockingQueue<>(256, new Comparator<BoatPositionPacket>() {
                         @Override
                         public int compare(BoatPositionPacket p1, BoatPositionPacket p2) {
@@ -420,7 +439,7 @@ public class StreamParser extends Thread {
                         }
                     }));
             }
-            markPositions.get(boatId).put(markPacket);
+            markLocations.get(boatId).put(markPacket);
         }
     }
 
@@ -592,7 +611,8 @@ public class StreamParser extends Thread {
      *
      * @return a map of time to finish and boat.
      */
-    public static Map<Long, Yacht> getBoatsPos() {
+    public static Map<Integer, Yacht> getBoatsPos() {
+
         return boatsPos;
     }
 

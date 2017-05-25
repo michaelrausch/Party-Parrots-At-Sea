@@ -6,6 +6,7 @@ import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import seng302.models.stream.StreamParser;
 
 /**
  * Yacht class for the racing boat.

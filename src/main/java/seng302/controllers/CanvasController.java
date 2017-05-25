@@ -214,7 +214,7 @@ public class CanvasController {
         for (BoatGroup boatGroup : boatGroups) {
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it
-            if (StreamParser.boatPositions.containsKey(boatGroup.getRaceId())) {
+            if (StreamParser.boatLocations.containsKey(boatGroup.getRaceId())) {
                 if (boatGroup.isStopped()) {
                     updateBoatGroup(boatGroup);
                 }
@@ -223,7 +223,7 @@ public class CanvasController {
         }
         for (MarkGroup markGroup : markGroups) {
             for (Long id : markGroup.getRaceIds()) {
-                if (StreamParser.markPositions.containsKey(id)) {
+                if (StreamParser.markLocations.containsKey(id)) {
                     updateMarkGroup(id, markGroup);
                 }
             }
@@ -240,7 +240,7 @@ public class CanvasController {
     }
 
     private void updateBoatGroup(BoatGroup boatGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatPositions.get(boatGroup.getRaceId());
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
         // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
         if (movementQueue.size() > 0){
             try {
@@ -256,7 +256,7 @@ public class CanvasController {
     }
 
     void updateMarkGroup (long raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markPositions.get(raceId);
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markLocations.get(raceId);
         if (movementQueue.size() > 0){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();

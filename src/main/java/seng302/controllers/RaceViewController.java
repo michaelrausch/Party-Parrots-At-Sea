@@ -67,7 +67,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private CanvasController includedCanvasController;
 
-    private ArrayList<Yacht> startingBoats = new ArrayList<>();
+    private static ArrayList<Yacht> startingBoats = new ArrayList<>();
     private boolean displayFps;
     private Timeline timerTimeline;
     private Stage stage;
@@ -220,7 +220,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 return -1;
             }
         });
-
 
         // Adds the new data series to the sparkline (and set the colour of the series)
         raceSparkLine.setCreateSymbols(false);

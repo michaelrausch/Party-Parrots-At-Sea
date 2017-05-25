@@ -34,6 +34,6 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
         setContentPane("/views/StartScreenView.fxml");
-        StreamParser.boatPositions.clear();
+        StreamParser.boatLocations.clear();
     }
 }
