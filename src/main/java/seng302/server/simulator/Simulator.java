@@ -57,7 +57,6 @@ public class Simulator extends Observable implements Runnable {
 					numOfFinishedBoats += moveBoat(boat, lapse);
 				}
 			}
-			//System.out.println(boats.get(0));
 
 			setChanged();
 			notifyObservers(boats);
@@ -68,8 +67,6 @@ public class Simulator extends Observable implements Runnable {
 				e.printStackTrace();
 			}
 		}
-
-		System.out.println("[SERVER] Race simulator has been terminated");
 	}
 
 	/**

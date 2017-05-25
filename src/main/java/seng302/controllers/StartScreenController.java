@@ -2,6 +2,7 @@ package seng302.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,7 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -23,8 +23,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.models.Yacht;
 import seng302.models.stream.StreamParser;
+import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 
 public class StartScreenController implements Initializable {
+
     @FXML
     private GridPane gridPane;
     @FXML
@@ -48,19 +50,18 @@ public class StartScreenController implements Initializable {
 
     private boolean switchedToRaceView = false;
 
-    private void setContentPane(String jfxUrl){
-        try{
+    private void setContentPane(String jfxUrl) {
+        try {
             // get the main controller anchor pane (MainView.fxml)
             AnchorPane contentPane = (AnchorPane) gridPane.getParent();
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-            contentPane.getChildren().addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
-        }
-        catch(javafx.fxml.LoadException e){
+            contentPane.getChildren()
+                .addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+        } catch (javafx.fxml.LoadException e) {
             e.printStackTrace();
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -72,7 +73,8 @@ public class StartScreenController implements Initializable {
     }
 
     /**
-     * Running a timer to update the livestream status on welcome screen. Update interval is 1 second.
+     * Running a timer to update the livestream status on welcome screen. Update interval is 1
+     * second.
      */
     public void startStream() {
         if (StreamParser.isStreamStatus()) {
@@ -102,8 +104,10 @@ public class StartScreenController implements Initializable {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.RED);
                             switchToRaceViewButton.setDisable(false);
-                            String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
-                            String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
+                            String timerMinute = Long
+                                .toString(StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long
+                                .toString(StreamParser.getTimeSinceStart() % 60);
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
@@ -114,8 +118,10 @@ public class StartScreenController implements Initializable {
                             updateTeamList();
                             timeTillLive.setTextFill(Color.BLACK);
                             switchToRaceViewButton.setDisable(false);
-                            String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
-                            String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
+                            String timerMinute = Long
+                                .toString(-1 * StreamParser.getTimeSinceStart() / 60);
+                            String timerSecond = Long
+                                .toString(-1 * StreamParser.getTimeSinceStart() % 60);
                             if (timerSecond.length() == 1) {
                                 timerSecond = "0" + timerSecond;
                             }
@@ -143,19 +149,40 @@ public class StartScreenController implements Initializable {
         teamList.setItems(data);
 
         boatNameCol.setCellValueFactory(
-                new PropertyValueFactory<>("boatName")
+            new PropertyValueFactory<>("boatName")
         );
         shortNameCol.setCellValueFactory(
-                new PropertyValueFactory<>("shortName")
+            new PropertyValueFactory<>("shortName")
         );
         countryCol.setCellValueFactory(
-                new PropertyValueFactory<>("country")
+            new PropertyValueFactory<>("country")
         );
         posCol.setCellValueFactory(
-                new PropertyValueFactory<>("position")
+            new PropertyValueFactory<>("position")
         );
 
-        data.addAll(StreamParser.getBoatsPos().values());
+        // check if the boat is racing
+        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+            .getParticipants();
+        ArrayList<Integer> participantIDs = new ArrayList<>();
+        for (Participant p : participants) {
+            participantIDs.add(p.getsourceID());
+        }
+
+        // add boats to the start screen list
+        if (StreamParser.isRaceStarted()) {  // if race is started, use StreamParser.getBoatsPos()
+            for (Yacht boat : StreamParser.getBoatsPos().values()) {
+                if (participantIDs.contains(boat.getSourceID())) {
+                    data.add(boat);
+                }
+            }
+        } else {  // else use StreamParser.getBoats()
+            for (Yacht boat : StreamParser.getBoats().values()) {
+                if (participantIDs.contains(boat.getSourceID())) {
+                    data.add(boat);
+                }
+            }
+        }
         teamList.refresh();
     }
 }

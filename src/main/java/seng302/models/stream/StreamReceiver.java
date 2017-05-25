@@ -44,7 +44,6 @@ public class StreamReceiver extends Thread {
     }
 
     public void start () {
-        System.out.println("[CLIENT] Starting " +  threadName );
         if (t == null) {
             t = new Thread (this, threadName);
             t.start ();
@@ -155,6 +154,5 @@ public class StreamReceiver extends Thread {
 
     public static void noMoreBytes(){
         moreBytes = false;
-        System.out.println("[CLIENT] Shutting down stream receiver");
     }
 }

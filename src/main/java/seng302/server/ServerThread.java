@@ -31,8 +31,6 @@ public class ServerThread implements Runnable, Observer {
         Thread runner = new Thread(this, threadName);
         runner.setDaemon(true);
 
-        serverLog("Spawning Server", 0);
-
         raceSimulator = new Simulator(BOAT_LOCATION_PERIOD);
         raceSimulator.addObserver(this);
         // run race simulator, so it can send boats' static location.
@@ -136,7 +134,6 @@ public class ServerThread implements Runnable, Observer {
      * Starts an instance of the race simulator
      */
     private void startRaceSim(){
-        serverLog("Starting Running Race Simulator", 0);
         // set race started to true, so the simulator will start moving boats
         raceSimulator.setRaceStarted(true);
     }
@@ -144,8 +141,7 @@ public class ServerThread implements Runnable, Observer {
     /**
      * Starts sending heartbeat messages to the client
      */
-    private void startSendingHeartbeats(){
-        serverLog("Sending Heartbeats", 0);
+    private void startSendingHeartbeats() {
         Timer t = new Timer();
 
         t.schedule(new TimerTask() {
@@ -156,7 +152,7 @@ public class ServerThread implements Runnable, Observer {
                 try {
                     server.send(heartbeat);
                 } catch (IOException e) {
-                    System.out.print("");
+                    e.printStackTrace();
                 }
             }
         }, 0, HEARTBEAT_PERIOD);
@@ -176,14 +172,13 @@ public class ServerThread implements Runnable, Observer {
                     if (startTime < System.currentTimeMillis() && !raceStarted){
                         startRaceSim();
                         raceStarted = true;
-                        serverLog("Race Started", 0);
                     }
                     else{
                         server.send(raceStartStatusMessage);
                     }
 
                 } catch (IOException e) {
-                    System.out.print("");
+                    e.printStackTrace();
                 }
             }
         }, 0, RACE_START_STATUS_PERIOD);
@@ -193,7 +188,6 @@ public class ServerThread implements Runnable, Observer {
      * Start sending race start status messages until race starts
      */
     private void startSendingRaceStatusMessages(){
-        serverLog("Sending race status messages", 0);
         Timer t = new Timer();
         t.schedule(new TimerTask() {
             @Override
@@ -201,9 +195,8 @@ public class ServerThread implements Runnable, Observer {
                 Message raceStatusMessage = getRaceStatusMessage();
                 try {
                     server.send(raceStatusMessage);
-
                 } catch (IOException e) {
-                    System.out.print("");
+                    e.printStackTrace();
                 }
             }
         }, 0, RACE_STATUS_PERIOD);
@@ -220,17 +213,12 @@ public class ServerThread implements Runnable, Observer {
 
             if (raceData != null){
                 server.send(raceData);
-                serverLog("Sending race data", 0);
             }
-
             if (boatData != null){
                 server.send(boatData);
-                serverLog("Sending boat data", 0);
             }
-
              if (regatta != null){
                  server.send(regatta);
-                 serverLog("Sending regatta data", 0);
             }
         } catch (IOException e) {
             serverLog("Couldn't send an XML Message: " + e.getMessage(), 0);
@@ -249,7 +237,6 @@ public class ServerThread implements Runnable, Observer {
                     Message raceData = getXmlMessage("/server_config/courseLimits.xml", XMLMessageSubType.RACE);
                     if (raceData != null) {
                         server.send(raceData);
-                        serverLog("Sending race data", 0);
                     }
                 }catch (IOException e) {
                     serverLog("Couldn't send an XML Message: " + e.getMessage(), 0);
@@ -345,7 +332,7 @@ public class ServerThread implements Runnable, Observer {
                     }
 
                 } catch (IOException e) {
-                    System.out.print("");
+                    e.printStackTrace();
                 }
             }
         }, 0, BOAT_LOCATION_PERIOD);
@@ -372,7 +359,6 @@ public class ServerThread implements Runnable, Observer {
                     numOfBoatsFinished ++;
                     if (!boatsFinished.get(boat.getSourceID())) {
                         boatsFinished.put(boat.getSourceID(), true);
-                        serverLog("Boat " + boat.getSourceID() + " finished the race", 1);
                     }
                 }
                 Message m = new BoatLocationMessage(boat.getSourceID(), 1, boat.getLat(),

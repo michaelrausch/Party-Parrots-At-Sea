@@ -5,5 +5,5 @@ package seng302.models.mark;
  * Created by Haoming Yin (hyi25) on 17/3/17.
  */
 public enum MarkType {
-    SINGLE_MARK, OPEN_GATE, CLOSED_GATE
+    SINGLE_MARK, OPEN_GATE
 }
