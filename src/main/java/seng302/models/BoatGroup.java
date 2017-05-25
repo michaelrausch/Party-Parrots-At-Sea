@@ -1,5 +1,6 @@
 package seng302.models;
 
+import java.util.ArrayList;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
@@ -450,6 +451,18 @@ public class BoatGroup extends Group {
     public void setLayLinesVisible(Boolean visible) {
         leftLayLine.setVisible(visible);
         rightLayline.setVisible(visible);
+    }
+
+    public void setLaylines(Line line1, Line line2) {
+        this.leftLayLine = line1;
+        this.rightLayline = line2;
+    }
+
+    public ArrayList<Line> getLaylines() {
+        ArrayList<Line> laylines = new ArrayList<>();
+        laylines.add(leftLayLine);
+        laylines.add(rightLayline);
+        return laylines;
     }
 
     public Yacht getBoat() {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -46,34 +47,27 @@ public class MarkGroup extends Group {
         super.getChildren().add(markCircle);
     }
 
-    private Point2D getPointRotation(Point2D ref, Double distance, Double angle){
-        Double newX = ref.getX() + (ref.getX() + distance -ref.getX())*Math.cos(angle) - (ref.getY() + distance -ref.getY())*Math.sin(angle);
-        Double newY = ref.getY() + (ref.getX() + distance -ref.getX())*Math.sin(angle) + (ref.getY() + distance -ref.getY())*Math.cos(angle);
+    public void addLaylines(Line line1, Line line2) {
 
-        return new Point2D(newX, newY);
+        super.getChildren().addAll(line1, line2);
     }
 
 
-    public void addLeftLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
+    public void removeLaylines() {
+        ArrayList<Node> toRemove = new ArrayList<>();
+        for(Node node : super.getChildren()) {
+            if (node instanceof Line) {
+                Line layLine = (Line) node;
 
-        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
-        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
-        line.setStrokeWidth(1);
-        line.setStroke(Color.GREEN);
-
-        super.getChildren().addAll(line);
-
-    }
-
-    public void addRightLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
-
-        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle - layLineAngle);
-        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
-        line.setStrokeWidth(1);
-        line.setStroke(Color.GREEN);
-
-        super.getChildren().addAll(line);
-
+                /***
+                 * OOHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhh
+                 */
+                if (layLine.getStrokeWidth() == 0.5){
+                    toRemove.add(layLine);
+                }
+            }
+        }
+        super.getChildren().removeAll(toRemove);
     }
 
     public MarkGroup(GateMark mark, Point2D points1, Point2D points2) {

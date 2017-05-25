@@ -22,6 +22,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -259,6 +260,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 color = yacht.getColour();
             }
         }
+        if (color == null){
+            return String.format( "#%02X%02X%02X",255,255,255);
+        }
         return String.format( "#%02X%02X%02X",
             (int)( color.getRed() * 255 ),
             (int)( color.getGreen() * 255 ),
@@ -427,6 +431,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
 
                 for(MarkGroup mg : includedCanvasController.getMarkGroups()) {
+
+                    mg.removeLaylines();
+
                     if (mg.getMainMark().getId() == nextMark.getId()) {
 
                         SingleMark singleMark1 = ((GateMark) nextMark).getSingleMark1();
@@ -446,13 +453,24 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         Point2D boatCurrentPos = new Point2D(bg.getBoatLayoutX(), bg.getBoatLayoutY());
                         Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
                         Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
+                        Line rightLayline = new Line();
+                        Line leftLayline = new Line();
                         if (lineFuncResult == 1) {
-                            mg.addRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
-                            mg.addLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            rightLayline = makeRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
                         } else if (lineFuncResult == -1) {
-                            mg.addRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
-                            mg.addLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                            rightLayline = makeRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
                         }
+
+                        leftLayline.setStrokeWidth(0.5);
+                        leftLayline.setStroke(bg.getBoat().getColour());
+
+                        rightLayline.setStrokeWidth(0.5);
+                        rightLayline.setStroke(bg.getBoat().getColour());
+
+                        bg.setLaylines(leftLayline, rightLayline);
+                        mg.addLaylines(leftLayline, rightLayline);
 
                     }
                 }
@@ -460,6 +478,32 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
 
         System.out.println();
+    }
+
+
+    private Point2D getPointRotation(Point2D ref, Double distance, Double angle){
+        Double newX = ref.getX() + (ref.getX() + distance -ref.getX())*Math.cos(angle) - (ref.getY() + distance -ref.getY())*Math.sin(angle);
+        Double newY = ref.getY() + (ref.getX() + distance -ref.getX())*Math.sin(angle) + (ref.getY() + distance -ref.getY())*Math.cos(angle);
+
+        return new Point2D(newX, newY);
+    }
+
+
+    public Line  makeLeftLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
+
+        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
+        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
+        return line;
+
+    }
+
+
+    public Line makeRightLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
+
+        Point2D ep = getPointRotation(startPoint, 50.0, baseAngle - layLineAngle);
+        Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
+        return line;
+
     }
 
 
@@ -623,9 +667,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             //We need to iterate over all race groups to get the matching boat group belonging to this boat if we
             //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
             if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
+                updateLaylines(bg);
                 bg.setIsSelected(true);
                 selectedBoat = yacht;
-                updateLaylines(bg);
             } else {
                 bg.setIsSelected(false);
             }
