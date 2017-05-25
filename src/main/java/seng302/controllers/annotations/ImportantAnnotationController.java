@@ -6,12 +6,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import seng302.controllers.RaceViewController;
-import seng302.controllers.annotations.Annotation;
 
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URL;;
 import java.util.ResourceBundle;
 
 public class ImportantAnnotationController implements Initializable {
