@@ -184,5 +184,17 @@ Remove scroll bars
 }
 
 .chart{
-    -fx-background-color: #ffffff;
+}
+
+.chart-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 1.6em;
+}
+
+.axis-label {
+    -fx-text-fill: #ffffff;
+}
+
+.axis {
+    -fx-tick-label-fill: #ffffff;
 }

@@ -90,9 +90,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         //Formatting the y axis of the sparkline
         raceSparkLine.getYAxis().setRotate(180);
         raceSparkLine.getYAxis().setTickLabelRotation(180);
-        raceSparkLine.getYAxis().setTranslateX(15);
+        raceSparkLine.getYAxis().setTranslateX(-5);
         raceSparkLine.getYAxis().setAutoRanging(false);
-
+        sparklineYAxis.setTickMarkVisible(false);
         startingBoats = new ArrayList<>(StreamParser.getBoats().values());
 
         includedCanvasController.setup(this);
