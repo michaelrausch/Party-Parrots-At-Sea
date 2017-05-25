@@ -38,6 +38,6 @@
             <Insets bottom="50.0" />
          </GridPane.margin>
       </TableView>
-      <Button mnemonicParsing="false" onAction="#switchToStartScreenView" styleClass="blue-ui-btn" text="Return to Start Screen" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Button mnemonicParsing="false" onAction="#switchToStartScreenView" styleClass="blue-ui-btn" text="Return to Start Screen" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="TOP" />
    </children>
 </GridPane>
