@@ -10,13 +10,20 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import seng302.models.BoatGroup;
+import javafx.scene.shape.Polygon;
+import javafx.scene.text.Text;
+import seng302.fxObjects.BoatAnnotations;
+import seng302.fxObjects.BoatGroup;
+import seng302.fxObjects.Wake;
 import seng302.models.Colors;
 import seng302.models.Yacht;
+import seng302.models.mark.GateMark;
+import seng302.models.mark.Mark;
+import seng302.fxObjects.MarkGroup;
+import seng302.models.mark.MarkType;
+import seng302.models.mark.SingleMark;
 import seng302.models.map.Boundary;
 import seng302.models.map.CanvasMap;
-import seng302.models.mark.*;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
@@ -45,7 +52,7 @@ public class CanvasController {
     private Group group;
     private GraphicsContext gc;
     private ImageView mapImage;
-    
+
     private final int BUFFER_SIZE   = 50;
     private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
     private final int PANEL_HEIGHT  = 960;
@@ -66,6 +73,8 @@ public class CanvasController {
 
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
+    private Text FPSdisplay = new Text();
+    private Polygon raceBorder = new Polygon();
 
     //FRAME RATE
     private Double frameRate = 60.0;
@@ -108,36 +117,48 @@ public class CanvasController {
         gc.setGlobalAlpha(0.5);
         fitMarksToCanvas();
         drawGoogleMap();
-        // TODO: 1/05/17 wmu16 - Change this call to now draw the marks as from the xml
-        initializeBoats();
+        FPSdisplay.setLayoutX(5);
+        FPSdisplay.setLayoutY(20);
+        FPSdisplay.setStrokeWidth(2);
+        group.getChildren().add(FPSdisplay);
+        group.getChildren().add(raceBorder);
         initializeMarks();
-        timer = new AnimationTimer() {
+        initializeBoats();
 
-            private int UPDATE_FPM_PERIOD = 50; // update FPM label every 50 frames
-            private int updateFPMCounter = 100;
+        timer = new AnimationTimer() {
+            private long lastTime = 0;
+            private int FPSCount = 30;
 
             @Override
             public void handle(long now) {
-
-                //fps stuff
-                long oldFrameTime = frameTimes[frameTimeIndex] ;
-                frameTimes[frameTimeIndex] = now ;
-                frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length ;
-                if (frameTimeIndex == 0) {
-                    arrayFilled = true ;
-                }
-                long elapsedNanos;
-                if (arrayFilled) {
-                    elapsedNanos = now - oldFrameTime ;
-                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
-                    frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
-                    if (updateFPMCounter++ > UPDATE_FPM_PERIOD) {
-                        updateFPMCounter = 0;
-                        drawFps(frameRate.intValue());
+                    if (lastTime == 0) {
+                        lastTime = now;
+                    } else {
+                        if (now - lastTime >= (1e8 / 60)) { //Fix for framerate going above 60 when minimized
+                            long oldFrameTime = frameTimes[frameTimeIndex];
+                            frameTimes[frameTimeIndex] = now;
+                            frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length;
+                            if (frameTimeIndex == 0) {
+                                arrayFilled = true;
+                            }
+                            long elapsedNanos;
+                            if (arrayFilled) {
+                                elapsedNanos = now - oldFrameTime;
+                                long elapsedNanosPerFrame = elapsedNanos / frameTimes.length;
+                                frameRate = 1_000_000_000.0 / elapsedNanosPerFrame;
+                                if (FPSCount-- == 0) {
+                                    FPSCount = 30;
+                                    drawFps(frameRate.intValue());
+                                }
+                                raceViewController.updateSparkLine();
+                            }
+                            updateGroups();
+                            if (StreamParser.isRaceFinished()) {
+                                this.stop();
+                            }
+                            lastTime = now;
+                        }
                     }
-                    raceViewController.updateSparkLine();
-                }
-                updateGroups();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
                 }
@@ -180,34 +201,16 @@ public class CanvasController {
     private void addRaceBorder() {
         XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
         ArrayList<Limit> courseLimits = raceXMLObject.getCourseLimit();
-        gc.setStroke(Color.DARKBLUE);
-        gc.setLineWidth(3);
-        double[] xBoundaryPoints = new double[courseLimits.size()];
-        double[] yBoundaryPoints = new double[courseLimits.size()];
-        for (int i = 0; i < courseLimits.size() - 1; i++) {
-            Limit thisPoint1 = courseLimits.get(i);
-            SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID(), thisPoint1.getSeqID());
-            Limit thisPoint2 = courseLimits.get(i+1);
-            SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID(), thisPoint2.getSeqID());
-            Point2D borderPoint1 = findScaledXY(thisMark1);
-            Point2D borderPoint2 = findScaledXY(thisMark2);
-            gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
-                borderPoint2.getX(), borderPoint2.getY());
-            xBoundaryPoints[i] = borderPoint1.getX();
-            yBoundaryPoints[i] = borderPoint1.getY();
+        raceBorder.setStroke(new Color(0.0f, 0.0f, 0.74509807f, 1));
+        raceBorder.setStrokeWidth(3);
+        raceBorder.setFill(new Color(0,0,0,0));
+        List<Double> boundaryPoints = new ArrayList<>();
+        for (Limit limit : courseLimits) {
+            Point2D location = findScaledXY(limit.getLat(), limit.getLng());
+            boundaryPoints.add(location.getX());
+            boundaryPoints.add(location.getY());
         }
-        Limit thisPoint1 = courseLimits.get(courseLimits.size()-1);
-        SingleMark thisMark1 = new SingleMark("", thisPoint1.getLat(), thisPoint1.getLng(), thisPoint1.getSeqID(), thisPoint1.getSeqID());
-        Limit thisPoint2 = courseLimits.get(0);
-        SingleMark thisMark2 = new SingleMark("", thisPoint2.getLat(), thisPoint2.getLng(), thisPoint2.getSeqID(), thisPoint2.getSeqID());
-        Point2D borderPoint1 = findScaledXY(thisMark1);
-        Point2D borderPoint2 = findScaledXY(thisMark2);
-        gc.strokeLine(borderPoint1.getX(), borderPoint1.getY(),
-            borderPoint2.getX(), borderPoint2.getY());
-        xBoundaryPoints[courseLimits.size()-1] = borderPoint1.getX();
-        yBoundaryPoints[courseLimits.size()-1] = borderPoint1.getY();
-//        gc.setFill(Color.LIGHTBLUE);
-//        gc.fillPolygon(xBoundaryPoints,yBoundaryPoints,yBoundaryPoints.length);
+        raceBorder.getPoints().setAll(boundaryPoints);
     }
 
     private void updateGroups(){
@@ -233,8 +236,6 @@ public class CanvasController {
 
     private void checkForCourseChanges() {
         if (StreamParser.isNewRaceXmlReceived()){
-            gc.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            drawGoogleMap();
             addRaceBorder();
         }
     }
@@ -247,7 +248,9 @@ public class CanvasController {
                 BoatPositionPacket positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
                 double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                boatGroup.setDestination(p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(), positionPacket.getTimeValid(), frameRate, boatGroup.getRaceId());
+                boatGroup.setDestination(
+                    p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(),
+                    positionPacket.getTimeValid(), frameRate);
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -273,7 +276,9 @@ public class CanvasController {
      */
     private void initializeBoats() {
         Map<Integer, Yacht> boats = StreamParser.getBoats();
-        Group boatAnnotations = new Group();
+        Group wakes = new Group();
+        Group trails = new Group();
+        Group annotations = new Group();
 
         ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML().getParticipants();
         ArrayList<Integer> participantIDs = new ArrayList<>();
@@ -286,10 +291,14 @@ public class CanvasController {
                 boat.setColour(Colors.getColor());
                 BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
                 boatGroups.add(boatGroup);
-                boatAnnotations.getChildren().add(boatGroup.getLowPriorityAnnotations());
+                trails.getChildren().add(boatGroup.getTrail());
+                wakes.getChildren().add(boatGroup.getWake());
+                annotations.getChildren().add(boatGroup.getAnnotations());
             }
         }
-        group.getChildren().add(boatAnnotations);
+        group.getChildren().addAll(trails);
+        group.getChildren().addAll(wakes);
+        group.getChildren().addAll(annotations);
         group.getChildren().addAll(boatGroups);
     }
 
@@ -345,14 +354,10 @@ public class CanvasController {
 
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
-            gc.clearRect(5, 5, 60, 30);
-            gc.setFont(new Font(16));
-            gc.setLineWidth(4);
-            gc.setGlobalAlpha(0.75);
-            gc.fillText(fps + " FPS", 5, 20);
-            gc.setGlobalAlpha(0.5);
+            FPSdisplay.setVisible(true);
+            FPSdisplay.setText(String.format("%d FPS", fps));
         } else {
-            gc.clearRect(5,5,60,30);
+            FPSdisplay.setVisible(false);
         }
     }
 

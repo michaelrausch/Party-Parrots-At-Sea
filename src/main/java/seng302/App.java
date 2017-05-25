@@ -29,9 +29,6 @@ public class App extends Application {
             StreamReceiver.noMoreBytes();
             System.exit(0);
         });
-
-
-
     }
 
     public static void main(String[] args) {
