@@ -70,7 +70,6 @@ public class FinishScreenViewController implements Initializable {
         for (Yacht boat : StreamParser.getBoatsPos().values()) {
             if (participantIDs.contains(boat.getSourceID())) {
                 data.add(boat);
-                System.out.println(boat.getBoatName() + ": " + boat.getPosition());
             }
         }
         finishOrderTable.refresh();
