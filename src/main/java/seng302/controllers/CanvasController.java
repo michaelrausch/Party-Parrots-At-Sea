@@ -34,6 +34,12 @@ import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.server.simulator.GeoUtility;
 import seng302.server.simulator.mark.Position;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.PriorityBlockingQueue;
+
 /**
  * Created by ptg19 on 15/03/17.
  * Modified by Haoming Yin (hyi25) on 20/3/2017.
@@ -49,16 +55,11 @@ public class CanvasController {
     private GraphicsContext gc;
     private ImageView mapImage;
 
-    private final int MARK_SIZE = 10;
-    private final int BUFFER_SIZE = 50;
-    private final int PANEL_WIDTH = 1260; // it should be 1280 but, minors 40 to cancel the bias.
-    private final int PANEL_HEIGHT = 960;
-    private final int CANVAS_WIDTH = 720;
+    private final int BUFFER_SIZE   = 50;
+    private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private final int PANEL_HEIGHT  = 960;
+    private final int CANVAS_WIDTH  = 720;
     private final int CANVAS_HEIGHT = 720;
-    private final int LHS_BUFFER = BUFFER_SIZE;
-    private final int RHS_BUFFER = BUFFER_SIZE;
-    private final int TOP_BUFFER = BUFFER_SIZE;
-    private final int BOT_BUFFER = TOP_BUFFER;
     private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
@@ -122,6 +123,9 @@ public class CanvasController {
         initializeMarks();
         timer = new AnimationTimer() {
 
+            private int UPDATE_FPM_PERIOD = 50; // update FPM label every 50 frames
+            private int updateFPMCounter = 100;
+
             @Override
             public void handle(long now) {
 
@@ -134,14 +138,15 @@ public class CanvasController {
                 }
                 long elapsedNanos;
                 if (arrayFilled) {
-                    elapsedNanos = now - oldFrameTime;
-                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length;
-                    frameRate = 1_000_000_000.0 / elapsedNanosPerFrame;
-                    drawFps(frameRate.intValue());
+                    elapsedNanos = now - oldFrameTime ;
+                    long elapsedNanosPerFrame = elapsedNanos / frameTimes.length ;
+                    frameRate = 1_000_000_000.0 / elapsedNanosPerFrame ;
+                    if (updateFPMCounter++ > UPDATE_FPM_PERIOD) {
+                        updateFPMCounter = 0;
+                        drawFps(frameRate.intValue());
+                    }
+                    raceViewController.updateSparkLine();
                 }
-
-                // TODO: 1/05/17 cir27 - Make the RaceObjects update on the actual delay.
-                elapsedNanos = 1000 / 60;
                 updateGroups();
                 if (StreamParser.isRaceFinished()) {
                     this.stop();
@@ -388,19 +393,16 @@ public class CanvasController {
 
     }
 
-    private void drawFps(int fps) {
-        if (raceViewController.isDisplayFps()) {
-            gc.clearRect(5, 5, 50, 20);
-            gc.setFill(Color.SKYBLUE);
-            gc.fillRect(4, 4, 51, 21);
-            gc.setFill(Color.BLACK);
-            gc.setFont(new Font(14));
-            gc.setLineWidth(3);
+    private void drawFps(int fps){
+        if (raceViewController.isDisplayFps()){
+            gc.clearRect(5, 5, 60, 30);
+            gc.setFont(new Font(16));
+            gc.setLineWidth(4);
+            gc.setGlobalAlpha(0.75);
             gc.fillText(fps + " FPS", 5, 20);
+            gc.setGlobalAlpha(0.5);
         } else {
-            gc.clearRect(5, 5, 50, 20);
-            gc.setFill(Color.SKYBLUE);
-            gc.fillRect(4, 4, 51, 21);
+            gc.clearRect(5,5,60,30);
         }
     }
 
@@ -463,29 +465,24 @@ public class CanvasController {
 
         if (scaleDirection == ScaleDirection.HORIZONTAL) {
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
-            referencePointX = LHS_BUFFER + distanceScaleFactor * Math.sin(referenceAngle) * Mark
-                .calculateDistance(referencePoint, minLonPoint);
+            referencePointX = BUFFER_SIZE + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, maxLatPoint));
-            referencePointY = CANVAS_HEIGHT - (TOP_BUFFER + BOT_BUFFER);
-            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * Mark
-                .calculateDistance(referencePoint, maxLatPoint);
-            referencePointY = referencePointY / 2;
-            referencePointY += TOP_BUFFER;
-            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark
-                .calculateDistance(referencePoint, maxLatPoint);
+            referencePointY  = CANVAS_HEIGHT - (BUFFER_SIZE + BUFFER_SIZE);
+            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
+            referencePointY  = referencePointY / 2;
+            referencePointY += BUFFER_SIZE;
+            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
         } else {
-            referencePointY = CANVAS_HEIGHT - BOT_BUFFER;
+            referencePointY = CANVAS_HEIGHT - BUFFER_SIZE;
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
-            referencePointX = LHS_BUFFER;
-            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark
-                .calculateDistance(referencePoint, minLonPoint);
-            referencePointX += ((CANVAS_WIDTH - (LHS_BUFFER + RHS_BUFFER)) - (minLonToMaxLon
-                * distanceScaleFactor)) / 2;
+            referencePointX  = BUFFER_SIZE;
+            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
+            referencePointX += ((CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
         }
-        if (horizontalInversion) {
-            referencePointX = CANVAS_WIDTH - RHS_BUFFER - (referencePointX - LHS_BUFFER);
+        if(horizontalInversion) {
+            referencePointX = CANVAS_WIDTH - BUFFER_SIZE - (referencePointX - BUFFER_SIZE);
         }
     }
 
@@ -509,10 +506,10 @@ public class CanvasController {
         double horiDistance =
             Math.cos(horiAngle) * Mark.calculateDistance(minLonPoint, maxLonPoint);
 
-        double vertScale = (CANVAS_HEIGHT - (TOP_BUFFER + BOT_BUFFER)) / vertDistance;
+        double vertScale = (CANVAS_HEIGHT - (BUFFER_SIZE + BUFFER_SIZE)) / vertDistance;
 
-        if ((horiDistance * vertScale) > (CANVAS_WIDTH - (RHS_BUFFER + LHS_BUFFER))) {
-            distanceScaleFactor = (CANVAS_WIDTH - (RHS_BUFFER + LHS_BUFFER)) / horiDistance;
+        if ((horiDistance * vertScale) > (CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE))) {
+            distanceScaleFactor = (CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE)) / horiDistance;
             scaleDirection = ScaleDirection.HORIZONTAL;
         } else {
             distanceScaleFactor = vertScale;
@@ -561,8 +558,8 @@ public class CanvasController {
             yAxisLocation += (int) Math
                 .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         }
-        if (horizontalInversion) {
-            xAxisLocation = CANVAS_WIDTH - RHS_BUFFER - (xAxisLocation - LHS_BUFFER);
+        if(horizontalInversion) {
+            xAxisLocation = CANVAS_WIDTH - BUFFER_SIZE - (xAxisLocation - BUFFER_SIZE);
         }
         return new Point2D(xAxisLocation, yAxisLocation);
     }

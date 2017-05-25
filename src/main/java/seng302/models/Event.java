@@ -92,7 +92,6 @@ public class Event {
         if (this.isFinishingEvent) {
             return (this.getTimeString() + ", " + this.getBoat().getBoatName() + " finished the race");
         }
-//        System.out.println(this.getDistanceBetweenMarks());
         return (this.getTimeString() + ", " + this.getBoat().getBoatName() + " passed " + this.mark1.getName() + " going heading " + this.getBoatHeading() + "°");
     }
 

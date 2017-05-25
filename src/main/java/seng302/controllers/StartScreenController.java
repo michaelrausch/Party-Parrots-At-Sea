@@ -2,6 +2,7 @@ package seng302.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,6 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.models.Yacht;
 import seng302.models.stream.StreamParser;
+import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 
 public class StartScreenController implements Initializable {
 
@@ -162,7 +164,28 @@ public class StartScreenController implements Initializable {
             new PropertyValueFactory<>("position")
         );
 
-        data.addAll(StreamParser.getBoatsPos().values());
+        // check if the boat is racing
+        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+            .getParticipants();
+        ArrayList<Integer> participantIDs = new ArrayList<>();
+        for (Participant p : participants) {
+            participantIDs.add(p.getsourceID());
+        }
+
+        // add boats to the start screen list
+        if (StreamParser.isRaceStarted()) {  // if race is started, use StreamParser.getBoatsPos()
+            for (Yacht boat : StreamParser.getBoatsPos().values()) {
+                if (participantIDs.contains(boat.getSourceID())) {
+                    data.add(boat);
+                }
+            }
+        } else {  // else use StreamParser.getBoats()
+            for (Yacht boat : StreamParser.getBoats().values()) {
+                if (participantIDs.contains(boat.getSourceID())) {
+                    data.add(boat);
+                }
+            }
+        }
         teamList.refresh();
     }
 }
