@@ -304,14 +304,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Mark getNextMark(BoatGroup bg) {
         Integer legNumber = bg.getBoat().getLegNumber();
 
-        System.out.println("Leg Number: " + legNumber);
         List<XMLParser.RaceXMLObject.Corner> markSequence = StreamParser.getXmlObject().getRaceXML().getCompoundMarkSequence();
 
         if (legNumber == 0) {
-            System.out.println("PreStart");
             return null;
         } else if (legNumber == markSequence.size() - 1) {
-            System.out.println("Finishing");
             return null;
         }
 
@@ -415,19 +412,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     private void updateLaylines(BoatGroup bg) {
 
-        System.out.println("========" + bg.getBoat().getBoatName() + "=========");
         Mark nextMark = getNextMark(bg);
         Boolean isUpwind = null;
         // Can only calc leg direction if there is a next mark and it is a gate mark
         if (nextMark != null) {
-            System.out.println("Next Mark: " + nextMark.getName());
             if (nextMark instanceof GateMark) {
                 if (bg.isUpwindLeg(includedCanvasController, nextMark)) {
                     isUpwind = true;
-                    System.out.println(bg.getBoat().getBoatName() + " is on an upwind leg");
                 } else {
                     isUpwind = false;
-                    System.out.println(bg.getBoat().getBoatName() + " is on a downwind leg");
                 }
 
                 for(MarkGroup mg : includedCanvasController.getMarkGroups()) {
@@ -476,8 +469,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
             }
         }
-
-        System.out.println();
     }
 
 
