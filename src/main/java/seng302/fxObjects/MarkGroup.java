@@ -12,7 +12,6 @@ import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
-import seng302.GeometryUtils;
 
 /**
  * Grouping of javaFX objects needed to represent a Mark on screen.

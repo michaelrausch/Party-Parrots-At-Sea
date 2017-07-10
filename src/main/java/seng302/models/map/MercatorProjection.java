@@ -1,5 +1,8 @@
 package seng302.models.map;
 
+import javafx.geometry.Point2D;
+import seng302.utilities.GeoPoint;
+
 /**
  * An utility class useful to convert between Geo locations and Mercator projection
  * planar coordinates.
@@ -22,31 +25,31 @@ public class MercatorProjection {
 
 	/**
 	 * Projects a Geo Location (lat, lng) on a planar
-	 * @param geo MapGeo (lat, lng) location to be projected
-	 * @return the projection GeoPoint (x, y) on planar
+	 * @param geo GeoPoint (lat, lng) location to be projected
+	 * @return the projection Point2D (x, y) on planar
 	 */
-	public static MapPoint toMapPoint(MapGeo geo) {
-		MapPoint point = new MapPoint(0, 0);
-		MapPoint origin = new MapPoint(MERCATOR_RANGE / 2.0, MERCATOR_RANGE / 2.0);
-		point.setX(origin.getX() + geo.getLng() * pixelsPerLngDegree);
+	public static Point2D toMapPoint(GeoPoint geo) {
+		double x, y;
+		Point2D origin = new Point2D(MERCATOR_RANGE / 2.0, MERCATOR_RANGE / 2.0);
+		x = (origin.getX() + geo.getLng() * pixelsPerLngDegree);
 
 //		NOTE(appleton): Truncating to 0.9999 effectively limits latitude to
 //      89.189.  This is about a third of a tile past the edge of the world tile.
 		double sinY = bound(Math.sin(Math.toRadians(geo.getLat())));
-		point.setY(origin.getY() + 0.5 * Math.log((1 + sinY) / (1 - sinY)) * (-pixelsPerLngRadian));
-		return point;
+		y = origin.getY() + 0.5 * Math.log((1 + sinY) / (1 - sinY)) * (-pixelsPerLngRadian);
+		return new Point2D(x, y);
 	}
 
 	/**
 	 * Converts the planar projection (x, y) back to Geo Location (lat, lng)
-	 * @param point MapPoint (x, y) to be converted back
+	 * @param point Point2D (x, y) to be converted back
 	 * @return the original Geo location converted from the given projection point
 	 */
-	public static MapGeo toMapGeo(MapPoint point) {
-		MapPoint origin = new MapPoint(MERCATOR_RANGE / 2.0, MERCATOR_RANGE / 2.0);
+	public static GeoPoint toMapGeo(Point2D point) {
+		Point2D origin = new Point2D(MERCATOR_RANGE / 2.0, MERCATOR_RANGE / 2.0);
 		double lng = (point.getX() - origin.getX()) / pixelsPerLngDegree;
 		double latRadians = (point.getY() - origin.getY()) / (-pixelsPerLngRadian);
 		double lat = Math.toDegrees(2 * Math.atan(Math.exp(latRadians)) - Math.PI / 2.0);
-		return new MapGeo(lat, lng);
+		return new GeoPoint(lat, lng);
 	}
 }
