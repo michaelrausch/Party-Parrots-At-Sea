@@ -6,16 +6,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import seng302.gameServer.GameConnectionListener;
+import seng302.gameServer.GameState;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * A Class describing the actions of the start screen controller
  * Created by wmu16 on 10/07/17.
  */
 public class StartScreen2Controller {
-
-
 
     @FXML
     private TextField ipTextField;
@@ -38,16 +41,43 @@ public class StartScreen2Controller {
         }
     }
 
+
+    /**
+     * ATTEMPTS TO:
+     * Sets up a new game state with your IP address as designated as the host.
+     * Starts a thread to listen for incoming connections
+     * Switches to the lobby screen
+     */
     @FXML
     public void hostButtonPressed() {
-        setContentPane("/views/LobbyView.fxml");
+        try {
+            String ipAddress = InetAddress.getLocalHost().getHostAddress();
+            new GameState(ipAddress);
+            GameConnectionListener gameConnectionListener = new GameConnectionListener();
+            gameConnectionListener.start();
+            setContentPane("/views/LobbyView.fxml");
+        } catch (UnknownHostException e) {
+            System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("COULD NOT OPEN CONNECTION!");
+        }
+
     }
 
 
     @FXML
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
+        String ipAddress = ipTextField.getText().trim();
+        Socket host = null;
+        try {
+            host = new Socket(ipAddress, GameConnectionListener.GAME_HOST_PORT);
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("connecting to: " + ipTextField.getText());
     }
 }

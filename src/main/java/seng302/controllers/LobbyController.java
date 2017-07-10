@@ -52,6 +52,7 @@ public class LobbyController {
         // TODO: 10/07/17 wmu16 - Finish function!
         setContentPane("/views/StartScreen2View.fxml");
         System.out.println("Leaving lobby!");
+
     }
 
 
