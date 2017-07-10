@@ -33,7 +33,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-        setContentPane("/views/StartScreenView.fxml");
+        setContentPane("/views/StartScreen2View.fxml");
         StreamParser.boatLocations.clear();
     }
 }
