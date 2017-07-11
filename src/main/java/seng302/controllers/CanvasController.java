@@ -8,6 +8,7 @@ import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
@@ -109,6 +110,7 @@ public class CanvasController {
         // Bind canvas size to stack pane size.
         canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_WIDTH));
         canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_HEIGHT));
+
     }
 
     public void initializeCanvas (){
@@ -525,4 +527,5 @@ public class CanvasController {
     List<MarkGroup> getMarkGroups() {
         return  markGroups;
     }
+
 }
