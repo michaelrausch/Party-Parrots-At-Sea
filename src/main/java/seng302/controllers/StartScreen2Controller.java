@@ -6,12 +6,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import seng302.gameServer.GameConnectionListener;
+import seng302.gameServer.GameServerThread;
 import seng302.gameServer.GameState;
+import seng302.models.stream.StreamReceiver;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
@@ -53,15 +53,11 @@ public class StartScreen2Controller {
         try {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
-            GameConnectionListener gameConnectionListener = new GameConnectionListener();
-            gameConnectionListener.start();
+            GameServerThread gameServerThread = new GameServerThread("Game Server");
             setContentPane("/views/LobbyView.fxml");
         } catch (UnknownHostException e) {
             System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("COULD NOT OPEN CONNECTION!");
         }
 
     }
@@ -71,13 +67,7 @@ public class StartScreen2Controller {
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
         String ipAddress = ipTextField.getText().trim();
-        Socket host = null;
-        try {
-            host = new Socket(ipAddress, GameConnectionListener.GAME_HOST_PORT);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("connecting to: " + ipTextField.getText());
+        StreamReceiver sr = new StreamReceiver(ipAddress, GameServerThread.PORT_NUMBER, "HostStream");
+        sr.start();
     }
 }

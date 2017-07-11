@@ -10,14 +10,15 @@ import java.util.ArrayList;
  */
 public class GameState {
 
-    public static final Integer MAX_NUM_PLAYERS = 10;
     private static String hostIpAddress;
     private static ArrayList<Player> players;
     private static Boolean isRaceStarted;
+    private static GameStages currentStage;
     
     public GameState(String hostIpAddress) {
         GameState.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
+        currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
     }
 
@@ -41,6 +42,13 @@ public class GameState {
         return isRaceStarted;
     }
 
+    public static GameStages getCurrentStage() {
+        return currentStage;
+    }
+
+    public static void setCurrentStage(GameStages currentStage) {
+        GameState.currentStage = currentStage;
+    }
 
     /**
      * This iterates through all players and updates each players info to its new state based on its current data
@@ -50,8 +58,8 @@ public class GameState {
             // TODO: 10/07/17 wmu16 - Update all player info 
         }
     }
-    
-    
-    
-    
+
+
+
+
 }

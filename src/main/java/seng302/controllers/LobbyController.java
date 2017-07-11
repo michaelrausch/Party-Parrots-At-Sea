@@ -8,6 +8,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import seng302.gameServer.GameStages;
+import seng302.gameServer.GameState;
 
 import java.io.IOException;
 
@@ -58,7 +60,6 @@ public class LobbyController {
 
     @FXML
     public void readyButtonPressed() {
-        // TODO: 10/07/17 wmu16 - Finish function
-        System.out.println("LEts play!!");
+        GameState.setCurrentStage(GameStages.RACING);
     }
 }
