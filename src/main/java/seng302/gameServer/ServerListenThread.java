@@ -1,6 +1,5 @@
 package seng302.gameServer;
 
-import com.sun.corba.se.spi.activation.Server;
 import seng302.models.Player;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ public class ServerListenThread extends Thread{
     private ServerSocketChannel socketChannel;
     private ClientConnectionDelegate delegate;
 
-    public ServerListenThread(ServerSocketChannel socketChannel, ClientConnectionDelegate delegate){
+    ServerListenThread(ServerSocketChannel socketChannel, ClientConnectionDelegate delegate){
         this.socketChannel = socketChannel;
         this.delegate = delegate;
     }

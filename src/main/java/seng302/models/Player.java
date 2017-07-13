@@ -24,7 +24,6 @@ public class Player {
         return socketChannel;
     }
 
-
     public Integer getLastMarkPassed() {
         return lastMarkPassed;
     }
@@ -40,6 +39,11 @@ public class Player {
     @Override
     public String toString() {
         String playerAddress = null;
+
+        if (socketChannel == null){
+            return "Disconnected Player";
+        }
+
         try {
             playerAddress = socketChannel.getRemoteAddress().toString();
         } catch (IOException e) {
@@ -47,5 +51,23 @@ public class Player {
         }
 
         return playerAddress;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null){
+            return false;
+        }
+
+        if (!(obj instanceof Player)){
+            return false;
+        }
+
+        return ((Player) obj).socketChannel.equals(socketChannel);
+    }
+
+    @Override
+    public int hashCode(){
+        return socketChannel.hashCode();
     }
 }
