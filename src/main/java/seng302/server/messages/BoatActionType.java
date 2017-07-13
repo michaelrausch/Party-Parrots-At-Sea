@@ -1,4 +1,4 @@
-package seng302.models.stream.packets;
+package seng302.server.messages;
 
 /**
  * Created by kre39 on 12/07/17.

@@ -10,13 +10,15 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import seng302.models.stream.StreamParser;
-import seng302.models.stream.packets.BoatActionPacket;
-import seng302.models.stream.packets.BoatActionType;
+import seng302.server.ClientTransmitterThread;
+import seng302.server.messages.BoatActionMessage;
+import seng302.server.messages.BoatActionType;
 
 public class Controller implements Initializable {
 
     @FXML
     private AnchorPane contentPane;
+    private ClientTransmitterThread clientTransmitterThread;
 
     private void setContentPane(String jfxUrl) {
         try {
@@ -37,29 +39,30 @@ public class Controller implements Initializable {
         contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
         setContentPane("/views/StartScreenView.fxml");
         StreamParser.boatLocations.clear();
+        clientTransmitterThread = new ClientTransmitterThread("RaceVision Test Client Transmitter");
 
 
     }
 
     /** Handle the key-pressed event from the text field. */
     public void keyPressed(KeyEvent e) {
-        BoatActionPacket boatActionPacket;
+        BoatActionMessage boatActionMessage;
         switch (e.getCode()){
             case SPACE: // align with vmg
-                boatActionPacket = new BoatActionPacket(BoatActionType.VMG);
-                boatActionPacket.sendPacket();
+                boatActionMessage = new BoatActionMessage(BoatActionType.VMG);
+                clientTransmitterThread.sendBoatActionMessage(boatActionMessage);
                 break;
             case PAGE_UP: // upwind
-                boatActionPacket = new BoatActionPacket(BoatActionType.UPWIND);
-                boatActionPacket.sendPacket();
+                boatActionMessage = new BoatActionMessage(BoatActionType.UPWIND);
+                clientTransmitterThread.sendBoatActionMessage(boatActionMessage);
                 break;
             case PAGE_DOWN: // downwind
-                boatActionPacket = new BoatActionPacket(BoatActionType.DOWNWIND);
-                boatActionPacket.sendPacket();
+                boatActionMessage = new BoatActionMessage(BoatActionType.DOWNWIND);
+                clientTransmitterThread.sendBoatActionMessage(boatActionMessage);
                 break;
             case ENTER: // tack/gybe
-                boatActionPacket = new BoatActionPacket(BoatActionType.TACK_GYBE);
-                boatActionPacket.sendPacket();
+                boatActionMessage = new BoatActionMessage(BoatActionType.TACK_GYBE);
+                clientTransmitterThread.sendBoatActionMessage(boatActionMessage);
                 break;
             //TODO Allow a zoom in and zoom out methods
             case Z:  // zoom in
@@ -75,8 +78,8 @@ public class Controller implements Initializable {
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
-                BoatActionPacket boatActionPacket = new BoatActionPacket(BoatActionType.SAILS_IN);
-                boatActionPacket.sendPacket();
+                BoatActionMessage boatActionMessage = new BoatActionMessage(BoatActionType.SAILS_IN);
+                clientTransmitterThread.sendBoatActionMessage(boatActionMessage);
                 break;
         }
     }

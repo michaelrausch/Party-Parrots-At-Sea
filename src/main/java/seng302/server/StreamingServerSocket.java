@@ -44,10 +44,9 @@ class StreamingServerSocket {
     void send(Message message) throws IOException{
         if (client == null){
             return;
+
         }
-
         message.send(client);
-
         seqNum++;
     }
 
