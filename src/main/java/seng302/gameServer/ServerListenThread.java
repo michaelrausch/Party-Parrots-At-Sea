@@ -28,8 +28,6 @@ public class ServerListenThread extends Thread{
             SocketChannel thisClient = socketChannel.accept();
             if (thisClient.socket() != null){
                 Player thisPlayer = new Player(thisClient);
-                GameState.addPlayer(thisPlayer);
-
                 delegate.clientConnected(thisPlayer);
             }
         } catch (IOException e) {

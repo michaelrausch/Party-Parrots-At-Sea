@@ -37,7 +37,7 @@ public class Header {
     private void putInBuffer(byte[] bytes, long val){
         byte[] tmp = bytes.clone();
         Message.reverse(tmp);
-        
+
         buff.put(tmp);
         buffPos += tmp.length;
         buff.position(buffPos);
