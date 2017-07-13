@@ -18,7 +18,6 @@ public class Player {
 
     public Player(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
-
     }
 
     public SocketChannel getSocketChannel() {

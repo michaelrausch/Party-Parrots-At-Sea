@@ -238,61 +238,49 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                     serverLog("Couldn't send an XML Message: " + e.getMessage(), 0);
                 }
             }
-        },25000);
+        },1000);
         //Delays the new course xml data for 25 seconds so the boats are able to pass the starting line
     }
 
     public void run() {
         ServerListenThread serverListenThread;
+        Boolean serverIsSendingMessages = false;
 
         try{
             server = ServerSocketChannel.open();
             server.socket().bind(new InetSocketAddress("localhost", PORT_NUMBER));
-//            serverListenThread = new ServerListenThread(server, this);
-//            serverListenThread.start();
+            serverListenThread = new ServerListenThread(server, this);
+            serverListenThread.start();
         }
         catch (IOException e){
             serverLog("Failed to bind socket: " + e.getMessage(), 0);
         }
 
-        acceptConnection();
-//        acceptConnection();
-//        acceptConnection();
-        System.out.println("well, hit here now");
+       while (hosting) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        for (Player player : GameState.getPlayers()) {
-            System.out.println(player);
-        }
+            if (GameState.getCurrentStage() == GameStages.RACING && !serverIsSendingMessages) {
+                serverLog("Race Started", 0);
 
+                startSendingHeartbeats();
+                sendXml();
+                startSendingRaceStartStatusMessages();
+                //startSendingRaceStatusMessages();
+                sendPostStartCourseXml();
+                serverIsSendingMessages = true;
+            }
 
-//        while (hosting) {
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//
-//            if (GameState.getCurrentStage() == GameStages.RACING) {
-//                System.out.println("Racing");
-//                //startSendingHeartbeats();
-//                sendXml();
-//                //startSendingRaceStartStatusMessages();
-//                //startSendingRaceStatusMessages();
-//                //sendPostStartCourseXml();
-//            }
-//
-//            else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-//
-//            }
-//
-//            startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
-//        }
+            else if (GameState.getCurrentStage() == GameStages.FINISHED) {
+                serverLog("Race Finished", 0);
+            }
 
-        startSendingHeartbeats();
-//        sendXml();
-        startSendingRaceStartStatusMessages();
-        //startSendingRaceStatusMessages();
-        sendPostStartCourseXml();
+            startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
+
+            }
     }
 
 //    /**
@@ -319,6 +307,19 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
 //        }, 0, BOAT_LOCATION_PERIOD);
 //    }
 
+    /**
+     * A client has tried to connect to the server
+     * @param player The player that connected
+     */
+    @Override
+    public void clientConnected(Player player) {
+        if (GameState.getPlayers().size() < MAX_NUM_PLAYERS && GameState.getCurrentStage() == GameStages.LOBBYING) {
+            System.out.println("");
+            serverLog("Player Connected", 0);
+            GameState.addPlayer(player);
+        }
+        sendXml();
+    }
 
     /**
      * Listens for a connection and upon finding one, creates a Player object and adds it to the universal GameState
@@ -349,13 +350,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
         seqNum++;       // TODO: 11/07/17 Do we increment seqNum for every message or for the one message to everyone 
     }
 
-    @Override
-    public void clientConnected(Player player) {
-        if (GameState.getPlayers().size() < MAX_NUM_PLAYERS && GameState.getCurrentStage() == GameStages.LOBBYING) {
-            System.out.println("Hi");
-            GameState.addPlayer(player);
-        }
-    }
+
     
     /**
      * Send a boat location message when they are updated by the simulator

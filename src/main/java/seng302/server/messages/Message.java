@@ -45,6 +45,7 @@ public abstract class Message {
         buffer = ByteBuffer.allocate(Header.getSize() + getSize() + CRC_SIZE);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         bufferPosition = 0;
+        buffer.position(bufferPosition);
     }
 
     /**
