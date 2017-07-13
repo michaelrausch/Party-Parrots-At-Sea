@@ -1,18 +1,17 @@
 package seng302.controllers;
 
-import com.sun.org.apache.bcel.internal.generic.BREAKPOINT;
-import javafx.event.EventHandler;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import seng302.models.stream.StreamParser;
+import seng302.models.stream.packets.BoatActionPacket;
+import seng302.models.stream.packets.BoatActionType;
 
 public class Controller implements Initializable {
 
@@ -44,32 +43,40 @@ public class Controller implements Initializable {
 
     /** Handle the key-pressed event from the text field. */
     public void keyPressed(KeyEvent e) {
+        BoatActionPacket boatActionPacket;
         switch (e.getCode()){
             case SPACE: // align with vmg
-                System.out.println("Key pressed = space");
+                boatActionPacket = new BoatActionPacket(BoatActionType.VMG);
+                boatActionPacket.sendPacket();
                 break;
             case PAGE_UP: // upwind
-                System.out.println("Key pressed = page up");
+                boatActionPacket = new BoatActionPacket(BoatActionType.UPWIND);
+                boatActionPacket.sendPacket();
                 break;
             case PAGE_DOWN: // downwind
-                System.out.println("Key pressed = page down");
+                boatActionPacket = new BoatActionPacket(BoatActionType.DOWNWIND);
+                boatActionPacket.sendPacket();
                 break;
             case ENTER: // tack/gybe
-                System.out.println("Key pressed = enter");
+                boatActionPacket = new BoatActionPacket(BoatActionType.TACK_GYBE);
+                boatActionPacket.sendPacket();
                 break;
+            //TODO Allow a zoom in and zoom out methods
             case Z:  // zoom in
-                System.out.println("Key pressed = z");
+                System.out.println("Zoom in");
                 break;
             case X:  // zoom out
-                System.out.println("Key pressed = x");
+                System.out.println("Zoom out");
                 break;
         }
     }
 
     public void keyReleased(KeyEvent e) {
         switch (e.getCode()) {
+            //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
-                System.out.println("Key pressed = shift");
+                BoatActionPacket boatActionPacket = new BoatActionPacket(BoatActionType.SAILS_IN);
+                boatActionPacket.sendPacket();
                 break;
         }
     }
