@@ -141,6 +141,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                 Message heartbeat = new Heartbeat(seqNum);
 
                 try {
+                    System.out.println("Sending heartbeat");
                     broadcast(heartbeat);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -163,6 +164,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                     if (startTime < System.currentTimeMillis() && GameState.getCurrentStage() != GameStages.RACING){
                     }
                     else{
+                        System.out.println("Sending race start status");
                         broadcast(raceStartStatusMessage);
                     }
 
@@ -202,12 +204,15 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
             Message regatta = getXmlMessage("/server_config/regatta.xml", XMLMessageSubType.REGATTA);
 
             if (raceData != null){
+                System.out.println("Sending RaceXML");
                 broadcast(raceData);
             }
             if (boatData != null){
+                System.out.println("Sending boatsXML");
                 broadcast(boatData);
             }
              if (regatta != null){
+                 System.out.println("Sending regattaXML");
                  broadcast(regatta);
             }
         } catch (IOException e) {
@@ -226,6 +231,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                 try {
                     Message raceData = getXmlMessage("/server_config/courseLimits.xml", XMLMessageSubType.RACE);
                     if (raceData != null) {
+                        System.out.println("Sending courseLimitsXML");
                         broadcast(raceData);
                     }
                 }catch (IOException e) {
@@ -242,37 +248,47 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
         try{
             server = ServerSocketChannel.open();
             server.socket().bind(new InetSocketAddress("localhost", PORT_NUMBER));
-            serverListenThread = new ServerListenThread(server, this);
-            serverListenThread.start();
+//            serverListenThread = new ServerListenThread(server, this);
+//            serverListenThread.start();
         }
         catch (IOException e){
             serverLog("Failed to bind socket: " + e.getMessage(), 0);
         }
-        while (hosting) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
-            if (GameState.getCurrentStage() == GameStages.RACING) {
-                System.out.println("Racing");
-                //startSendingHeartbeats();
-                sendXml();
-                //startSendingRaceStartStatusMessages();
-                //startSendingRaceStatusMessages();
-                //sendPostStartCourseXml();
-            }
+        acceptConnection();
+        acceptConnection();
+//        acceptConnection();
 
-            else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-
-            }
-
-            startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
+        for (Player player : GameState.getPlayers()) {
+            System.out.println(player);
         }
 
+
+//        while (hosting) {
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//            if (GameState.getCurrentStage() == GameStages.RACING) {
+//                System.out.println("Racing");
+//                //startSendingHeartbeats();
+//                sendXml();
+//                //startSendingRaceStartStatusMessages();
+//                //startSendingRaceStatusMessages();
+//                //sendPostStartCourseXml();
+//            }
+//
+//            else if (GameState.getCurrentStage() == GameStages.FINISHED) {
+//
+//            }
+//
+//            startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
+//        }
+
         startSendingHeartbeats();
-        sendXml();
+//        sendXml();
         startSendingRaceStartStatusMessages();
         //startSendingRaceStatusMessages();
         sendPostStartCourseXml();
@@ -303,6 +319,21 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
 //    }
 
 
+    /**
+     * Listens for a connection and upon finding one, creates a Player object and adds it to the universal GameState
+     */
+    private void acceptConnection() {
+        try {
+            SocketChannel thisClient = server.accept();
+            if (thisClient.socket() != null){
+                Player thisPlayer = new Player(thisClient);
+                GameState.addPlayer(thisPlayer);
+            }
+        } catch (IOException e) {
+            e.getMessage();
+        }
+    }
+
 
     void unicast(Message message, SocketChannel client) throws IOException {
         message.send(client);       // TODO: 11/07/17 Do we incement seqNum for individual messages? 
@@ -311,6 +342,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
 
     void broadcast(Message message) throws IOException{
         for(Player player : GameState.getPlayers()) {
+            System.out.println("Sending message seqNo[" + seqNum + "] to Player: " + player.toString());
             message.send(player.getSocketChannel());
         }
         seqNum++;       // TODO: 11/07/17 Do we increment seqNum for every message or for the one message to everyone 

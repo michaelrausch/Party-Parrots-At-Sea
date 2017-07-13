@@ -2,6 +2,7 @@ package seng302.models;
 
 import javafx.scene.paint.Color;
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -35,5 +36,17 @@ public class Player {
 
     public Yacht getYacht() {
         return yacht;
+    }
+
+    @Override
+    public String toString() {
+        String playerAddress = null;
+        try {
+            playerAddress = socketChannel.getRemoteAddress().toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return playerAddress;
     }
 }

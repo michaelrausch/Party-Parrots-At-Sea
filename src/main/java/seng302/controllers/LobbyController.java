@@ -52,7 +52,7 @@ public class LobbyController {
     @FXML
     public void leaveLobbyButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function!
-        setContentPane("/views/StartScreen2View.fxml");
+        setContentPane("/views/StartScreenView.fxml");
         System.out.println("Leaving lobby!");
 
     }
