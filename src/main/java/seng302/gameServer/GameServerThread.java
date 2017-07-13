@@ -26,7 +26,6 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
     private long startTime;
     private short seqNum;
     
-    private final int HEARTBEAT_PERIOD = 5000;
     private final int RACE_STATUS_PERIOD = 1000/2;
     private final int RACE_START_STATUS_PERIOD = 1000;
     private final int BOAT_LOCATION_PERIOD = 1000/5;
@@ -128,28 +127,6 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                 100, GameState.getPlayers().size(), RaceType.MATCH_RACE, 1, boatSubMessages);
     }
 
-
-    /**
-     * Starts sending heartbeat messages to the client
-     */
-    private void startSendingHeartbeats() {
-        Timer t = new Timer();
-
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Message heartbeat = new Heartbeat(seqNum);
-
-                try {
-                    System.out.println("Sending heartbeat");
-                    broadcast(heartbeat);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, 0, HEARTBEAT_PERIOD);
-    }
-
     /**
      * Start sending race start status messages until race starts
      */
@@ -164,7 +141,6 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                     if (startTime < System.currentTimeMillis() && GameState.getCurrentStage() != GameStages.RACING){
                     }
                     else{
-                        System.out.println("Sending race start status");
                         broadcast(raceStartStatusMessage);
                     }
 
@@ -204,15 +180,12 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
             Message regatta = getXmlMessage("/server_config/regatta.xml", XMLMessageSubType.REGATTA);
 
             if (raceData != null){
-                System.out.println("Sending RaceXML");
                 broadcast(raceData);
             }
             if (boatData != null){
-                System.out.println("Sending boatsXML");
                 broadcast(boatData);
             }
              if (regatta != null){
-                 System.out.println("Sending regattaXML");
                  broadcast(regatta);
             }
         } catch (IOException e) {
@@ -231,7 +204,6 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                 try {
                     Message raceData = getXmlMessage("/server_config/courseLimits.xml", XMLMessageSubType.RACE);
                     if (raceData != null) {
-                        System.out.println("Sending courseLimitsXML");
                         broadcast(raceData);
                     }
                 }catch (IOException e) {
@@ -244,12 +216,17 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
 
     public void run() {
         ServerListenThread serverListenThread;
+        HeartbeatThread heartbeatThread;
         Boolean serverIsSendingMessages = false;
 
         try{
             server = ServerSocketChannel.open();
             server.socket().bind(new InetSocketAddress("localhost", PORT_NUMBER));
+
             serverListenThread = new ServerListenThread(server, this);
+            heartbeatThread = new HeartbeatThread(this);
+
+            heartbeatThread.start();
             serverListenThread.start();
         }
         catch (IOException e){
@@ -266,7 +243,6 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
             if (GameState.getCurrentStage() == GameStages.RACING && !serverIsSendingMessages) {
                 serverLog("Race Started", 0);
 
-                startSendingHeartbeats();
                 sendXml();
                 startSendingRaceStartStatusMessages();
                 //startSendingRaceStatusMessages();
@@ -279,7 +255,6 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
             }
 
             startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
-
             }
     }
 
@@ -314,44 +289,35 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
     @Override
     public void clientConnected(Player player) {
         if (GameState.getPlayers().size() < MAX_NUM_PLAYERS && GameState.getCurrentStage() == GameStages.LOBBYING) {
-            System.out.println("");
             serverLog("Player Connected", 0);
             GameState.addPlayer(player);
+            sendXml();
         }
-        sendXml();
     }
 
     /**
-     * Listens for a connection and upon finding one, creates a Player object and adds it to the universal GameState
+     * A player has left the game, remove the player from the GameState
+     * @param player The player that left
      */
-    private void acceptConnection() {
-        try {
-            SocketChannel thisClient = server.accept();
-            if (thisClient.socket() != null){
-                Player thisPlayer = new Player(thisClient);
-                GameState.addPlayer(thisPlayer);
-            }
-        } catch (IOException e) {
-            e.getMessage();
-        }
+    @Override
+    public void clientDisconnected(Player player) {
+        serverLog("Player disconnected", 0);
+        GameState.removePlayer(player);
+        sendXml();
     }
-
 
     void unicast(Message message, SocketChannel client) throws IOException {
-        message.send(client);       // TODO: 11/07/17 Do we incement seqNum for individual messages? 
+        message.send(client);
     }
-
 
     void broadcast(Message message) throws IOException{
         for(Player player : GameState.getPlayers()) {
-            System.out.println("Sending message seqNo[" + seqNum + "] to Player: " + player.toString());
+            //System.out.println("Sending message seqNo[" + seqNum + "] to Player: " + player.toString());
             message.send(player.getSocketChannel());
         }
-        seqNum++;       // TODO: 11/07/17 Do we increment seqNum for every message or for the one message to everyone 
+        seqNum++;
     }
 
-
-    
     /**
      * Send a boat location message when they are updated by the simulator
      * @param o .
@@ -387,8 +353,6 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                 e.printStackTrace();
             }*/
         }
-
-
 
 //        if (numOfBoatsFinished == ((List<Boat>) arg).size()) {
 //            startSendingRaceFinishedBoatPositions();

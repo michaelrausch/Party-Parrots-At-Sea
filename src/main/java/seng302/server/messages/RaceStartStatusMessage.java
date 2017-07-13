@@ -54,6 +54,15 @@ public class RaceStartStatusMessage extends Message {
         writeCRC();
         rewind();
 
-        outputStream.write(getBuffer());
+        if (outputStream == null){
+            return;
+        }
+
+        try{
+            outputStream.write(getBuffer());
+        }
+        catch (IOException e){
+            return;
+        }
     }
 }
