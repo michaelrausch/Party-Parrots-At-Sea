@@ -8,6 +8,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import seng302.gameServer.GameServerThread;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 
@@ -32,6 +33,7 @@ public class LobbyController {
     @FXML
     private TableColumn readyTableColumn;
 
+    private GameServerThread gameServerThread;
 
     private void setContentPane(String jfxUrl) {
         try {
@@ -54,12 +56,17 @@ public class LobbyController {
         // TODO: 10/07/17 wmu16 - Finish function!
         setContentPane("/views/StartScreenView.fxml");
         System.out.println("Leaving lobby!");
-
+        GameState.setCurrentStage(GameStages.CANCELLED);
+        gameServerThread.terminateGame();
     }
 
 
     @FXML
     public void readyButtonPressed() {
         GameState.setCurrentStage(GameStages.RACING);
+    }
+
+    protected void setGameServerThread(GameServerThread gameServerThread) {
+        this.gameServerThread = gameServerThread;
     }
 }

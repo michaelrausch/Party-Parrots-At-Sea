@@ -2,6 +2,7 @@ package seng302.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -25,20 +26,27 @@ public class StartScreenController {
     @FXML
     private GridPane startScreen2;
 
-
-    private void setContentPane(String jfxUrl) {
+    /**
+     * Loads the fxml content into the parent pane
+     * @param jfxUrl
+     * @return the controller of the fxml
+     */
+    private Object setContentPane(String jfxUrl) {
         try {
             AnchorPane contentPane = (AnchorPane) startScreen2.getParent();
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-            contentPane.getChildren()
-                    .addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(jfxUrl));
+            contentPane.getChildren().addAll((Pane) fxmlLoader.load());
+
+            return fxmlLoader.getController();
         } catch (javafx.fxml.LoadException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
 
@@ -53,9 +61,13 @@ public class StartScreenController {
         try {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
-            new GameServerThread("Game Server");
+            GameServerThread gameServerThread = new GameServerThread("Game Server");
             System.out.println("Server thread started");
-            setContentPane("/views/LobbyView.fxml");
+
+            // get the lobby controller so that we can pass the game server thread to it
+            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
+            lobbyController.setGameServerThread(gameServerThread);
+
         } catch (UnknownHostException e) {
             System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
             e.printStackTrace();

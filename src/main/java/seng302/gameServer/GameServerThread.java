@@ -256,8 +256,9 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
         }
 
         acceptConnection();
-        acceptConnection();
 //        acceptConnection();
+//        acceptConnection();
+        System.out.println("well, hit here now");
 
         for (Player player : GameState.getPlayers()) {
             System.out.println(player);
@@ -399,4 +400,13 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
 //        }
 
     //}
+
+    public void terminateGame() {
+        try {
+            //TODO: for now, I just close the socket, but i think we should terminate the whole thread instead. -hyi25 13 July
+            server.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

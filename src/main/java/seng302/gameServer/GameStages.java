@@ -9,7 +9,8 @@ public enum GameStages {
     LOBBYING(0),
     PRE_RACE(1),
     RACING(2),
-    FINISHED(3);
+    FINISHED(3),
+    CANCELLED(4);
 
     private long code;
 
