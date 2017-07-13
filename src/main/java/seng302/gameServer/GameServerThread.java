@@ -3,14 +3,10 @@ package seng302.gameServer;
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.server.messages.*;
-import seng302.server.simulator.Boat;
-import seng302.server.simulator.Simulator;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.net.SocketOption;
-import java.net.SocketOptions;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
@@ -280,7 +276,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
 
             startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
 
-            }
+        }
     }
 
 //    /**
@@ -360,41 +356,42 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
     @Override
     @SuppressWarnings("unchecked")
     public void update(Observable o, Object arg) {
-        /* Only send if server started
-        // TODO: I don't understand why i need to check server is null or not ... confused - haoming 2/5/17
-        if(server == null || !server.isStarted()){
-            return;
-        }
-
-        int numOfBoatsFinished = 0;
-        for (Boat boat : (List<Boat>) arg){
-            try {
-                if (boat.isFinished()) {
-                    numOfBoatsFinished ++;
-                    if (!boatsFinished.get(boat.getSourceID())) {
-                        boatsFinished.put(boat.getSourceID(), true);
-                    }
-                }
-                Message m = new BoatLocationMessage(boat.getSourceID(), 1, boat.getLat(),
-                        boat.getLng(), boat.getLastPassedCorner().getBearingToNextCorner(),
-                        ((long) boat.getSpeed()));
-                broadcast(m);
-            } catch (IOException e) {
-                serverLog("Couldn't send a boat status message", 3);
-                return;
-            }
-            catch (NullPointerException e){
-                e.printStackTrace();
-            }*/
-        }
-
-
+//        /* Only send if server started*/
+////        // TODO: I don't understand why i need to check server is null or not ... confused - haoming 2/5/17
+//        if (server == null || !server.isStarted()) {
+//            return;
+//        }
+//
+//        int numOfBoatsFinished = 0;
+//        for (Boat boat : (List<Boat>) arg) {
+//            try {
+//                if (boat.isFinished()) {
+//                    numOfBoatsFinished++;
+//                    if (!boatsFinished.get(boat.getSourceID())) {
+//                        boatsFinished.put(boat.getSourceID(), true);
+//                    }
+//                }
+//                Message m = new BoatLocationMessage(boat.getSourceID(), 1, boat.getLat(),
+//                        boat.getLng(), boat.getLastPassedCorner().getBearingToNextCorner(),
+//                        ((long) boat.getSpeed()));
+//                broadcast(m);
+//            } catch (IOException e) {
+//                serverLog("Couldn't send a boat status message", 3);
+//                return;
+//            } catch (NullPointerException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
 //        if (numOfBoatsFinished == ((List<Boat>) arg).size()) {
 //            startSendingRaceFinishedBoatPositions();
 //        }
 
-    //}
+    }
+
+
+
+
 
     public void terminateGame() {
         try {
