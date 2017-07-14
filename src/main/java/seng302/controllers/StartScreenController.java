@@ -2,13 +2,13 @@ package seng302.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameServerThread;
 import seng302.gameServer.GameState;
+import seng302.gameServerWithThreading.MainServerThread;
 import seng302.models.stream.StreamReceiver;
 
 import java.io.IOException;
@@ -61,12 +61,10 @@ public class StartScreenController {
         try {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
-            GameServerThread gameServerThread = new GameServerThread("Game Server");
-            System.out.println("Server thread started");
-
+            new MainServerThread().start();
             // get the lobby controller so that we can pass the game server thread to it
-            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
-            lobbyController.setGameServerThread(gameServerThread);
+            setContentPane("/views/LobbyView.fxml");
+
 
         } catch (UnknownHostException e) {
             System.err.println("COULD NOT FIND YOUR IP ADDRESS!");

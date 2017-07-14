@@ -195,6 +195,25 @@ public abstract class Message {
     }
 
     /**
+     * takes an array of up to 7 bytes in little endian format and
+     * returns a positive long constructed from the input bytes
+     *
+     * @return a positive long if there is less than 8 bytes -1 otherwise
+     */
+    public static long bytesToLong(byte[] bytes){
+        long partialLong = 0;
+        int index = 0;
+        for (byte b: bytes){
+            if (index > 6){
+                return -1;
+            }
+            partialLong = partialLong | (b & 0xFFL) << (index * 8);
+            index++;
+        }
+        return partialLong;
+    }
+
+    /**
      * Reverse an array of bytes
      * @param data The byte[] to reverse
      */
@@ -205,4 +224,5 @@ public abstract class Message {
             data[right] = (byte) (temp & 0xff);
         }
     }
+
 }
