@@ -24,14 +24,6 @@ public class LobbyController {
     private GridPane lobbyScreen;
     @FXML
     private Text lobbyIpText;
-    @FXML
-    private TableView lobbyTable;
-    @FXML
-    private TableColumn ipTableColumn;
-    @FXML
-    private TableColumn colourTableColumn;
-    @FXML
-    private TableColumn readyTableColumn;
 
     private GameServerThread gameServerThread;
 
