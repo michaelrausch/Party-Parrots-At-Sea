@@ -32,7 +32,7 @@ import seng302.models.stream.packets.StreamPacket;
  * that are threadsafe so the visualiser can always access the latest speed and position available
  * Created by kre39 on 23/04/17.
  */
-public class StreamParser extends Thread {
+public class StreamParser{
 
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markLocations = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
@@ -58,54 +58,16 @@ public class StreamParser extends Thread {
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
-     *
-     * @param threadName name of the thread
      */
-    public StreamParser(String threadName) {
-        this.threadName = threadName;
+    public StreamParser() {
     }
-
-    /**
-     * Used to within threading so when the stream parser thread runs, it will keep looking for a
-     * packet to process until it is unable to find anymore packets
-     */
-    public void run() {
-        appRunning = true;
-        try {
-            streamStatus = true;
-            xmlObject = new XMLParser();
-            while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
-                Thread.sleep(1);
-            }
-            while (appRunning) {
-                StreamPacket packet = StreamReceiver.packetBuffer.take();
-                parsePacket(packet);
-                Thread.sleep(1);
-                while (StreamReceiver.packetBuffer.peek() == null) {
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Used to start the stream parser thread when multithreading
-     */
-    public void start() {
-        if (t == null) {
-            t = new Thread(this, threadName);
-            t.start();
-        }
-    }
-
     /**
      * Looks at the type of the packet then sends it to the appropriate parser to extract the
      * specific data associated with that packet type
      *
      * @param packet the packet to be looked at and processed
      */
-    private static void parsePacket(StreamPacket packet) {
+    public static void parsePacket(StreamPacket packet) {
         try {
             switch (packet.getType()) {
                 case HEARTBEAT:

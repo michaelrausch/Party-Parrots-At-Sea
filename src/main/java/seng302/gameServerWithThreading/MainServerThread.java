@@ -2,31 +2,40 @@ package seng302.gameServerWithThreading;
 
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.models.stream.PacketBufferDelegate;
+import seng302.models.stream.StreamParser;
+import seng302.models.stream.packets.StreamPacket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class ServerThreadHandler extends Thread {
+public class MainServerThread extends Thread implements PacketBufferDelegate{
 
     private static final int PORT = 4950;
     private static final Integer MAX_NUM_PLAYERS = 10;
 
     private ServerSocket serverSocket = null;
     private Socket socket;
-    private ArrayList<ServerThread> serverThreads = new ArrayList<>();
+    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
 
-    public ServerThreadHandler() {
+    private PriorityBlockingQueue<StreamPacket> packetBuffer;
+
+
+    public MainServerThread() {
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
             System.out.println("IO error in server thread handler upon trying to make new server socket");
         }
+
+        packetBuffer = new PriorityBlockingQueue<>();
     }
 
 
@@ -38,30 +47,61 @@ public class ServerThreadHandler extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            //LOBBYING
             if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState.getPlayers().size() < MAX_NUM_PLAYERS) {
                 try {
+                    // TODO: 14/07/17 wmu16 - Get out of blocking call somehow after a time
                     socket = serverSocket.accept();
                 } catch (IOException e) {
                     System.out.println("IO error in server thread handler upon trying to accept connection");
                 }
-                ServerThread thread = new ServerThread(socket);
-                serverThreads.add(thread);
+                ServerToClientThread thread = new ServerToClientThread(socket, this);
+                serverToClientThreads.add(thread);
                 thread.start();
             }
 
+            //RACING
+            else if (GameState.getCurrentStage() == GameStages.RACING) {
+
+            }
+
+
+            //FINISHED
+            else if (GameState.getCurrentStage() == GameStages.FINISHED) {
+
+            }
+
             updateClients();
+
+            while (!packetBuffer.isEmpty()){
+                try {
+                    StreamPacket packet = packetBuffer.take();
+                    StreamParser.parsePacket(packet);
+                } catch (InterruptedException e) {
+                    continue;
+                }
+            }
         }
 
+
+        // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
         try {
             serverSocket.close();
+            return;
         } catch (IOException e) {
             System.out.println("IO error in server thread handler upon closing socket");
         }
     }
 
     public void updateClients() {
-        for (ServerThread serverThread : serverThreads) {
-            serverThread.updateClient();
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            serverToClientThread.updateClient();
         }
+    }
+
+    @Override
+    public boolean addToBuffer(StreamPacket streamPacket) {
+        return packetBuffer.add(streamPacket);
     }
 }
