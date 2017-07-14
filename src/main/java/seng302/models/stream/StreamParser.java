@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -146,6 +145,8 @@ public class StreamParser extends Thread {
                     extractAvgWind(packet);
                     break;
                 default:
+                    //TODO: Haoming added something dumb here.
+                    System.out.println(packet);
                     break;
             }
         } catch (NullPointerException e) {

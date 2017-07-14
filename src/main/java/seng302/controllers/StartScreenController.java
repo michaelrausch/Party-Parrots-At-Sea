@@ -79,8 +79,8 @@ public class StartScreenController {
     @FXML
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
-        String ipAddress = ipTextField.getText().trim();
-        StreamReceiver sr = new StreamReceiver(ipAddress, GameServerThread.PORT_NUMBER, "HostStream");
+        String ipAddress = ipTextField.getText().trim().toLowerCase();
+        StreamReceiver sr = new StreamReceiver(ipAddress, 4950, "HostStream");
         sr.start();
     }
 }
