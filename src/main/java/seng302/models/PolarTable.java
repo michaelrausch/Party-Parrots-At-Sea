@@ -24,9 +24,8 @@ public final class PolarTable {
      * Iterates through each row of the polar table, in pairs, to extract the row into a hashmap of angle to boat speed.
      * These angle boatspeed hashmaps are then added to an outer hashmap at the end of wind speed key to each row hashmap
      * as a value
-     * @param file containing the polar csv information
      */
-    public static void parsePolarFile(String file) {
+    public static void parsePolarFile(InputStream polarFile) {
         polarTable = new HashMap<>();
         upwindOptimal = new HashMap<>();
         downwindOptimal = new HashMap<>();
@@ -34,7 +33,7 @@ public final class PolarTable {
         String line;
         Boolean isHeaderLine = true;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(polarFile))) {
             while ((line = br.readLine()) != null) {
                 String[] thisLine = line.split(",");
 
@@ -69,6 +68,8 @@ public final class PolarTable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
 

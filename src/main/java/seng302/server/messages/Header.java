@@ -44,9 +44,20 @@ public class Header {
     }
 
     /**
+     * Reset the buffer
+     */
+    public void reset(){
+        buffPos = 0;
+        buff.clear();
+        buff.position(buffPos);
+    }
+
+    /**
      * @return a ByteBuffer containing the message header
      */
     public ByteBuffer getByteBuffer(){
+        reset();
+
         putInBuffer(ByteBuffer.allocate(1).put((byte)syncByte1).array(), syncByte1);
 
         putInBuffer(ByteBuffer.allocate(1).put((byte)syncByte2).array(), syncByte2);
