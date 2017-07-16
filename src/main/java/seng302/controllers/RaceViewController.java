@@ -29,7 +29,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import seng302.utilities.GeometryUtils;
+import seng302.utilities.GeoUtility;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
@@ -446,7 +446,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
                         Point2D boatCurrentPos = new Point2D(bg.getBoatLayoutX(), bg.getBoatLayoutY());
                         Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
-                        Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
+                        Integer lineFuncResult = GeoUtility.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
                         Line rightLayline = new Line();
                         Line leftLayline = new Line();
                         if (lineFuncResult == 1) {
