@@ -10,7 +10,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
 import seng302.models.Yacht;
-import seng302.utilities.GeometryUtils;
+import seng302.utilities.GeoUtility;
 import seng302.controllers.CanvasController;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
@@ -246,11 +246,11 @@ public class BoatGroup extends Group {
         Point2D nextMarkPoint2 = canvasController.findScaledXY(nextMark2.getLatitude(), nextMark2.getLongitude());
 
         Point2D boatCurrentPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-        Point2D windTestPoint = GeometryUtils.makeArbitraryVectorPoint(nextMarkPoint1, windAngle, 10d);
+        Point2D windTestPoint = GeoUtility.makeArbitraryVectorPoint(nextMarkPoint1, windAngle, 10d);
 
 
-        Integer boatLineFuncResult = GeometryUtils.lineFunction(nextMarkPoint1, nextMarkPoint2, boatCurrentPoint);
-        Integer windLineFuncResult = GeometryUtils.lineFunction(nextMarkPoint1, nextMarkPoint2, windTestPoint);
+        Integer boatLineFuncResult = GeoUtility.lineFunction(nextMarkPoint1, nextMarkPoint2, boatCurrentPoint);
+        Integer windLineFuncResult = GeoUtility.lineFunction(nextMarkPoint1, nextMarkPoint2, windTestPoint);
 
 
         /*
