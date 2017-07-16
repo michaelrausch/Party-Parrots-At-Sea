@@ -1,7 +1,8 @@
 package seng302.server.simulator;
 
 import seng302.server.simulator.mark.Corner;
-import seng302.server.simulator.mark.Position;
+import seng302.utilities.GeoPoint;
+import seng302.utilities.GeoUtility;
 
 public class Boat {
 
@@ -29,8 +30,8 @@ public class Boat {
 	 */
 	public void move(double heading, double duration) {
 		Double distance = speed * duration / 1000000; // convert mm to meter
-		Position originPos = new Position(lat, lng);
-		Position newPos = GeoUtility.getGeoCoordinate(originPos, heading, distance);
+		GeoPoint originPos = new GeoPoint(lat, lng);
+		GeoPoint newPos = GeoUtility.getGeoCoordinate(originPos, heading, distance);
 		this.lat = newPos.getLat();
 		this.lng = newPos.getLng();
 	}

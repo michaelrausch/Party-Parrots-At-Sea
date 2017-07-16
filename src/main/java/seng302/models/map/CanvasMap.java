@@ -1,6 +1,8 @@
 package seng302.models.map;
 
+import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
+import seng302.utilities.GeoPoint;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.net.URL;
@@ -65,10 +67,10 @@ public class CanvasMap {
 
 	private MapSize getMapSize(int zoom, Boundary boundary) {
 		double scale = Math.pow(2, zoom);
-		MapGeo geoSW = new MapGeo(boundary.getSouthLat(), boundary.getWestLng());
-		MapGeo geoNE = new MapGeo(boundary.getNorthLat(), boundary.getEastLng());
-		MapPoint pointSW = MercatorProjection.toMapPoint(geoSW);
-		MapPoint pointNE = MercatorProjection.toMapPoint(geoNE);
+		GeoPoint geoSW = new GeoPoint(boundary.getSouthLat(), boundary.getWestLng());
+		GeoPoint geoNE = new GeoPoint(boundary.getNorthLat(), boundary.getEastLng());
+		Point2D pointSW = MercatorProjection.toMapPoint(geoSW);
+		Point2D pointNE = MercatorProjection.toMapPoint(geoNE);
 		return new MapSize(Math.abs(pointNE.getX() - pointSW.getX()) * scale,
 				Math.abs(pointNE.getY() - pointSW.getY()) * scale);
 	}

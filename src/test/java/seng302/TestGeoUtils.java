@@ -3,6 +3,7 @@ package seng302;
 import javafx.geometry.Point2D;
 import org.junit.Before;
 import org.junit.Test;
+import seng302.utilities.GeometryUtils;
 
 import static org.junit.Assert.*;
 

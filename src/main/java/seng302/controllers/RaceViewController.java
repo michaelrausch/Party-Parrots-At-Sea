@@ -27,7 +27,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import seng302.GeometryUtils;
+import seng302.utilities.GeometryUtils;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;

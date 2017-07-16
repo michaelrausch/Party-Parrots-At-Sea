@@ -1,25 +1,21 @@
 package seng302.fxObjects;
 
 import java.util.ArrayList;
-import javafx.event.EventHandler;
+
 import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
-import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import seng302.models.Yacht;
-import seng302.GeometryUtils;
+import seng302.utilities.GeometryUtils;
 import seng302.controllers.CanvasController;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.SingleMark;
 import seng302.models.stream.StreamParser;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2

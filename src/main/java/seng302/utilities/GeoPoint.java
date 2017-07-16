@@ -1,16 +1,16 @@
-package seng302.server.simulator.mark;
+package seng302.utilities;
 
-public class Position {
+/**
+ * A class represent Geo location (latitude, longitude).
+ * Created by Haoming on 15/5/2017
+ */
+public class GeoPoint {
 
 	double lat, lng;
 
-	public Position(double lat, double lng) {
+	public GeoPoint(double lat, double lng) {
 		this.lat = lat;
 		this.lng = lng;
-	}
-
-	public String toString() {
-		return String.format("Position at lat:%f lng:%f.", lat, lng);
 	}
 
 	public double getLat() {
