@@ -1,6 +1,4 @@
-package seng302.server.simulator;
-
-import seng302.server.simulator.mark.Position;
+package seng302.utilities;
 
 public class GeoUtility {
 
@@ -13,7 +11,7 @@ public class GeoUtility {
 	 * @param p2 second geographical position
 	 * @return the distance in meter between two points in meters
 	 */
-	public static Double getDistance(Position p1, Position p2) {
+	public static Double getDistance(GeoPoint p1, GeoPoint p2) {
 
 		double dLat = Math.toRadians(p2.getLat() - p1.getLat());
 		double dLon = Math.toRadians(p2.getLng() - p1.getLng());
@@ -42,7 +40,7 @@ public class GeoUtility {
 	 * (≈ Baghdad) to 35°N,135°E (≈ Osaka), you would start on a heading of 60°
 	 * and end up on a heading of 120°
 	 */
-	public static Double getBearing(Position p1, Position p2) {
+	public static Double getBearing(GeoPoint p1, GeoPoint p2) {
 
 		double dLon = Math.toRadians(p2.getLng() - p1.getLng());
 
@@ -64,7 +62,7 @@ public class GeoUtility {
 	 * @param distance the distance in meter, from original position to the new position
 	 * @return the new position
 	 */
-	public static Position getGeoCoordinate(Position origin, Double bearing, Double distance) {
+	public static GeoPoint getGeoCoordinate(GeoPoint origin, Double bearing, Double distance) {
 		double b = Math.toRadians(bearing); // bearing to radians
 		double d = distance / 1000.0; // distance to km
 
@@ -77,6 +75,6 @@ public class GeoUtility {
 				+ Math.atan2(Math.sin(b) * Math.sin(d / EARTH_RADIUS) * Math.cos(originLat),
 				Math.cos(d / EARTH_RADIUS) - Math.sin(originLat) * Math.sin(endLat));
 
-		return new Position(Math.toDegrees(endLat), Math.toDegrees(endLng));
+		return new GeoPoint(Math.toDegrees(endLat), Math.toDegrees(endLng));
 	}
 }

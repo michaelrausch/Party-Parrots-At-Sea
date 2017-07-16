@@ -1,4 +1,4 @@
-package seng302;
+package seng302.utilities;
 
 import javafx.geometry.Point2D;
 

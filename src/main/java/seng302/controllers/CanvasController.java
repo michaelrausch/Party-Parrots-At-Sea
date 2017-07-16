@@ -22,9 +22,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import seng302.fxObjects.BoatAnnotations;
 import seng302.fxObjects.BoatGroup;
-import seng302.fxObjects.Wake;
 import seng302.models.Colors;
 import seng302.models.Yacht;
 import seng302.models.mark.GateMark;
@@ -39,14 +37,8 @@ import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
 import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 import seng302.models.stream.packets.BoatPositionPacket;
-import seng302.server.simulator.GeoUtility;
-import seng302.server.simulator.mark.Position;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.PriorityBlockingQueue;
+import seng302.utilities.GeoPoint;
+import seng302.utilities.GeoUtility;
 
 /**
  * Created by ptg19 on 15/03/17.
@@ -210,8 +202,8 @@ public class CanvasController {
         double bearingFromTopLeftToOrigin = Math
             .toDegrees(Math.atan2(-topLeftPoint.getX(), topLeftPoint.getY()));
         // the top left extreme
-        Position topLeftPos = new Position(maxLatPoint.getLatitude(), minLonPoint.getLongitude());
-        Position originPos = GeoUtility
+        GeoPoint topLeftPos = new GeoPoint(maxLatPoint.getLatitude(), minLonPoint.getLongitude());
+        GeoPoint originPos = GeoUtility
             .getGeoCoordinate(topLeftPos, bearingFromTopLeftToOrigin, distanceFromTopLeftToOrigin);
 
         // distance from origin corner to bottom right corner of the panel
@@ -220,7 +212,7 @@ public class CanvasController {
                 .pow(PANEL_WIDTH * metersPerPixelX, 2));
         double bearingFromOriginToBottomRight = Math
             .toDegrees(Math.atan2(PANEL_WIDTH, -PANEL_HEIGHT));
-        Position bottomRightPos = GeoUtility
+        GeoPoint bottomRightPos = GeoUtility
             .getGeoCoordinate(originPos, bearingFromOriginToBottomRight,
                 distanceFromOriginToBottomRight);
 
