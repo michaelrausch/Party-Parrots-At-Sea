@@ -6,6 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import seng302.client.ClientTransmitterThread;
 import seng302.gameServer.GameServerThread;
 import seng302.gameServer.GameState;
 import seng302.gameServerWithThreading.MainServerThread;
@@ -25,6 +26,8 @@ public class StartScreenController {
     private TextField ipTextField;
     @FXML
     private GridPane startScreen2;
+
+    private Controller controller;
 
     /**
      * Loads the fxml content into the parent pane
@@ -62,9 +65,9 @@ public class StartScreenController {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
             new MainServerThread().start();
+//            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
-
 
         } catch (UnknownHostException e) {
             System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
@@ -78,7 +81,17 @@ public class StartScreenController {
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
         String ipAddress = ipTextField.getText().trim().toLowerCase();
+        //startClientTransmitterThread();
         StreamReceiver sr = new StreamReceiver(ipAddress, 4950, "HostStream");
         sr.start();
+
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
+    }
+
+    public void startClientTransmitterThread() {
+        this.controller.setClientTransmitterThread(new ClientTransmitterThread("RaceVision Test Client Transmitter"));
     }
 }

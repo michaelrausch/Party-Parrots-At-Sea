@@ -5,12 +5,22 @@ package seng302.server.messages;
  */
 public enum BoatActionType {
 
-    VMG,
-    SAILS_IN,
-    SAILS_OUT,
-    TACK_GYBE,
-    UPWIND,
-    DOWNWIND;
+    VMG(1),
+    SAILS_IN(2),
+    SAILS_OUT(3),
+    TACK_GYBE(4),
+    UPWIND(5),
+    DOWNWIND(6);
+
+    private int type;
+
+    BoatActionType(int type){
+        this.type = type;
+    }
+
+    public int getType(){
+        return this.type;
+    }
 
     public static Short getBoatPacketType(BoatActionType type){
         switch (type){

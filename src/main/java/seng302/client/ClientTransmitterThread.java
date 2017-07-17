@@ -1,6 +1,8 @@
-package seng302.server;
+package seng302.client;
 
 import java.io.IOException;
+
+import seng302.server.StreamingServerSocket;
 import seng302.server.messages.BoatActionMessage;
 
 /**
@@ -8,7 +10,7 @@ import seng302.server.messages.BoatActionMessage;
  */
 public class ClientTransmitterThread implements Runnable {
     private StreamingServerSocket server;
-    private final int PORT_NUMBER = 4951;
+    private final int PORT_NUMBER = 0;
     private static final int LOG_LEVEL = 1;
 
     public ClientTransmitterThread(String threadName){

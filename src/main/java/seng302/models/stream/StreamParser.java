@@ -106,6 +106,8 @@ public class StreamParser{
                 case AVG_WIND:
                     extractAvgWind(packet);
                     break;
+                case BOAT_ACTION:
+                    extractBoatAction(packet);
                 default:
                     //TODO: Haoming added something dumb here.
                     System.out.println(packet);
@@ -488,6 +490,27 @@ public class StreamParser{
         long speed3 = bytesToLong(Arrays.copyOfRange(payload, 17, 19));
         long period4 = bytesToLong(Arrays.copyOfRange(payload, 19, 21));
         long speed4 = bytesToLong(Arrays.copyOfRange(payload, 21, 23));
+    }
+
+
+    private static void extractBoatAction(StreamPacket packet) {
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long actionType = bytesToLong(Arrays.copyOfRange(payload, 0, 1));
+        if (actionType == 1) {
+            System.out.println("VMG");
+        } else if (actionType == 2) {
+            System.out.println("SAILS IN");
+        } else if (actionType == 3) {
+            System.out.println("SAILS OUT");
+        } else if (actionType == 4) {
+            System.out.println("TACK/GYBE");
+        } else if (actionType == 5) {
+            System.out.println("UPWIND");
+        } else if (actionType == 6) {
+            System.out.println("DOWNWIND");
+        }
+
     }
 
     /**

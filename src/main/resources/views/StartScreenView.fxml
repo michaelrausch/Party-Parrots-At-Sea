@@ -34,7 +34,7 @@
         </Label>
       <Button mnemonicParsing="false" onAction="#hostButtonPressed" prefHeight="25.0" prefWidth="175.0" text="Host" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
       <Button mnemonicParsing="false" onAction="#connectButtonPressed" prefHeight="25.0" prefWidth="147.0" text="Connect" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-      <TextField fx:id="ipTextField" maxWidth="-Infinity" prefHeight="25.0" prefWidth="200.0" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+      <TextField fx:id="ipTextField" maxWidth="-Infinity" prefHeight="25.0" prefWidth="200.0" text="localhost" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
          <GridPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </GridPane.margin>

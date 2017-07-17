@@ -1,11 +1,15 @@
 package seng302.models.stream;
 
 import seng302.models.stream.packets.StreamPacket;
+import seng302.server.messages.BoatActionMessage;
+import seng302.server.messages.BoatActionType;
+import seng302.server.messages.Heartbeat;
+import seng302.server.messages.Message;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.zip.CRC32;
@@ -13,9 +17,10 @@ import java.util.zip.Checksum;
 
 
 public class StreamReceiver extends Thread {
-    private InputStream stream;
+    private InputStream inputStream;
+    private OutputStream outputStream;
     private Socket host;
-    private  ByteArrayOutputStream crcBuffer;
+    private ByteArrayOutputStream crcBuffer;
     private Thread t;
     private String threadName;
     public static PriorityBlockingQueue<StreamPacket> packetBuffer;
@@ -59,48 +64,54 @@ public class StreamReceiver extends Thread {
 
     public void connect(){
         try {
-            stream = host.getInputStream();
+            inputStream = host.getInputStream();
+            outputStream = host.getOutputStream();
+            BoatActionMessage thisMessage = new BoatActionMessage(BoatActionType.TACK_GYBE);
+            ByteBuffer thisBBMessage = thisMessage.stealBuffer();
+            byte[] calumsBuffer = thisBBMessage.array();
+            outputStream.write(thisBBMessage.array());
+
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
-        int sync1;
-        int sync2;
-        moreBytes = true;
-        while(moreBytes) {
-            try {
-                crcBuffer = new ByteArrayOutputStream();
-                sync1 = readByte();
-                sync2 = readByte();
-                //checking if it is the start of the packet
-                if(sync1 == 0x47 && sync2 == 0x83) {
-                    int type = readByte();
-                    //No. of milliseconds since Jan 1st 1970
-                    long timeStamp = bytesToLong(getBytes(6));
-                    skipBytes(4);
-                    long payloadLength = bytesToLong(getBytes(2));
-                    byte[] payload = getBytes((int) payloadLength);
-                    Checksum checksum = new CRC32();
-                    checksum.update(crcBuffer.toByteArray(), 0, crcBuffer.size());
-                    long computedCrc = checksum.getValue();
-                    long packetCrc = bytesToLong(getBytes(4));
-                    if (computedCrc == packetCrc) {
-                        packetBuffer.add(new StreamPacket(type, payloadLength, timeStamp, payload));
-                    } else {
-                        System.err.println("Packet has been dropped");
-                    }
-                }
-            } catch (Exception e) {
-                moreBytes = false;
-            }
-        }
+//        int sync1;
+//        int sync2;
+//        moreBytes = true;
+//        while(moreBytes) {
+//            try {
+//                crcBuffer = new ByteArrayOutputStream();
+//                sync1 = readByte();
+//                sync2 = readByte();
+//                //checking if it is the start of the packet
+//                if(sync1 == 0x47 && sync2 == 0x83) {
+//                    int type = readByte();
+//                    //No. of milliseconds since Jan 1st 1970
+//                    long timeStamp = bytesToLong(getBytes(6));
+//                    skipBytes(4);
+//                    long payloadLength = bytesToLong(getBytes(2));
+//                    byte[] payload = getBytes((int) payloadLength);
+//                    Checksum checksum = new CRC32();
+//                    checksum.update(crcBuffer.toByteArray(), 0, crcBuffer.size());
+//                    long computedCrc = checksum.getValue();
+//                    long packetCrc = bytesToLong(getBytes(4));
+//                    if (computedCrc == packetCrc) {
+//                        packetBuffer.add(new StreamPacket(type, payloadLength, timeStamp, payload));
+//                    } else {
+//                        System.err.println("Packet has been dropped");
+//                    }
+//                }
+//            } catch (Exception e) {
+//                moreBytes = false;
+//            }
+//        }
     }
 
     private int readByte() throws Exception {
         int currentByte = -1;
         try {
-            currentByte = stream.read();
+            currentByte = inputStream.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {
             e.printStackTrace();

@@ -19,7 +19,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class MainServerThread extends Thread implements PacketBufferDelegate{
 
     private static final int PORT = 4950;
-    private static final Integer MAX_NUM_PLAYERS = 10;
+    private static final Integer MAX_NUM_PLAYERS = 1;
 
     private ServerSocket serverSocket = null;
     private Socket socket;
@@ -72,9 +72,10 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
             }
 
-            updateClients();
+//            updateClients();
 
             while (!packetBuffer.isEmpty()){
+                System.out.println("WHATUPPP");
                 try {
                     StreamPacket packet = packetBuffer.take();
                     StreamParser.parsePacket(packet);
@@ -83,6 +84,8 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
                 }
             }
         }
+
+        System.out.println("WHOOPSIES");
 
 
         // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
@@ -102,6 +105,7 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
     @Override
     public boolean addToBuffer(StreamPacket streamPacket) {
+        System.out.println("HEY HI");
         return packetBuffer.add(streamPacket);
     }
 }

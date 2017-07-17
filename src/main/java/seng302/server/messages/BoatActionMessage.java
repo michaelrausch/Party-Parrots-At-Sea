@@ -1,6 +1,7 @@
 package seng302.server.messages;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -27,7 +28,7 @@ public class BoatActionMessage extends Message{
      * @param outputStream The output stream to send the message
      */
     public void send(SocketChannel outputStream) throws IOException {
-        System.out.println("Sending boat action type: " + actionType.toString());
+        System.out.println("[CLIENT] Sending boat action type: " + actionType.toString());
         allocateBuffer();
         writeHeaderToBuffer();
         // Write message fields
@@ -36,5 +37,16 @@ public class BoatActionMessage extends Message{
         rewind();
 
         outputStream.write(getBuffer());
+    }
+
+
+    public ByteBuffer stealBuffer() {
+        allocateBuffer();
+        writeHeaderToBuffer();
+        // Write message fields
+        putInt((int) BoatActionType.getBoatPacketType(actionType), 1);
+        writeCRC();
+        rewind();
+        return getBuffer();
     }
 }

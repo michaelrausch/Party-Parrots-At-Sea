@@ -6,11 +6,12 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import seng302.models.stream.StreamParser;
-import seng302.server.ClientTransmitterThread;
+import seng302.client.ClientTransmitterThread;
 import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.BoatActionType;
 
@@ -20,28 +21,29 @@ public class Controller implements Initializable {
     private AnchorPane contentPane;
     private ClientTransmitterThread clientTransmitterThread;
 
-    private void setContentPane(String jfxUrl) {
+    private Object setContentPane(String jfxUrl) {
         try {
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-            contentPane.getChildren()
-                .addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+            FXMLLoader fxmlLoader = new FXMLLoader((getClass().getResource(jfxUrl)));
+            Parent view = fxmlLoader.load();
+            contentPane.getChildren().addAll(view);
+            return fxmlLoader.getController();
         } catch (javafx.fxml.LoadException e) {
             System.err.println(e.getCause());
         } catch (IOException e) {
             System.err.println(e);
         }
+        return null;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-        setContentPane("/views/StartScreenView.fxml");
+        StartScreenController startScreenController = (StartScreenController) setContentPane("/views/StartScreenView.fxml");
+        startScreenController.setController(this);
         StreamParser.boatLocations.clear();
-        clientTransmitterThread = new ClientTransmitterThread("RaceVision Test Client Transmitter");
-
-
     }
 
     /** Handle the key-pressed event from the text field. */
@@ -82,5 +84,9 @@ public class Controller implements Initializable {
                 clientTransmitterThread.sendBoatActionMessage(boatActionMessage);
                 break;
         }
+    }
+
+    public void setClientTransmitterThread(ClientTransmitterThread ctt) {
+        clientTransmitterThread = ctt;
     }
 }

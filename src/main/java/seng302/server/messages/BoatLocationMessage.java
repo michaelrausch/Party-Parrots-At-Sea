@@ -1,6 +1,7 @@
 package seng302.server.messages;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 public class BoatLocationMessage extends Message {

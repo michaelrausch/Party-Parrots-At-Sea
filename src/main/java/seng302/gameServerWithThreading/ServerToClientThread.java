@@ -1,13 +1,13 @@
 package seng302.gameServerWithThreading;
 
+import seng302.gameServer.GameState;
+import seng302.models.Player;
 import seng302.models.stream.PacketBufferDelegate;
+import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
 import seng302.server.messages.Message;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -36,6 +36,7 @@ public class ServerToClientThread extends Thread {
     public ServerToClientThread(Socket socket, PacketBufferDelegate packetBufferDelegate) {
         this.socket = socket;
         this.packetBufferDelegate = packetBufferDelegate;
+        GameState.addPlayer(new Player(socket.getChannel()));
     }
 
     public void run() {
@@ -46,7 +47,7 @@ public class ServerToClientThread extends Thread {
             System.out.println("IO error in server thread upon grabbing streams");
         }
 
-        threeWayHandshake();
+//        threeWayHandshake();
 
         int sync1;
         int sync2;
@@ -63,6 +64,7 @@ public class ServerToClientThread extends Thread {
 //                }
                     updateClient = false;
                 }
+
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
@@ -79,7 +81,9 @@ public class ServerToClientThread extends Thread {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-                        packetBufferDelegate.addToBuffer(new StreamPacket(type, payloadLength, timeStamp, payload));
+                        StreamParser.parsePacket(new StreamPacket(type, payloadLength, timeStamp, payload));
+                        // TODO: 17/07/17 wmu16 - Fix this or maybe we dont need to go through the main server at all!?!?
+//                        packetBufferDelegate.addToBuffer(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         System.err.println("Packet has been dropped");
                     }

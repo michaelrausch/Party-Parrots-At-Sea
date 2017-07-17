@@ -13,13 +13,13 @@ import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-class StreamingServerSocket {
+public class StreamingServerSocket {
     private ServerSocketChannel socket;
     private SocketChannel client;
     private short seqNum;
     private boolean isServerStarted;
 
-    StreamingServerSocket(int port) throws IOException{
+    public StreamingServerSocket(int port) throws IOException{
         socket = ServerSocketChannel.open();
         socket.socket().bind(new InetSocketAddress("localhost", port));
         //socket.setSoTimeout(10000);
@@ -27,7 +27,7 @@ class StreamingServerSocket {
         isServerStarted = false;
     }
 
-    void start(){
+    public void start(){
         try {
             client = socket.accept();
         } catch (IOException e) {
@@ -41,7 +41,7 @@ class StreamingServerSocket {
         }
     }
 
-    void send(Message message) throws IOException{
+    public void send(Message message) throws IOException{
         if (client == null){
             return;
 
