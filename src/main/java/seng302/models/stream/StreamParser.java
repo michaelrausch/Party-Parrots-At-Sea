@@ -108,9 +108,6 @@ public class StreamParser{
                     break;
                 case BOAT_ACTION:
                     extractBoatAction(packet);
-                default:
-                    //TODO: Haoming added something dumb here.
-                    System.out.println(packet);
                     break;
             }
         } catch (NullPointerException e) {

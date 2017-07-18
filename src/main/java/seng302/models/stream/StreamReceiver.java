@@ -63,18 +63,6 @@ public class StreamReceiver extends Thread {
 
 
     public void connect(){
-        try {
-            inputStream = host.getInputStream();
-            outputStream = host.getOutputStream();
-            BoatActionMessage thisMessage = new BoatActionMessage(BoatActionType.TACK_GYBE);
-            ByteBuffer thisBBMessage = thisMessage.stealBuffer();
-            byte[] calumsBuffer = thisBBMessage.array();
-            outputStream.write(thisBBMessage.array());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
 
 //        int sync1;
 //        int sync2;

@@ -46,12 +46,12 @@ public class HeartbeatThread extends Thread{
             if (!player.getSocketChannel().isConnected()){
                 playerLostConnection(player);
             }
-
-            try {
-                heartbeat.send(player.getSocketChannel());
-            } catch (IOException e) {
-                playerLostConnection(player);
-            }
+//
+//            try {
+//                player.getSocketChannel().socket().getOutputStream().write(heartbeat.getBuffer());
+//            } catch (IOException e) {
+//                playerLostConnection(player);
+//            }
         }
 
         updateDelegate();

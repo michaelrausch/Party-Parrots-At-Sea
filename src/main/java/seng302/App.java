@@ -8,7 +8,6 @@ import javafx.stage.Stage;
 import seng302.models.PolarTable;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.StreamReceiver;
-import seng302.server.ServerThread;
 
 public class App extends Application {
 

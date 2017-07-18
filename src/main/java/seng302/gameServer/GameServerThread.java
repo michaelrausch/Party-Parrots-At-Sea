@@ -306,14 +306,11 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
         sendXml();
     }
 
-    void unicast(Message message, SocketChannel client) throws IOException {
-        message.send(client);
-    }
 
     void broadcast(Message message) throws IOException{
         for(Player player : GameState.getPlayers()) {
-            //System.out.println("Sending message seqNo[" + seqNum + "] to Player: " + player.toString());
-            message.send(player.getSocketChannel());
+            //heh
+            player.getSocketChannel().socket().getOutputStream().write(message.getBuffer());
         }
         seqNum++;
     }

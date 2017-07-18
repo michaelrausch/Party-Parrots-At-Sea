@@ -1,10 +1,7 @@
 package seng302.server.messages;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
+import java.io.OutputStream;
 
 public class RaceStartStatusMessage extends Message {
     private final int MESSAGE_SIZE = 20;
@@ -32,15 +29,6 @@ public class RaceStartStatusMessage extends Message {
         this.raceId = raceId;
 
         setHeader(new Header(MessageType.RACE_START_STATUS, 1, (short) getSize()));
-    }
-
-    @Override
-    public int getSize() {
-        return MESSAGE_SIZE;
-    }
-
-    @Override
-    public void send(SocketChannel outputStream) throws IOException {
         allocateBuffer();
         writeHeaderToBuffer();
 
@@ -53,16 +41,11 @@ public class RaceStartStatusMessage extends Message {
 
         writeCRC();
         rewind();
-
-        if (outputStream == null){
-            return;
-        }
-
-        try{
-            outputStream.write(getBuffer());
-        }
-        catch (IOException e){
-            return;
-        }
     }
+
+    @Override
+    public int getSize() {
+        return MESSAGE_SIZE;
+    }
+
 }

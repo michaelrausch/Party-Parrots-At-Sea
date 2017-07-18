@@ -1,53 +1,50 @@
-package seng302.gameServerWithThreading;
+package seng302.client;
 
-import seng302.gameServer.GameState;
-import seng302.models.Player;
-import seng302.models.stream.PacketBufferDelegate;
-import seng302.models.stream.StreamParser;
-import seng302.models.stream.packets.StreamPacket;
-import seng302.server.messages.Message;
-
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import seng302.models.stream.StreamParser;
+import seng302.models.stream.packets.StreamPacket;
+import seng302.server.messages.BoatActionMessage;
+import seng302.server.messages.BoatActionType;
+import seng302.server.messages.Message;
+
 /**
- * A class describing a single connection to a Client for the purposes of sending and receiving on its own thread.
- * All server threads created and owned by the server thread handler which can trigger client updates on its threads
- * Created by wmu16 on 13/07/17.
+ * Created by kre39 on 13/07/17.
  */
-public class ServerToClientThread extends Thread {
-
-    private static final Integer MAX_ID_ATTEMPTS = 10;
-
+public class ClientToServerThread extends Thread {
+    private Socket socket;
     private InputStream is;
     private OutputStream os;
-    private Socket socket;
+    private final int PORT_NUMBER = 0;
+    private static final int LOG_LEVEL = 1;
 
+    private Boolean updateClient = true;
     private  ByteArrayOutputStream crcBuffer;
 
-    private final PacketBufferDelegate packetBufferDelegate;
-
-    private Boolean userIdentified = false;
-    private Boolean connected = true;
-    private Boolean updateClient = true;
-
-    public ServerToClientThread(Socket socket, PacketBufferDelegate packetBufferDelegate) {
-        this.socket = socket;
+    public ClientToServerThread(String ipAddress, Integer portNumber){
         try {
+            socket = new Socket(ipAddress, portNumber);
             is = socket.getInputStream();
             os = socket.getOutputStream();
         } catch (IOException e) {
-            System.out.println("IO error in server thread upon grabbing streams");
+            e.printStackTrace();
         }
-        this.packetBufferDelegate = packetBufferDelegate;
-        //        threeWayHandshake();
-        GameState.addPlayer(new Player(socket.getChannel()));
+
+    }
+
+    static void serverLog(String message, int logLevel){
+        if(logLevel <= LOG_LEVEL){
+            System.out.println("[SERVER] " + message);
+        }
     }
 
     public void run() {
-
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
@@ -95,37 +92,17 @@ public class ServerToClientThread extends Thread {
 
     }
 
-    public void updateClient() {
-        updateClient = true;
-    }
-
-
     /**
-     * Tries to confirm the connection just accepted.
-     * Sends ID, expects that ID echoed for confirmation,
-     * if so, sends a confirmation packet back to that connection
-     * Creates a player instance with that ID and this thread and adds it to the GameState
-     * If not, close the socket and end the threads execution
+     * Send the post-start race course information
      */
-    private void threeWayHandshake() {
-//        // TODO: 13/07/17 Finish using AC35
-//        Integer playerID = GameState.getUniquePlayerID();
-//        Integer confirmationID = null;
-//        Integer identificationAttempt = 0
-//        while (!userIdentified) {
-//            os.write(playerID);                                       //Send out new ID looking for echo
-//            confirmationID = is.read();
-//            if (playerID == idConfirmation) {                         //ID is echoed back. Connection is a client
-//                os.write(  some determined confirmation message  );   //Confirm to client
-//                GameState.addPlayer(new Player(playerID, this));      //Create a player in game state for client
-//                userIdentified = true;
-//            } else if (identificationAttempt > MAX_ID_ATTEMPTS) {     //No response. not a client. tidy up and go home.
-//                closeSocket();
-//                return;
-//            }
-//        identificationAttempt++;
-//        }
+    public void sendBoatActionMessage(BoatActionMessage boatActionMessage) {
+        try {
+            os.write(boatActionMessage.getBuffer());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 
     public void closeSocket() {
         try {
@@ -163,4 +140,4 @@ public class ServerToClientThread extends Thread {
             readByte();
         }
     }
-}
+ }

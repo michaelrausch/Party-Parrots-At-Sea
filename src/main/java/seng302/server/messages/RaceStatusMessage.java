@@ -1,7 +1,7 @@
 package seng302.server.messages;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -47,22 +47,6 @@ public class RaceStatusMessage extends Message{
         crc = new CRC32();
 
         setHeader(new Header(MESSAGE_TYPE, (int) sourceId, (short) getSize()));
-    }
-
-    /**
-     * @return the size of this message in bytes
-     */
-    @Override
-    public int getSize() {
-        return MESSAGE_BASE_SIZE + (20 * ((int) numBoatsInRace));
-    }
-
-    /**
-     * Send this message as a stream of bytes
-     * @param outputStream The output stream to send the message
-     */
-    @Override
-    public void send(SocketChannel outputStream) throws IOException {
         allocateBuffer();
         writeHeaderToBuffer();
 
@@ -82,7 +66,14 @@ public class RaceStatusMessage extends Message{
 
         writeCRC();
         rewind();
-
-        outputStream.write(getBuffer());
     }
+
+    /**
+     * @return the size of this message in bytes
+     */
+    @Override
+    public int getSize() {
+        return MESSAGE_BASE_SIZE + (20 * ((int) numBoatsInRace));
+    }
+
 }

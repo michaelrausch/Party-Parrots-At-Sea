@@ -6,8 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import seng302.client.ClientTransmitterThread;
-import seng302.gameServer.GameServerThread;
+import seng302.client.ClientToServerThread;
 import seng302.gameServer.GameState;
 import seng302.gameServerWithThreading.MainServerThread;
 import seng302.models.stream.StreamReceiver;
@@ -81,17 +80,13 @@ public class StartScreenController {
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
         String ipAddress = ipTextField.getText().trim().toLowerCase();
-        //startClientTransmitterThread();
-        StreamReceiver sr = new StreamReceiver(ipAddress, 4950, "HostStream");
-        sr.start();
+        ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, 4950);
+        controller.setClientToServerThread(clientToServerThread);
+        clientToServerThread.start();
 
     }
 
     public void setController(Controller controller) {
         this.controller = controller;
-    }
-
-    public void startClientTransmitterThread() {
-        this.controller.setClientTransmitterThread(new ClientTransmitterThread("RaceVision Test Client Transmitter"));
     }
 }

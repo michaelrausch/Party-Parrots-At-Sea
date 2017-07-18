@@ -1,9 +1,9 @@
 package seng302.server.messages;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
@@ -32,11 +32,6 @@ public abstract class Message {
      * @return the size of the message
      */
     public abstract int getSize();
-
-    /**
-     * Send the message as through the outputStream
-     */
-    public abstract void send(SocketChannel outputStream) throws IOException;
 
     /**
      * Allocate byte buffer to correct size
@@ -162,10 +157,10 @@ public abstract class Message {
     }
 
     /**
-     * @return The current buffer
+     * @return The current buffer as a byte array
      */
-    public ByteBuffer getBuffer(){
-        return buffer;
+    public byte[] getBuffer(){
+        return buffer.array();
     }
 
     /**

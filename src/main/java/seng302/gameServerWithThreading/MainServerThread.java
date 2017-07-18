@@ -72,7 +72,7 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
             }
 
-//            updateClients();
+            updateClients();
 
             while (!packetBuffer.isEmpty()){
                 System.out.println("WHATUPPP");
