@@ -11,7 +11,7 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
 import seng302.models.Yacht;
 import seng302.utilities.GeometryUtils;
-import seng302.controllers.CanvasController;
+import seng302.controllers.GameViewController;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.SingleMark;
@@ -236,7 +236,7 @@ public class BoatGroup extends Group {
      * going up wind, if they are on different sides of the gate, then the boat is going downwind
      * @param canvasController
      */
-    public Boolean isUpwindLeg(CanvasController canvasController, Mark nextMark) {
+    public Boolean isUpwindLeg(GameViewController canvasController, Mark nextMark) {
 
         Double windAngle = StreamParser.getWindDirection();
         GateMark thisGateMark = (GateMark) nextMark;

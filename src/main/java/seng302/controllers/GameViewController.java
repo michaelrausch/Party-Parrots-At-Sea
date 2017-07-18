@@ -7,13 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
 import javafx.animation.AnimationTimer;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -43,22 +42,20 @@ import seng302.utilities.GeoUtility;
  * Created by ptg19 on 15/03/17.
  * Modified by Haoming Yin (hyi25) on 20/3/2017.
  */
-public class CanvasController {
+public class GameViewController {
 
     @FXML
-    private AnchorPane canvasPane;
+    private AnchorPane mainPane;
 
     private RaceViewController raceViewController;
-    private ResizableCanvas canvas;
-    private Group group;
-    private GraphicsContext gc;
+    private ObservableList<Node> gameObjects;
     private ImageView mapImage;
 
-    private final int BUFFER_SIZE   = 50;
-    private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
-    private final int PANEL_HEIGHT  = 960;
-    private final int CANVAS_WIDTH  = 720;
-    private final int CANVAS_HEIGHT = 720;
+    private int BUFFER_SIZE   = 50;
+    private int panelWidth = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private int panelHeight = 960;
+    private double canvasWidth = 720;
+    private double canvasHeight = 720;
     private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
@@ -83,48 +80,43 @@ public class CanvasController {
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
 
-    public AnimationTimer timer;
+    AnimationTimer timer;
 
     private enum ScaleDirection {
         HORIZONTAL,
         VERTICAL
     }
 
-    public void setup(RaceViewController raceViewController) {
+    void setup(RaceViewController raceViewController) {
         this.raceViewController = raceViewController;
     }
 
     public void initialize() {
         raceViewController = new RaceViewController();
-        canvas = new ResizableCanvas();
-        group = new Group();
-
+        gameObjects = mainPane.getChildren();
         // create image view for map, bind panel size to image
         mapImage = new ImageView();
-        canvasPane.getChildren().add(mapImage);
-        mapImage.fitWidthProperty().bind(canvasPane.widthProperty());
-        mapImage.fitHeightProperty().bind(canvasPane.heightProperty());
-
-        canvasPane.getChildren().add(canvas);
-        canvasPane.getChildren().add(group);
-        // Bind canvas size to stack pane size.
-        canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_WIDTH));
-        canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_HEIGHT));
+        mainPane.getChildren().add(mapImage);
+        mapImage.fitWidthProperty().bind(mainPane.widthProperty());
+        mapImage.fitHeightProperty().bind(mainPane.heightProperty());
     }
 
-    public void initializeCanvas() {
+    void initializeCanvas() {
 
-        gc = canvas.getGraphicsContext2D();
-        gc.setGlobalAlpha(0.5);
         fitMarksToCanvas();
         drawGoogleMap();
         FPSdisplay.setLayoutX(5);
         FPSdisplay.setLayoutY(20);
         FPSdisplay.setStrokeWidth(2);
-        group.getChildren().add(FPSdisplay);
-        group.getChildren().add(raceBorder);
+        gameObjects.add(FPSdisplay);
+        gameObjects.add(raceBorder);
         initializeMarks();
         initializeBoats();
+        mainPane.widthProperty().addListener(resize -> {
+            canvasWidth = mainPane.getWidth();
+            canvasHeight = mainPane.getHeight();
+            fitMarksToCanvas();
+        });
 
         timer = new AnimationTimer() {
             private long lastTime = 0;
@@ -171,15 +163,13 @@ public class CanvasController {
     private void switchToFinishScreen() {
         try {
             // canvas view -> anchor pane -> grid pane -> main view
-            GridPane gridPane = (GridPane) canvasPane.getParent().getParent();
+            GridPane gridPane = (GridPane) mainPane.getParent().getParent();
             AnchorPane contentPane = (AnchorPane) gridPane.getParent();
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             contentPane.getChildren().addAll(
                 (Pane) FXMLLoader.load(getClass().getResource("/views/FinishScreenView.fxml")));
-        } catch (javafx.fxml.LoadException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -206,10 +196,10 @@ public class CanvasController {
 
         // distance from origin corner to bottom right corner of the panel
         double distanceFromOriginToBottomRight = Math.sqrt(
-            Math.pow(PANEL_HEIGHT * metersPerPixelY, 2) + Math
-                .pow(PANEL_WIDTH * metersPerPixelX, 2));
+            Math.pow(panelHeight * metersPerPixelY, 2) + Math
+                .pow(panelWidth * metersPerPixelX, 2));
         double bearingFromOriginToBottomRight = Math
-            .toDegrees(Math.atan2(PANEL_WIDTH, -PANEL_HEIGHT));
+            .toDegrees(Math.atan2(panelWidth, -panelHeight));
         GeoPoint bottomRightPos = GeoUtility
             .getGeoCoordinate(originPos, bearingFromOriginToBottomRight,
                 distanceFromOriginToBottomRight);
@@ -288,7 +278,7 @@ public class CanvasController {
         }
     }
 
-    void updateMarkGroup (long raceId, MarkGroup markGroup) {
+    private void updateMarkGroup (long raceId, MarkGroup markGroup) {
         PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markLocations.get(raceId);
         if (movementQueue.size() > 0){
             try {
@@ -327,10 +317,10 @@ public class CanvasController {
                 annotations.getChildren().add(boatGroup.getAnnotations());
             }
         }
-        group.getChildren().addAll(trails);
-        group.getChildren().addAll(wakes);
-        group.getChildren().addAll(annotations);
-        group.getChildren().addAll(boatGroups);
+        gameObjects.addAll(trails);
+        gameObjects.addAll(wakes);
+        gameObjects.addAll(annotations);
+        gameObjects.addAll(boatGroups);
     }
 
     private void initializeMarks() {
@@ -349,40 +339,7 @@ public class CanvasController {
                 markGroups.add(markGroup);
             }
         }
-        group.getChildren().addAll(markGroups);
-    }
-
-    class ResizableCanvas extends Canvas {
-
-        ResizableCanvas() {
-            // Redraw canvas when size changes.
-            widthProperty().addListener(evt -> draw());
-            heightProperty().addListener(evt -> draw());
-        }
-
-        private void draw() {
-            double width = getWidth();
-            double height = getHeight();
-
-            GraphicsContext gc = getGraphicsContext2D();
-            gc.clearRect(0, 0, width, height);
-        }
-
-        @Override
-        public boolean isResizable() {
-            return true;
-        }
-
-        @Override
-        public double prefWidth(double height) {
-            return getWidth();
-        }
-
-        @Override
-        public double prefHeight(double width) {
-            return getHeight();
-        }
-
+        gameObjects.addAll(markGroups);
     }
 
     private void drawFps(int fps){
@@ -452,21 +409,21 @@ public class CanvasController {
             referencePointX = BUFFER_SIZE + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, maxLatPoint));
-            referencePointY  = CANVAS_HEIGHT - (BUFFER_SIZE + BUFFER_SIZE);
+            referencePointY  = canvasHeight - (BUFFER_SIZE + BUFFER_SIZE);
             referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
             referencePointY  = referencePointY / 2;
             referencePointY += BUFFER_SIZE;
             referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
         } else {
-            referencePointY = CANVAS_HEIGHT - BUFFER_SIZE;
+            referencePointY = canvasHeight - BUFFER_SIZE;
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
             referencePointX  = BUFFER_SIZE;
             referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
-            referencePointX += ((CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
+            referencePointX += ((canvasWidth - (BUFFER_SIZE + BUFFER_SIZE)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
         }
         if(horizontalInversion) {
-            referencePointX = CANVAS_WIDTH - BUFFER_SIZE - (referencePointX - BUFFER_SIZE);
+            referencePointX = canvasWidth - BUFFER_SIZE - (referencePointX - BUFFER_SIZE);
         }
     }
 
@@ -490,10 +447,10 @@ public class CanvasController {
         double horiDistance =
             Math.cos(horiAngle) * Mark.calculateDistance(minLonPoint, maxLonPoint);
 
-        double vertScale = (CANVAS_HEIGHT - (BUFFER_SIZE + BUFFER_SIZE)) / vertDistance;
+        double vertScale = (canvasHeight - (BUFFER_SIZE + BUFFER_SIZE)) / vertDistance;
 
-        if ((horiDistance * vertScale) > (CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE))) {
-            distanceScaleFactor = (CANVAS_WIDTH - (BUFFER_SIZE + BUFFER_SIZE)) / horiDistance;
+        if ((horiDistance * vertScale) > (canvasWidth - (BUFFER_SIZE + BUFFER_SIZE))) {
+            distanceScaleFactor = (canvasWidth - (BUFFER_SIZE + BUFFER_SIZE)) / horiDistance;
             scaleDirection = ScaleDirection.HORIZONTAL;
         } else {
             distanceScaleFactor = vertScale;
@@ -509,8 +466,8 @@ public class CanvasController {
     public Point2D findScaledXY (double unscaledLat, double unscaledLon) {
         double distanceFromReference;
         double angleFromReference;
-        int xAxisLocation = (int) referencePointX;
-        int yAxisLocation = (int) referencePointY;
+        double xAxisLocation = referencePointX;
+        double yAxisLocation = referencePointY;
 
         angleFromReference = Mark
             .calculateHeadingRad(minLatPoint.getLatitude(), minLatPoint.getLongitude(), unscaledLat,
@@ -519,31 +476,23 @@ public class CanvasController {
             .calculateDistance(minLatPoint.getLatitude(), minLatPoint.getLongitude(), unscaledLat,
                 unscaledLon);
         if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
-            xAxisLocation += (int) Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= (int) Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            yAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
         } else if (angleFromReference >= 0) {
             angleFromReference = angleFromReference - Math.PI / 2;
-            xAxisLocation += (int) Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += (int) Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation += Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            yAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         } else if (angleFromReference < 0 && angleFromReference >= -Math.PI / 2) {
             angleFromReference = Math.abs(angleFromReference);
-            xAxisLocation -= (int) Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= (int) Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation -= Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            yAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
         } else {
             angleFromReference = Math.abs(angleFromReference) - Math.PI / 2;
-            xAxisLocation -= (int) Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += (int) Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            yAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         }
         if(horizontalInversion) {
-            xAxisLocation = CANVAS_WIDTH - BUFFER_SIZE - (xAxisLocation - BUFFER_SIZE);
+            xAxisLocation = canvasWidth - BUFFER_SIZE - (xAxisLocation - BUFFER_SIZE);
         }
         return new Point2D(xAxisLocation, yAxisLocation);
     }

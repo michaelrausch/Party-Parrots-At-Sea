@@ -72,7 +72,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private ComboBox boatSelectionComboBox;
     @FXML
-    private CanvasController includedCanvasController;
+    private GameViewController gameViewController;
 
     private static ArrayList<Yacht> startingBoats = new ArrayList<>();
     private boolean displayFps;
@@ -95,13 +95,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         sparklineYAxis.setTickMarkVisible(false);
         startingBoats = new ArrayList<>(StreamParser.getBoats().values());
 
-        includedCanvasController.setup(this);
-        includedCanvasController.initializeCanvas();
+        gameViewController.setup(this);
+        gameViewController.initializeCanvas();
         initializeUpdateTimer();
         initialiseFPSCheckBox();
         initialiseAnnotationSlider();
         initialiseBoatSelectionComboBox();
-        includedCanvasController.timer.start();
+        gameViewController.timer.start();
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
     }
 
@@ -416,13 +416,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         // Can only calc leg direction if there is a next mark and it is a gate mark
         if (nextMark != null) {
             if (nextMark instanceof GateMark) {
-                if (bg.isUpwindLeg(includedCanvasController, nextMark)) {
+                if (bg.isUpwindLeg(gameViewController, nextMark)) {
                     isUpwind = true;
                 } else {
                     isUpwind = false;
                 }
 
-                for(MarkGroup mg : includedCanvasController.getMarkGroups()) {
+                for(MarkGroup mg : gameViewController.getMarkGroups()) {
 
                     mg.removeLaylines();
 
@@ -430,8 +430,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
                         SingleMark singleMark1 = ((GateMark) nextMark).getSingleMark1();
                         SingleMark singleMark2 = ((GateMark) nextMark).getSingleMark2();
-                        Point2D markPoint1 = includedCanvasController.findScaledXY(singleMark1.getLatitude(), singleMark1.getLongitude());
-                        Point2D markPoint2 = includedCanvasController.findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
+                        Point2D markPoint1 = gameViewController
+                            .findScaledXY(singleMark1.getLatitude(), singleMark1.getLongitude());
+                        Point2D markPoint2 = gameViewController
+                            .findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
                         HashMap<Double, Double> angleAndSpeed;
                         if (isUpwind) {
                             angleAndSpeed = PolarTable.getOptimalUpwindVMG(StreamParser.getWindSpeed());
@@ -575,13 +577,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         switch (annotationLevel) {
             // No Annotations
             case 0:
-                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                for (BoatGroup bg : gameViewController.getBoatGroups()) {
                     bg.setVisibility(false, false, false, false, false, false);
                 }
                 break;
             // Important Annotations
             case 1:
-                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                for (BoatGroup bg : gameViewController.getBoatGroups()) {
                     bg.setVisibility(
                             importantAnnotations.getAnnotationState(Annotation.NAME),
                             importantAnnotations.getAnnotationState(Annotation.SPEED),
@@ -594,7 +596,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 break;
             // All Annotations
             case 2:
-                for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+                for (BoatGroup bg : gameViewController.getBoatGroups()) {
                     bg.setVisibility(true, true, true, true, true, true);
                 }
                 break;
@@ -608,7 +610,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param yacht The yacht for which we want to view all annotations
      */
     private void setSelectedBoat(Yacht yacht) {
-        for (BoatGroup bg : includedCanvasController.getBoatGroups()) {
+        for (BoatGroup bg : gameViewController.getBoatGroups()) {
             //We need to iterate over all race groups to get the matching boat group belonging to this boat if we
             //are to toggle its annotations, there is no other backwards knowledge of a yacht to its boatgroup.
             if (bg.getBoat().getHullID().equals(yacht.getHullID())) {
