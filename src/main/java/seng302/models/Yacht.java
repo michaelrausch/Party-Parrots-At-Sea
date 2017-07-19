@@ -81,6 +81,19 @@ public class Yacht {
         this.position = "-";
     }
 
+    /**
+     * @param timeInterval since last update in milliseconds
+     */
+    public void update(Long timeInterval) {
+        Double secondsElapsed = timeInterval / 1000000.0;
+        Double metersCovered = velocity * secondsElapsed;
+        // 111111 meters is approximately 1 degree of lat/long at the equator
+        lat = lat + (metersCovered * Math.sin(heading * (2 * Math.PI / 360))) / 111111;
+        lon = lon + (metersCovered * Math.cos(heading * (2 * Math.PI / 360))) / (111111 * Math
+            .cos(lat * (2 * Math.PI / 360)));
+        // formula take from https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
+    }
+
     public String getBoatType() {
         return boatType;
     }

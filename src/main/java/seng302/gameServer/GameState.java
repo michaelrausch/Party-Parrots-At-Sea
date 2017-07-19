@@ -1,8 +1,12 @@
 package seng302.gameServer;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import seng302.models.Player;
 
 import java.util.ArrayList;
+import seng302.models.Yacht;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -10,8 +14,10 @@ import java.util.ArrayList;
  */
 public class GameState {
 
+    private static Long previousUpdateTime;
     private static String hostIpAddress;
-    private static ArrayList<Player> players;
+    private static List<Player> players;
+    private static Map<Integer, Yacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     
@@ -20,13 +26,15 @@ public class GameState {
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
+        //set this when game stage changes to prerace
+        previousUpdateTime = System.currentTimeMillis();
     }
 
     public static String getHostIpAddress() {
         return hostIpAddress;
     }
 
-    public static ArrayList<Player> getPlayers() {
+    public static List<Player> getPlayers() {
         return players;
     }
     
@@ -50,16 +58,11 @@ public class GameState {
         GameState.currentStage = currentStage;
     }
 
-    /**
-     * This iterates through all players and updates each players info to its new state based on its current data
-     */
-    private void update(){
-        for(Player player : players) {
-            // TODO: 10/07/17 wmu16 - Update all player info 
+    public void update() {
+        Long timeInterval = System.currentTimeMillis() - previousUpdateTime;
+        previousUpdateTime = System.currentTimeMillis();
+        for (Yacht yacht : yachts.values()) {
+            yacht.update(timeInterval);
         }
     }
-
-
-
-
 }
