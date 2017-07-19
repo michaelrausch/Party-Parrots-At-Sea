@@ -135,4 +135,5 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
         GameState.removePlayer(player);
 //        sendXml();
     }
+
 }
