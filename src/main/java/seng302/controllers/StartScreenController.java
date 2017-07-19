@@ -80,10 +80,14 @@ public class StartScreenController {
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
         String ipAddress = ipTextField.getText().trim().toLowerCase();
-        ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, 4950);
-        controller.setClientToServerThread(clientToServerThread);
-        clientToServerThread.start();
-
+        try {
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, 4950);
+            controller.setClientToServerThread(clientToServerThread);
+            clientToServerThread.start();
+            setContentPane("/views/LobbyView.fxml");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void setController(Controller controller) {
