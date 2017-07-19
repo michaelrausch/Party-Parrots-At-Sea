@@ -1,5 +1,9 @@
 package seng302.gameServerWithThreading;
 
+import java.util.Collection;
+import java.util.Collections;
+import javafx.application.Platform;
+import seng302.controllers.LobbyController;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.models.stream.PacketBufferDelegate;
@@ -19,11 +23,11 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class MainServerThread extends Thread implements PacketBufferDelegate{
 
     private static final int PORT = 4950;
-    private static final Integer MAX_NUM_PLAYERS = 1;
+    private static final Integer MAX_NUM_PLAYERS = 3;
 
     private ServerSocket serverSocket = null;
     private Socket socket;
-    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
+    private static ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
 
     private PriorityBlockingQueue<StreamPacket> packetBuffer;
 
@@ -47,7 +51,6 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
             //LOBBYING
             if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState.getPlayers().size() < MAX_NUM_PLAYERS) {
                 try {
@@ -58,6 +61,9 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
                 }
                 ServerToClientThread thread = new ServerToClientThread(socket, this);
                 serverToClientThreads.add(thread);
+                System.out.println("[SERVER]: Client found");
+                // Platform.runLater() is used to update the UI from within a thread (found on stack overflow)
+                Platform.runLater(LobbyController::refreshCompetitors);
                 thread.start();
             }
 
@@ -72,7 +78,7 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
             }
 
-            updateClients();
+//            updateClients();
 
             while (!packetBuffer.isEmpty()){
                 System.out.println("WHATUPPP");
@@ -107,5 +113,14 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
     public boolean addToBuffer(StreamPacket streamPacket) {
         System.out.println("HEY HI");
         return packetBuffer.add(streamPacket);
+    }
+
+
+    public static Collection getServerToClientThreads() {
+        Collection<String> ips = new ArrayList<>();
+        for (ServerToClientThread serverToClientThread: serverToClientThreads){
+            ips.add(serverToClientThread.getName());
+        }
+        return Collections.synchronizedCollection(ips);
     }
 }
