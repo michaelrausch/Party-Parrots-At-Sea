@@ -40,7 +40,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
         runner.start();
     }
 
-     static void serverLog(String message, int logLevel){
+    public static void serverLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
             System.out.println("[SERVER] " + message);
         }

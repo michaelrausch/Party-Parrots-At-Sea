@@ -2,9 +2,13 @@ package seng302.gameServerWithThreading;
 
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.models.mark.Mark;
+import seng302.models.mark.MarkType;
 import seng302.models.stream.PacketBufferDelegate;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
+import seng302.models.xml.Regatta;
+import seng302.models.xml.XMLGenerator;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -40,6 +44,17 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
 
     public void run() {
+        // @TODO remove before commit
+        XMLGenerator g = new XMLGenerator();
+
+        Regatta r = new Regatta("Test regatta", 1.123, 4.456);
+        r.setMagneticVariation(12.1);
+        r.setUtcOffset(12);
+
+        g.setRegatta(r);
+
+        System.out.println("g.getRegattaAsXml() = " + g.getRegattaAsXml());
+
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!isInterrupted()) {
             try {
