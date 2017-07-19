@@ -1,4 +1,4 @@
-package seng302.gameServerWithThreading;
+package seng302.gameServer;
 
 import seng302.gameServer.GameState;
 import seng302.models.Player;
@@ -27,13 +27,11 @@ public class ServerToClientThread extends Thread {
 
     private  ByteArrayOutputStream crcBuffer;
 
-    private final PacketBufferDelegate packetBufferDelegate;
-
     private Boolean userIdentified = false;
     private Boolean connected = true;
     private Boolean updateClient = true;
 
-    public ServerToClientThread(Socket socket, PacketBufferDelegate packetBufferDelegate) {
+    public ServerToClientThread(Socket socket) {
         this.socket = socket;
         try {
             is = socket.getInputStream();
@@ -41,17 +39,17 @@ public class ServerToClientThread extends Thread {
         } catch (IOException e) {
             System.out.println("IO error in server thread upon grabbing streams");
         }
-        this.packetBufferDelegate = packetBufferDelegate;
-        //        threeWayHandshake();
-        GameState.addPlayer(new Player(socket.getChannel()));
+//                threeWayHandshake();
+        GameState.addPlayer(new Player(socket));
     }
 
     public void run() {
-
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
         while(true) {
+            //System.out.print(".");
+
             try {
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
@@ -80,9 +78,9 @@ public class ServerToClientThread extends Thread {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
+                        //System.out.println("RECEIVED A PACKET");
                         StreamParser.parsePacket(new StreamPacket(type, payloadLength, timeStamp, payload));
                         // TODO: 17/07/17 wmu16 - Fix this or maybe we dont need to go through the main server at all!?!?
-//                        packetBufferDelegate.addToBuffer(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         System.err.println("Packet has been dropped");
                     }
@@ -139,6 +137,7 @@ public class ServerToClientThread extends Thread {
     private int readByte() throws Exception {
         int currentByte = -1;
         try {
+            // @TODO @FIX ConnectionReset Exception when a client disconnects before it is garbage collected
             currentByte = is.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {

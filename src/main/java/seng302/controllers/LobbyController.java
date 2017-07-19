@@ -2,13 +2,10 @@ package seng302.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import seng302.gameServer.GameServerThread;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 
@@ -24,8 +21,6 @@ public class LobbyController {
     private GridPane lobbyScreen;
     @FXML
     private Text lobbyIpText;
-
-    private GameServerThread gameServerThread;
 
     private void setContentPane(String jfxUrl) {
         try {
@@ -49,7 +44,6 @@ public class LobbyController {
         setContentPane("/views/StartScreenView.fxml");
         System.out.println("Leaving lobby!");
         GameState.setCurrentStage(GameStages.CANCELLED);
-        gameServerThread.terminateGame();
     }
 
 
@@ -58,7 +52,4 @@ public class LobbyController {
         GameState.setCurrentStage(GameStages.RACING);
     }
 
-    protected void setGameServerThread(GameServerThread gameServerThread) {
-        this.gameServerThread = gameServerThread;
-    }
 }

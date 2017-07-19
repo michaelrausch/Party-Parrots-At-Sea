@@ -3,6 +3,8 @@ package seng302.gameServer;
 import seng302.models.Player;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
@@ -11,11 +13,11 @@ import java.nio.channels.SocketChannel;
  * Created by wmu16 on 11/07/17.
  */
 public class ServerListenThread extends Thread{
-    private ServerSocketChannel socketChannel;
+    private ServerSocket serverSocket;
     private ClientConnectionDelegate delegate;
 
-    ServerListenThread(ServerSocketChannel socketChannel, ClientConnectionDelegate delegate){
-        this.socketChannel = socketChannel;
+    public ServerListenThread(ServerSocket serverSocket, ClientConnectionDelegate delegate){
+        this.serverSocket = serverSocket;
         this.delegate = delegate;
     }
 
@@ -24,10 +26,11 @@ public class ServerListenThread extends Thread{
      */
     private void acceptConnection() {
         try {
-            SocketChannel thisClient = socketChannel.accept();
-            if (thisClient.socket() != null){
-                Player thisPlayer = new Player(thisClient);
-                delegate.clientConnected(thisPlayer);
+            Socket thisClient = serverSocket.accept();
+            if (thisClient != null){
+                ServerToClientThread thisConnection = new ServerToClientThread(thisClient);
+                thisConnection.start();
+                delegate.clientConnected(thisConnection);
             }
         } catch (IOException e) {
             e.getMessage();
