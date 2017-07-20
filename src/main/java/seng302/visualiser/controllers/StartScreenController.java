@@ -58,6 +58,10 @@ public class StartScreenController {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
             new MainServerThread().start();
+            ClientToServerThread clientToServerThread = new ClientToServerThread("localhost", 4950);
+            controller.setClientToServerThread(clientToServerThread);
+            clientToServerThread.start();
+//            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
 
