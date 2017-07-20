@@ -1,10 +1,17 @@
 package seng302.controllers;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -17,7 +24,7 @@ import seng302.gameServer.GameState;
  * A class describing the actions of the lobby screen
  * Created by wmu16 on 10/07/17.
  */
-public class LobbyController {
+public class LobbyController implements Initializable{
 
     @FXML
     private ListView competitorsListView;
@@ -43,11 +50,45 @@ public class LobbyController {
         }
     }
 
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        lobbyIpText.setText("Lobby Host IP: " + getLocalHostIp());
+    }
+
     public void initialize() {
         competitors = FXCollections.observableArrayList();
         competitorsListView.setItems(competitors);
     }
 
+    private String getLocalHostIp() {
+        String ipAddress = null;
+        try {
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                NetworkInterface ni = e.nextElement();
+                if (ni.isLoopback())
+                    continue;
+                if(ni.isPointToPoint())
+                    continue;
+                if(ni.isVirtual())
+                    continue;
+
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if(address instanceof Inet4Address) {    // skip all ipv6
+                        ipAddress = address.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (ipAddress == null) {
+            System.out.println("[HOST] Cannot obtain local host ip address.");
+        }
+        return ipAddress;
+    }
 
     @FXML
     public void leaveLobbyButtonPressed() {
