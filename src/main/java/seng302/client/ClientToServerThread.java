@@ -35,7 +35,6 @@ public class ClientToServerThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     static void serverLog(String message, int logLevel){

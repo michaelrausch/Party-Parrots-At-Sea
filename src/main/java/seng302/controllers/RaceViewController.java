@@ -29,6 +29,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import seng302.client.ClientToServerThread;
 import seng302.utilities.GeoUtility;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
@@ -86,6 +87,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Yacht selectedBoat;
 
     public void initialize() {
+
         // Load a default important annotation state
         importantAnnotations = new ImportantAnnotationsState();
 
