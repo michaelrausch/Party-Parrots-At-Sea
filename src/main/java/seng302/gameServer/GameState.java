@@ -66,6 +66,14 @@ public class GameState {
         GameState.currentStage = currentStage;
     }
 
+    public static Double getWindDirection() {
+        return windDirection;
+    }
+
+    public static Double getWindSpeed() {
+        return windSpeed;
+    }
+
     public static void updateBoat(Integer sourceId, BoatActionType actionType) {
         switch (actionType) {
             case VMG:
