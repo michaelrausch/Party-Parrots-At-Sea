@@ -8,6 +8,9 @@ import seng302.server.messages.XMLMessageSubType;
 import java.io.*;
 import java.net.URISyntaxException;
 
+/**
+ * An XML generator to generate the Race, Boat, and Regatta XML dynamically
+ */
 public class XMLGenerator {
     private static final String XML_TEMPLATE_DIR = "/server_config/xml_templates";
     private static final String REGATTA_TEMPLATE_NAME = "regatta.ftlh";
@@ -34,18 +37,36 @@ public class XMLGenerator {
         }
     }
 
+    /**
+     * Create an instance of the XML Generator
+     */
     public XMLGenerator(){
         setupConfiguration();
     }
 
+    /**
+     * Set the race regatta to send to players
+     * Note: This must be set before a regatta message can be generated
+     * @param regatta The race regatta
+     */
     public void setRegatta(Regatta regatta){
         this.regatta = regatta;
     }
-    
+
+    /**
+     * Set the race to send to players
+     * Note: This must be set before a boat or race message can be generated
+     * @param race The race
+     */
     public void setRace(Race race){
         this.race = race;
     }
 
+    /**
+     * Parse an XML template and generate the output as a string
+     * @param templateName The templates file name
+     * @param type The XML message sub type
+     */
     private String parseToXmlString(String templateName, XMLMessageSubType type) throws IOException, TemplateException {
         Template template;
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -78,6 +99,11 @@ public class XMLGenerator {
         }
     }
 
+    /**
+     * Get the race regatta as a string
+     * Note: Regatta must be set before calling this
+     * @return String containing the regatta XML, null if there was an error
+     */
     public String getRegattaAsXml(){
         String result = null;
 
@@ -94,7 +120,11 @@ public class XMLGenerator {
         return result;
     }
 
-
+    /**
+     * Get the boats XML as a string
+     * Note: Race must be set before calling this
+     * @return String containing the boats XML, null if there was an error
+     */
     public String getBoatsAsXml() {
         String result = null;
 
@@ -111,6 +141,11 @@ public class XMLGenerator {
         return result;
     }
 
+    /**
+     * Get the race XML as a string
+     * Note: Race must be set before calling this
+     * @return String containing the race XML, null if there was an error
+     */
     public String getRaceAsXml() {
         String result = null;
 

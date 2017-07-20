@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Race>
-    <CreationTimeDate>2015-08-29T11:27:15+02:00</CreationTimeDate>
-    <RaceStartTime Start="2015-08-29T13:10:00+02:00" Postpone="False" />
+    <CreationTimeDate>${raceStartTime}</CreationTimeDate>
+    <RaceStartTime Start="${raceStartTime}" Postpone="False" />
     <RaceID>15082901</RaceID>
     <RaceType>Fleet</RaceType>
 

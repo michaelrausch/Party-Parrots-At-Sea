@@ -1,5 +1,8 @@
 package seng302.models.xml;
 
+/**
+ * A Race regatta that can be parsed into XML
+ */
 public class Regatta {
   private final Double DEFAULT_ALTITUDE = 0d;
   private final Integer DEFAULT_REGATTA_ID = 0;
