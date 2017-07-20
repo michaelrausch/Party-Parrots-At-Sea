@@ -9,7 +9,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import seng302.models.stream.StreamParser;
+import seng302.client.ClientPacketParser;
 import seng302.client.ClientToServerThread;
 import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.BoatActionType;
@@ -42,7 +42,7 @@ public class Controller implements Initializable {
         contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
         StartScreenController startScreenController = (StartScreenController) setContentPane("/views/StartScreenView.fxml");
         startScreenController.setController(this);
-        StreamParser.boatLocations.clear();
+        ClientPacketParser.boatLocations.clear();
     }
 
     /** Handle the key-pressed event from the text field. */

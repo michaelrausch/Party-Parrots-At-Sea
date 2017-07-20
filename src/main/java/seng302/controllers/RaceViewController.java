@@ -4,7 +4,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -17,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -29,6 +27,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import seng302.client.ClientPacketParser;
 import seng302.utilities.GeoUtility;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
@@ -40,7 +39,6 @@ import seng302.models.*;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.SingleMark;
-import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser;
 
 import java.io.IOException;
@@ -95,7 +93,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceSparkLine.getYAxis().setTranslateX(-5);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
-        startingBoats = new ArrayList<>(StreamParser.getBoats().values());
+        startingBoats = new ArrayList<>(ClientPacketParser.getBoats().values());
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
@@ -305,7 +303,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Mark getNextMark(BoatGroup bg) {
         Integer legNumber = bg.getBoat().getLegNumber();
 
-        List<XMLParser.RaceXMLObject.Corner> markSequence = StreamParser.getXmlObject().getRaceXML().getCompoundMarkSequence();
+        List<XMLParser.RaceXMLObject.Corner> markSequence = ClientPacketParser.getXmlObject()
+            .getRaceXML().getCompoundMarkSequence();
 
         if (legNumber == 0) {
             return null;
@@ -317,7 +316,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             if (legNumber + 2 == corner.getSeqID()) {
                 Integer thisCompoundMarkID = corner.getCompoundMarkID();
 
-                for (Mark mark : StreamParser.getXmlObject().getRaceXML().getAllCompoundMarks()) {
+                for (Mark mark : ClientPacketParser.getXmlObject().getRaceXML()
+                    .getAllCompoundMarks()) {
                     if (mark.getCompoundMarkID() == thisCompoundMarkID) {
                         return mark;
                     }
@@ -330,11 +330,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
-     * Updates the wind direction arrow and text as from info from the StreamParser
+     * Updates the wind direction arrow and text as from info from the ClientPacketParser
      */
     private void updateWindDirection() {
-        windDirectionText.setText(String.format("%.1f°", StreamParser.getWindDirection()));
-        windArrowText.setRotate(StreamParser.getWindDirection());
+        windDirectionText.setText(String.format("%.1f°", ClientPacketParser.getWindDirection()));
+        windArrowText.setRotate(ClientPacketParser.getWindDirection());
     }
 
 
@@ -342,7 +342,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the clock for the race
      */
     private void updateRaceTime() {
-        if (StreamParser.isRaceFinished()) {
+        if (ClientPacketParser.isRaceFinished()) {
             timerLabel.setFill(Color.RED);
             timerLabel.setText("Race Finished!");
         } else {
@@ -352,18 +352,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
-     * Grabs the boats currently in the race as from the StreamParser and sets them to be selectable
+     * Grabs the boats currently in the race as from the ClientPacketParser and sets them to be selectable
      * in the boat selection combo box
      */
     private void updateBoatSelectionComboBox() {
         ObservableList<Yacht> observableBoats = FXCollections
-            .observableArrayList(StreamParser.getBoatsPos().values());
+            .observableArrayList(ClientPacketParser.getBoatsPos().values());
         boatSelectionComboBox.setItems(observableBoats);
     }
 
 
     /**
-     * Updates the order of the boats as from the StreamParser and sets them in the boat order
+     * Updates the order of the boats as from the ClientPacketParser and sets them in the boat order
      * section
      */
     private void updateOrder() {
@@ -372,15 +372,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // list of racing boat id
-        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+        ArrayList<Participant> participants = ClientPacketParser.getXmlObject().getRaceXML()
             .getParticipants();
         ArrayList<Integer> participantIDs = new ArrayList<>();
         for (Participant p : participants) {
             participantIDs.add(p.getsourceID());
         }
 
-        if (StreamParser.isRaceStarted()) {
-            for (Yacht boat : StreamParser.getBoatsPos().values()) {
+        if (ClientPacketParser.isRaceStarted()) {
+            for (Yacht boat : ClientPacketParser.getBoatsPos().values()) {
                 if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
                     if (boat.getBoatStatus() == 3) {  // 3 is finish status
                         Text textToAdd = new Text(boat.getPosition() + ". " +
@@ -398,7 +398,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
             }
         } else {
-            for (Yacht boat : StreamParser.getBoats().values()) {
+            for (Yacht boat : ClientPacketParser.getBoats().values()) {
                 if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
                     Text textToAdd = new Text(boat.getPosition() + ". " +
                         boat.getShortName() + " ");
@@ -436,9 +436,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         Point2D markPoint2 = includedCanvasController.findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
                         HashMap<Double, Double> angleAndSpeed;
                         if (isUpwind) {
-                            angleAndSpeed = PolarTable.getOptimalUpwindVMG(StreamParser.getWindSpeed());
+                            angleAndSpeed = PolarTable
+                                .getOptimalUpwindVMG(ClientPacketParser.getWindSpeed());
                         } else {
-                            angleAndSpeed = PolarTable.getOptimalDownwindVMG(StreamParser.getWindSpeed());
+                            angleAndSpeed = PolarTable
+                                .getOptimalDownwindVMG(ClientPacketParser.getWindSpeed());
                         }
 
                         Double resultingAngle = angleAndSpeed.keySet().iterator().next();
@@ -450,11 +452,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         Line rightLayline = new Line();
                         Line leftLayline = new Line();
                         if (lineFuncResult == 1) {
-                            rightLayline = makeRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
-                            leftLayline = makeLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            rightLayline = makeRightLayline(markPoint2, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint1, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
                         } else if (lineFuncResult == -1) {
-                            rightLayline = makeRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
-                            leftLayline = makeLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                            rightLayline = makeRightLayline(markPoint1, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint2, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
                         }
 
                         leftLayline.setStrokeWidth(0.5);
@@ -550,16 +560,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     private String getTimeSinceStartOfRace() {
         String timerString = "0:00";
-        if (StreamParser.getTimeSinceStart() > 0) {
-            String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
-            String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
+        if (ClientPacketParser.getTimeSinceStart() > 0) {
+            String timerMinute = Long.toString(ClientPacketParser.getTimeSinceStart() / 60);
+            String timerSecond = Long.toString(ClientPacketParser.getTimeSinceStart() % 60);
             if (timerSecond.length() == 1) {
                 timerSecond = "0" + timerSecond;
             }
             timerString = "-" + timerMinute + ":" + timerSecond;
         } else {
-            String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
-            String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
+            String timerMinute = Long.toString(-1 * ClientPacketParser.getTimeSinceStart() / 60);
+            String timerSecond = Long.toString(-1 * ClientPacketParser.getTimeSinceStart() % 60);
             if (timerSecond.length() == 1) {
                 timerSecond = "0" + timerSecond;
             }

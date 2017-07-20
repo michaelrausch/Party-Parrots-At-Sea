@@ -7,6 +7,7 @@ import seng302.models.Player;
 
 import java.util.ArrayList;
 import seng302.models.Yacht;
+import seng302.server.messages.BoatActionType;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -65,6 +66,22 @@ public class GameState {
         GameState.currentStage = currentStage;
     }
 
+    public static void updateBoat(Integer sourceId, BoatActionType actionType) {
+        switch (actionType) {
+            case VMG:
+                break;
+            case SAILS_IN:
+                break;
+            case SAILS_OUT:
+                break;
+            case TACK_GYBE:
+                break;
+            case UPWIND:
+                break;
+            case DOWNWIND:
+                break;
+        }
+    }
 
     public static void update() {
         Long timeInterval = System.currentTimeMillis() - previousUpdateTime;

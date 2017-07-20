@@ -8,10 +8,8 @@ import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionMessage;
-import seng302.server.messages.BoatActionType;
 import seng302.server.messages.Message;
 
 /**
@@ -77,7 +75,8 @@ public class ClientToServerThread extends Thread {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-                        StreamParser.parsePacket(new StreamPacket(type, payloadLength, timeStamp, payload));
+                        ClientPacketParser
+                            .parsePacket(new StreamPacket(type, payloadLength, timeStamp, payload));
                         // TODO: 17/07/17 wmu16 - Fix this or maybe we dont need to go through the main server at all!?!?
 //                        packetBufferDelegate.addToBuffer(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {

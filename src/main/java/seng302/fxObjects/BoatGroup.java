@@ -9,13 +9,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
+import seng302.client.ClientPacketParser;
 import seng302.models.Yacht;
 import seng302.utilities.GeoUtility;
 import seng302.controllers.CanvasController;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.SingleMark;
-import seng302.models.stream.StreamParser;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -238,7 +238,7 @@ public class BoatGroup extends Group {
      */
     public Boolean isUpwindLeg(CanvasController canvasController, Mark nextMark) {
 
-        Double windAngle = StreamParser.getWindDirection();
+        Double windAngle = ClientPacketParser.getWindDirection();
         GateMark thisGateMark = (GateMark) nextMark;
         SingleMark nextMark1 = thisGateMark.getSingleMark1();
         SingleMark nextMark2 = thisGateMark.getSingleMark2();
