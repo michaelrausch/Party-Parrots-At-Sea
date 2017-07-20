@@ -1,11 +1,14 @@
 package seng302.models;
 
+import static seng302.utilities.GeoUtility.getGeoCoordinate;
+
 import javafx.scene.paint.Color;
 import seng302.models.mark.Mark;
 import seng302.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import seng302.utilities.GeoPoint;
 
 /**
  * Yacht class for the racing boat.
@@ -35,10 +38,9 @@ public class Yacht {
     private Integer penaltiesServed;
     private Long estimateTimeAtFinish;
     private String position;
-    private Double lat;
-    private Double lon;
-    private Float heading;
-    private double velocity;
+    private GeoPoint location;
+    private Double heading;
+    private Double velocity;
     private Long timeTillNext;
     private Long markRoundTime;
 
@@ -52,8 +54,12 @@ public class Yacht {
      *
      * @param boatName Create a yacht object with name.
      */
-    public Yacht(String boatName) {
+    public Yacht(String boatName, String shortName, GeoPoint location, Double heading) {
         this.boatName = boatName;
+        this.shortName = shortName;
+        this.location = location;
+        this.heading = heading;
+        this.velocity = 0.0;
     }
 
     /**
@@ -87,11 +93,7 @@ public class Yacht {
     public void update(Long timeInterval) {
         Double secondsElapsed = timeInterval / 1000000.0;
         Double metersCovered = velocity * secondsElapsed;
-        // 111111 meters is approximately 1 degree of lat/long at the equator
-        lat = lat + (metersCovered * Math.sin(heading * (2 * Math.PI / 360))) / 111111;
-        lon = lon + (metersCovered * Math.cos(heading * (2 * Math.PI / 360))) / (111111 * Math
-            .cos(lat * (2 * Math.PI / 360)));
-        // formula take from https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
+        location = getGeoCoordinate(location, heading, metersCovered);
     }
 
     public String getBoatType() {
@@ -218,30 +220,6 @@ public class Yacht {
     public Mark getNextMark(){
         return nextMark;
       }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
-        this.lon = lon;
-    }
-
-    public Float getHeading() {
-        return heading;
-    }
-
-    public void setHeading(Float heading) {
-        this.heading = heading;
-    }
 
     @Override
     public String toString() {

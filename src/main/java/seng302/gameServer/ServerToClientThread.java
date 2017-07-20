@@ -1,7 +1,9 @@
 package seng302.gameServer;
 
+import java.util.Random;
 import seng302.gameServer.GameState;
 import seng302.models.Player;
+import seng302.models.Yacht;
 import seng302.models.stream.PacketBufferDelegate;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
@@ -11,6 +13,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.utilities.GeoPoint;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on its own thread.
@@ -31,6 +34,7 @@ public class ServerToClientThread extends Thread {
     private Boolean connected = true;
     private Boolean updateClient = true;
 
+    private Integer mockId = 100;
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
         try {
@@ -41,6 +45,8 @@ public class ServerToClientThread extends Thread {
         }
 //                threeWayHandshake();
         GameState.addPlayer(new Player(socket));
+        GameState.addYacht(mockId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+        mockId += 1;
     }
 
     public void run() {

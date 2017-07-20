@@ -57,10 +57,12 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
                 e.printStackTrace();
             }
 
-
+            if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
+                GameState.update();
+            }
             //RACING
             if (GameState.getCurrentStage() == GameStages.RACING) {
-
+                GameState.update();
             }
 
 

@@ -15,6 +15,9 @@ import seng302.models.Yacht;
 public class GameState {
 
     private static Long previousUpdateTime;
+    private static Double windDirection = 0d;
+    private static Double windSpeed = 0d;
+
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, Yacht> yachts;
@@ -46,6 +49,10 @@ public class GameState {
         players.remove(player);
     }
 
+    public static void addYacht(Integer sourceId, Yacht yatch) {
+        yachts.put(sourceId, yatch);
+    }
+
     public static Boolean getIsRaceStarted() {
         return isRaceStarted;
     }
@@ -58,7 +65,8 @@ public class GameState {
         GameState.currentStage = currentStage;
     }
 
-    public void update() {
+
+    public static void update() {
         Long timeInterval = System.currentTimeMillis() - previousUpdateTime;
         previousUpdateTime = System.currentTimeMillis();
         for (Yacht yacht : yachts.values()) {
