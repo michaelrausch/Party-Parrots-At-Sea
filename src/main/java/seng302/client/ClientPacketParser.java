@@ -1,4 +1,4 @@
-package seng302.models.stream;
+package seng302.client;
 
 
 import java.io.IOException;
@@ -22,6 +22,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
 import seng302.models.mark.Mark;
+import seng302.models.stream.XMLParser;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.packets.StreamPacket;
 
@@ -31,7 +32,7 @@ import seng302.models.stream.packets.StreamPacket;
  * that are threadsafe so the visualiser can always access the latest speed and position available
  * Created by kre39 on 23/04/17.
  */
-public class StreamParser{
+public class ClientPacketParser {
 
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markLocations = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
@@ -58,7 +59,7 @@ public class StreamParser{
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
      */
-    public StreamParser() {
+    public ClientPacketParser() {
     }
     /**
      * Looks at the type of the packet then sends it to the appropriate parser to extract the
@@ -105,9 +106,6 @@ public class StreamParser{
                     break;
                 case AVG_WIND:
                     extractAvgWind(packet);
-                    break;
-                case BOAT_ACTION:
-                    extractBoatAction(packet);
                     break;
             }
         } catch (NullPointerException e) {
@@ -489,27 +487,6 @@ public class StreamParser{
         long speed3 = bytesToLong(Arrays.copyOfRange(payload, 17, 19));
         long period4 = bytesToLong(Arrays.copyOfRange(payload, 19, 21));
         long speed4 = bytesToLong(Arrays.copyOfRange(payload, 21, 23));
-    }
-
-
-    private static void extractBoatAction(StreamPacket packet) {
-        byte[] payload = packet.getPayload();
-        int messageVersionNo = payload[0];
-        long actionType = bytesToLong(Arrays.copyOfRange(payload, 0, 1));
-        if (actionType == 1) {
-            System.out.println("VMG");
-        } else if (actionType == 2) {
-            System.out.println("SAILS IN");
-        } else if (actionType == 3) {
-            System.out.println("SAILS OUT");
-        } else if (actionType == 4) {
-            System.out.println("TACK/GYBE");
-        } else if (actionType == 5) {
-            System.out.println("UPWIND");
-        } else if (actionType == 6) {
-            System.out.println("DOWNWIND");
-        }
-
     }
 
     /**

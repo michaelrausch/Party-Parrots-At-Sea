@@ -1,11 +1,14 @@
 package seng302.models;
 
-import javafx.scene.paint.Color;
-import seng302.models.mark.Mark;
-import seng302.controllers.RaceViewController;
+import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
+import javafx.scene.paint.Color;
+import seng302.controllers.RaceViewController;
+import seng302.models.mark.Mark;
+import seng302.utilities.GeoPoint;
 
 /**
  * Yacht class for the racing boat.
@@ -35,10 +38,9 @@ public class Yacht {
     private Integer penaltiesServed;
     private Long estimateTimeAtFinish;
     private String position;
-    private Double lat;
-    private Double lon;
-    private Float heading;
-    private double velocity;
+    private GeoPoint location;
+    private Double heading;
+    private Double velocity;
     private Long timeTillNext;
     private Long markRoundTime;
 
@@ -52,8 +54,12 @@ public class Yacht {
      *
      * @param boatName Create a yacht object with name.
      */
-    public Yacht(String boatName) {
+    public Yacht(String boatName, String shortName, GeoPoint location, Double heading) {
         this.boatName = boatName;
+        this.shortName = shortName;
+        this.location = location;
+        this.heading = heading;
+        this.velocity = 0.0;
     }
 
     /**
@@ -80,6 +86,41 @@ public class Yacht {
         this.country = country;
         this.position = "-";
     }
+
+    /**
+     * @param timeInterval since last update in milliseconds
+     */
+    public void update(Long timeInterval) {
+        Double secondsElapsed = timeInterval / 1000000.0;
+        Double metersCovered = velocity * secondsElapsed;
+        location = getGeoCoordinate(location, heading, metersCovered);
+    }
+
+    /**
+     * Adjusts the yachts velocity based on the wind direction and speed from the polar table.
+     *
+     * @param windDir current wind Direction TODO: 20/07/17 ajm412: (TWA or AWA, not 100% sure?)
+     * @param windSpd current wind Speed
+     */
+    public void updateYachtVelocity(Double windDir, Double windSpd) {
+        Double closestSpd = PolarTable.getClosestMatch(windSpd);
+        Map<Double, Double> polarsFromClosestSpd = PolarTable.getPolarTable().get(closestSpd);
+
+        Double closest = 0d;
+        Double closest_key = 0d;
+
+        for (Double key : polarsFromClosestSpd.keySet()) {
+            Double difference = Math.abs(key - windDir);
+            if (difference <= closest) {
+                closest = difference;
+                closest_key = key;
+            }
+        }
+//        System.out.println("Closest angle " + closest_key);
+//        System.out.println("WindDir " + windDir);
+        velocity = polarsFromClosestSpd.get(closest_key);
+    }
+
 
     public String getBoatType() {
         return boatType;
@@ -205,30 +246,6 @@ public class Yacht {
     public Mark getNextMark(){
         return nextMark;
       }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
-        this.lon = lon;
-    }
-
-    public Float getHeading() {
-        return heading;
-    }
-
-    public void setHeading(Float heading) {
-        this.heading = heading;
-    }
 
     @Override
     public String toString() {

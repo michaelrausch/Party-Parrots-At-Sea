@@ -6,8 +6,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import seng302.client.ClientPacketParser;
 import seng302.models.PolarTable;
-import seng302.models.stream.StreamParser;
 import seng302.models.stream.StreamReceiver;
 
 public class App extends Application {
@@ -26,7 +26,7 @@ public class App extends Application {
 
         primaryStage.show();
         primaryStage.setOnCloseRequest(e -> {
-            StreamParser.appClose();
+            ClientPacketParser.appClose();
             StreamReceiver.noMoreBytes();
             System.exit(0);
         });

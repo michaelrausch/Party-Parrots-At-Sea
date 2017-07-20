@@ -1,18 +1,22 @@
 package seng302.gameServer;
 
-import seng302.gameServer.GameState;
+
+import java.util.Random;
+import seng302.client.ClientPacketParser;
 import seng302.models.Player;
-import seng302.models.stream.PacketBufferDelegate;
-import seng302.models.stream.StreamParser;
+import seng302.models.Yacht;
+import seng302.models.stream.packets.PacketType;
 import seng302.models.stream.packets.StreamPacket;
 import seng302.server.messages.ChatterMessage;
 import seng302.server.messages.Heartbeat;
+import seng302.server.messages.BoatActionType;
 import seng302.server.messages.Message;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.utilities.GeoPoint;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on its own thread.
@@ -20,7 +24,6 @@ import java.util.zip.Checksum;
  * Created by wmu16 on 13/07/17.
  */
 public class ServerToClientThread extends Thread {
-
     private static final Integer MAX_ID_ATTEMPTS = 10;
 
     private InputStream is;
@@ -33,6 +36,8 @@ public class ServerToClientThread extends Thread {
     private Boolean connected = true;
     private Boolean updateClient = true;
 
+    private Integer sourceId;
+
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
         try {
@@ -43,6 +48,9 @@ public class ServerToClientThread extends Thread {
         }
 //                threeWayHandshake();
         GameState.addPlayer(new Player(socket));
+        Random rand = new Random();
+        sourceId = rand.nextInt(100000);
+        GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
     }
 
     public void run() {
@@ -86,8 +94,14 @@ public class ServerToClientThread extends Thread {
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
                         //System.out.println("RECEIVED A PACKET");
-                        StreamParser.parsePacket(new StreamPacket(type, payloadLength, timeStamp, payload));
-                        // TODO: 17/07/17 wmu16 - Fix this or maybe we dont need to go through the main server at all!?!?
+                        switch (PacketType.assignPacketType(type)) {
+                            case BOAT_ACTION:
+                                BoatActionType actionType = ServerPacketParser
+                                    .extractBoatAction(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                GameState.updateBoat(sourceId, actionType);
+                                break;
+                        }
                     } else {
                         System.err.println("Packet has been dropped");
                     }

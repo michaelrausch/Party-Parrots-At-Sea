@@ -18,7 +18,7 @@ public class BoatActionMessage extends Message{
         allocateBuffer();
         writeHeaderToBuffer();
         // Write message fields
-        putInt((int) BoatActionType.getBoatPacketType(actionType), 1);
+        putInt(actionType.getValue(), 1);
         writeCRC();
         rewind();
 

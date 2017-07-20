@@ -15,8 +15,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import seng302.client.ClientPacketParser;
 import seng302.models.Yacht;
-import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 
 public class FinishScreenViewController implements Initializable {
@@ -59,7 +59,7 @@ public class FinishScreenViewController implements Initializable {
         );
 
         // check if the boat is racing
-        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+        ArrayList<Participant> participants = ClientPacketParser.getXmlObject().getRaceXML()
             .getParticipants();
         ArrayList<Integer> participantIDs = new ArrayList<>();
         for (Participant p : participants) {
@@ -67,7 +67,7 @@ public class FinishScreenViewController implements Initializable {
         }
 
         // add data to table
-        for (Yacht boat : StreamParser.getBoatsPos().values()) {
+        for (Yacht boat : ClientPacketParser.getBoatsPos().values()) {
             if (participantIDs.contains(boat.getSourceID())) {
                 data.add(boat);
             }

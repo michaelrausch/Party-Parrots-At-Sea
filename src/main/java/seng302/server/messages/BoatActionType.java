@@ -1,5 +1,8 @@
 package seng302.server.messages;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by kre39 on 12/07/17.
  */
@@ -12,31 +15,24 @@ public enum BoatActionType {
     UPWIND(5),
     DOWNWIND(6);
 
-    private int type;
+    private final int type;
+    private static final Map<Integer, BoatActionType> intToTypeMap = new HashMap<>();
+
+    static {
+        for (BoatActionType type : BoatActionType.values()) {
+            intToTypeMap.put(type.getValue(), type);
+        }
+    }
 
     BoatActionType(int type){
         this.type = type;
     }
 
-    public int getType(){
-        return this.type;
+    public static BoatActionType getType(int value) {
+        return intToTypeMap.get(value);
     }
 
-    public static Short getBoatPacketType(BoatActionType type){
-        switch (type){
-            case VMG:
-                return 1;
-            case SAILS_IN:
-                return 2;
-            case SAILS_OUT:
-                return 3;
-            case TACK_GYBE:
-                return 4;
-            case UPWIND:
-                return 5;
-            case DOWNWIND:
-                return 6;
-        }
-        return 0;
+    public int getValue() {
+        return this.type;
     }
 }

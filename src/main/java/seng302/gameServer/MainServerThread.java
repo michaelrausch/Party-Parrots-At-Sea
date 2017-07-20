@@ -1,8 +1,8 @@
 package seng302.gameServer;
 
+import seng302.client.ClientPacketParser;
 import seng302.models.Player;
 import seng302.models.stream.PacketBufferDelegate;
-import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
 
 import java.io.IOException;
@@ -57,11 +57,12 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
                 e.printStackTrace();
             }
 
-
-
+            if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
+                GameState.update();
+            }
             //RACING
             if (GameState.getCurrentStage() == GameStages.RACING) {
-                updateClients();
+                GameState.update();
             }
 
 
@@ -71,12 +72,11 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
             }
             updateClients();
 
-
             while (!packetBuffer.isEmpty()){
                 System.out.println("WHATUPPP");
                 try {
                     StreamPacket packet = packetBuffer.take();
-                    StreamParser.parsePacket(packet);
+                    ClientPacketParser.parsePacket(packet);
                 } catch (InterruptedException e) {
                     continue;
                 }
