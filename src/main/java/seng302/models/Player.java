@@ -3,6 +3,7 @@ package seng302.models;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -11,17 +12,17 @@ import java.nio.channels.SocketChannel;
  */
 public class Player {
 
-    private SocketChannel socketChannel;
+    private Socket socket;
     private Yacht yacht;
     private Integer lastMarkPassed;
 
 
-    public Player(SocketChannel socketChannel) {
-        this.socketChannel = socketChannel;
+    public Player(Socket socket) {
+        this.socket = socket;
     }
 
-    public SocketChannel getSocketChannel() {
-        return socketChannel;
+    public Socket getSocket() {
+        return socket;
     }
 
     public Integer getLastMarkPassed() {
@@ -40,15 +41,12 @@ public class Player {
     public String toString() {
         String playerAddress = null;
 
-        if (socketChannel == null){
+        if (socket == null){
             return "Disconnected Player";
         }
 
-        try {
-            playerAddress = socketChannel.getRemoteAddress().toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        playerAddress = socket.getRemoteSocketAddress().toString();
+
 
         return playerAddress;
     }
@@ -63,11 +61,11 @@ public class Player {
             return false;
         }
 
-        return ((Player) obj).socketChannel.equals(socketChannel);
+        return ((Player) obj).socket.equals(socket);
     }
 
     @Override
     public int hashCode(){
-        return socketChannel.hashCode();
+        return socket.hashCode();
     }
 }

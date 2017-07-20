@@ -18,7 +18,7 @@ public class HeartbeatThread extends Thread{
     private Integer seqNum;
     private Stack<Player> disconnectedPlayers;
 
-    HeartbeatThread(ClientConnectionDelegate delegate){
+    public HeartbeatThread(ClientConnectionDelegate delegate){
         this.delegate =  delegate;
         seqNum = 0;
         disconnectedPlayers = new Stack<>();
@@ -43,15 +43,15 @@ public class HeartbeatThread extends Thread{
         Message heartbeat = new Heartbeat(seqNum);
 
         for (Player player : GameState.getPlayers()){
-            if (!player.getSocketChannel().isConnected()){
+            if (!player.getSocket().isConnected()){
                 playerLostConnection(player);
             }
-//
-//            try {
-//                player.getSocketChannel().socket().getOutputStream().write(heartbeat.getBuffer());
-//            } catch (IOException e) {
-//                playerLostConnection(player);
-//            }
+
+            try {
+                player.getSocket().getOutputStream().write(heartbeat.getBuffer());
+            } catch (IOException e) {
+                playerLostConnection(player);
+            }
         }
 
         updateDelegate();
