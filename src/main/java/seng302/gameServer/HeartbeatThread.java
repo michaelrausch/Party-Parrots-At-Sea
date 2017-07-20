@@ -1,6 +1,6 @@
 package seng302.gameServer;
 
-import seng302.models.Player;
+import seng302.model.Player;
 import seng302.server.messages.Heartbeat;
 import seng302.server.messages.Message;
 

@@ -3,8 +3,8 @@ package seng302.visualizer.annotations;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import seng302.controllers.annotations.Annotation;
-import seng302.controllers.annotations.ImportantAnnotationsState;
+import seng302.visualiser.controllers.annotations.Annotation;
+import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 
 import static org.junit.Assert.assertEquals;
 

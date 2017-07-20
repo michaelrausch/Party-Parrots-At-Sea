@@ -3,7 +3,7 @@ package seng302;
 import javafx.scene.paint.Color;
 import org.junit.Assert;
 import org.junit.Test;
-import seng302.models.Colors;
+import seng302.model.Colors;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

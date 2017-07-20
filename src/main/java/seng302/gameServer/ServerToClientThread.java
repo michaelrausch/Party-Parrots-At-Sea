@@ -1,10 +1,8 @@
 package seng302.gameServer;
 
-import seng302.gameServer.GameState;
-import seng302.models.Player;
-import seng302.models.stream.PacketBufferDelegate;
-import seng302.models.stream.StreamParser;
-import seng302.models.stream.packets.StreamPacket;
+import seng302.model.Player;
+import seng302.model.stream.StreamParser;
+import seng302.model.stream.packets.StreamPacket;
 import seng302.server.messages.Message;
 
 import java.io.*;

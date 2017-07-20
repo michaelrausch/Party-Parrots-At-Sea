@@ -6,7 +6,7 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.layout.*?>
 
-<GridPane fx:id="finishScreenGridPane" maxHeight="837.0" maxWidth="837.0" minHeight="837.0" minWidth="837.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="837.0" prefWidth="837.0" style="-fx-background-color: #2C2c36;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.FinishScreenViewController">
+<GridPane fx:id="finishScreenGridPane" maxHeight="837.0" maxWidth="837.0" minHeight="837.0" minWidth="837.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="837.0" prefWidth="837.0" style="-fx-background-color: #2C2c36;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.FinishScreenViewController">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
   </columnConstraints>
