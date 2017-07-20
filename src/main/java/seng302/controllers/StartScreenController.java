@@ -40,7 +40,6 @@ public class StartScreenController {
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(jfxUrl));
             contentPane.getChildren().addAll((Pane) fxmlLoader.load());
-
             return fxmlLoader.getController();
         } catch (javafx.fxml.LoadException e) {
             e.printStackTrace();
@@ -63,6 +62,10 @@ public class StartScreenController {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
             new MainServerThread().start();
+            ClientToServerThread clientToServerThread = new ClientToServerThread("localhost", 4950);
+            controller.setClientToServerThread(clientToServerThread);
+            clientToServerThread.start();
+//            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
 

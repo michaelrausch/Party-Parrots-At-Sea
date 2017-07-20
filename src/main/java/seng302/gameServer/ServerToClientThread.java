@@ -5,6 +5,8 @@ import seng302.models.Player;
 import seng302.models.stream.PacketBufferDelegate;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
+import seng302.server.messages.ChatterMessage;
+import seng302.server.messages.Heartbeat;
 import seng302.server.messages.Message;
 
 import java.io.*;
@@ -54,6 +56,9 @@ public class ServerToClientThread extends Thread {
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
+                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
+                    sendMessage(chatterMessage);
+
 //                try {
 //                    GameState.outputState(os);
 //                } catch (IOException e) {
@@ -62,9 +67,11 @@ public class ServerToClientThread extends Thread {
                     updateClient = false;
                 }
 
+
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
+
                 //checking if it is the start of the packet
                 if(sync1 == 0x47 && sync2 == 0x83) {
                     int type = readByte();
@@ -86,6 +93,7 @@ public class ServerToClientThread extends Thread {
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 closeSocket();
                 return;
             }
@@ -160,6 +168,14 @@ public class ServerToClientThread extends Thread {
     private void skipBytes(long n) throws Exception{
         for (int i=0; i < n; i++){
             readByte();
+        }
+    }
+
+    public void sendMessage(Message message){
+        try {
+            os.write(message.getBuffer());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

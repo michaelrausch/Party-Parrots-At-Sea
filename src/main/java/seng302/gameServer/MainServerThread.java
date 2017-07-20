@@ -58,9 +58,10 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
             }
 
 
+
             //RACING
             if (GameState.getCurrentStage() == GameStages.RACING) {
-
+                updateClients();
             }
 
 
@@ -68,8 +69,8 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
 
             }
-
             updateClients();
+
 
             while (!packetBuffer.isEmpty()){
                 System.out.println("WHATUPPP");
@@ -113,6 +114,13 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
         System.out.println("HEY HI");
         return packetBuffer.add(streamPacket);
     }
+
+    private void initializeRace(){
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            serverToClientThread.updateClient();
+        }
+    }
+
 
     /**
      * A client has tried to connect to the server

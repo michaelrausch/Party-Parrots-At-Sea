@@ -123,6 +123,7 @@ public class StreamParser{
      */
     private static void extractHeartBeat(StreamPacket packet) {
         long heartbeat = bytesToLong(packet.getPayload());
+        System.out.println("heartbeat = " + heartbeat);
     }
 
     private static String getTimeZoneString() {
@@ -354,6 +355,7 @@ public class StreamParser{
         int messageType = payload[1];
         int length = payload[2];
         String message = new String(Arrays.copyOfRange(payload, 3, 3 + length));
+        System.out.println(message);
     }
 
     /**

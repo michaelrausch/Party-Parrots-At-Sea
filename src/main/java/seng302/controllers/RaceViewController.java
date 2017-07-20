@@ -95,16 +95,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceSparkLine.getYAxis().setTranslateX(-5);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
-        startingBoats = new ArrayList<>(StreamParser.getBoats().values());
+        //startingBoats = new ArrayList<>(StreamParser.getBoats().values());
 
-        includedCanvasController.setup(this);
-        includedCanvasController.initializeCanvas();
-        initializeUpdateTimer();
-        initialiseFPSCheckBox();
-        initialiseAnnotationSlider();
-        initialiseBoatSelectionComboBox();
-        includedCanvasController.timer.start();
-        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        //includedCanvasController.setup(this);
+        //includedCanvasController.initializeCanvas();
+        //initializeUpdateTimer();
+        //initialiseFPSCheckBox();
+        //initialiseAnnotationSlider();
+        //initialiseBoatSelectionComboBox();
+        //includedCanvasController.timer.start();
+        //selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
 
     }
 

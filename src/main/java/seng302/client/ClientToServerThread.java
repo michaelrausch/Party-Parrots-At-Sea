@@ -60,7 +60,6 @@ public class ClientToServerThread extends Thread {
 //                }
                     updateClient = false;
                 }
-
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();

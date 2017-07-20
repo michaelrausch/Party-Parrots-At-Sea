@@ -29,4 +29,5 @@ public class BoatActionMessage extends Message{
         return MESSAGE_SIZE;
     }
 
+
 }

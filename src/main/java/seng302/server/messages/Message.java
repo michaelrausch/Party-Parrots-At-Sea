@@ -219,5 +219,4 @@ public abstract class Message {
             data[right] = (byte) (temp & 0xff);
         }
     }
-
 }
