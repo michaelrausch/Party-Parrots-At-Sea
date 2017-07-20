@@ -1,9 +1,9 @@
 package seng302.server.messages;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 
@@ -34,17 +34,13 @@ public abstract class Message {
     public abstract int getSize();
 
     /**
-     * Send the message as through the outputStream
-     */
-    public abstract void send(SocketChannel outputStream) throws IOException;
-
-    /**
      * Allocate byte buffer to correct size
      */
     void allocateBuffer(){
         buffer = ByteBuffer.allocate(Header.getSize() + getSize() + CRC_SIZE);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         bufferPosition = 0;
+        buffer.position(bufferPosition);
     }
 
     /**
@@ -161,10 +157,10 @@ public abstract class Message {
     }
 
     /**
-     * @return The current buffer
+     * @return The current buffer as a byte array
      */
-    public ByteBuffer getBuffer(){
-        return buffer;
+    public byte[] getBuffer(){
+        return buffer.array();
     }
 
     /**
@@ -194,6 +190,25 @@ public abstract class Message {
     }
 
     /**
+     * takes an array of up to 7 bytes in little endian format and
+     * returns a positive long constructed from the input bytes
+     *
+     * @return a positive long if there is less than 8 bytes -1 otherwise
+     */
+    public static long bytesToLong(byte[] bytes){
+        long partialLong = 0;
+        int index = 0;
+        for (byte b: bytes){
+            if (index > 6){
+                return -1;
+            }
+            partialLong = partialLong | (b & 0xFFL) << (index * 8);
+            index++;
+        }
+        return partialLong;
+    }
+
+    /**
      * Reverse an array of bytes
      * @param data The byte[] to reverse
      */
@@ -204,4 +219,5 @@ public abstract class Message {
             data[right] = (byte) (temp & 0xff);
         }
     }
+
 }

@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -16,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -27,7 +29,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import seng302.utilities.GeometryUtils;
+import seng302.utilities.GeoUtility;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
@@ -103,6 +105,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseBoatSelectionComboBox();
         gameViewController.timer.start();
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+
     }
 
 
@@ -136,7 +139,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             Scene scene = new Scene(fxmlLoader.load(), 469, 298);
             scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             stage.initStyle(StageStyle.UNDECORATED);
-
             stage.setScene(scene);
             stage.show();
 
@@ -446,7 +448,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
                         Point2D boatCurrentPos = new Point2D(bg.getBoatLayoutX(), bg.getBoatLayoutY());
                         Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
-                        Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
+                        Integer lineFuncResult = GeoUtility.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
                         Line rightLayline = new Line();
                         Line leftLayline = new Line();
                         if (lineFuncResult == 1) {
@@ -639,4 +641,5 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public static boolean sparkLineStatus(Integer yachtId) {
         return sparkLineData.containsKey(yachtId);
     }
+
 }

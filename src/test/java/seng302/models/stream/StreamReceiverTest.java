@@ -61,16 +61,16 @@ public class StreamReceiverTest {
         assert pq.size() == 0;
     }
 
-    @Test
-    public void connectReadsAPacket() throws Exception {
-        Socket host=mock(Socket.class);
-        InputStream stream = new ByteArrayInputStream(workingPacket);
-        when(host.getInputStream()).thenReturn(stream);
-        StreamReceiver streamReceiver = new StreamReceiver(host, pq);
-
-        streamReceiver.connect();
-        assert pq.size() == 1;
-    }
+//    @Test
+//    public void connectReadsAPacket() throws Exception {
+//        Socket host=mock(Socket.class);
+//        InputStream stream = new ByteArrayInputStream(workingPacket);
+//        when(host.getInputStream()).thenReturn(stream);
+//        StreamReceiver streamReceiver = new StreamReceiver(host, pq);
+//
+//        streamReceiver.connect();
+//        assert pq.size() == 1;
+//    }
 
     @Test
     public void connectDropsAMismatchedCrc() throws Exception {

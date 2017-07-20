@@ -24,6 +24,10 @@ public class Yacht {
     private String shortName;
     private String boatName;
     private String country;
+
+    // Situational data
+
+
     // Boat status
     private Integer boatStatus;
     private Integer legNumber;
@@ -31,6 +35,9 @@ public class Yacht {
     private Integer penaltiesServed;
     private Long estimateTimeAtFinish;
     private String position;
+    private Double lat;
+    private Double lon;
+    private Float heading;
     private double velocity;
     private Long timeTillNext;
     private Long markRoundTime;
@@ -191,17 +198,41 @@ public class Yacht {
         this.lastMarkRounded = lastMarkRounded;
     }
 
+    public void setNextMark(Mark nextMark) {
+            this.nextMark = nextMark;
+      }
+
+    public Mark getNextMark(){
+        return nextMark;
+      }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLon() {
+        return lon;
+    }
+
+    public void setLon(Double lon) {
+        this.lon = lon;
+    }
+
+    public Float getHeading() {
+        return heading;
+    }
+
+    public void setHeading(Float heading) {
+        this.heading = heading;
+    }
+
     @Override
     public String toString() {
         return boatName;
     }
-
-      public void setNextMark(Mark nextMark) {
-            this.nextMark = nextMark;
-      }
-
-      public Mark getNextMark(){
-        return nextMark;
-      }
 
 }

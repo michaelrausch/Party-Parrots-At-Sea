@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -32,7 +31,7 @@ import seng302.models.stream.packets.StreamPacket;
  * that are threadsafe so the visualiser can always access the latest speed and position available
  * Created by kre39 on 23/04/17.
  */
-public class StreamParser extends Thread {
+public class StreamParser{
 
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markLocations = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
@@ -58,54 +57,16 @@ public class StreamParser extends Thread {
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
-     *
-     * @param threadName name of the thread
      */
-    public StreamParser(String threadName) {
-        this.threadName = threadName;
+    public StreamParser() {
     }
-
-    /**
-     * Used to within threading so when the stream parser thread runs, it will keep looking for a
-     * packet to process until it is unable to find anymore packets
-     */
-    public void run() {
-        appRunning = true;
-        try {
-            streamStatus = true;
-            xmlObject = new XMLParser();
-            while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
-                Thread.sleep(1);
-            }
-            while (appRunning) {
-                StreamPacket packet = StreamReceiver.packetBuffer.take();
-                parsePacket(packet);
-                Thread.sleep(1);
-                while (StreamReceiver.packetBuffer.peek() == null) {
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Used to start the stream parser thread when multithreading
-     */
-    public void start() {
-        if (t == null) {
-            t = new Thread(this, threadName);
-            t.start();
-        }
-    }
-
     /**
      * Looks at the type of the packet then sends it to the appropriate parser to extract the
      * specific data associated with that packet type
      *
      * @param packet the packet to be looked at and processed
      */
-    private static void parsePacket(StreamPacket packet) {
+    public static void parsePacket(StreamPacket packet) {
         try {
             switch (packet.getType()) {
                 case HEARTBEAT:
@@ -145,7 +106,8 @@ public class StreamParser extends Thread {
                 case AVG_WIND:
                     extractAvgWind(packet);
                     break;
-                default:
+                case BOAT_ACTION:
+                    extractBoatAction(packet);
                     break;
             }
         } catch (NullPointerException e) {
@@ -525,6 +487,27 @@ public class StreamParser extends Thread {
         long speed3 = bytesToLong(Arrays.copyOfRange(payload, 17, 19));
         long period4 = bytesToLong(Arrays.copyOfRange(payload, 19, 21));
         long speed4 = bytesToLong(Arrays.copyOfRange(payload, 21, 23));
+    }
+
+
+    private static void extractBoatAction(StreamPacket packet) {
+        byte[] payload = packet.getPayload();
+        int messageVersionNo = payload[0];
+        long actionType = bytesToLong(Arrays.copyOfRange(payload, 0, 1));
+        if (actionType == 1) {
+            System.out.println("VMG");
+        } else if (actionType == 2) {
+            System.out.println("SAILS IN");
+        } else if (actionType == 3) {
+            System.out.println("SAILS OUT");
+        } else if (actionType == 4) {
+            System.out.println("TACK/GYBE");
+        } else if (actionType == 5) {
+            System.out.println("UPWIND");
+        } else if (actionType == 6) {
+            System.out.println("DOWNWIND");
+        }
+
     }
 
     /**

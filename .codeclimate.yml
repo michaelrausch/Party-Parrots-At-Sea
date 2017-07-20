@@ -1,0 +1,17 @@
+engines:
+  pmd:
+    enabled: true
+    channel: "beta"
+
+  fixme:
+    enabled: true
+    config:
+      strings:
+      - FIXME
+      - TODO
+      - BUG
+      - FIX
+
+ratings:
+  paths:
+  - "**.java"
