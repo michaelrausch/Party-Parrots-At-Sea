@@ -68,7 +68,7 @@ public class FinishScreenViewController implements Initializable {
 
         // add data to table
         for (Yacht boat : StreamParser.getBoatsPos().values()) {
-            if (participantIDs.contains(boat.getSourceID())) {
+            if (participantIDs.contains(boat.getSourceId())) {
                 data.add(boat);
             }
         }

@@ -2,11 +2,15 @@ package seng302.gameServerWithThreading;
 
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.models.Yacht;
 import seng302.models.mark.Mark;
 import seng302.models.mark.MarkType;
+import seng302.models.mark.SingleMark;
 import seng302.models.stream.PacketBufferDelegate;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
+import seng302.models.xml.Boats;
+import seng302.models.xml.Race;
 import seng302.models.xml.Regatta;
 import seng302.models.xml.XMLGenerator;
 
@@ -53,7 +57,18 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
         g.setRegatta(r);
 
+        Race b = new Race();
+        b.addBoat(new Yacht("SomeType", 123, "hid", "NZL",
+                "Emirates Team New Zealand", "NZL"));
+
+        g.setRace(b);
+
+        System.out.println("g.getBoatsAsXml() = " + g.getBoatsAsXml());
+        g.getBoatsAsXml();
+
         System.out.println("g.getRegattaAsXml() = " + g.getRegattaAsXml());
+
+        System.out.println("g.ragce() = " + g.getRaceAsXml());
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!isInterrupted()) {

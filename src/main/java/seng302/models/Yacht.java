@@ -85,11 +85,11 @@ public class Yacht {
         return boatType;
     }
 
-    public Integer getSourceID() {
+    public Integer getSourceId() {
         return sourceID;
     }
 
-    public String getHullID() {
+    public String getHullId() {
         return hullID;
     }
 
@@ -207,6 +207,7 @@ public class Yacht {
       }
 
     public Double getLat() {
+        if (lat == null) return 0d;
         return lat;
     }
 
@@ -215,6 +216,8 @@ public class Yacht {
     }
 
     public Double getLon() {
+
+        if (lon == null) return 0d;
         return lon;
     }
 

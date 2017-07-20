@@ -96,7 +96,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                 thereAreBoatsNotFinished = true;
             }
 
-            BoatSubMessage m = new BoatSubMessage(y.getSourceID(), boatStatus, y.getLastMarkRounded().getId(), 0, 0, 1234l, 1234l);
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), boatStatus, y.getLastMarkRounded().getId(), 0, 0, 1234l, 1234l);
             boatSubMessages.add(m);
         }
 

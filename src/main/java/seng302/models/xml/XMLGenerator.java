@@ -11,8 +11,11 @@ import java.net.URISyntaxException;
 public class XMLGenerator {
     private static final String XML_TEMPLATE_DIR = "/server_config/xml_templates";
     private static final String REGATTA_TEMPLATE_NAME = "regatta.ftlh";
+    private static final String BOATS_TEMPLATE_NAME = "boats.ftlh";
+    private static final String RACE_TEMPLATE_NAME = "race.ftlh";
     private Configuration configuration;
     private Regatta regatta;
+    private Race race;
 
     /**
      * Set up a configuration instance for Apache Freemake
@@ -38,6 +41,10 @@ public class XMLGenerator {
     public void setRegatta(Regatta regatta){
         this.regatta = regatta;
     }
+    
+    public void setRace(Race race){
+        this.race = race;
+    }
 
     private String parseToXmlString(String templateName, XMLMessageSubType type) throws IOException, TemplateException {
         Template template;
@@ -52,11 +59,11 @@ public class XMLGenerator {
                 break;
 
             case BOAT:
-                template.process(regatta, writer);
+                template.process(race, writer);
                 break;
 
             case RACE:
-                template.process(regatta, writer);
+                template.process(race, writer);
                 break;
 
             default:
@@ -88,5 +95,35 @@ public class XMLGenerator {
     }
 
 
+    public String getBoatsAsXml() {
+        String result = null;
 
+        if (race == null) return null;
+
+        try {
+            result = parseToXmlString(BOATS_TEMPLATE_NAME, XMLMessageSubType.BOAT);
+        } catch (TemplateException e) {
+            System.out.println("[FATAL] Error parsing boats");
+        } catch (IOException e) {
+            System.out.println("[FATAL] Error reading boats");
+        }
+
+        return result;
+    }
+
+    public String getRaceAsXml() {
+        String result = null;
+
+        if (race == null) return null;
+
+        try {
+            result = parseToXmlString(RACE_TEMPLATE_NAME, XMLMessageSubType.RACE);
+        } catch (TemplateException e) {
+            System.out.println("[FATAL] Error parsing race");
+        } catch (IOException e) {
+            System.out.println("[FATAL] Error reading race");
+        }
+
+        return result;
+    }
 }

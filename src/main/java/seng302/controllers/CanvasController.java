@@ -320,7 +320,7 @@ public class CanvasController {
         }
 
         for (Yacht boat : boats.values()) {
-            if (participantIDs.contains(boat.getSourceID())) {
+            if (participantIDs.contains(boat.getSourceId())) {
                 boat.setColour(Colors.getColor());
                 BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
                 boatGroups.add(boatGroup);

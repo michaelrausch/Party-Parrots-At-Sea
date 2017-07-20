@@ -16,20 +16,12 @@
     </BoatShapes>
 
     <Boats>
-        <#list marks as mark>
-            <Boat Type="Mark" SourceID="${mark.sourceId}" ShapeID="1" HullNum="${mark.hullNumber}" StoweName="${mark.stoweName}" ShortName="${mark.shortName}"
-                  BoatName="${mark.boatName}">
-                <GPSposition Z="${mark.zpos}" Y="${mark.ypos}" X="${mark.xpos}" />
-                <FlagPosition Z="${mark.zpos}" Y="${mark.ypos}" X="${mark.xpos}" />
-            </Boat>
-        </#list>
-
         <#list boats as boat>
-            <Boat Type="Yacht" SourceID="${boat.sourceId}" ShapeID="4" HullNum="${boat.hullNumber}" StoweName="${boat.stoweName}" ShortName="${boat.shortName}"
+            <Boat Type="Yacht" SourceID="${boat.sourceId}" ShapeID="4" HullNum="${boat.hullId}" StoweName="${boat.shortName}" ShortName="${boat.shortName}"
                   BoatName="${boat.boatName}" Country="${boat.country}">
 
-                <GPSposition Z="${boat.zpos}" Y="${boat.ypos}" X="${boat.xpos}" />
-                <MastTop Z="${boat.zpos}" Y="${boat.ypos}" X="${boat.xpos}"/>
+                <GPSposition Z="0" Y="${boat.lat}" X="${boat.lon}" />
+                <MastTop Z="0" Y="${boat.lat}" X="${boat.lon}" />
             </Boat>
         </#list>
     </Boats>
