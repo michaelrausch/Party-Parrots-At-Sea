@@ -1,11 +1,6 @@
-package seng302.gameServerWithThreading;
+package seng302.gameServer;
 
-import java.util.Collection;
-import java.util.Collections;
-import javafx.application.Platform;
-import seng302.controllers.LobbyController;
-import seng302.gameServer.GameStages;
-import seng302.gameServer.GameState;
+import seng302.models.Player;
 import seng302.models.stream.PacketBufferDelegate;
 import seng302.models.stream.StreamParser;
 import seng302.models.stream.packets.StreamPacket;
@@ -20,14 +15,15 @@ import java.util.concurrent.PriorityBlockingQueue;
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread extends Thread implements PacketBufferDelegate{
+public class MainServerThread extends Thread implements PacketBufferDelegate, ClientConnectionDelegate{
 
     private static final int PORT = 4950;
     private static final Integer MAX_NUM_PLAYERS = 3;
+    private static final int LOG_LEVEL = 1;
 
     private ServerSocket serverSocket = null;
     private Socket socket;
-    private static ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
+    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
 
     private PriorityBlockingQueue<StreamPacket> packetBuffer;
 
@@ -44,6 +40,15 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
 
     public void run() {
+        ServerListenThread serverListenThread;
+        HeartbeatThread heartbeatThread;
+
+        serverListenThread = new ServerListenThread(serverSocket, this);
+        heartbeatThread = new HeartbeatThread(this);
+
+        heartbeatThread.start();
+        serverListenThread.start();
+
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!isInterrupted()) {
             try {
@@ -51,24 +56,10 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //LOBBYING
-            if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState.getPlayers().size() < MAX_NUM_PLAYERS) {
-                try {
-                    // TODO: 14/07/17 wmu16 - Get out of blocking call somehow after a time
-                    socket = serverSocket.accept();
-                } catch (IOException e) {
-                    System.out.println("IO error in server thread handler upon trying to accept connection");
-                }
-                ServerToClientThread thread = new ServerToClientThread(socket, this);
-                serverToClientThreads.add(thread);
-                System.out.println("[SERVER]: Client found");
-                // Platform.runLater() is used to update the UI from within a thread (found on stack overflow)
-                Platform.runLater(LobbyController::refreshCompetitors);
-                thread.start();
-            }
+
 
             //RACING
-            else if (GameState.getCurrentStage() == GameStages.RACING) {
+            if (GameState.getCurrentStage() == GameStages.RACING) {
 
             }
 
@@ -78,7 +69,7 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
 
             }
 
-//            updateClients();
+            updateClients();
 
             while (!packetBuffer.isEmpty()){
                 System.out.println("WHATUPPP");
@@ -103,9 +94,17 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
         }
     }
 
+
     public void updateClients() {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.updateClient();
+        }
+    }
+
+
+    static void serverLog(String message, int logLevel){
+        if(logLevel <= LOG_LEVEL){
+            System.out.println("[SERVER] " + message);
         }
     }
 
@@ -115,12 +114,26 @@ public class MainServerThread extends Thread implements PacketBufferDelegate{
         return packetBuffer.add(streamPacket);
     }
 
+    /**
+     * A client has tried to connect to the server
+     * @param serverToClientThread The player that connected
+     */
+    @Override
+    public void clientConnected(ServerToClientThread serverToClientThread) {
+        serverLog("Player Connected From " + serverToClientThread.getName(), 0);
+        serverToClientThreads.add(serverToClientThread);
 
-    public static Collection getServerToClientThreads() {
-        Collection<String> ips = new ArrayList<>();
-        for (ServerToClientThread serverToClientThread: serverToClientThreads){
-            ips.add(serverToClientThread.getName());
-        }
-        return Collections.synchronizedCollection(ips);
     }
+
+    /**
+     * A player has left the game, remove the player from the GameState
+     * @param player The player that left
+     */
+    @Override
+    public void clientDisconnected(Player player) {
+        serverLog("Player disconnected", 0);
+        GameState.removePlayer(player);
+//        sendXml();
+    }
+
 }

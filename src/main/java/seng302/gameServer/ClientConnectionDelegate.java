@@ -5,9 +5,9 @@ import seng302.models.Player;
 public interface ClientConnectionDelegate {
     /**
      * A player has connected to the server
-     * @param player The player that has connected
+     * @param serverToClientThread The player that has connected
      */
-    void clientConnected(Player player);
+    void clientConnected(ServerToClientThread serverToClientThread);
 
     /**
      * A player has disconnected from the server

@@ -8,8 +8,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import seng302.client.ClientToServerThread;
 import seng302.gameServer.GameState;
-import seng302.gameServerWithThreading.MainServerThread;
-import seng302.models.stream.StreamReceiver;
+import seng302.gameServer.MainServerThread;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -64,7 +63,6 @@ public class StartScreenController {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
             new MainServerThread().start();
-//            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
 
