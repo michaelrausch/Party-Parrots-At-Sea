@@ -1,6 +1,9 @@
 package seng302.models;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -140,7 +143,7 @@ public final class PolarTable {
     }
 
 
-    private static Double getClosestMatch(Double thisWindSpeed) {
+    public static Double getClosestMatch(Double thisWindSpeed) {
 
         ArrayList<Double> windValues = new ArrayList<>(polarTable.keySet());
 

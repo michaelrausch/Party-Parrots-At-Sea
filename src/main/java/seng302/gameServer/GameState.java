@@ -1,11 +1,9 @@
 package seng302.gameServer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import seng302.models.Player;
-
-import java.util.ArrayList;
 import seng302.models.Yacht;
 
 /**
@@ -63,6 +61,14 @@ public class GameState {
 
     public static void setCurrentStage(GameStages currentStage) {
         GameState.currentStage = currentStage;
+    }
+
+    public static Double getWindDirection() {
+        return windDirection;
+    }
+
+    public static Double getWindSpeed() {
+        return windSpeed;
     }
 
 
