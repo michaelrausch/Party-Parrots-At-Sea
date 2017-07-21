@@ -1,11 +1,9 @@
 package seng302.gameServer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import seng302.models.Player;
 
-import java.util.ArrayList;
 import seng302.models.Yacht;
 import seng302.server.messages.BoatActionType;
 
@@ -30,6 +28,7 @@ public class GameState {
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
+        yachts = new HashMap<>();
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
     }
@@ -74,6 +73,10 @@ public class GameState {
         return windSpeed;
     }
 
+    public static Map<Integer, Yacht> getYachts() {
+        return yachts;
+    }
+
     public static void updateBoat(Integer sourceId, BoatActionType actionType) {
         switch (actionType) {
             case VMG:
@@ -92,6 +95,7 @@ public class GameState {
     }
 
     public static void update() {
+
         Long timeInterval = System.currentTimeMillis() - previousUpdateTime;
         previousUpdateTime = System.currentTimeMillis();
         for (Yacht yacht : yachts.values()) {

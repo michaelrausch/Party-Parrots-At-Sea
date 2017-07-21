@@ -316,7 +316,7 @@ public class BoatGroup extends Group {
      * @return An array containing all ID's associated with this RaceObject.
      */
     public long getRaceId() {
-        return boat.getSourceId();
+        return boat.getSourceID();
     }
 
     public Group getWake () {

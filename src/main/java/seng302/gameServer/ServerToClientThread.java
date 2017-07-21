@@ -1,16 +1,15 @@
 package seng302.gameServer;
 
 
+import java.util.ArrayList;
 import java.util.Random;
 import seng302.client.ClientPacketParser;
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.PacketType;
 import seng302.models.stream.packets.StreamPacket;
-import seng302.server.messages.ChatterMessage;
-import seng302.server.messages.Heartbeat;
-import seng302.server.messages.BoatActionType;
-import seng302.server.messages.Message;
+import seng302.models.xml.XMLGenerator;
+import seng302.server.messages.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -35,8 +34,12 @@ public class ServerToClientThread extends Thread {
     private Boolean userIdentified = false;
     private Boolean connected = true;
     private Boolean updateClient = true;
+    private Boolean intiialisedRace = false;
 
+    private Integer seqNo;
     private Integer sourceId;
+
+    private XMLGenerator xml;
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
@@ -51,6 +54,7 @@ public class ServerToClientThread extends Thread {
         Random rand = new Random();
         sourceId = rand.nextInt(100000);
         GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+        seqNo = 0;
     }
 
     public void run() {
@@ -61,12 +65,16 @@ public class ServerToClientThread extends Thread {
             //System.out.print(".");
 
             try {
+                if (intiialisedRace) {
+                    sendSetupMessages();
+                }
+                
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
                     ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
                     sendMessage(chatterMessage);
-
+                    sendBoatLocationPackets();
 //                try {
 //                    GameState.outputState(os);
 //                } catch (IOException e) {
@@ -115,6 +123,16 @@ public class ServerToClientThread extends Thread {
 
     }
 
+    private void sendSetupMessages() {
+        xml = new XMLGenerator();
+        XMLMessage xmlMessage = new XMLMessage(xml.getRegattaAsXml(), XMLMessageSubType.REGATTA, xml.getRegattaAsXml().length());
+        sendMessage(xmlMessage);
+        xmlMessage = new XMLMessage(xml.getBoatsAsXml(), XMLMessageSubType.BOAT, xml.getBoatsAsXml().length());
+        sendMessage(xmlMessage);
+        xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE, xml.getRaceAsXml().length());
+        sendMessage(xmlMessage);
+    }
+
     public void updateClient() {
         updateClient = true;
     }
@@ -156,6 +174,11 @@ public class ServerToClientThread extends Thread {
     }
 
 
+    public void initialiseRace(){
+        intiialisedRace = true;
+    }
+    
+    
     private int readByte() throws Exception {
         int currentByte = -1;
         try {
@@ -190,6 +213,20 @@ public class ServerToClientThread extends Thread {
             os.write(message.getBuffer());
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private int getSeqNo(){
+        seqNo++;
+        return seqNo;
+    }
+
+
+    private void sendBoatLocationPackets(){
+        ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
+        for (Yacht yacht: yachts){
+            BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId,getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
+            sendMessage(boatLocationMessage);
         }
     }
 }

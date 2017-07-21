@@ -252,4 +252,11 @@ public class Yacht {
         return boatName;
     }
 
+    public GeoPoint getLocation() {
+        return location;
+    }
+
+    public Double getHeading() {
+        return heading;
+    }
 }

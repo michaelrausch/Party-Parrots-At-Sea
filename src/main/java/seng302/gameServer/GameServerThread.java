@@ -96,7 +96,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
                 thereAreBoatsNotFinished = true;
             }
 
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), boatStatus, y.getLastMarkRounded().getId(), 0, 0, 1234l, 1234l);
+            BoatSubMessage m = new BoatSubMessage(y.getSourceID(), boatStatus, y.getLastMarkRounded().getId(), 0, 0, 1234l, 1234l);
             boatSubMessages.add(m);
         }
 
@@ -223,11 +223,11 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
             server = ServerSocketChannel.open();
             server.socket().bind(new InetSocketAddress("localhost", PORT_NUMBER));
 
-            serverListenThread = new ServerListenThread(server, this);
+//            serverListenThread = new ServerListenThread(server, this);
             heartbeatThread = new HeartbeatThread(this);
 
             heartbeatThread.start();
-            serverListenThread.start();
+//            serverListenThread.start();
         }
         catch (IOException e){
             serverLog("Failed to bind socket: " + e.getMessage(), 0);
@@ -286,13 +286,17 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
      * A client has tried to connect to the server
      * @param player The player that connected
      */
-    @Override
     public void clientConnected(Player player) {
         if (GameState.getPlayers().size() < MAX_NUM_PLAYERS && GameState.getCurrentStage() == GameStages.LOBBYING) {
             serverLog("Player Connected", 0);
             GameState.addPlayer(player);
             sendXml();
         }
+    }
+
+    @Override
+    public void clientConnected(ServerToClientThread serverToClientThread) {
+
     }
 
     /**
@@ -310,7 +314,7 @@ public class GameServerThread implements Runnable, Observer, ClientConnectionDel
     void broadcast(Message message) throws IOException{
         for(Player player : GameState.getPlayers()) {
             //heh
-            player.getSocketChannel().socket().getOutputStream().write(message.getBuffer());
+            player.getSocket().getOutputStream().write(message.getBuffer());
         }
         seqNum++;
     }

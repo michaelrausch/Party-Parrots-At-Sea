@@ -558,7 +558,7 @@ public class XMLParser {
                         getNodeAttributeString(currentBoat, "Country"));
                     this.boats.add(boat);
                     if (boat.getBoatType().equals("Yacht")) {
-                        competingBoats.put(boat.getSourceId(), boat);
+                        competingBoats.put(boat.getSourceID(), boat);
                     }
                 }
             }
