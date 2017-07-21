@@ -15,9 +15,11 @@ import seng302.server.messages.BoatActionType;
  */
 public class GameState {
 
+    private static final Integer HEADING_STEP = 3;
+
     private static Long previousUpdateTime;
-    private static Double windDirection = 0d;
-    private static Double windSpeed = 0d;
+    public static Double windDirection;
+    private static Double windSpeed;
 
     private static String hostIpAddress;
     private static List<Player> players;
@@ -26,6 +28,10 @@ public class GameState {
     private static GameStages currentStage;
     
     public GameState(String hostIpAddress) {
+        windDirection = 170d;
+        windSpeed = 0d;
+
+
         GameState.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
@@ -75,18 +81,24 @@ public class GameState {
     }
 
     public static void updateBoat(Integer sourceId, BoatActionType actionType) {
+        Yacht playerYacht = yachts.get(sourceId);
         switch (actionType) {
             case VMG:
                 break;
             case SAILS_IN:
+                playerYacht.toggleSailIn();
                 break;
             case SAILS_OUT:
+                playerYacht.toggleSailIn();
                 break;
             case TACK_GYBE:
+                playerYacht.tackGybe(windDirection);
                 break;
             case UPWIND:
+                playerYacht.turnUpwind();
                 break;
             case DOWNWIND:
+                playerYacht.turnDownwind();
                 break;
         }
     }
