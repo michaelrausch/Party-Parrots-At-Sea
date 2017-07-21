@@ -6,7 +6,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,6 +20,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import seng302.client.ClientStateQueryingRunnable;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 
@@ -24,7 +28,7 @@ import seng302.gameServer.GameState;
  * A class describing the actions of the lobby screen
  * Created by wmu16 on 10/07/17.
  */
-public class LobbyController implements Initializable{
+public class LobbyController implements Initializable, Observer{
 
     @FXML
     private ListView competitorsListView;
@@ -34,6 +38,7 @@ public class LobbyController implements Initializable{
     private Text lobbyIpText;
 
     private static ObservableList competitors;
+    private ClientStateQueryingRunnable clientStateQueryingRunnable;
 
     private void setContentPane(String jfxUrl) {
         try {
@@ -53,11 +58,27 @@ public class LobbyController implements Initializable{
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         lobbyIpText.setText("Lobby Host IP: " + getLocalHostIp());
-    }
-
-    public void initialize() {
         competitors = FXCollections.observableArrayList();
         competitorsListView.setItems(competitors);
+
+        // set up client state query thread, so that when it receives the race-started packet
+        // it can switch to the race view
+        ClientStateQueryingRunnable clientStateQueryingRunnable = new ClientStateQueryingRunnable();
+        clientStateQueryingRunnable.addObserver(this);
+        Thread clientStateQueryingThread = new Thread(clientStateQueryingRunnable, "Client State querying thread");
+        clientStateQueryingThread.setDaemon(true);
+        clientStateQueryingThread.start();
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                switchToRaceView();
+                clientStateQueryingRunnable.terminate();
+            }
+        });
     }
 
     private String getLocalHostIp() {
@@ -94,16 +115,16 @@ public class LobbyController implements Initializable{
     public void leaveLobbyButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function!
         setContentPane("/views/StartScreenView.fxml");
-        System.out.println("Leaving lobby!");
         GameState.setCurrentStage(GameStages.CANCELLED);
         // TODO: 20/07/17 wmu16 - Implement some way of terminating the game
     }
 
-
     @FXML
     public void readyButtonPressed() {
         GameState.setCurrentStage(GameStages.RACING);
-        setContentPane("/views/RaceView.fxml");
+    }
 
+    private void switchToRaceView() {
+        setContentPane("/views/RaceView.fxml");
     }
 }

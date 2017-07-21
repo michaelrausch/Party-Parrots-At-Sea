@@ -1,5 +1,6 @@
 package seng302.gameServer;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class GameState {
     public GameState(String hostIpAddress) {
         GameState.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
+        yachts = new HashMap<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
         //set this when game stage changes to prerace

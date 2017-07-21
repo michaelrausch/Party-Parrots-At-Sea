@@ -96,12 +96,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         startingBoats = new ArrayList<>(ClientPacketParser.getBoats().values());
 
         includedCanvasController.setup(this);
-        includedCanvasController.initializeCanvas();
+//        includedCanvasController.initializeCanvas();
         initializeUpdateTimer();
         initialiseFPSCheckBox();
         initialiseAnnotationSlider();
         initialiseBoatSelectionComboBox();
-        includedCanvasController.timer.start();
+//        includedCanvasController.timer.start();
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
 
     }
@@ -283,7 +283,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 event -> {
                     updateRaceTime();
                     updateWindDirection();
-                    updateOrder();
+//                    updateOrder();
                     updateBoatSelectionComboBox();
                 })
         );

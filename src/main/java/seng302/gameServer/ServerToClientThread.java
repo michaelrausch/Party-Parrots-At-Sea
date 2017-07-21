@@ -50,7 +50,7 @@ public class ServerToClientThread extends Thread {
         GameState.addPlayer(new Player(socket));
         Random rand = new Random();
         sourceId = rand.nextInt(100000);
-        GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+//        GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
     }
 
     public void run() {
@@ -58,14 +58,13 @@ public class ServerToClientThread extends Thread {
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
         while(true) {
-            //System.out.print(".");
 
             try {
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
-                    sendMessage(chatterMessage);
+                    //ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Chatter message");
+                    //sendMessage(chatterMessage);
 
 //                try {
 //                    GameState.outputState(os);
