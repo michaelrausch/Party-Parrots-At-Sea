@@ -1,12 +1,7 @@
 package seng302.server.messages;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
-import java.util.zip.CRC32;
+import java.io.OutputStream;
 
 public class XMLMessage extends Message{
     private final MessageType MESSAGE_TYPE = MessageType.XML_MESSAGE;
@@ -35,20 +30,6 @@ public class XMLMessage extends Message{
         sequence = sequenceNum;
 
         setHeader(new Header(MESSAGE_TYPE, 0x01, (short) getSize()));
-    }
-
-    /**
-     * @return The length of this message
-     */
-    public int getSize(){
-        return MESSAGE_SIZE + content.length();
-    }
-
-    /**
-     * Send this message as a stream of bytes
-     * @param outputStream The output stream to send the message
-     */
-    public void send(SocketChannel outputStream) throws IOException {
         allocateBuffer();
         writeHeaderToBuffer();
 
@@ -63,7 +44,12 @@ public class XMLMessage extends Message{
 
         writeCRC();
         rewind();
+    }
 
-        outputStream.write(getBuffer());
+    /**
+     * @return The length of this message
+     */
+    public int getSize(){
+        return MESSAGE_SIZE + content.length();
     }
 }

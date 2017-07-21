@@ -1,4 +1,4 @@
-package seng302.models.stream;
+package seng302.client;
 
 
 import java.io.IOException;
@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -23,6 +22,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.models.Yacht;
 import seng302.models.mark.Mark;
+import seng302.models.stream.XMLParser;
 import seng302.models.stream.packets.BoatPositionPacket;
 import seng302.models.stream.packets.StreamPacket;
 
@@ -32,7 +32,7 @@ import seng302.models.stream.packets.StreamPacket;
  * that are threadsafe so the visualiser can always access the latest speed and position available
  * Created by kre39 on 23/04/17.
  */
-public class StreamParser extends Thread {
+public class ClientPacketParser {
 
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markLocations = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
@@ -58,54 +58,16 @@ public class StreamParser extends Thread {
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed
-     *
-     * @param threadName name of the thread
      */
-    public StreamParser(String threadName) {
-        this.threadName = threadName;
+    public ClientPacketParser() {
     }
-
-    /**
-     * Used to within threading so when the stream parser thread runs, it will keep looking for a
-     * packet to process until it is unable to find anymore packets
-     */
-    public void run() {
-        appRunning = true;
-        try {
-            streamStatus = true;
-            xmlObject = new XMLParser();
-            while (StreamReceiver.packetBuffer == null || StreamReceiver.packetBuffer.size() < 1) {
-                Thread.sleep(1);
-            }
-            while (appRunning) {
-                StreamPacket packet = StreamReceiver.packetBuffer.take();
-                parsePacket(packet);
-                Thread.sleep(1);
-                while (StreamReceiver.packetBuffer.peek() == null) {
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Used to start the stream parser thread when multithreading
-     */
-    public void start() {
-        if (t == null) {
-            t = new Thread(this, threadName);
-            t.start();
-        }
-    }
-
     /**
      * Looks at the type of the packet then sends it to the appropriate parser to extract the
      * specific data associated with that packet type
      *
      * @param packet the packet to be looked at and processed
      */
-    private static void parsePacket(StreamPacket packet) {
+    public static void parsePacket(StreamPacket packet) {
         try {
             switch (packet.getType()) {
                 case HEARTBEAT:
@@ -145,8 +107,6 @@ public class StreamParser extends Thread {
                 case AVG_WIND:
                     extractAvgWind(packet);
                     break;
-                default:
-                    break;
             }
         } catch (NullPointerException e) {
             System.out.println("Error parsing packet");
@@ -161,6 +121,7 @@ public class StreamParser extends Thread {
      */
     private static void extractHeartBeat(StreamPacket packet) {
         long heartbeat = bytesToLong(packet.getPayload());
+        System.out.println("heartbeat = " + heartbeat);
     }
 
     private static String getTimeZoneString() {
@@ -392,6 +353,7 @@ public class StreamParser extends Thread {
         int messageType = payload[1];
         int length = payload[2];
         String message = new String(Arrays.copyOfRange(payload, 3, 3 + length));
+        System.out.println(message);
     }
 
     /**

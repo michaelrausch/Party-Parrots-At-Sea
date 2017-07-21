@@ -21,6 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import seng302.client.ClientPacketParser;
 import seng302.fxObjects.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.Yacht;
@@ -31,7 +32,6 @@ import seng302.models.mark.MarkType;
 import seng302.models.mark.SingleMark;
 import seng302.models.map.Boundary;
 import seng302.models.map.CanvasMap;
-import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser;
 import seng302.models.stream.XMLParser.RaceXMLObject.Limit;
 import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
@@ -110,6 +110,7 @@ public class CanvasController {
         // Bind canvas size to stack pane size.
         canvas.widthProperty().bind(new SimpleDoubleProperty(CANVAS_WIDTH));
         canvas.heightProperty().bind(new SimpleDoubleProperty(CANVAS_HEIGHT));
+
     }
 
     public void initializeCanvas() {
@@ -154,13 +155,13 @@ public class CanvasController {
                                 raceViewController.updateSparkLine();
                             }
                             updateGroups();
-                            if (StreamParser.isRaceFinished()) {
+                            if (ClientPacketParser.isRaceFinished()) {
                                 this.stop();
                             }
                             lastTime = now;
                         }
                     }
-                if (StreamParser.isRaceFinished()) {
+                if (ClientPacketParser.isRaceFinished()) {
                     this.stop();
                     switchToFinishScreen();
                 }
@@ -229,7 +230,7 @@ public class CanvasController {
      * in a compound mark etc..
      */
     private void addRaceBorder() {
-        XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
+        XMLParser.RaceXMLObject raceXMLObject = ClientPacketParser.getXmlObject().getRaceXML();
         ArrayList<Limit> courseLimits = raceXMLObject.getCourseLimit();
         raceBorder.setStroke(new Color(0.0f, 0.0f, 0.74509807f, 1));
         raceBorder.setStrokeWidth(3);
@@ -247,7 +248,7 @@ public class CanvasController {
         for (BoatGroup boatGroup : boatGroups) {
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it
-            if (StreamParser.boatLocations.containsKey(boatGroup.getRaceId())) {
+            if (ClientPacketParser.boatLocations.containsKey(boatGroup.getRaceId())) {
                 if (boatGroup.isStopped()) {
                     updateBoatGroup(boatGroup);
                 }
@@ -256,7 +257,7 @@ public class CanvasController {
         }
         for (MarkGroup markGroup : markGroups) {
             for (Long id : markGroup.getRaceIds()) {
-                if (StreamParser.markLocations.containsKey(id)) {
+                if (ClientPacketParser.markLocations.containsKey(id)) {
                     updateMarkGroup(id, markGroup);
                 }
             }
@@ -265,13 +266,14 @@ public class CanvasController {
     }
 
     private void checkForCourseChanges() {
-        if (StreamParser.isNewRaceXmlReceived()){
+        if (ClientPacketParser.isNewRaceXmlReceived()) {
             addRaceBorder();
         }
     }
 
     private void updateBoatGroup(BoatGroup boatGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = ClientPacketParser.boatLocations
+            .get(boatGroup.getRaceId());
         // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
         if (movementQueue.size() > 0) {
             try {
@@ -289,7 +291,8 @@ public class CanvasController {
     }
 
     void updateMarkGroup (long raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markLocations.get(raceId);
+        PriorityBlockingQueue<BoatPositionPacket> movementQueue = ClientPacketParser.markLocations
+            .get(raceId);
         if (movementQueue.size() > 0){
             try {
                 BoatPositionPacket positionPacket = movementQueue.take();
@@ -305,12 +308,12 @@ public class CanvasController {
      * Draws all the boats.
      */
     private void initializeBoats() {
-        Map<Integer, Yacht> boats = StreamParser.getBoats();
+        Map<Integer, Yacht> boats = ClientPacketParser.getBoats();
         Group wakes = new Group();
         Group trails = new Group();
         Group annotations = new Group();
 
-        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+        ArrayList<Participant> participants = ClientPacketParser.getXmlObject().getRaceXML()
             .getParticipants();
         ArrayList<Integer> participantIDs = new ArrayList<>();
         for (Participant p : participants) {
@@ -334,7 +337,8 @@ public class CanvasController {
     }
 
     private void initializeMarks() {
-        List<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getNonDupCompoundMarks();
+        List<Mark> allMarks = ClientPacketParser.getXmlObject().getRaceXML()
+            .getNonDupCompoundMarks();
         for (Mark mark : allMarks) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 SingleMark sMark = (SingleMark) mark;
@@ -400,7 +404,7 @@ public class CanvasController {
      */
     private void fitMarksToCanvas() {
         //Check is called once to avoid unnecessarily change the course limits once the race is running
-        StreamParser.isNewRaceXmlReceived();
+        ClientPacketParser.isNewRaceXmlReceived();
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
@@ -416,7 +420,7 @@ public class CanvasController {
      */
     private void findMinMaxPoint() {
         List<Limit> sortedPoints = new ArrayList<>();
-        for (Limit limit : StreamParser.getXmlObject().getRaceXML().getCourseLimit()) {
+        for (Limit limit : ClientPacketParser.getXmlObject().getRaceXML().getCourseLimit()) {
             sortedPoints.add(limit);
         }
         sortedPoints.sort(Comparator.comparingDouble(Limit::getLat));
@@ -576,4 +580,5 @@ public class CanvasController {
     List<MarkGroup> getMarkGroups() {
         return  markGroups;
     }
+
 }

@@ -16,7 +16,8 @@ public enum MessageType {
     BOAT_LOCATION(37),
     MARK_ROUNDING(38),
     COURSE_WIND(44),
-    AVERAGE_WIND(47);
+    AVERAGE_WIND(47),
+    BOAT_ACTION(100);
 
     private int code;
 
