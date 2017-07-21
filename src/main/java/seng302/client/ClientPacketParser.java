@@ -170,8 +170,10 @@ public class ClientPacketParser {
             if (raceStatus == 4 || raceStatus == 8) {
                 raceFinished = true;
                 raceStarted = false;
+                ClientState.setRaceStarted(false);
             } else if (!raceStarted) {
                 raceStarted = true;
+                ClientState.setRaceStarted(true);
                 raceFinished = false;
             }
             timeSinceStart = timeTillStart;
