@@ -19,6 +19,7 @@ public class Player {
 
     public Player(Socket socket) {
         this.socket = socket;
+        yacht = new Yacht("test", 12.2, "asd", 12);
     }
 
     public Socket getSocket() {

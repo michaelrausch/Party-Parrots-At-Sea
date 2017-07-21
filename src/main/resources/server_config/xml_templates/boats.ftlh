@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 
 <BoatConfig>
     <Modified>2012-05-17T07:49:40+0200</Modified>
@@ -17,11 +16,11 @@
 
     <Boats>
         <#list boats as boat>
-            <Boat Type="Yacht" SourceID="${boat.sourceId}" ShapeID="4" HullNum="${boat.hullId}" StoweName="${boat.shortName}" ShortName="${boat.shortName}"
+            <Boat Type="Yacht" SourceID="${boat.sourceId}" ShapeID="4" HullNum="${boat.hullID}" StoweName="${boat.shortName}" ShortName="${boat.shortName}"
                   BoatName="${boat.boatName}" Country="${boat.country}">
 
-                <GPSposition Z="0" Y="${boat.lat}" X="${boat.lon}" />
-                <MastTop Z="0" Y="${boat.lat}" X="${boat.lon}" />
+                <GPSposition Z="0" Y="${boat.location.lat}" X="${boat.location.lng}" />
+                <MastTop Z="0" Y="${boat.location.lat}" X="${boat.location.lng}" />
             </Boat>
         </#list>
     </Boats>

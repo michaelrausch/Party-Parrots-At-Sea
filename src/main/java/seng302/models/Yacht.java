@@ -74,6 +74,7 @@ public class Yacht {
         this.velocity = boatVelocity;
         this.shortName = shortName;
         this.sourceID = id;
+        this.location = new GeoPoint(0.0, 0.0);
     }
 
     public Yacht(String boatType, Integer sourceID, String hullID, String shortName,
@@ -126,11 +127,14 @@ public class Yacht {
         return boatType;
     }
 
-    public Integer getSourceID() {
+    public Integer getSourceId() {
+        //@TODO Remove and merge with Creating Game Loop
+        if (sourceID == null) return 0;
         return sourceID;
     }
 
     public String getHullID() {
+        if (hullID == null) return "";
         return hullID;
     }
 
@@ -143,6 +147,7 @@ public class Yacht {
     }
 
     public String getCountry() {
+        if (country == null) return "";
         return country;
     }
 

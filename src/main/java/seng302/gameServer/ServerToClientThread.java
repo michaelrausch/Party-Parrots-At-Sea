@@ -8,6 +8,14 @@ import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.PacketType;
 import seng302.models.stream.packets.StreamPacket;
+import seng302.server.messages.ChatterMessage;
+import seng302.server.messages.Heartbeat;
+import seng302.server.messages.BoatActionType;
+import seng302.server.messages.Message;
+import seng302.models.xml.Race;
+import seng302.models.xml.Regatta;
+import seng302.models.xml.XMLGenerator;
+import seng302.server.messages.*;
 import seng302.models.xml.XMLGenerator;
 import seng302.server.messages.*;
 
@@ -125,10 +133,22 @@ public class ServerToClientThread extends Thread {
 
     private void sendSetupMessages() {
         xml = new XMLGenerator();
+        Race race = new Race();
+
+        for (Player player : GameState.getPlayers()){
+            race.addBoat(player.getYacht());
+        }
+
+        //@TODO calculate lat/lng values
+        xml.setRegatta(new Regatta("RaceVision Test Game", 0d, 0d));
+        xml.setRace(race);
+
         XMLMessage xmlMessage = new XMLMessage(xml.getRegattaAsXml(), XMLMessageSubType.REGATTA, xml.getRegattaAsXml().length());
         sendMessage(xmlMessage);
+
         xmlMessage = new XMLMessage(xml.getBoatsAsXml(), XMLMessageSubType.BOAT, xml.getBoatsAsXml().length());
         sendMessage(xmlMessage);
+
         xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE, xml.getRaceAsXml().length());
         sendMessage(xmlMessage);
     }

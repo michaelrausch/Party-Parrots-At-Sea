@@ -199,7 +199,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     void updateSparkLine(){
         // Collect the racing boats that aren't already in the chart
-        ArrayList<Yacht> sparkLineCandidates = startingBoats.stream().filter(yacht -> !sparkLineData.containsKey(yacht.getSourceID())
+        ArrayList<Yacht> sparkLineCandidates = startingBoats.stream().filter(yacht -> !sparkLineData.containsKey(yacht.getSourceId())
                 && yacht.getPosition() != null & yacht.getPosition() != "-").collect(Collectors.toCollection(ArrayList::new));
 
         // Obtain the qualifying boats to set the max on the Y axis
@@ -212,7 +212,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             Series<String, Double> yachtData = new Series<>();
             yachtData.setName(yacht.getBoatName());
             yachtData.getData().add(new XYChart.Data<>(Integer.toString(yacht.getLegNumber()), 1 + racingBoats.size() - Double.parseDouble(yacht.getPosition())));
-            sparkLineData.put(yacht.getSourceID(), yachtData);
+            sparkLineData.put(yacht.getSourceId(), yachtData);
         });
 
         // Lambda function to sort the series in order of leg (later legs shown more to the right)
@@ -242,7 +242,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param legNumber the leg number that the position will be assigned to
      */
     public static void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
-        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceID());
+        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceId());
         positionData.getData().add(new XYChart.Data<>(Integer.toString(legNumber), 1 + racingBoats.size() - Double.parseDouble(yacht.getPosition())));
     }
 
@@ -381,7 +381,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
         if (ClientPacketParser.isRaceStarted()) {
             for (Yacht boat : ClientPacketParser.getBoatsPos().values()) {
-                if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
+                if (participantIDs.contains(boat.getSourceId())) {  // check if the boat is racing
                     if (boat.getBoatStatus() == 3) {  // 3 is finish status
                         Text textToAdd = new Text(boat.getPosition() + ". " +
                             boat.getShortName() + " (Finished)");
@@ -399,7 +399,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             }
         } else {
             for (Yacht boat : ClientPacketParser.getBoats().values()) {
-                if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
+                if (participantIDs.contains(boat.getSourceId())) {  // check if the boat is racing
                     Text textToAdd = new Text(boat.getPosition() + ". " +
                         boat.getShortName() + " ");
                     textToAdd.setFill(Paint.valueOf("#d3d3d3"));
