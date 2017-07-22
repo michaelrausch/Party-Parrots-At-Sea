@@ -17,12 +17,15 @@ import seng302.server.messages.Message;
  */
 public class ClientToServerThread implements Runnable {
 
+    private static final int LOG_LEVEL = 1;
+
     private Thread thread;
+
+    private Integer ourID;
 
     private Socket socket;
     private InputStream is;
     private OutputStream os;
-    private static final int LOG_LEVEL = 1;
 
     private Boolean updateClient = true;
     private  ByteArrayOutputStream crcBuffer;
@@ -34,6 +37,16 @@ public class ClientToServerThread implements Runnable {
             os = socket.getOutputStream();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        Integer allocatedID = threeWayHandshake();
+        if (allocatedID != null) {
+            ourID = allocatedID;
+            clientLog("Successful handshake. Allocated ID: " + ourID, 1);
+        } else {
+            clientLog("Unsuccessful handhsake", 1);
+            closeSocket();
+            return;
         }
 
         thread = new Thread(this);
@@ -95,6 +108,33 @@ public class ClientToServerThread implements Runnable {
         }
 
     }
+
+
+    /**
+     * Listens for an allocated sourceID and returns it to the server if recieved
+     * @return the sourceID allocated to us by the server
+     */
+    private Integer threeWayHandshake() {
+        Integer ourSourceID = null;
+        while (true) {
+            try {
+                ourSourceID = is.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (ourSourceID != null) {
+                try {
+                    os.write(ourSourceID);
+                    return ourSourceID;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
+    }
+
+
 
     /**
      * Send the post-start race course information

@@ -47,11 +47,19 @@ public class ServerToClientThread implements Runnable {
         } catch (IOException e) {
             System.out.println("IO error in server thread upon grabbing streams");
         }
-//                threeWayHandshake();
-        GameState.addPlayer(new Player(socket));
-        Random rand = new Random();
-        sourceId = rand.nextInt(100000);
-        GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+
+        //Attempt threeway handshake with connection
+        sourceId = GameState.getUniquePlayerID();
+        if (threeWayHandshake(sourceId)) {
+            serverLog("Successful handshake. Client allocated id: " + sourceId, 1);
+            GameState.addYacht(sourceId,
+                    new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+            GameState.addPlayer(new Player(socket));      //Is this neccesary???
+        } else {
+            serverLog("Unsuccessful handshake. Connection rejected", 1);
+            closeSocket();
+            return;
+        }
 
         thread = new Thread(this);
         thread.start();
@@ -113,7 +121,7 @@ public class ServerToClientThread implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                serverLog("ERROR OCCURED, CLOSING SERVER CONNETION: " + socket.getRemoteSocketAddress().toString(), 1);
+                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
                 closeSocket();
                 return;
             }
@@ -132,28 +140,32 @@ public class ServerToClientThread implements Runnable {
      * if so, sends a confirmation packet back to that connection
      * Creates a player instance with that ID and this thread and adds it to the GameState
      * If not, close the socket and end the threads execution
+     * @param id the id to try and assign to the connection
+     * @return A boolean indicating if it was a successful handshake
      */
-    private void threeWayHandshake() {
-//        // TODO: 13/07/17 Finish using AC35
-//        Integer playerID = GameState.getUniquePlayerID();
-//        Integer confirmationID = null;
-//        Integer identificationAttempt = 0
-//        while (!userIdentified) {
-//            os.write(playerID);                                       //Send out new ID looking for echo
-//            confirmationID = is.read();
-//            if (playerID == idConfirmation) {                         //ID is echoed back. Connection is a client
-//                os.write(  some determined confirmation message  );   //Confirm to client
-//                GameState.addPlayer(new Player(playerID, this));      //Create a player in game state for client
-//                userIdentified = true;
-//            } else if (identificationAttempt > MAX_ID_ATTEMPTS) {     //No response. not a client. tidy up and go home.
-//                closeSocket();
-//                return;
-//            }
-//        identificationAttempt++;
-//        }
+    private Boolean threeWayHandshake(Integer id) {
+        Integer confirmationID = null;
+        Integer identificationAttempt = 0;
+        while (!userIdentified) {
+            try {
+                os.write(id);                                         //Send out new ID looking for echo
+                confirmationID = is.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (id.equals(confirmationID)) {                          //ID is echoed back. Connection is a client
+                return true;
+            } else if (identificationAttempt > MAX_ID_ATTEMPTS) {     //No response. not a client. tidy up and go home.
+                return false;
+            }
+        identificationAttempt++;
+        }
+
+        return true;
     }
 
-    public void closeSocket() {
+    private void closeSocket() {
         try {
             socket.close();
         } catch (IOException e) {

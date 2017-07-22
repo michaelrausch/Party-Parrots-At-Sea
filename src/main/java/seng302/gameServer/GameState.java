@@ -121,4 +121,14 @@ public class GameState {
             yacht.update(timeInterval);
         }
     }
+
+
+    /**
+     * Generates a new ID based off the size of current players + 1
+     * @return a playerID to be allocated to a new connetion
+     */
+    public static Integer getUniquePlayerID() {
+        // TODO: 22/07/17 wmu16 - This may not be robust enough and may have to be improved on.
+        return yachts.size() + 1;
+    }
 }
