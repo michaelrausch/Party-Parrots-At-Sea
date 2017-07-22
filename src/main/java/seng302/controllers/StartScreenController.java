@@ -70,6 +70,7 @@ public class StartScreenController {
             ClientToServerThread clientToServerThread = new ClientToServerThread("localhost", 4950);
             controller.setClientToServerThread(clientToServerThread);
             clientToServerThread.start();
+            ClientState.setHost(true);
 //            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
@@ -92,6 +93,7 @@ public class StartScreenController {
             ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, port);
             controller.setClientToServerThread(clientToServerThread);
             clientToServerThread.start();
+            ClientState.setHost(false);
             ClientState.setConnectedToHost(true);
             setContentPane("/views/LobbyView.fxml");
         } catch (Exception e) {
