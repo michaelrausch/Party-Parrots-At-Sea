@@ -15,7 +15,10 @@ import seng302.server.messages.Message;
 /**
  * Created by kre39 on 13/07/17.
  */
-public class ClientToServerThread extends Thread {
+public class ClientToServerThread implements Runnable {
+
+    private Thread thread;
+
     private Socket socket;
     private InputStream is;
     private OutputStream os;
@@ -32,6 +35,9 @@ public class ClientToServerThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        thread = new Thread(this);
+        thread.start();
 
     }
 
@@ -139,4 +145,8 @@ public class ClientToServerThread extends Thread {
             readByte();
         }
     }
- }
+
+    public Thread getThread() {
+        return thread;
+    }
+}

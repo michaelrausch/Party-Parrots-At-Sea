@@ -62,10 +62,9 @@ public class StartScreenController {
         try {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
-            new MainServerThread().start();
+            new MainServerThread();
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
-
         } catch (UnknownHostException e) {
             System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
             e.printStackTrace();
@@ -79,9 +78,9 @@ public class StartScreenController {
         // TODO: 10/07/17 wmu16 - Finish function
         String ipAddress = ipTextField.getText().trim().toLowerCase();
         try {
+            // TODO: 22/07/17 wmu 16 - make this port number some static constant somewhere perhaps a config file?
             ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, 4950);
             controller.setClientToServerThread(clientToServerThread);
-            clientToServerThread.start();
             setContentPane("/views/LobbyView.fxml");
         } catch (Exception e){
             e.printStackTrace();

@@ -20,10 +20,12 @@ import seng302.utilities.GeoPoint;
  * All server threads created and owned by the server thread handler which can trigger client updates on its threads
  * Created by wmu16 on 13/07/17.
  */
-public class ServerToClientThread extends Thread {
+public class ServerToClientThread implements Runnable {
 
     private static final Integer LOG_LEVEL = 1;
     private static final Integer MAX_ID_ATTEMPTS = 10;
+
+    private Thread thread;
 
     private InputStream is;
     private OutputStream os;
@@ -50,6 +52,9 @@ public class ServerToClientThread extends Thread {
         Random rand = new Random();
         sourceId = rand.nextInt(100000);
         GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+
+        thread = new Thread(this);
+        thread.start();
     }
 
 
@@ -184,5 +189,10 @@ public class ServerToClientThread extends Thread {
         for (int i=0; i < n; i++){
             readByte();
         }
+    }
+
+
+    public Thread getThread() {
+        return thread;
     }
 }
