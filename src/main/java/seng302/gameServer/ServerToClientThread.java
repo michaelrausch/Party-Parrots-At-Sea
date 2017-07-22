@@ -2,7 +2,6 @@ package seng302.gameServer;
 
 
 import java.util.Random;
-import seng302.client.ClientPacketParser;
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.PacketType;
@@ -22,6 +21,8 @@ import seng302.utilities.GeoPoint;
  * Created by wmu16 on 13/07/17.
  */
 public class ServerToClientThread extends Thread {
+
+    private static final Integer LOG_LEVEL = 1;
     private static final Integer MAX_ID_ATTEMPTS = 10;
 
     private InputStream is;
@@ -49,6 +50,13 @@ public class ServerToClientThread extends Thread {
         Random rand = new Random();
         sourceId = rand.nextInt(100000);
         GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+    }
+
+
+    static void serverLog(String message, int logLevel){
+        if(logLevel <= LOG_LEVEL){
+            System.out.println("[SERVER] " + message);
+        }
     }
 
     public void run() {
@@ -100,6 +108,7 @@ public class ServerToClientThread extends Thread {
                     }
                 }
             } catch (Exception e) {
+                serverLog("ERROR OCCURED, CLOSING SERVER CONNETION: " + socket.getRemoteSocketAddress().toString(), 1);
                 closeSocket();
                 return;
             }

@@ -19,7 +19,6 @@ public class ClientToServerThread extends Thread {
     private Socket socket;
     private InputStream is;
     private OutputStream os;
-    private final int PORT_NUMBER = 0;
     private static final int LOG_LEVEL = 1;
 
     private Boolean updateClient = true;
@@ -36,9 +35,9 @@ public class ClientToServerThread extends Thread {
 
     }
 
-    static void serverLog(String message, int logLevel){
+    static void clientLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
-            System.out.println("[SERVER] " + message);
+            System.out.println("[CLIENT] " + message);
         }
     }
 
@@ -98,6 +97,7 @@ public class ClientToServerThread extends Thread {
         try {
             os.write(boatActionMessage.getBuffer());
         } catch (IOException e) {
+            clientLog("COULD NOT WRITE TO SERVER", 0);
             e.printStackTrace();
         }
     }
