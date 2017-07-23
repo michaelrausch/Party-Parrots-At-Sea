@@ -273,7 +273,7 @@ public class ClientPacketParser {
         long messageLength = bytesToLong(Arrays.copyOfRange(payload, 12, 14));
         String xmlMessage = new String(
             (Arrays.copyOfRange(payload, 14, (int) (14 + messageLength)))).trim();
-        System.out.println(xmlMessage);
+
         //Create XML document Object
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = null;
@@ -375,8 +375,6 @@ public class ClientPacketParser {
         double lon = ((180d * (double) rawLon) / Math.pow(2, 31));
         long heading = bytesToLong(Arrays.copyOfRange(payload, 28, 30));
         double groundSpeed = bytesToLong(Arrays.copyOfRange(payload, 38, 40)) / 1000.0;
-        System.out.println("boats = " + boats.values());
-        System.out.println("boats = " + boats.keySet());
         //type 1 is a racing yacht and type 3 is a mark, needed for updating positions of the mark and boat
         if (deviceType == 1){
             Yacht boat = boats.get((int) boatId);

@@ -22,7 +22,7 @@ public class Yacht {
     private Color colour;
 
     private String boatType;
-    private Integer sourceID;
+    private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
     private String boatName;
@@ -73,14 +73,14 @@ public class Yacht {
         this.boatName = boatName;
         this.velocity = boatVelocity;
         this.shortName = shortName;
-        this.sourceID = id;
+        this.sourceId = id;
         this.location = new GeoPoint(0.0, 0.0);
     }
 
-    public Yacht(String boatType, Integer sourceID, String hullID, String shortName,
+    public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
-        this.sourceID = sourceID;
+        this.sourceId = sourceId;
         this.hullID = hullID;
         this.shortName = shortName;
         this.boatName = boatName;
@@ -132,8 +132,8 @@ public class Yacht {
 
     public Integer getSourceId() {
         //@TODO Remove and merge with Creating Game Loop
-        if (sourceID == null) return 0;
-        return sourceID;
+        if (sourceId == null) return 0;
+        return sourceId;
     }
 
     public String getHullID() {
@@ -167,7 +167,8 @@ public class Yacht {
     }
 
     public void setLegNumber(Integer legNumber) {
-        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(sourceID)) {
+        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(
+            sourceId)) {
             RaceViewController.updateYachtPositionSparkline(this, legNumber);
         }
         this.legNumber = legNumber;

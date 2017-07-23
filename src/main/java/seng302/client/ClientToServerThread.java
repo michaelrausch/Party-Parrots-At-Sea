@@ -84,6 +84,7 @@ public class ClientToServerThread extends Thread {
                 }
             } catch (Exception e) {
                 closeSocket();
+                e.printStackTrace();
                 return;
             }
         }

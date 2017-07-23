@@ -19,8 +19,8 @@
             <Boat Type="Yacht" SourceID="${boat.sourceId}" ShapeID="4" HullNum="${boat.hullID}" StoweName="${boat.shortName}" ShortName="${boat.shortName}"
                   BoatName="${boat.boatName}" Country="${boat.country}">
 
-                <GPSposition Z="0" Y="${boat.location.lat}" X="${boat.location.lng}" />
-                <MastTop Z="0" Y="${boat.location.lat}" X="${boat.location.lng}" />
+                <GPSposition Z="0" Y="3.7" X="0" />
+                <MastTop Z="0" Y="6.2" X="0" />
             </Boat>
         </#list>
     </Boats>

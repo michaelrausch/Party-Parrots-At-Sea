@@ -22,6 +22,7 @@ import seng302.server.messages.BoatLocationMessage;
 import seng302.server.messages.Message;
 import seng302.server.messages.XMLMessage;
 import seng302.server.messages.XMLMessageSubType;
+import seng302.utilities.GeoPoint;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on its own thread.
@@ -57,8 +58,9 @@ public class ServerToClientThread extends Thread {
         }
 //                threeWayHandshake();
         Random rand = new Random();
-        sourceId = rand.nextInt(100000);
+        sourceId = rand.nextInt(1000);
         Yacht yacht = new Yacht("Yacht", sourceId, sourceId.toString(), "Kap", "Kappa", "NZ");
+//        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(new Player(socket, yacht));
         seqNo = 0;
@@ -140,7 +142,7 @@ public class ServerToClientThread extends Thread {
         }
 
         //@TODO calculate lat/lng values
-        xml.setRegatta(new Regatta("RaceVision Test Game", 0d, 0d));
+        xml.setRegatta(new Regatta("RaceVision Test Game", 57.6679590, 11.8503233));
         xml.setRace(race);
 
         XMLMessage xmlMessage = new XMLMessage(xml.getRegattaAsXml(), XMLMessageSubType.REGATTA, xml.getRegattaAsXml().length());
@@ -247,10 +249,6 @@ public class ServerToClientThread extends Thread {
         ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
         for (Yacht yacht: yachts){
             BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId, getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
-//            System.out.println("yacht.getLocation().getLat() = " + yacht.getLocation().getLat());
-//            System.out.println("yacht.getLocation().getLng() = " + yacht.getLocation().getLng());
-//            System.out.println("yacht.getBoatName() = " + yacht.getBoatName());
-//            System.out.println("yacht = " + sourceId);
             sendMessage(boatLocationMessage);
         }
     }
