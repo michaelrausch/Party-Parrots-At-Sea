@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import seng302.models.Yacht;
 
 /**
- * Created by zyt10 on 21/07/17.
+ * Used by the client to store static variables to be used in game.
  */
 public class ClientState {
 

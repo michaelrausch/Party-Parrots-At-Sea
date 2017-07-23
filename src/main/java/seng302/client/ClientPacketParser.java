@@ -66,6 +66,7 @@ public class ClientPacketParser {
      * @param packet the packet to be looked at and processed
      */
     public static void parsePacket(StreamPacket packet) {
+        System.out.println(packet.getType());
         try {
             switch (packet.getType()) {
                 case HEARTBEAT:
@@ -283,9 +284,9 @@ public class ClientPacketParser {
         if (messageType == 7) {   //7 is the boat XML
             boats = xmlObject.getBoatXML().getCompetingBoats();
             ClientState.setBoats(xmlObject.getBoatXML().getCompetingBoats());
+            ClientState.setDirtyState(true);
         }
         if (messageType == 6) { //6 is race info xml
-
             newRaceXmlReceived = true;
         }
     }

@@ -125,29 +125,29 @@ public class LobbyController implements Initializable, Observer{
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                switchToRaceView();
-//                initialiseListView();
-                clientStateQueryingRunnable.terminate();
+//                switchToRaceView();
+                initialiseListView();
+//                clientStateQueryingRunnable.terminate();
             }
         });
     }
 
     private void initialiseListView() {
-        firstListView.setItems(firstCompetitor);
-        secondListView.setItems(secondCompetitor);
-        thirdListView.setItems(thirdCompetitor);
-        fourthListView.setItems(fourthCompetitor);
-        fifthListView.setItems(fifthCompetitor);
-        sixthListView.setItems(sixthCompetitor);
-        seventhListView.setItems(seventhCompetitor);
-        eighthListView.setItems(eighthCompetitor);
+        firstListView.getItems().clear();
+        secondListView.getItems().clear();
+        thirdListView.getItems().clear();
+        fourthListView.getItems().clear();
+        fifthListView.getItems().clear();
+        sixthListView.getItems().clear();
+        seventhListView.getItems().clear();
+        eighthListView.getItems().clear();
 
         competitors = new ArrayList<>();
         Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
             fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
 
         for (ObservableList<String> ol : competitors) {
-            ol = FXCollections.observableArrayList();
+            ol.removeAll();
         }
 
         firstCompetitor.add(ClientState.getClientSourceId());
@@ -163,6 +163,17 @@ public class LobbyController implements Initializable, Observer{
                 competitorIndex++;
             }
         }
+
+
+
+        firstListView.setItems(firstCompetitor);
+        secondListView.setItems(secondCompetitor);
+        thirdListView.setItems(thirdCompetitor);
+        fourthListView.setItems(fourthCompetitor);
+        fifthListView.setItems(fifthCompetitor);
+        sixthListView.setItems(sixthCompetitor);
+        seventhListView.setItems(seventhCompetitor);
+        eighthListView.setItems(eighthCompetitor);
     }
 
     private void initialiseLobbyControllerThread() {
