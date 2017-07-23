@@ -1,29 +1,27 @@
 package seng302.gameServer;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
-import seng302.client.ClientPacketParser;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.PacketType;
 import seng302.models.stream.packets.StreamPacket;
-import seng302.server.messages.ChatterMessage;
-import seng302.server.messages.Heartbeat;
-import seng302.server.messages.BoatActionType;
-import seng302.server.messages.Message;
 import seng302.models.xml.Race;
 import seng302.models.xml.Regatta;
 import seng302.models.xml.XMLGenerator;
-import seng302.server.messages.*;
-import seng302.models.xml.XMLGenerator;
-import seng302.server.messages.*;
-
-import java.io.*;
-import java.net.Socket;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
-import seng302.utilities.GeoPoint;
+import seng302.server.messages.BoatActionType;
+import seng302.server.messages.BoatLocationMessage;
+import seng302.server.messages.Message;
+import seng302.server.messages.XMLMessage;
+import seng302.server.messages.XMLMessageSubType;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on its own thread.
@@ -42,7 +40,7 @@ public class ServerToClientThread extends Thread {
     private Boolean userIdentified = false;
     private Boolean connected = true;
     private Boolean updateClient = true;
-    private Boolean intiialisedRace = false;
+    private Boolean initialisedRace = false;
 
     private Integer seqNo;
     private Integer sourceId;
@@ -58,10 +56,11 @@ public class ServerToClientThread extends Thread {
             System.out.println("IO error in server thread upon grabbing streams");
         }
 //                threeWayHandshake();
-        GameState.addPlayer(new Player(socket));
         Random rand = new Random();
         sourceId = rand.nextInt(100000);
-        GameState.addYacht(sourceId, new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+        Yacht yacht = new Yacht("Yacht", sourceId, sourceId.toString(), "Kap", "Kappa", "NZ");
+        GameState.addYacht(sourceId, yacht);
+        GameState.addPlayer(new Player(socket, yacht));
         seqNo = 0;
     }
 
@@ -73,21 +72,22 @@ public class ServerToClientThread extends Thread {
             //System.out.print(".");
 
             try {
-                if (intiialisedRace) {
+                if (initialisedRace) {
                     sendSetupMessages();
+                    initialisedRace = false;
                 }
                 
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
-                    sendMessage(chatterMessage);
-                    sendBoatLocationPackets();
+//                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
+//                    sendMessage(chatterMessage);
 //                try {
 //                    GameState.outputState(os);
 //                } catch (IOException e) {
 //                    System.out.println("IO error in server thread upon writing to output stream");
 //                }
+                    sendBoatLocationPackets();
                     updateClient = false;
                 }
 
@@ -151,6 +151,7 @@ public class ServerToClientThread extends Thread {
 
         xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE, xml.getRaceAsXml().length());
         sendMessage(xmlMessage);
+
     }
 
     public void updateClient() {
@@ -195,7 +196,7 @@ public class ServerToClientThread extends Thread {
 
 
     public void initialiseRace(){
-        intiialisedRace = true;
+        initialisedRace = true;
     }
     
     
@@ -245,7 +246,11 @@ public class ServerToClientThread extends Thread {
     private void sendBoatLocationPackets(){
         ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
         for (Yacht yacht: yachts){
-            BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId,getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
+            BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId, getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
+//            System.out.println("yacht.getLocation().getLat() = " + yacht.getLocation().getLat());
+//            System.out.println("yacht.getLocation().getLng() = " + yacht.getLocation().getLng());
+//            System.out.println("yacht.getBoatName() = " + yacht.getBoatName());
+//            System.out.println("yacht = " + sourceId);
             sendMessage(boatLocationMessage);
         }
     }

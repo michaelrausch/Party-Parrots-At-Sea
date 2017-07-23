@@ -17,9 +17,9 @@ public class Player {
     private Integer lastMarkPassed;
 
 
-    public Player(Socket socket) {
+    public Player(Socket socket, Yacht yacht) {
         this.socket = socket;
-        yacht = new Yacht("test", 12.2, "asd", 12);
+        this.yacht = yacht;
     }
 
     public Socket getSocket() {

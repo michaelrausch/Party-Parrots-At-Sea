@@ -86,6 +86,9 @@ public class Yacht {
         this.boatName = boatName;
         this.country = country;
         this.position = "-";
+        this.location = new GeoPoint(0.0, 0.0);
+        this.heading = 0.0;
+        this.velocity = 0.0;
     }
 
     /**
