@@ -93,7 +93,7 @@ public class Yacht {
         this.boatName = boatName;
         this.velocity = boatVelocity;
         this.shortName = shortName;
-        this.sourceID = id;
+        this.sourceId = id;
         this.sailIn = false;
     }
 
@@ -339,7 +339,4 @@ public class Yacht {
         return location;
     }
 
-    public Double getHeading() {
-        return heading;
-    }
 }

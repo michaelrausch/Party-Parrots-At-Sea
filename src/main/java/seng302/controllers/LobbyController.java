@@ -104,6 +104,5 @@ public class LobbyController implements Initializable{
     public void readyButtonPressed() {
         GameState.setCurrentStage(GameStages.RACING);
         setContentPane("/views/RaceView.fxml");
-
     }
 }

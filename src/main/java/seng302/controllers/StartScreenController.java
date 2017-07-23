@@ -62,13 +62,12 @@ public class StartScreenController {
         try {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
-            new MainServerThread()
+            new MainServerThread();
             ClientToServerThread clientToServerThread = new ClientToServerThread("localhost", 4950);
             controller.setClientToServerThread(clientToServerThread);
 //            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
-
         } catch (UnknownHostException e) {
             System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
             e.printStackTrace();

@@ -64,18 +64,16 @@ public class ServerToClientThread implements Runnable {
         sourceId = GameState.getUniquePlayerID();
         if (threeWayHandshake(sourceId)) {
             serverLog("Successful handshake. Client allocated id: " + sourceId, 1);
-            GameState.addYacht(sourceId,
-                new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
-            GameState.addPlayer(new Player(socket));      //Is this neccesary???
+            Yacht yacht = new Yacht("Yacht", sourceId, sourceId.toString(), "Kap", "Kappa", "NZ");
+//        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
+            GameState.addYacht(sourceId, yacht);
+            GameState.addPlayer(new Player(socket, yacht));
         } else {
             serverLog("Unsuccessful handshake. Connection rejected", 1);
             closeSocket();
             return;
         }
-        Yacht yacht = new Yacht("Yacht", sourceId, sourceId.toString(), "Kap", "Kappa", "NZ");
-//        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
-        GameState.addYacht(sourceId, yacht);
-        GameState.addPlayer(new Player(socket, yacht));
+
         seqNo = 0;
         thread = new Thread(this);
         thread.start();
