@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 import javafx.scene.paint.Color;
 import seng302.controllers.RaceViewController;
+import seng302.gameServer.GameState;
 import seng302.models.mark.Mark;
 import seng302.utilities.GeoPoint;
 
@@ -17,6 +18,12 @@ import seng302.utilities.GeoPoint;
  * also done outside Boat class because some old variables are not used anymore.
  */
 public class Yacht {
+
+    private final Double TURN_STEP = 3.0;
+
+    private Double lastHeading;
+    private Boolean sailIn;
+
 
     // Used in boat group
     private Color colour;
@@ -50,6 +57,18 @@ public class Yacht {
 
 
     /**
+     * @param location latlon location of the boat stored in a geopoint
+     * @param heading heading of the boat in degrees from 0 to 365 with 0 being north
+     */
+    public Yacht(GeoPoint location, Double heading) {
+        this.location = location;
+        this.heading = heading;
+        this.velocity = 0.0;
+        this.sailIn = false;
+    }
+
+
+    /**
      * Used in EventTest and RaceTest.
      *
      * @param boatName Create a yacht object with name.
@@ -60,6 +79,7 @@ public class Yacht {
         this.location = location;
         this.heading = heading;
         this.velocity = 0.0;
+        this.sailIn = false;
     }
 
     /**
@@ -74,10 +94,11 @@ public class Yacht {
         this.velocity = boatVelocity;
         this.shortName = shortName;
         this.sourceID = id;
+        this.sailIn = false;
     }
 
     public Yacht(String boatType, Integer sourceID, String hullID, String shortName,
-        String boatName, String country) {
+                 String boatName, String country) {
         this.boatType = boatType;
         this.sourceID = sourceID;
         this.hullID = hullID;
@@ -85,15 +106,18 @@ public class Yacht {
         this.boatName = boatName;
         this.country = country;
         this.position = "-";
+        this.sailIn = false;
     }
 
     /**
      * @param timeInterval since last update in milliseconds
      */
     public void update(Long timeInterval) {
-        Double secondsElapsed = timeInterval / 1000000.0;
-        Double metersCovered = velocity * secondsElapsed;
-        location = getGeoCoordinate(location, heading, metersCovered);
+        if (sailIn) {
+            Double secondsElapsed = timeInterval / 1000000.0;
+            Double metersCovered = velocity * secondsElapsed;
+            location = getGeoCoordinate(location, heading, metersCovered);
+        }
     }
 
     /**
@@ -119,6 +143,52 @@ public class Yacht {
 //        System.out.println("Closest angle " + closest_key);
 //        System.out.println("WindDir " + windDir);
         velocity = polarsFromClosestSpd.get(closest_key);
+    }
+
+    public Double getHeading() {
+        return heading;
+    }
+
+    public void adjustHeading(Double amount) {
+        lastHeading = heading;
+        heading = (heading + amount) % 360.0;
+    }
+
+    public void tackGybe(Double windDirection) {
+        adjustHeading(-2 * ((heading - windDirection) % 360));
+    }
+
+    public void toggleSailIn() {
+        sailIn = !sailIn;
+    }
+
+    public void turnUpwind() {
+        Double normalizedHeading = (heading - GameState.windDirection) % 360;
+        if (normalizedHeading == 0) {
+            if (lastHeading < 180) {
+                adjustHeading(-TURN_STEP);
+            } else {
+                adjustHeading(TURN_STEP);
+            }
+        } else if (normalizedHeading == 180) {
+            if (lastHeading < 180) {
+                adjustHeading(TURN_STEP);
+            } else {
+                adjustHeading(-TURN_STEP);
+            }
+        } else if (normalizedHeading < 180) {
+            adjustHeading(-TURN_STEP);
+        } else {
+            adjustHeading(TURN_STEP);
+        }
+    }
+
+    public void turnDownwind() {
+        if ((heading - GameState.windDirection) % 360 < 180) {
+            adjustHeading(TURN_STEP);
+        } else {
+            adjustHeading(-TURN_STEP);
+        }
     }
 
 
@@ -240,16 +310,19 @@ public class Yacht {
     }
 
     public void setNextMark(Mark nextMark) {
-            this.nextMark = nextMark;
-      }
+        this.nextMark = nextMark;
+    }
 
     public Mark getNextMark(){
         return nextMark;
-      }
+    }
+
+    public Boolean getSailIn() {
+        return sailIn;
+    }
 
     @Override
     public String toString() {
         return boatName;
     }
-
 }

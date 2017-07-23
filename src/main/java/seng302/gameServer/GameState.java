@@ -14,8 +14,8 @@ import seng302.server.messages.BoatActionType;
 public class GameState {
 
     private static Long previousUpdateTime;
-    private static Double windDirection = 0d;
-    private static Double windSpeed = 0d;
+    public static Double windDirection;
+    private static Double windSpeed;
 
     private static String hostIpAddress;
     private static List<Player> players;
@@ -24,6 +24,12 @@ public class GameState {
     private static GameStages currentStage;
     
     public GameState(String hostIpAddress) {
+        windDirection = 170d;
+        windSpeed = 0d;
+        yachts = new HashMap<>();
+        players = new ArrayList<>();
+
+
         GameState.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
@@ -49,8 +55,8 @@ public class GameState {
         players.remove(player);
     }
 
-    public static void addYacht(Integer sourceId, Yacht yatch) {
-        yachts.put(sourceId, yatch);
+    public static void addYacht(Integer sourceId, Yacht yacht) {
+        yachts.put(sourceId, yacht);
     }
 
     public static Boolean getIsRaceStarted() {
@@ -74,20 +80,39 @@ public class GameState {
     }
 
     public static void updateBoat(Integer sourceId, BoatActionType actionType) {
+        Yacht playerYacht = yachts.get(sourceId);
+        System.out.println("-----------------------");
         switch (actionType) {
             case VMG:
+                System.out.println("Snapping to VMG");
+                // TODO: 22/07/17 wmu16 - Add in the vmg calculation code here
                 break;
             case SAILS_IN:
+                playerYacht.toggleSailIn();
+                System.out.println("Toggling Sails");
                 break;
             case SAILS_OUT:
+                playerYacht.toggleSailIn();
+                System.out.println("Toggling Sails");
                 break;
             case TACK_GYBE:
+                playerYacht.tackGybe(windDirection);
+                System.out.println("Tack/Gybe");
                 break;
             case UPWIND:
+                playerYacht.turnUpwind();
+                System.out.println("Moving upwind");
                 break;
             case DOWNWIND:
+                playerYacht.turnDownwind();
+                System.out.println("Moving downwind");
                 break;
         }
+
+        System.out.println("-----------------------");
+        System.out.println("Heading: " + playerYacht.getHeading());
+        System.out.println("Sails are in: " + playerYacht.getSailIn());
+        System.out.println("-----------------------\n");
     }
 
     public static void update() {
@@ -96,5 +121,15 @@ public class GameState {
         for (Yacht yacht : yachts.values()) {
             yacht.update(timeInterval);
         }
+    }
+
+
+    /**
+     * Generates a new ID based off the size of current players + 1
+     * @return a playerID to be allocated to a new connetion
+     */
+    public static Integer getUniquePlayerID() {
+        // TODO: 22/07/17 wmu16 - This may not be robust enough and may have to be improved on.
+        return yachts.size() + 1;
     }
 }
