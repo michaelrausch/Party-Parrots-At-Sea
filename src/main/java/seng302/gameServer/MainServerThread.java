@@ -15,11 +15,13 @@ import java.util.concurrent.PriorityBlockingQueue;
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread extends Thread implements PacketBufferDelegate, ClientConnectionDelegate{
+public class MainServerThread implements Runnable, PacketBufferDelegate, ClientConnectionDelegate{
 
     private static final int PORT = 4950;
     private static final Integer MAX_NUM_PLAYERS = 3;
     private static final int LOG_LEVEL = 1;
+
+    private Thread thread;
 
     private ServerSocket serverSocket = null;
     private Socket socket;
@@ -36,6 +38,9 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
         }
 
         packetBuffer = new PriorityBlockingQueue<>();
+
+        thread = new Thread(this);
+        thread.start();
     }
 
 
@@ -50,7 +55,7 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
         serverListenThread.start();
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
-        while (!isInterrupted()) {
+        while (!thread.isInterrupted()) {
             try {
                 Thread.sleep(1000 / 60);    //60 times per second we should calculate the game state
             } catch (InterruptedException e) {
@@ -123,7 +128,7 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
      */
     @Override
     public void clientConnected(ServerToClientThread serverToClientThread) {
-        serverLog("Player Connected From " + serverToClientThread.getName(), 0);
+        serverLog("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         serverToClientThreads.add(serverToClientThread);
 
     }

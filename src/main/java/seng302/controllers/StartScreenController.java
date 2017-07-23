@@ -40,6 +40,7 @@ public class StartScreenController {
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(jfxUrl));
             contentPane.getChildren().addAll((Pane) fxmlLoader.load());
+
             return fxmlLoader.getController();
         } catch (javafx.fxml.LoadException e) {
             e.printStackTrace();
@@ -61,10 +62,9 @@ public class StartScreenController {
         try {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             new GameState(ipAddress);
-            new MainServerThread().start();
+            new MainServerThread()
             ClientToServerThread clientToServerThread = new ClientToServerThread("localhost", 4950);
             controller.setClientToServerThread(clientToServerThread);
-            clientToServerThread.start();
 //            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
@@ -82,9 +82,9 @@ public class StartScreenController {
         // TODO: 10/07/17 wmu16 - Finish function
         String ipAddress = ipTextField.getText().trim().toLowerCase();
         try {
+            // TODO: 22/07/17 wmu 16 - make this port number some static constant somewhere perhaps a config file?
             ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, 4950);
             controller.setClientToServerThread(clientToServerThread);
-            clientToServerThread.start();
             setContentPane("/views/LobbyView.fxml");
         } catch (Exception e){
             e.printStackTrace();

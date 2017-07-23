@@ -29,8 +29,12 @@ import seng302.utilities.GeoPoint;
  * All server threads created and owned by the server thread handler which can trigger client updates on its threads
  * Created by wmu16 on 13/07/17.
  */
-public class ServerToClientThread extends Thread {
+public class ServerToClientThread implements Runnable {
+
+    private static final Integer LOG_LEVEL = 1;
     private static final Integer MAX_ID_ATTEMPTS = 10;
+
+    private Thread thread;
 
     private InputStream is;
     private OutputStream os;
@@ -56,14 +60,31 @@ public class ServerToClientThread extends Thread {
         } catch (IOException e) {
             System.out.println("IO error in server thread upon grabbing streams");
         }
-//                threeWayHandshake();
-        Random rand = new Random();
-        sourceId = rand.nextInt(1000);
+        //Attempt threeway handshake with connection
+        sourceId = GameState.getUniquePlayerID();
+        if (threeWayHandshake(sourceId)) {
+            serverLog("Successful handshake. Client allocated id: " + sourceId, 1);
+            GameState.addYacht(sourceId,
+                new Yacht("Kappa", "Kap", new GeoPoint(0.0, 0.0), 0.0));
+            GameState.addPlayer(new Player(socket));      //Is this neccesary???
+        } else {
+            serverLog("Unsuccessful handshake. Connection rejected", 1);
+            closeSocket();
+            return;
+        }
         Yacht yacht = new Yacht("Yacht", sourceId, sourceId.toString(), "Kap", "Kappa", "NZ");
 //        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(new Player(socket, yacht));
         seqNo = 0;
+        thread = new Thread(this);
+        thread.start();
+    }
+
+    static void serverLog(String message, int logLevel){
+        if(logLevel <= LOG_LEVEL){
+            System.out.println("[SERVER] " + message);
+        }
     }
 
     public void run() {
@@ -78,7 +99,7 @@ public class ServerToClientThread extends Thread {
                     sendSetupMessages();
                     initialisedRace = false;
                 }
-                
+
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
@@ -93,11 +114,9 @@ public class ServerToClientThread extends Thread {
                     updateClient = false;
                 }
 
-
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
-
                 //checking if it is the start of the packet
                 if(sync1 == 0x47 && sync2 == 0x83) {
                     int type = readByte();
@@ -125,6 +144,7 @@ public class ServerToClientThread extends Thread {
                     }
                 }
             } catch (Exception e) {
+                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
                 e.printStackTrace();
                 closeSocket();
                 return;
@@ -167,28 +187,32 @@ public class ServerToClientThread extends Thread {
      * if so, sends a confirmation packet back to that connection
      * Creates a player instance with that ID and this thread and adds it to the GameState
      * If not, close the socket and end the threads execution
+     * @param id the id to try and assign to the connection
+     * @return A boolean indicating if it was a successful handshake
      */
-    private void threeWayHandshake() {
-//        // TODO: 13/07/17 Finish using AC35
-//        Integer playerID = GameState.getUniquePlayerID();
-//        Integer confirmationID = null;
-//        Integer identificationAttempt = 0
-//        while (!userIdentified) {
-//            os.write(playerID);                                       //Send out new ID looking for echo
-//            confirmationID = is.read();
-//            if (playerID == idConfirmation) {                         //ID is echoed back. Connection is a client
-//                os.write(  some determined confirmation message  );   //Confirm to client
-//                GameState.addPlayer(new Player(playerID, this));      //Create a player in game state for client
-//                userIdentified = true;
-//            } else if (identificationAttempt > MAX_ID_ATTEMPTS) {     //No response. not a client. tidy up and go home.
-//                closeSocket();
-//                return;
-//            }
-//        identificationAttempt++;
-//        }
+    private Boolean threeWayHandshake(Integer id) {
+        Integer confirmationID = null;
+        Integer identificationAttempt = 0;
+        while (!userIdentified) {
+            try {
+                os.write(id);                                         //Send out new ID looking for echo
+                confirmationID = is.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (id.equals(confirmationID)) {                          //ID is echoed back. Connection is a client
+                return true;
+            } else if (identificationAttempt > MAX_ID_ATTEMPTS) {     //No response. not a client. tidy up and go home.
+                return false;
+            }
+        identificationAttempt++;
+        }
+
+        return true;
     }
 
-    public void closeSocket() {
+    private void closeSocket() {
         try {
             socket.close();
         } catch (IOException e) {
@@ -200,8 +224,8 @@ public class ServerToClientThread extends Thread {
     public void initialiseRace(){
         initialisedRace = true;
     }
-    
-    
+
+
     private int readByte() throws Exception {
         int currentByte = -1;
         try {
@@ -251,5 +275,10 @@ public class ServerToClientThread extends Thread {
             BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId, getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
             sendMessage(boatLocationMessage);
         }
+    }
+
+
+    public Thread getThread() {
+        return thread;
     }
 }

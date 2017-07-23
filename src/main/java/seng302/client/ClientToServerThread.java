@@ -15,12 +15,17 @@ import seng302.server.messages.Message;
 /**
  * Created by kre39 on 13/07/17.
  */
-public class ClientToServerThread extends Thread {
+public class ClientToServerThread implements Runnable {
+
+    private static final int LOG_LEVEL = 1;
+
+    private Thread thread;
+
+    private Integer ourID;
+
     private Socket socket;
     private InputStream is;
     private OutputStream os;
-    private final int PORT_NUMBER = 0;
-    private static final int LOG_LEVEL = 1;
 
     private Boolean updateClient = true;
     private  ByteArrayOutputStream crcBuffer;
@@ -34,11 +39,24 @@ public class ClientToServerThread extends Thread {
             e.printStackTrace();
         }
 
+        Integer allocatedID = threeWayHandshake();
+        if (allocatedID != null) {
+            ourID = allocatedID;
+            clientLog("Successful handshake. Allocated ID: " + ourID, 1);
+        } else {
+            clientLog("Unsuccessful handhsake", 1);
+            closeSocket();
+            return;
+        }
+
+        thread = new Thread(this);
+        thread.start();
+
     }
 
-    static void serverLog(String message, int logLevel){
+    static void clientLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
-            System.out.println("[SERVER] " + message);
+            System.out.println("[CLIENT] " + message);
         }
     }
 
@@ -91,6 +109,33 @@ public class ClientToServerThread extends Thread {
 
     }
 
+
+    /**
+     * Listens for an allocated sourceID and returns it to the server if recieved
+     * @return the sourceID allocated to us by the server
+     */
+    private Integer threeWayHandshake() {
+        Integer ourSourceID = null;
+        while (true) {
+            try {
+                ourSourceID = is.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (ourSourceID != null) {
+                try {
+                    os.write(ourSourceID);
+                    return ourSourceID;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
+    }
+
+
+
     /**
      * Send the post-start race course information
      */
@@ -98,6 +143,7 @@ public class ClientToServerThread extends Thread {
         try {
             os.write(boatActionMessage.getBuffer());
         } catch (IOException e) {
+            clientLog("COULD NOT WRITE TO SERVER", 0);
             e.printStackTrace();
         }
     }
@@ -139,4 +185,8 @@ public class ClientToServerThread extends Thread {
             readByte();
         }
     }
- }
+
+    public Thread getThread() {
+        return thread;
+    }
+}
