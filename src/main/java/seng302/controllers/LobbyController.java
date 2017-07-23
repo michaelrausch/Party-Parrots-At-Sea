@@ -5,7 +5,10 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
@@ -15,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -39,6 +43,22 @@ public class LobbyController implements Initializable, Observer{
     @FXML
     private Text lobbyIpText;
     @FXML
+    private ListView firstListView;
+    @FXML
+    private ListView secondListView;
+    @FXML
+    private ListView thirdListView;
+    @FXML
+    private ListView fourthListView;
+    @FXML
+    private ListView fifthListView;
+    @FXML
+    private ListView sixthListView;
+    @FXML
+    private ListView seventhListView;
+    @FXML
+    private ListView eighthListView;
+    @FXML
     private ImageView firstImageView;
     @FXML
     private ImageView secondImageView;
@@ -55,7 +75,15 @@ public class LobbyController implements Initializable, Observer{
     @FXML
     private ImageView eighthImageView;
 
-    private static ObservableList competitors;
+    private static List<ObservableList<String>> competitors = new ArrayList<>();
+    private static ObservableList<String> firstCompetitor = FXCollections.observableArrayList();
+    private static ObservableList<String> secondCompetitor = FXCollections.observableArrayList();
+    private static ObservableList<String> thirdCompetitor = FXCollections.observableArrayList();
+    private static ObservableList<String> fourthCompetitor = FXCollections.observableArrayList();
+    private static ObservableList<String> fifthCompetitor = FXCollections.observableArrayList();
+    private static ObservableList<String> sixthCompetitor = FXCollections.observableArrayList();
+    private static ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
+    private static ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
     private ClientStateQueryingRunnable clientStateQueryingRunnable;
 
     private void setContentPane(String jfxUrl) {
@@ -79,10 +107,9 @@ public class LobbyController implements Initializable, Observer{
             lobbyIpText.setText("Lobby Host IP: " + getLocalHostIp());
         else
             lobbyIpText.setText("Connected to IP: ");
-        initialiseImageView();
-
-        competitors = FXCollections.observableArrayList();
-//        competitorsListView.setItems(competitors);
+        initialiseListView();
+//        initialiseLobbyControllerThread();
+//        initialiseImageView();  // parrot gif init
 
         // set up client state query thread, so that when it receives the race-started packet
         // it can switch to the race view
@@ -99,9 +126,58 @@ public class LobbyController implements Initializable, Observer{
             @Override
             public void run() {
                 switchToRaceView();
+//                initialiseListView();
                 clientStateQueryingRunnable.terminate();
             }
         });
+    }
+
+    private void initialiseListView() {
+        firstListView.setItems(firstCompetitor);
+        secondListView.setItems(secondCompetitor);
+        thirdListView.setItems(thirdCompetitor);
+        fourthListView.setItems(fourthCompetitor);
+        fifthListView.setItems(fifthCompetitor);
+        sixthListView.setItems(sixthCompetitor);
+        seventhListView.setItems(seventhCompetitor);
+        eighthListView.setItems(eighthCompetitor);
+
+        competitors = new ArrayList<>();
+        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
+            fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
+
+        for (ObservableList<String> ol : competitors) {
+            ol = FXCollections.observableArrayList();
+        }
+
+        firstCompetitor.add(ClientState.getClientSourceId());
+
+        int competitorIndex = 1;
+        for (Integer yachtId : ClientState.getBoats().keySet()) {
+            // break if there are more than 7 competitors
+            if (competitorIndex >= 8) {
+                break;
+            }
+            if (!yachtId.equals(ClientState.getClientSourceId())) {
+                competitors.get(competitorIndex).add(String.valueOf(yachtId));
+                competitorIndex++;
+            }
+        }
+    }
+
+    private void initialiseLobbyControllerThread() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+
+                    }
+                });
+            }
+        });
+        thread.start();
     }
 
     private void initialiseImageView() {
@@ -159,7 +235,7 @@ public class LobbyController implements Initializable, Observer{
         setContentPane("/views/StartScreenView.fxml");
         GameState.setCurrentStage(GameStages.CANCELLED);
         // TODO: 20/07/17 wmu16 - Implement some way of terminating the game
-        ClientState.setHost(false);
+        ClientState.setConnectedToHost(false);
     }
 
     @FXML

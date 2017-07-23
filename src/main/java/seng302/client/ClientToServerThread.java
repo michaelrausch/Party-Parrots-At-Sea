@@ -32,14 +32,15 @@ public class ClientToServerThread implements Runnable {
     private  ByteArrayOutputStream crcBuffer;
 
     public ClientToServerThread(String ipAddress, Integer portNumber) throws Exception{
-            socket = new Socket(ipAddress, portNumber);
-            is = socket.getInputStream();
-            os = socket.getOutputStream();
+        socket = new Socket(ipAddress, portNumber);
+        is = socket.getInputStream();
+        os = socket.getOutputStream();
 
         Integer allocatedID = threeWayHandshake();
         if (allocatedID != null) {
             ourID = allocatedID;
             clientLog("Successful handshake. Allocated ID: " + ourID, 1);
+            ClientState.setClientSourceId(String.valueOf(ourID));
         } else {
             clientLog("Unsuccessful handhsake", 1);
             closeSocket();
@@ -96,13 +97,17 @@ public class ClientToServerThread implements Runnable {
                     } else {
                         System.err.println("Packet has been dropped");
                     }
+
                 }
+
             } catch (Exception e) {
                 closeSocket();
+                System.out.println("this exception");
                 return;
             }
         }
-
+        closeSocket();
+        System.out.println("[CLIENT] Disconnected from server");
     }
 
 

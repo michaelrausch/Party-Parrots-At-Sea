@@ -38,7 +38,7 @@ public class ClientPacketParser {
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
     private static boolean newRaceXmlReceived = false;
     private static boolean raceStarted = false;
-    private static XMLParser xmlObject;
+    private static XMLParser xmlObject = new XMLParser();
     private static boolean raceFinished = false;
     private static boolean streamStatus = false;
     private static long timeSinceStart = -1;
@@ -49,6 +49,7 @@ public class ClientPacketParser {
     private static Long currentTimeLong;
     private static String currentTimeString;
     private static boolean appRunning;
+    private static Map<Integer, Yacht> clientStateBoats = new ConcurrentHashMap<>();
 
      //CONVERSION CONSTANTS
     private static final Double MS_TO_KNOTS = 1.94384;
@@ -185,44 +186,35 @@ public class ClientPacketParser {
 
         int noBoats = payload[22];
         int raceType = payload[23];
+        clientStateBoats = ClientState.getBoats();
         for (int i = 0; i < noBoats; i++) {
             long boatStatusSourceID = bytesToLong(
                 Arrays.copyOfRange(payload, 24 + (i * 20), 28 + (i * 20)));
-            Yacht boat = boats.get((int) boatStatusSourceID);
-            boat.setBoatStatus((int) payload[28 + (i * 20)]);
-            setBoatLegPosition(boat, (int) payload[29 + (i * 20)]);
-            boat.setPenaltiesAwarded((int) payload[30 + (i * 20)]);
-            boat.setPenaltiesServed((int) payload[31 + (i * 20)]);
-            Long estTimeAtNextMark = bytesToLong(
+            int boatStatus = (int) payload[28 + (i * 20)];
+            int boatLegNumber = (int) payload[29 + (i * 20)];
+            int boatPenaltyAwarded = (int) payload[30 + (i * 20)];
+            int boatPenaltyServed = (int) payload[31 + (i * 20)];
+            long estTimeAtNextMark = bytesToLong(
                 Arrays.copyOfRange(payload, 32 + (i * 20), 38 + (i * 20)));
-            boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
-            Long estTimeAtFinish = bytesToLong(
+            long estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
+
+            Yacht boat = boats.get((int) boatStatusSourceID);
+            boat.setBoatStatus((boatStatus));
+            setBoatLegPosition(boat, boatLegNumber);
+            boat.setPenaltiesAwarded(boatPenaltyAwarded);
+            boat.setPenaltiesServed(boatPenaltyServed);
+            boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
 
-//            FOR DEBUGGING:
-
-//            boatsPos.put(estTimeAtFinish, boat);
-//            String boatStatus = "SourceID: " + boatStatusSourceID;
-//            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];
-//            boatStatus += "\nLegNumber: " + (int)payload[29 + (i * 20)];
-//            boatStatus += "\nPenaltiesAwarded: " + (int)payload[29 + (i * 20)];
-//            boatStatus += "\nPenaltiesServed: " + (int)payload[30 + (i * 20)];
-//            boatStatus += "\nEstTimeAtNextMark: " + bytesToLong(Arrays.copyOfRange(payload,31 + (i * 20),37+ (i * 20)));
-//            boatStatus += "\nEstTimeAtFinish: " + bytesToLong(Arrays.copyOfRange(payload,37 + (i * 20),43+ (i * 20)));
-//            boatStatuses.add(boatStatus);
+            Yacht clientBoat = clientStateBoats.get((int) boatStatusSourceID);
+            clientBoat.setBoatStatus((boatStatus));
+            setBoatLegPosition(clientBoat, boatLegNumber);
+            clientBoat.setPenaltiesAwarded(boatPenaltyAwarded);
+            clientBoat.setPenaltiesServed(boatPenaltyServed);
+            clientBoat.setEstimateTimeAtNextMark(estTimeAtNextMark);
+            clientBoat.setEstimateTimeAtFinish(estTimeAtFinish);
         }
-//        if (isRaceStarted()) {
-//            int pos = 1;
-//            for (Yacht yacht : boatsPos.values()) {
-//                yacht.setPosition(String.valueOf(pos));
-//                pos++;
-//            }
-//        } else {
-//            for (Yacht yacht : boatsPos.values()) {
-//                yacht.setPosition("-");
-//            }
-//        }
     }
 
     private static void setBoatLegPosition(Yacht updatingBoat, Integer leg){
@@ -269,7 +261,6 @@ public class ClientPacketParser {
      * @param packet Packet parsed in to use the payload
      */
     private static void extractXmlMessage(StreamPacket packet) {
-
         byte[] payload = packet.getPayload();
 
         int messageType = payload[9];
@@ -291,6 +282,7 @@ public class ClientPacketParser {
         xmlObject.constructXML(doc, messageType);
         if (messageType == 7) {   //7 is the boat XML
             boats = xmlObject.getBoatXML().getCompetingBoats();
+            ClientState.setBoats(xmlObject.getBoatXML().getCompetingBoats());
         }
         if (messageType == 6) { //6 is race info xml
 

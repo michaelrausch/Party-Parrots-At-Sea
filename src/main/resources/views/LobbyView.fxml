@@ -56,38 +56,38 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+            <ListView fx:id="firstListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin>
             </ListView>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
+            <ListView fx:id="secondListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin>
             </ListView>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3">
+            <ListView fx:id="thirdListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin></ListView>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="4">
+            <ListView fx:id="fourthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="4">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin>
             </ListView>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
+            <ListView fx:id="eighthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin></ListView>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <ListView fx:id="fifthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin></ListView>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <ListView fx:id="sixthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin></ListView>
-            <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+            <ListView fx:id="seventhListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
                </GridPane.margin></ListView>

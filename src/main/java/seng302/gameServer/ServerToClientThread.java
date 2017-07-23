@@ -2,12 +2,11 @@ package seng302.gameServer;
 
 
 import java.util.Random;
-import seng302.client.ClientPacketParser;
+import org.apache.commons.io.IOUtils;
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.PacketType;
 import seng302.models.stream.packets.StreamPacket;
-import seng302.server.messages.Heartbeat;
 import seng302.server.messages.BoatActionType;
 import seng302.server.messages.Message;
 
@@ -15,6 +14,8 @@ import java.io.*;
 import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.server.messages.XMLMessage;
+import seng302.server.messages.XMLMessageSubType;
 import seng302.utilities.GeoPoint;
 
 /**
@@ -78,6 +79,20 @@ public class ServerToClientThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
+
+        // used by ryan to simulate sending boats.xml
+//        InputStream inputStream = getClass().getResourceAsStream("/server_config/boats.xml");
+//        StringWriter writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        String xml = writer.toString();
+//        Message message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+        //-------
+
         while(true) {
 
             try {
@@ -92,9 +107,11 @@ public class ServerToClientThread implements Runnable {
                     updateClient = false;
                 }
 
+
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
+
                 //checking if it is the start of the packet
                 if(sync1 == 0x47 && sync2 == 0x83) {
                     int type = readByte();
@@ -204,16 +221,16 @@ public class ServerToClientThread implements Runnable {
         }
     }
 
-
-    public Thread getThread() {
-        return thread;
-    }
-
     public void sendMessage(Message message){
         try {
             os.write(message.getBuffer());
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public Thread getThread() {
+        return thread;
     }
 }
