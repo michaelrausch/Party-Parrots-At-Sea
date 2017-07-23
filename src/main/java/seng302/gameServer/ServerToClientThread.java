@@ -45,7 +45,7 @@ public class ServerToClientThread implements Runnable {
     private Boolean userIdentified = false;
     private Boolean connected = true;
     private Boolean updateClient = true;
-    private Boolean initialisedRace = false;
+    private Boolean initialisedRace = true;
 
     private Integer seqNo;
     private Integer sourceId;

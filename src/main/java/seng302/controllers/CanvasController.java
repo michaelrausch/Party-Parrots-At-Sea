@@ -420,6 +420,7 @@ public class CanvasController {
      */
     private void findMinMaxPoint() {
         List<Limit> sortedPoints = new ArrayList<>();
+
         for (Limit limit : ClientPacketParser.getXmlObject().getRaceXML().getCourseLimit()) {
             sortedPoints.add(limit);
         }
