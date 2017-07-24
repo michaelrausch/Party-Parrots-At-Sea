@@ -10,7 +10,7 @@ public abstract class Mark {
     private MarkType markType;
     private double latitude;
     private double longitude;
-    private long id;
+    private int id;
     private int compoundMarkID;
 
     /**
@@ -134,7 +134,7 @@ public abstract class Mark {
         return longitude;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

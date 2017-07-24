@@ -8,18 +8,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import seng302.model.stream.StreamParser;
-import seng302.model.stream.XMLParser;
-import seng302.model.stream.packets.BoatPositionPacket;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.Message;
@@ -29,7 +21,7 @@ import seng302.server.messages.Message;
  */
 public class ClientToServerThread extends Thread {
     private Queue<StreamPacket> streamPackets = new ConcurrentLinkedQueue<>();
-    private List<ListChangeListener<Queue<StreamPacket>>> boatPacketListeners = new ArrayList<>();
+    private List<ClientSocketListener> listeners = new ArrayList<>();
 
     private Socket socket;
     private InputStream is;
@@ -78,10 +70,9 @@ public class ClientToServerThread extends Thread {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-                        streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
-                        for (ListChangeListener cl : boatPacketListeners) {
-                            cl.onChanged();
-                        }
+//                        streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
+                        for (ClientSocketListener csl : listeners)
+                            csl.newPacket(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         System.err.println("Packet has been dropped");
                     }
@@ -114,12 +105,12 @@ public class ClientToServerThread extends Thread {
         }
     }
 
-    public void addStreamObserver (ListChangeListener<Queue<StreamPacket>> listChangeListener) {
-        boatPacketListeners.add(listChangeListener);
+    public void addStreamObserver (ClientSocketListener streamListener) {
+        listeners.add(streamListener);
     }
 
-    public void removeStreamObserver (ListChangeListener<Queue<StreamPacket>> listChangeListener) {
-        boatPacketListeners.remove(listChangeListener);
+    public void removeStreamObserver (ClientSocketListener streamListener) {
+        listeners.remove(streamListener);
     }
 
     private int readByte() throws Exception {

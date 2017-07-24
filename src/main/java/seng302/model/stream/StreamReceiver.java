@@ -116,25 +116,6 @@ public class StreamReceiver extends Thread {
         }
     }
 
-    /**
-     * takes an array of up to 7 bytes in little endian format and
-     * returns a positive long constructed from the input bytes
-     *
-     * @return a positive long if there is less than 8 bytes -1 otherwise
-     */
-    private long bytesToLong(byte[] bytes){
-        long partialLong = 0;
-        int index = 0;
-        for (byte b: bytes){
-            if (index > 6){
-                return -1;
-            }
-            partialLong = partialLong | (b & 0xFFL) << (index * 8);
-            index++;
-        }
-        return partialLong;
-    }
-
     public static void main(String[] args) {
 
         StreamReceiver sr = new StreamReceiver("csse-s302staff.canterbury.ac.nz", 4941,"TestThread1");

@@ -13,7 +13,7 @@ public class StreamPacket {
     private byte[] payload;
 
     public StreamPacket(int type, long messageLength, long timeStamp, byte[] payload) {
-        this.type = PacketType.assignPacketType(type);
+        this.type = PacketType.assignPacketType(type, payload);
         this.messageLength = messageLength;
         this.timeStamp = timeStamp;
         this.payload = payload;

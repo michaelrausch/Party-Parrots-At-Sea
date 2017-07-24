@@ -5,8 +5,8 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import seng302.model.Yacht;
-import seng302.model.stream.StreamParser;
+import seng302.model.Boat;
+import seng302.model.stream.parsers.StreamParser;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -34,9 +34,9 @@ public class BoatAnnotations extends Group{
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
 
-    private Yacht boat;
+    private Boat boat;
 
-    BoatAnnotations (Yacht boat, Color theme) {
+    BoatAnnotations (Boat boat, Color theme) {
         super.setCache(true);
         this.boat = boat;
         background.setX(BACKGROUND_X);
@@ -83,10 +83,10 @@ public class BoatAnnotations extends Group{
     }
 
     void update () {
-        velocityObject.setText(String.format(String.format("%.2f m/s", boat.getVelocity())));
+        velocityObject.setText(String.format("%.2f m/s", boat.getVelocity()));
 
+        DateFormat format = new SimpleDateFormat("mm:ss");
         if (boat.getTimeTillNext() != null) {
-            DateFormat format = new SimpleDateFormat("mm:ss");
             String timeToNextMark = format
                     .format(boat.getTimeTillNext() - StreamParser.getCurrentTimeLong());
             estTimeToNextMarkObject.setText("Next mark: " + timeToNextMark);
@@ -95,7 +95,6 @@ public class BoatAnnotations extends Group{
         }
 
         if (boat.getMarkRoundTime() != null) {
-            DateFormat format = new SimpleDateFormat("mm:ss");
             String elapsedTime = format
                     .format(StreamParser.getCurrentTimeLong() - boat.getMarkRoundTime());
             legTimeObject.setText("Last mark: " + elapsedTime);

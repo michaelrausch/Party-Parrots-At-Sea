@@ -1,7 +1,5 @@
 package seng302.model.stream.packets;
 
-import java.lang.reflect.Type;
-
 /**
  * Created by Kusal on 4/24/2017.
  */
@@ -9,7 +7,9 @@ public enum PacketType {
     HEARTBEAT,
     RACE_STATUS,
     DISPLAY_TEXT_MESSAGE,
-    XML_MESSAGE,
+    RACE_XML,
+    REGATTA_XML,
+    BOAT_XML,
     RACE_START_STATUS,
     YACHT_EVENT_CODE,
     YACHT_ACTION_CODE,
@@ -21,7 +21,7 @@ public enum PacketType {
     BOAT_ACTION,
     OTHER;
 
-    public static PacketType assignPacketType(int packetType){
+    public static PacketType assignPacketType(int packetType, byte[] payload){
         switch(packetType){
             case 1:
                 return HEARTBEAT;
@@ -30,7 +30,14 @@ public enum PacketType {
             case 20:
                 return DISPLAY_TEXT_MESSAGE;
             case 26:
-                return XML_MESSAGE;
+                switch (payload[9]) { //The type of XML message
+                    case 5:
+                        return REGATTA_XML;
+                    case 6:
+                        return RACE_XML;
+                    case 7:
+                        return BOAT_XML;
+                }
             case 27:
                 return RACE_START_STATUS;
             case 29:

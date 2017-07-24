@@ -2,6 +2,7 @@ package seng302.model;
 
 import javafx.scene.paint.Color;
 import seng302.model.mark.Mark;
+import seng302.model.stream.packets.StreamPacket;
 import seng302.visualiser.controllers.RaceViewController;
 
 import java.text.DateFormat;
@@ -13,10 +14,10 @@ import java.text.SimpleDateFormat;
  * Class created to store more variables (eg. boat statuses) compared to the XMLParser boat class,
  * also done outside Boat class because some old variables are not used anymore.
  */
-public class Yacht {
+public class Boat {
 
     // Used in boat group
-    private Color colour;
+    private Color colour = Color.BLACK;
 
     private String boatType;
     private Integer sourceID;
@@ -25,19 +26,16 @@ public class Yacht {
     private String boatName;
     private String country;
 
-    // Situational data
-
-
     // Boat status
     private Integer boatStatus;
-    private Integer legNumber;
+    private Integer legNumber = 0;
+    private Integer position = 0;
     private Integer penaltiesAwarded;
     private Integer penaltiesServed;
     private Long estimateTimeAtFinish;
-    private String position;
     private Double lat;
     private Double lon;
-    private Float heading;
+    private Double heading;
     private double velocity;
     private Long timeTillNext;
     private Long markRoundTime;
@@ -46,31 +44,7 @@ public class Yacht {
     private Mark lastMarkRounded;
     private Mark nextMark;
 
-
-    /**
-     * Used in EventTest and RaceTest.
-     *
-     * @param boatName Create a yacht object with name.
-     */
-    public Yacht(String boatName) {
-        this.boatName = boatName;
-    }
-
-    /**
-     * Used in BoatGroupTest.
-     *
-     * @param boatName The name of the team sailing the boat
-     * @param boatVelocity The speed of the boat in meters/second
-     * @param shortName A shorter version of the teams name
-     */
-    public Yacht(String boatName, double boatVelocity, String shortName, int id) {
-        this.boatName = boatName;
-        this.velocity = boatVelocity;
-        this.shortName = shortName;
-        this.sourceID = id;
-    }
-
-    public Yacht(String boatType, Integer sourceID, String hullID, String shortName,
+    public Boat(String boatType, Integer sourceID, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
         this.sourceID = sourceID;
@@ -78,7 +52,6 @@ public class Yacht {
         this.shortName = shortName;
         this.boatName = boatName;
         this.country = country;
-        this.position = "-";
     }
 
     public String getBoatType() {
@@ -118,26 +91,7 @@ public class Yacht {
     }
 
     public void setLegNumber(Integer legNumber) {
-        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(sourceID)) {
-            RaceViewController.updateYachtPositionSparkline(this, legNumber);
-        }
         this.legNumber = legNumber;
-    }
-
-    public Integer getPenaltiesAwarded() {
-        return penaltiesAwarded;
-    }
-
-    public void setPenaltiesAwarded(Integer penaltiesAwarded) {
-        this.penaltiesAwarded = penaltiesAwarded;
-    }
-
-    public Integer getPenaltiesServed() {
-        return penaltiesServed;
-    }
-
-    public void setPenaltiesServed(Integer penaltiesServed) {
-        this.penaltiesServed = penaltiesServed;
     }
 
     public void setEstimateTimeAtNextMark(Long estimateTimeAtNextMark) {
@@ -153,11 +107,11 @@ public class Yacht {
         this.estimateTimeAtFinish = estimateTimeAtFinish;
     }
 
-    public String getPosition() {
+    public Integer getPosition() {
         return position;
     }
 
-    public void setPosition(String position) {
+    public void setPosition(Integer position) {
         this.position = position;
     }
 
@@ -222,11 +176,11 @@ public class Yacht {
         this.lon = lon;
     }
 
-    public Float getHeading() {
+    public Double getHeading() {
         return heading;
     }
 
-    public void setHeading(Float heading) {
+    public void setHeading(Double heading) {
         this.heading = heading;
     }
 

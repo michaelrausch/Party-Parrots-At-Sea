@@ -3,7 +3,7 @@ package seng302.model;
 import javafx.scene.paint.Color;
 
 /**
- * Enum for randomly generating colours.
+ * Enum for generating colours.
  */
 public enum Colors {
     RED, PERU, SEAGREEN, GREEN, BLUE, PURPLE;

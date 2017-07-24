@@ -10,12 +10,12 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
 import seng302.visualiser.controllers.GameViewController;
-import seng302.model.Yacht;
+import seng302.model.Boat;
 import seng302.utilities.GeoUtility;
 import seng302.model.mark.GateMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.SingleMark;
-import seng302.model.stream.StreamParser;
+import seng302.model.stream.parsers.StreamParser;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -38,7 +38,7 @@ public class BoatGroup extends Group {
     private Double lastRotation = 0.0;
     private long framesToMove;
     //Graphical objects
-    private Yacht boat;
+    private Boat boat;
     private Group lineGroup = new Group();
     private Polygon boatPoly;
     private Wake wake;
@@ -58,7 +58,7 @@ public class BoatGroup extends Group {
      * to tell which BoatGroup to update.
      * @param color The colour of the boat polygon and the trailing line.
      */
-    public BoatGroup(Yacht boat, Color color) {
+    public BoatGroup(Boat boat, Color color) {
         destinationSet = false;
         this.boat = boat;
         initChildren(color);
@@ -74,7 +74,7 @@ public class BoatGroup extends Group {
      * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat
      * polygon.
      */
-    public BoatGroup(Yacht boat, Color color, double... points) {
+    public BoatGroup(Boat boat, Color color, double... points) {
         destinationSet = false;
         this.boat = boat;
         initChildren(color, points);
@@ -258,14 +258,8 @@ public class BoatGroup extends Group {
         boat is travelling into the wind. thus upwind. Otherwise if they are on different sides, then the boat is going
         with the wind.
          */
-        if (boatLineFuncResult == windLineFuncResult) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return boatLineFuncResult.equals(windLineFuncResult);
     }
-
 
     public void setIsSelected(Boolean isSelected) {
         this.isSelected = isSelected;
@@ -275,7 +269,9 @@ public class BoatGroup extends Group {
         setLayLinesVisible(isSelected);
     }
 
-    public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime, boolean trail, boolean wake) {
+    public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime,
+        boolean trail, boolean wake) {
+
         boatAnnotations.setVisibile(teamName, velocity, estTime, legTime);
         this.wake.setVisible(wake);
         this.lineGroup.setVisible(trail);
@@ -306,7 +302,7 @@ public class BoatGroup extends Group {
         return laylines;
     }
 
-    public Yacht getBoat() {
+    public Boat getBoat() {
         return boat;
     }
 

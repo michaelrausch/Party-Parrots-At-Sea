@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -19,22 +20,22 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import seng302.visualiser.controllers.RaceViewController;
+import seng302.model.Limit;
 import seng302.visualiser.fxObjects.BoatGroup;
 import seng302.visualiser.fxObjects.MarkGroup;
 import seng302.model.Colors;
-import seng302.model.Yacht;
+import seng302.model.Boat;
 import seng302.model.map.Boundary;
 import seng302.model.map.CanvasMap;
 import seng302.model.mark.GateMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkType;
 import seng302.model.mark.SingleMark;
-import seng302.model.stream.StreamParser;
-import seng302.model.stream.XMLParser;
-import seng302.model.stream.XMLParser.RaceXMLObject.Limit;
-import seng302.model.stream.XMLParser.RaceXMLObject.Participant;
-import seng302.model.stream.packets.BoatPositionPacket;
+import seng302.model.stream.parsers.StreamParser;
+import seng302.model.stream.parsers.xml.XMLParser;
+import seng302.model.stream.parsers.xml.XMLParser.RaceXMLObject.Limit;
+import seng302.model.stream.parsers.xml.XMLParser.RaceXMLObject.Participant;
+import seng302.model.stream.parsers.PositionUpdateData;
 import seng302.utilities.GeoPoint;
 import seng302.utilities.GeoUtility;
 
@@ -42,7 +43,7 @@ import seng302.utilities.GeoUtility;
  * Created by cir27 on 20/07/17.
  */
 public class GameView extends Pane {
-    private RaceViewController raceViewController;
+
     private ObservableList<Node> gameObjects;
     private ImageView mapImage;
 
@@ -66,7 +67,9 @@ public class GameView extends Pane {
 
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
-    private Text FPSdisplay = new Text();
+
+    private Text fpsDisplay = new Text();
+
     private Polygon raceBorder = new Polygon();
 
     //FRAME RATE
@@ -75,44 +78,24 @@ public class GameView extends Pane {
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
 
-    AnimationTimer timer;
+    private AnimationTimer timer;
 
     private enum ScaleDirection {
         HORIZONTAL,
         VERTICAL
     }
 
-    void setup(RaceViewController raceViewController) {
-        this.raceViewController = raceViewController;
-    }
-
-    public void initialize() {
-        raceViewController = new RaceViewController();
+    public GameView () {
         gameObjects = this.getChildren();
         // create image view for map, bind panel size to image
         mapImage = new ImageView();
         gameObjects.add(mapImage);
         mapImage.fitWidthProperty().bind(this.widthProperty());
         mapImage.fitHeightProperty().bind(this.heightProperty());
+        initializeTimer();
     }
 
-    void initializeCanvas() {
-
-        fitMarksToCanvas();
-        drawGoogleMap();
-        FPSdisplay.setLayoutX(5);
-        FPSdisplay.setLayoutY(20);
-        FPSdisplay.setStrokeWidth(2);
-        gameObjects.add(FPSdisplay);
-        gameObjects.add(raceBorder);
-        initializeMarks();
-        initializeBoats();
-        this.widthProperty().addListener(resize -> {
-            canvasWidth = this.getWidth();
-            canvasHeight = this.getHeight();
-            fitMarksToCanvas();
-        });
-
+    private void initializeTimer () {
         timer = new AnimationTimer() {
             private long lastTime = 0;
             private int FPSCount = 30;
@@ -136,22 +119,33 @@ public class GameView extends Pane {
                             frameRate = 1_000_000_000.0 / elapsedNanosPerFrame;
                             if (FPSCount-- == 0) {
                                 FPSCount = 30;
-//                                drawFps(frameRate.intValue());
+                                drawFps(frameRate.intValue());
                             }
                         }
                         updateGroups();
-                        if (StreamParser.isRaceFinished()) {
-                            this.stop();
-                        }
                         lastTime = now;
                     }
                 }
-                if (StreamParser.isRaceFinished()) {
-                    this.stop();
-                    switchToFinishScreen();
-                }
             }
         };
+    }
+
+    void initializeCanvas() {
+
+        fitMarksToCanvas();
+        drawGoogleMap();
+        fpsDisplay.setLayoutX(5);
+        fpsDisplay.setLayoutY(20);
+        fpsDisplay.setStrokeWidth(2);
+        gameObjects.add(fpsDisplay);
+        gameObjects.add(raceBorder);
+        initializeMarks();
+        initializeBoats();
+        this.widthProperty().addListener(resize -> {
+            canvasWidth = this.getWidth();
+            canvasHeight = this.getHeight();
+            fitMarksToCanvas();
+        });
     }
 
     private void switchToFinishScreen() {
@@ -255,28 +249,28 @@ public class GameView extends Pane {
     }
 
     private void updateBoatGroup(BoatGroup boatGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
-        // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
-        if (movementQueue.size() > 0) {
-            try {
-                BoatPositionPacket positionPacket = movementQueue.take();
+//        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
+//        // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
+//        if (movementQueue.size() > 0) {
+//            try {
+//                PositionUpdateData positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
-                double heading = 360.0 / 0xffff * positionPacket.getHeading();
+//                double heading = 360.0 / 0xffff * positionPacket.getHeading();
                 boatGroup.setDestination(
                     p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(),
                     positionPacket.getTimeValid(), frameRate);
-            } catch (InterruptedException e){
-                e.printStackTrace();
-            }
+//            } catch (InterruptedException e){
+//                e.printStackTrace();
 //            }
-        }
+////            }
+//        }
     }
 
     private void updateMarkGroup (long raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<BoatPositionPacket> movementQueue = StreamParser.markLocations.get(raceId);
+        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.markLocations.get(raceId);
         if (movementQueue.size() > 0){
             try {
-                BoatPositionPacket positionPacket = movementQueue.take();
+                PositionUpdateData positionPacket = movementQueue.take();
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
                 markGroup.moveMarkTo(p2d.getX(), p2d.getY(), raceId);
             } catch (InterruptedException e) {
@@ -289,7 +283,7 @@ public class GameView extends Pane {
      * Draws all the boats.
      */
     private void initializeBoats() {
-        Map<Integer, Yacht> boats = StreamParser.getBoats();
+        Map<Integer, Boat> boats = StreamParser.getBoats();
         Group wakes = new Group();
         Group trails = new Group();
         Group annotations = new Group();
@@ -301,7 +295,7 @@ public class GameView extends Pane {
             participantIDs.add(p.getsourceID());
         }
 
-        for (Yacht boat : boats.values()) {
+        for (Boat boat : boats.values()) {
             if (participantIDs.contains(boat.getSourceID())) {
                 boat.setColour(Colors.getColor());
                 BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
@@ -336,14 +330,9 @@ public class GameView extends Pane {
         gameObjects.addAll(markGroups);
     }
 
-//    private void drawFps(int fps){
-//        if (raceViewController.isDisplayFps()){
-//            FPSdisplay.setVisible(true);
-//            FPSdisplay.setText(String.format("%d FPS", fps));
-//        } else {
-//            FPSdisplay.setVisible(false);
-//        }
-//    }
+    private void drawFps(int fps){
+        fpsDisplay.setText(String.format("%d FPS", fps));
+    }
 
     /**
      * Calculates x and y location for every marker that fits it to the canvas the race will be
@@ -367,7 +356,7 @@ public class GameView extends Pane {
      */
     private void findMinMaxPoint() {
         List<Limit> sortedPoints = new ArrayList<>();
-        for (Limit limit : StreamParser.getXmlObject().getRaceXML().getCourseLimit()) {
+        for (Limit limit : raceData) {
             sortedPoints.add(limit);
         }
         sortedPoints.sort(Comparator.comparingDouble(Limit::getLat));
@@ -512,4 +501,34 @@ public class GameView extends Pane {
         metersPerPixelY = dVertical / dy;
     }
 
+    public void setAnnotationVisibilities (boolean teamName, boolean velocity, boolean estTime,
+        boolean legTime, boolean trail, boolean wake) {
+        for (BoatGroup boatGroup : boatGroups) {
+            boatGroup.setVisibility(teamName, velocity, estTime, legTime, trail, wake);
+        }
+    }
+
+    public void setFPSVisibility (boolean visibility) {
+        fpsDisplay.setVisible(visibility);
+    }
+
+    public ReadOnlyBooleanProperty getFPSVisibilityProperty () {
+        return fpsDisplay.visibleProperty();
+    }
+
+    public void selectBoat (int boatId) {
+
+    }
+
+    public void pauseRace () {
+        timer.stop();
+    }
+
+    public void startRace () {
+        timer.start();
+    }
+
+    public void updateBorder (List<Limit> courseLimit) {
+
+    }
 }

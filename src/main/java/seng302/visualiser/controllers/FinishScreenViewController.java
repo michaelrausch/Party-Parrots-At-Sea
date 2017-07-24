@@ -15,24 +15,24 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import seng302.model.Yacht;
-import seng302.model.stream.StreamParser;
-import seng302.model.stream.XMLParser.RaceXMLObject.Participant;
+import seng302.model.Boat;
+import seng302.model.stream.parsers.StreamParser;
+import seng302.model.stream.parsers.xml.XMLParser.RaceXMLObject.Participant;
 
 public class FinishScreenViewController implements Initializable {
 
     @FXML
     private GridPane finishScreenGridPane;
     @FXML
-    private TableView<Yacht> finishOrderTable;
+    private TableView<Boat> finishOrderTable;
     @FXML
-    private TableColumn<Yacht, String> posCol;
+    private TableColumn<Boat, String> posCol;
     @FXML
-    private TableColumn<Yacht, String> boatNameCol;
+    private TableColumn<Boat, String> boatNameCol;
     @FXML
-    private TableColumn<Yacht, String> shortNameCol;
+    private TableColumn<Boat, String> shortNameCol;
     @FXML
-    private TableColumn<Yacht, String> countryCol;
+    private TableColumn<Boat, String> countryCol;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -41,7 +41,7 @@ public class FinishScreenViewController implements Initializable {
         finishOrderTable.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // set up data for table
-        ObservableList<Yacht> data = FXCollections.observableArrayList();
+        ObservableList<Boat> data = FXCollections.observableArrayList();
         finishOrderTable.setItems(data);
 
         // setting table col data
@@ -67,7 +67,7 @@ public class FinishScreenViewController implements Initializable {
         }
 
         // add data to table
-        for (Yacht boat : StreamParser.getBoatsPos().values()) {
+        for (Boat boat : StreamParser.getBoatsPos().values()) {
             if (participantIDs.contains(boat.getSourceID())) {
                 data.add(boat);
             }

@@ -2,7 +2,7 @@ package seng302.gameServer;
 
 import seng302.model.Player;
 import seng302.model.stream.PacketBufferDelegate;
-import seng302.model.stream.StreamParser;
+import seng302.model.stream.parsers.StreamParser;
 import seng302.model.stream.packets.StreamPacket;
 
 import java.io.IOException;
