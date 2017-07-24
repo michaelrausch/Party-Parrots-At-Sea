@@ -38,7 +38,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button focusTraversable="false" mnemonicParsing="false" onAction="#readyButtonPressed" prefWidth="101.0" text="Ready" GridPane.halignment="CENTER" />
+            <Button fx:id="readyButton" focusTraversable="false" mnemonicParsing="false" onAction="#readyButtonPressed" prefWidth="101.0" text="Ready" GridPane.halignment="CENTER" />
             <Button focusTraversable="false" mnemonicParsing="false" onAction="#leaveLobbyButtonPressed" text="Leave Lobby" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
          </children>
       </GridPane>

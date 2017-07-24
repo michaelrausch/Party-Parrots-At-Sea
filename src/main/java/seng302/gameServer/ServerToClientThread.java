@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
@@ -23,12 +24,18 @@ import seng302.models.xml.Regatta;
 import seng302.models.xml.XMLGenerator;
 import seng302.server.messages.BoatActionType;
 import seng302.server.messages.BoatLocationMessage;
+import seng302.server.messages.BoatStatus;
+import seng302.server.messages.BoatSubMessage;
 import seng302.server.messages.Message;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.server.messages.RaceStatus;
+import seng302.server.messages.RaceStatusMessage;
+import seng302.server.messages.RaceType;
+import seng302.server.messages.WindDirection;
 import seng302.server.messages.XMLMessage;
 import seng302.server.messages.XMLMessageSubType;
 import seng302.server.messages.XMLMessage;
@@ -172,6 +179,8 @@ public class ServerToClientThread implements Runnable, Observer {
 //        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
 //        sendMessage(message);
 //        System.out.println("[server] send message 4 " + message);
+//        sendMessage(getRaceStatusMessage());
+//        System.out.println("sent race status");
         //-------
 
         while(true) {
@@ -215,7 +224,7 @@ public class ServerToClientThread implements Runnable, Observer {
                                 break;
                         }
                     } else {
-                        System.err.println("Packet has been dropped");
+                        serverLog("Packet has been dropped", 1);
                     }
                 }
             } catch (Exception e) {
@@ -359,10 +368,42 @@ public class ServerToClientThread implements Runnable, Observer {
         }
     }
 
-
-
-
     public Thread getThread() {
         return thread;
+    }
+
+    public void sendRaceStatusMessage(){
+        // variables taken from GameServerThread
+        int TIME_TILL_RACE_START = 20*1000;
+        long startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
+
+        List<BoatSubMessage> boatSubMessages = new ArrayList<>();
+        BoatStatus boatStatus;
+        RaceStatus raceStatus;
+
+        for (Player player : GameState.getPlayers()){
+            Yacht y = player.getYacht();
+
+            if (GameState.getCurrentStage() == GameStages.PRE_RACE){
+                boatStatus = BoatStatus.PRESTART;
+            }
+            else if(GameState.getCurrentStage() == GameStages.RACING){
+                boatStatus = BoatStatus.RACING;
+            } else {
+                boatStatus = BoatStatus.UNDEFINED;
+            }
+
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), boatStatus, 0, 0, 0, 1234l, 1234l);
+            boatSubMessages.add(m);
+        }
+
+        if (GameState.getCurrentStage() == GameStages.RACING){
+            raceStatus = RaceStatus.STARTED;
+        } else {
+            raceStatus = RaceStatus.WARNING;
+        }
+
+        sendMessage(new RaceStatusMessage(1, raceStatus, startTime, WindDirection.SOUTH,
+            100, GameState.getPlayers().size(), RaceType.MATCH_RACE, 1, boatSubMessages));
     }
 }

@@ -72,14 +72,15 @@ public class StartScreenController {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
             // get the lobby controller so that we can pass the game server thread to it
             new GameState(getLocalHostIp());
-            new MainServerThread();
+            MainServerThread mainServerThread = new MainServerThread();
             ClientState.setHost(true);
             // host will connect and handshake to itself after setting up the server
             // TODO: 24/07/17 wmu16 - Make port number some static global type constant?
             ClientToServerThread clientToServerThread = new ClientToServerThread(ClientState.getHostIp(), 4942);
             ClientState.setConnectedToHost(true);
             controller.setClientToServerThread(clientToServerThread);
-            setContentPane("/views/LobbyView.fxml");
+            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
+            lobbyController.setMainServerThread(mainServerThread);
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setHeaderText("Cannot host");

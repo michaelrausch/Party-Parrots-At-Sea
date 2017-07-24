@@ -95,11 +95,9 @@ public class ClientToServerThread implements Runnable {
                         // TODO: 17/07/17 wmu16 - Fix this or maybe we dont need to go through the main server at all!?!?
 //                        packetBufferDelegate.addToBuffer(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
-                        System.err.println("Packet has been dropped");
+                        clientLog("Packet has been dropped", 1);
                     }
-
                 }
-
             } catch (Exception e) {
                 closeSocket();
                 e.printStackTrace();
