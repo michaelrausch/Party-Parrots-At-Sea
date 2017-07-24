@@ -1,5 +1,6 @@
 package seng302.gameServer;
 
+import java.util.Observable;
 import seng302.client.ClientPacketParser;
 import seng302.models.Player;
 import seng302.models.stream.PacketBufferDelegate;
@@ -15,7 +16,7 @@ import java.util.concurrent.PriorityBlockingQueue;
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread implements Runnable, PacketBufferDelegate, ClientConnectionDelegate{
+public class MainServerThread extends Observable implements Runnable, PacketBufferDelegate, ClientConnectionDelegate{
 
     private static final int PORT = 4942;
     private static final Integer MAX_NUM_PLAYERS = 3;
@@ -54,6 +55,7 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
         heartbeatThread.start();
         serverListenThread.start();
 
+
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!thread.isInterrupted()) {
             try {
@@ -64,7 +66,6 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
                 GameState.update();
-                updateClients();
             }
 
             //RACING
@@ -99,6 +100,8 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
     }
 
 
+
+
     public void updateClients() {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.updateClient();
@@ -125,7 +128,9 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
     public void clientConnected(ServerToClientThread serverToClientThread) {
         serverLog("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         serverToClientThreads.add(serverToClientThread);
-
+        this.addObserver(serverToClientThread);
+        setChanged();
+        notifyObservers();
     }
 
     /**

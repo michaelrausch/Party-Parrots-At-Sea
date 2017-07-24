@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Random;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -37,7 +39,7 @@ import seng302.utilities.GeoPoint;
  * All server threads created and owned by the server thread handler which can trigger client updates on its threads
  * Created by wmu16 on 13/07/17.
  */
-public class ServerToClientThread implements Runnable {
+public class ServerToClientThread implements Runnable, Observer {
 
     private static final Integer LOG_LEVEL = 1;
     private static final Integer MAX_ID_ATTEMPTS = 10;
@@ -91,6 +93,11 @@ public class ServerToClientThread implements Runnable {
         if(logLevel <= LOG_LEVEL){
             System.out.println("[SERVER] " + message);
         }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        sendSetupMessages();
     }
 
     public void run() {
@@ -177,13 +184,6 @@ public class ServerToClientThread implements Runnable {
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-//                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
-//                    sendMessage(chatterMessage);
-//                try {
-//                    GameState.outputState(os);
-//                } catch (IOException e) {
-//                    System.out.println("IO error in server thread upon writing to output stream");
-//                }
                     sendBoatLocationPackets();
                     updateClient = false;
                 }
@@ -247,6 +247,7 @@ public class ServerToClientThread implements Runnable {
 
         xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE, xml.getRaceAsXml().length());
         sendMessage(xmlMessage);
+        System.out.println("Sent xml messages for " + thread.getName());
 
     }
 
@@ -294,10 +295,6 @@ public class ServerToClientThread implements Runnable {
         }
     }
 
-
-    public void initialiseRace(){
-        initialisedRace = true;
-    }
 
 
     private int readByte() throws Exception {
