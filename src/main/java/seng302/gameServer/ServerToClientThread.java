@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import org.apache.commons.io.IOUtils;
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.PacketType;
@@ -20,6 +21,13 @@ import seng302.models.xml.XMLGenerator;
 import seng302.server.messages.BoatActionType;
 import seng302.server.messages.BoatLocationMessage;
 import seng302.server.messages.Message;
+
+import java.io.*;
+import java.net.Socket;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
+import seng302.server.messages.XMLMessage;
+import seng302.server.messages.XMLMessageSubType;
 import seng302.server.messages.XMLMessage;
 import seng302.server.messages.XMLMessageSubType;
 import seng302.utilities.GeoPoint;
@@ -89,8 +97,76 @@ public class ServerToClientThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
+
+        // used by ryan to simulate sending boats.xml
+//        InputStream inputStream = getClass().getResourceAsStream("/server_config/boats1.xml");
+//        StringWriter writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        String xml = writer.toString();
+//        Message message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 1 " + message);
+//
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        inputStream = getClass().getResourceAsStream("/server_config/boats.xml");
+//        writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        xml = writer.toString();
+//        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 2 " + message);
+//
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        inputStream = getClass().getResourceAsStream("/server_config/boats2.xml");
+//        writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        xml = writer.toString();
+//        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 3 " + message);
+//
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        inputStream = getClass().getResourceAsStream("/server_config/boats.xml");
+//        writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        xml = writer.toString();
+//        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 4 " + message);
+        //-------
+
         while(true) {
-            //System.out.print(".");
 
             try {
                 if (initialisedRace) {
@@ -273,6 +349,8 @@ public class ServerToClientThread implements Runnable {
             BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId, getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
             sendMessage(boatLocationMessage);
         }
+    }
+
     }
 
 

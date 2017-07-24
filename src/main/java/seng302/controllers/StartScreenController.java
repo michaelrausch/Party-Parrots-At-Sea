@@ -1,11 +1,17 @@
 package seng302.controllers;
 
+import java.net.Inet4Address;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import seng302.client.ClientState;
 import seng302.client.ClientToServerThread;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
@@ -22,6 +28,8 @@ public class StartScreenController {
 
     @FXML
     private TextField ipTextField;
+    @FXML
+    private TextField portTextField;
     @FXML
     private GridPane startScreen2;
 
@@ -54,43 +62,99 @@ public class StartScreenController {
     /**
      * ATTEMPTS TO:
      * Sets up a new game state with your IP address as designated as the host.
-     * Starts a thread to listen for incoming connections
+     * Starts a thread to listen for incoming connections.
+     * Starts a client to server thread and connects to own ip.
      * Switches to the lobby screen
      */
     @FXML
     public void hostButtonPressed() {
         try {
             String ipAddress = InetAddress.getLocalHost().getHostAddress();
-            new GameState(ipAddress);
-            new MainServerThread();
-            ClientToServerThread clientToServerThread = new ClientToServerThread("localhost", 4950);
-            controller.setClientToServerThread(clientToServerThread);
-//            new GameServerThread("Fuck you");
             // get the lobby controller so that we can pass the game server thread to it
+            new GameState(getLocalHostIp());
+            new MainServerThread();
+            ClientState.setHost(true);
+            // host will connect and handshake to itself after setting up the server
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ClientState.getHostIp(), 4950);
+            ClientState.setConnectedToHost(true);
+            controller.setClientToServerThread(clientToServerThread);
             setContentPane("/views/LobbyView.fxml");
-        } catch (UnknownHostException e) {
-            System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setHeaderText("Cannot host");
+            alert.setContentText("Oops, failed to host, try to restart.");
+            alert.showAndWait();
             e.printStackTrace();
         }
 
+
     }
 
-
+    /**
+     * ATTEMPTS TO:
+     * Connect to an ip address and port using the ip and port specified on start screen.
+     * Starts a Client To Server Thread to maintain connection to host.
+     * Switch view to lobby view.
+     */
     @FXML
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
-        String ipAddress = ipTextField.getText().trim().toLowerCase();
         try {
-            // TODO: 22/07/17 wmu 16 - make this port number some static constant somewhere perhaps a config file?
-            ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, 4950);
+            String ipAddress = ipTextField.getText().trim().toLowerCase();
+            Integer port = Integer.valueOf(portTextField.getText().trim());
+
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, port);
+            ClientState.setHost(false);
+            ClientState.setConnectedToHost(true);
+
             controller.setClientToServerThread(clientToServerThread);
             setContentPane("/views/LobbyView.fxml");
-        } catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setHeaderText("Cannot reach the host");
+            alert.setContentText("Please check your host IP address.");
+            alert.showAndWait();
         }
     }
 
     public void setController(Controller controller) {
         this.controller = controller;
+    }
+
+    /**
+     * Gets the local host ip address and sets this ip to ClientState.
+     * Only runs by the host.
+     *
+     * @return the localhost ip address
+     */
+    private String getLocalHostIp() {
+        String ipAddress = null;
+        try {
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                NetworkInterface ni = e.nextElement();
+                if (ni.isLoopback())
+                    continue;
+                if(ni.isPointToPoint())
+                    continue;
+                if(ni.isVirtual())
+                    continue;
+
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if(address instanceof Inet4Address) {    // skip all ipv6
+                        ipAddress = address.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (ipAddress == null) {
+            System.out.println("[HOST] Cannot obtain local host ip address.");
+        }
+        ClientState.setHostIp(ipAddress);
+        return ipAddress;
     }
 }

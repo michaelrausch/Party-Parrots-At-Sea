@@ -34,7 +34,7 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
-            System.out.println("IO error in server thread handler upon trying to make new server socket");
+            serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
 
         packetBuffer = new PriorityBlockingQueue<>();
@@ -80,7 +80,6 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
             updateClients();
 
             while (!packetBuffer.isEmpty()){
-                System.out.println("WHATUPPP");
                 try {
                     StreamPacket packet = packetBuffer.take();
                     ClientPacketParser.parsePacket(packet);
@@ -89,9 +88,6 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
                 }
             }
         }
-
-        System.out.println("WHOOPSIES");
-
 
         // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
         try {
@@ -118,7 +114,6 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
 
     @Override
     public boolean addToBuffer(StreamPacket streamPacket) {
-        System.out.println("HEY HI");
         return packetBuffer.add(streamPacket);
     }
 

@@ -37,6 +37,7 @@ public class GameState {
         yachts = new HashMap<>();
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
+        yachts = new HashMap<>();
     }
 
     public static String getHostIpAddress() {
