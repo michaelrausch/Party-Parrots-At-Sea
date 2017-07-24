@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -27,18 +28,19 @@ import seng302.client.ClientState;
 import seng302.client.ClientStateQueryingRunnable;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.gameServer.MainServerThread;
 
 /**
  * A class describing the actions of the lobby screen
  * Created by wmu16 on 10/07/17.
  */
 public class LobbyController implements Initializable, Observer{
-
-
     @FXML
     private GridPane lobbyScreen;
     @FXML
     private Text lobbyIpText;
+    @FXML
+    private Button readyButton;
     @FXML
     private ListView firstListView;
     @FXML
@@ -83,6 +85,9 @@ public class LobbyController implements Initializable, Observer{
     private static ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
     private ClientStateQueryingRunnable clientStateQueryingRunnable;
 
+    private Boolean switchedPane = false;
+    private MainServerThread mainServerThread;
+
     private void setContentPane(String jfxUrl) {
         try {
             AnchorPane contentPane = (AnchorPane) lobbyScreen.getParent();
@@ -100,10 +105,14 @@ public class LobbyController implements Initializable, Observer{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (ClientState.isHost())
+        if (ClientState.isHost()) {
             lobbyIpText.setText("Lobby Host IP: " + ClientState.getHostIp());
-        else
+            readyButton.setDisable(false);
+        }
+        else {
             lobbyIpText.setText("Connected to IP: ");
+            readyButton.setDisable(true);
+        }
         initialiseListView();
 //        initialiseLobbyControllerThread();
 //        initialiseImageView();  // parrot gif init
@@ -122,9 +131,12 @@ public class LobbyController implements Initializable, Observer{
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-//                switchToRaceView();
-                initialiseListView();
-//                clientStateQueryingRunnable.terminate();
+                if (arg.equals("game started") && !switchedPane) {
+                    switchToRaceView();
+                }
+                if (arg.equals(("update players"))) {
+                    initialiseListView();
+                }
             }
         });
     }
@@ -160,8 +172,6 @@ public class LobbyController implements Initializable, Observer{
                 competitorIndex++;
             }
         }
-
-
 
         firstListView.setItems(firstCompetitor);
         secondListView.setItems(secondCompetitor);
@@ -218,9 +228,10 @@ public class LobbyController implements Initializable, Observer{
 
     @FXML
     public void readyButtonPressed() {
+//        setContentPane("/views/RaceView.fxml");
         playTheme();
-        setContentPane("/views/RaceView.fxml");
         GameState.setCurrentStage(GameStages.RACING);
+        mainServerThread.startGame();
     }
 
 
@@ -242,6 +253,13 @@ public class LobbyController implements Initializable, Observer{
     }
 
     private void switchToRaceView() {
-        setContentPane("/views/RaceView.fxml");
+        if (!switchedPane) {
+            switchedPane = true;
+            setContentPane("/views/RaceView.fxml");
+        }
+    }
+
+    public void setMainServerThread(MainServerThread mainServerThread) {
+        this.mainServerThread = mainServerThread;
     }
 }

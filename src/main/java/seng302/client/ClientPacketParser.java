@@ -215,6 +215,11 @@ public class ClientPacketParser {
             clientBoat.setEstimateTimeAtNextMark(estTimeAtNextMark);
             clientBoat.setEstimateTimeAtFinish(estTimeAtFinish);
         }
+
+        // 3 is race started
+        if (raceStatus == 3) {
+            ClientState.setRaceStarted(true);
+        }
     }
 
     private static void setBoatLegPosition(Yacht updatingBoat, Integer leg){

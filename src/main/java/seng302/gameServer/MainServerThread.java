@@ -99,9 +99,6 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
         }
     }
 
-
-
-
     public void updateClients() {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.updateClient();
@@ -146,4 +143,9 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
 //        sendXml();
     }
 
+    public void startGame() {
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            serverToClientThread.sendRaceStatusMessage();
+        }
+    }
 }
