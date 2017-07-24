@@ -47,7 +47,7 @@
             <Font size="21.0" />
          </font>
       </Text>
-      <TextField fx:id="portTextField" alignment="CENTER" maxWidth="75.0" prefHeight="25.0" prefWidth="55.0" promptText="Port" text="4950" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+      <TextField fx:id="portTextField" alignment="CENTER" maxWidth="75.0" prefHeight="25.0" prefWidth="55.0" promptText="Port" text="4942" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
          <opaqueInsets>
             <Insets />
          </opaqueInsets>

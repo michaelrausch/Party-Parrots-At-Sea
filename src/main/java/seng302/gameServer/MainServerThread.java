@@ -17,7 +17,7 @@ import java.util.concurrent.PriorityBlockingQueue;
  */
 public class MainServerThread implements Runnable, PacketBufferDelegate, ClientConnectionDelegate{
 
-    private static final int PORT = 4950;
+    private static final int PORT = 4942;
     private static final Integer MAX_NUM_PLAYERS = 3;
     private static final int LOG_LEVEL = 1;
 

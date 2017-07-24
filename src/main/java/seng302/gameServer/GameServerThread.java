@@ -18,7 +18,7 @@ import java.util.*;
 public class GameServerThread implements Runnable, Observer, ClientConnectionDelegate{
     
     private static final Integer MAX_NUM_PLAYERS = 10;
-    public static final int PORT_NUMBER = 4950;
+    public static final int PORT_NUMBER = 4942;
 
     private Boolean hosting = true;
     

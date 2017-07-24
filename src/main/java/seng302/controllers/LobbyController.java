@@ -220,6 +220,7 @@ public class LobbyController implements Initializable, Observer{
 
     @FXML
     public void readyButtonPressed() {
+        setContentPane("/views/RaceView.fxml");
         GameState.setCurrentStage(GameStages.RACING);
     }
 

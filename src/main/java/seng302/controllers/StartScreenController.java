@@ -75,7 +75,8 @@ public class StartScreenController {
             new MainServerThread();
             ClientState.setHost(true);
             // host will connect and handshake to itself after setting up the server
-            ClientToServerThread clientToServerThread = new ClientToServerThread(ClientState.getHostIp(), 4950);
+            // TODO: 24/07/17 wmu16 - Make port number some static global type constant?
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ClientState.getHostIp(), 4942);
             ClientState.setConnectedToHost(true);
             controller.setClientToServerThread(clientToServerThread);
             setContentPane("/views/LobbyView.fxml");
