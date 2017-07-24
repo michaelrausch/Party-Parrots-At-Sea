@@ -81,71 +81,71 @@ public class ServerToClientThread implements Runnable {
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
 
         // used by ryan to simulate sending boats.xml
-        InputStream inputStream = getClass().getResourceAsStream("/server_config/boats1.xml");
-        StringWriter writer = new StringWriter();
-        try {
-            IOUtils.copy(inputStream, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String xml = writer.toString();
-        Message message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
-        sendMessage(message);
-        System.out.println("[server] send message 1 " + message);
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        inputStream = getClass().getResourceAsStream("/server_config/boats.xml");
-        writer = new StringWriter();
-        try {
-            IOUtils.copy(inputStream, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        xml = writer.toString();
-        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
-        sendMessage(message);
-        System.out.println("[server] send message 2 " + message);
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        inputStream = getClass().getResourceAsStream("/server_config/boats2.xml");
-        writer = new StringWriter();
-        try {
-            IOUtils.copy(inputStream, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        xml = writer.toString();
-        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
-        sendMessage(message);
-        System.out.println("[server] send message 3 " + message);
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        inputStream = getClass().getResourceAsStream("/server_config/boats.xml");
-        writer = new StringWriter();
-        try {
-            IOUtils.copy(inputStream, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        xml = writer.toString();
-        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
-        sendMessage(message);
-        System.out.println("[server] send message 4 " + message);
+//        InputStream inputStream = getClass().getResourceAsStream("/server_config/boats1.xml");
+//        StringWriter writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        String xml = writer.toString();
+//        Message message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 1 " + message);
+//
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        inputStream = getClass().getResourceAsStream("/server_config/boats.xml");
+//        writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        xml = writer.toString();
+//        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 2 " + message);
+//
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        inputStream = getClass().getResourceAsStream("/server_config/boats2.xml");
+//        writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        xml = writer.toString();
+//        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 3 " + message);
+//
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        inputStream = getClass().getResourceAsStream("/server_config/boats.xml");
+//        writer = new StringWriter();
+//        try {
+//            IOUtils.copy(inputStream, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        xml = writer.toString();
+//        message = new XMLMessage(xml, XMLMessageSubType.BOAT, 0);
+//        sendMessage(message);
+//        System.out.println("[server] send message 4 " + message);
         //-------
 
         while(true) {
