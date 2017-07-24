@@ -157,7 +157,7 @@ public class LobbyController implements Initializable, Observer{
             if (competitorIndex >= 8) {
                 break;
             }
-            if (!yachtId.equals(ClientState.getClientSourceId())) {
+            if (!yachtId.equals(Integer.parseInt(ClientState.getClientSourceId()))) {
                 competitors.get(competitorIndex).add(String.valueOf(yachtId));
                 competitorIndex++;
             }

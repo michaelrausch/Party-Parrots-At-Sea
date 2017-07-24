@@ -351,7 +351,7 @@ public class ServerToClientThread implements Runnable {
         }
     }
 
-    }
+
 
 
     public Thread getThread() {
