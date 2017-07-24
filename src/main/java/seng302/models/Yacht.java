@@ -19,7 +19,7 @@ import seng302.utilities.GeoPoint;
  */
 public class Yacht {
 
-    private final Double TURN_STEP = 3.0;
+    private final Double TURN_STEP = 2.0;
 
     private Double lastHeading;
     private Boolean sailIn;

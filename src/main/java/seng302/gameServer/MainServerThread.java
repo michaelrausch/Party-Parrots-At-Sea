@@ -19,6 +19,7 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
 
     private static final int PORT = 4942;
     private static final Integer MAX_NUM_PLAYERS = 3;
+    private static final Integer UPDATES_PER_SECOND = 5;
     private static final int LOG_LEVEL = 1;
 
     private Thread thread;
@@ -57,7 +58,7 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!thread.isInterrupted()) {
             try {
-                Thread.sleep(1000 / 60);    //60 times per second we should calculate the game state
+                Thread.sleep(1000 / UPDATES_PER_SECOND);    //60 times per second we should calculate the game state
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -77,7 +78,6 @@ public class MainServerThread implements Runnable, PacketBufferDelegate, ClientC
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
 
             }
-            updateClients();
 
             while (!packetBuffer.isEmpty()){
                 try {

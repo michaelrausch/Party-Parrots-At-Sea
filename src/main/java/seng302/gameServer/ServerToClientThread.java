@@ -184,7 +184,7 @@ public class ServerToClientThread implements Runnable {
 //                } catch (IOException e) {
 //                    System.out.println("IO error in server thread upon writing to output stream");
 //                }
-                    sendBoatLocationPackets();
+//                    sendBoatLocationPackets();
                     updateClient = false;
                 }
 
@@ -251,6 +251,7 @@ public class ServerToClientThread implements Runnable {
     }
 
     public void updateClient() {
+        sendBoatLocationPackets();
         updateClient = true;
     }
 
@@ -347,7 +348,15 @@ public class ServerToClientThread implements Runnable {
         ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
         for (Yacht yacht: yachts){
 //            System.out.println("[SERVER] Lat: " + yacht.getLocation().getLat() + " Lon: " + yacht.getLocation().getLng());
-            BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId, getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
+            BoatLocationMessage boatLocationMessage =
+                    new BoatLocationMessage(
+                            sourceId,
+                            getSeqNo(),
+                            yacht.getLocation().getLat(),
+                            yacht.getLocation().getLng(),
+                            yacht.getHeading(),
+                            (long) yacht.getVelocity());
+            
             sendMessage(boatLocationMessage);
         }
     }

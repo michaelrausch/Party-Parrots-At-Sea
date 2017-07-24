@@ -172,27 +172,27 @@ public class BoatGroup extends Group {
             isStopped = true;
         }
 
-        if (distanceTravelled > 70) {
-            distanceTravelled = 0d;
-
-            if (lastPoint != null) {
-                Line l = new Line(
-                    lastPoint.getX(),
-                    lastPoint.getY(),
-                    boatPoly.getLayoutX(),
-                    boatPoly.getLayoutY()
-                );
-                l.getStrokeDashArray().setAll(3d, 7d);
-                l.setStroke(boat.getColour());
-                l.setCache(true);
-                l.setCacheHint(CacheHint.SPEED);
-                lineGroup.getChildren().add(l);
-            }
-
-            if (destinationSet) {
-                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-            }
-        }
+//        if (distanceTravelled > 70) {
+//            distanceTravelled = 0d;
+//
+//            if (lastPoint != null) {
+//                Line l = new Line(
+//                    lastPoint.getX(),
+//                    lastPoint.getY(),
+//                    boatPoly.getLayoutX(),
+//                    boatPoly.getLayoutY()
+//                );
+//                l.getStrokeDashArray().setAll(3d, 7d);
+//                l.setStroke(boat.getColour());
+//                l.setCache(true);
+//                l.setCacheHint(CacheHint.SPEED);
+//                lineGroup.getChildren().add(l);
+//            }
+//
+//            if (destinationSet) {
+//                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+//            }
+//        }
         wake.updatePosition();
     }
 
