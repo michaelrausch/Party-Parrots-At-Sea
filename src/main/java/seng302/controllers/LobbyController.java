@@ -1,17 +1,13 @@
 package seng302.controllers;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.ResourceBundle;
+import java.util.*;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,6 +20,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import seng302.client.ClientState;
 import seng302.client.ClientStateQueryingRunnable;
@@ -220,8 +218,27 @@ public class LobbyController implements Initializable, Observer{
 
     @FXML
     public void readyButtonPressed() {
+        playTheme();
         setContentPane("/views/RaceView.fxml");
         GameState.setCurrentStage(GameStages.RACING);
+    }
+
+
+    private static MediaPlayer mediaPlayer;
+
+    private void playTheme() {
+        Random random = new Random(System.currentTimeMillis());
+        if(random.nextInt(11) == 10) {
+            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
+            Media hit = new Media(file.toString());
+            mediaPlayer = new MediaPlayer(hit);
+            mediaPlayer.play();
+        } else if(random.nextInt(11) == 9) {
+            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
+            Media hit = new Media(file.toString());
+            mediaPlayer = new MediaPlayer(hit);
+            mediaPlayer.play();
+        }
     }
 
     private void switchToRaceView() {

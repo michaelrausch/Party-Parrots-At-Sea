@@ -60,7 +60,7 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!thread.isInterrupted()) {
             try {
-                Thread.sleep(1000 / UPDATES_PER_SECOND);    //60 times per second we should calculate the game state
+                Thread.sleep(1000 / UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

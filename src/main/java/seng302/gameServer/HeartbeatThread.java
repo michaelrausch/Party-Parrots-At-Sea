@@ -43,7 +43,7 @@ public class HeartbeatThread extends Thread{
         Message heartbeat = new Heartbeat(seqNum);
 
         for (Player player : GameState.getPlayers()){
-            if (!player.getSocket().isConnected()){
+            if (!player.getSocket().isConnected()) {
                 playerLostConnection(player);
             }
 

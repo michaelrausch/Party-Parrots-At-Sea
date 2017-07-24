@@ -25,7 +25,7 @@ public class GameState {
     
     public GameState(String hostIpAddress) {
         windDirection = 170d;
-        windSpeed = 0d;
+        windSpeed = 1300d;
         yachts = new HashMap<>();
         players = new ArrayList<>();
 
@@ -117,6 +117,8 @@ public class GameState {
         System.out.println("-----------------------");
         System.out.println("Heading: " + playerYacht.getHeading());
         System.out.println("Sails are in: " + playerYacht.getSailIn());
+        System.out.println("Lat: " + playerYacht.getLocation().getLat());
+        System.out.println("Lng: " + playerYacht.getLocation().getLng());
         System.out.println("-----------------------\n");
     }
 

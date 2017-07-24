@@ -1,7 +1,6 @@
 package seng302.gameServer;
 
 
-import com.sun.xml.internal.bind.v2.TODO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,7 +74,7 @@ public class ServerToClientThread implements Runnable, Observer {
         sourceId = GameState.getUniquePlayerID();
         if (threeWayHandshake(sourceId)) {
             serverLog("Successful handshake. Client allocated id: " + sourceId, 1);
-            Yacht yacht = new Yacht("Yacht", sourceId, sourceId.toString(), "Kap", "Kappa", "NZ");
+            Yacht yacht = new Yacht("Yacht", sourceId, sourceId.toString(), "Kapa", "Kappa", "NZ");
 //        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
             GameState.addYacht(sourceId, yacht);
             GameState.addPlayer(new Player(socket, yacht));
@@ -185,7 +184,14 @@ public class ServerToClientThread implements Runnable, Observer {
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-                    sendBoatLocationPackets();
+//                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
+//                    sendMessage(chatterMessage);
+//                try {
+//                    GameState.outputState(os);
+//                } catch (IOException e) {
+//                    System.out.println("IO error in server thread upon writing to output stream");
+//                }
+//                    sendBoatLocationPackets();
                     updateClient = false;
                 }
 
@@ -219,8 +225,9 @@ public class ServerToClientThread implements Runnable, Observer {
                     }
                 }
             } catch (Exception e) {
-                // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected 
+                // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected
                 serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
+//                e.printStackTrace();
                 closeSocket();
                 return;
             }
@@ -232,8 +239,8 @@ public class ServerToClientThread implements Runnable, Observer {
         xml = new XMLGenerator();
         Race race = new Race();
 
-        for (Player player : GameState.getPlayers()){
-            race.addBoat(player.getYacht());
+        for (Yacht yacht : GameState.getYachts().values()){
+            race.addBoat(yacht);
         }
 
         //@TODO calculate lat/lng values
@@ -248,7 +255,7 @@ public class ServerToClientThread implements Runnable, Observer {
 
         xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE, xml.getRaceAsXml().length());
         sendMessage(xmlMessage);
-        System.out.println("Sent xml messages for " + thread.getName());
+//        System.out.println("Sent xml messages for " + thread.getName());
 
     }
 
