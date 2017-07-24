@@ -36,8 +36,6 @@ public class ClientPacketParser {
 
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> markLocations = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<Long, PriorityBlockingQueue<BoatPositionPacket>> boatLocations = new ConcurrentHashMap<>();
-    private String threadName;
-    private Thread t;
     private static boolean newRaceXmlReceived = false;
     private static boolean raceStarted = false;
     private static XMLParser xmlObject;
@@ -48,10 +46,9 @@ public class ClientPacketParser {
     private static Map<Integer, Yacht> boatsPos = new ConcurrentSkipListMap<>();
     private static double windDirection = 0;
     private static Double windSpeed = 0d;
-     private static Long currentTimeLong;
+    private static Long currentTimeLong;
     private static String currentTimeString;
     private static boolean appRunning;
-
 
      //CONVERSION CONSTANTS
     private static final Double MS_TO_KNOTS = 1.94384;
@@ -121,7 +118,7 @@ public class ClientPacketParser {
      */
     private static void extractHeartBeat(StreamPacket packet) {
         long heartbeat = bytesToLong(packet.getPayload());
-        System.out.println("heartbeat = " + heartbeat);
+        System.out.println("[CLIENT] Received heartbeat = " + heartbeat);
     }
 
     private static String getTimeZoneString() {
@@ -173,8 +170,10 @@ public class ClientPacketParser {
             if (raceStatus == 4 || raceStatus == 8) {
                 raceFinished = true;
                 raceStarted = false;
+                ClientState.setRaceStarted(false);
             } else if (!raceStarted) {
                 raceStarted = true;
+                ClientState.setRaceStarted(true);
                 raceFinished = false;
             }
             timeSinceStart = timeTillStart;
@@ -200,6 +199,9 @@ public class ClientPacketParser {
             Long estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
+
+//            FOR DEBUGGING:
+
 //            boatsPos.put(estTimeAtFinish, boat);
 //            String boatStatus = "SourceID: " + boatStatusSourceID;
 //            boatStatus += "\nBoat Status: " + (int)payload[28 + (i * 20)];

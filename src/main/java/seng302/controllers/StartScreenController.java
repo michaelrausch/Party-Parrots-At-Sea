@@ -2,10 +2,13 @@ package seng302.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import seng302.client.ClientState;
 import seng302.client.ClientToServerThread;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
@@ -22,6 +25,8 @@ public class StartScreenController {
 
     @FXML
     private TextField ipTextField;
+    @FXML
+    private TextField portTextField;
     @FXML
     private GridPane startScreen2;
 
@@ -69,24 +74,33 @@ public class StartScreenController {
             // get the lobby controller so that we can pass the game server thread to it
             setContentPane("/views/LobbyView.fxml");
         } catch (UnknownHostException e) {
+            alert.setHeaderText("Cannot host");
+            alert.setContentText("Oops, failed to host, try to restart.");
+            alert.showAndWait();
             System.err.println("COULD NOT FIND YOUR IP ADDRESS!");
             e.printStackTrace();
         }
-
     }
-
 
     @FXML
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
-        String ipAddress = ipTextField.getText().trim().toLowerCase();
         try {
             // TODO: 22/07/17 wmu 16 - make this port number some static constant somewhere perhaps a config file?
             ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, 4950);
+            String ipAddress = ipTextField.getText().trim().toLowerCase();
+            Integer port = Integer.valueOf(portTextField.getText().trim());
+
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, port);
             controller.setClientToServerThread(clientToServerThread);
+            clientToServerThread.start();
+            ClientState.setConnectedToHost(true);
             setContentPane("/views/LobbyView.fxml");
-        } catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setHeaderText("Cannot reach the host");
+            alert.setContentText("Please check your host IP address.");
+            alert.showAndWait();
         }
     }
 

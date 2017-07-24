@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -30,14 +31,10 @@ public class ClientToServerThread implements Runnable {
     private Boolean updateClient = true;
     private  ByteArrayOutputStream crcBuffer;
 
-    public ClientToServerThread(String ipAddress, Integer portNumber){
-        try {
+    public ClientToServerThread(String ipAddress, Integer portNumber) throws Exception{
             socket = new Socket(ipAddress, portNumber);
             is = socket.getInputStream();
             os = socket.getOutputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         Integer allocatedID = threeWayHandshake();
         if (allocatedID != null) {
@@ -64,7 +61,7 @@ public class ClientToServerThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-        while(true) {
+        while(ClientState.isConnectedToHost()) {
             try {
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {

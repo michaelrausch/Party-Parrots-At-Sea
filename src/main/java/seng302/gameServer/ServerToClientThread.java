@@ -90,7 +90,6 @@ public class ServerToClientThread implements Runnable {
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
         while(true) {
-            //System.out.print(".");
 
             try {
                 if (initialisedRace) {
