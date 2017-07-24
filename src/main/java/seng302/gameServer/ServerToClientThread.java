@@ -346,6 +346,7 @@ public class ServerToClientThread implements Runnable {
     private void sendBoatLocationPackets(){
         ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
         for (Yacht yacht: yachts){
+//            System.out.println("[SERVER] Lat: " + yacht.getLocation().getLat() + " Lon: " + yacht.getLocation().getLng());
             BoatLocationMessage boatLocationMessage = new BoatLocationMessage(sourceId, getSeqNo(), yacht.getLocation().getLat(), yacht.getLocation().getLng(), yacht.getHeading(), (long) yacht.getVelocity());
             sendMessage(boatLocationMessage);
         }

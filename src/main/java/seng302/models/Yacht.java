@@ -110,7 +110,7 @@ public class Yacht {
         this.sailIn = false;
         this.location = new GeoPoint(57.6679590, 11.8503233);
         this.heading = 0.0;
-        this.velocity = 0.0;
+        this.velocity = 50000.0;
     }
 
     /**
@@ -155,6 +155,7 @@ public class Yacht {
 
     public void adjustHeading(Double amount) {
         lastHeading = heading;
+        // TODO: 24/07/17 wmu16 - '%' in java does remainder, we need modulo. All this must be changed here, this is why we have neg values!
         heading = (heading + amount) % 360.0;
     }
 
@@ -188,7 +189,20 @@ public class Yacht {
     }
 
     public void turnDownwind() {
-        if ((heading - GameState.windDirection) % 360 < 180) {
+        Double normalizedHeading = (heading - GameState.windDirection) % 360;
+        if (normalizedHeading == 0) {
+            if (lastHeading < 180) {
+                adjustHeading(TURN_STEP);
+            } else {
+                adjustHeading(-TURN_STEP);
+            }
+        } else if (normalizedHeading == 180) {
+            if (lastHeading < 180) {
+                adjustHeading(-TURN_STEP);
+            } else {
+                adjustHeading(TURN_STEP);
+            }
+        } else if (normalizedHeading < 180) {
             adjustHeading(TURN_STEP);
         } else {
             adjustHeading(-TURN_STEP);

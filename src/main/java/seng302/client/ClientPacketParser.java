@@ -368,6 +368,7 @@ public class ClientPacketParser {
         //Converts the double to a usable lat/lon
         double lat = ((180d * (double) rawLat) / Math.pow(2, 31));
         double lon = ((180d * (double) rawLon) / Math.pow(2, 31));
+//        System.out.println("[CLIENT] Lat: " + lat + " Lon: " + lon);
         long heading = bytesToLong(Arrays.copyOfRange(payload, 28, 30));
         double groundSpeed = bytesToLong(Arrays.copyOfRange(payload, 38, 40)) / 1000.0;
         //type 1 is a racing yacht and type 3 is a mark, needed for updating positions of the mark and boat
