@@ -1,5 +1,8 @@
 package seng302.controllers;
 
+import java.net.Inet4Address;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
@@ -59,17 +62,20 @@ public class StartScreenController {
     /**
      * ATTEMPTS TO:
      * Sets up a new game state with your IP address as designated as the host.
-     * Starts a thread to listen for incoming connections
+     * Starts a thread to listen for incoming connections.
+     * Starts a client to server thread and connects to own ip.
      * Switches to the lobby screen
      */
     @FXML
     public void hostButtonPressed() {
         try {
-            String ipAddress = InetAddress.getLocalHost().getHostAddress();
-            new GameState(ipAddress);
+            new GameState(getLocalHostIp());
             new MainServerThread();
             ClientState.setHost(true);
-            // get the lobby controller so that we can pass the game server thread to it
+            // host will connect and handshake to itself after setting up the server
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ClientState.getHostIp(), 4950);
+            ClientState.setConnectedToHost(true);
+            controller.setClientToServerThread(clientToServerThread);
             setContentPane("/views/LobbyView.fxml");
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.ERROR);
@@ -78,8 +84,16 @@ public class StartScreenController {
             alert.showAndWait();
             e.printStackTrace();
         }
+
+
     }
 
+    /**
+     * ATTEMPTS TO:
+     * Connect to an ip address and port using the ip and port specified on start screen.
+     * Starts a Client To Server Thread to maintain connection to host.
+     * Switch view to lobby view.
+     */
     @FXML
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
@@ -88,9 +102,10 @@ public class StartScreenController {
             Integer port = Integer.valueOf(portTextField.getText().trim());
 
             ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, port);
-            controller.setClientToServerThread(clientToServerThread);
             ClientState.setHost(false);
             ClientState.setConnectedToHost(true);
+
+            controller.setClientToServerThread(clientToServerThread);
             setContentPane("/views/LobbyView.fxml");
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.ERROR);
@@ -102,5 +117,42 @@ public class StartScreenController {
 
     public void setController(Controller controller) {
         this.controller = controller;
+    }
+
+    /**
+     * Gets the local host ip address and sets this ip to ClientState.
+     * Only runs by the host.
+     *
+     * @return the localhost ip address
+     */
+    private String getLocalHostIp() {
+        String ipAddress = null;
+        try {
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                NetworkInterface ni = e.nextElement();
+                if (ni.isLoopback())
+                    continue;
+                if(ni.isPointToPoint())
+                    continue;
+                if(ni.isVirtual())
+                    continue;
+
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if(address instanceof Inet4Address) {    // skip all ipv6
+                        ipAddress = address.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (ipAddress == null) {
+            System.out.println("[HOST] Cannot obtain local host ip address.");
+        }
+        ClientState.setHostIp(ipAddress);
+        return ipAddress;
     }
 }

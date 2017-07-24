@@ -104,7 +104,7 @@ public class LobbyController implements Initializable, Observer{
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (ClientState.isHost())
-            lobbyIpText.setText("Lobby Host IP: " + getLocalHostIp());
+            lobbyIpText.setText("Lobby Host IP: " + ClientState.getHostIp());
         else
             lobbyIpText.setText("Connected to IP: ");
         initialiseListView();
@@ -208,36 +208,6 @@ public class LobbyController implements Initializable, Observer{
         seventhImageView.setImage(image7);
         Image image8 = new Image(getClass().getResourceAsStream("/ParrotGif/will.gif"));
         eighthImageView.setImage(image8);
-    }
-
-    private String getLocalHostIp() {
-        String ipAddress = null;
-        try {
-            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-            while (e.hasMoreElements()) {
-                NetworkInterface ni = e.nextElement();
-                if (ni.isLoopback())
-                    continue;
-                if(ni.isPointToPoint())
-                    continue;
-                if(ni.isVirtual())
-                    continue;
-
-                Enumeration<InetAddress> addresses = ni.getInetAddresses();
-                while(addresses.hasMoreElements()) {
-                    InetAddress address = addresses.nextElement();
-                    if(address instanceof Inet4Address) {    // skip all ipv6
-                        ipAddress = address.getHostAddress();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (ipAddress == null) {
-            System.out.println("[HOST] Cannot obtain local host ip address.");
-        }
-        return ipAddress;
     }
 
     @FXML
