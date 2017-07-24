@@ -141,6 +141,8 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
     public void clientDisconnected(Player player) {
         serverLog("Player disconnected", 0);
         GameState.removePlayer(player);
+        setChanged();
+        notifyObservers();
 //        sendXml();
     }
 

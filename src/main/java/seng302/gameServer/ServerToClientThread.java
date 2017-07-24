@@ -1,6 +1,7 @@
 package seng302.gameServer;
 
 
+import com.sun.xml.internal.bind.v2.TODO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -218,8 +219,8 @@ public class ServerToClientThread implements Runnable, Observer {
                     }
                 }
             } catch (Exception e) {
+                // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected 
                 serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
-                e.printStackTrace();
                 closeSocket();
                 return;
             }
