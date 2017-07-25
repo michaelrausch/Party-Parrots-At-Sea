@@ -16,6 +16,7 @@ public enum PacketType {
     MARK_ROUNDING,
     COURSE_WIND,
     AVG_WIND,
+    BOAT_ACTION,
     OTHER;
 
     public static PacketType assignPacketType(int packetType){
@@ -44,6 +45,8 @@ public enum PacketType {
                 return COURSE_WIND;
             case 47:
                 return AVG_WIND;
+            case 100:
+                return BOAT_ACTION;
             default:
         }
         return OTHER;

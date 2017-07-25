@@ -27,7 +27,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import seng302.GeometryUtils;
+import seng302.client.ClientPacketParser;
+import seng302.utilities.GeoUtility;
 import seng302.controllers.annotations.Annotation;
 import seng302.controllers.annotations.ImportantAnnotationController;
 import seng302.controllers.annotations.ImportantAnnotationDelegate;
@@ -38,7 +39,6 @@ import seng302.models.*;
 import seng302.models.mark.GateMark;
 import seng302.models.mark.Mark;
 import seng302.models.mark.SingleMark;
-import seng302.models.stream.StreamParser;
 import seng302.models.stream.XMLParser;
 
 import java.io.IOException;
@@ -51,6 +51,8 @@ import java.util.stream.Collectors;
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+    @FXML
+    private Text windSpeedText;
     @FXML
     private LineChart raceSparkLine;
     @FXML
@@ -93,7 +95,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceSparkLine.getYAxis().setTranslateX(-5);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
-        startingBoats = new ArrayList<>(StreamParser.getBoats().values());
+        startingBoats = new ArrayList<>(ClientPacketParser.getBoats().values());
 
         includedCanvasController.setup(this);
         includedCanvasController.initializeCanvas();
@@ -103,6 +105,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseBoatSelectionComboBox();
         includedCanvasController.timer.start();
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+
     }
 
 
@@ -136,7 +139,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             Scene scene = new Scene(fxmlLoader.load(), 469, 298);
             scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             stage.initStyle(StageStyle.UNDECORATED);
-
             stage.setScene(scene);
             stage.show();
 
@@ -199,7 +201,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     void updateSparkLine(){
         // Collect the racing boats that aren't already in the chart
-        ArrayList<Yacht> sparkLineCandidates = startingBoats.stream().filter(yacht -> !sparkLineData.containsKey(yacht.getSourceID())
+        ArrayList<Yacht> sparkLineCandidates = startingBoats.stream().filter(yacht -> !sparkLineData.containsKey(yacht.getSourceId())
                 && yacht.getPosition() != null & yacht.getPosition() != "-").collect(Collectors.toCollection(ArrayList::new));
 
         // Obtain the qualifying boats to set the max on the Y axis
@@ -212,7 +214,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             Series<String, Double> yachtData = new Series<>();
             yachtData.setName(yacht.getBoatName());
             yachtData.getData().add(new XYChart.Data<>(Integer.toString(yacht.getLegNumber()), 1 + racingBoats.size() - Double.parseDouble(yacht.getPosition())));
-            sparkLineData.put(yacht.getSourceID(), yachtData);
+            sparkLineData.put(yacht.getSourceId(), yachtData);
         });
 
         // Lambda function to sort the series in order of leg (later legs shown more to the right)
@@ -242,7 +244,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param legNumber the leg number that the position will be assigned to
      */
     public static void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
-        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceID());
+        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceId());
         positionData.getData().add(new XYChart.Data<>(Integer.toString(legNumber), 1 + racingBoats.size() - Double.parseDouble(yacht.getPosition())));
     }
 
@@ -283,7 +285,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 event -> {
                     updateRaceTime();
                     updateWindDirection();
-                    updateOrder();
+//                    updateOrder();
                     updateBoatSelectionComboBox();
                 })
         );
@@ -303,7 +305,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Mark getNextMark(BoatGroup bg) {
         Integer legNumber = bg.getBoat().getLegNumber();
 
-        List<XMLParser.RaceXMLObject.Corner> markSequence = StreamParser.getXmlObject().getRaceXML().getCompoundMarkSequence();
+        List<XMLParser.RaceXMLObject.Corner> markSequence = ClientPacketParser.getXmlObject()
+            .getRaceXML().getCompoundMarkSequence();
 
         if (legNumber == 0) {
             return null;
@@ -315,7 +318,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             if (legNumber + 2 == corner.getSeqID()) {
                 Integer thisCompoundMarkID = corner.getCompoundMarkID();
 
-                for (Mark mark : StreamParser.getXmlObject().getRaceXML().getAllCompoundMarks()) {
+                for (Mark mark : ClientPacketParser.getXmlObject().getRaceXML()
+                    .getAllCompoundMarks()) {
                     if (mark.getCompoundMarkID() == thisCompoundMarkID) {
                         return mark;
                     }
@@ -328,11 +332,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
-     * Updates the wind direction arrow and text as from info from the StreamParser
+     * Updates the wind direction arrow and text as from info from the ClientPacketParser
      */
     private void updateWindDirection() {
-        windDirectionText.setText(String.format("%.1f°", StreamParser.getWindDirection()));
-        windArrowText.setRotate(StreamParser.getWindDirection());
+        windDirectionText.setText(String.format("%.1f°", ClientPacketParser.getWindDirection()));
+        windArrowText.setRotate(ClientPacketParser.getWindDirection());
+        windSpeedText.setText(String.format("%.1f Knots", ClientPacketParser.getWindSpeed()));
     }
 
 
@@ -340,7 +345,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the clock for the race
      */
     private void updateRaceTime() {
-        if (StreamParser.isRaceFinished()) {
+        if (ClientPacketParser.isRaceFinished()) {
             timerLabel.setFill(Color.RED);
             timerLabel.setText("Race Finished!");
         } else {
@@ -350,18 +355,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
-     * Grabs the boats currently in the race as from the StreamParser and sets them to be selectable
+     * Grabs the boats currently in the race as from the ClientPacketParser and sets them to be selectable
      * in the boat selection combo box
      */
     private void updateBoatSelectionComboBox() {
         ObservableList<Yacht> observableBoats = FXCollections
-            .observableArrayList(StreamParser.getBoatsPos().values());
+            .observableArrayList(ClientPacketParser.getBoatsPos().values());
         boatSelectionComboBox.setItems(observableBoats);
     }
 
 
     /**
-     * Updates the order of the boats as from the StreamParser and sets them in the boat order
+     * Updates the order of the boats as from the ClientPacketParser and sets them in the boat order
      * section
      */
     private void updateOrder() {
@@ -370,16 +375,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // list of racing boat id
-        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
+        ArrayList<Participant> participants = ClientPacketParser.getXmlObject().getRaceXML()
             .getParticipants();
         ArrayList<Integer> participantIDs = new ArrayList<>();
         for (Participant p : participants) {
             participantIDs.add(p.getsourceID());
         }
 
-        if (StreamParser.isRaceStarted()) {
-            for (Yacht boat : StreamParser.getBoatsPos().values()) {
-                if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
+        if (ClientPacketParser.isRaceStarted()) {
+            for (Yacht boat : ClientPacketParser.getBoatsPos().values()) {
+                if (participantIDs.contains(boat.getSourceId())) {  // check if the boat is racing
                     if (boat.getBoatStatus() == 3) {  // 3 is finish status
                         Text textToAdd = new Text(boat.getPosition() + ". " +
                             boat.getShortName() + " (Finished)");
@@ -396,8 +401,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
             }
         } else {
-            for (Yacht boat : StreamParser.getBoats().values()) {
-                if (participantIDs.contains(boat.getSourceID())) {  // check if the boat is racing
+            for (Yacht boat : ClientPacketParser.getBoats().values()) {
+                if (participantIDs.contains(boat.getSourceId())) {  // check if the boat is racing
                     Text textToAdd = new Text(boat.getPosition() + ". " +
                         boat.getShortName() + " ");
                     textToAdd.setFill(Paint.valueOf("#d3d3d3"));
@@ -434,9 +439,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                         Point2D markPoint2 = includedCanvasController.findScaledXY(singleMark2.getLatitude(), singleMark2.getLongitude());
                         HashMap<Double, Double> angleAndSpeed;
                         if (isUpwind) {
-                            angleAndSpeed = PolarTable.getOptimalUpwindVMG(StreamParser.getWindSpeed());
+                            angleAndSpeed = PolarTable
+                                .getOptimalUpwindVMG(ClientPacketParser.getWindSpeed());
                         } else {
-                            angleAndSpeed = PolarTable.getOptimalDownwindVMG(StreamParser.getWindSpeed());
+                            angleAndSpeed = PolarTable
+                                .getOptimalDownwindVMG(ClientPacketParser.getWindSpeed());
                         }
 
                         Double resultingAngle = angleAndSpeed.keySet().iterator().next();
@@ -444,15 +451,23 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
                         Point2D boatCurrentPos = new Point2D(bg.getBoatLayoutX(), bg.getBoatLayoutY());
                         Point2D gateMidPoint = markPoint1.midpoint(markPoint2);
-                        Integer lineFuncResult = GeometryUtils.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
+                        Integer lineFuncResult = GeoUtility.lineFunction(boatCurrentPos, gateMidPoint, markPoint2);
                         Line rightLayline = new Line();
                         Line leftLayline = new Line();
                         if (lineFuncResult == 1) {
-                            rightLayline = makeRightLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
-                            leftLayline = makeLeftLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
+                            rightLayline = makeRightLayline(markPoint2, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint1, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
                         } else if (lineFuncResult == -1) {
-                            rightLayline = makeRightLayline(markPoint1, 180 - resultingAngle, StreamParser.getWindDirection());
-                            leftLayline = makeLeftLayline(markPoint2, 180 - resultingAngle, StreamParser.getWindDirection());
+                            rightLayline = makeRightLayline(markPoint1, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
+                            leftLayline = makeLeftLayline(markPoint2, 180 - resultingAngle,
+                                ClientPacketParser
+                                    .getWindDirection());
                         }
 
                         leftLayline.setStrokeWidth(0.5);
@@ -548,16 +563,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     private String getTimeSinceStartOfRace() {
         String timerString = "0:00";
-        if (StreamParser.getTimeSinceStart() > 0) {
-            String timerMinute = Long.toString(StreamParser.getTimeSinceStart() / 60);
-            String timerSecond = Long.toString(StreamParser.getTimeSinceStart() % 60);
+        if (ClientPacketParser.getTimeSinceStart() > 0) {
+            String timerMinute = Long.toString(ClientPacketParser.getTimeSinceStart() / 60);
+            String timerSecond = Long.toString(ClientPacketParser.getTimeSinceStart() % 60);
             if (timerSecond.length() == 1) {
                 timerSecond = "0" + timerSecond;
             }
             timerString = "-" + timerMinute + ":" + timerSecond;
         } else {
-            String timerMinute = Long.toString(-1 * StreamParser.getTimeSinceStart() / 60);
-            String timerSecond = Long.toString(-1 * StreamParser.getTimeSinceStart() % 60);
+            String timerMinute = Long.toString(-1 * ClientPacketParser.getTimeSinceStart() / 60);
+            String timerSecond = Long.toString(-1 * ClientPacketParser.getTimeSinceStart() % 60);
             if (timerSecond.length() == 1) {
                 timerSecond = "0" + timerSecond;
             }
@@ -637,4 +652,5 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public static boolean sparkLineStatus(Integer yachtId) {
         return sparkLineData.containsKey(yachtId);
     }
+
 }

@@ -1,10 +1,12 @@
 package seng302.server.simulator.mark;
 
+import seng302.utilities.GeoPoint;
+
 /**
  * An abstract class to represent general marks
  * Created by Haoming Yin (hyi25) on 17/3/17.
  */
-public class Mark extends Position {
+public class Mark extends GeoPoint {
 
     private int seqID;
     private String name;
@@ -22,7 +24,7 @@ public class Mark extends Position {
      */
     @Override
     public String toString() {
-        return String.format("Mark%d: %s, source: %d, lat: %f, lng: %f", seqID, name, sourceID, lat, lng);
+        return String.format("Mark%d: %s, source: %d, lat: %f, lng: %f", seqID, name, sourceID, getLat(), getLng());
     }
 
     public int getSeqID() {

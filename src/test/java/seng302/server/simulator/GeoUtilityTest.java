@@ -1,7 +1,8 @@
 package seng302.server.simulator;
 
 import org.junit.Test;
-import seng302.server.simulator.mark.Position;
+import seng302.utilities.GeoPoint;
+import seng302.utilities.GeoUtility;
 
 import static org.junit.Assert.*;
 
@@ -11,10 +12,10 @@ import static org.junit.Assert.*;
  */
 public class GeoUtilityTest {
 
-	private Position p1 = new Position(57.670333, 11.827833);
-	private Position p2 = new Position(57.671524, 11.844495);
-	private Position p3 = new Position(57.670822, 11.843392);
-	private Position p4 = new Position(25.694829, 98.392049);
+	private GeoPoint p1 = new GeoPoint(57.670333, 11.827833);
+	private GeoPoint p2 = new GeoPoint(57.671524, 11.844495);
+	private GeoPoint p3 = new GeoPoint(57.670822, 11.843392);
+	private GeoPoint p4 = new GeoPoint(25.694829, 98.392049);
 
 	private double toleranceRate = 0.01;
 
@@ -54,7 +55,7 @@ public class GeoUtilityTest {
 
 	@Test
 	public void getGeoCoordinate() throws Exception {
-		Position expected, actual;
+		GeoPoint expected, actual;
 
 		actual = GeoUtility.getGeoCoordinate(p1, 82.0, 1000.0);
 		expected = p2;

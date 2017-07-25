@@ -3,6 +3,7 @@ package seng302;
 import javafx.geometry.Point2D;
 import org.junit.Before;
 import org.junit.Test;
+import seng302.utilities.GeoUtility;
 
 import static org.junit.Assert.*;
 
@@ -34,9 +35,9 @@ public class TestGeoUtils {
     @Test
     public void testLineFunction() {
 
-        Integer lineFunctionResult1 = GeometryUtils.lineFunction(linePoint1, linePoint2, arbitraryPoint1);
-        Integer lineFunctionResult2 = GeometryUtils.lineFunction(linePoint1, linePoint2, arbitraryPoint2);
-        Integer lineFunctionResult3 = GeometryUtils.lineFunction(linePoint1, linePoint2, arbitraryPoint3);
+        Integer lineFunctionResult1 = GeoUtility.lineFunction(linePoint1, linePoint2, arbitraryPoint1);
+        Integer lineFunctionResult2 = GeoUtility.lineFunction(linePoint1, linePoint2, arbitraryPoint2);
+        Integer lineFunctionResult3 = GeoUtility.lineFunction(linePoint1, linePoint2, arbitraryPoint3);
 
         //Point1 and Point2 are on opposite sides
         assertEquals(Math.abs(lineFunctionResult1), Math.abs(lineFunctionResult2));
@@ -50,13 +51,13 @@ public class TestGeoUtils {
     public void testMakeArbitraryVectorPoint() {
 
         //Make a point (1,0) from point (0,0)
-        Point2D newPoint = GeometryUtils.makeArbitraryVectorPoint(linePoint1, 0d, 1d);
+        Point2D newPoint = GeoUtility.makeArbitraryVectorPoint(linePoint1, 0d, 1d);
         Point2D expected = new Point2D(1,0);
 
         assertEquals(expected.getX(), newPoint.getX(), 1E-6);
         assertEquals(expected.getY(), newPoint.getY(), 1E-6);
 
-        newPoint = GeometryUtils.makeArbitraryVectorPoint(linePoint1, 90d, 1d);
+        newPoint = GeoUtility.makeArbitraryVectorPoint(linePoint1, 90d, 1d);
         expected = new Point2D(0, 1);
 
         assertEquals(expected.getX(), newPoint.getX(), 1E-6);

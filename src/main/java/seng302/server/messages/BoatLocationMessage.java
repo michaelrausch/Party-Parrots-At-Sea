@@ -1,7 +1,7 @@
 package seng302.server.messages;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
+import java.io.OutputStream;
 
 public class BoatLocationMessage extends Message {
     private final int MESSAGE_SIZE = 56;
@@ -39,7 +39,6 @@ public class BoatLocationMessage extends Message {
      * @param boatSpeed The boats speed
      */
     public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude, double heading, long boatSpeed){
-        boatSpeed /= 10;
         messageVersionNumber = 1;
         time = System.currentTimeMillis();
         this.sourceId = sourceId;
@@ -64,6 +63,36 @@ public class BoatLocationMessage extends Message {
         this.rudderAngle = 0;
 
         setHeader(new Header(MessageType.BOAT_LOCATION, 1, (short) getSize()));
+        allocateBuffer();
+        writeHeaderToBuffer();
+
+        long headingToSend = (long)((heading/360.0) * 65535.0);
+
+        putByte((byte) messageVersionNumber);
+        putInt(time, 6);
+        putInt((int) sourceId, 4);
+        putUnsignedInt((int) sequenceNum, 4);
+        putByte((byte) deviceType.getCode());
+        putInt((int) latLonToBinaryPackedLong(latitude), 4);
+        putInt((int) latLonToBinaryPackedLong(longitude), 4);
+        putInt((int) altitude, 4);
+        putInt(headingToSend, 2);
+        putInt((int) pitch, 2);
+        putInt((int) roll, 2);
+        putInt((int) boatSpeed, 2);
+        putUnsignedInt((int) COG, 2);
+        putUnsignedInt((int) SOG, 2);
+        putUnsignedInt((int) apparentWindSpeed, 2);
+        putInt((int) apparentWindAngle, 2);
+        putUnsignedInt((int) trueWindSpeed, 2);
+        putUnsignedInt((int) trueWindDirection, 2);
+        putInt((int) trueWindAngle, 2);
+        putUnsignedInt((int) currentDrift, 2);
+        putUnsignedInt((int) currentSet, 2);
+        putInt((int) rudderAngle, 2);
+
+        writeCRC();
+        rewind();
     }
 
     /**
@@ -123,42 +152,5 @@ public class BoatLocationMessage extends Message {
     @Override
     public int getSize() {
         return MESSAGE_SIZE;
-    }
-
-
-    @Override
-    public void send(SocketChannel outputStream) throws IOException{
-        allocateBuffer();
-        writeHeaderToBuffer();
-
-        long headingToSend = (long)((heading/360.0) * 65535.0);
-
-        putByte((byte) messageVersionNumber);
-        putInt(time, 6);
-        putInt((int) sourceId, 4);
-        putUnsignedInt((int) sequenceNum, 4);
-        putByte((byte) deviceType.getCode());
-        putInt((int) latLonToBinaryPackedLong(latitude), 4);
-        putInt((int) latLonToBinaryPackedLong(longitude), 4);
-        putInt((int) altitude, 4);
-        putInt(headingToSend, 2);
-        putInt((int) pitch, 2);
-        putInt((int) roll, 2);
-        putInt((int) boatSpeed, 2);
-        putUnsignedInt((int) COG, 2);
-        putUnsignedInt((int) SOG, 2);
-        putUnsignedInt((int) apparentWindSpeed, 2);
-        putInt((int) apparentWindAngle, 2);
-        putUnsignedInt((int) trueWindSpeed, 2);
-        putUnsignedInt((int) trueWindDirection, 2);
-        putInt((int) trueWindAngle, 2);
-        putUnsignedInt((int) currentDrift, 2);
-        putUnsignedInt((int) currentSet, 2);
-        putInt((int) rudderAngle, 2);
-
-        writeCRC();
-        rewind();
-
-        outputStream.write(getBuffer());
     }
 }

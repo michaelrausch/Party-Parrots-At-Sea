@@ -1,6 +1,10 @@
 package seng302.models;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,9 +28,8 @@ public final class PolarTable {
      * Iterates through each row of the polar table, in pairs, to extract the row into a hashmap of angle to boat speed.
      * These angle boatspeed hashmaps are then added to an outer hashmap at the end of wind speed key to each row hashmap
      * as a value
-     * @param file containing the polar csv information
      */
-    public static void parsePolarFile(String file) {
+    public static void parsePolarFile(InputStream polarFile) {
         polarTable = new HashMap<>();
         upwindOptimal = new HashMap<>();
         downwindOptimal = new HashMap<>();
@@ -34,7 +37,7 @@ public final class PolarTable {
         String line;
         Boolean isHeaderLine = true;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(polarFile))) {
             while ((line = br.readLine()) != null) {
                 String[] thisLine = line.split(",");
 
@@ -69,6 +72,8 @@ public final class PolarTable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
 
@@ -122,7 +127,7 @@ public final class PolarTable {
      */
     public static HashMap<Double, Double> getOptimalUpwindVMG(Double thisWindSpeed) {
 
-        Double polarWindSpeed = getClosestMatch(thisWindSpeed);
+        Double polarWindSpeed = getClosestWindSpeedInPolar(thisWindSpeed);
         return upwindOptimal.get(polarWindSpeed);
     }
 
@@ -134,30 +139,47 @@ public final class PolarTable {
      */
     public static HashMap<Double, Double> getOptimalDownwindVMG(Double thisWindSpeed) {
 
-        Double polarWindSpeed = getClosestMatch(thisWindSpeed);
+        Double polarWindSpeed = getClosestWindSpeedInPolar(thisWindSpeed);
         return downwindOptimal.get(polarWindSpeed);
     }
 
 
-    private static Double getClosestMatch(Double thisWindSpeed) {
+    public static Double getBoatSpeed(Double thisWindSpeed, Double thisHeading) {
 
-        ArrayList<Double> windValues = new ArrayList<>(polarTable.keySet());
+        Double polarWindSpeed = getClosestWindSpeedInPolar(thisWindSpeed);
+        Double polarAngle = getClosestAngleInPolar(polarTable.get(polarWindSpeed), thisHeading);
 
-        Double lowerVal = windValues.get(0);
-        Double upperVal = windValues.get(1);
+        return polarTable.get(polarWindSpeed).get(polarAngle);
+    }
 
-        for(int i = 0; i < windValues.size() - 1; i++) {
-            lowerVal = windValues.get(i);
-            upperVal = windValues.get(i+1);
-            if (thisWindSpeed <= upperVal) {
-                break;
+
+    public static Double getClosestWindSpeedInPolar(Double thisWindSpeed) {
+        Double smallestDif = Double.POSITIVE_INFINITY;
+        Double closestWind = 0d;
+
+        for (Double polarWindSpeed : polarTable.keySet()) {
+            Double difference = Math.abs(polarWindSpeed - thisWindSpeed);
+            if (difference < smallestDif) {
+                smallestDif = difference;
+                closestWind = polarWindSpeed;
             }
         }
+        return closestWind;
+    }
 
-        Double lowerDiff = Math.abs(lowerVal - thisWindSpeed);
-        Double upperDiff = Math.abs(upperVal - thisWindSpeed);
 
-        return (lowerDiff <= upperDiff) ? lowerVal : upperVal;
+    public static Double getClosestAngleInPolar(HashMap<Double, Double> thisWindSpeedPolar, Double thisHeading) {
+        Double smallestDif = Double.POSITIVE_INFINITY;
+        Double closestAngle = 0d;
+
+        for (Double polarAngle : thisWindSpeedPolar.keySet()) {
+            Double difference = Math.abs(polarAngle - thisHeading);
+            if (difference < smallestDif) {
+                smallestDif = difference;
+                closestAngle = polarAngle;
+            }
+        }
+        return closestAngle;
     }
 
 }

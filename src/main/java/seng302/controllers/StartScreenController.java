@@ -1,191 +1,162 @@
 package seng302.controllers;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.net.Inet4Address;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import seng302.models.Yacht;
-import seng302.models.stream.StreamParser;
-import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
+import seng302.client.ClientState;
+import seng302.client.ClientToServerThread;
+import seng302.gameServer.GameState;
+import seng302.gameServer.MainServerThread;
 
-public class StartScreenController implements Initializable {
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+/**
+ * A Class describing the actions of the start screen controller
+ * Created by wmu16 on 10/07/17.
+ */
+public class StartScreenController {
 
     @FXML
-    private GridPane gridPane;
+    private TextField ipTextField;
     @FXML
-    private Label timeTillLive;
+    private TextField portTextField;
     @FXML
-    private Button streamButton;
-    @FXML
-    private Button switchToRaceViewButton;
-    @FXML
-    private TableView<Yacht> teamList;
-    @FXML
-    private TableColumn<Yacht, String> boatNameCol;
-    @FXML
-    private TableColumn<Yacht, String> shortNameCol;
-    @FXML
-    private TableColumn<Yacht, String> countryCol;
-    @FXML
-    private TableColumn<Yacht, String> posCol;
-    @FXML
-    private Label realTime;
+    private GridPane startScreen2;
 
-    private boolean switchedToRaceView = false;
+    private Controller controller;
 
-    private void setContentPane(String jfxUrl) {
+    /**
+     * Loads the fxml content into the parent pane
+     * @param jfxUrl
+     * @return the controller of the fxml
+     */
+    private Object setContentPane(String jfxUrl) {
         try {
-            // get the main controller anchor pane (MainView.fxml)
-            AnchorPane contentPane = (AnchorPane) gridPane.getParent();
+            AnchorPane contentPane = (AnchorPane) startScreen2.getParent();
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-            contentPane.getChildren()
-                .addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(jfxUrl));
+            contentPane.getChildren().addAll((Pane) fxmlLoader.load());
+
+            return fxmlLoader.getController();
         } catch (javafx.fxml.LoadException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        gridPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-        teamList.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+
+    /**
+     * ATTEMPTS TO:
+     * Sets up a new game state with your IP address as designated as the host.
+     * Starts a thread to listen for incoming connections.
+     * Starts a client to server thread and connects to own ip.
+     * Switches to the lobby screen
+     */
+    @FXML
+    public void hostButtonPressed() {
+        try {
+            String ipAddress = InetAddress.getLocalHost().getHostAddress();
+            // get the lobby controller so that we can pass the game server thread to it
+            new GameState(getLocalHostIp());
+            MainServerThread mainServerThread = new MainServerThread();
+            ClientState.setHost(true);
+            // host will connect and handshake to itself after setting up the server
+            // TODO: 24/07/17 wmu16 - Make port number some static global type constant?
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ClientState.getHostIp(), 4942);
+            ClientState.setConnectedToHost(true);
+            controller.setClientToServerThread(clientToServerThread);
+            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
+            lobbyController.setMainServerThread(mainServerThread);
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setHeaderText("Cannot host");
+            alert.setContentText("Oops, failed to host, try to restart.");
+            alert.showAndWait();
+            e.printStackTrace();
+        }
+
+
     }
 
     /**
-     * Running a timer to update the livestream status on welcome screen. Update interval is 1
-     * second.
+     * ATTEMPTS TO:
+     * Connect to an ip address and port using the ip and port specified on start screen.
+     * Starts a Client To Server Thread to maintain connection to host.
+     * Switch view to lobby view.
      */
-    public void startStream() {
-        // reset boolean for switch to race view
-        switchedToRaceView = false;
+    @FXML
+    public void connectButtonPressed() {
+        // TODO: 10/07/17 wmu16 - Finish function
+        try {
+            String ipAddress = ipTextField.getText().trim().toLowerCase();
+            Integer port = Integer.valueOf(portTextField.getText().trim());
 
-        if (StreamParser.isStreamStatus()) {
-            streamButton.setVisible(false);
-            realTime.setVisible(true);
-            timeTillLive.setVisible(true);
-            timeTillLive.setTextFill(Color.GREEN);
-            timeTillLive.setText("Connecting...");
-            Timer timer = new Timer();
-            timer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    Platform.runLater(() -> {
-                        if (StreamParser.isRaceStarted()) {
-                            if (!switchedToRaceView) {
-                                switchToRaceView();
-                            }
-                            timer.cancel();
-                        }
-                        if (StreamParser.isRaceFinished()) {
-                            realTime.setText(StreamParser.getCurrentTimeString());
-                            timeTillLive.setTextFill(Color.RED);
-                            timeTillLive.setText("Race finished! Waiting for new race...");
-                            switchToRaceViewButton.setDisable(true);
-                        } else if (StreamParser.getTimeSinceStart() > 0) {
-                            realTime.setText(StreamParser.getCurrentTimeString());
-                            updateTeamList();
-                            timeTillLive.setTextFill(Color.RED);
-                            switchToRaceViewButton.setDisable(false);
-                            String timerMinute = Long
-                                .toString(StreamParser.getTimeSinceStart() / 60);
-                            String timerSecond = Long
-                                .toString(StreamParser.getTimeSinceStart() % 60);
-                            if (timerSecond.length() == 1) {
-                                timerSecond = "0" + timerSecond;
-                            }
-                            String timerString = "-" + timerMinute + ":" + timerSecond;
-                            timeTillLive.setText(timerString);
-                        } else {
-                            realTime.setText(StreamParser.getCurrentTimeString());
-                            updateTeamList();
-                            timeTillLive.setTextFill(Color.BLACK);
-                            switchToRaceViewButton.setDisable(false);
-                            String timerMinute = Long
-                                .toString(-1 * StreamParser.getTimeSinceStart() / 60);
-                            String timerSecond = Long
-                                .toString(-1 * StreamParser.getTimeSinceStart() % 60);
-                            if (timerSecond.length() == 1) {
-                                timerSecond = "0" + timerSecond;
-                            }
-                            String timerString = timerMinute + ":" + timerSecond;
-                            timeTillLive.setText(timerString);
-                        }
-                    });
-                }
-            }, 0, 1000);
-        } else {
-            timeTillLive.setText("Stream not available.");
-            timeTillLive.setTextFill(Color.RED);
+            ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, port);
+            ClientState.setHost(false);
+            ClientState.setConnectedToHost(true);
+
+            controller.setClientToServerThread(clientToServerThread);
+            setContentPane("/views/LobbyView.fxml");
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setHeaderText("Cannot reach the host");
+            alert.setContentText("Please check your host IP address.");
+            alert.showAndWait();
         }
     }
 
-    public void switchToRaceView() {
-        StreamParser.boatLocations.clear();
-        switchedToRaceView = true;
-        setContentPane("/views/RaceView.fxml");
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 
-    private void updateTeamList() {
-        ObservableList<Yacht> data = FXCollections.observableArrayList();
+    /**
+     * Gets the local host ip address and sets this ip to ClientState.
+     * Only runs by the host.
+     *
+     * @return the localhost ip address
+     */
+    private String getLocalHostIp() {
+        String ipAddress = null;
+        try {
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                NetworkInterface ni = e.nextElement();
+                if (ni.isLoopback())
+                    continue;
+                if(ni.isPointToPoint())
+                    continue;
+                if(ni.isVirtual())
+                    continue;
 
-        teamList.setItems(data);
-
-        boatNameCol.setCellValueFactory(
-            new PropertyValueFactory<>("boatName")
-        );
-        shortNameCol.setCellValueFactory(
-            new PropertyValueFactory<>("shortName")
-        );
-        countryCol.setCellValueFactory(
-            new PropertyValueFactory<>("country")
-        );
-        posCol.setCellValueFactory(
-            new PropertyValueFactory<>("position")
-        );
-
-        // check if the boat is racing
-        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
-            .getParticipants();
-        ArrayList<Integer> participantIDs = new ArrayList<>();
-        for (Participant p : participants) {
-            participantIDs.add(p.getsourceID());
-        }
-
-        // add boats to the start screen list
-        if (StreamParser.isRaceStarted()) {  // if race is started, use StreamParser.getBoatsPos()
-            for (Yacht boat : StreamParser.getBoatsPos().values()) {
-                if (participantIDs.contains(boat.getSourceID())) {
-                    data.add(boat);
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if(address instanceof Inet4Address) {    // skip all ipv6
+                        ipAddress = address.getHostAddress();
+                    }
                 }
             }
-        } else {  // else use StreamParser.getBoats()
-            for (Yacht boat : StreamParser.getBoats().values()) {
-                if (participantIDs.contains(boat.getSourceID())) {
-                    data.add(boat);
-                }
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        teamList.refresh();
+        if (ipAddress == null) {
+            System.out.println("[HOST] Cannot obtain local host ip address.");
+        }
+        ClientState.setHostIp(ipAddress);
+        return ipAddress;
     }
 }

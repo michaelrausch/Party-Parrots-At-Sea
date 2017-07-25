@@ -1,60 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.canvas.*?>
 <?import java.lang.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
-<GridPane fx:id="gridPane" nodeOrientation="LEFT_TO_RIGHT" prefWidth="800.0" style="-fx-background-color: #2C2c36;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.StartScreenController">
+<GridPane fx:id="startScreen2" nodeOrientation="LEFT_TO_RIGHT" prefWidth="800.0" style="-fx-background-color: #2C2c36;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.controllers.StartScreenController">
     <columnConstraints>
-      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="442.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="358.0" />
     </columnConstraints>
     <rowConstraints>
-      <RowConstraints percentHeight="10.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="52.0" minHeight="52.0" prefHeight="52.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="0.0" percentHeight="8.0" prefHeight="0.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="28.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="55.0" minHeight="55.0" percentHeight="9.0" prefHeight="55.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="0.0" minHeight="0.0" percentHeight="29.0" prefHeight="0.0" vgrow="SOMETIMES" />
-        <RowConstraints maxHeight="93.0" minHeight="72.0" prefHeight="72.0" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="283.0" minHeight="262.0" prefHeight="283.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+        <RowConstraints minHeight="72.0" prefHeight="72.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="65.0" minHeight="36.0" prefHeight="46.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="108.0" minHeight="72.0" prefHeight="98.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="72.0" prefHeight="72.0" vgrow="SOMETIMES" />
     </rowConstraints>
      <children>
-        <Label alignment="CENTER" text="Welcome to Race Vision" textFill="WHITE" GridPane.halignment="CENTER" GridPane.valignment="BOTTOM">
+        <Label alignment="CENTER" text="Welcome to Race Vision" textFill="WHITE" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="BOTTOM">
            <font>
               <Font size="40.0" />
            </font>
         </Label>
-        <Label text="Your live AC35 livestream" textFill="WHITE" GridPane.halignment="CENTER" GridPane.rowIndex="1">
-           <font>
-              <Font size="20.0" />
-           </font>
-        </Label>
-        <Label text="Livestream Status:" textFill="WHITE" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
-           <font>
-              <Font size="28.0" />
-           </font>
-        </Label>
-        <Label fx:id="timeTillLive" text="0:00 minutes" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="4">
-           <font>
-              <Font size="27.0" />
-           </font>
-        </Label>
-        <Button fx:id="streamButton" mnemonicParsing="false" onAction="#startStream" styleClass="blue-ui-btn" text="Click to stream" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-        <Button fx:id="switchToRaceViewButton" disable="true" mnemonicParsing="false" onAction="#switchToRaceView" styleClass="blue-ui-btn" text="Watch Race" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="TOP" />
-        <TableView fx:id="teamList" maxWidth="661.0" prefHeight="324.0" prefWidth="629.0" styleClass="ui-table" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.rowIndex="5" GridPane.vgrow="NEVER">
-          <columns>
-              <TableColumn fx:id="posCol" editable="false" maxWidth="74.0" minWidth="74.0" prefWidth="74.0" resizable="false" sortable="false" text="Position" />
-            <TableColumn fx:id="boatNameCol" editable="false" maxWidth="171.0" minWidth="171.0" prefWidth="171.0" resizable="false" sortable="false" text="Boat Name" />
-            <TableColumn fx:id="shortNameCol" editable="false" maxWidth="155.18472290039062" minWidth="107.0" prefWidth="155.18472290039062" resizable="false" sortable="false" text="Short Name" />
-              <TableColumn fx:id="countryCol" editable="false" maxWidth="258.9999694824219" minWidth="147.0" prefWidth="258.9999694824219" resizable="false" sortable="false" text="Country" />
-          </columns>
-           <GridPane.margin>
-              <Insets top="10.0" />
-           </GridPane.margin>
-        </TableView>
-        <Label fx:id="realTime" text="Local time" textFill="WHITE" visible="false" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="BOTTOM" />
+      <Button mnemonicParsing="false" onAction="#hostButtonPressed" prefHeight="25.0" prefWidth="175.0" text="Host" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+      <Button mnemonicParsing="false" onAction="#connectButtonPressed" prefHeight="25.0" prefWidth="147.0" text="Connect" GridPane.columnIndex="1" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets left="5.0" right="5.0" />
+         </GridPane.margin></Button>
+      <TextField fx:id="ipTextField" alignment="CENTER" maxWidth="-Infinity" prefHeight="25.0" prefWidth="148.0" promptText="Host IP" text="132.181.14." GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets bottom="10.0" left="5.0" right="85.0" top="10.0" />
+         </GridPane.margin>
+      </TextField>
+      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="OR" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </Text>
+      <TextField fx:id="portTextField" alignment="CENTER" maxWidth="75.0" prefHeight="25.0" prefWidth="55.0" promptText="Port" text="4942" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <GridPane.margin>
+            <Insets left="5.0" right="5.0" />
+         </GridPane.margin>
+      </TextField>
      </children>
 </GridPane>

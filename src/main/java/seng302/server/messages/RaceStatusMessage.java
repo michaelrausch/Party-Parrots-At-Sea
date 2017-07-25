@@ -1,7 +1,7 @@
 package seng302.server.messages;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -9,12 +9,14 @@ public class RaceStatusMessage extends Message{
     private final MessageType MESSAGE_TYPE = MessageType.RACE_STATUS;
     private final int MESSAGE_VERSION = 2; //Always set to 1
     private final int MESSAGE_BASE_SIZE = 24;
+    private final double windDirFactor = 0x4000 / 90;
+
 
     private long currentTime;
     private long raceId;
     private RaceStatus raceStatus;
     private long expectedStartTime;
-    private WindDirection raceWindDirection;
+    private double raceWindDirection;
     private long windSpeed;
     private long numBoatsInRace;
     private RaceType raceType;
@@ -33,13 +35,13 @@ public class RaceStatusMessage extends Message{
      * @param sourceId The source of this message
      * @param boats A list of boat status sub messages
      */
-    public RaceStatusMessage(long raceId, RaceStatus raceStatus, long expectedStartTime, WindDirection raceWindDirection,
+    public RaceStatusMessage(long raceId, RaceStatus raceStatus, long expectedStartTime, double raceWindDirection,
                              long windSpeed, long numBoatsInRace, RaceType raceType, long sourceId, List<BoatSubMessage> boats){
         currentTime = System.currentTimeMillis();
         this.raceId = raceId;
         this.raceStatus = raceStatus;
         this.expectedStartTime = expectedStartTime;
-        this.raceWindDirection = raceWindDirection;
+        this.raceWindDirection = raceWindDirection * windDirFactor;
         this.windSpeed = windSpeed;
         this.numBoatsInRace = numBoatsInRace;
         this.raceType = raceType;
@@ -47,22 +49,6 @@ public class RaceStatusMessage extends Message{
         crc = new CRC32();
 
         setHeader(new Header(MESSAGE_TYPE, (int) sourceId, (short) getSize()));
-    }
-
-    /**
-     * @return the size of this message in bytes
-     */
-    @Override
-    public int getSize() {
-        return MESSAGE_BASE_SIZE + (20 * ((int) numBoatsInRace));
-    }
-
-    /**
-     * Send this message as a stream of bytes
-     * @param outputStream The output stream to send the message
-     */
-    @Override
-    public void send(SocketChannel outputStream) throws IOException {
         allocateBuffer();
         writeHeaderToBuffer();
 
@@ -71,7 +57,7 @@ public class RaceStatusMessage extends Message{
         putInt((int) raceId, 4);
         putByte((byte) raceStatus.getCode());
         putInt(expectedStartTime, 6);
-        putInt((int) raceWindDirection.getCode(), 2);
+        putInt((int) this.raceWindDirection, 2);
         putInt((int) windSpeed, 2);
         putByte((byte) numBoatsInRace);
         putByte((byte) raceType.getCode());
@@ -82,7 +68,14 @@ public class RaceStatusMessage extends Message{
 
         writeCRC();
         rewind();
-
-        outputStream.write(getBuffer());
     }
+
+    /**
+     * @return the size of this message in bytes
+     */
+    @Override
+    public int getSize() {
+        return MESSAGE_BASE_SIZE + (20 * ((int) numBoatsInRace));
+    }
+
 }

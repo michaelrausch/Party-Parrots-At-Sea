@@ -3,8 +3,9 @@ package seng302.server.simulator;
 import seng302.server.simulator.mark.CompoundMark;
 import seng302.server.simulator.mark.Corner;
 import seng302.server.simulator.mark.Mark;
-import seng302.server.simulator.mark.Position;
 import seng302.server.simulator.parsers.RaceParser;
+import seng302.utilities.GeoPoint;
+import seng302.utilities.GeoUtility;
 
 import java.util.HashSet;
 import java.util.List;
@@ -80,8 +81,8 @@ public class Simulator extends Observable implements Runnable {
 
 			boat.move(boat.getLastPassedCorner().getBearingToNextCorner(), duration);
 
-			Position boatPos = new Position(boat.getLat(), boat.getLng());
-			Position lastMarkPos = boat.getLastPassedCorner().getCompoundMark().getMark1();
+			GeoPoint boatPos = new GeoPoint(boat.getLat(), boat.getLng());
+			GeoPoint lastMarkPos = boat.getLastPassedCorner().getCompoundMark().getMark1();
 
 			double distanceFromLastMark = GeoUtility.getDistance(boatPos, lastMarkPos);
 			// if a boat passes its heading mark
@@ -97,13 +98,13 @@ public class Simulator extends Observable implements Runnable {
 				}
 
 				// move compensate distance for the mark just passed
-				Position pos = GeoUtility.getGeoCoordinate(
+				GeoPoint pos = GeoUtility.getGeoCoordinate(
 						boat.getLastPassedCorner().getCompoundMark().getMark1(),
 						boat.getLastPassedCorner().getBearingToNextCorner(),
 						compensateDistance);
 				boat.setLat(pos.getLat());
 				boat.setLng(pos.getLng());
-				distanceFromLastMark = GeoUtility.getDistance(new Position(boat.getLat(), boat.getLng()),
+				distanceFromLastMark = GeoUtility.getDistance(new GeoPoint(boat.getLat(), boat.getLng()),
 						boat.getLastPassedCorner().getCompoundMark().getMark1());
 			}
 		}
