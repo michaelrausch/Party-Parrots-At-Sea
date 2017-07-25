@@ -196,29 +196,12 @@ public class LobbyController implements Initializable, Observer{
     @FXML
     public void readyButtonPressed() {
 //        setContentPane("/views/RaceView.fxml");
-//        playTheme();
         GameState.setCurrentStage(GameStages.RACING);
         mainServerThread.startGame();
     }
 
 
-//    private static MediaPlayer mediaPlayer;
-//
-//    private void playTheme() {
-//        Random random = new Random(System.currentTimeMillis());
-//        Integer rand = random.nextInt();
-//        if(rand == 10) {
-//            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
-//            Media hit = new Media(file.toString());
-//            mediaPlayer = new MediaPlayer(hit);
-//            mediaPlayer.play();
-//        } else if(rand == 9) {
-//            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
-//            Media hit = new Media(file.toString());
-//            mediaPlayer = new MediaPlayer(hit);
-//            mediaPlayer.play();
-//        }
-//    }
+
 
     private void switchToRaceView() {
         if (!switchedPane) {
