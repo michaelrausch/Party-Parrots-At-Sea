@@ -13,19 +13,19 @@
 
     <Course>
         <CompoundMark CompoundMarkID="1" Name="Mark0">
-            <Mark SeqID="1" Name="Start Line 1" TargetLat="57.6703330" TargetLng="11.8278330" SourceID="122" />
-            <Mark SeqID="2" Name="Start Line 2" TargetLat="57.6703330" TargetLng="11.8278330" SourceID="123" />
+            <Mark SeqID="1" Name="Start Line 1" TargetLat="57.670603" TargetLng="11.828262" SourceID="122" />
+            <Mark SeqID="2" Name="Start Line 2" TargetLat="57.669445" TargetLng="11.826413" SourceID="123" />
         </CompoundMark>
         <CompoundMark CompoundMarkID="2" Name="Mark1">
             <Mark SeqID="1" Name="Mark1" TargetLat="57.6675700" TargetLng="11.8359880" SourceID="131" />
         </CompoundMark>
         <CompoundMark CompoundMarkID="3" Name="Mark2">
             <Mark SeqID="1" Name="Lee Gate 1" TargetLat="57.6708220" TargetLng="11.8433900" SourceID="124" />
-            <Mark SeqID="2" Name="Lee Gate 2" TargetLat="57.6708220" TargetLng="11.8433900" SourceID="125" />
+            <Mark SeqID="2" Name="Lee Gate 2" TargetLat="57.671629" TargetLng="11.840951" SourceID="125" />
         </CompoundMark>
         <CompoundMark CompoundMarkID="4" Name="Mark3">
-            <Mark SeqID="1" Name="Wind Gate 1" TargetLat="57.6650170" TargetLng="11.8279170" SourceID="126" />
-            <Mark SeqID="2" Name="Wind Gate 2" TargetLat="57.6650170" TargetLng="11.8279170" SourceID="127" />
+            <Mark SeqID="1" Name="Wind Gate 1" TargetLat="57.665316" TargetLng="11.827184" SourceID="126" />
+            <Mark SeqID="2" Name="Wind Gate 2" TargetLat="57.664190" TargetLng="11.829576" SourceID="127" />
         </CompoundMark>
         <CompoundMark CompoundMarkID="5" Name="Mark2">
             <Mark SeqID="1" Name="Lee Gate 1" TargetLat="57.6708220" TargetLng="11.8433900" SourceID="124" />
@@ -52,7 +52,7 @@
             <Mark SeqID="2" Name="Wind Gate 2" TargetLat="57.6650170" TargetLng="11.8279170" SourceID="127" />
         </CompoundMark>
         <CompoundMark CompoundMarkID="11" Name="Mark4">
-            <Mark SeqID="1" Name="Finish Line 1" TargetLat="57.6715240" TargetLng="11.8444950" SourceID="128" />
+            <Mark SeqID="1" Name="Finish Line 1" TargetLat="57.672350" TargetLng="11.842535" SourceID="128" />
             <Mark SeqID="2" Name="Finish Line 2" TargetLat="57.6715240" TargetLng="11.8444950" SourceID="129" />
         </CompoundMark>
     </Course>
