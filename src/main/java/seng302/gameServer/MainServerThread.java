@@ -137,11 +137,21 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
      */
     @Override
     public void clientDisconnected(Player player) {
-        serverLog("Player disconnected", 0);
+        try {
+            player.getSocket().close();
+        } catch (Exception e) {
+            serverLog("Cannot disconnect the socket for the disconnected player.", 0);
+        }
+        serverLog("Player " + player.getYacht().getSourceId() + "'s socket disconnected", 0);
+        GameState.removeYacht(player.getYacht().getSourceId());
         GameState.removePlayer(player);
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            if (serverToClientThread.getSocket() == player.getSocket()) {
+                this.deleteObserver(serverToClientThread);
+            }
+        }
         setChanged();
         notifyObservers();
-//        sendXml();
     }
 
     public void startGame() {

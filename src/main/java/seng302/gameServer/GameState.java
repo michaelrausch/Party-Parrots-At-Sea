@@ -60,6 +60,10 @@ public class GameState {
         yachts.put(sourceId, yacht);
     }
 
+    public static void removeYacht(Integer yachtId) {
+        yachts.remove(yachtId);
+    }
+
     public static Boolean getIsRaceStarted() {
         return isRaceStarted;
     }
