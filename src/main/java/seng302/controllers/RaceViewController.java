@@ -52,6 +52,8 @@ import java.util.stream.Collectors;
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
     @FXML
+    private Text windSpeedText;
+    @FXML
     private LineChart raceSparkLine;
     @FXML
     private NumberAxis sparklineYAxis;
@@ -335,6 +337,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private void updateWindDirection() {
         windDirectionText.setText(String.format("%.1f°", ClientPacketParser.getWindDirection()));
         windArrowText.setRotate(ClientPacketParser.getWindDirection());
+        windSpeedText.setText(String.format("%.1f Knots", ClientPacketParser.getWindSpeed()));
     }
 
 
