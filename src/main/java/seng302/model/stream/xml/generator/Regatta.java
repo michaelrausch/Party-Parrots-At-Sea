@@ -1,4 +1,4 @@
-package seng302.models.xml;
+package seng302.model.stream.xml.generator;
 
 /**
  * A Race regatta that can be parsed into XML

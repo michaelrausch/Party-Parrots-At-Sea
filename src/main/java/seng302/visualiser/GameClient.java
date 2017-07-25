@@ -1,0 +1,305 @@
+package seng302.visualiser;
+
+import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.Pane;
+import seng302.gameServer.GameState;
+import seng302.gameServer.MainServerThread;
+import seng302.model.Yacht;
+import seng302.model.RaceState;
+import seng302.model.mark.Mark;
+import seng302.model.stream.parser.PositionUpdateData.DeviceType;
+import seng302.model.stream.parser.MarkRoundingData;
+import seng302.model.stream.parser.RaceStatusData;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.stream.parser.StreamParser;
+import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.model.stream.xml.parser.XMLParser;
+import seng302.model.stream.parser.PositionUpdateData;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.visualiser.ClientToServerThread;
+import seng302.visualiser.controllers.LobbyController;
+import seng302.visualiser.controllers.LobbyController.CloseStatus;
+import seng302.visualiser.controllers.RaceViewController;
+
+/**
+ * Created by cir27 on 20/07/17.
+ */
+public class GameClient {
+
+    private Pane holderPane;
+    private ClientToServerThread socketThread;
+    private MainServerThread server;
+
+    private RaceViewController raceView;
+
+    private Map<Integer, Yacht> allBoatsMap;
+    private RegattaXMLData regattaData;
+    private RaceXMLData courseData;
+    private RaceState raceState = new RaceState();
+
+    private ObservableList<String> lobbyList = FXCollections.observableArrayList();
+
+    public GameClient(Pane holder) {
+        this.holderPane = holder;
+    }
+
+    public void runAsClient (String ipAddress, Integer portNumber) {
+        try {
+            socketThread = new ClientToServerThread(ipAddress, portNumber);
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            System.out.println("Unable to connect to host...");
+        }
+        LobbyController lobbyController = loadLobby("/views/LobbyView.fxml");
+        lobbyController.setPlayerListSource(lobbyList);
+        lobbyController.setTitle("Connected to host - IP : " + ipAddress + " Port : " + portNumber);
+        lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
+        socketThread.addStreamObserver(this::parsePacket);
+    }
+
+    public void runAsHost (String ipAddress, Integer portNumber) {
+        server = new MainServerThread();
+        try {
+            socketThread = new ClientToServerThread(ipAddress, portNumber);
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            System.out.println("Unable to make local connection to host...");
+        }
+        LobbyController lobbyController = loadLobby("/views/HostLobbyView.fxml");
+        lobbyController.setPlayerListSource(GameState.getObservablePlayers());
+        lobbyController.setTitle("Hosting Lobby - IP : " + ipAddress + " Port : " + portNumber);
+        lobbyController.addCloseListener(exitCause -> {
+            if (exitCause == CloseStatus.READY) {
+                server.startGame();
+                socketThread.addStreamObserver(this::parsePacket);
+            } else if (exitCause == CloseStatus.LEAVE) {
+                loadStartScreen();
+            }
+        });
+    }
+
+    private void loadStartScreen () {
+        socketThread.closeSocket();
+        socketThread = null;
+        if (server != null) {
+            // TODO: 26/07/17 cir27 - handle disconnecting
+            server.shutDown();
+            server = null;
+        }
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/StartScreenView.fxml"));
+        try {
+            holderPane.getChildren().clear();
+            holderPane.getChildren().add(fxmlLoader.load());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Loads a view of the lobby into the clients pane
+     * @param lobbyView fxml file for the desired lobby
+     * @return the lobby controller.
+     */
+    private LobbyController loadLobby (String lobbyView) {
+        FXMLLoader fxmlLoader = new FXMLLoader(GameClient.class.getResource(lobbyView));
+        try {
+            holderPane.getChildren().clear();
+            holderPane.getChildren().add(fxmlLoader.load());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fxmlLoader.getController();
+    }
+
+    private void loadRaceView () {
+//        allBoatsMap.forEach((id, boat) -> {
+//            if (courseData.getParticipants().contains(id))
+//                racingBoats.put(id, boat);
+//        });
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/RaceView.fxml"));
+        raceView = fxmlLoader.getController();
+        try {
+            holderPane.getChildren().add(fxmlLoader.load());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        raceView.loadRace(allBoatsMap, courseData, raceState);
+    }
+
+    private void parsePacket(StreamPacket packet) {
+        switch (packet.getType()) {
+            case RACE_STATUS:
+                processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
+                break;
+
+            case REGATTA_XML:
+                System.out.println("REGATTA XML");
+                regattaData = XMLParser.parseRegatta(
+                    StreamParser.extractXmlMessage(packet)
+                );
+                raceState.setTimeZone(
+                    TimeZone.getTimeZone(
+                        ZoneId.ofOffset("UTC", ZoneOffset.ofHours(regattaData.getUtcOffset()))
+                    )
+                );
+                startRaceIfAllDataReceived();
+                break;
+
+            case RACE_XML:
+                System.out.println("RACE XML");
+                courseData = XMLParser.parseRace(
+                    StreamParser.extractXmlMessage(packet)
+                );
+                if (raceView != null) {
+                    raceView.updateRaceData(courseData);
+                }
+                startRaceIfAllDataReceived();
+                break;
+
+            case BOAT_XML:
+                System.out.println("BOAT XML");
+                allBoatsMap = XMLParser.parseBoats(
+                    StreamParser.extractXmlMessage(packet)
+                );
+                lobbyList.clear();
+                allBoatsMap.forEach((id, boat) -> lobbyList.add(id.toString() + boat.getBoatName()));
+                startRaceIfAllDataReceived();
+                break;
+
+            case RACE_START_STATUS:
+                raceState.updateState(StreamParser.extractRaceStartStatus(packet));
+                break;
+
+            case BOAT_LOCATION:
+                updatePosition(StreamParser.extractBoatLocation(packet));
+                break;
+
+            case MARK_ROUNDING:
+                updateMarkRounding(StreamParser.extractMarkRounding(packet));
+                break;
+        }
+    }
+
+    private void startRaceIfAllDataReceived() {
+        if (allXMLReceived())
+            loadRaceView();
+    }
+
+    private boolean allXMLReceived () {
+        return courseData != null && allBoatsMap != null && regattaData != null;
+    }
+
+    /**
+     * Updates the position of a boat. Boat and position are given in the provided data.
+     * @param positionData
+     */
+    private void updatePosition(PositionUpdateData positionData) {
+        if (positionData.getType() == DeviceType.YACHT_TYPE) {
+            if (allXMLReceived() && allBoatsMap.containsKey(positionData.getDeviceId())) {
+                Yacht yacht = allBoatsMap.get(positionData.getDeviceId());
+                yacht.setVelocityProperty(positionData.getGroundSpeed());
+                yacht.setLat(positionData.getLat());
+                yacht.setLon(positionData.getLon());
+                yacht.setHeading(positionData.getHeading());
+            }
+        } else if (positionData.getType() == DeviceType.MARK_TYPE) {
+            Mark mark = courseData.getCompoundMarks().get(positionData.getDeviceId());
+        }
+    }
+
+    /**
+     * Updates the boat as having passed the mark. Boat and mark are given by the ids in the
+     * provided data.
+     * @param roundingData Contains data for the rounding of a mark.
+     */
+    private void updateMarkRounding(MarkRoundingData roundingData) {
+        if (allXMLReceived()) {
+            Yacht yacht = allBoatsMap.get(roundingData.getBoatId());
+            yacht.setMarkRoundingTime(roundingData.getTimeStamp());
+            yacht.updateTimeSinceLastMarkProperty(
+                raceState.getRaceTime() - roundingData.getTimeStamp());
+            yacht.setLastMarkRounded(
+                courseData.getCompoundMarks().get(
+                    roundingData.getMarkId()
+                )
+            );
+        }
+    }
+
+    private void processRaceStatusUpdate (RaceStatusData data) {
+        if (allXMLReceived()) {
+            raceState.updateState(data);
+            for (long[] boatData : data.getBoatData()) {
+                Yacht yacht = allBoatsMap.get((int) boatData[0]);
+                yacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
+                yacht.setEstimateTimeAtFinish(boatData[2]);
+                int legNumber = (int) boatData[3];
+                yacht.setLegNumber(legNumber);
+                if (legNumber != yacht.getLegNumber()) {
+                    int placing = 1;
+                    for (Yacht otherYacht : allBoatsMap.values()) {
+                        if (otherYacht.getSourceId() != boatData[0] &&
+                            yacht.getLegNumber() <= otherYacht.getLegNumber())
+                            placing++;
+                    }
+                    yacht.setPositionInteger(placing);
+                }
+            }
+        }
+    }
+
+    private void close () {
+        socketThread.closeSocket();
+    }
+
+//    /** Handle the key-pressed event from the text field. */
+//    public void keyPressed(KeyEvent e) {
+//        BoatActionMessage boatActionMessage;
+//        switch (e.getCode()){
+//            case SPACE: // align with vmg
+//                boatActionMessage = new BoatActionMessage(BoatActionType.VMG);
+//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
+//                break;
+//            case PAGE_UP: // upwind
+//                boatActionMessage = new BoatActionMessage(BoatActionType.UPWIND);
+//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
+//                break;
+//            case PAGE_DOWN: // downwind
+//                boatActionMessage = new BoatActionMessage(BoatActionType.DOWNWIND);
+//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
+//                break;
+//            case ENTER: // tack/gybe
+//                boatActionMessage = new BoatActionMessage(BoatActionType.TACK_GYBE);
+//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
+//                break;
+//            //TODO Allow a zoom in and zoom out methods
+//            case Z:  // zoom in
+//                System.out.println("Zoom in");
+//                break;
+//            case X:  // zoom out
+//                System.out.println("Zoom out");
+//                break;
+//        }
+//    }
+
+//    public void keyReleased(KeyEvent e) {
+//        switch (e.getCode()) {
+//            //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
+//            case SHIFT:  // sails in/sails out
+//                BoatActionMessage boatActionMessage = new BoatActionMessage(BoatActionType.SAILS_IN);
+//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
+//                break;
+//        }
+//    }
+//
+//    onKeyPressed="#keyPressed" onKeyReleased="#keyReleased"
+}

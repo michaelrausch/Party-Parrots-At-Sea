@@ -1,11 +1,10 @@
-package seng302.models.xml;
-
-import seng302.models.Yacht;
+package seng302.model.stream.xml.generator;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import seng302.model.Yacht;
 
 /**
  * A Race object that can be parsed into XML

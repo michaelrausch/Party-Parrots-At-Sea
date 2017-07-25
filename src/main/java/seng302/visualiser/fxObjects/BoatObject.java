@@ -10,12 +10,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
-import seng302.model.Boat;
-import seng302.utilities.GeoUtility;
-import seng302.model.mark.GateMark;
-import seng302.model.mark.Mark;
-import seng302.model.mark.SingleMark;
-import seng302.model.stream.parsers.StreamParser;
+import seng302.model.Yacht;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -38,7 +33,6 @@ public class BoatObject extends Group {
     private Double lastRotation = 0.0;
     private long framesToMove;
     //Graphical objects
-    private Boat boat;
     private Group lineGroup = new Group();
     private Polygon boatPoly;
     private Wake wake;
@@ -161,7 +155,7 @@ public class BoatObject extends Group {
                     boatPoly.getLayoutY()
                 );
                 l.getStrokeDashArray().setAll(3d, 7d);
-                l.setStroke(boat.getColour());
+                l.setStroke(colour);
                 l.setCache(true);
                 l.setCacheHint(CacheHint.SPEED);
                 lineGroup.getChildren().add(l);
@@ -199,7 +193,7 @@ public class BoatObject extends Group {
 
         rotateTo(rotation);
         wake.setRotation(rotation, groundSpeed);
-        boat.setVelocity(groundSpeed);
+//        yacht.setVelocity(groundSpeed);
         lastTimeValid = timeValid;
         isStopped = false;
         lastRotation = rotation;
@@ -278,19 +272,6 @@ public class BoatObject extends Group {
         return laylines;
     }
 
-    public Boat getBoat() {
-        return boat;
-    }
-
-    /**
-     * Returns all raceIds associated with this group. For BoatGroups the ID's are for the boat.
-     *
-     * @return An array containing all ID's associated with this RaceObject.
-     */
-    public long getRaceId() {
-        return boat.getSourceID();
-    }
-
     public Group getWake () {
         return wake;
     }
@@ -314,11 +295,6 @@ public class BoatObject extends Group {
 
     public boolean isStopped() {
         return isStopped;
-    }
-
-    @Override
-    public String toString() {
-        return boat.toString();
     }
 
 }

@@ -12,35 +12,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Random;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import org.apache.commons.io.IOUtils;
-import seng302.models.Player;
-import seng302.models.Yacht;
-import seng302.models.stream.packets.PacketType;
-import seng302.models.stream.packets.StreamPacket;
-import seng302.models.xml.Race;
-import seng302.models.xml.Regatta;
-import seng302.models.xml.XMLGenerator;
+import seng302.model.Player;
+import seng302.model.Yacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.model.stream.xml.generator.XMLGenerator;
 import seng302.server.messages.BoatActionType;
 import seng302.server.messages.BoatLocationMessage;
 import seng302.server.messages.BoatStatus;
 import seng302.server.messages.BoatSubMessage;
 import seng302.server.messages.Message;
 
-import java.io.*;
-import java.net.Socket;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 import seng302.server.messages.RaceStatus;
 import seng302.server.messages.RaceStatusMessage;
 import seng302.server.messages.RaceType;
 import seng302.server.messages.XMLMessage;
 import seng302.server.messages.XMLMessageSubType;
-import seng302.server.messages.XMLMessage;
-import seng302.server.messages.XMLMessageSubType;
-import seng302.utilities.GeoPoint;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -153,7 +144,7 @@ public class ServerToClientThread implements Runnable, Observer {
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
                         //System.out.println("RECEIVED A PACKET");
-                        switch (PacketType.assignPacketType(type)) {
+                        switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
                                 BoatActionType actionType = ServerPacketParser
                                     .extractBoatAction(
@@ -306,7 +297,7 @@ public class ServerToClientThread implements Runnable, Observer {
                     yacht.getLocation().getLat(),
                     yacht.getLocation().getLng(),
                     yacht.getHeading(),
-                    (long) yacht.getVelocity());
+                    yacht.getVelocity().longValue());
 
             sendMessage(boatLocationMessage);
         }

@@ -27,14 +27,13 @@ import seng302.visualiser.fxObjects.AnnotationBox;
 import seng302.visualiser.fxObjects.BoatObject;
 import seng302.visualiser.fxObjects.MarkObject;
 import seng302.model.Colors;
-import seng302.model.Boat;
+import seng302.model.Yacht;
 import seng302.model.map.Boundary;
 import seng302.model.map.CanvasMap;
 import seng302.model.mark.GateMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkType;
 import seng302.model.mark.SingleMark;
-import seng302.model.stream.parsers.StreamParser;
 import seng302.utilities.GeoPoint;
 import seng302.utilities.GeoUtility;
 
@@ -65,7 +64,7 @@ public class GameView extends Pane {
     private double metersPerPixelY;
 
     private Map<SingleMark, MarkObject> markObjects = new HashMap<>();
-    private Map<Boat, BoatObject> boatObjects = new HashMap<>();
+    private Map<Yacht, BoatObject> boatObjects = new HashMap<>();
     private List<AnnotationBox> annotations = new ArrayList<>();
 
     private Text fpsDisplay = new Text();
@@ -255,17 +254,17 @@ public class GameView extends Pane {
     /**
      * Draws all the boats.
      */
-    public void setBoats(List<Boat> boats) {
+    public void setBoats(List<Yacht> yachts) {
         Group annotationsGroup = new Group();
         Group wakesGroup = new Group();
         Group boatObjectGroup = new Group();
 
         BoatObject newObject;
-        for (Boat boat : boats) {
+        for (Yacht yacht : yachts) {
             newObject = new BoatObject();
 //            newObject.bindBoat(boat);
             newObject.setFill(Colors.getColor());
-            createAnnotationBox(boat);
+            createAnnotationBox(yacht);
 
         }
 //        Group wakes = new Group();
@@ -279,19 +278,19 @@ public class GameView extends Pane {
         gameObjects.addAll(boatObjects.values());
     }
 
-    private AnnotationBox createAnnotationBox (Boat boat) {
+    private AnnotationBox createAnnotationBox (Yacht yacht) {
         AnnotationBox newAnnotation;
         newAnnotation = new AnnotationBox();
-        newAnnotation.addAnnotation("name", boat.getShortName());
+        newAnnotation.addAnnotation("name", yacht.getShortName());
 //        newAnnotation.addAnnotation("country", boat.getCountry());
         newAnnotation.addAnnotation(
             "velocity",
-            boat.getVelocityProperty(),
+            yacht.getVelocityProperty(),
             (velocity) -> String.format("%.2f ms", velocity.doubleValue())
         );
         newAnnotation.addAnnotation(
             "nextMark",
-            boat.timeTillNextProperty(),
+            yacht.timeTillNextProperty(),
             (time) -> {
                 DateFormat format = new SimpleDateFormat("mm:ss");
                 return format.format(time);
@@ -299,7 +298,7 @@ public class GameView extends Pane {
         );
         newAnnotation.addAnnotation(
             "lastMark",
-            boat.timeTillNextProperty(),
+            yacht.timeTillNextProperty(),
             (time) -> {
                 DateFormat format = new SimpleDateFormat("mm:ss");
                 return format.format(time);
@@ -518,9 +517,9 @@ public class GameView extends Pane {
         return fpsDisplay.visibleProperty();
     }
 
-    public void selectBoat (Boat selectedBoat) {
+    public void selectBoat (Yacht selectedYacht) {
         boatObjects.forEach((boat, group) ->
-            group.setIsSelected(boat == selectedBoat)
+            group.setIsSelected(boat == selectedYacht)
         );
     }
 

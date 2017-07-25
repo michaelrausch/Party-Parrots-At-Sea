@@ -3,8 +3,8 @@ package seng302.model;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
-import seng302.model.stream.parsers.RaceStartData;
-import seng302.model.stream.parsers.RaceStatusData;
+import seng302.model.stream.parser.RaceStartData;
+import seng302.model.stream.parser.RaceStatusData;
 
 /**
  * Class for storing race data that does not relate to specific vessels or marks such as time or wind.
@@ -19,7 +19,7 @@ public class RaceState {
     private double windDirection;
     private long raceTime;
     private long expectedStartTime;
-    private boolean isRaceStarted;
+    private boolean isRaceStarted = false;
 //    long timeTillStart;
 
     public RaceState() {

@@ -2,16 +2,14 @@ package seng302.gameServer;
 
 import java.time.LocalDateTime;
 import java.util.Observable;
-import seng302.client.ClientPacketParser;
-import seng302.models.Player;
-import seng302.models.stream.PacketBufferDelegate;
-import seng302.models.stream.packets.StreamPacket;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.PriorityBlockingQueue;
+import seng302.model.Player;
+import seng302.model.stream.PacketBufferDelegate;
+import seng302.model.stream.packets.StreamPacket;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -84,7 +82,7 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
             while (!packetBuffer.isEmpty()){
                 try {
                     StreamPacket packet = packetBuffer.take();
-                    ClientPacketParser.parsePacket(packet);
+//                    ClientPacketParser.parsePacket(packet);
                 } catch (InterruptedException e) {
                     continue;
                 }
@@ -158,5 +156,17 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.sendRaceStatusMessage();
         }
+    }
+
+    public void shutDown() {
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            try {
+                serverToClientThread.getSocket().close();
+            } catch (IOException ioe) {
+                serverLog("Failed to close socket " + serverToClientThread.getSocket().toString(), 0);
+            }
+        }
+        serverToClientThreads = null;
+        thread = null;
     }
 }

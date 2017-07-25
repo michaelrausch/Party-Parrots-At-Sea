@@ -1,8 +1,10 @@
-package seng302.controllers;
+package seng302.visualiser.controllers;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,12 +17,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import seng302.client.ClientPacketParser;
-import seng302.models.Yacht;
-import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
-import seng302.model.Boat;
-import seng302.model.stream.parsers.StreamParser;
-import seng302.model.stream.parsers.xml.XMLParser.RaceXMLObject.Participant;
+import seng302.model.Yacht;
+import seng302.model.stream.parser.StreamParser;
 
 public class FinishScreenViewController implements Initializable {
 
@@ -37,6 +35,8 @@ public class FinishScreenViewController implements Initializable {
     @FXML
     private TableColumn<Yacht, String> countryCol;
 
+    ObservableList<Yacht> data = FXCollections.observableArrayList();
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         finishScreenGridPane.getStylesheets()
@@ -44,7 +44,6 @@ public class FinishScreenViewController implements Initializable {
         finishOrderTable.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // set up data for table
-        ObservableList<Yacht> data = FXCollections.observableArrayList();
         finishOrderTable.setItems(data);
 
         // setting table col data
@@ -60,22 +59,13 @@ public class FinishScreenViewController implements Initializable {
         countryCol.setCellValueFactory(
             new PropertyValueFactory<>("country")
         );
-
-        // check if the boat is racing
-        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
-            .getParticipants();
-        ArrayList<Integer> participantIDs = new ArrayList<>();
-        for (Participant p : participants) {
-            participantIDs.add(p.getsourceID());
-        }
-
-        // add data to table
-        for (Yacht boat : StreamParser.getBoatsPos().values()) {
-            if (participantIDs.contains(boat.getSourceID())) {
-                data.add(boat);
-            }
-        }
         finishOrderTable.refresh();
+    }
+
+    public void setFinishers (List<Yacht> participants) {
+        List<Yacht> sorted = new ArrayList<>(participants);
+        sorted.sort(Comparator.comparingInt(Yacht::getPositionInteger));
+        finishOrderTable.getItems().setAll(sorted);
     }
 
     private void setContentPane(String jfxUrl) {

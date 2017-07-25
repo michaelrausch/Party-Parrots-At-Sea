@@ -1,13 +1,11 @@
-package seng302.models.xml;
+package seng302.model.stream.xml.generator;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.apache.commons.io.IOUtils;
 import seng302.server.messages.XMLMessageSubType;
 
 import java.io.*;
-import java.net.URISyntaxException;
 
 /**
  * An XML generator to generate the Race, Boat, and Regatta XML dynamically

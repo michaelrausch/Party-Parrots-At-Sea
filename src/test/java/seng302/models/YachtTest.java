@@ -1,17 +1,17 @@
 package seng302.models;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
-import org.junit.Test;
+import seng302.model.PolarTable;
+import seng302.model.Yacht;
 import seng302.utilities.GeoPoint;
 
 public class YachtTest {
 
     Double windDir;
     Double windSpd;
-    List<Yacht> yachts = new ArrayList<Yacht>();
+    List<Yacht> yachts = new ArrayList<>();
 
     @Before
     public void setUp() {

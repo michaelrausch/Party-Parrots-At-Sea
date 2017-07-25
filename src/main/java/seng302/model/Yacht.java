@@ -5,17 +5,13 @@ import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import seng302.model.mark.Mark;
 import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
-import javafx.scene.paint.Color;
-import seng302.client.ClientPacketParser;
-import seng302.controllers.RaceViewController;
 import seng302.gameServer.GameState;
-import seng302.models.mark.Mark;
 import seng302.utilities.GeoPoint;
 
 /**
@@ -24,17 +20,8 @@ import seng302.utilities.GeoPoint;
  * Class created to store more variables (eg. boat statuses) compared to the XMLParser boat class,
  * also done outside Boat class because some old variables are not used anymore.
  */
-public class Boat {
-
-    private final Double TURN_STEP = 5.0;
-
-    private Double lastHeading;
-    private Boolean sailIn;
-
-
-    // Used in boat group
-    private Color colour = Color.BLACK;
-
+public class Yacht {
+    //BOTH AFAIK
     private String boatType;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
@@ -42,28 +29,32 @@ public class Boat {
     private String boatName;
     private String country;
 
-    // Boat status
-    private Integer boatStatus;
-    private Integer legNumber = 0;
-    private Integer position = 0;
     private Long estimateTimeAtFinish;
-    private Long markRoundTime;
-    private Double lat;
-    private Double lon;
-    private Double heading;
-    private ReadOnlyDoubleWrapper velocity = new ReadOnlyDoubleWrapper();
-    private ReadOnlyLongWrapper timeTillNext = new ReadOnlyLongWrapper();
-    private ReadOnlyLongWrapper timeSinceLastMark = new ReadOnlyLongWrapper();
-    private String position;
-    private GeoPoint location;
-    private Double heading;
-    private Double velocity;
     private Long timeTillNext;
     private Long markRoundTime;
+    private Double heading;
+    private Double lat;
+    private Double lon;
+    private Integer legNumber = 0;
 
-    // Mark rounding
+    //SERVER SIDE
+    private final Double TURN_STEP = 5.0;
+    private Double lastHeading;
+    private Boolean sailIn;
+    private String position;
+    private GeoPoint location;
+    private Integer boatStatus;
+    private Double velocity;
+
+    //CLIENT SIDE
+    private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
+    private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
+    private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
+    private ReadOnlyDoubleProperty headingProperty = new ReadOnlyDoubleWrapper();
     private Mark lastMarkRounded;
     private Mark nextMark;
+    private Integer positionInt = 0;
+    private Color colour;
 
 
     /**
@@ -110,8 +101,6 @@ public class Boat {
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
             String boatName, String country) {
-    public Boat(String boatType, Integer sourceID, String hullID, String shortName,
-        String boatName, String country) {
         this.boatType = boatType;
         this.sourceId = sourceId;
         this.hullID = hullID;
@@ -134,16 +123,11 @@ public class Boat {
             Double thisHeading = ((double) Math.floorMod(heading.longValue(), 360L));
             Double windSpeedKnots = 0d;
             Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, thisHeading);
-            velocity = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 3000;
+            velocity = boatSpeedInKnots / 1.94384449 * 3000; // TODO: 25/07/17 cir27 - remove magic numbers
             //System.out.println("velocity = " + velocity);
             Double metersCovered = velocity * secondsElapsed;
             location = getGeoCoordinate(location, heading, metersCovered);
         }
-    }
-
-
-    public Double getHeading() {
-        return heading;
     }
 
     public void adjustHeading(Double amount) {
@@ -244,15 +228,14 @@ public class Boat {
     }
 
     public void setLegNumber(Integer legNumber) {
-        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(
-            sourceId)) {
-            RaceViewController.updateYachtPositionSparkline(this, legNumber);
-        }
+//        if (colour != null  && position != "-" && legNumber != this.legNumber) {
+//            RaceViewController.updateYachtPositionSparkline(this, legNumber);
+//        }
         this.legNumber = legNumber;
     }
 
-    public void setEstimateTimeTillNextMark(Long estimateTimeAtNextMark) {
-        timeTillNext.set(estimateTimeAtNextMark);
+    public void setEstimateTimeTillNextMark(Long estimateTimeTillNextMark) {
+        timeTillNext = estimateTimeTillNextMark;
     }
 
     public String getEstimateTimeAtFinish() {
@@ -264,37 +247,28 @@ public class Boat {
         this.estimateTimeAtFinish = estimateTimeAtFinish;
     }
 
-    public Integer getPosition() {
-        return position;
+    public Integer getPositionInteger() {
+        return positionInt;
     }
 
-    public void setPosition(Integer position) {
-        this.position = position;
+    public void setPositionInteger(Integer position) {
+        this.positionInt = position;
     }
 
-    public Color getColour() {
-        return colour;
+    public void setVelocityProperty(double velocity) {
+        this.velocityProperty.set(velocity);
     }
-
-    public void setColour(Color colour) {
-        this.colour = colour;
-    }
-
-    public void setVelocity(double velocity) {
-        this.velocity.set(velocity);
-    }
-
 
     public void setMarkRoundingTime(Long markRoundingTime) {
         this.markRoundTime = markRoundingTime;
     }
 
     public ReadOnlyDoubleProperty getVelocityProperty() {
-        return velocity.getReadOnlyProperty();
+        return velocityProperty.getReadOnlyProperty();
     }
 
     public ReadOnlyLongProperty timeTillNextProperty() {
-        return timeTillNext.getReadOnlyProperty();
+        return timeTillNextProperty.getReadOnlyProperty();
     }
 
     public Long getMarkRoundTime() {
@@ -339,6 +313,8 @@ public class Boat {
 
     public void setHeading(Double heading) {
         this.heading = heading;
+    }
+
     public Boolean getSailIn() {
         return sailIn;
     }
@@ -352,12 +328,37 @@ public class Boat {
         return location;
     }
 
-    public void setTimeSinceLastMark (long timeSinceLastMark) {
-        this.timeSinceLastMark.set(timeSinceLastMark);
+    public void updateTimeSinceLastMarkProperty(long timeSinceLastMark) {
+        this.timeSinceLastMarkProperty.set(timeSinceLastMark);
     }
 
     public ReadOnlyLongProperty timeSinceLastMarkProperty () {
-        return timeSinceLastMark.getReadOnlyProperty();
+        return timeSinceLastMarkProperty.getReadOnlyProperty();
     }
 
+    public Long getTimeTillNext() {
+        return timeTillNext;
+    }
+
+    public void setTimeTillNext(Long timeTillNext) {
+        this.timeTillNext = timeTillNext;
+    }
+
+
+    public Color getColour() {
+        return colour;
+    }
+
+    public void setColour(Color colour) {
+        this.colour = colour;
+    }
+
+
+    public Double getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(Double velocity) {
+        this.velocity = velocity;
+    }
 }

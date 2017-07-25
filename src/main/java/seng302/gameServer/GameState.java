@@ -2,10 +2,11 @@ package seng302.gameServer;
 
 import java.util.*;
 
-import seng302.models.Player;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import seng302.model.Player;
-
-import seng302.models.Yacht;
+import seng302.model.Yacht;
+import seng302.model.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionType;
 
 /**
@@ -23,14 +24,26 @@ public class GameState {
     private static Map<Integer, Yacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
-    
+
+    // TODO: 26/07/17 cir27 - Super hackish fix until something more permanent can be made.
+    private static ObservableList<String> observablePlayers = FXCollections.observableArrayList();
+    private static Map<Player, String> playerStringMap = new HashMap<>();
+    /*
+        Ideally I would like to make this class an object instantiated by the server and given to
+        it's created threads if necessary. Outside of that I think the dependencies on it
+        (atm only Yacht & GameClient) can be removed from most other classes. The observable list of
+        players could be pulled directly from the server by the GameClient since it instantiates it
+        and it is reasonable for it to pull data. The current setup of publicly available statics is
+        pretty meh IMO because anything can change it making it unreliable and like people did with
+        the old ServerParser class everything that needs shared just gets thrown in the static
+        collections and things become a real mess.
+     */
+
     public GameState(String hostIpAddress) {
         windDirection = 170d;
         windSpeed = 10000d;
         yachts = new HashMap<>();
         players = new ArrayList<>();
-
-
         GameState.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
@@ -48,13 +61,22 @@ public class GameState {
     public static List<Player> getPlayers() {
         return players;
     }
-    
+
+    public static ObservableList<String> getObservablePlayers () {
+        return observablePlayers;
+    }
+
     public static void addPlayer(Player player) {
         players.add(player);
+        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
+        observablePlayers.add(playerText);
+        playerStringMap.put(player, playerText);
     }
     
     public static void removePlayer(Player player) {
         players.remove(player);
+        observablePlayers.remove(playerStringMap.get(player));
+        playerStringMap.remove(player);
     }
 
     public static void addYacht(Integer sourceId, Yacht yacht) {

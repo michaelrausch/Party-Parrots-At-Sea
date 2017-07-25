@@ -1,16 +1,16 @@
-package seng302.model.stream.parsers;
+package seng302.model.stream.parser;
 
 /**
  * Class for storing data parsed from race start status packet
  */
 public class RaceStartData {
 
-    long raceId;
-    long raceStartTime;
-    int notificationType;
-    long timeStamp;
+    private long raceId;
+    private long raceStartTime;
+    private int notificationType;
+    private long timeStamp;
 
-    public RaceStartData (long raceId, long raceStartTime, int notificationType, long timeStamp) {
+    RaceStartData (long raceId, long raceStartTime, int notificationType, long timeStamp) {
         this.raceId = raceId;
         this.raceStartTime = raceStartTime;
         this.notificationType = notificationType;

@@ -1,4 +1,4 @@
-package seng302.model.stream.parsers;
+package seng302.model.stream.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +17,9 @@ public class RaceStatusData {
     private boolean raceStarted = false;
     private long currentTime;
     private long expectedStartTime;
-    List<long[]> boatData = new ArrayList<>();
+    private List<long[]> boatData = new ArrayList<>();
 
-    public RaceStatusData(
+    RaceStatusData(
         long windDir, long rawWindSpeed, int raceStatus, long currentTime, long expectedStartTime) {
 
         windDirection = windDir / WIND_DIR_FACTOR;
@@ -29,7 +29,7 @@ public class RaceStatusData {
         this.expectedStartTime = expectedStartTime;
     }
 
-    public void addBoatData (long boatID, long estTimeToNextMark, long estTimeToFinish, int leg) {
+    void addBoatData (long boatID, long estTimeToNextMark, long estTimeToFinish, int leg) {
         boatData.add(new long[] {boatID, estTimeToNextMark, estTimeToFinish, leg});
     }
 

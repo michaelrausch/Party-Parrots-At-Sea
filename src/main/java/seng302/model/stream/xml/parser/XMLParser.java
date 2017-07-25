@@ -1,4 +1,4 @@
-package seng302.model.stream.parsers.xml;
+package seng302.model.stream.xml.parser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import seng302.model.Boat;
+import seng302.model.Yacht;
 import seng302.model.Corner;
 import seng302.model.Limit;
 import seng302.model.mark.GateMark;
@@ -124,8 +124,8 @@ public class XMLParser {
      * @param doc XML Document Object
      * @return Mapping of sourceIds to Boats.
      */
-    public static Map<Integer, Boat> parseBoats(Document doc){
-        Map<Integer, Boat> competingBoats = new HashMap<>();
+    public static Map<Integer, Yacht> parseBoats(Document doc){
+        Map<Integer, Yacht> competingBoats = new HashMap<>();
 
         Element docEle = doc.getDocumentElement();
 
@@ -134,14 +134,14 @@ public class XMLParser {
             Node currentBoat = boatsList.item(i);
             if (currentBoat.getNodeName().equals("Boat")) {
 //                    Boat boat = new Boat(currentBoat);
-                Boat boat = new Boat(XMLParser.getNodeAttributeString(currentBoat, "Type"),
+                Yacht yacht = new Yacht(XMLParser.getNodeAttributeString(currentBoat, "Type"),
                     XMLParser.getNodeAttributeInt(currentBoat, "SourceID"),
                     XMLParser.getNodeAttributeString(currentBoat, "HullNum"),
                     XMLParser.getNodeAttributeString(currentBoat, "ShortName"),
                     XMLParser.getNodeAttributeString(currentBoat, "BoatName"),
                     XMLParser.getNodeAttributeString(currentBoat, "Country"));
-                if (boat.getBoatType().equals("Yacht")) {
-                    competingBoats.put(boat.getSourceID(), boat);
+                if (yacht.getBoatType().equals("Yacht")) {
+                    competingBoats.put(yacht.getSourceId(), yacht);
                 }
             }
         }

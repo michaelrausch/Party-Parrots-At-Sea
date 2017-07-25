@@ -1,4 +1,4 @@
-package seng302.model.stream.parsers;
+package seng302.model.stream.parser;
 
 public class PositionUpdateData {
 
@@ -14,7 +14,7 @@ public class PositionUpdateData {
     private double heading;
     private double groundSpeed;
 
-    public PositionUpdateData(int deviceId, DeviceType type, double lat, double lon,
+    PositionUpdateData(int deviceId, DeviceType type, double lat, double lon,
         double heading, double groundSpeed) {
         this.deviceId = deviceId;
         this.type = type;

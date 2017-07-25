@@ -1,4 +1,4 @@
-package seng302.model.stream.parsers.xml;
+package seng302.model.stream.xml.parser;
 
 import java.util.HashMap;
 import java.util.List;

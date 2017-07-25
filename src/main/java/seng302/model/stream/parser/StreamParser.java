@@ -1,6 +1,6 @@
-package seng302.model.stream.parsers;
+package seng302.model.stream.parser;
 
-import seng302.model.stream.parsers.PositionUpdateData.DeviceType;
+import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.parsers.xml.RegattaXMLData;
 
 /**
  * StreamParser is a utilities class for taking byte data, formatted according to the AC35

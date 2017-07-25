@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import seng302.model.PolarTable;
-import seng302.model.stream.parsers.StreamParser;
 import seng302.model.stream.StreamReceiver;
 
 public class App extends Application {

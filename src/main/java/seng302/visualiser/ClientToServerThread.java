@@ -9,48 +9,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import seng302.model.stream.packets.StreamPacket;
-import seng302.models.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.Message;
 
 /**
  * Created by kre39 on 13/07/17.
  */
-public class ClientToServerThread extends Thread {
-    private Queue<StreamPacket> streamPackets = new ConcurrentLinkedQueue<>();
-    private List<ClientSocketListener> listeners = new ArrayList<>();
-
 public class ClientToServerThread implements Runnable {
-
     private static final int LOG_LEVEL = 1;
 
+    private Queue<StreamPacket> streamPackets = new ConcurrentLinkedQueue<>();
+    private List<ClientSocketListener> listeners = new ArrayList<>();
     private Thread thread;
-
-    private Integer ourID;
 
     private Socket socket;
     private InputStream is;
     private OutputStream os;
 
+    private int clientId;
+
     private Boolean updateClient = true;
     private  ByteArrayOutputStream crcBuffer;
 
-    public ClientToServerThread(String ipAddress, Integer portNumber) throws Exception{
+    public ClientToServerThread(String ipAddress, Integer portNumber) throws IOException{
         socket = new Socket(ipAddress, portNumber);
         is = socket.getInputStream();
         os = socket.getOutputStream();
 
         Integer allocatedID = threeWayHandshake();
         if (allocatedID != null) {
-            ourID = allocatedID;
-            clientLog("Successful handshake. Allocated ID: " + ourID, 1);
-            ClientState.setClientSourceId(String.valueOf(ourID));
+            clientId = allocatedID;
+            clientLog("Successful handshake. Allocated ID: " + clientId, 1);
         } else {
             clientLog("Unsuccessful handshake", 1);
             closeSocket();
@@ -59,7 +53,6 @@ public class ClientToServerThread implements Runnable {
 
         thread = new Thread(this);
         thread.start();
-
     }
 
     static void clientLog(String message, int logLevel){
@@ -72,7 +65,7 @@ public class ClientToServerThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-        while(ClientState.isConnectedToHost()) {
+        while(true) { /**REMOVED SOMETHING HERE ClientState.isConnectedToHost() */
             try {
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
@@ -113,8 +106,8 @@ public class ClientToServerThread implements Runnable {
                 return;
             }
         }
-        closeSocket();
-        clientLog("Disconnected from server", 0);
+//        closeSocket();
+//        clientLog("Disconnected from server", 0);
     }
 
 

@@ -1,7 +1,7 @@
 package seng302.gameServer;
 
 import java.util.Arrays;
-import seng302.models.stream.packets.StreamPacket;
+import seng302.model.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionType;
 
 
