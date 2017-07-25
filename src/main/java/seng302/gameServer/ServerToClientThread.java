@@ -34,7 +34,6 @@ import java.util.zip.Checksum;
 import seng302.server.messages.RaceStatus;
 import seng302.server.messages.RaceStatusMessage;
 import seng302.server.messages.RaceType;
-import seng302.server.messages.WindDirection;
 import seng302.server.messages.XMLMessage;
 import seng302.server.messages.XMLMessageSubType;
 import seng302.server.messages.XMLMessage;
@@ -410,7 +409,7 @@ public class ServerToClientThread implements Runnable, Observer {
             raceStatus = RaceStatus.WARNING;
         }
 
-        sendMessage(new RaceStatusMessage(1, raceStatus, startTime, WindDirection.SOUTH,
-            100, GameState.getPlayers().size(), RaceType.MATCH_RACE, 1, boatSubMessages));
+        sendMessage(new RaceStatusMessage(1, raceStatus, startTime, GameState.getWindDirection(),
+            GameState.getWindSpeed().longValue(), GameState.getPlayers().size(), RaceType.MATCH_RACE, 1, boatSubMessages));
     }
 }

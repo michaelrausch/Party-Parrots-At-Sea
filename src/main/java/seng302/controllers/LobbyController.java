@@ -115,7 +115,7 @@ public class LobbyController implements Initializable, Observer{
         }
         initialiseListView();
 //        initialiseLobbyControllerThread();
-//        initialiseImageView();  // parrot gif init
+        initialiseImageView();  // parrot gif init
 
         // set up client state query thread, so that when it receives the race-started packet
         // it can switch to the race view
