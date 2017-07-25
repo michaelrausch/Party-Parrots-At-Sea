@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -42,7 +43,7 @@ public class ClientToServerThread implements Runnable {
             clientLog("Successful handshake. Allocated ID: " + ourID, 1);
             ClientState.setClientSourceId(String.valueOf(ourID));
         } else {
-            clientLog("Unsuccessful handhsake", 1);
+            clientLog("Unsuccessful handshake", 1);
             closeSocket();
             return;
         }
@@ -54,7 +55,7 @@ public class ClientToServerThread implements Runnable {
 
     static void clientLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
-            System.out.println("[CLIENT] " + message);
+            System.out.println("[CLIENT " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
     }
 
@@ -105,7 +106,7 @@ public class ClientToServerThread implements Runnable {
             }
         }
         closeSocket();
-        System.out.println("[CLIENT] Disconnected from server");
+        clientLog("Disconnected from server", 0);
     }
 
 

@@ -119,7 +119,6 @@ public class ClientPacketParser {
      */
     private static void extractHeartBeat(StreamPacket packet) {
         long heartbeat = bytesToLong(packet.getPayload());
-        System.out.println("[CLIENT] Received heartbeat = " + heartbeat);
     }
 
     private static String getTimeZoneString() {

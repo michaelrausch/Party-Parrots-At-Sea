@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -97,7 +99,7 @@ public class ServerToClientThread implements Runnable, Observer {
 
     static void serverLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
-            System.out.println("[SERVER] " + message);
+            System.out.println("[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
     }
 
@@ -234,8 +236,8 @@ public class ServerToClientThread implements Runnable, Observer {
                 }
             } catch (Exception e) {
                 // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected
-                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
-                e.printStackTrace();
+//                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
+//                e.printStackTrace();
                 closeSocket();
                 return;
             }
@@ -346,6 +348,8 @@ public class ServerToClientThread implements Runnable, Observer {
     public void sendMessage(Message message){
         try {
             os.write(message.getBuffer());
+        } catch (SocketException e) {
+            serverLog("Player " + sourceId + " " + e.getMessage(), 0);
         } catch (IOException e) {
             e.printStackTrace();
         }
