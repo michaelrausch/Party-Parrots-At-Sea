@@ -1,10 +1,6 @@
 package seng302.controllers;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.*;
 
@@ -84,6 +80,10 @@ public class LobbyController implements Initializable, Observer{
     private static ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
     private static ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
     private ClientStateQueryingRunnable clientStateQueryingRunnable;
+    private static List<ImageView> gifImageViews;
+    private static List<ListView> listViews;
+
+    private int MAX_NUM_PLAYERS = 8;
 
     private Boolean switchedPane = false;
     private MainServerThread mainServerThread;
@@ -113,8 +113,18 @@ public class LobbyController implements Initializable, Observer{
             lobbyIpText.setText("Connected to IP: ");
             readyButton.setDisable(true);
         }
+
+        gifImageViews = new ArrayList<>();
+        Collections.addAll(gifImageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
+                fifthImageView, sixthImageView, seventhImageView, eighthImageView);
+        listViews = new ArrayList<>();
+        Collections.addAll(listViews, firstListView, secondListView, thirdListView, fourthListView, fifthListView,
+                sixthListView, seventhListView, eighthListView);
+        competitors = new ArrayList<>();
+        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
+                fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
+
         initialiseListView();
-//        initialiseLobbyControllerThread();
         initialiseImageView();  // parrot gif init
 
         // set up client state query thread, so that when it receives the race-started packet
@@ -142,45 +152,16 @@ public class LobbyController implements Initializable, Observer{
     }
 
     private void initialiseListView() {
-        firstListView.getItems().clear();
-        secondListView.getItems().clear();
-        thirdListView.getItems().clear();
-        fourthListView.getItems().clear();
-        fifthListView.getItems().clear();
-        sixthListView.getItems().clear();
-        seventhListView.getItems().clear();
-        eighthListView.getItems().clear();
+        listViews.forEach(listView -> listView.getItems().clear());
+        gifImageViews.forEach(gif -> gif.setVisible(false));
+        competitors.forEach(ol -> ol.removeAll());
 
-        competitors = new ArrayList<>();
-        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
-            fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
-
-        for (ObservableList<String> ol : competitors) {
-            ol.removeAll();
+        List<Integer> ids = new ArrayList<>(ClientState.getBoats().keySet());
+        for (int i = 0; i < ids.size(); i++) {
+            competitors.get(i).add(String.format("Player ID: %d", ids.get(i)));
+            listViews.get(i).setItems(competitors.get(i));
+            gifImageViews.get(i).setVisible(true);
         }
-
-        firstCompetitor.add(ClientState.getClientSourceId());
-
-        int competitorIndex = 1;
-        for (Integer yachtId : ClientState.getBoats().keySet()) {
-            // break if there are more than 7 competitors
-            if (competitorIndex >= 8) {
-                break;
-            }
-            if (!yachtId.equals(Integer.parseInt(ClientState.getClientSourceId()))) {
-                competitors.get(competitorIndex).add(String.valueOf(yachtId));
-                competitorIndex++;
-            }
-        }
-
-        firstListView.setItems(firstCompetitor);
-        secondListView.setItems(secondCompetitor);
-        thirdListView.setItems(thirdCompetitor);
-        fourthListView.setItems(fourthCompetitor);
-        fifthListView.setItems(fifthCompetitor);
-        sixthListView.setItems(sixthCompetitor);
-        seventhListView.setItems(seventhCompetitor);
-        eighthListView.setItems(eighthCompetitor);
     }
 
     private void initialiseLobbyControllerThread() {
