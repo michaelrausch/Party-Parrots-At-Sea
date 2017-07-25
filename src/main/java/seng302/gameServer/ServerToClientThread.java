@@ -236,7 +236,7 @@ public class ServerToClientThread implements Runnable, Observer {
             } catch (Exception e) {
                 // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected
                 serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
-//                e.printStackTrace();
+                e.printStackTrace();
                 closeSocket();
                 return;
             }
@@ -364,7 +364,7 @@ public class ServerToClientThread implements Runnable, Observer {
 //            System.out.println("[SERVER] Lat: " + yacht.getLocation().getLat() + " Lon: " + yacht.getLocation().getLng());
             BoatLocationMessage boatLocationMessage =
                     new BoatLocationMessage(
-                            sourceId,
+                            yacht.getSourceId(),
                             getSeqNo(),
                             yacht.getLocation().getLat(),
                             yacht.getLocation().getLng(),

@@ -239,12 +239,13 @@ public class LobbyController implements Initializable, Observer{
 
     private void playTheme() {
         Random random = new Random(System.currentTimeMillis());
-        if(random.nextInt(11) == 10) {
+        Integer rand = random.nextInt();
+        if(rand == 10) {
             URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
             Media hit = new Media(file.toString());
             mediaPlayer = new MediaPlayer(hit);
             mediaPlayer.play();
-        } else if(random.nextInt(11) == 9) {
+        } else if(rand == 9) {
             URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
             Media hit = new Media(file.toString());
             mediaPlayer = new MediaPlayer(hit);
