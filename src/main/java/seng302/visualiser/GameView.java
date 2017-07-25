@@ -1,11 +1,13 @@
 package seng302.visualiser;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.PriorityBlockingQueue;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.ObservableList;
@@ -21,8 +23,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import seng302.model.Limit;
-import seng302.visualiser.fxObjects.BoatGroup;
-import seng302.visualiser.fxObjects.MarkGroup;
+import seng302.visualiser.fxObjects.AnnotationBox;
+import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.MarkObject;
 import seng302.model.Colors;
 import seng302.model.Boat;
 import seng302.model.map.Boundary;
@@ -32,10 +35,6 @@ import seng302.model.mark.Mark;
 import seng302.model.mark.MarkType;
 import seng302.model.mark.SingleMark;
 import seng302.model.stream.parsers.StreamParser;
-import seng302.model.stream.parsers.xml.XMLParser;
-import seng302.model.stream.parsers.xml.XMLParser.RaceXMLObject.Limit;
-import seng302.model.stream.parsers.xml.XMLParser.RaceXMLObject.Participant;
-import seng302.model.stream.parsers.PositionUpdateData;
 import seng302.utilities.GeoPoint;
 import seng302.utilities.GeoUtility;
 
@@ -65,8 +64,9 @@ public class GameView extends Pane {
     private double metersPerPixelX;
     private double metersPerPixelY;
 
-    private List<MarkGroup> markGroups = new ArrayList<>();
-    private List<BoatGroup> boatGroups = new ArrayList<>();
+    private Map<SingleMark, MarkObject> markObjects = new HashMap<>();
+    private Map<Boat, BoatObject> boatObjects = new HashMap<>();
+    private List<AnnotationBox> annotations = new ArrayList<>();
 
     private Text fpsDisplay = new Text();
 
@@ -130,17 +130,14 @@ public class GameView extends Pane {
         };
     }
 
-    void initializeCanvas() {
-
-        fitMarksToCanvas();
+    public void initializeCanvas() {
         drawGoogleMap();
         fpsDisplay.setLayoutX(5);
         fpsDisplay.setLayoutY(20);
         fpsDisplay.setStrokeWidth(2);
         gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
-        initializeMarks();
-        initializeBoats();
+
         this.widthProperty().addListener(resize -> {
             canvasWidth = this.getWidth();
             canvasHeight = this.getHeight();
@@ -206,14 +203,12 @@ public class GameView extends Pane {
      * same, so they do not have things such as a type and must be derived from the number of marks
      * in a compound mark etc..
      */
-    private void addRaceBorder() {
-        XMLParser.RaceXMLObject raceXMLObject = StreamParser.getXmlObject().getRaceXML();
-        ArrayList<Limit> courseLimits = raceXMLObject.getCourseLimit();
+    public void updateBorder(List<Limit> border) {
         raceBorder.setStroke(new Color(0.0f, 0.0f, 0.74509807f, 1));
         raceBorder.setStrokeWidth(3);
         raceBorder.setFill(new Color(0,0,0,0));
         List<Double> boundaryPoints = new ArrayList<>();
-        for (Limit limit : courseLimits) {
+        for (Limit limit : border) {
             Point2D location = findScaledXY(limit.getLat(), limit.getLng());
             boundaryPoints.add(location.getX());
             boundaryPoints.add(location.getY());
@@ -222,112 +217,114 @@ public class GameView extends Pane {
     }
 
     private void updateGroups() {
-        for (BoatGroup boatGroup : boatGroups) {
-            // some raceObjects will have multiple ID's (for instance gate marks)
-            //checking if the current "ID" has any updates associated with it
-            if (StreamParser.boatLocations.containsKey(boatGroup.getRaceId())) {
-                if (boatGroup.isStopped()) {
-                    updateBoatGroup(boatGroup);
-                }
-            }
-            boatGroup.move();
-        }
-        for (MarkGroup markGroup : markGroups) {
-            for (Long id : markGroup.getRaceIds()) {
-                if (StreamParser.markLocations.containsKey(id)) {
-                    updateMarkGroup(id, markGroup);
-                }
-            }
-        }
-        checkForCourseChanges();
+        boatObjects.forEach((boat, boatObject) -> {});
+        markObjects.forEach((mark, markObject) -> {});
     }
 
-    private void checkForCourseChanges() {
-        if (StreamParser.isNewRaceXmlReceived()){
-            addRaceBorder();
-        }
-    }
-
-    private void updateBoatGroup(BoatGroup boatGroup) {
-//        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
-//        // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
-//        if (movementQueue.size() > 0) {
+//    private void updateBoatGroup(BoatGroup boatGroup) {
+////        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
+////        // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
+////        if (movementQueue.size() > 0) {
+////            try {
+////                PositionUpdateData positionPacket = movementQueue.take();
+//                Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
+////                double heading = 360.0 / 0xffff * positionPacket.getHeading();
+//                boatGroup.setDestination(
+//                    p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(),
+//                    positionPacket.getTimeValid(), frameRate);
+////            } catch (InterruptedException e){
+////                e.printStackTrace();
+////            }
+//////            }
+////        }
+//    }
+//
+//    private void updateMarkGroup (long raceId, MarkGroup markGroup) {
+//        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.markLocations.get(raceId);
+//        if (movementQueue.size() > 0){
 //            try {
 //                PositionUpdateData positionPacket = movementQueue.take();
-                Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
-//                double heading = 360.0 / 0xffff * positionPacket.getHeading();
-                boatGroup.setDestination(
-                    p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(),
-                    positionPacket.getTimeValid(), frameRate);
-//            } catch (InterruptedException e){
+//                Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
+//                markGroup.moveMarkTo(p2d.getX(), p2d.getY(), raceId);
+//            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-////            }
 //        }
-    }
-
-    private void updateMarkGroup (long raceId, MarkGroup markGroup) {
-        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.markLocations.get(raceId);
-        if (movementQueue.size() > 0){
-            try {
-                PositionUpdateData positionPacket = movementQueue.take();
-                Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
-                markGroup.moveMarkTo(p2d.getX(), p2d.getY(), raceId);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    }
 
     /**
      * Draws all the boats.
      */
-    private void initializeBoats() {
-        Map<Integer, Boat> boats = StreamParser.getBoats();
-        Group wakes = new Group();
-        Group trails = new Group();
-        Group annotations = new Group();
+    public void setBoats(List<Boat> boats) {
+        Group annotationsGroup = new Group();
+        Group wakesGroup = new Group();
+        Group boatObjectGroup = new Group();
 
-        ArrayList<Participant> participants = StreamParser.getXmlObject().getRaceXML()
-            .getParticipants();
-        ArrayList<Integer> participantIDs = new ArrayList<>();
-        for (Participant p : participants) {
-            participantIDs.add(p.getsourceID());
-        }
+        BoatObject newObject;
+        for (Boat boat : boats) {
+            newObject = new BoatObject();
+//            newObject.bindBoat(boat);
+            newObject.setFill(Colors.getColor());
+            createAnnotationBox(boat);
 
-        for (Boat boat : boats.values()) {
-            if (participantIDs.contains(boat.getSourceID())) {
-                boat.setColour(Colors.getColor());
-                BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-                boatGroups.add(boatGroup);
-                trails.getChildren().add(boatGroup.getTrail());
-                wakes.getChildren().add(boatGroup.getWake());
-                annotations.getChildren().add(boatGroup.getAnnotations());
-            }
         }
-        gameObjects.addAll(trails);
-        gameObjects.addAll(wakes);
-        gameObjects.addAll(annotations);
-        gameObjects.addAll(boatGroups);
+//        Group wakes = new Group();
+//        Group trails = new Group();
+//        Group annotationsGroup = new Group();
+//
+//        gameObjects.addAll(trails);
+//        gameObjects.addAll(wakes);
+        annotationsGroup.getChildren().addAll(annotations);
+        gameObjects.addAll(annotationsGroup);
+        gameObjects.addAll(boatObjects.values());
     }
 
-    private void initializeMarks() {
-        List<Mark> allMarks = StreamParser.getXmlObject().getRaceXML().getNonDupCompoundMarks();
-        for (Mark mark : allMarks) {
+    private AnnotationBox createAnnotationBox (Boat boat) {
+        AnnotationBox newAnnotation;
+        newAnnotation = new AnnotationBox();
+        newAnnotation.addAnnotation("name", boat.getShortName());
+//        newAnnotation.addAnnotation("country", boat.getCountry());
+        newAnnotation.addAnnotation(
+            "velocity",
+            boat.getVelocityProperty(),
+            (velocity) -> String.format("%.2f ms", velocity.doubleValue())
+        );
+        newAnnotation.addAnnotation(
+            "nextMark",
+            boat.timeTillNextProperty(),
+            (time) -> {
+                DateFormat format = new SimpleDateFormat("mm:ss");
+                return format.format(time);
+            }
+        );
+        newAnnotation.addAnnotation(
+            "lastMark",
+            boat.timeTillNextProperty(),
+            (time) -> {
+                DateFormat format = new SimpleDateFormat("mm:ss");
+                return format.format(time);
+            }
+        );
+        annotations.add(newAnnotation);
+        return newAnnotation;
+    }
+
+    public void updateCourse(List<Mark> course) {
+        for (Mark mark : course) {
             if (mark.getMarkType() == MarkType.SINGLE_MARK) {
                 SingleMark sMark = (SingleMark) mark;
 
-                MarkGroup markGroup = new MarkGroup(sMark, findScaledXY(sMark));
-                markGroups.add(markGroup);
+                MarkObject markObject = new MarkObject(sMark, findScaledXY(sMark));
+                markObjects.put(sMark, markObject);
             } else {
                 GateMark gMark = (GateMark) mark;
 
-                MarkGroup markGroup = new MarkGroup(gMark, findScaledXY(gMark.getSingleMark1()),
+                MarkObject markObject = new MarkObject(gMark, findScaledXY(gMark.getSingleMark1()),
                     findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
-                markGroups.add(markGroup);
+//                markObjects.put(markObject.);
             }
         }
-        gameObjects.addAll(markGroups);
+//        gameObjects.addAll(markObjects);
     }
 
     private void drawFps(int fps){
@@ -340,12 +337,11 @@ public class GameView extends Pane {
      */
     private void fitMarksToCanvas() {
         //Check is called once to avoid unnecessarily change the course limits once the race is running
-        StreamParser.isNewRaceXmlReceived();
         findMinMaxPoint();
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
         //givePointsXY();
-        addRaceBorder();
+//        updateBorder();
     }
 
 
@@ -356,9 +352,9 @@ public class GameView extends Pane {
      */
     private void findMinMaxPoint() {
         List<Limit> sortedPoints = new ArrayList<>();
-        for (Limit limit : raceData) {
-            sortedPoints.add(limit);
-        }
+//        for (Limit limit : ) {
+//            sortedPoints.add(limit);
+//        }
         sortedPoints.sort(Comparator.comparingDouble(Limit::getLat));
         Limit minLatMark = sortedPoints.get(0);
         Limit maxLatMark = sortedPoints.get(sortedPoints.size()-1);
@@ -503,8 +499,14 @@ public class GameView extends Pane {
 
     public void setAnnotationVisibilities (boolean teamName, boolean velocity, boolean estTime,
         boolean legTime, boolean trail, boolean wake) {
-        for (BoatGroup boatGroup : boatGroups) {
-            boatGroup.setVisibility(teamName, velocity, estTime, legTime, trail, wake);
+        for (BoatObject boatObject : boatObjects.values()) {
+            boatObject.setVisibility(teamName, velocity, estTime, legTime, trail, wake);
+        }
+        for (AnnotationBox ag : annotations) {
+            ag.setAnnotationVisibility("name", teamName);
+            ag.setAnnotationVisibility("velocity", velocity);
+            ag.setAnnotationVisibility("nextMark", estTime);
+            ag.setAnnotationVisibility("lastMark", legTime);
         }
     }
 
@@ -516,8 +518,10 @@ public class GameView extends Pane {
         return fpsDisplay.visibleProperty();
     }
 
-    public void selectBoat (int boatId) {
-
+    public void selectBoat (Boat selectedBoat) {
+        boatObjects.forEach((boat, group) ->
+            group.setIsSelected(boat == selectedBoat)
+        );
     }
 
     public void pauseRace () {
@@ -526,9 +530,5 @@ public class GameView extends Pane {
 
     public void startRace () {
         timer.start();
-    }
-
-    public void updateBorder (List<Limit> courseLimit) {
-
     }
 }

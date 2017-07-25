@@ -1,9 +1,11 @@
 package seng302.model;
 
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.ReadOnlyLongProperty;
+import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import seng302.model.mark.Mark;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.visualiser.controllers.RaceViewController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -30,15 +32,14 @@ public class Boat {
     private Integer boatStatus;
     private Integer legNumber = 0;
     private Integer position = 0;
-    private Integer penaltiesAwarded;
-    private Integer penaltiesServed;
     private Long estimateTimeAtFinish;
+    private Long markRoundTime;
     private Double lat;
     private Double lon;
     private Double heading;
-    private double velocity;
-    private Long timeTillNext;
-    private Long markRoundTime;
+    private ReadOnlyDoubleWrapper velocity = new ReadOnlyDoubleWrapper();
+    private ReadOnlyLongWrapper timeTillNext = new ReadOnlyLongWrapper();
+    private ReadOnlyLongWrapper timeSinceLastMark = new ReadOnlyLongWrapper();
 
     // Mark rounding
     private Mark lastMarkRounded;
@@ -94,8 +95,8 @@ public class Boat {
         this.legNumber = legNumber;
     }
 
-    public void setEstimateTimeAtNextMark(Long estimateTimeAtNextMark) {
-        timeTillNext = estimateTimeAtNextMark;
+    public void setEstimateTimeTillNextMark(Long estimateTimeAtNextMark) {
+        timeTillNext.set(estimateTimeAtNextMark);
     }
 
     public String getEstimateTimeAtFinish() {
@@ -124,7 +125,7 @@ public class Boat {
     }
 
     public void setVelocity(double velocity) {
-        this.velocity = velocity;
+        this.velocity.set(velocity);
     }
 
 
@@ -132,12 +133,12 @@ public class Boat {
         this.markRoundTime = markRoundingTime;
     }
 
-    public double getVelocity() {
-        return velocity;
+    public ReadOnlyDoubleProperty getVelocityProperty() {
+        return velocity.getReadOnlyProperty();
     }
 
-    public Long getTimeTillNext() {
-        return timeTillNext;
+    public ReadOnlyLongProperty timeTillNextProperty() {
+        return timeTillNext.getReadOnlyProperty();
     }
 
     public Long getMarkRoundTime() {
@@ -187,6 +188,14 @@ public class Boat {
     @Override
     public String toString() {
         return boatName;
+    }
+
+    public void setTimeSinceLastMark (long timeSinceLastMark) {
+        this.timeSinceLastMark.set(timeSinceLastMark);
+    }
+
+    public ReadOnlyLongProperty timeSinceLastMarkProperty () {
+        return timeSinceLastMark.getReadOnlyProperty();
     }
 
 }

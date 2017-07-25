@@ -38,20 +38,6 @@ public class StreamParser {
         return heartbeat;
     }
 
-    private static String getTimeZoneString(RegattaXMLData regattaXML) {
-        Integer offset = regattaXML.getUtcOffset();
-        StringBuilder utcOffset = new StringBuilder();
-        utcOffset.append("GMT");
-        if (offset > 0) {
-            utcOffset.append("+");
-            utcOffset.append(offset);
-        } else if (offset < 0) {
-            utcOffset.append("-");
-            utcOffset.append(offset);
-        }
-        return utcOffset.toString();
-    }
-
     /**
      * Extracts the useful race status data from race status type packets. This method will also
      * print to the console the current state of the race (if it has started/finished or is about to
@@ -112,7 +98,7 @@ public class StreamParser {
 //            boat.setPenaltiesServed((int) payload[31 + (i * 20)]);
             Long estTimeAtNextMark = bytesToLong(
                 Arrays.copyOfRange(payload, 32 + (i * 20), 38 + (i * 20)));
-//            boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
+//            boat.setEstimateTimeTillNextMark(estTimeAtNextMark);
             Long estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
             int leg = (int) payload[29 + (i * 20)];

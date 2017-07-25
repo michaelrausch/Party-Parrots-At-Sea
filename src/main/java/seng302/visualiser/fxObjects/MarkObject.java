@@ -16,7 +16,7 @@ import seng302.model.mark.SingleMark;
 /**
  * Grouping of javaFX objects needed to represent a Mark on screen.
  */
-public class MarkGroup extends Group {
+public class MarkObject extends Group {
 
     private static int MARK_RADIUS        = 5;
     private static int LINE_THICKNESS     = 2;
@@ -31,7 +31,7 @@ public class MarkGroup extends Group {
      * @param mark
      * @param points
      */
-    public MarkGroup (SingleMark mark, Point2D points) {
+    public MarkObject(SingleMark mark, Point2D points) {
         marks.add(mark);
         mainMark = mark;
         Color color = Color.BLACK;
@@ -73,7 +73,7 @@ public class MarkGroup extends Group {
         super.getChildren().removeAll(toRemove);
     }
 
-    public MarkGroup(GateMark mark, Point2D points1, Point2D points2) {
+    public MarkObject(GateMark mark, Point2D points1, Point2D points2) {
         marks.add(mark.getSingleMark1());
         marks.add(mark.getSingleMark2());
         mainMark = mark;

@@ -6,10 +6,10 @@ import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
-import seng302.visualiser.controllers.GameViewController;
 import seng302.model.Boat;
 import seng302.utilities.GeoUtility;
 import seng302.model.mark.GateMark;
@@ -25,7 +25,7 @@ import seng302.model.stream.parsers.StreamParser;
  * minimized in which case it attempts to store animations and apply them when the window is
  * maximised.
  */
-public class BoatGroup extends Group {
+public class BoatObject extends Group {
 
     //Constants for drawing
     private static final double BOAT_HEIGHT = 15d;
@@ -47,79 +47,57 @@ public class BoatGroup extends Group {
     private Double distanceTravelled = 0.0;
     private Point2D lastPoint;
     private boolean destinationSet;
-    private BoatAnnotations boatAnnotations;
+    private AnnotationBox annotationBox;
+
+    private Paint colour = Color.BLACK;
 
     private Boolean isSelected = true;  //All boats are initialised as selected
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
-     *
-     * @param boat The boat that the BoatGroup will represent. Must contain an ID which will be used
-     * to tell which BoatGroup to update.
-     * @param color The colour of the boat polygon and the trailing line.
      */
-    public BoatGroup(Boat boat, Color color) {
-        destinationSet = false;
-        this.boat = boat;
-        initChildren(color);
+    public BoatObject() {
+        this(-BOAT_WIDTH / 2, BOAT_HEIGHT / 2,
+            0.0, -BOAT_HEIGHT / 2,
+            BOAT_WIDTH / 2, BOAT_HEIGHT / 2);
     }
 
     /**
      * Creates a BoatGroup with the boat being the default polygon. The head of the boat should be
      * at point (0,0).
      *
-     * @param boat The boat that the BoatGroup will represent. Must contain an ID which will be used
-     * to tell which BoatGroup to update.
-     * @param color The colour of the boat polygon and the trailing line.
      * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat
      * polygon.
      */
-    public BoatGroup(Boat boat, Color color, double... points) {
-        destinationSet = false;
-        this.boat = boat;
-        initChildren(color, points);
-    }
-
-    /**
-     * Creates the javafx objects that will be the in the group by default.
-     *
-     * @param color The colour of the boat polygon and the trailing line.
-     * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat
-     * polygon.
-     */
-    private void initChildren(Color color, double... points) {
+    public BoatObject(double... points) {
         boatPoly = new Polygon(points);
-        boatPoly.setFill(color);
+        boatPoly.setFill(colour);
         boatPoly.setOnMouseEntered(event -> {
             boatPoly.setFill(Color.FLORALWHITE);
             boatPoly.setStroke(Color.RED);
         });
         boatPoly.setOnMouseExited(event -> {
-            boatPoly.setFill(color);
+            boatPoly.setFill(colour);
             boatPoly.setStroke(Color.BLACK);
         });
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
         boatPoly.setCache(true);
         boatPoly.setCacheHint(CacheHint.SPEED);
-        boatAnnotations = new BoatAnnotations(boat, color);
+
+        annotationBox = new AnnotationBox();
+        annotationBox.setFill(colour);
 
         leftLayLine = new Line();
         rightLayline = new Line();
 
         wake = new Wake(0, -BOAT_HEIGHT);
-        super.getChildren().addAll(boatPoly, boatAnnotations);
+        super.getChildren().addAll(boatPoly, annotationBox);
     }
 
-    /**
-     * Creates the javafx objects that will be the in the group by default.
-     *
-     * @param color The colour of the boat polygon and the trailing line.
-     */
-    private void initChildren(Color color) {
-        initChildren(color,
-            -BOAT_WIDTH / 2, BOAT_HEIGHT / 2,
-            0.0, -BOAT_HEIGHT / 2,
-            BOAT_WIDTH / 2, BOAT_HEIGHT / 2);
+    public void setFill (Paint value) {
+        this.colour = value;
+        boatPoly.setFill(colour);
+        annotationBox.setFill(colour);
     }
 
     /**
@@ -132,8 +110,8 @@ public class BoatGroup extends Group {
     private void moveGroupBy(double dx, double dy) {
         boatPoly.setLayoutX(boatPoly.getLayoutX() + dx);
         boatPoly.setLayoutY(boatPoly.getLayoutY() + dy);
-        boatAnnotations.setLayoutX(boatAnnotations.getLayoutX() + dx);
-        boatAnnotations.setLayoutY(boatAnnotations.getLayoutY() + dy);
+        annotationBox.setLayoutX(annotationBox.getLayoutX() + dx);
+        annotationBox.setLayoutY(annotationBox.getLayoutY() + dy);
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
     }
@@ -149,8 +127,8 @@ public class BoatGroup extends Group {
         rotateTo(rotation);
         boatPoly.setLayoutX(x);
         boatPoly.setLayoutY(y);
-        boatAnnotations.setLayoutX(x);
-        boatAnnotations.setLayoutY(y);
+        annotationBox.setLayoutX(x);
+        annotationBox.setLayoutY(y);
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(rotation);
@@ -225,54 +203,52 @@ public class BoatGroup extends Group {
         lastTimeValid = timeValid;
         isStopped = false;
         lastRotation = rotation;
-        boatAnnotations.update();
     }
 
 
-    /**
-     * This function works out if a boat is going upwind or down wind. It looks at the boats current position, the next
-     * gates position and the current wind
-     * If bot the wind vector from the next gate and the boat from the next gate lay on the same side, then the boat is
-     * going up wind, if they are on different sides of the gate, then the boat is going downwind
-     * @param canvasController
-     */
-    public Boolean isUpwindLeg(GameViewController canvasController, Mark nextMark) {
-
-        Double windAngle = StreamParser.getWindDirection();
-        GateMark thisGateMark = (GateMark) nextMark;
-        SingleMark nextMark1 = thisGateMark.getSingleMark1();
-        SingleMark nextMark2 = thisGateMark.getSingleMark2();
-        Point2D nextMarkPoint1 = canvasController.findScaledXY(nextMark1.getLatitude(), nextMark1.getLongitude());
-        Point2D nextMarkPoint2 = canvasController.findScaledXY(nextMark2.getLatitude(), nextMark2.getLongitude());
-
-        Point2D boatCurrentPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-        Point2D windTestPoint = GeoUtility.makeArbitraryVectorPoint(nextMarkPoint1, windAngle, 10d);
-
-
-        Integer boatLineFuncResult = GeoUtility.lineFunction(nextMarkPoint1, nextMarkPoint2, boatCurrentPoint);
-        Integer windLineFuncResult = GeoUtility.lineFunction(nextMarkPoint1, nextMarkPoint2, windTestPoint);
-
-
-        /*
-        If both the wind vector from the gate and the boat from the gate are on the same side of that gate, then the
-        boat is travelling into the wind. thus upwind. Otherwise if they are on different sides, then the boat is going
-        with the wind.
-         */
-        return boatLineFuncResult.equals(windLineFuncResult);
-    }
+//    /**
+//     * This function works out if a boat is going upwind or down wind. It looks at the boats current position, the next
+//     * gates position and the current wind
+//     * If bot the wind vector from the next gate and the boat from the next gate lay on the same side, then the boat is
+//     * going up wind, if they are on different sides of the gate, then the boat is going downwind
+//     * @param canvasController
+//     */
+//    public Boolean isUpwindLeg(GameViewController canvasController, Mark nextMark) {
+//
+//        Double windAngle = StreamParser.getWindDirection();
+//        GateMark thisGateMark = (GateMark) nextMark;
+//        SingleMark nextMark1 = thisGateMark.getSingleMark1();
+//        SingleMark nextMark2 = thisGateMark.getSingleMark2();
+//        Point2D nextMarkPoint1 = canvasController.findScaledXY(nextMark1.getLatitude(), nextMark1.getLongitude());
+//        Point2D nextMarkPoint2 = canvasController.findScaledXY(nextMark2.getLatitude(), nextMark2.getLongitude());
+//
+//        Point2D boatCurrentPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+//        Point2D windTestPoint = GeoUtility.makeArbitraryVectorPoint(nextMarkPoint1, windAngle, 10d);
+//
+//
+//        Integer boatLineFuncResult = GeoUtility.lineFunction(nextMarkPoint1, nextMarkPoint2, boatCurrentPoint);
+//        Integer windLineFuncResult = GeoUtility.lineFunction(nextMarkPoint1, nextMarkPoint2, windTestPoint);
+//
+//
+//        /*
+//        If both the wind vector from the gate and the boat from the gate are on the same side of that gate, then the
+//        boat is travelling into the wind. thus upwind. Otherwise if they are on different sides, then the boat is going
+//        with the wind.
+//         */
+//        return boatLineFuncResult.equals(windLineFuncResult);
+//        return true;
+//    }
 
     public void setIsSelected(Boolean isSelected) {
         this.isSelected = isSelected;
         setLineGroupVisible(isSelected);
         setWakeVisible(isSelected);
-        boatAnnotations.setVisible(isSelected);
+        annotationBox.setVisible(isSelected);
         setLayLinesVisible(isSelected);
     }
 
     public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime,
         boolean trail, boolean wake) {
-
-        boatAnnotations.setVisibile(teamName, velocity, estTime, legTime);
         this.wake.setVisible(wake);
         this.lineGroup.setVisible(trail);
     }
@@ -324,7 +300,7 @@ public class BoatGroup extends Group {
     }
 
     public Group getAnnotations() {
-        return boatAnnotations;
+        return annotationBox;
     }
 
     public Double getBoatLayoutX() {
