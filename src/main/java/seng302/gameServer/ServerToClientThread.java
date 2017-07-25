@@ -12,10 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Random;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import org.apache.commons.io.IOUtils;
+
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.models.stream.packets.PacketType;
@@ -29,18 +28,11 @@ import seng302.server.messages.BoatStatus;
 import seng302.server.messages.BoatSubMessage;
 import seng302.server.messages.Message;
 
-import java.io.*;
-import java.net.Socket;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
 import seng302.server.messages.RaceStatus;
 import seng302.server.messages.RaceStatusMessage;
 import seng302.server.messages.RaceType;
 import seng302.server.messages.XMLMessage;
 import seng302.server.messages.XMLMessageSubType;
-import seng302.server.messages.XMLMessage;
-import seng302.server.messages.XMLMessageSubType;
-import seng302.utilities.GeoPoint;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -306,7 +298,7 @@ public class ServerToClientThread implements Runnable, Observer {
                     yacht.getLocation().getLat(),
                     yacht.getLocation().getLng(),
                     yacht.getHeading(),
-                    (long) yacht.getVelocity());
+                    (long) yacht.getVelocityMMS());
 
             sendMessage(boatLocationMessage);
         }
@@ -348,7 +340,7 @@ public class ServerToClientThread implements Runnable, Observer {
         }
 
         sendMessage(new RaceStatusMessage(1, raceStatus, startTime, GameState.getWindDirection(),
-            GameState.getWindSpeed().longValue(), GameState.getPlayers().size(),
+            GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
             RaceType.MATCH_RACE, 1, boatSubMessages));
     }
 

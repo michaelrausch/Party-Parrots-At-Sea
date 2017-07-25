@@ -83,7 +83,7 @@ public class BoatAnnotations extends Group{
     }
 
     void update () {
-        velocityObject.setText(String.format(String.format("%.2f m/s", boat.getVelocity())));
+        velocityObject.setText(String.format(String.format("%.2f m/s", boat.getVelocityMMS())));
 
         if (boat.getTimeTillNext() != null) {
             DateFormat format = new SimpleDateFormat("mm:ss");

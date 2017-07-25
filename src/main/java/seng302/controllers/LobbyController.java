@@ -17,8 +17,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import seng302.client.ClientState;
 import seng302.client.ClientStateQueryingRunnable;
@@ -198,29 +196,29 @@ public class LobbyController implements Initializable, Observer{
     @FXML
     public void readyButtonPressed() {
 //        setContentPane("/views/RaceView.fxml");
-        playTheme();
+//        playTheme();
         GameState.setCurrentStage(GameStages.RACING);
         mainServerThread.startGame();
     }
 
 
-    private static MediaPlayer mediaPlayer;
-
-    private void playTheme() {
-        Random random = new Random(System.currentTimeMillis());
-        Integer rand = random.nextInt();
-        if(rand == 10) {
-            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
-            Media hit = new Media(file.toString());
-            mediaPlayer = new MediaPlayer(hit);
-            mediaPlayer.play();
-        } else if(rand == 9) {
-            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
-            Media hit = new Media(file.toString());
-            mediaPlayer = new MediaPlayer(hit);
-            mediaPlayer.play();
-        }
-    }
+//    private static MediaPlayer mediaPlayer;
+//
+//    private void playTheme() {
+//        Random random = new Random(System.currentTimeMillis());
+//        Integer rand = random.nextInt();
+//        if(rand == 10) {
+//            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
+//            Media hit = new Media(file.toString());
+//            mediaPlayer = new MediaPlayer(hit);
+//            mediaPlayer.play();
+//        } else if(rand == 9) {
+//            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
+//            Media hit = new Media(file.toString());
+//            mediaPlayer = new MediaPlayer(hit);
+//            mediaPlayer.play();
+//        }
+//    }
 
     private void switchToRaceView() {
         if (!switchedPane) {
