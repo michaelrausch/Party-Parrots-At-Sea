@@ -11,6 +11,7 @@ public class RaceStatusMessage extends Message{
     private final int MESSAGE_BASE_SIZE = 24;
     private final double windDirFactor = 0x4000 / 90;
 
+
     private long currentTime;
     private long raceId;
     private RaceStatus raceStatus;

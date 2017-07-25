@@ -25,7 +25,7 @@ public class GameState {
     
     public GameState(String hostIpAddress) {
         windDirection = 170d;
-        windSpeed = 1300d;
+        windSpeed = 10000d;
         yachts = new HashMap<>();
         players = new ArrayList<>();
 
