@@ -16,8 +16,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
@@ -90,6 +88,11 @@ public class LobbyController implements Initializable {
     private static ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
     private static ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
 //    private ClientStateQueryingRunnable clientStateQueryingRunnable;
+    private ClientStateQueryingRunnable clientStateQueryingRunnable;
+    private static List<ImageView> imageViews;
+    private static List<ListView> listViews;
+
+    private int MAX_NUM_PLAYERS = 8;
 
     private Boolean switchedPane = false;
 
@@ -123,6 +126,27 @@ public class LobbyController implements Initializable {
 //        }
 //        initialiseListView();
 //        initialiseLobbyControllerThread();
+//        initialiseImageView();  // parrot gif init
+//        if (ClientState.isHost()) {
+//            lobbyIpText.setText("Lobby Host IP: " + ClientState.getHostIp());
+//            readyButton.setDisable(false);
+//        }
+//        else {
+//            lobbyIpText.setText("Connected to IP: ");
+//            readyButton.setDisable(true);
+//        }
+//
+//        imageViews = new ArrayList<>();
+//        Collections.addAll(imageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
+//                fifthImageView, sixthImageView, seventhImageView, eighthImageView);
+//        listViews = new ArrayList<>();
+//        Collections.addAll(listViews, firstListView, secondListView, thirdListView, fourthListView, fifthListView,
+//                sixthListView, seventhListView, eighthListView);
+//        competitors = new ArrayList<>();
+//        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
+//                fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
+//
+//        initialiseListView();
 //        initialiseImageView();  // parrot gif init
 
         // set up client state query thread, so that when it receives the race-started packet
@@ -161,13 +185,16 @@ public class LobbyController implements Initializable {
 //        seventhListView.getItems().clear();
 //        eighthListView.getItems().clear();
 
-        competitors = new ArrayList<>();
-        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
-            fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
-
-        for (ObservableList<String> ol : competitors) {
-            ol.removeAll();
-        }
+//        listViews.forEach(listView -> listView.getItems().clear());
+//        imageViews.forEach(gif -> gif.setVisible(false));
+//        competitors.forEach(ol -> ol.removeAll());
+//
+//        List<Integer> ids = new ArrayList<>(ClientState.getBoats().keySet());
+//        for (int i = 0; i < ids.size(); i++) {
+//            competitors.get(i).add(String.format("Player ID: %d", ids.get(i)));
+//            listViews.get(i).setItems(competitors.get(i));
+//            imageViews.get(i).setVisible(true);
+//        }
 
 //        firstCompetitor.add(ClientState.getClientSourceId());
 
@@ -183,15 +210,15 @@ public class LobbyController implements Initializable {
 //            }
 //        }
 
-        firstListView.setItems(firstCompetitor);
-        secondListView.setItems(secondCompetitor);
-        thirdListView.setItems(thirdCompetitor);
-        fourthListView.setItems(fourthCompetitor);
-        fifthListView.setItems(fifthCompetitor);
-        sixthListView.setItems(sixthCompetitor);
-        seventhListView.setItems(seventhCompetitor);
-        eighthListView.setItems(eighthCompetitor);
-    }
+//        firstListView.setItems(firstCompetitor);
+//        secondListView.setItems(secondCompetitor);
+//        thirdListView.setItems(thirdCompetitor);
+//        fourthListView.setItems(fourthCompetitor);
+//        fifthListView.setItems(fifthCompetitor);
+//        sixthListView.setItems(sixthCompetitor);
+//        seventhListView.setItems(seventhCompetitor);
+//        eighthListView.setItems(eighthCompetitor);
+//    }
 
 //    private void initialiseLobbyControllerThread() {
 //        Thread thread = new Thread(new Runnable() {
@@ -209,22 +236,25 @@ public class LobbyController implements Initializable {
 //    }
 
     private void initialiseImageView() {
-        Image image1 = new Image(getClass().getResourceAsStream("/ParrotGif/alistair.gif"));
-        firstImageView.setImage(image1);
-        Image image2 = new Image(getClass().getResourceAsStream("/ParrotGif/calum.gif"));
-        secondImageView.setImage(image2);
-        Image image3 = new Image(getClass().getResourceAsStream("/ParrotGif/haoming.gif"));
-        thirdImageView.setImage(image3);
-        Image image4 = new Image(getClass().getResourceAsStream("/ParrotGif/kusal.gif"));
-        fourthImageView.setImage(image4);
-        Image image5 = new Image(getClass().getResourceAsStream("/ParrotGif/michael.gif"));
-        fifthImageView.setImage(image5);
-        Image image6 = new Image(getClass().getResourceAsStream("/ParrotGif/peter.gif"));
-        sixthImageView.setImage(image6);
-        Image image7 = new Image(getClass().getResourceAsStream("/ParrotGif/ryan.gif"));
-        seventhImageView.setImage(image7);
-        Image image8 = new Image(getClass().getResourceAsStream("/ParrotGif/will.gif"));
-        eighthImageView.setImage(image8);
+        for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
+            imageViews.get(i).setImage(new Image(getClass().getResourceAsStream("/pics/sail.png")));
+        }
+//        Image image1 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        firstImageView.setImage(image1);
+//        Image image2 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        secondImageView.setImage(image2);
+//        Image image3 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        thirdImageView.setImage(image3);
+//        Image image4 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        fourthImageView.setImage(image4);
+//        Image image5 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        fifthImageView.setImage(image5);
+//        Image image6 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        sixthImageView.setImage(image6);
+//        Image image7 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        seventhImageView.setImage(image7);
+//        Image image8 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        eighthImageView.setImage(image8);
     }
 
     @FXML
@@ -239,30 +269,30 @@ public class LobbyController implements Initializable {
     @FXML
     public void readyButtonPressed() {
 //        setContentPane("/views/RaceView.fxml");
-        playTheme();
+//        playTheme();
         GameState.setCurrentStage(GameStages.RACING);
         for (LobbyCloseListener readyListener : lobbyListeners)
             readyListener.notify(CloseStatus.READY);
     }
 
 
-    private static MediaPlayer mediaPlayer;
-
-    private void playTheme() {
-        Random random = new Random(System.currentTimeMillis());
-        Integer rand = random.nextInt();
-        if(rand == 10) {
-            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
-            Media hit = new Media(file.toString());
-            mediaPlayer = new MediaPlayer(hit);
-            mediaPlayer.play();
-        } else if(rand == 9) {
-            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
-            Media hit = new Media(file.toString());
-            mediaPlayer = new MediaPlayer(hit);
-            mediaPlayer.play();
-        }
-    }
+//    private static MediaPlayer mediaPlayer;
+//
+//    private void playTheme() {
+//        Random random = new Random(System.currentTimeMillis());
+//        Integer rand = random.nextInt();
+//        if(rand == 10) {
+//            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
+//            Media hit = new Media(file.toString());
+//            mediaPlayer = new MediaPlayer(hit);
+//            mediaPlayer.play();
+//        } else if(rand == 9) {
+//            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
+//            Media hit = new Media(file.toString());
+//            mediaPlayer = new MediaPlayer(hit);
+//            mediaPlayer.play();
+//        }
+//    }
 
 //    private void switchToRaceView() {
 //        if (!switchedPane) {

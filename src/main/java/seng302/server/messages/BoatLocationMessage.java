@@ -39,7 +39,6 @@ public class BoatLocationMessage extends Message {
      * @param boatSpeed The boats speed
      */
     public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude, double heading, long boatSpeed){
-        boatSpeed /= 10;
         messageVersionNumber = 1;
         time = System.currentTimeMillis();
         this.sourceId = sourceId;

@@ -103,8 +103,12 @@ public class GameState {
         return windDirection;
     }
 
-    public static Double getWindSpeed() {
+    public static Double getWindSpeedMMS() {
         return windSpeed;
+    }
+
+    public static Double getWindSpeedKnots() {
+        return windSpeed / 1000 * ClientPacketParser.MS_TO_KNOTS;
     }
 
     public static Map<Integer, Yacht> getYachts() {
@@ -116,6 +120,7 @@ public class GameState {
 //        System.out.println("-----------------------");
         switch (actionType) {
             case VMG:
+                playerYacht.turnToVMG();
 //                System.out.println("Snapping to VMG");
                 // TODO: 22/07/17 wmu16 - Add in the vmg calculation code here
                 break;
@@ -141,12 +146,13 @@ public class GameState {
                 break;
         }
 
-//        System.out.println("-----------------------");
-//        System.out.println("Heading: " + playerYacht.getHeading());
-//        System.out.println("Sails are in: " + playerYacht.getSailIn());
-//        System.out.println("Lat: " + playerYacht.getLocation().getLat());
-//        System.out.println("Lng: " + playerYacht.getLocation().getLng());
-//        System.out.println("-----------------------\n");
+        System.out.println("-----------------------");
+        System.out.println("Sails are in: " + playerYacht.getSailIn());
+        System.out.println("Heading: " + playerYacht.getHeading());
+        System.out.println("Velocity: " + playerYacht.getVelocityMMS() / 1000);
+        System.out.println("Lat: " + playerYacht.getLocation().getLat());
+        System.out.println("Lng: " + playerYacht.getLocation().getLng());
+        System.out.println("-----------------------\n");
     }
 
     public static void update() {

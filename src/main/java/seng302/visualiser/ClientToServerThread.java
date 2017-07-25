@@ -152,7 +152,7 @@ public class ClientToServerThread implements Runnable {
         try {
             socket.close();
         } catch (IOException e) {
-            System.out.println("IO error in server thread upon trying to close socket");
+            clientLog("Failed to close the socket", 0);
         }
     }
 

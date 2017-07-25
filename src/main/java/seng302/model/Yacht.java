@@ -11,6 +11,11 @@ import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+
+import javafx.scene.paint.Color;
+import seng302.client.ClientPacketParser;
+import seng302.controllers.RaceViewController;
 import seng302.gameServer.GameState;
 import seng302.utilities.GeoPoint;
 
@@ -110,8 +115,8 @@ public class Yacht {
         this.position = "-";
         this.sailIn = false;
         this.location = new GeoPoint(57.670341, 11.826856);
-        this.heading = 120.0;
-        this.velocity = 50000.0;
+        this.heading = 120.0;   //In degrees
+        this.velocity = 0d;     //in mms-1
     }
 
     /**
@@ -120,24 +125,28 @@ public class Yacht {
     public void update(Long timeInterval) {
         if (sailIn) {
             Double secondsElapsed = timeInterval / 1000000.0;
-            Double thisHeading = ((double) Math.floorMod(heading.longValue(), 360L));
-            Double windSpeedKnots = 0d;
-            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, thisHeading);
-            velocity = boatSpeedInKnots / 1.94384449 * 3000; // TODO: 25/07/17 cir27 - remove magic numbers
-            //System.out.println("velocity = " + velocity);
+            Double windSpeedKnots = GameState.getWindSpeedKnots();
+            Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
+            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
+            velocity = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
             Double metersCovered = velocity * secondsElapsed;
             location = getGeoCoordinate(location, heading, metersCovered);
+        } else {
+            velocity = 0d;
         }
     }
 
     public void adjustHeading(Double amount) {
+        Double newVal = heading + amount;
         lastHeading = heading;
         // TODO: 24/07/17 wmu16 - '%' in java does remainder, we need modulo. All this must be changed here, this is why we have neg values!
-        heading = (heading + amount) % 360.0;
+        heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
 
     public void tackGybe(Double windDirection) {
-        adjustHeading(-2 * ((heading - windDirection) % 360));
+        Double normalizedHeading = heading - GameState.windDirection;
+        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360);
+        adjustHeading(-2 * normalizedHeading);
     }
 
     public void toggleSailIn() {
@@ -145,7 +154,8 @@ public class Yacht {
     }
 
     public void turnUpwind() {
-        Double normalizedHeading = (heading - GameState.windDirection) % 360;
+        Double normalizedHeading = heading - GameState.windDirection;
+        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360);
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
                 adjustHeading(-TURN_STEP);
@@ -166,7 +176,8 @@ public class Yacht {
     }
 
     public void turnDownwind() {
-        Double normalizedHeading = (heading - GameState.windDirection) % 360;
+        Double normalizedHeading = heading - GameState.windDirection;
+        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360);
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
                 adjustHeading(TURN_STEP);
@@ -186,6 +197,9 @@ public class Yacht {
         }
     }
 
+    public void turnToVMG() {
+        // TODO: 25/07/17 wmu16 - Fix this so it grabs the optimal value from the optimal Polar
+    }
 
     public String getBoatType() {
         return boatType;
@@ -267,8 +281,19 @@ public class Yacht {
         return velocityProperty.getReadOnlyProperty();
     }
 
+    public double getVelocityMMS() {
+        return velocity;
+    }
+
     public ReadOnlyLongProperty timeTillNextProperty() {
         return timeTillNextProperty.getReadOnlyProperty();
+
+    public Double getVelocityKnots() {
+        return velocity / 1000 * ClientPacketParser.MS_TO_KNOTS;
+    }
+
+    public Long getTimeTillNext() {
+        return timeTillNext;
     }
 
     public Long getMarkRoundTime() {

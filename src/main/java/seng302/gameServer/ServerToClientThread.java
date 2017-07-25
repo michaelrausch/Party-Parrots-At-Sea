@@ -339,7 +339,7 @@ public class ServerToClientThread implements Runnable, Observer {
         }
 
         sendMessage(new RaceStatusMessage(1, raceStatus, startTime, GameState.getWindDirection(),
-            GameState.getWindSpeed().longValue(), GameState.getPlayers().size(),
+            GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
             RaceType.MATCH_RACE, 1, boatSubMessages));
     }
 
