@@ -13,8 +13,9 @@ public class Player {
     private Integer lastMarkPassed;
 
 
-    public Player(Socket socket) {
+    public Player(Socket socket, Yacht yacht) {
         this.socket = socket;
+        this.yacht = yacht;
     }
 
     public Socket getSocket() {

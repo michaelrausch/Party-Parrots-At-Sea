@@ -25,7 +25,6 @@ public class ServerListenThread extends Thread{
             Socket thisClient = serverSocket.accept();
             if (thisClient != null){
                 ServerToClientThread thisConnection = new ServerToClientThread(thisClient);
-                thisConnection.start();
                 delegate.clientConnected(thisConnection);
             }
         } catch (IOException e) {

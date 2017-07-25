@@ -6,9 +6,17 @@ import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import seng302.model.mark.Mark;
+import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+
+import javafx.scene.paint.Color;
+import seng302.client.ClientPacketParser;
+import seng302.controllers.RaceViewController;
+import seng302.gameServer.GameState;
+import seng302.models.mark.Mark;
+import seng302.utilities.GeoPoint;
 
 /**
  * Yacht class for the racing boat.
@@ -18,11 +26,17 @@ import java.text.SimpleDateFormat;
  */
 public class Boat {
 
+    private final Double TURN_STEP = 5.0;
+
+    private Double lastHeading;
+    private Boolean sailIn;
+
+
     // Used in boat group
     private Color colour = Color.BLACK;
 
     private String boatType;
-    private Integer sourceID;
+    private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
     private String boatName;
@@ -40,30 +54,167 @@ public class Boat {
     private ReadOnlyDoubleWrapper velocity = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNext = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMark = new ReadOnlyLongWrapper();
+    private String position;
+    private GeoPoint location;
+    private Double heading;
+    private Double velocity;
+    private Long timeTillNext;
+    private Long markRoundTime;
 
     // Mark rounding
     private Mark lastMarkRounded;
     private Mark nextMark;
 
+
+    /**
+     * @param location latlon location of the boat stored in a geopoint
+     * @param heading heading of the boat in degrees from 0 to 365 with 0 being north
+     */
+    public Yacht(GeoPoint location, Double heading) {
+        this.location = location;
+        this.heading = heading;
+        this.velocity = 0.0;
+        this.sailIn = false;
+    }
+
+
+    /**
+     * Used in EventTest and RaceTest.
+     *
+     * @param boatName Create a yacht object with name.
+     */
+    public Yacht(String boatName, String shortName, GeoPoint location, Double heading) {
+        this.boatName = boatName;
+        this.shortName = shortName;
+        this.location = location;
+        this.heading = heading;
+        this.velocity = 0.0;
+        this.sailIn = false;
+    }
+
+    /**
+     * Used in BoatGroupTest.
+     *
+     * @param boatName The name of the team sailing the boat
+     * @param boatVelocity The speed of the boat in meters/second
+     * @param shortName A shorter version of the teams name
+     */
+    public Yacht(String boatName, double boatVelocity, String shortName, int id) {
+        this.boatName = boatName;
+        this.velocity = boatVelocity;
+        this.shortName = shortName;
+        this.sourceId = id;
+        this.sailIn = false;
+    }
+
+
+    public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
+            String boatName, String country) {
     public Boat(String boatType, Integer sourceID, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
-        this.sourceID = sourceID;
+        this.sourceId = sourceId;
         this.hullID = hullID;
         this.shortName = shortName;
         this.boatName = boatName;
         this.country = country;
+        this.position = "-";
+        this.sailIn = false;
+        this.location = new GeoPoint(57.670341, 11.826856);
+        this.heading = 120.0;
+        this.velocity = 50000.0;
     }
+
+    /**
+     * @param timeInterval since last update in milliseconds
+     */
+    public void update(Long timeInterval) {
+        if (sailIn) {
+            Double secondsElapsed = timeInterval / 1000000.0;
+            Double thisHeading = ((double) Math.floorMod(heading.longValue(), 360L));
+            Double windSpeedKnots = 0d;
+            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, thisHeading);
+            velocity = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 3000;
+            //System.out.println("velocity = " + velocity);
+            Double metersCovered = velocity * secondsElapsed;
+            location = getGeoCoordinate(location, heading, metersCovered);
+        }
+    }
+
+
+    public Double getHeading() {
+        return heading;
+    }
+
+    public void adjustHeading(Double amount) {
+        lastHeading = heading;
+        // TODO: 24/07/17 wmu16 - '%' in java does remainder, we need modulo. All this must be changed here, this is why we have neg values!
+        heading = (heading + amount) % 360.0;
+    }
+
+    public void tackGybe(Double windDirection) {
+        adjustHeading(-2 * ((heading - windDirection) % 360));
+    }
+
+    public void toggleSailIn() {
+        sailIn = !sailIn;
+    }
+
+    public void turnUpwind() {
+        Double normalizedHeading = (heading - GameState.windDirection) % 360;
+        if (normalizedHeading == 0) {
+            if (lastHeading < 180) {
+                adjustHeading(-TURN_STEP);
+            } else {
+                adjustHeading(TURN_STEP);
+            }
+        } else if (normalizedHeading == 180) {
+            if (lastHeading < 180) {
+                adjustHeading(TURN_STEP);
+            } else {
+                adjustHeading(-TURN_STEP);
+            }
+        } else if (normalizedHeading < 180) {
+            adjustHeading(-TURN_STEP);
+        } else {
+            adjustHeading(TURN_STEP);
+        }
+    }
+
+    public void turnDownwind() {
+        Double normalizedHeading = (heading - GameState.windDirection) % 360;
+        if (normalizedHeading == 0) {
+            if (lastHeading < 180) {
+                adjustHeading(TURN_STEP);
+            } else {
+                adjustHeading(-TURN_STEP);
+            }
+        } else if (normalizedHeading == 180) {
+            if (lastHeading < 180) {
+                adjustHeading(-TURN_STEP);
+            } else {
+                adjustHeading(TURN_STEP);
+            }
+        } else if (normalizedHeading < 180) {
+            adjustHeading(TURN_STEP);
+        } else {
+            adjustHeading(-TURN_STEP);
+        }
+    }
+
 
     public String getBoatType() {
         return boatType;
     }
 
-    public Integer getSourceID() {
-        return sourceID;
+    public Integer getSourceId() {
+        //@TODO Remove and merge with Creating Game Loop
+        if (sourceId == null) return 0;
+        return sourceId;
     }
 
     public String getHullID() {
+        if (hullID == null) return "";
         return hullID;
     }
 
@@ -76,6 +227,7 @@ public class Boat {
     }
 
     public String getCountry() {
+        if (country == null) return "";
         return country;
     }
 
@@ -92,6 +244,10 @@ public class Boat {
     }
 
     public void setLegNumber(Integer legNumber) {
+        if (colour != null  && position != "-" && legNumber != this.legNumber&& RaceViewController.sparkLineStatus(
+            sourceId)) {
+            RaceViewController.updateYachtPositionSparkline(this, legNumber);
+        }
         this.legNumber = legNumber;
     }
 
@@ -154,12 +310,12 @@ public class Boat {
     }
 
     public void setNextMark(Mark nextMark) {
-            this.nextMark = nextMark;
-      }
+        this.nextMark = nextMark;
+    }
 
     public Mark getNextMark(){
         return nextMark;
-      }
+    }
 
     public Double getLat() {
         return lat;
@@ -183,11 +339,17 @@ public class Boat {
 
     public void setHeading(Double heading) {
         this.heading = heading;
+    public Boolean getSailIn() {
+        return sailIn;
     }
 
     @Override
     public String toString() {
         return boatName;
+    }
+
+    public GeoPoint getLocation() {
+        return location;
     }
 
     public void setTimeSinceLastMark (long timeSinceLastMark) {

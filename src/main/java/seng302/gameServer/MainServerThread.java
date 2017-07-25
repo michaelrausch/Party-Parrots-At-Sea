@@ -1,9 +1,11 @@
 package seng302.gameServer;
 
-import seng302.model.Player;
-import seng302.model.stream.PacketBufferDelegate;
-import seng302.model.stream.parsers.StreamParser;
-import seng302.model.stream.packets.StreamPacket;
+import java.time.LocalDateTime;
+import java.util.Observable;
+import seng302.client.ClientPacketParser;
+import seng302.models.Player;
+import seng302.models.stream.PacketBufferDelegate;
+import seng302.models.stream.packets.StreamPacket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,11 +17,14 @@ import java.util.concurrent.PriorityBlockingQueue;
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread extends Thread implements PacketBufferDelegate, ClientConnectionDelegate{
+public class MainServerThread extends Observable implements Runnable, PacketBufferDelegate, ClientConnectionDelegate{
 
-    private static final int PORT = 4950;
+    private static final int PORT = 4942;
     private static final Integer MAX_NUM_PLAYERS = 3;
+    private static final Integer UPDATES_PER_SECOND = 2;
     private static final int LOG_LEVEL = 1;
+
+    private Thread thread;
 
     private ServerSocket serverSocket = null;
     private Socket socket;
@@ -32,10 +37,13 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
-            System.out.println("IO error in server thread handler upon trying to make new server socket");
+            serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
 
         packetBuffer = new PriorityBlockingQueue<>();
+
+        thread = new Thread(this);
+        thread.start();
     }
 
 
@@ -49,42 +57,39 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
         heartbeatThread.start();
         serverListenThread.start();
 
+
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
-        while (!isInterrupted()) {
+        while (!thread.isInterrupted()) {
             try {
-                Thread.sleep(1000 / 60);    //60 times per second we should calculate the game state
+                Thread.sleep(1000 / UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-
+            if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
+                GameState.update();
+            }
 
             //RACING
             if (GameState.getCurrentStage() == GameStages.RACING) {
+                GameState.update();
                 updateClients();
             }
-
 
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
 
             }
-            updateClients();
-
 
             while (!packetBuffer.isEmpty()){
-                System.out.println("WHATUPPP");
                 try {
                     StreamPacket packet = packetBuffer.take();
-                    StreamParser.parsePacket(packet);
+                    ClientPacketParser.parsePacket(packet);
                 } catch (InterruptedException e) {
                     continue;
                 }
             }
         }
-
-        System.out.println("WHOOPSIES");
-
 
         // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
         try {
@@ -95,7 +100,6 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
         }
     }
 
-
     public void updateClients() {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.updateClient();
@@ -105,22 +109,14 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
 
     static void serverLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
-            System.out.println("[SERVER] " + message);
+            System.out.println("[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
     }
 
     @Override
     public boolean addToBuffer(StreamPacket streamPacket) {
-        System.out.println("HEY HI");
         return packetBuffer.add(streamPacket);
     }
-
-    private void initializeRace(){
-        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-            serverToClientThread.updateClient();
-        }
-    }
-
 
     /**
      * A client has tried to connect to the server
@@ -128,9 +124,11 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
      */
     @Override
     public void clientConnected(ServerToClientThread serverToClientThread) {
-        serverLog("Player Connected From " + serverToClientThread.getName(), 0);
+        serverLog("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         serverToClientThreads.add(serverToClientThread);
-
+        this.addObserver(serverToClientThread);
+        setChanged();
+        notifyObservers();
     }
 
     /**
@@ -139,9 +137,26 @@ public class MainServerThread extends Thread implements PacketBufferDelegate, Cl
      */
     @Override
     public void clientDisconnected(Player player) {
-        serverLog("Player disconnected", 0);
+        try {
+            player.getSocket().close();
+        } catch (Exception e) {
+            serverLog("Cannot disconnect the socket for the disconnected player.", 0);
+        }
+        serverLog("Player " + player.getYacht().getSourceId() + "'s socket disconnected", 0);
+        GameState.removeYacht(player.getYacht().getSourceId());
         GameState.removePlayer(player);
-//        sendXml();
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            if (serverToClientThread.getSocket() == player.getSocket()) {
+                this.deleteObserver(serverToClientThread);
+            }
+        }
+        setChanged();
+        notifyObservers();
     }
 
+    public void startGame() {
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            serverToClientThread.sendRaceStatusMessage();
+        }
+    }
 }

@@ -35,6 +35,11 @@
                         <Font name="System Bold" size="13.0" />
                     </font>
                 </Text>
+            <Text fx:id="windSpeedText" fill="#d3d3d3" layoutX="12.0" layoutY="213.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0 Knot" textAlignment="RIGHT">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Text>
                 <CheckBox fx:id="toggleFps" focusTraversable="false" graphicTextGap="0.0" layoutX="21.0" layoutY="453.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="143.0" selected="true" styleClass="ui-checkbox" text="Show FPS" textFill="WHITE" />
             <VBox fx:id="positionVbox" layoutX="12.0" layoutY="280.0" prefHeight="140.0" prefWidth="200.0" styleClass="text-white" />
             <Pane layoutX="11.0" layoutY="30.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="51.0" prefWidth="193.0">

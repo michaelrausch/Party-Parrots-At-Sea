@@ -1,4 +1,4 @@
-package seng302.visualiser.controllers;
+package seng302.controllers;
 
 import java.io.IOException;
 import java.net.URL;
@@ -15,6 +15,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import seng302.client.ClientPacketParser;
+import seng302.models.Yacht;
+import seng302.models.stream.XMLParser.RaceXMLObject.Participant;
 import seng302.model.Boat;
 import seng302.model.stream.parsers.StreamParser;
 import seng302.model.stream.parsers.xml.XMLParser.RaceXMLObject.Participant;
@@ -24,15 +27,15 @@ public class FinishScreenViewController implements Initializable {
     @FXML
     private GridPane finishScreenGridPane;
     @FXML
-    private TableView<Boat> finishOrderTable;
+    private TableView<Yacht> finishOrderTable;
     @FXML
-    private TableColumn<Boat, String> posCol;
+    private TableColumn<Yacht, String> posCol;
     @FXML
-    private TableColumn<Boat, String> boatNameCol;
+    private TableColumn<Yacht, String> boatNameCol;
     @FXML
-    private TableColumn<Boat, String> shortNameCol;
+    private TableColumn<Yacht, String> shortNameCol;
     @FXML
-    private TableColumn<Boat, String> countryCol;
+    private TableColumn<Yacht, String> countryCol;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -41,7 +44,7 @@ public class FinishScreenViewController implements Initializable {
         finishOrderTable.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // set up data for table
-        ObservableList<Boat> data = FXCollections.observableArrayList();
+        ObservableList<Yacht> data = FXCollections.observableArrayList();
         finishOrderTable.setItems(data);
 
         // setting table col data
@@ -67,7 +70,7 @@ public class FinishScreenViewController implements Initializable {
         }
 
         // add data to table
-        for (Boat boat : StreamParser.getBoatsPos().values()) {
+        for (Yacht boat : StreamParser.getBoatsPos().values()) {
             if (participantIDs.contains(boat.getSourceID())) {
                 data.add(boat);
             }

@@ -13,7 +13,7 @@ import java.util.*;
  * cannot be sent to a player
  */
 public class HeartbeatThread extends Thread{
-    private final int HEARTBEAT_PERIOD = 5000;
+    private final int HEARTBEAT_PERIOD = 200;
     private ClientConnectionDelegate delegate;
     private Integer seqNum;
     private Stack<Player> disconnectedPlayers;
@@ -43,7 +43,7 @@ public class HeartbeatThread extends Thread{
         Message heartbeat = new Heartbeat(seqNum);
 
         for (Player player : GameState.getPlayers()){
-            if (!player.getSocket().isConnected()){
+            if (!player.getSocket().isConnected()) {
                 playerLostConnection(player);
             }
 
