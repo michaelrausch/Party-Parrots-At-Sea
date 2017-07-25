@@ -1,5 +1,6 @@
 package seng302.gameServer;
 
+import java.time.LocalDateTime;
 import java.util.Observable;
 import seng302.client.ClientPacketParser;
 import seng302.models.Player;
@@ -108,7 +109,7 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
 
     static void serverLog(String message, int logLevel){
         if(logLevel <= LOG_LEVEL){
-            System.out.println("[SERVER] " + message);
+            System.out.println("[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
     }
 
