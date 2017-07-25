@@ -4,8 +4,9 @@ import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map;
+
 import javafx.scene.paint.Color;
+import seng302.client.ClientPacketParser;
 import seng302.controllers.RaceViewController;
 import seng302.gameServer.GameState;
 import seng302.models.mark.Mark;
@@ -19,7 +20,7 @@ import seng302.utilities.GeoPoint;
  */
 public class Yacht {
 
-    private final Double TURN_STEP = 2.0;
+    private final Double TURN_STEP = 5.0;
 
     private Double lastHeading;
     private Boolean sailIn;
@@ -119,35 +120,16 @@ public class Yacht {
     public void update(Long timeInterval) {
         if (sailIn) {
             Double secondsElapsed = timeInterval / 1000000.0;
+            Double thisHeading = ((double) Math.floorMod(heading.longValue(), 360L));
+            Double windSpeedKnots = 0d;
+            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, thisHeading);
+            velocity = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 3000;
+            //System.out.println("velocity = " + velocity);
             Double metersCovered = velocity * secondsElapsed;
             location = getGeoCoordinate(location, heading, metersCovered);
         }
     }
 
-    /**
-     * Adjusts the yachts velocity based on the wind direction and speed from the polar table.
-     *
-     * @param windDir current wind Direction TODO: 20/07/17 ajm412: (TWA or AWA, not 100% sure?)
-     * @param windSpd current wind Speed
-     */
-    public void updateYachtVelocity(Double windDir, Double windSpd) {
-        Double closestSpd = PolarTable.getClosestMatch(windSpd);
-        Map<Double, Double> polarsFromClosestSpd = PolarTable.getPolarTable().get(closestSpd);
-
-        Double closest = 0d;
-        Double closest_key = 0d;
-
-        for (Double key : polarsFromClosestSpd.keySet()) {
-            Double difference = Math.abs(key - windDir);
-            if (difference <= closest) {
-                closest = difference;
-                closest_key = key;
-            }
-        }
-//        System.out.println("Closest angle " + closest_key);
-//        System.out.println("WindDir " + windDir);
-        velocity = polarsFromClosestSpd.get(closest_key);
-    }
 
     public Double getHeading() {
         return heading;

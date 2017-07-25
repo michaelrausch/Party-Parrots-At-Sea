@@ -3,6 +3,7 @@ package seng302.models.xml;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.apache.commons.io.IOUtils;
 import seng302.server.messages.XMLMessageSubType;
 
 import java.io.*;
@@ -27,11 +28,7 @@ public class XMLGenerator {
         configuration = new Configuration(Configuration.VERSION_2_3_26);
 
         try {
-            configuration.setDirectoryForTemplateLoading(new File(getClass().getResource(XML_TEMPLATE_DIR).toURI()));
-        } catch (IOException e){
-            System.out.println("[FATAL] Server could not read XML templates");
-        } catch (URISyntaxException e) {
-            System.out.println("[FATAL] Xml template directory URI is invalid");
+            configuration.setClassForTemplateLoading(getClass(), XML_TEMPLATE_DIR);
         } catch (NullPointerException e){
             System.out.println("[FATAL] Server could not load XML Template directory, ensure this directory isn't empty");
         }

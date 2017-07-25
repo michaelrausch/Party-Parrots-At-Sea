@@ -21,7 +21,7 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
 
     private static final int PORT = 4942;
     private static final Integer MAX_NUM_PLAYERS = 3;
-    private static final Integer UPDATES_PER_SECOND = 5;
+    private static final Integer UPDATES_PER_SECOND = 2;
     private static final int LOG_LEVEL = 1;
 
     private Thread thread;

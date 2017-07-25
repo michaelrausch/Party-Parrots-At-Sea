@@ -52,7 +52,7 @@ public class ClientPacketParser {
     private static Map<Integer, Yacht> clientStateBoats = new ConcurrentHashMap<>();
 
      //CONVERSION CONSTANTS
-    private static final Double MS_TO_KNOTS = 1.94384;
+    public static final Double MS_TO_KNOTS = 1.94384;
 
     /**
      * Used to initialise the thread name and stream parser object so a thread can be executed

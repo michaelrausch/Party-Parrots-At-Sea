@@ -24,13 +24,4 @@ public class YachtTest {
         yachts.add(new Yacht("Yacht 3", "Y3", new GeoPoint(-35.0, -15.5), 20.0));
     }
 
-    @Test
-    public void testVelocityUpdate() {
-        for (Yacht yacht : yachts) {
-            yacht.updateYachtVelocity(windDir, windSpd);
-            System.out.println(yacht.getVelocity());
-            // TODO: 20/07/17 ajm412: add assertions.
-        }
-    }
-
 }
