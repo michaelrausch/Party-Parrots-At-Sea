@@ -80,7 +80,7 @@ public class LobbyController implements Initializable, Observer{
     private static ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
     private static ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
     private ClientStateQueryingRunnable clientStateQueryingRunnable;
-    private static List<ImageView> gifImageViews;
+    private static List<ImageView> imageViews;
     private static List<ListView> listViews;
 
     private int MAX_NUM_PLAYERS = 8;
@@ -114,8 +114,8 @@ public class LobbyController implements Initializable, Observer{
             readyButton.setDisable(true);
         }
 
-        gifImageViews = new ArrayList<>();
-        Collections.addAll(gifImageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
+        imageViews = new ArrayList<>();
+        Collections.addAll(imageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
                 fifthImageView, sixthImageView, seventhImageView, eighthImageView);
         listViews = new ArrayList<>();
         Collections.addAll(listViews, firstListView, secondListView, thirdListView, fourthListView, fifthListView,
@@ -153,49 +153,37 @@ public class LobbyController implements Initializable, Observer{
 
     private void initialiseListView() {
         listViews.forEach(listView -> listView.getItems().clear());
-        gifImageViews.forEach(gif -> gif.setVisible(false));
+        imageViews.forEach(gif -> gif.setVisible(false));
         competitors.forEach(ol -> ol.removeAll());
 
         List<Integer> ids = new ArrayList<>(ClientState.getBoats().keySet());
         for (int i = 0; i < ids.size(); i++) {
             competitors.get(i).add(String.format("Player ID: %d", ids.get(i)));
             listViews.get(i).setItems(competitors.get(i));
-            gifImageViews.get(i).setVisible(true);
+            imageViews.get(i).setVisible(true);
         }
     }
 
-    private void initialiseLobbyControllerThread() {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-
-                    }
-                });
-            }
-        });
-        thread.start();
-    }
-
     private void initialiseImageView() {
-        Image image1 = new Image(getClass().getResourceAsStream("/ParrotGif/alistair.gif"));
-        firstImageView.setImage(image1);
-        Image image2 = new Image(getClass().getResourceAsStream("/ParrotGif/calum.gif"));
-        secondImageView.setImage(image2);
-        Image image3 = new Image(getClass().getResourceAsStream("/ParrotGif/haoming.gif"));
-        thirdImageView.setImage(image3);
-        Image image4 = new Image(getClass().getResourceAsStream("/ParrotGif/kusal.gif"));
-        fourthImageView.setImage(image4);
-        Image image5 = new Image(getClass().getResourceAsStream("/ParrotGif/michael.gif"));
-        fifthImageView.setImage(image5);
-        Image image6 = new Image(getClass().getResourceAsStream("/ParrotGif/peter.gif"));
-        sixthImageView.setImage(image6);
-        Image image7 = new Image(getClass().getResourceAsStream("/ParrotGif/ryan.gif"));
-        seventhImageView.setImage(image7);
-        Image image8 = new Image(getClass().getResourceAsStream("/ParrotGif/will.gif"));
-        eighthImageView.setImage(image8);
+        for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
+            imageViews.get(i).setImage(new Image(getClass().getResourceAsStream("/pics/sail.png")));
+        }
+//        Image image1 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        firstImageView.setImage(image1);
+//        Image image2 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        secondImageView.setImage(image2);
+//        Image image3 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        thirdImageView.setImage(image3);
+//        Image image4 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        fourthImageView.setImage(image4);
+//        Image image5 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        fifthImageView.setImage(image5);
+//        Image image6 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        sixthImageView.setImage(image6);
+//        Image image7 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        seventhImageView.setImage(image7);
+//        Image image8 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
+//        eighthImageView.setImage(image8);
     }
 
     @FXML
