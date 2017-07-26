@@ -5,7 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import seng302.models.Yacht;
 
 /**
- * Used by the client to store static variables to be used in game.
+ * Used by the client to store static variables, which other threads and classes
+ * observer so that they can update their status accordingly.
  */
 public class ClientState {
 

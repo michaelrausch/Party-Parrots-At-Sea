@@ -65,7 +65,7 @@ public class ClientToServerThread implements Runnable {
     }
 
     /**
-     * Prints out log message and time happened.
+     * Prints out log messages and the time happened.
      * Only perform task if log level is below LOG_LEVEL variable.
      *
      * @param message a string of message to be printed out
@@ -78,7 +78,8 @@ public class ClientToServerThread implements Runnable {
     }
 
     /**
-     * Perform the thread loop. Will exit loop if ClientState connected to host variable is false.
+     * Perform the thread loop. It exits the loop if ClientState connected to host
+     * variable is false.
      */
     public void run() {
         int sync1;
@@ -104,7 +105,6 @@ public class ClientToServerThread implements Runnable {
                     if (computedCrc == packetCrc) {
                         ClientPacketParser
                             .parsePacket(new StreamPacket(type, payloadLength, timeStamp, payload));
-                        // TODO: 17/07/17 wmu16 - Fix this or maybe we dont need to go through the main server at all!?!?
 //                        packetBufferDelegate.addToBuffer(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         clientLog("Packet has been dropped", 1);
@@ -122,7 +122,7 @@ public class ClientToServerThread implements Runnable {
 
 
     /**
-     * Listens for an allocated sourceID and returns it to the server if received
+     * Listens for an allocated sourceID and returns it to the server
      * @return the sourceID allocated to us by the server
      */
     private Integer threeWayHandshake() {

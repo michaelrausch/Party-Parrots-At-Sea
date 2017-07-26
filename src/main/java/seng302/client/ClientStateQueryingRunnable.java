@@ -13,8 +13,10 @@ public class ClientStateQueryingRunnable extends Observable implements Runnable 
     public ClientStateQueryingRunnable() {}
 
     /**
-     * Notifies observers "game started" if ClientState raceStarted flag is true and terminates itself.
-     * Notifies observers "update players" if ClientState boatsUpdated flag is true and resets the flag to false;
+     * Notifies observers(the lobby controller) that "game started" if ClientState
+     * raceStarted flag is true and terminates itself. Also, it notifies observers
+     * to add/remove players if ClientState boatsUpdated flag is true, then resets
+     * the flag to false;
      */
     @Override
     public void run() {
