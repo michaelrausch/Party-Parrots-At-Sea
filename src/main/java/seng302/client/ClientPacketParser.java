@@ -59,6 +59,7 @@ public class ClientPacketParser {
      */
     public ClientPacketParser() {
     }
+
     /**
      * Looks at the type of the packet then sends it to the appropriate parser to extract the
      * specific data associated with that packet type
@@ -108,7 +109,7 @@ public class ClientPacketParser {
             }
         } catch (NullPointerException e) {
             System.out.println("Error parsing packet");
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -185,7 +186,6 @@ public class ClientPacketParser {
 
         int noBoats = payload[22];
         int raceType = payload[23];
-        clientStateBoats = ClientState.getBoats();
         for (int i = 0; i < noBoats; i++) {
             long boatStatusSourceID = bytesToLong(
                 Arrays.copyOfRange(payload, 24 + (i * 20), 28 + (i * 20)));
@@ -206,7 +206,9 @@ public class ClientPacketParser {
             boat.setEstimateTimeAtNextMark(estTimeAtNextMark);
             boat.setEstimateTimeAtFinish(estTimeAtFinish);
 
-            Yacht clientBoat = clientStateBoats.get((int) boatStatusSourceID);
+            // Update Client State boats when receive race status packet.
+            // Potentially could replace boats in ClientPacketParser.
+            Yacht clientBoat = ClientState.getBoats().get((int) boatStatusSourceID);
             clientBoat.setBoatStatus((boatStatus));
             setBoatLegPosition(clientBoat, boatLegNumber);
             clientBoat.setPenaltiesAwarded(boatPenaltyAwarded);
@@ -215,9 +217,12 @@ public class ClientPacketParser {
             clientBoat.setEstimateTimeAtFinish(estTimeAtFinish);
         }
 
-        // 3 is race started
+        // 3 is race started.
+        // ClientState race started flag will be set to true if race started, else set false.
         if (raceStatus == 3) {
             ClientState.setRaceStarted(true);
+        } else {
+            ClientState.setRaceStarted(false);
         }
     }
 
@@ -289,8 +294,10 @@ public class ClientPacketParser {
         xmlObject.constructXML(doc, messageType);
         if (messageType == 7) {   //7 is the boat XML
             boats = xmlObject.getBoatXML().getCompetingBoats();
+            // Set/Update the ClientState boats after receiving new boat xml.
+            // Flag boatsUpdated in ClientState to true.
             ClientState.setBoats(xmlObject.getBoatXML().getCompetingBoats());
-            ClientState.setDirtyState(true);
+            ClientState.setBoatsUpdated(true);
         }
         if (messageType == 6) { //6 is race info xml
             newRaceXmlReceived = true;

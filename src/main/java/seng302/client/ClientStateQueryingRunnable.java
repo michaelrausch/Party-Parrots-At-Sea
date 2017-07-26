@@ -12,6 +12,12 @@ public class ClientStateQueryingRunnable extends Observable implements Runnable 
 
     public ClientStateQueryingRunnable() {}
 
+    /**
+     * Notifies observers(the lobby controller) that "game started" if ClientState
+     * raceStarted flag is true and terminates itself. Also, it notifies observers
+     * to add/remove players if ClientState boatsUpdated flag is true, then resets
+     * the flag to false;
+     */
     @Override
     public void run() {
         while(!terminate) {
@@ -29,14 +35,19 @@ public class ClientStateQueryingRunnable extends Observable implements Runnable 
                 terminate();
             }
 
-            if (ClientState.isDirtyState()) {
+            if (ClientState.isBoatsUpdated()) {
                 setChanged();
                 notifyObservers("update players");
-                ClientState.setDirtyState(false);
+                ClientState.setBoatsUpdated(false);
             }
         }
     }
 
+    /**
+     * Used to terminate the thread.
+     *
+     * Currently called by the main while loop when game started is detected.
+     */
     public void terminate() {
         terminate = true;
     }
