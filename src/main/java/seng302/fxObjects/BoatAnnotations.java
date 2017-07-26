@@ -144,6 +144,9 @@ public class BoatAnnotations extends Group{
         return totalVisible;
     }
 
+    /**
+     * Sets these annotations to show more detailed info.
+     */
     public void setAsPlayer () {
         isPlayer = true;
         velocityObject.setVisible(true);

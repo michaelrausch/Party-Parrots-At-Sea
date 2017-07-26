@@ -352,6 +352,9 @@ public class BoatGroup extends Group {
         return boat.toString();
     }
 
+    /**
+     * Sets this boat to appear highlighted
+     */
     public void setAsPlayer() {
         boatPoly.getPoints().setAll(
           -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,

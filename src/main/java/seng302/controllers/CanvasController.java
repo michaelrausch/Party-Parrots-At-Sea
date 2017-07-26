@@ -330,6 +330,7 @@ public class CanvasController {
                     boatGroups.add(boatGroup);
                     annotations.getChildren().add(boatGroup.getAnnotations());
                 } else {
+                    //Move annotations and boat to bottom of group keeping player ontop.
                     if (boatGroups.size() > 0) {
                         boatGroups.add(0, boatGroup);
                     } else {
