@@ -55,29 +55,29 @@ public class Wake extends Group {
     }
 
     void setRotation (double rotation, double velocity) {
-        if (Math.abs(rotations[0] - rotation) > 20) {
+//        if (Math.abs(rotations[0] - rotation) > 20) {
             rotate(rotation);
-        } else {
-            rotations[0] = rotation;
-            ((Rotate) arcs[0].getTransforms().get(0)).setAngle(rotation);
-            for (int i = 1; i < numWakes; i++) {
-                double wakeSeparationRad = Math.toRadians(rotations[i - 1] - rotations[i]);
-                double shortestDistance = Math.atan2(
-                        Math.sin(wakeSeparationRad),
-                        Math.cos(wakeSeparationRad)
-                );
-                double distDeg = Math.toDegrees(shortestDistance);
-                if (rotationalVelocities[i - 1] < 0.01 && rotationalVelocities[i - 1] > -0.01) {
-                    rotationalVelocities[i] = distDeg / UNIFICATION_SPEED * 2 * Math.log(Math.abs(distDeg) + 1) / Math.log(MAX_DIFF / numWakes);
-
-                } else {
-                    if (distDeg < (MAX_DIFF / numWakes)) {
-                        rotationalVelocities[i] = distDeg / UNIFICATION_SPEED * Math.log(Math.abs(distDeg) + 1) / Math.log(MAX_DIFF / numWakes);
-                    } else
-                        rotationalVelocities[i] = rotationalVelocities[i - 1];
-                }
-            }
-        }
+//        } else {
+//            rotations[0] = rotation;
+//            ((Rotate) arcs[0].getTransforms().get(0)).setAngle(rotation);
+//            for (int i = 1; i < numWakes; i++) {
+//                double wakeSeparationRad = Math.toRadians(rotations[i - 1] - rotations[i]);
+//                double shortestDistance = Math.atan2(
+//                        Math.sin(wakeSeparationRad),
+//                        Math.cos(wakeSeparationRad)
+//                );
+//                double distDeg = Math.toDegrees(shortestDistance);
+//                if (rotationalVelocities[i - 1] < 0.01 && rotationalVelocities[i - 1] > -0.01) {
+//                    rotationalVelocities[i] = distDeg / UNIFICATION_SPEED * 2 * Math.log(Math.abs(distDeg) + 1) / Math.log(MAX_DIFF / numWakes);
+//
+//                } else {
+//                    if (distDeg < (MAX_DIFF / numWakes)) {
+//                        rotationalVelocities[i] = distDeg / UNIFICATION_SPEED * Math.log(Math.abs(distDeg) + 1) / Math.log(MAX_DIFF / numWakes);
+//                    } else
+//                        rotationalVelocities[i] = rotationalVelocities[i - 1];
+//                }
+//            }
+//        }
 
         double rad = (14 / numWakes) + velocity;
         for (Arc arc : arcs) {
