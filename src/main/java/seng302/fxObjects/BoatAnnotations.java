@@ -33,7 +33,7 @@ public class BoatAnnotations extends Group{
     private Text velocityObject;
     private Text estTimeToNextMarkObject;
     private Text legTimeObject;
-
+    private boolean isPlayer = false;
     private Yacht boat;
 
     BoatAnnotations (Yacht boat, Color theme) {
@@ -56,12 +56,17 @@ public class BoatAnnotations extends Group{
 
         velocityObject = getTextObject("0 m/s", theme);
         velocityObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * 2);
+        velocityObject.setVisible(false);
 
         estTimeToNextMarkObject = getTextObject("Next mark: ", theme);
         estTimeToNextMarkObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * 3);
+        estTimeToNextMarkObject.setVisible(false);
 
         legTimeObject = getTextObject("Last mark: -", theme);
         legTimeObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * 4);
+        legTimeObject.setVisible(false);
+
+        this.setVisibile(true, false, false, false);
 
         super.getChildren().addAll(background, teamNameObject, velocityObject, estTimeToNextMarkObject, legTimeObject);
     }
@@ -83,6 +88,8 @@ public class BoatAnnotations extends Group{
     }
 
     void update () {
+        teamNameObject.setText("Player: " + boat.getShortName());
+
         velocityObject.setText(String.format(String.format("%.2f m/s", boat.getVelocityMMS())));
 
         if (boat.getTimeTillNext() != null) {
@@ -107,10 +114,12 @@ public class BoatAnnotations extends Group{
     void setVisibile (boolean nameVisibility, boolean speedVisibility,
                              boolean estTimeVisibility, boolean lastMarkVisibility) {
         int totalVisible = 0;
+
         totalVisible = updateVisibility(nameVisibility, teamNameObject, totalVisible);
-        totalVisible = updateVisibility(speedVisibility, velocityObject, totalVisible);
-        totalVisible = updateVisibility(estTimeVisibility, estTimeToNextMarkObject, totalVisible);
-        totalVisible = updateVisibility(lastMarkVisibility, legTimeObject, totalVisible);
+        if (isPlayer)
+            totalVisible = updateVisibility(speedVisibility, velocityObject, totalVisible);
+//        totalVisible = updateVisibility(estTimeVisibility, estTimeToNextMarkObject, totalVisible);
+//        totalVisible = updateVisibility(lastMarkVisibility, legTimeObject, totalVisible);
         if (totalVisible != 0) {
             background.setVisible(true);
             background.setHeight(Math.abs(BACKGROUND_X) + TEXT_BUFFER + BACKGROUND_H_PER_TEXT * totalVisible);
@@ -129,5 +138,10 @@ public class BoatAnnotations extends Group{
             text.setVisible(false);
         }
         return totalVisible;
+    }
+
+    public void setAsPlayer () {
+        isPlayer = true;
+        velocityObject.setVisible(true);
     }
 }

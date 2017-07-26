@@ -135,7 +135,10 @@ public class ImportantAnnotationController implements Initializable {
             boatEstTimeToNextMarkSelect.isSelected()));
         boatElapsedTimeSelect.setOnAction(
             event -> setAnnotation(Annotation.LEGTIME, boatElapsedTimeSelect.isSelected()));
-
+        boatEstTimeToNextMarkSelect.setVisible(false);
+        boatEstTimeToNextMarkSelect.setDisable(true);
+        boatElapsedTimeSelect.setVisible(false);
+        boatElapsedTimeSelect.setDisable(true);
         closeButton.setOnAction(event -> stage.close());
     }
 }

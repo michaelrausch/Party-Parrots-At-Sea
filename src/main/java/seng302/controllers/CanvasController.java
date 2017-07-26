@@ -22,6 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import seng302.client.ClientPacketParser;
+import seng302.client.ClientState;
 import seng302.fxObjects.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.Yacht;
@@ -324,10 +325,24 @@ public class CanvasController {
             if (participantIDs.contains(boat.getSourceId())) {
                 boat.setColour(Colors.getColor());
                 BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-                boatGroups.add(boatGroup);
+                if (boat.getSourceId().equals(Integer.parseInt(ClientState.getClientSourceId()))) {
+                    boatGroup.setAsPlayer();
+                    boatGroups.add(boatGroup);
+                    annotations.getChildren().add(boatGroup.getAnnotations());
+                } else {
+                    if (boatGroups.size() > 0) {
+                        boatGroups.add(0, boatGroup);
+                    } else {
+                        boatGroups.add(boatGroup);
+                    }
+                    if (annotations.getChildren().size() > 0) {
+                        annotations.getChildren().add(0, boatGroup.getAnnotations());
+                    } else {
+                        annotations.getChildren().add(boatGroup.getAnnotations());
+                    }
+                }
                 trails.getChildren().add(boatGroup.getTrail());
                 wakes.getChildren().add(boatGroup.getWake());
-                annotations.getChildren().add(boatGroup.getAnnotations());
             }
         }
         group.getChildren().addAll(trails);
