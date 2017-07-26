@@ -12,7 +12,9 @@ import seng302.server.messages.BoatActionType;
  * A Static class to hold information about the current state of the game (model)
  * Created by wmu16 on 10/07/17.
  */
-public class GameState {
+public class GameState implements Runnable {
+
+    private static Integer STATE_UPDATES_PER_SECOND = 60;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -31,7 +33,7 @@ public class GameState {
         players = new ArrayList<>();
 
 
-        GameState.hostIpAddress = hostIpAddress;
+        this.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
@@ -39,6 +41,9 @@ public class GameState {
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         yachts = new HashMap<>();
+
+        new Thread(this).start();
+
     }
 
     public static String getHostIpAddress() {
@@ -134,7 +139,6 @@ public class GameState {
     }
 
     public static void update() {
-
         Long timeInterval = System.currentTimeMillis() - previousUpdateTime;
         previousUpdateTime = System.currentTimeMillis();
         for (Yacht yacht : yachts.values()) {
@@ -150,5 +154,29 @@ public class GameState {
     public static Integer getUniquePlayerID() {
         // TODO: 22/07/17 wmu16 - This may not be robust enough and may have to be improved on.
         return yachts.size() + 1;
+    }
+
+
+    /**
+     * A thread to have the game state update itself at certain intervals
+     */
+    @Override
+    public void run() {
+
+        while(true) {
+            try {
+                Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (currentStage == GameStages.PRE_RACE) {
+                update();
+            }
+
+            //RACING
+            if (currentStage == GameStages.RACING) {
+                update();
+            }
+        }
     }
 }

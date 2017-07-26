@@ -117,26 +117,36 @@ public class Yacht {
      * @param timeInterval since last update in milliseconds
      */
     public void update(Long timeInterval) {
+
         Double secondsElapsed = timeInterval / 1000000.0;
         Double windSpeedKnots = GameState.getWindSpeedKnots();
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
         Double maxBoatSpeed = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
-        if (sailIn && velocity <= maxBoatSpeed) { // Acceleration
+        if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
+
             if (velocity < maxBoatSpeed) {
-                velocity += maxBoatSpeed / 25;
-                if (velocity > maxBoatSpeed) {
-                    velocity = maxBoatSpeed;
-                }
+                velocity += maxBoatSpeed / 15;  // Acceleration
             }
+            if (velocity > maxBoatSpeed) {
+                velocity = maxBoatSpeed;        // Prevent the boats from exceeding top speed
+            }
+
         } else { // Deceleration
-            if (velocity > 0) {
-                velocity = velocity -= maxBoatSpeed / 25;
+
+            if (velocity > 0d) {
+                if (maxBoatSpeed != 0d) {
+                    velocity -= maxBoatSpeed / 25;
+                } else {
+                    velocity -= velocity / 25;
+                }
                 if (velocity < 0) {
                     velocity = 0d;
                 }
             }
+
         }
+
         Double metersCovered = velocity * secondsElapsed;
         location = getGeoCoordinate(location, heading, metersCovered);
     }

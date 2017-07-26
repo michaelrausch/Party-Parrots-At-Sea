@@ -167,7 +167,7 @@ public class LobbyController implements Initializable, Observer{
 
         List<Integer> ids = new ArrayList<>(ClientState.getBoats().keySet());
         for (int i = 0; i < ids.size(); i++) {
-            competitors.get(i).add(String.format("Player ID: %d", ids.get(i)));
+            competitors.get(i).add(ClientState.getBoats().get(ids.get(i)).getBoatName());
             listViews.get(i).setItems(competitors.get(i));
             imageViews.get(i).setVisible(true);
         }
