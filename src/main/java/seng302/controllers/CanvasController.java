@@ -250,11 +250,8 @@ public class CanvasController {
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it
             if (ClientPacketParser.boatLocations.containsKey(boatGroup.getRaceId())) {
-                if (boatGroup.isStopped()) {
-                    updateBoatGroup(boatGroup);
-                }
+                updateBoatGroup(boatGroup);
             }
-            boatGroup.move();
         }
         for (MarkGroup markGroup : markGroups) {
             for (Long id : markGroup.getRaceIds()) {

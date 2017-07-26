@@ -163,18 +163,33 @@ public class BoatGroup extends Group {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
-    public void move() {
-        double dx = xIncrement * framesToMove;
-        double dy = yIncrement * framesToMove;
+    /**
+     * Sets the destination of the boat and the headng it should have once it reaches
+     *
+     * @param newXValue The X co-ordinate the boat needs to move to.
+     * @param newYValue The Y co-ordinate the boat needs to move to.
+     * @param rotation Rotation to move graphics to.
+     * @param timeValid the time the position values are valid for
+     */
+    public void setDestination(double newXValue, double newYValue, double rotation,
+        double groundSpeed, long timeValid, double frameRate) {
 
-        distanceTravelled += Math.abs(dx) + Math.abs(dy);
-        moveGroupBy(xIncrement, yIncrement);
-        framesToMove = framesToMove - 1;
+        destinationSet = true;
+        Double dx = Math.abs(boatPoly.getLayoutX() - newXValue);
+        Double dy = Math.abs(boatPoly.getLayoutY() - newYValue);
+        moveTo(newXValue, newYValue, rotation);
 
-        if (framesToMove <= 0) {
-            isStopped = true;
-        }
-        if (distanceTravelled > 70 && isPlayer) {
+
+        rotateTo(rotation);
+        wake.setRotation(rotation, groundSpeed);
+        boat.setVelocity(groundSpeed);
+        isStopped = false;
+        lastRotation = rotation;
+        boatAnnotations.update();
+
+        distanceTravelled += Math.sqrt((dx * dx) + (dy * dy));
+
+        if (distanceTravelled > 10 && isPlayer) {
             distanceTravelled = 0d;
 
             if (lastPoint != null) {
@@ -190,45 +205,10 @@ public class BoatGroup extends Group {
                 l.setCacheHint(CacheHint.SPEED);
                 lineGroup.getChildren().add(l);
             }
-
             if (destinationSet) {
                 lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
             }
         }
-//        wake.updatePosition();
-    }
-
-    /**
-     * Sets the destination of the boat and the headng it should have once it reaches
-     *
-     * @param newXValue The X co-ordinate the boat needs to move to.
-     * @param newYValue The Y co-ordinate the boat needs to move to.
-     * @param rotation Rotation to move graphics to.
-     * @param timeValid the time the position values are valid for
-     */
-    public void setDestination(double newXValue, double newYValue, double rotation,
-        double groundSpeed, long timeValid, double frameRate) {
-        if (lastTimeValid == 0) {
-            lastTimeValid = timeValid - 200;
-        }
-        moveTo(newXValue, newYValue, rotation);
-//        framesToMove = Math.round((frameRate / (1000.0f / (timeValid - lastTimeValid))));
-//        double dx = newXValue - boatPoly.getLayoutX();
-//        double dy = newYValue - boatPoly.getLayoutY();
-//
-//        xIncrement = dx / framesToMove;
-//        yIncrement = dy / framesToMove;
-
-        destinationSet = true;
-
-        rotateTo(rotation);
-//        wake.rotate(rotation);
-        wake.setRotation(rotation, groundSpeed);
-        boat.setVelocity(groundSpeed);
-        lastTimeValid = timeValid;
-        isStopped = false;
-        lastRotation = rotation;
-        boatAnnotations.update();
     }
 
 
