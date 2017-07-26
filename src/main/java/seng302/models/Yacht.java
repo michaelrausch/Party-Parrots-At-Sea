@@ -4,8 +4,6 @@ import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
 import javafx.scene.paint.Color;
 import seng302.client.ClientPacketParser;
 import seng302.controllers.RaceViewController;
