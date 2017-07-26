@@ -11,27 +11,25 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.logging.Logger;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread extends Observable implements Runnable, PacketBufferDelegate, ClientConnectionDelegate{
+public class MainServerThread extends Observable implements Runnable, ClientConnectionDelegate{
 
     private static final int PORT = 4942;
-    private static final Integer MAX_NUM_PLAYERS = 3;
-    private static final Integer UPDATES_PER_SECOND = 2;
+    private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
     private static final int LOG_LEVEL = 1;
 
     private Thread thread;
 
     private ServerSocket serverSocket = null;
-    private Socket socket;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
-
-    private PriorityBlockingQueue<StreamPacket> packetBuffer;
-
 
     public MainServerThread() {
         try {
@@ -39,8 +37,6 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
         } catch (IOException e) {
             serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
-
-        packetBuffer = new PriorityBlockingQueue<>();
 
         thread = new Thread(this);
         thread.start();
@@ -57,22 +53,20 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
         heartbeatThread.start();
         serverListenThread.start();
 
-
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!thread.isInterrupted()) {
             try {
-                Thread.sleep(1000 / UPDATES_PER_SECOND);
+                Thread.sleep(1000 / CLIENT_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
-                GameState.update();
+                updateClients();
             }
 
             //RACING
             if (GameState.getCurrentStage() == GameStages.RACING) {
-                GameState.update();
                 updateClients();
             }
 
@@ -81,14 +75,6 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
 
             }
 
-            while (!packetBuffer.isEmpty()){
-                try {
-                    StreamPacket packet = packetBuffer.take();
-                    ClientPacketParser.parsePacket(packet);
-                } catch (InterruptedException e) {
-                    continue;
-                }
-            }
         }
 
         // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
@@ -111,11 +97,6 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
         if(logLevel <= LOG_LEVEL){
             System.out.println("[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
-    }
-
-    @Override
-    public boolean addToBuffer(StreamPacket streamPacket) {
-        return packetBuffer.add(streamPacket);
     }
 
     /**
@@ -155,8 +136,16 @@ public class MainServerThread extends Observable implements Runnable, PacketBuff
     }
 
     public void startGame() {
-        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-            serverToClientThread.sendRaceStatusMessage();
-        }
+        Timer t = new Timer();
+
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+                    serverToClientThread.sendRaceStatusMessage();
+                }
+            }
+        }, 0, 500);
     }
 }

@@ -4,8 +4,7 @@ import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
+import java.util.HashMap;
 import javafx.scene.paint.Color;
 import seng302.client.ClientPacketParser;
 import seng302.controllers.RaceViewController;
@@ -119,17 +118,38 @@ public class Yacht {
      * @param timeInterval since last update in milliseconds
      */
     public void update(Long timeInterval) {
-        if (sailIn) {
-            Double secondsElapsed = timeInterval / 1000000.0;
-            Double windSpeedKnots = GameState.getWindSpeedKnots();
-            Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
-            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-            velocity = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
-            Double metersCovered = velocity * secondsElapsed;
-            location = getGeoCoordinate(location, heading, metersCovered);
-        } else {
-            velocity = 0d;
+
+        Double secondsElapsed = timeInterval / 1000000.0;
+        Double windSpeedKnots = GameState.getWindSpeedKnots();
+        Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
+        Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
+        Double maxBoatSpeed = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
+        if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
+
+            if (velocity < maxBoatSpeed) {
+                velocity += maxBoatSpeed / 15;  // Acceleration
+            }
+            if (velocity > maxBoatSpeed) {
+                velocity = maxBoatSpeed;        // Prevent the boats from exceeding top speed
+            }
+
+        } else { // Deceleration
+
+            if (velocity > 0d) {
+                if (maxBoatSpeed != 0d) {
+                    velocity -= maxBoatSpeed / 600;
+                } else {
+                    velocity -= velocity / 100;
+                }
+                if (velocity < 0) {
+                    velocity = 0d;
+                }
+            }
+
         }
+
+        Double metersCovered = velocity * secondsElapsed;
+        location = getGeoCoordinate(location, heading, metersCovered);
     }
 
 
@@ -145,8 +165,7 @@ public class Yacht {
     }
 
     public void tackGybe(Double windDirection) {
-        Double normalizedHeading = heading - GameState.windDirection;
-        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360);
+        Double normalizedHeading = normalizeHeading();
         adjustHeading(-2 * normalizedHeading);
     }
 
@@ -155,8 +174,7 @@ public class Yacht {
     }
 
     public void turnUpwind() {
-        Double normalizedHeading = heading - GameState.windDirection;
-        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360);
+        Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
                 adjustHeading(-TURN_STEP);
@@ -177,8 +195,7 @@ public class Yacht {
     }
 
     public void turnDownwind() {
-        Double normalizedHeading = heading - GameState.windDirection;
-        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360);
+        Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
                 adjustHeading(TURN_STEP);
@@ -199,10 +216,43 @@ public class Yacht {
     }
 
     public void turnToVMG() {
-        // TODO: 25/07/17 wmu16 - Fix this so it grabs the optimal value from the optimal Polar
+        Double normalizedHeading = normalizeHeading();
+        Double optimalHeading;
+        HashMap<Double, Double> optimalPolarMap;
+
+        if (normalizedHeading >= 90 && normalizedHeading <= 270) { // Downwind
+            optimalPolarMap = PolarTable.getOptimalDownwindVMG(GameState.getWindSpeedKnots());
+            optimalHeading = optimalPolarMap.keySet().iterator().next();
+        } else {
+            optimalPolarMap = PolarTable.getOptimalUpwindVMG(GameState.getWindSpeedKnots());
+            optimalHeading = optimalPolarMap.keySet().iterator().next();
+        }
+        // Take optimal heading and turn into correct
+        optimalHeading =
+            optimalHeading + (double) Math.floorMod(GameState.getWindDirection().longValue(), 360L);
+
+        turnTowardsHeading(optimalHeading);
+
     }
 
+    private void turnTowardsHeading(Double newHeading) {
+        System.out.println(newHeading);
+        if (heading < 90 && newHeading > 270) {
+            adjustHeading(-TURN_STEP);
+        } else {
+            if (heading < newHeading) {
+                adjustHeading(TURN_STEP);
+            } else {
+                adjustHeading(-TURN_STEP);
+            }
+        }
+    }
 
+    private Double normalizeHeading() {
+        Double normalizedHeading = heading - GameState.windDirection;
+        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360L);
+        return normalizedHeading;
+    }
 
     public String getBoatType() {
         return boatType;

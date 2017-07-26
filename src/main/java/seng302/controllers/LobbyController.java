@@ -112,6 +112,7 @@ public class LobbyController implements Initializable, Observer{
             readyButton.setDisable(true);
         }
 
+        // put all javafx objects in lists, so we can iterate though conveniently
         imageViews = new ArrayList<>();
         Collections.addAll(imageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
                 fifthImageView, sixthImageView, seventhImageView, eighthImageView);
@@ -134,6 +135,13 @@ public class LobbyController implements Initializable, Observer{
         clientStateQueryingThread.start();
     }
 
+    /**
+     * Observers "ClientStateQueryingRunnable".
+     * When the clients state has been marked to "race start", the querying thread
+     * will notify this lobby to change the view
+     * @param o
+     * @param arg
+     */
     @Override
     public void update(Observable o, Object arg) {
         Platform.runLater(new Runnable() {
@@ -149,6 +157,9 @@ public class LobbyController implements Initializable, Observer{
         });
     }
 
+    /**
+     * Reset all ListViews and ImageViews according to the current competitors
+     */
     private void initialiseListView() {
         listViews.forEach(listView -> listView.getItems().clear());
         imageViews.forEach(gif -> gif.setVisible(false));
@@ -156,12 +167,15 @@ public class LobbyController implements Initializable, Observer{
 
         List<Integer> ids = new ArrayList<>(ClientState.getBoats().keySet());
         for (int i = 0; i < ids.size(); i++) {
-            competitors.get(i).add(String.format("Player ID: %d", ids.get(i)));
+            competitors.get(i).add(ClientState.getBoats().get(ids.get(i)).getBoatName());
             listViews.get(i).setItems(competitors.get(i));
             imageViews.get(i).setVisible(true);
         }
     }
 
+    /**
+     * Loads preset images into imageViews
+     */
     private void initialiseImageView() {
         for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
             imageViews.get(i).setImage(new Image(getClass().getResourceAsStream("/pics/sail.png")));
@@ -195,30 +209,10 @@ public class LobbyController implements Initializable, Observer{
 
     @FXML
     public void readyButtonPressed() {
-//        setContentPane("/views/RaceView.fxml");
-//        playTheme();
         GameState.setCurrentStage(GameStages.RACING);
         mainServerThread.startGame();
     }
 
-
-//    private static MediaPlayer mediaPlayer;
-//
-//    private void playTheme() {
-//        Random random = new Random(System.currentTimeMillis());
-//        Integer rand = random.nextInt();
-//        if(rand == 10) {
-//            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
-//            Media hit = new Media(file.toString());
-//            mediaPlayer = new MediaPlayer(hit);
-//            mediaPlayer.play();
-//        } else if(rand == 9) {
-//            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
-//            Media hit = new Media(file.toString());
-//            mediaPlayer = new MediaPlayer(hit);
-//            mediaPlayer.play();
-//        }
-//    }
 
     private void switchToRaceView() {
         if (!switchedPane) {

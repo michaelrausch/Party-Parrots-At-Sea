@@ -22,6 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import seng302.client.ClientPacketParser;
+import seng302.client.ClientState;
 import seng302.fxObjects.BoatGroup;
 import seng302.models.Colors;
 import seng302.models.Yacht;
@@ -57,8 +58,8 @@ public class CanvasController {
     private final int BUFFER_SIZE   = 50;
     private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
     private final int PANEL_HEIGHT  = 960;
-    private final int CANVAS_WIDTH  = 720;
-    private final int CANVAS_HEIGHT = 720;
+    private final int CANVAS_WIDTH  = 1100;
+    private final int CANVAS_HEIGHT = 920;
     private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
@@ -74,7 +75,7 @@ public class CanvasController {
 
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
-    private Text FPSdisplay = new Text();
+    private Text FPSDisplay = new Text();
     private Polygon raceBorder = new Polygon();
 
     //FRAME RATE
@@ -119,10 +120,10 @@ public class CanvasController {
         gc.setGlobalAlpha(0.5);
         fitMarksToCanvas();
         drawGoogleMap();
-        FPSdisplay.setLayoutX(5);
-        FPSdisplay.setLayoutY(20);
-        FPSdisplay.setStrokeWidth(2);
-        group.getChildren().add(FPSdisplay);
+        FPSDisplay.setLayoutX(5);
+        FPSDisplay.setLayoutY(20);
+        FPSDisplay.setStrokeWidth(2);
+        group.getChildren().add(FPSDisplay);
         group.getChildren().add(raceBorder);
         initializeMarks();
         initializeBoats();
@@ -249,11 +250,8 @@ public class CanvasController {
             // some raceObjects will have multiple ID's (for instance gate marks)
             //checking if the current "ID" has any updates associated with it
             if (ClientPacketParser.boatLocations.containsKey(boatGroup.getRaceId())) {
-                if (boatGroup.isStopped()) {
-                    updateBoatGroup(boatGroup);
-                }
+                updateBoatGroup(boatGroup);
             }
-            boatGroup.move();
         }
         for (MarkGroup markGroup : markGroups) {
             for (Long id : markGroup.getRaceIds()) {
@@ -324,10 +322,25 @@ public class CanvasController {
             if (participantIDs.contains(boat.getSourceId())) {
                 boat.setColour(Colors.getColor());
                 BoatGroup boatGroup = new BoatGroup(boat, boat.getColour());
-                boatGroups.add(boatGroup);
+                if (boat.getSourceId().equals(Integer.parseInt(ClientState.getClientSourceId()))) {
+                    boatGroup.setAsPlayer();
+                    boatGroups.add(boatGroup);
+                    annotations.getChildren().add(boatGroup.getAnnotations());
+                } else {
+                    //Move annotations and boat to bottom of group keeping player ontop.
+                    if (boatGroups.size() > 0) {
+                        boatGroups.add(0, boatGroup);
+                    } else {
+                        boatGroups.add(boatGroup);
+                    }
+                    if (annotations.getChildren().size() > 0) {
+                        annotations.getChildren().add(0, boatGroup.getAnnotations());
+                    } else {
+                        annotations.getChildren().add(boatGroup.getAnnotations());
+                    }
+                }
                 trails.getChildren().add(boatGroup.getTrail());
                 wakes.getChildren().add(boatGroup.getWake());
-                annotations.getChildren().add(boatGroup.getAnnotations());
             }
         }
         group.getChildren().addAll(trails);
@@ -391,10 +404,10 @@ public class CanvasController {
 
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
-            FPSdisplay.setVisible(true);
-            FPSdisplay.setText(String.format("%d FPS", fps));
+            FPSDisplay.setVisible(true);
+            FPSDisplay.setText(String.format("%d FPS", fps));
         } else {
-            FPSdisplay.setVisible(false);
+            FPSDisplay.setVisible(false);
         }
     }
 
