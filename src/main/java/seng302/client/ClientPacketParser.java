@@ -228,18 +228,21 @@ public class ClientPacketParser {
 
     private static void setBoatLegPosition(Yacht updatingBoat, Integer leg){
         Integer placing = 1;
-        if (leg != updatingBoat.getLegNumber() && (raceStarted || raceFinished)) {
+
+        if (/* TODO implement when we are getting this data /TODO leg != updatingBoat.getLegNumber() && */(raceStarted || raceFinished)) {
             for (Yacht boat : boats.values()) {
+                placing = boat.getSourceId();
+                /* See above to-do
                 if (boat.getLegNumber() != null && leg <= boat.getLegNumber()){
                     placing += 1;
-                }
+                }*/
             }
             updatingBoat.setPosition(placing.toString());
             updatingBoat.setLegNumber(leg);
             boatsPos.putIfAbsent(placing, updatingBoat);
             boatsPos.replace(placing, updatingBoat);
         } else if(updatingBoat.getLegNumber() == null){
-            updatingBoat.setPosition("1");
+            updatingBoat.setPosition("-");
             updatingBoat.setLegNumber(leg);
         }
     }

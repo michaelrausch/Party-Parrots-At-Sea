@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.logging.Logger;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -133,8 +136,16 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     }
 
     public void startGame() {
-        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-            serverToClientThread.sendRaceStatusMessage();
-        }
+        Timer t = new Timer();
+
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+                    serverToClientThread.sendRaceStatusMessage();
+                }
+            }
+        }, 0, 500);
     }
 }

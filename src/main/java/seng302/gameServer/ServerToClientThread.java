@@ -340,8 +340,7 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public void sendRaceStatusMessage() {
         // variables taken from GameServerThread
-        int TIME_TILL_RACE_START = 20 * 1000;
-        long startTime = System.currentTimeMillis() + TIME_TILL_RACE_START;
+
 
         List<BoatSubMessage> boatSubMessages = new ArrayList<>();
         BoatStatus boatStatus;
@@ -369,7 +368,7 @@ public class ServerToClientThread implements Runnable, Observer {
             raceStatus = RaceStatus.WARNING;
         }
 
-        sendMessage(new RaceStatusMessage(1, raceStatus, startTime, GameState.getWindDirection(),
+        sendMessage(new RaceStatusMessage(1, raceStatus, GameState.getStartTime(), GameState.getWindDirection(),
             GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
             RaceType.MATCH_RACE, 1, boatSubMessages));
     }
