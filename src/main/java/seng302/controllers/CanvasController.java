@@ -75,7 +75,7 @@ public class CanvasController {
 
     private List<MarkGroup> markGroups = new ArrayList<>();
     private List<BoatGroup> boatGroups = new ArrayList<>();
-    private Text FPSdisplay = new Text();
+    private Text FPSDisplay = new Text();
     private Polygon raceBorder = new Polygon();
 
     //FRAME RATE
@@ -120,10 +120,10 @@ public class CanvasController {
         gc.setGlobalAlpha(0.5);
         fitMarksToCanvas();
         drawGoogleMap();
-        FPSdisplay.setLayoutX(5);
-        FPSdisplay.setLayoutY(20);
-        FPSdisplay.setStrokeWidth(2);
-        group.getChildren().add(FPSdisplay);
+        FPSDisplay.setLayoutX(5);
+        FPSDisplay.setLayoutY(20);
+        FPSDisplay.setStrokeWidth(2);
+        group.getChildren().add(FPSDisplay);
         group.getChildren().add(raceBorder);
         initializeMarks();
         initializeBoats();
@@ -407,10 +407,10 @@ public class CanvasController {
 
     private void drawFps(int fps){
         if (raceViewController.isDisplayFps()){
-            FPSdisplay.setVisible(true);
-            FPSdisplay.setText(String.format("%d FPS", fps));
+            FPSDisplay.setVisible(true);
+            FPSDisplay.setText(String.format("%d FPS", fps));
         } else {
-            FPSdisplay.setVisible(false);
+            FPSDisplay.setVisible(false);
         }
     }
 

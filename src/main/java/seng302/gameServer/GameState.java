@@ -26,7 +26,10 @@ public class GameState implements Runnable {
     private static Map<Integer, Yacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
-    
+
+    private static long startTime = System.currentTimeMillis();
+
+
     public GameState(String hostIpAddress) {
         windDirection = 180d;
         windSpeed = 10000d;
@@ -80,7 +83,15 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
+        if (currentStage == GameStages.RACING){
+            startTime = System.currentTimeMillis();
+        }
+
         GameState.currentStage = currentStage;
+    }
+
+    public static long getStartTime(){
+        return startTime;
     }
 
     public static Double getWindDirection() {
