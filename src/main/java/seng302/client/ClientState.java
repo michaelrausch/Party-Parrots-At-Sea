@@ -1,8 +1,5 @@
 package seng302.client;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import seng302.models.Yacht;
@@ -17,7 +14,7 @@ public class ClientState {
     private static Boolean raceStarted = false;
     private static Boolean connectedToHost = false;
     private static Map<Integer, Yacht> boats = new ConcurrentHashMap<>();
-    private static Boolean dirtyState = true;
+    private static Boolean boatsUpdated = true;
     private static String clientSourceId = "";
 
     public static String getHostIp() {
@@ -56,12 +53,12 @@ public class ClientState {
         return boats;
     }
 
-    public static Boolean isDirtyState() {
-        return dirtyState;
+    public static Boolean isBoatsUpdated() {
+        return boatsUpdated;
     }
 
-    public static void setDirtyState(Boolean dirtyState) {
-        ClientState.dirtyState = dirtyState;
+    public static void setBoatsUpdated(Boolean boatsUpdated) {
+        ClientState.boatsUpdated = boatsUpdated;
     }
 
     public static String getClientSourceId() {
