@@ -210,14 +210,14 @@ public class BoatGroup extends Group {
         double groundSpeed, long timeValid, double frameRate) {
         if (lastTimeValid == 0) {
             lastTimeValid = timeValid - 200;
-            moveTo(newXValue, newYValue, rotation);
         }
-        framesToMove = Math.round((frameRate / (1000.0f / (timeValid - lastTimeValid))));
-        double dx = newXValue - boatPoly.getLayoutX();
-        double dy = newYValue - boatPoly.getLayoutY();
-
-        xIncrement = dx / framesToMove;
-        yIncrement = dy / framesToMove;
+        moveTo(newXValue, newYValue, rotation);
+//        framesToMove = Math.round((frameRate / (1000.0f / (timeValid - lastTimeValid))));
+//        double dx = newXValue - boatPoly.getLayoutX();
+//        double dy = newYValue - boatPoly.getLayoutY();
+//
+//        xIncrement = dx / framesToMove;
+//        yIncrement = dy / framesToMove;
 
         destinationSet = true;
 

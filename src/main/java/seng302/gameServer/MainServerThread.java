@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 public class MainServerThread extends Observable implements Runnable, ClientConnectionDelegate{
 
     private static final int PORT = 4942;
-    private static final Integer CLIENT_UPDATES_PER_SECOND = 5;
+    private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
     private static final int LOG_LEVEL = 1;
 
     private Thread thread;
