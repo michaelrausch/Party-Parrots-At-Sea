@@ -88,7 +88,6 @@ public class LobbyController implements Initializable {
     private static ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
     private static ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
 //    private ClientStateQueryingRunnable clientStateQueryingRunnable;
-    private ClientStateQueryingRunnable clientStateQueryingRunnable;
     private static List<ImageView> imageViews;
     private static List<ListView> listViews;
 
@@ -233,12 +232,12 @@ public class LobbyController implements Initializable {
 //            }
 //        });
 //        thread.start();
-//    }
+    }
 
     private void initialiseImageView() {
-        for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
-            imageViews.get(i).setImage(new Image(getClass().getResourceAsStream("/pics/sail.png")));
-        }
+//        for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
+//            imageViews.get(i).setImage(new Image(getClass().getResourceAsStream("/pics/sail.png")));
+//        }
 //        Image image1 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
 //        firstImageView.setImage(image1);
 //        Image image2 = new Image(getClass().getResourceAsStream("/pics/sail.png"));

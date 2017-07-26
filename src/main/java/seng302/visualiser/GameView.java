@@ -262,8 +262,15 @@ public class GameView extends Pane {
         BoatObject newObject;
         for (Yacht yacht : yachts) {
             newObject = new BoatObject();
-//            newObject.bindBoat(boat);
             newObject.setFill(Colors.getColor());
+            boatObjects.put(yacht, newObject);
+            yacht.addLocationListener((boat, lat, lon, heading, velocity) ->{
+                BoatObject bo = boatObjects.get(boat);
+                Point2D p2d = findScaledXY(lat, lon);
+                bo.setLayoutX(p2d.getX());
+                bo.setLayoutY(p2d.getY());
+//                bo.setTrajectory(heading, velocity * (metersPerPixelX + metersPerPixelY) / 2);
+            });
             createAnnotationBox(yacht);
 
         }

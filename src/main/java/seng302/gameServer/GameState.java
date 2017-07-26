@@ -108,7 +108,7 @@ public class GameState {
     }
 
     public static Double getWindSpeedKnots() {
-        return windSpeed / 1000 * ClientPacketParser.MS_TO_KNOTS;
+        return windSpeed / 1000 * 1.943844492; // TODO: 26/07/17 cir27 - remove magic numbers
     }
 
     public static Map<Integer, Yacht> getYachts() {

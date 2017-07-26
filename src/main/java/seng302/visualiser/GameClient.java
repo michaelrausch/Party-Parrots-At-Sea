@@ -172,6 +172,7 @@ public class GameClient {
                 );
                 lobbyList.clear();
                 allBoatsMap.forEach((id, boat) -> lobbyList.add(id.toString() + boat.getBoatName()));
+                allBoatsMap.forEach((i, b) -> System.out.println(b.getBoatName()));
                 startRaceIfAllDataReceived();
                 break;
 
@@ -206,10 +207,8 @@ public class GameClient {
         if (positionData.getType() == DeviceType.YACHT_TYPE) {
             if (allXMLReceived() && allBoatsMap.containsKey(positionData.getDeviceId())) {
                 Yacht yacht = allBoatsMap.get(positionData.getDeviceId());
-                yacht.setVelocityProperty(positionData.getGroundSpeed());
-                yacht.setLat(positionData.getLat());
-                yacht.setLon(positionData.getLon());
-                yacht.setHeading(positionData.getHeading());
+                yacht.updateLocation(positionData.getLat(),
+                    positionData.getLon(), positionData.getHeading(), positionData.getGroundSpeed());
             }
         } else if (positionData.getType() == DeviceType.MARK_TYPE) {
             Mark mark = courseData.getCompoundMarks().get(positionData.getDeviceId());

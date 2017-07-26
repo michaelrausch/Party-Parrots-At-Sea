@@ -1,21 +1,17 @@
 package seng302.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
+import javafx.scene.control.ListView;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import seng302.model.mark.Mark;
 import static seng302.utilities.GeoUtility.getGeoCoordinate;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
-import javafx.scene.paint.Color;
-import seng302.client.ClientPacketParser;
-import seng302.controllers.RaceViewController;
 import seng302.gameServer.GameState;
 import seng302.utilities.GeoPoint;
 
@@ -26,6 +22,12 @@ import seng302.utilities.GeoPoint;
  * also done outside Boat class because some old variables are not used anymore.
  */
 public class Yacht {
+
+    @FunctionalInterface
+    public interface YachtLocationListener {
+        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
+    }
+
     //BOTH AFAIK
     private String boatType;
     private Integer sourceId;
@@ -52,10 +54,13 @@ public class Yacht {
     private Double velocity;
 
     //CLIENT SIDE
+    private List<YachtLocationListener> locationListeners = new ArrayList<>();
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
-    private ReadOnlyDoubleProperty headingProperty = new ReadOnlyDoubleWrapper();
+//    private ReadOnlyDoubleWrapper headingProperty = new ReadOnlyDoubleWrapper();
+//    private ReadOnlyDoubleWrapper latitudeProperty = new ReadOnlyDoubleWrapper();
+//    private ReadOnlyDoubleWrapper longitudeProperty = new ReadOnlyDoubleWrapper();
     private Mark lastMarkRounded;
     private Mark nextMark;
     private Integer positionInt = 0;
@@ -128,7 +133,7 @@ public class Yacht {
             Double windSpeedKnots = GameState.getWindSpeedKnots();
             Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
             Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-            velocity = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
+            velocity = boatSpeedInKnots / 1.943844492 * 1000; // TODO: 26/07/17 cir27 - Remove magic number
             Double metersCovered = velocity * secondsElapsed;
             location = getGeoCoordinate(location, heading, metersCovered);
         } else {
@@ -269,7 +274,7 @@ public class Yacht {
         this.positionInt = position;
     }
 
-    public void setVelocityProperty(double velocity) {
+    public void updateVelocityProperty(double velocity) {
         this.velocityProperty.set(velocity);
     }
 
@@ -287,9 +292,10 @@ public class Yacht {
 
     public ReadOnlyLongProperty timeTillNextProperty() {
         return timeTillNextProperty.getReadOnlyProperty();
+    }
 
     public Double getVelocityKnots() {
-        return velocity / 1000 * ClientPacketParser.MS_TO_KNOTS;
+        return velocity / 1000 * 1.943844492; // TODO: 26/07/17 cir27 - remove magic number
     }
 
     public Long getTimeTillNext() {
@@ -361,10 +367,6 @@ public class Yacht {
         return timeSinceLastMarkProperty.getReadOnlyProperty();
     }
 
-    public Long getTimeTillNext() {
-        return timeTillNext;
-    }
-
     public void setTimeTillNext(Long timeTillNext) {
         this.timeTillNext = timeTillNext;
     }
@@ -385,5 +387,44 @@ public class Yacht {
 
     public void setVelocity(Double velocity) {
         this.velocity = velocity;
+    }
+
+//    public void updateLatitudeProperty (Double lat) {
+//        latitudeProperty.set(lat);
+//    }
+//
+//    public void updateLongitudeProperty (double lon) {
+//        longitudeProperty.set(lon);
+//    }
+//
+//    public void updateHeadingProperty (double heading) {
+//        headingProperty.set(heading);
+//    }
+//
+//    public ReadOnlyDoubleProperty latitudeProperty () {
+//        return latitudeProperty.getReadOnlyProperty();
+//    }
+//
+//    public ReadOnlyDoubleProperty longitudeProperty () {
+//        return longitudeProperty.getReadOnlyProperty();
+//    }
+//
+//    public ReadOnlyDoubleProperty headingProperty () {
+//        return headingProperty;
+//    }
+
+    public void updateLocation (double lat, double lon, double heading, double velocity) {
+        this.lat = lat;
+        this.lon = lon;
+        this.heading = heading;
+        this.velocity = velocity;
+        updateVelocityProperty(velocity);
+        for (YachtLocationListener yll : locationListeners) {
+            yll.notifyLocation(this, lat, lon, heading, velocity);
+        }
+    }
+
+    public void addLocationListener (YachtLocationListener listener) {
+        locationListeners.add(listener);
     }
 }
