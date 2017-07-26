@@ -1,10 +1,11 @@
 package seng302.gameServer;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import seng302.client.ClientPacketParser;
 import seng302.models.Player;
-
 import seng302.models.Yacht;
 import seng302.server.messages.BoatActionType;
 
@@ -30,7 +31,7 @@ public class GameState implements Runnable {
 
 
     public GameState(String hostIpAddress) {
-        windDirection = 170d;
+        windDirection = 180d;
         windSpeed = 10000d;
         yachts = new HashMap<>();
         players = new ArrayList<>();
@@ -116,7 +117,6 @@ public class GameState implements Runnable {
             case VMG:
                 playerYacht.turnToVMG();
 //                System.out.println("Snapping to VMG");
-                // TODO: 22/07/17 wmu16 - Add in the vmg calculation code here
                 break;
             case SAILS_IN:
                 playerYacht.toggleSailIn();

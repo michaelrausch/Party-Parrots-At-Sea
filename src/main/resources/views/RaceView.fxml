@@ -30,7 +30,7 @@
                         <Font name="AdobeArabic-Regular" size="55.0" />
                     </font>
                 </Text>
-                <Text fx:id="windDirectionText" fill="#d3d3d3" layoutX="171.0" layoutY="214.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0°" textAlignment="RIGHT">
+                <Text fx:id="windDirectionText" fill="#d3d3d3" layoutX="171.0" layoutY="238.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0°" textAlignment="RIGHT">
                     <font>
                         <Font name="System Bold" size="13.0" />
                     </font>
