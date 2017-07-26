@@ -105,7 +105,6 @@ public class ClientToServerThread implements Runnable {
                     if (computedCrc == packetCrc) {
                         ClientPacketParser
                             .parsePacket(new StreamPacket(type, payloadLength, timeStamp, payload));
-//                        packetBufferDelegate.addToBuffer(new StreamPacket(type, payloadLength, timeStamp, payload));
                     } else {
                         clientLog("Packet has been dropped", 1);
                     }

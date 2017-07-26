@@ -140,11 +140,6 @@ public class ServerToClientThread implements Runnable, Observer {
         while (socket.isConnected()) {
 
             try {
-//                if (initialisedRace) {
-//                    sendSetupMessages();
-//                    initialisedRace = false;
-//                }
-
                 //Perform a write if it is time to as delegated by the MainServerThread
                 if (updateClient) {
                     // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
@@ -210,18 +205,18 @@ public class ServerToClientThread implements Runnable, Observer {
         xml.setRegatta(new Regatta("RaceVision Test Game", 57.6679590, 11.8503233));
         xml.setRace(race);
 
-        XMLMessage xmlMessage = new XMLMessage(xml.getRegattaAsXml(), XMLMessageSubType.REGATTA,
-            xml.getRegattaAsXml().length());
+        XMLMessage xmlMessage;
+        xmlMessage = new XMLMessage(xml.getRegattaAsXml(), XMLMessageSubType.REGATTA,
+                xml.getRegattaAsXml().length());
         sendMessage(xmlMessage);
 
         xmlMessage = new XMLMessage(xml.getBoatsAsXml(), XMLMessageSubType.BOAT,
-            xml.getBoatsAsXml().length());
+                xml.getBoatsAsXml().length());
         sendMessage(xmlMessage);
 
         xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE,
-            xml.getRaceAsXml().length());
+                xml.getRaceAsXml().length());
         sendMessage(xmlMessage);
-//        System.out.println("Sent xml messages for " + thread.getName());
     }
 
     public void updateClient() {

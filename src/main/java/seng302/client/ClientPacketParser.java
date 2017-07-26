@@ -79,7 +79,6 @@ public class ClientPacketParser {
                     extractDisplayMessage(packet);
                     break;
                 case XML_MESSAGE:
-                    newRaceXmlReceived = true;
                     extractXmlMessage(packet);
                     break;
                 case RACE_START_STATUS:
@@ -292,6 +291,7 @@ public class ClientPacketParser {
         }
 
         xmlObject.constructXML(doc, messageType);
+
         if (messageType == 7) {   //7 is the boat XML
             boats = xmlObject.getBoatXML().getCompetingBoats();
             // Set/Update the ClientState boats after receiving new boat xml.

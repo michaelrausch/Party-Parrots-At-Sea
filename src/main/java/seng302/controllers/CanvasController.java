@@ -58,8 +58,8 @@ public class CanvasController {
     private final int BUFFER_SIZE   = 50;
     private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
     private final int PANEL_HEIGHT  = 960;
-    private final int CANVAS_WIDTH  = 720;
-    private final int CANVAS_HEIGHT = 720;
+    private final int CANVAS_WIDTH  = 1100;
+    private final int CANVAS_HEIGHT = 920;
     private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
