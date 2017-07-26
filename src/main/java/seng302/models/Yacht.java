@@ -4,8 +4,6 @@ import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
 import javafx.scene.paint.Color;
 import seng302.client.ClientPacketParser;
 import seng302.controllers.RaceViewController;
@@ -119,17 +117,28 @@ public class Yacht {
      * @param timeInterval since last update in milliseconds
      */
     public void update(Long timeInterval) {
-        if (sailIn) {
-            Double secondsElapsed = timeInterval / 1000000.0;
-            Double windSpeedKnots = GameState.getWindSpeedKnots();
-            Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
-            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-            velocity = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
-            Double metersCovered = velocity * secondsElapsed;
-            location = getGeoCoordinate(location, heading, metersCovered);
-        } else {
-            velocity = 0d;
+        Double secondsElapsed = timeInterval / 1000000.0;
+        Double windSpeedKnots = GameState.getWindSpeedKnots();
+        Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
+        Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
+        Double maxBoatSpeed = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
+        if (sailIn && velocity <= maxBoatSpeed) { // Acceleration
+            if (velocity < maxBoatSpeed) {
+                velocity += maxBoatSpeed / 25;
+                if (velocity > maxBoatSpeed) {
+                    velocity = maxBoatSpeed;
+                }
+            }
+        } else { // Deceleration
+            if (velocity > 0) {
+                velocity = velocity -= maxBoatSpeed / 25;
+                if (velocity < 0) {
+                    velocity = 0d;
+                }
+            }
         }
+        Double metersCovered = velocity * secondsElapsed;
+        location = getGeoCoordinate(location, heading, metersCovered);
     }
 
 
