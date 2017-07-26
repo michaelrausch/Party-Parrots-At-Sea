@@ -111,7 +111,7 @@ public class BoatAnnotations extends Group{
         }
     }
 
-    private void setVisible(boolean nameVisibility, boolean speedVisibility,
+    void setVisible(boolean nameVisibility, boolean speedVisibility,
                              boolean estTimeVisibility, boolean lastMarkVisibility) {
         int totalVisible = 0;
 

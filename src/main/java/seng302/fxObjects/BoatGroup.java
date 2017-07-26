@@ -51,6 +51,7 @@ public class BoatGroup extends Group {
     private BoatAnnotations boatAnnotations;
     private Color color;
     private Boolean isSelected = true;  //All boats are initialised as selected\
+    private boolean isPlayer = false;
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
@@ -173,28 +174,27 @@ public class BoatGroup extends Group {
         if (framesToMove <= 0) {
             isStopped = true;
         }
+        if (distanceTravelled > 70 && isPlayer) {
+            distanceTravelled = 0d;
 
-//        if (distanceTravelled > 70) {
-//            distanceTravelled = 0d;
-//
-//            if (lastPoint != null) {
-//                Line l = new Line(
-//                    lastPoint.getX(),
-//                    lastPoint.getY(),
-//                    boatPoly.getLayoutX(),
-//                    boatPoly.getLayoutY()
-//                );
-//                l.getStrokeDashArray().setAll(3d, 7d);
-//                l.setStroke(boat.getColour());
-//                l.setCache(true);
-//                l.setCacheHint(CacheHint.SPEED);
-//                lineGroup.getChildren().add(l);
-//            }
-//
-//            if (destinationSet) {
-//                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-//            }
-//        }
+            if (lastPoint != null) {
+                Line l = new Line(
+                    lastPoint.getX(),
+                    lastPoint.getY(),
+                    boatPoly.getLayoutX(),
+                    boatPoly.getLayoutY()
+                );
+                l.getStrokeDashArray().setAll(3d, 7d);
+                l.setStroke(boat.getColour());
+                l.setCache(true);
+                l.setCacheHint(CacheHint.SPEED);
+                lineGroup.getChildren().add(l);
+            }
+
+            if (destinationSet) {
+                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+            }
+        }
 //        wake.updatePosition();
     }
 
@@ -279,7 +279,7 @@ public class BoatGroup extends Group {
     }
 
     public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime, boolean trail, boolean wake) {
-        boatAnnotations.setVisibile(teamName, velocity, estTime, legTime);
+        boatAnnotations.setVisible(teamName, velocity, estTime, legTime);
         this.wake.setVisible(wake);
         this.lineGroup.setVisible(trail);
     }
@@ -361,5 +361,6 @@ public class BoatGroup extends Group {
         boatPoly.setStroke(Color.BLACK);
         boatPoly.setStrokeWidth(3);
         boatAnnotations.setAsPlayer();
+        isPlayer = true;
     }
 }
