@@ -101,7 +101,8 @@ public class ClientToServerThread implements Runnable {
                 }
             } catch (Exception e) {
                 closeSocket();
-                e.printStackTrace();
+                System.err.println("SERVER DISCONNECTED");
+//                e.printStackTrace();
                 return;
             }
         }
