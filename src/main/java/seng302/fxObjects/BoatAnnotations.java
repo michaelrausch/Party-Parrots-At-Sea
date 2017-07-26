@@ -66,7 +66,7 @@ public class BoatAnnotations extends Group{
         legTimeObject.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * 4);
         legTimeObject.setVisible(false);
 
-        this.setVisibile(true, false, false, false);
+        this.setVisible(true, false, false, false);
 
         super.getChildren().addAll(background, teamNameObject, velocityObject, estTimeToNextMarkObject, legTimeObject);
     }
@@ -111,10 +111,14 @@ public class BoatAnnotations extends Group{
         }
     }
 
-    void setVisibile (boolean nameVisibility, boolean speedVisibility,
+    private void setVisible(boolean nameVisibility, boolean speedVisibility,
                              boolean estTimeVisibility, boolean lastMarkVisibility) {
         int totalVisible = 0;
 
+        /*
+            This is a temporary fix until the new annotation group is added along with the visualiser
+            overhaul.
+         */
         totalVisible = updateVisibility(nameVisibility, teamNameObject, totalVisible);
         if (isPlayer)
             totalVisible = updateVisibility(speedVisibility, velocityObject, totalVisible);

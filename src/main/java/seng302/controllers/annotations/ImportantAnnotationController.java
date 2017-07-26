@@ -135,6 +135,7 @@ public class ImportantAnnotationController implements Initializable {
             boatEstTimeToNextMarkSelect.isSelected()));
         boatElapsedTimeSelect.setOnAction(
             event -> setAnnotation(Annotation.LEGTIME, boatElapsedTimeSelect.isSelected()));
+        // TODO: 26/07/17 cir27 - Create a more robust fix for this when the annotation for the game are decided upon.
         boatEstTimeToNextMarkSelect.setVisible(false);
         boatEstTimeToNextMarkSelect.setDisable(true);
         boatElapsedTimeSelect.setVisible(false);
