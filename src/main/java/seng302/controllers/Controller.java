@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import seng302.client.ClientPacketParser;
+import seng302.client.ClientState;
 import seng302.client.ClientToServerThread;
 import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.BoatActionType;
@@ -22,7 +23,7 @@ public class Controller implements Initializable {
     private long lastSendingTime;
     private int KEY_STROKE_SENDING_FREQUENCY = 50;
 
-    private Object setContentPane(String jfxUrl) {
+    public Object setContentPane(String jfxUrl) {
         try {
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
@@ -41,19 +42,25 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        setUpStartScreen();
+        lastSendingTime = System.currentTimeMillis();
+    }
+
+    void setUpStartScreen() {
+        contentPane.getChildren().removeAll();
+        contentPane.getChildren().clear();
         contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
         StartScreenController startScreenController = (StartScreenController) setContentPane("/views/StartScreenView.fxml");
         startScreenController.setController(this);
         ClientPacketParser.boatLocations.clear();
-
-        lastSendingTime = System.currentTimeMillis();
     }
+
 
     /** Handle the key-pressed event from the text field. */
     public void keyPressed(KeyEvent e) {
         BoatActionMessage boatActionMessage;
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastSendingTime > KEY_STROKE_SENDING_FREQUENCY) {
+        if (currentTime - lastSendingTime > KEY_STROKE_SENDING_FREQUENCY && ClientState.isRaceStarted()) {
             lastSendingTime = currentTime;
             switch (e.getCode()) {
                 case SPACE: // align with vmg

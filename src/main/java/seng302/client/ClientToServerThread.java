@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import seng302.models.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.Message;
@@ -42,9 +45,10 @@ public class ClientToServerThread implements Runnable {
      *
      * @param ipAddress a string of ip address to be connected to
      * @param portNumber an integer port number
-     * @throws Exception SocketConnection if fail to connect to ip address and port number combination
+     * @throws Exception SocketConnection if fail to connect to ip address and port number
+     * combination
      */
-    public ClientToServerThread(String ipAddress, Integer portNumber) throws Exception{
+    public ClientToServerThread(String ipAddress, Integer portNumber) throws Exception {
         socket = new Socket(ipAddress, portNumber);
         is = socket.getInputStream();
         os = socket.getOutputStream();
@@ -71,9 +75,10 @@ public class ClientToServerThread implements Runnable {
      * @param message a string of message to be printed out
      * @param logLevel an int for log level
      */
-    static void clientLog(String message, int logLevel){
-        if(logLevel <= LOG_LEVEL){
-            System.out.println("[CLIENT " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
+    static void clientLog(String message, int logLevel) {
+        if (logLevel <= LOG_LEVEL) {
+            System.out.println(
+                "[CLIENT " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
     }
 
@@ -85,13 +90,13 @@ public class ClientToServerThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-        while(ClientState.isConnectedToHost()) {
+        while (ClientState.isConnectedToHost()) {
             try {
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
                 //checking if it is the start of the packet
-                if(sync1 == 0x47 && sync2 == 0x83) {
+                if (sync1 == 0x47 && sync2 == 0x83) {
                     int type = readByte();
                     //No. of milliseconds since Jan 1st 1970
                     long timeStamp = Message.bytesToLong(getBytes(6));
@@ -111,7 +116,16 @@ public class ClientToServerThread implements Runnable {
                 }
             } catch (Exception e) {
                 closeSocket();
-                clientLog("Disconnected from server", 1);
+                Platform.runLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                          Alert alert = new Alert(AlertType.ERROR);
+                                          alert.setHeaderText("Host has disconnected");
+                                          alert.setContentText("Cannot find Server");
+                                          alert.showAndWait();
+                                      }
+                                  });
+                    clientLog("Disconnected from server", 1);
                 return;
             }
         }
@@ -122,6 +136,7 @@ public class ClientToServerThread implements Runnable {
 
     /**
      * Listens for an allocated sourceID and returns it to the server
+     *
      * @return the sourceID allocated to us by the server
      */
     private Integer threeWayHandshake() {
@@ -144,7 +159,6 @@ public class ClientToServerThread implements Runnable {
             }
         }
     }
-
 
 
     /**
@@ -176,22 +190,22 @@ public class ClientToServerThread implements Runnable {
         } catch (IOException e) {
             clientLog("Read byte failed", 1);
         }
-        if (currentByte == -1){
+        if (currentByte == -1) {
             throw new Exception();
         }
         return currentByte;
     }
 
-    private byte[] getBytes(int n) throws Exception{
+    private byte[] getBytes(int n) throws Exception {
         byte[] bytes = new byte[n];
-        for (int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             bytes[i] = (byte) readByte();
         }
         return bytes;
     }
 
-    private void skipBytes(long n) throws Exception{
-        for (int i=0; i < n; i++){
+    private void skipBytes(long n) throws Exception {
+        for (int i = 0; i < n; i++) {
             readByte();
         }
     }

@@ -81,6 +81,7 @@ public class StartScreenController {
             controller.setClientToServerThread(clientToServerThread);
             LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
             lobbyController.setMainServerThread(mainServerThread);
+            lobbyController.setController(controller);
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setHeaderText("Cannot host");
@@ -110,7 +111,8 @@ public class StartScreenController {
             ClientState.setConnectedToHost(true);
 
             controller.setClientToServerThread(clientToServerThread);
-            setContentPane("/views/LobbyView.fxml");
+            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
+            lobbyController.setController(controller);
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setHeaderText("Cannot reach the host");

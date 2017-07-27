@@ -33,10 +33,6 @@ public class GameState implements Runnable {
     public GameState(String hostIpAddress) {
         windDirection = 180d;
         windSpeed = 10000d;
-        yachts = new HashMap<>();
-        players = new ArrayList<>();
-
-
         this.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;

@@ -85,10 +85,12 @@ public class LobbyController implements Initializable, Observer{
 
     private Boolean switchedPane = false;
     private MainServerThread mainServerThread;
+    private Controller controller;
 
     private void setContentPane(String jfxUrl) {
         try {
             AnchorPane contentPane = (AnchorPane) lobbyScreen.getParent();
+            System.out.println(contentPane);
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
@@ -200,11 +202,12 @@ public class LobbyController implements Initializable, Observer{
 
     @FXML
     public void leaveLobbyButtonPressed() {
-        // TODO: 10/07/17 wmu16 - Finish function!
-        setContentPane("/views/StartScreenView.fxml");
-        GameState.setCurrentStage(GameStages.CANCELLED);
-        // TODO: 20/07/17 wmu16 - Implement some way of terminating the game
+        if (ClientState.isHost()) {
+            GameState.setCurrentStage(GameStages.CANCELLED);
+            mainServerThread.terminate();
+        }
         ClientState.setConnectedToHost(false);
+        controller.setUpStartScreen();
     }
 
     @FXML
@@ -223,5 +226,9 @@ public class LobbyController implements Initializable, Observer{
 
     public void setMainServerThread(MainServerThread mainServerThread) {
         this.mainServerThread = mainServerThread;
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
     }
 }
