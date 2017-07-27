@@ -136,13 +136,7 @@ public class GameState implements Runnable {
                 break;
         }
 
-        System.out.println("-----------------------");
-        System.out.println("Sails are in: " + playerYacht.getSailIn());
-        System.out.println("Heading: " + playerYacht.getHeading());
-        System.out.println("Velocity: " + playerYacht.getVelocityMMS() / 1000);
-        System.out.println("Lat: " + playerYacht.getLocation().getLat());
-        System.out.println("Lng: " + playerYacht.getLocation().getLng());
-        System.out.println("-----------------------\n");
+//        printBoatStatus(playerYacht);
     }
 
     public static void update() {
@@ -185,5 +179,15 @@ public class GameState implements Runnable {
                 update();
             }
         }
+    }
+
+    private static void printBoatStatus(Yacht playerYacht) {
+        System.out.println("-----------------------");
+        System.out.println("Sails are in: " + playerYacht.getSailIn());
+        System.out.println("Heading: " + playerYacht.getHeading());
+        System.out.println("Velocity: " + playerYacht.getVelocityMMS() / 1000);
+        System.out.println("Lat: " + playerYacht.getLocation().getLat());
+        System.out.println("Lng: " + playerYacht.getLocation().getLng());
+        System.out.println("-----------------------\n");
     }
 }
