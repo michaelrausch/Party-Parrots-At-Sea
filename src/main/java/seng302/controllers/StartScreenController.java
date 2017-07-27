@@ -109,6 +109,7 @@ public class StartScreenController {
             ClientState.setHost(false);
             ClientState.setConnectedToHost(true);
 
+            ClientState.setHostIp(ipAddress);
             controller.setClientToServerThread(clientToServerThread);
             LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
             lobbyController.setController(controller);

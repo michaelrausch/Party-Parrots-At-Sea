@@ -111,7 +111,7 @@ public class LobbyController implements Initializable, Observer{
             readyButton.setDisable(false);
         }
         else {
-            lobbyIpText.setText("Connected to IP: ");
+            lobbyIpText.setText("Connected to IP: " + ClientState.getHostIp());
             readyButton.setDisable(true);
         }
 
