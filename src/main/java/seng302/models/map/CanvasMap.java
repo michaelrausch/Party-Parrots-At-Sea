@@ -37,7 +37,7 @@ public class CanvasMap {
 
 			return new Image(connection.getInputStream());
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("[CanvasMap] Exception");
 			return null;
 		}
 	}

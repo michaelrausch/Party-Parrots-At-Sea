@@ -96,13 +96,12 @@ public class ServerToClientThread implements Runnable, Observer {
             all = ln.lines().collect(Collectors.toList());
             lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
         } catch (IOException e) {
-            System.out.println("IO error in server thread upon grabbing streams");
-            e.printStackTrace();
+            serverLog("IO error in server thread upon grabbing streams", 1);
         }
         //Attempt threeway handshake with connection
         sourceId = GameState.getUniquePlayerID();
         if (threeWayHandshake(sourceId)) {
-            serverLog("Successful handshake. Client allocated id: " + sourceId, 1);
+            serverLog("Successful handshake. Client allocated id: " + sourceId, 0);
             Yacht yacht = new Yacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
             );
@@ -186,7 +185,6 @@ public class ServerToClientThread implements Runnable, Observer {
             } catch (Exception e) {
                 // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected
 //                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
-//                e.printStackTrace();
                 closeSocket();
                 return;
             }
@@ -243,7 +241,7 @@ public class ServerToClientThread implements Runnable, Observer {
                 os.write(id);                                         //Send out new ID looking for echo
                 confirmationID = is.read();
             } catch (IOException e) {
-                e.printStackTrace();
+                serverLog("Three way handshake failed", 1);
             }
 
             if (id.equals(confirmationID)) {                          //ID is echoed back. Connection is a client
@@ -273,7 +271,7 @@ public class ServerToClientThread implements Runnable, Observer {
             currentByte = is.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {
-            e.printStackTrace();
+            serverLog("Socket read failed", 1);
         }
         if (currentByte == -1) {
             throw new Exception();
@@ -299,10 +297,10 @@ public class ServerToClientThread implements Runnable, Observer {
         try {
             os.write(message.getBuffer());
         } catch (SocketException e) {
-            //serverLog("Player " + sourceId + " side socket disconnected", 0);
+            //serverLog("Player " + sourceId + " side socket disconnected", 1);
             return;
         } catch (IOException e) {
-            e.printStackTrace();
+            serverLog("Message send failed", 1);
         }
     }
 

@@ -51,9 +51,9 @@ public class StartScreenController {
 
             return fxmlLoader.getController();
         } catch (javafx.fxml.LoadException e) {
-            e.printStackTrace();
+            System.out.println("[Controller] FXML load exception");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("[Controller] IO exception");
         }
         return null;
     }
@@ -87,7 +87,6 @@ public class StartScreenController {
             alert.setHeaderText("Cannot host");
             alert.setContentText("Oops, failed to host, try to restart.");
             alert.showAndWait();
-            e.printStackTrace();
         }
 
 
@@ -153,7 +152,7 @@ public class StartScreenController {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("[StartScreenController] Exception");
         }
         if (ipAddress == null) {
             System.out.println("[HOST] Cannot obtain local host ip address.");

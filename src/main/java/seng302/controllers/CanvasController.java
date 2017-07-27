@@ -181,9 +181,9 @@ public class CanvasController {
             contentPane.getChildren().addAll(
                 (Pane) FXMLLoader.load(getClass().getResource("/views/FinishScreenView.fxml")));
         } catch (javafx.fxml.LoadException e) {
-            e.printStackTrace();
+            System.out.println("[Controller] FXML load exception");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("[Controller] IO exception");
         }
     }
 
@@ -282,9 +282,8 @@ public class CanvasController {
                     p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(),
                     positionPacket.getTimeValid(), frameRate);
             } catch (InterruptedException e){
-                e.printStackTrace();
+                System.out.println("[CanvasController] Interrupted Exception");
             }
-//            }
         }
     }
 
@@ -297,7 +296,7 @@ public class CanvasController {
                 Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
                 markGroup.moveMarkTo(p2d.getX(), p2d.getY(), raceId);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("[CanvasController] Interrupted exception");
             }
         }
     }

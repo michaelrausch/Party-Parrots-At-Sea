@@ -60,7 +60,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
             try {
                 Thread.sleep(1000 / CLIENT_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                serverLog("Interrupted exception in Main Server Thread thread sleep", 1);
             }
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {

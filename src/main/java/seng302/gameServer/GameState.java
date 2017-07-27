@@ -174,7 +174,7 @@ public class GameState implements Runnable {
             try {
                 Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("[GameState] interrupted exception");
             }
             if (currentStage == GameStages.PRE_RACE) {
                 update();

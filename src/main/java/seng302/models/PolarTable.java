@@ -68,7 +68,7 @@ public final class PolarTable {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("[PolarTable] IO exception");
         }
 
 
