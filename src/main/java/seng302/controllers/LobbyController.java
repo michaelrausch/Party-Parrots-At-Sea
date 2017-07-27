@@ -90,7 +90,6 @@ public class LobbyController implements Initializable, Observer{
     private void setContentPane(String jfxUrl) {
         try {
             AnchorPane contentPane = (AnchorPane) lobbyScreen.getParent();
-            System.out.println(contentPane);
             contentPane.getChildren().removeAll();
             contentPane.getChildren().clear();
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
@@ -100,6 +99,8 @@ public class LobbyController implements Initializable, Observer{
             System.out.println("[Controller] FXML load exception");
         } catch (IOException e) {
             System.out.println("[Controller] IO exception");
+        } catch (NullPointerException e) {
+//            System.out.println("[Controller] Null Pointer Exception");
         }
     }
 
