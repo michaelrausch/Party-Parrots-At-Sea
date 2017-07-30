@@ -1,12 +1,12 @@
 package seng302.visualizer.annotations;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import seng302.visualiser.controllers.annotations.Annotation;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
-
-import static org.junit.Assert.assertEquals;
 
 public class TestImportantAnnotationState {
     private ImportantAnnotationsState importantAnnotationsState;

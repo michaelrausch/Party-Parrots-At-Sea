@@ -1,9 +1,6 @@
 package seng302;
 
 import org.junit.Test;
-import seng302.visualiser.controllers.RaceViewController;
-
-import static org.junit.Assert.assertTrue;
 
 
 public class TestRaceTimer {

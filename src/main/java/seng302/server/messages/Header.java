@@ -1,9 +1,6 @@
 package seng302.server.messages;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Collections;
 
 public class Header {
     // From API spec

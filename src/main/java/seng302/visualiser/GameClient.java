@@ -3,29 +3,28 @@ package seng302.visualiser;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
-import seng302.model.Yacht;
 import seng302.model.RaceState;
+import seng302.model.Yacht;
 import seng302.model.mark.Mark;
-import seng302.model.stream.parser.PositionUpdateData.DeviceType;
-import seng302.model.stream.parser.MarkRoundingData;
-import seng302.model.stream.parser.RaceStatusData;
-import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.model.stream.parser.StreamParser;
-import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.model.stream.xml.parser.XMLParser;
-import seng302.model.stream.parser.PositionUpdateData;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.visualiser.ClientToServerThread;
+import seng302.model.stream.parser.MarkRoundingData;
+import seng302.model.stream.parser.PositionUpdateData;
+import seng302.model.stream.parser.PositionUpdateData.DeviceType;
+import seng302.model.stream.parser.RaceStatusData;
+import seng302.utilities.StreamParser;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.LobbyController.CloseStatus;
 import seng302.visualiser.controllers.RaceViewController;
@@ -61,9 +60,10 @@ public class GameClient {
         }
         LobbyController lobbyController = loadLobby("/views/LobbyView.fxml");
         lobbyController.setPlayerListSource(lobbyList);
+        lobbyController.disableReadyButton();
         lobbyController.setTitle("Connected to host - IP : " + ipAddress + " Port : " + portNumber);
         lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
-        socketThread.addStreamObserver(this::parsePacket);
+        socketThread.addStreamObserver(this::parsePackets);
     }
 
     public void runAsHost (String ipAddress, Integer portNumber) {
@@ -74,13 +74,13 @@ public class GameClient {
             ioe.printStackTrace();
             System.out.println("Unable to make local connection to host...");
         }
-        LobbyController lobbyController = loadLobby("/views/HostLobbyView.fxml");
+        socketThread.addStreamObserver(this::parsePackets);
+        LobbyController lobbyController = loadLobby("/views/LobbyView.fxml");
         lobbyController.setPlayerListSource(GameState.getObservablePlayers());
         lobbyController.setTitle("Hosting Lobby - IP : " + ipAddress + " Port : " + portNumber);
         lobbyController.addCloseListener(exitCause -> {
             if (exitCause == CloseStatus.READY) {
                 server.startGame();
-                socketThread.addStreamObserver(this::parsePacket);
             } else if (exitCause == CloseStatus.LEAVE) {
                 loadStartScreen();
             }
@@ -88,11 +88,11 @@ public class GameClient {
     }
 
     private void loadStartScreen () {
-        socketThread.closeSocket();
+        socketThread.setSocketToClose();
         socketThread = null;
         if (server != null) {
             // TODO: 26/07/17 cir27 - handle disconnecting
-            server.shutDown();
+//            server.shutDown();
             server = null;
         }
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/StartScreenView.fxml"));
@@ -125,68 +125,78 @@ public class GameClient {
 //            if (courseData.getParticipants().contains(id))
 //                racingBoats.put(id, boat);
 //        });
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/RaceView.fxml"));
-        raceView = fxmlLoader.getController();
+        FXMLLoader fxmlLoader = new FXMLLoader(RaceViewController.class.getResource("/views/RaceView.fxml"));
+//        raceView = fxmlLoader.getController();
         try {
-            holderPane.getChildren().add(fxmlLoader.load());
+            Node node = fxmlLoader.load();
+            Platform.runLater(() -> {
+                    holderPane.getChildren().clear();
+                    holderPane.getChildren().add(node);
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
+        raceView = fxmlLoader.getController();
         raceView.loadRace(allBoatsMap, courseData, raceState);
     }
 
-    private void parsePacket(StreamPacket packet) {
-        switch (packet.getType()) {
-            case RACE_STATUS:
-                processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
-                break;
+    private void parsePackets() {
+        while (socketThread.getPacketQueue().peek() != null) {
+            StreamPacket packet = socketThread.getPacketQueue().poll();
+            switch (packet.getType()) {
+                case RACE_STATUS:
+                    processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
+                    startRaceIfAllDataReceived();
+                    break;
 
-            case REGATTA_XML:
-                System.out.println("REGATTA XML");
-                regattaData = XMLParser.parseRegatta(
-                    StreamParser.extractXmlMessage(packet)
-                );
-                raceState.setTimeZone(
-                    TimeZone.getTimeZone(
-                        ZoneId.ofOffset("UTC", ZoneOffset.ofHours(regattaData.getUtcOffset()))
-                    )
-                );
-                startRaceIfAllDataReceived();
-                break;
+                case REGATTA_XML:
+                    System.out.println("REGATTA XML");
+                    regattaData = XMLParser.parseRegatta(
+                        StreamParser.extractXmlMessage(packet)
+                    );
+                    raceState.setTimeZone(
+                        TimeZone.getTimeZone(
+                            ZoneId.ofOffset("UTC", ZoneOffset.ofHours(regattaData.getUtcOffset()))
+                        )
+                    );
+//                    startRaceIfAllDataReceived();
+                    break;
 
-            case RACE_XML:
-                System.out.println("RACE XML");
-                courseData = XMLParser.parseRace(
-                    StreamParser.extractXmlMessage(packet)
-                );
-                if (raceView != null) {
-                    raceView.updateRaceData(courseData);
-                }
-                startRaceIfAllDataReceived();
-                break;
+                case RACE_XML:
+                    System.out.println("RACE XML");
+                    courseData = XMLParser.parseRace(
+                        StreamParser.extractXmlMessage(packet)
+                    );
+                    if (raceView != null) {
+                        raceView.updateRaceData(courseData);
+                    }
+//                    startRaceIfAllDataReceived();
+                    break;
 
-            case BOAT_XML:
-                System.out.println("BOAT XML");
-                allBoatsMap = XMLParser.parseBoats(
-                    StreamParser.extractXmlMessage(packet)
-                );
-                lobbyList.clear();
-                allBoatsMap.forEach((id, boat) -> lobbyList.add(id.toString() + boat.getBoatName()));
-                allBoatsMap.forEach((i, b) -> System.out.println(b.getBoatName()));
-                startRaceIfAllDataReceived();
-                break;
+                case BOAT_XML:
+                    System.out.println("BOAT XML");
+                    allBoatsMap = XMLParser.parseBoats(
+                        StreamParser.extractXmlMessage(packet)
+                    );
+                    lobbyList.clear();
+                    allBoatsMap
+                        .forEach((id, boat) -> lobbyList.add(id.toString() + boat.getBoatName()));
+                    allBoatsMap.forEach((i, b) -> System.out.println(b.getBoatName()));
+//                    startRaceIfAllDataReceived();
+                    break;
 
-            case RACE_START_STATUS:
-                raceState.updateState(StreamParser.extractRaceStartStatus(packet));
-                break;
+                case RACE_START_STATUS:
+                    raceState.updateState(StreamParser.extractRaceStartStatus(packet));
+                    break;
 
-            case BOAT_LOCATION:
-                updatePosition(StreamParser.extractBoatLocation(packet));
-                break;
+                case BOAT_LOCATION:
+                    updatePosition(StreamParser.extractBoatLocation(packet));
+                    break;
 
-            case MARK_ROUNDING:
-                updateMarkRounding(StreamParser.extractMarkRounding(packet));
-                break;
+                case MARK_ROUNDING:
+                    updateMarkRounding(StreamParser.extractMarkRounding(packet));
+                    break;
+            }
         }
     }
 
@@ -243,6 +253,7 @@ public class GameClient {
                 yacht.setEstimateTimeAtFinish(boatData[2]);
                 int legNumber = (int) boatData[3];
                 yacht.setLegNumber(legNumber);
+                yacht.setBoatStatus((int) boatData[4]);
                 if (legNumber != yacht.getLegNumber()) {
                     int placing = 1;
                     for (Yacht otherYacht : allBoatsMap.values()) {
@@ -257,7 +268,7 @@ public class GameClient {
     }
 
     private void close () {
-        socketThread.closeSocket();
+        socketThread.setSocketToClose();
     }
 
 //    /** Handle the key-pressed event from the text field. */

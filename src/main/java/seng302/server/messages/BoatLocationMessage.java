@@ -1,8 +1,5 @@
 package seng302.server.messages;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 public class BoatLocationMessage extends Message {
     private final int MESSAGE_SIZE = 56;
 

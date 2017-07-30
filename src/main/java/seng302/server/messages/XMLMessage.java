@@ -1,8 +1,5 @@
 package seng302.server.messages;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 public class XMLMessage extends Message{
     private final MessageType MESSAGE_TYPE = MessageType.XML_MESSAGE;
     private final int MESSAGE_VERSION = 1; //Always set to 1

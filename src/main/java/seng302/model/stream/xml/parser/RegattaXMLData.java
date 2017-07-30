@@ -12,7 +12,7 @@ public class RegattaXMLData {
     private Double centralLng;
     private Integer utcOffset;
 
-    RegattaXMLData (Integer regattaID, String regattaName, String courseName,
+    public RegattaXMLData (Integer regattaID, String regattaName, String courseName,
         Double centralLat, Double centralLng, Integer utcOffset) {
         this.regattaID = regattaID;
         this.regattaName = regattaName;

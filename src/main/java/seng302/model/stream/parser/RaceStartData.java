@@ -10,7 +10,7 @@ public class RaceStartData {
     private int notificationType;
     private long timeStamp;
 
-    RaceStartData (long raceId, long raceStartTime, int notificationType, long timeStamp) {
+    public RaceStartData (long raceId, long raceStartTime, int notificationType, long timeStamp) {
         this.raceId = raceId;
         this.raceStartTime = raceStartTime;
         this.notificationType = notificationType;

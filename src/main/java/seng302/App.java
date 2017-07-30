@@ -17,7 +17,9 @@ public class App extends Application {
 
         Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
         primaryStage.setTitle("RaceVision");
-        primaryStage.setScene(new Scene(root, 1530, 960));
+        Scene scene = new Scene(root, 1530, 960);
+        scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+        primaryStage.setScene(scene);
 //        primaryStage.setMaxWidth(1530);
 //        primaryStage.setMaxHeight(960);
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
@@ -27,11 +29,11 @@ public class App extends Application {
         primaryStage.setOnCloseRequest(e -> {
 //            ClientPacketParser.appClose();
             StreamReceiver.noMoreBytes();
-            ClientPacketParser.appClose();
+//            ClientPacketParser.appClose();
             System.exit(0);
         });
 
-        ClientState.primaryStage = primaryStage;
+//        ClientState.primaryStage = primaryStage;
     }
 
     public static void main(String[] args) {

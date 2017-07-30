@@ -1,9 +1,10 @@
 package seng302.server;
 
-import org.junit.Test;
-import seng302.server.messages.*;
-
 import static junit.framework.TestCase.assertTrue;
+
+import org.junit.Test;
+import seng302.server.messages.Header;
+import seng302.server.messages.MessageType;
 
 /**
  * Tests message header

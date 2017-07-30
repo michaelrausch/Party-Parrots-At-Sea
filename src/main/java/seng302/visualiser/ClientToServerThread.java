@@ -5,14 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.time.LocalDateTime;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.Message;
@@ -22,6 +24,21 @@ import seng302.server.messages.Message;
  * its own thread.
  */
 public class ClientToServerThread implements Runnable {
+
+    /**
+     * Functional interface for receiving packets from client socket.
+     */
+    @FunctionalInterface
+    public interface ClientSocketListener {
+        void newPacket();
+    }
+
+    private class ByteReadException extends Exception {
+        private ByteReadException(String message) {
+            super(message);
+        }
+    }
+
     private static final int LOG_LEVEL = 1;
 
     private Queue<StreamPacket> streamPackets = new ConcurrentLinkedQueue<>();
@@ -34,8 +51,9 @@ public class ClientToServerThread implements Runnable {
 
     private int clientId;
 
-    private Boolean updateClient = true;
+//    private Boolean updateClient = true;
     private ByteArrayOutputStream crcBuffer;
+    private boolean socketOpen = true;
 
     /**
      * Constructor for ClientToServerThread which takes in ipAddress and portNumber and attempts to
@@ -53,7 +71,6 @@ public class ClientToServerThread implements Runnable {
         socket = new Socket(ipAddress, portNumber);
         is = socket.getInputStream();
         os = socket.getOutputStream();
-
         Integer allocatedID = threeWayHandshake();
         if (allocatedID != null) {
             clientId = allocatedID;
@@ -90,8 +107,19 @@ public class ClientToServerThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-        while(true) { /**REMOVED SOMETHING HERE ClientState.isConnectedToHost() */
+        while(socketOpen) { /**REMOVED SOMETHING HERE ClientState.isConnectedToHost() */
+            System.out.println("socket.isConnected() = " + socket.isConnected());
             try {
+                //Perform a write if it is time to as delegated by the MainServerThread
+//                if (updateClient) {
+//                    // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
+////                try {
+////                    GameState.outputState(os);
+////                } catch (IOException e) {
+////                    System.out.println("IO error in server thread upon writing to output stream");
+////                }
+//                    updateClient = false;
+//                }
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
@@ -109,29 +137,33 @@ public class ClientToServerThread implements Runnable {
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
 //                        streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
-                        for (ClientSocketListener csl : listeners)
-                            csl.newPacket(new StreamPacket(type, payloadLength, timeStamp, payload));
+//                        for (ClientSocketListener csl : listeners)
+//                            csl.newPacket(new StreamPacket(type, payloadLength, timeStamp, payload));
+                        if (streamPackets.size() > 0) {
+                            streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
+                        } else {
+                            streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
+                            for (ClientSocketListener csl : listeners)
+                                csl.newPacket();
+                        }
                     } else {
                         clientLog("Packet has been dropped", 1);
                     }
                 }
-            } catch (Exception e) {
+            } catch (ByteReadException e) {
                 closeSocket();
-                Platform.runLater(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                          Alert alert = new Alert(AlertType.ERROR);
-                                          alert.setHeaderText("Host has disconnected");
-                                          alert.setContentText("Cannot find Server");
-                                          alert.showAndWait();
-                                      }
-                                  });
-                    clientLog("Disconnected from server", 1);
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setHeaderText("Host has disconnected");
+                    alert.setContentText("Cannot find Server");
+                    alert.showAndWait();
+                });
+                clientLog(e.getMessage(), 1);
                 return;
             }
         }
-//        closeSocket();
-//        clientLog("Disconnected from server", 0);
+        closeSocket();
+        clientLog("Closed connection to Server", 0);
     }
 
 
@@ -147,7 +179,6 @@ public class ClientToServerThread implements Runnable {
                 ourSourceID = is.read();
             } catch (IOException e) {
                 clientLog("Three way handshake failed", 1);
-
             }
             if (ourSourceID != null) {
                 try {
@@ -174,12 +205,20 @@ public class ClientToServerThread implements Runnable {
     }
 
 
-    public void closeSocket() {
+    private void closeSocket() {
         try {
             socket.close();
         } catch (IOException e) {
             clientLog("Failed to close the socket", 1);
         }
+    }
+
+    public void setSocketToClose () {
+        socketOpen = false;
+    }
+
+    public Queue<StreamPacket> getPacketQueue () {
+        return streamPackets;
     }
 
     public void addStreamObserver (ClientSocketListener streamListener) {
@@ -190,7 +229,7 @@ public class ClientToServerThread implements Runnable {
         listeners.remove(streamListener);
     }
 
-    private int readByte() throws Exception {
+    private int readByte() throws ByteReadException {
         int currentByte = -1;
         try {
             currentByte = is.read();
@@ -199,12 +238,12 @@ public class ClientToServerThread implements Runnable {
             clientLog("Read byte failed", 1);
         }
         if (currentByte == -1) {
-            throw new Exception();
+            throw new ByteReadException("InputStream reach end of stream");
         }
         return currentByte;
     }
 
-    private byte[] getBytes(int n) throws Exception {
+    private byte[] getBytes(int n) throws ByteReadException {
         byte[] bytes = new byte[n];
         for (int i = 0; i < n; i++) {
             bytes[i] = (byte) readByte();
@@ -212,7 +251,7 @@ public class ClientToServerThread implements Runnable {
         return bytes;
     }
 
-    private void skipBytes(long n) throws Exception {
+    private void skipBytes(long n) throws ByteReadException {
         for (int i = 0; i < n; i++) {
             readByte();
         }

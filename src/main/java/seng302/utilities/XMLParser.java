@@ -1,4 +1,5 @@
-package seng302.model.stream.xml.parser;
+package seng302.utilities;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,13 +8,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import seng302.model.Yacht;
 import seng302.model.Corner;
 import seng302.model.Limit;
+import seng302.model.Yacht;
 import seng302.model.mark.GateMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkType;
 import seng302.model.mark.SingleMark;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.stream.xml.parser.RegattaXMLData;
 
 /**
  * Utilities for parsing XML documents

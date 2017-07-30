@@ -22,20 +22,18 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import seng302.model.Limit;
-import seng302.visualiser.fxObjects.AnnotationBox;
-import seng302.visualiser.fxObjects.BoatObject;
-import seng302.visualiser.fxObjects.MarkObject;
 import seng302.model.Colors;
+import seng302.model.Limit;
 import seng302.model.Yacht;
-import seng302.model.map.Boundary;
-import seng302.model.map.CanvasMap;
 import seng302.model.mark.GateMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkType;
 import seng302.model.mark.SingleMark;
 import seng302.utilities.GeoPoint;
 import seng302.utilities.GeoUtility;
+import seng302.visualiser.fxObjects.AnnotationBox;
+import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.MarkObject;
 
 /**
  * Created by cir27 on 20/07/17.
@@ -45,11 +43,11 @@ public class GameView extends Pane {
     private ObservableList<Node> gameObjects;
     private ImageView mapImage;
 
-    private final int BUFFER_SIZE   = 50;
-    private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
-    private final int PANEL_HEIGHT  = 960;
-    private final int CANVAS_WIDTH  = 1100;
-    private final int CANVAS_HEIGHT = 920;
+    private double bufferSize   = 50;
+    private double panelWidth   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private double panelHeight  = 960;
+    private double canvasWidth  = 1100;
+    private double canvasHeight = 920;
     private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
@@ -63,13 +61,14 @@ public class GameView extends Pane {
     private double metersPerPixelX;
     private double metersPerPixelY;
 
-    private Map<SingleMark, MarkObject> markObjects = new HashMap<>();
     private Map<Yacht, BoatObject> boatObjects = new HashMap<>();
     private List<AnnotationBox> annotations = new ArrayList<>();
 
     private Text fpsDisplay = new Text();
-
-    private Polygon raceBorder = new Polygon();
+    /* Note that if either of these is null then values for it have not been added and the other
+       should be used as the limits of the map. */
+    private Polygon raceBorder;
+    private Map<SingleMark, MarkObject> markObjects = new HashMap<>();
 
     //FRAME RATE
     private Double frameRate = 60.0;
@@ -205,9 +204,13 @@ public class GameView extends Pane {
      * in a compound mark etc..
      */
     public void updateBorder(List<Limit> border) {
-        raceBorder.setStroke(new Color(0.0f, 0.0f, 0.74509807f, 1));
-        raceBorder.setStrokeWidth(3);
-        raceBorder.setFill(new Color(0,0,0,0));
+        if (raceBorder == null) {
+            raceBorder = new Polygon();
+            raceBorder.setStroke(new Color(0.0f, 0.0f, 0.74509807f, 1));
+            raceBorder.setStrokeWidth(3);
+            raceBorder.setFill(new Color(0,0,0,0));
+            findCanvasScaling();
+        }
         List<Double> boundaryPoints = new ArrayList<>();
         for (Limit limit : border) {
             Point2D location = findScaledXY(limit.getLat(), limit.getLng());
@@ -393,24 +396,24 @@ public class GameView extends Pane {
 
         if (scaleDirection == ScaleDirection.HORIZONTAL) {
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
-            referencePointX = BUFFER_SIZE + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
+            referencePointX = bufferSize + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, maxLatPoint));
-            referencePointY  = canvasHeight - (BUFFER_SIZE + BUFFER_SIZE);
+            referencePointY  = canvasHeight - (bufferSize + bufferSize);
             referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
             referencePointY  = referencePointY / 2;
-            referencePointY += BUFFER_SIZE;
+            referencePointY += bufferSize;
             referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
         } else {
-            referencePointY = canvasHeight - BUFFER_SIZE;
+            referencePointY = canvasHeight - bufferSize;
 
             referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
-            referencePointX  = BUFFER_SIZE;
+            referencePointX  = bufferSize;
             referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
-            referencePointX += ((canvasWidth - (BUFFER_SIZE + BUFFER_SIZE)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
+            referencePointX += ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
         }
         if(horizontalInversion) {
-            referencePointX = canvasWidth - BUFFER_SIZE - (referencePointX - BUFFER_SIZE);
+            referencePointX = canvasWidth - bufferSize - (referencePointX - bufferSize);
         }
     }
 
@@ -434,10 +437,10 @@ public class GameView extends Pane {
         double horiDistance =
             Math.cos(horiAngle) * Mark.calculateDistance(minLonPoint, maxLonPoint);
 
-        double vertScale = (canvasHeight - (BUFFER_SIZE + BUFFER_SIZE)) / vertDistance;
+        double vertScale = (canvasHeight - (bufferSize + bufferSize)) / vertDistance;
 
-        if ((horiDistance * vertScale) > (canvasWidth - (BUFFER_SIZE + BUFFER_SIZE))) {
-            distanceScaleFactor = (canvasWidth - (BUFFER_SIZE + BUFFER_SIZE)) / horiDistance;
+        if ((horiDistance * vertScale) > (canvasWidth - (bufferSize + bufferSize))) {
+            distanceScaleFactor = (canvasWidth - (bufferSize + bufferSize)) / horiDistance;
             scaleDirection = ScaleDirection.HORIZONTAL;
         } else {
             distanceScaleFactor = vertScale;
@@ -479,7 +482,7 @@ public class GameView extends Pane {
             yAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         }
         if(horizontalInversion) {
-            xAxisLocation = canvasWidth - BUFFER_SIZE - (xAxisLocation - BUFFER_SIZE);
+            xAxisLocation = canvasWidth - bufferSize - (xAxisLocation - bufferSize);
         }
         return new Point2D(xAxisLocation, yAxisLocation);
     }

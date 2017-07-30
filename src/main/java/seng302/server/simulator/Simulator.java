@@ -1,14 +1,13 @@
 package seng302.server.simulator;
 
+import java.util.List;
+import java.util.Observable;
+import java.util.concurrent.ThreadLocalRandom;
 import seng302.server.simulator.mark.Corner;
 import seng302.server.simulator.mark.Mark;
 import seng302.server.simulator.parsers.RaceParser;
 import seng302.utilities.GeoPoint;
 import seng302.utilities.GeoUtility;
-
-import java.util.List;
-import java.util.Observable;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Simulator extends Observable implements Runnable {
 

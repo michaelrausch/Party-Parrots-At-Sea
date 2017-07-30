@@ -1,13 +1,10 @@
-package seng302.model.map;
+package seng302.visualiser.map;
 
+import java.net.URL;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
-import seng302.utilities.GeoPoint;
-
 import javax.net.ssl.HttpsURLConnection;
-import java.net.URL;
-
-import java.lang.Math;
+import seng302.utilities.GeoPoint;
 
 /**
  * CanvasMap retrieves a map image with given geo boundary from Google Map server.
@@ -25,12 +22,12 @@ public class CanvasMap {
 
 	private String KEY = "AIzaSyC-5oOShMCY5Oy_9L7guYMPUPFHDMr37wE";
 
-	public CanvasMap(Boundary boundary) {
+	CanvasMap(Boundary boundary) {
 		this.boundary = boundary;
 		calculateOptimalMapSize();
 	}
 
-	public Image getMapImage() {
+	Image getMapImage() {
 		try {
 			URL url = new URL(getRequest());
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

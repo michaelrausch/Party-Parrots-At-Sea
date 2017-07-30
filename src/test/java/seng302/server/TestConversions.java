@@ -1,9 +1,9 @@
 package seng302.server;
 
+import static junit.framework.TestCase.assertEquals;
+
 import org.junit.Test;
 import seng302.server.messages.BoatLocationMessage;
-
-import static junit.framework.TestCase.assertEquals;
 
 /**
  * Test conversions used by the boat location messages

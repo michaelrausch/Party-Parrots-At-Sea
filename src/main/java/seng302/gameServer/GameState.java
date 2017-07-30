@@ -1,12 +1,13 @@
 package seng302.gameServer;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seng302.model.Player;
 import seng302.model.Yacht;
-import seng302.model.stream.packets.StreamPacket;
 import seng302.server.messages.BoatActionType;
 
 /**
@@ -26,6 +27,7 @@ public class GameState implements Runnable {
     private static Map<Integer, Yacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
+    private static long startTime;
 
     // TODO: 26/07/17 cir27 - Super hackish fix until something more permanent can be made.
     private static ObservableList<String> observablePlayers = FXCollections.observableArrayList();
@@ -169,7 +171,6 @@ public class GameState implements Runnable {
             yacht.update(timeInterval);
         }
     }
-
 
     /**
      * Generates a new ID based off the size of current players + 1

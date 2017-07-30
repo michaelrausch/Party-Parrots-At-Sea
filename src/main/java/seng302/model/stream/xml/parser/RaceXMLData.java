@@ -18,7 +18,7 @@ public class RaceXMLData {
     private List<Limit> courseLimit;
     private Map<Integer, Mark> individualMarks;
 
-    RaceXMLData(List<Integer> participants, List<Mark> compoundMarks, List<Corner> markSequence,
+    public RaceXMLData(List<Integer> participants, List<Mark> compoundMarks, List<Corner> markSequence,
         List<Limit> courseLimit) {
         this.participants = participants;
         this.markSequence = markSequence;

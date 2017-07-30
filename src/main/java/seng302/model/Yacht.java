@@ -1,22 +1,19 @@
 package seng302.model;
 
+import static seng302.utilities.GeoUtility.getGeoCoordinate;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
-import javafx.scene.control.ListView;
 import javafx.scene.paint.Color;
-import seng302.model.mark.Mark;
-import static seng302.utilities.GeoUtility.getGeoCoordinate;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import javafx.scene.paint.Color;
-import seng302.client.ClientPacketParser;
-import seng302.controllers.RaceViewController;
 import seng302.gameServer.GameState;
+import seng302.model.mark.Mark;
 import seng302.utilities.GeoPoint;
 
 /**
@@ -30,6 +27,11 @@ public class Yacht {
     @FunctionalInterface
     public interface YachtLocationListener {
         void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
+    }
+
+    @FunctionalInterface
+    public interface YachtPositionListener {
+        void notifyPosition(int position);
     }
 
     //BOTH AFAIK
@@ -137,7 +139,7 @@ public class Yacht {
         Double windSpeedKnots = GameState.getWindSpeedKnots();
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-        Double maxBoatSpeed = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
+        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000;
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
@@ -159,28 +161,20 @@ public class Yacht {
                     velocity = 0d;
                 }
             }
-        if (sailIn) {
-            Double secondsElapsed = timeInterval / 1000000.0;
-            Double windSpeedKnots = GameState.getWindSpeedKnots();
-            Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
-            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-            velocity = boatSpeedInKnots / 1.943844492 * 1000; // TODO: 26/07/17 cir27 - Remove magic number
-            Double metersCovered = velocity * secondsElapsed;
-            location = getGeoCoordinate(location, heading, metersCovered);
-        } else {
-            velocity = 0d;
         }
-    }
-
-        }
-
+//        if (sailIn) {
+//            Double secondsElapsed = timeInterval / 1000000.0;
+//            Double windSpeedKnots = GameState.getWindSpeedKnots();
+//            Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
+//            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
+//            velocity = boatSpeedInKnots / 1.943844492 * 1000; // TODO: 26/07/17 cir27 - Remove magic number
+//            Double metersCovered = velocity * secondsElapsed;
+//            location = getGeoCoordinate(location, heading, metersCovered);
+//        } else {
+//            velocity = 0d;
+//        }
         Double metersCovered = velocity * secondsElapsed;
         location = getGeoCoordinate(location, heading, metersCovered);
-    }
-
-
-    public Double getHeading() {
-        return heading;
     }
 
     public void adjustHeading(Double amount) {
@@ -500,5 +494,9 @@ public class Yacht {
 
     public void addLocationListener (YachtLocationListener listener) {
         locationListeners.add(listener);
+    }
+
+    public void addPositionListener (YachtPositionListener listener) {
+
     }
 }

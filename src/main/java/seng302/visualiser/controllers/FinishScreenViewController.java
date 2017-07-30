@@ -18,7 +18,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import seng302.model.Yacht;
-import seng302.model.stream.parser.StreamParser;
 
 public class FinishScreenViewController implements Initializable {
 

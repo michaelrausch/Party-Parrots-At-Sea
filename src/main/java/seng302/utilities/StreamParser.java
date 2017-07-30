@@ -1,6 +1,5 @@
-package seng302.model.stream.parser;
+package seng302.utilities;
 
-import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -14,6 +13,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.parser.MarkRoundingData;
+import seng302.model.stream.parser.PositionUpdateData;
+import seng302.model.stream.parser.PositionUpdateData.DeviceType;
+import seng302.model.stream.parser.RaceStartData;
+import seng302.model.stream.parser.RaceStatusData;
 
 /**
  * StreamParser is a utilities class for taking byte data, formatted according to the AC35
@@ -87,22 +91,24 @@ public class StreamParser {
 //
         int noBoats = payload[22];
         int raceType = payload[23];
+        long boatID, estTimeAtNextMark, estTimeAtFinish;
+        int leg, boatStatus;
         for (int i = 0; i < noBoats; i++) {
-            long boatID = bytesToLong(
+            boatID = bytesToLong(
                 Arrays.copyOfRange(payload, 24 + (i * 20), 28 + (i * 20)));
-//            boat.setBoatStatus((int) payload[28 + (i * 20)]);
+            boatStatus = (int) payload[28 + (i * 20)];
 
 //            setBoatLegPosition(boat, (int) payload[29 + (i * 20)]);
 //            boat.setPenaltiesAwarded((int) payload[30 + (i * 20)]);
 //            boat.setPenaltiesServed((int) payload[31 + (i * 20)]);
-            Long estTimeAtNextMark = bytesToLong(
+            estTimeAtNextMark = bytesToLong(
                 Arrays.copyOfRange(payload, 32 + (i * 20), 38 + (i * 20)));
 //            boat.setEstimateTimeTillNextMark(estTimeAtNextMark);
-            Long estTimeAtFinish = bytesToLong(
+            estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
-            int leg = (int) payload[29 + (i * 20)];
+            leg = (int) payload[29 + (i * 20)];
 //            boat.setEstimateTimeAtFinish(estTimeAtFinish);
-            data.addBoatData(boatID, estTimeAtNextMark, estTimeAtFinish, leg);
+            data.addBoatData(boatID, estTimeAtNextMark, estTimeAtFinish, leg, boatStatus);
         }
         return  data;
     }

@@ -1,9 +1,9 @@
-package seng302.model.map;
+package seng302.visualiser.map;
+
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import seng302.utilities.GeoPoint;
-
-import static org.junit.Assert.*;
 
 /**
  * Unit test for Mercator Project class.

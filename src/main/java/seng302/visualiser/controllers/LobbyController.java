@@ -2,8 +2,9 @@ package seng302.visualiser.controllers;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,7 +12,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -35,9 +35,6 @@ public class LobbyController implements Initializable {
     public interface LobbyCloseListener {
         void notify(CloseStatus exitCause);
     }
-
-    @FXML
-    private ListView<String> competitorsListView;
 
     @FXML
     private GridPane lobbyScreen;
@@ -259,10 +256,13 @@ public class LobbyController implements Initializable {
     @FXML
     public void leaveLobbyButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function!
-        setContentPane("/views/StartScreenView.fxml");
+//        setContentPane("/views/StartScreenView.fxml");
         GameState.setCurrentStage(GameStages.CANCELLED);
         // TODO: 20/07/17 wmu16 - Implement some way of terminating the game
 //        ClientState.setConnectedToHost(false);
+        for (LobbyCloseListener readyListener : lobbyListeners)
+            readyListener.notify(CloseStatus.LEAVE);
+
     }
 
     @FXML
@@ -309,11 +309,15 @@ public class LobbyController implements Initializable {
     }
 
     public void setPlayerListSource (ObservableList<String> players) {
-        if (competitorsListView != null)
-            competitorsListView.setItems(players);
-        if (firstListView != null) {
+//        if (competitorsListView != null)
+//            competitorsListView.setItems(players);
+//        if (firstListView != null) {
             firstListView.setItems(players);
             firstImageView.setVisible(false);
-        }
+//        }
+    }
+
+    public void disableReadyButton () {
+        readyButton.setDisable(true);
     }
 }

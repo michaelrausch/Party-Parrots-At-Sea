@@ -1,5 +1,7 @@
 package seng302.visualiser.controllers.annotations;
 
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -7,8 +9,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-import java.net.URL;;
-import java.util.ResourceBundle;
+;
 
 public class ImportantAnnotationController implements Initializable {
 

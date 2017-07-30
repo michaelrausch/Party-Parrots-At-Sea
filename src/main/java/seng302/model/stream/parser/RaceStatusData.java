@@ -19,7 +19,7 @@ public class RaceStatusData {
     private long expectedStartTime;
     private List<long[]> boatData = new ArrayList<>();
 
-    RaceStatusData(
+    public RaceStatusData(
         long windDir, long rawWindSpeed, int raceStatus, long currentTime, long expectedStartTime) {
 
         windDirection = windDir / WIND_DIR_FACTOR;
@@ -29,8 +29,8 @@ public class RaceStatusData {
         this.expectedStartTime = expectedStartTime;
     }
 
-    void addBoatData (long boatID, long estTimeToNextMark, long estTimeToFinish, int leg) {
-        boatData.add(new long[] {boatID, estTimeToNextMark, estTimeToFinish, leg});
+    public void addBoatData (long boatID, long estTimeToNextMark, long estTimeToFinish, int leg, int boatStatus) {
+        boatData.add(new long[] {boatID, estTimeToNextMark, estTimeToFinish, leg, boatStatus});
     }
 
     public double getWindDirection() {

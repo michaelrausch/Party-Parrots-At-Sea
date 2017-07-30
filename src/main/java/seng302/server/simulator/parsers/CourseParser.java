@@ -1,5 +1,9 @@
 package seng302.server.simulator.parsers;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -8,11 +12,6 @@ import seng302.server.simulator.mark.CompoundMark;
 import seng302.server.simulator.mark.Corner;
 import seng302.server.simulator.mark.Mark;
 import seng302.server.simulator.mark.RoundingType;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Parses the race xml file to get course details

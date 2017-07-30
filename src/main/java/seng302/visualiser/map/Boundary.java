@@ -1,4 +1,4 @@
-package seng302.model.map;
+package seng302.visualiser.map;
 
 /**
  * The Boundary class represents a rectangle territorial boundary on a map. It
@@ -7,11 +7,11 @@ package seng302.model.map;
  *
  * Created by Haoming on 10/5/17
  */
-public class Boundary {
+class Boundary {
 
 	private double northLat, eastLng, southLat, westLng;
 
-	public Boundary(double northLat, double eastLng, double southLat, double westLng) {
+	Boundary(double northLat, double eastLng, double southLat, double westLng) {
 		this.northLat = northLat;
 		this.eastLng = eastLng;
 		this.southLat = southLat;

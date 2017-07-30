@@ -1,12 +1,11 @@
-package seng302.model.map;
+package seng302.visualiser.map;
 
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class TestMapController implements Initializable{
 

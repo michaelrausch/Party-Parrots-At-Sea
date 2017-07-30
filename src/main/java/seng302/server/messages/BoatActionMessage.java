@@ -1,9 +1,5 @@
 package seng302.server.messages;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-
 /**
  * Created by kre39 on 12/07/17.
  */

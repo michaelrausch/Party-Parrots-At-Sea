@@ -11,7 +11,7 @@ public class MarkRoundingData {
     private int roundingSide;
     private long timeStamp;
 
-    MarkRoundingData(int boatId, int markId, int roundingSide, long timeStamp) {
+    public MarkRoundingData(int boatId, int markId, int roundingSide, long timeStamp) {
         this.boatId = boatId;
         this.markId = markId;
         this.roundingSide = roundingSide;

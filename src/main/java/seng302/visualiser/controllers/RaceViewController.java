@@ -1,5 +1,11 @@
 package seng302.visualiser.controllers;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -9,7 +15,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
-
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -30,7 +35,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import seng302.model.Corner;
+import seng302.model.RaceState;
+import seng302.model.Yacht;
+import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.annotations.Annotation;
@@ -38,11 +45,6 @@ import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 import seng302.visualiser.fxObjects.BoatObject;
-import seng302.model.*;
-import seng302.model.mark.Mark;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Controller class that manages the display of a race
@@ -91,6 +93,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceSparkLine.getYAxis().setTranslateX(-5);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
+
+        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
     }
@@ -189,11 +193,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
             }
         });
-
+        annotationSlider.setValue(2);
         annotationSlider.valueProperty().addListener((obs, oldVal, newVal) ->
             setAnnotations((int) annotationSlider.getValue())
         );
-        annotationSlider.setValue(2);
     }
 
 
@@ -368,14 +371,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     private void updateOrder() {
         positionVbox.getChildren().clear();
-        positionVbox.getChildren().removeAll();
-        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+//        positionVbox.getChildren().removeAll();
+//        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // list of racing yacht id
         List<Yacht> sorted = new ArrayList<>(participants.values());
         sorted.sort(Comparator.comparingInt(Yacht::getPositionInteger));
 
         for (Yacht yacht : sorted) {
+//            System.out.println("yacht == null  " + String.valueOf(yacht == null));
             if (yacht.getBoatStatus() == 3) {  // 3 is finish status
                 Text textToAdd = new Text(yacht.getPositionInteger() + ". " +
                     yacht.getShortName() + " (Finished)");
@@ -389,6 +393,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 textToAdd.setStyle("");
                 positionVbox.getChildren().add(textToAdd);
             }
+//            System.out.println("finished a loop :))))))))))))");
         }
 //            participants.forEach((id, yacht) ->{
 //                Text textToAdd = new Text(yacht.getPosition() + ". " +

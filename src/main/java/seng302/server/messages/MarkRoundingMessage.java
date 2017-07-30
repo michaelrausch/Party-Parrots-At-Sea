@@ -1,8 +1,5 @@
 package seng302.server.messages;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 public class MarkRoundingMessage extends Message{
     private final long MESSAGE_VERSION_NUMBER = 1;
     private final int MESSAGE_SIZE = 21;

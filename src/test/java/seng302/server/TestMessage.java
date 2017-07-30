@@ -1,16 +1,12 @@
 package seng302.server;
 
-import org.junit.Test;
-import seng302.server.messages.*;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+
+import org.junit.Test;
+import seng302.server.messages.Message;
+import seng302.server.messages.XMLMessage;
+import seng302.server.messages.XMLMessageSubType;
 
 public class TestMessage {
     private static int XML_MESSAGE_LEN = 14;

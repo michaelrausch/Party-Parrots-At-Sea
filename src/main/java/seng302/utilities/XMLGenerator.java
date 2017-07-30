@@ -1,11 +1,15 @@
-package seng302.model.stream.xml.generator;
+package seng302.utilities;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
 import seng302.server.messages.XMLMessageSubType;
-
-import java.io.*;
 
 /**
  * An XML generator to generate the Race, Boat, and Regatta XML dynamically

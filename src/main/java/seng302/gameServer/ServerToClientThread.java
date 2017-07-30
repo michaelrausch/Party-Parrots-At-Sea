@@ -3,7 +3,6 @@ package seng302.gameServer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
@@ -26,13 +24,12 @@ import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
-import seng302.model.stream.xml.generator.XMLGenerator;
+import seng302.utilities.XMLGenerator;
 import seng302.server.messages.BoatActionType;
 import seng302.server.messages.BoatLocationMessage;
 import seng302.server.messages.BoatStatus;
 import seng302.server.messages.BoatSubMessage;
 import seng302.server.messages.Message;
-
 import seng302.server.messages.RaceStatus;
 import seng302.server.messages.RaceStatusMessage;
 import seng302.server.messages.RaceType;
@@ -270,6 +267,7 @@ public class ServerToClientThread implements Runnable, Observer {
             currentByte = is.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {
+            e.printStackTrace();
             serverLog("Socket read failed", 1);
         }
         if (currentByte == -1) {

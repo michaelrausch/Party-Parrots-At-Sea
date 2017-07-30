@@ -1,7 +1,5 @@
 package seng302.model;
 
-import org.w3c.dom.Node;
-
 /**
  * Stores the data for the cornering of a mark.
  */

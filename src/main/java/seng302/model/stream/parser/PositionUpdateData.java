@@ -14,7 +14,7 @@ public class PositionUpdateData {
     private double heading;
     private double groundSpeed;
 
-    PositionUpdateData(int deviceId, DeviceType type, double lat, double lon,
+    public PositionUpdateData(int deviceId, DeviceType type, double lat, double lon,
         double heading, double groundSpeed) {
         this.deviceId = deviceId;
         this.type = type;
