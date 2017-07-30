@@ -1,6 +1,5 @@
 package seng302.visualiser;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,37 +10,33 @@ import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import seng302.model.Colors;
+import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.Yacht;
-import seng302.model.mark.GateMark;
+import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
-import seng302.model.mark.MarkType;
-import seng302.model.mark.SingleMark;
-import seng302.utilities.GeoPoint;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.AnnotationBox;
 import seng302.visualiser.fxObjects.BoatObject;
-import seng302.visualiser.fxObjects.MarkObject;
+import seng302.visualiser.fxObjects.Gate;
+import seng302.visualiser.fxObjects.Marker;
+import seng302.visualiser.map.Boundary;
+import seng302.visualiser.map.CanvasMap;
 
 /**
  * Created by cir27 on 20/07/17.
  */
 public class GameView extends Pane {
-
-    private ObservableList<Node> gameObjects;
-    private ImageView mapImage;
 
     private double bufferSize   = 50;
     private double panelWidth   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
@@ -52,23 +47,25 @@ public class GameView extends Pane {
 
     private double distanceScaleFactor;
     private ScaleDirection scaleDirection;
-    private Mark minLatPoint;
-    private Mark minLonPoint;
-    private Mark maxLatPoint;
-    private Mark maxLonPoint;
-    private double referencePointX;
-    private double referencePointY;
-    private double metersPerPixelX;
-    private double metersPerPixelY;
+    private GeoPoint minLatPoint, minLonPoint, maxLatPoint, maxLonPoint;
+    private double referencePointX, referencePointY;
+    private double metersPerPixelX, metersPerPixelY;
+
+    private Text fpsDisplay = new Text();
+    private Polygon raceBorder = new Polygon();
+
+    /* Note that if either of these is null then values for it have not been added and the other
+       should be used as the limits of the map. */
+    private List<Limit> borderPoints;
+    private List<CompoundMark> course;
+    private Map<Mark, Marker> markerObjects;
 
     private Map<Yacht, BoatObject> boatObjects = new HashMap<>();
     private List<AnnotationBox> annotations = new ArrayList<>();
+    private List<Integer> markSequence;
+    private ObservableList<Node> gameObjects;
 
-    private Text fpsDisplay = new Text();
-    /* Note that if either of these is null then values for it have not been added and the other
-       should be used as the limits of the map. */
-    private Polygon raceBorder;
-    private Map<SingleMark, MarkObject> markObjects = new HashMap<>();
+    private ImageView mapImage = new ImageView();
 
     //FRAME RATE
     private Double frameRate = 60.0;
@@ -86,11 +83,24 @@ public class GameView extends Pane {
     public GameView () {
         gameObjects = this.getChildren();
         // create image view for map, bind panel size to image
-        mapImage = new ImageView();
-        gameObjects.add(mapImage);
         mapImage.fitWidthProperty().bind(this.widthProperty());
         mapImage.fitHeightProperty().bind(this.heightProperty());
+        gameObjects.add(mapImage);
+        fpsDisplay.setLayoutX(5);
+        fpsDisplay.setLayoutY(20);
+        fpsDisplay.setStrokeWidth(2);
+        gameObjects.add(fpsDisplay);
+        gameObjects.add(raceBorder);
         initializeTimer();
+        this.widthProperty().addListener(resize -> {
+            canvasWidth = this.getWidth();
+            canvasHeight = this.getHeight();
+            if (borderPoints != null) {
+                updateBorder(borderPoints);
+            } else if (course != null) {
+                updateCourse(course, markSequence);
+            }
+        });
     }
 
     private void initializeTimer () {
@@ -120,44 +130,12 @@ public class GameView extends Pane {
                                 drawFps(frameRate.intValue());
                             }
                         }
-                        updateGroups();
+                        boatObjects.forEach((boat, boatObject) -> {});
                         lastTime = now;
                     }
                 }
             }
         };
-    }
-
-    public void initializeCanvas() {
-        drawGoogleMap();
-        fpsDisplay.setLayoutX(5);
-        fpsDisplay.setLayoutY(20);
-        fpsDisplay.setStrokeWidth(2);
-        gameObjects.add(fpsDisplay);
-        gameObjects.add(raceBorder);
-
-        this.widthProperty().addListener(resize -> {
-            canvasWidth = this.getWidth();
-            canvasHeight = this.getHeight();
-            fitMarksToCanvas();
-        });
-    }
-
-    private void switchToFinishScreen() {
-        try {
-            // canvas view -> anchor pane -> grid pane -> main view
-            GridPane gridPane = (GridPane) this.getParent().getParent();
-            AnchorPane contentPane = (AnchorPane) gridPane.getParent();
-            contentPane.getChildren().removeAll();
-            contentPane.getChildren().clear();
-            contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-            contentPane.getChildren().addAll(
-                (Pane) FXMLLoader.load(getClass().getResource("/views/FinishScreenView.fxml")));
-        } catch (javafx.fxml.LoadException e) {
-            System.out.println("[Controller] FXML load exception");
-        } catch (IOException e) {
-            System.out.println("[Controller] IO exception");
-        }
     }
 
     /**
@@ -166,7 +144,7 @@ public class GameView extends Pane {
      */
     private void drawGoogleMap() {
         findMetersPerPixel();
-        Point2D topLeftPoint = findScaledXY(maxLatPoint.getLatitude(), minLonPoint.getLongitude());
+        Point2D topLeftPoint = findScaledXY(maxLatPoint.getLat(), minLonPoint.getLng());
         // distance from top left extreme to panel origin (top left corner)
         double distanceFromTopLeftToOrigin = Math.sqrt(
             Math.pow(topLeftPoint.getX() * metersPerPixelX, 2) + Math
@@ -175,7 +153,7 @@ public class GameView extends Pane {
         double bearingFromTopLeftToOrigin = Math
             .toDegrees(Math.atan2(-topLeftPoint.getX(), topLeftPoint.getY()));
         // the top left extreme
-        GeoPoint topLeftPos = new GeoPoint(maxLatPoint.getLatitude(), minLonPoint.getLongitude());
+        GeoPoint topLeftPos = new GeoPoint(maxLatPoint.getLat(), minLonPoint.getLng());
         GeoPoint originPos = GeoUtility
             .getGeoCoordinate(topLeftPos, bearingFromTopLeftToOrigin, distanceFromTopLeftToOrigin);
 
@@ -196,20 +174,103 @@ public class GameView extends Pane {
     }
 
     /**
-     * Adds border marks to the canvas, taken from the XML file
+     * Adds a course to the GameView. The view is scaled accordingly unless a border is set in which
+     * case the course is added relative ot the border.
      *
-     * NOTE: This is quite confusing as objects are grabbed from the XMLParser such as Mark and
-     * CompoundMark which are named the same as those in the model package but are, however not the
-     * same, so they do not have things such as a type and must be derived from the number of marks
-     * in a compound mark etc..
+     * @param newCourse the mark objects that make up the course.
+     */
+    public void updateCourse(List<CompoundMark> newCourse, List<Integer> sequence) {
+        course = newCourse;
+        this.markSequence = sequence;
+        markerObjects = new HashMap<>();
+        Paint colour = Color.BLACK;
+        //Creates new markers
+        for (CompoundMark cMark : course) {
+            //Set start and end colour
+            if (cMark.getId() == sequence.get(0)) {
+                colour = Color.GREEN;
+            } else if (cMark.getId() == sequence.get(sequence.size() - 1)) {
+                colour = Color.RED;
+            }
+            //Create mark dots
+            for (Mark mark : cMark.getMarks()) {
+                makeAndBindMarker(mark, colour);
+            }
+            //Create gate line
+            if (cMark.isGate()) {
+                for (int i = 0; i < cMark.getMarks().size()-1; i++) {
+                    makeAndBindGate(
+                        markerObjects.get(cMark.getSubMark(i)),
+                        markerObjects.get(cMark.getSubMark(i+1)),
+                        colour
+                    );
+                }
+            }
+            colour = Color.BLACK;
+        }
+        //Set X,Y co-ordinates
+        if (borderPoints == null) {
+            rescaleRace(new ArrayList<>(markerObjects.keySet()));
+        } else {
+            rescaleRace(new ArrayList<>(borderPoints));
+        }
+        //Move the Markers to initial position.
+        markerObjects.forEach(((mark, marker) -> {
+            Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
+            marker.setCenterX(p2d.getX());
+            marker.setCenterY(p2d.getY());
+        }));
+    }
+
+    /**
+     * Creates a new Marker and binds it's position to the given Mark.
+     *
+     * @param observableMark The mark to bind the marker to.
+     * @param colour The desired colour of the mark
+     */
+    private void makeAndBindMarker(Mark observableMark, Paint colour) {
+        Marker marker = new Marker(colour);
+        markerObjects.put(observableMark, marker);
+        observableMark.addPositionListener((mark, lat, lon) -> {
+            Point2D p2d = findScaledXY(lat, lon);
+            markerObjects.get(mark).setCenterX(p2d.getX());
+            markerObjects.get(mark).setCenterY(p2d.getY());
+        });
+    }
+
+    /**
+     * Creates a new gate connecting the given marks.
+     *
+     * @param m1 The first Mark of the gate.
+     * @param m2 The second Mark of the gate.
+     * @param colour The desired colour of the gate.
+     */
+    private void makeAndBindGate(Marker m1, Marker m2, Paint colour) {
+        Gate gate = new Gate(colour);
+        gate.startXProperty().bind(
+            m1.centerXProperty()
+        );
+        gate.startYProperty().bind(
+            m1.centerYProperty()
+        );
+        gate.endXProperty().bind(
+            m2.centerXProperty()
+        );
+        gate.endYProperty().bind(
+            m2.centerYProperty()
+        );
+    }
+
+    /**
+     * Adds a border to the GameView and rescales to the size of the border, does not rescale if a
+     * border already exists. Assumes the border is larger than the course.
+     *
+     * @param border the race border to be drawn.
      */
     public void updateBorder(List<Limit> border) {
-        if (raceBorder == null) {
-            raceBorder = new Polygon();
-            raceBorder.setStroke(new Color(0.0f, 0.0f, 0.74509807f, 1));
-            raceBorder.setStrokeWidth(3);
-            raceBorder.setFill(new Color(0,0,0,0));
-            findCanvasScaling();
+        if (borderPoints == null) {
+            borderPoints = border;
+            rescaleRace(new ArrayList<>(borderPoints));
         }
         List<Double> boundaryPoints = new ArrayList<>();
         for (Limit limit : border) {
@@ -220,41 +281,18 @@ public class GameView extends Pane {
         raceBorder.getPoints().setAll(boundaryPoints);
     }
 
-    private void updateGroups() {
-        boatObjects.forEach((boat, boatObject) -> {});
-        markObjects.forEach((mark, markObject) -> {});
+    /**
+     * Rescales the race to the size of the window.
+     *
+     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
+     */
+    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
+        //Check is called once to avoid unnecessarily change the course limits once the race is running
+        findMinMaxPoint(limitingCoordinates);
+        double minLonToMaxLon = scaleRaceExtremities();
+        calculateReferencePointLocation(minLonToMaxLon);
+        drawGoogleMap();
     }
-
-//    private void updateBoatGroup(BoatGroup boatGroup) {
-////        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.boatLocations.get(boatGroup.getRaceId());
-////        // giving the movementQueue a 5 packet buffer to account for slightly out of order packets
-////        if (movementQueue.size() > 0) {
-////            try {
-////                PositionUpdateData positionPacket = movementQueue.take();
-//                Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
-////                double heading = 360.0 / 0xffff * positionPacket.getHeading();
-//                boatGroup.setDestination(
-//                    p2d.getX(), p2d.getY(), heading, positionPacket.getGroundSpeed(),
-//                    positionPacket.getTimeValid(), frameRate);
-////            } catch (InterruptedException e){
-////                e.printStackTrace();
-////            }
-//////            }
-////        }
-//    }
-//
-//    private void updateMarkGroup (long raceId, MarkGroup markGroup) {
-//        PriorityBlockingQueue<PositionUpdateData> movementQueue = StreamParser.markLocations.get(raceId);
-//        if (movementQueue.size() > 0){
-//            try {
-//                PositionUpdateData positionPacket = movementQueue.take();
-//                Point2D p2d = findScaledXY(positionPacket.getLat(), positionPacket.getLon());
-//                markGroup.moveMarkTo(p2d.getX(), p2d.getY(), raceId);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
     /**
      * Draws all the boats.
@@ -320,65 +358,27 @@ public class GameView extends Pane {
         return newAnnotation;
     }
 
-    public void updateCourse(List<Mark> course) {
-        for (Mark mark : course) {
-            if (mark.getMarkType() == MarkType.SINGLE_MARK) {
-                SingleMark sMark = (SingleMark) mark;
-
-                MarkObject markObject = new MarkObject(sMark, findScaledXY(sMark));
-                markObjects.put(sMark, markObject);
-            } else {
-                GateMark gMark = (GateMark) mark;
-
-                MarkObject markObject = new MarkObject(gMark, findScaledXY(gMark.getSingleMark1()),
-                    findScaledXY(gMark.getSingleMark2())); //should be 2 objects in the list.
-//                markObjects.put(markObject.);
-            }
-        }
-//        gameObjects.addAll(markObjects);
-    }
-
     private void drawFps(int fps){
         fpsDisplay.setText(String.format("%d FPS", fps));
     }
 
     /**
-     * Calculates x and y location for every marker that fits it to the canvas the race will be
-     * drawn on.
-     */
-    private void fitMarksToCanvas() {
-        //Check is called once to avoid unnecessarily change the course limits once the race is running
-        findMinMaxPoint();
-        double minLonToMaxLon = scaleRaceExtremities();
-        calculateReferencePointLocation(minLonToMaxLon);
-        //givePointsXY();
-//        updateBorder();
-    }
-
-
-    /**
-     * Sets the class variables minLatPoint, maxLatPoint, minLonPoint, maxLonPoint to the marker
-     * with the leftmost marker, rightmost marker, southern most marker and northern most marker
+     * Sets the class variables minLatPoint, maxLatPoint, minLonPoint, maxLonPoint to the point
+     * with the leftmost point, rightmost point, southern most point and northern most point
      * respectively.
      */
-    private void findMinMaxPoint() {
-        List<Limit> sortedPoints = new ArrayList<>();
-//        for (Limit limit : ) {
-//            sortedPoints.add(limit);
-//        }
-        sortedPoints.sort(Comparator.comparingDouble(Limit::getLat));
-        Limit minLatMark = sortedPoints.get(0);
-        Limit maxLatMark = sortedPoints.get(sortedPoints.size()-1);
-        minLatPoint = new SingleMark(minLatMark.toString(), minLatMark.getLat(), minLatMark.getLng(), minLatMark.getSeqID(), minLatMark.getSeqID());
-        maxLatPoint = new SingleMark(maxLatMark.toString(), maxLatMark.getLat(), maxLatMark.getLng(), maxLatMark.getSeqID(), minLatMark.getSeqID());
+    private void findMinMaxPoint(List<GeoPoint> points) {
+        List<GeoPoint> sortedPoints = new ArrayList<>(points);
+        sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLat));
+        minLatPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
+        GeoPoint maxLat = sortedPoints.get(sortedPoints.size()-1);
+        maxLatPoint = new GeoPoint(maxLat.getLat(), maxLat.getLng());
 
-        sortedPoints.sort(Comparator.comparingDouble(Limit::getLng));
-        //If the course is on a point on the earth where longitudes wrap around.
-        Limit minLonMark = sortedPoints.get(0);
-        Limit maxLonMark = sortedPoints.get(sortedPoints.size()-1);
-        minLonPoint = new SingleMark(minLonMark.toString(), minLonMark.getLat(), minLonMark.getLng(), minLonMark.getSeqID(), minLonMark.getSeqID());
-        maxLonPoint = new SingleMark(maxLonMark.toString(), maxLonMark.getLat(), maxLonMark.getLng(), maxLonMark.getSeqID(), minLonMark.getSeqID());
-        if (maxLonPoint.getLongitude() - minLonPoint.getLongitude() > 180) {
+        sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLng));
+        minLonPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
+        GeoPoint maxLon = sortedPoints.get(sortedPoints.size()-1);
+        maxLonPoint = new GeoPoint(maxLon.getLat(), maxLon.getLng());
+        if (maxLonPoint.getLng() - minLonPoint.getLng() > 180) {
             horizontalInversion = true;
         }
     }
@@ -391,25 +391,29 @@ public class GameView extends Pane {
      * maximum longitude.
      */
     private void calculateReferencePointLocation(double minLonToMaxLon) {
-        Mark referencePoint = minLatPoint;
+        GeoPoint referencePoint = minLatPoint;
         double referenceAngle;
 
         if (scaleDirection == ScaleDirection.HORIZONTAL) {
-            referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
-            referencePointX = bufferSize + distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
-
-            referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, maxLatPoint));
+            referenceAngle = Math.abs(
+                    GeoUtility.getBearingRad(referencePoint, minLonPoint)
+            );
+            referencePointX = bufferSize + distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility.getDistance(referencePoint, minLonPoint);
+            referenceAngle = Math.abs(GeoUtility.getDistance(referencePoint, maxLatPoint));
             referencePointY  = canvasHeight - (bufferSize + bufferSize);
-            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
+            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility.getDistance(referencePoint, maxLatPoint);
             referencePointY  = referencePointY / 2;
             referencePointY += bufferSize;
-            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * Mark.calculateDistance(referencePoint, maxLatPoint);
+            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility.getDistance(referencePoint, maxLatPoint);
         } else {
             referencePointY = canvasHeight - bufferSize;
-
-            referenceAngle = Math.abs(Mark.calculateHeadingRad(referencePoint, minLonPoint));
+            referenceAngle = Math.abs(
+                Math.toRadians(
+                    GeoUtility.getDistance(referencePoint, minLonPoint)
+                )
+            );
             referencePointX  = bufferSize;
-            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * Mark.calculateDistance(referencePoint, minLonPoint);
+            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility.getDistance(referencePoint, minLonPoint);
             referencePointX += ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
         }
         if(horizontalInversion) {
@@ -424,18 +428,21 @@ public class GameView extends Pane {
      */
     private double scaleRaceExtremities() {
 
-        double vertAngle = Math.abs(Mark.calculateHeadingRad(minLatPoint, maxLatPoint));
+        double vertAngle = Math.abs(
+                GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
+        );
         double vertDistance =
-            Math.cos(vertAngle) * Mark.calculateDistance(minLatPoint, maxLatPoint);
-        double horiAngle = Mark.calculateHeadingRad(minLonPoint, maxLonPoint);
-
+            Math.cos(vertAngle) * GeoUtility.getDistance(minLatPoint, maxLatPoint);
+        double horiAngle = Math.abs(
+                GeoUtility.getBearingRad(minLonPoint, maxLonPoint)
+        );
         if (horiAngle <= (Math.PI / 2)) {
             horiAngle = (Math.PI / 2) - horiAngle;
         } else {
             horiAngle = horiAngle - (Math.PI / 2);
         }
         double horiDistance =
-            Math.cos(horiAngle) * Mark.calculateDistance(minLonPoint, maxLonPoint);
+            Math.cos(horiAngle) * GeoUtility.getDistance(minLonPoint, maxLonPoint);
 
         double vertScale = (canvasHeight - (bufferSize + bufferSize)) / vertDistance;
 
@@ -449,22 +456,22 @@ public class GameView extends Pane {
         return horiDistance;
     }
 
-    private Point2D findScaledXY(Mark unscaled) {
-        return findScaledXY(unscaled.getLatitude(), unscaled.getLongitude());
+    private Point2D findScaledXY(GeoPoint unscaled) {
+        return findScaledXY(unscaled.getLat(), unscaled.getLng());
     }
 
-    public Point2D findScaledXY (double unscaledLat, double unscaledLon) {
+    private Point2D findScaledXY (double unscaledLat, double unscaledLon) {
         double distanceFromReference;
         double angleFromReference;
         double xAxisLocation = referencePointX;
         double yAxisLocation = referencePointY;
 
-        angleFromReference = Mark
-            .calculateHeadingRad(minLatPoint.getLatitude(), minLatPoint.getLongitude(), unscaledLat,
-                unscaledLon);
-        distanceFromReference = Mark
-            .calculateDistance(minLatPoint.getLatitude(), minLatPoint.getLongitude(), unscaledLat,
-                unscaledLon);
+        angleFromReference = GeoUtility.getBearingRad(
+                minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
+        );
+        distanceFromReference = GeoUtility.getDistance(
+            minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
+        );
         if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
             xAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
             yAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
@@ -492,14 +499,14 @@ public class GameView extends Pane {
      */
     private void findMetersPerPixel() {
         Point2D p1, p2;
-        Mark m1, m2;
+        GeoPoint g1, g2;
         double theta, distance, dx, dy, dHorizontal, dVertical;
-        m1 = new SingleMark("m1", maxLatPoint.getLatitude(), minLonPoint.getLongitude(), 1, 0);
-        m2 = new SingleMark("m2", minLatPoint.getLatitude(), maxLonPoint.getLongitude(), 2, 0);
-        p1 = findScaledXY(m1);
-        p2 = findScaledXY(m2);
-        theta = Mark.calculateHeadingRad(m1, m2);
-        distance = Mark.calculateDistance(m1, m2);
+        g1 = new GeoPoint(maxLatPoint.getLat(), minLonPoint.getLng());
+        g2 = new GeoPoint(minLatPoint.getLat(), maxLatPoint.getLng());
+        p1 = findScaledXY(new GeoPoint(maxLatPoint.getLat(), minLonPoint.getLng()));
+        p2 = findScaledXY(new GeoPoint(minLatPoint.getLat(), maxLatPoint.getLng()));
+        theta = GeoUtility.getBearingRad(g1, g2);
+        distance = GeoUtility.getDistance(g1, g2);
         dHorizontal = Math.abs(Math.sin(theta) * distance);
         dVertical = Math.abs(Math.cos(theta) * distance);
         dx = Math.abs(p1.getX() - p2.getX());

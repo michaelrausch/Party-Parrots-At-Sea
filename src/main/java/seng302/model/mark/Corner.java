@@ -1,4 +1,4 @@
-package seng302.model;
+package seng302.model.mark;
 
 /**
  * Stores the data for the cornering of a mark.

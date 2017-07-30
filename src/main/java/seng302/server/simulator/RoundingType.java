@@ -1,4 +1,4 @@
-package seng302.server.simulator.mark;
+package seng302.server.simulator;
 
 public enum RoundingType {
 

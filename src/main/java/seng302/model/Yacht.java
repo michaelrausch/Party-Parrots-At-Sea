@@ -14,7 +14,6 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import seng302.gameServer.GameState;
 import seng302.model.mark.Mark;
-import seng302.utilities.GeoPoint;
 
 /**
  * Yacht class for the racing boat.

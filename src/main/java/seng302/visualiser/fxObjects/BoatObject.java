@@ -344,4 +344,6 @@ public class BoatObject extends Group {
 //        boatAnnotations.setAsPlayer();
 //        isPlayer = true;
     }
+
+    public void updateTrajectory(heading, velocity, scaleFactor)
 }

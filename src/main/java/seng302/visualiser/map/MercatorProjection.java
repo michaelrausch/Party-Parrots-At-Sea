@@ -1,7 +1,7 @@
 package seng302.visualiser.map;
 
 import javafx.geometry.Point2D;
-import seng302.utilities.GeoPoint;
+import seng302.model.GeoPoint;
 
 /**
  * An utility class useful to convert between Geo locations and Mercator projection

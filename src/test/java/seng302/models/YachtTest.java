@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Before;
 import seng302.model.PolarTable;
 import seng302.model.Yacht;
-import seng302.utilities.GeoPoint;
+import seng302.model.GeoPoint;
 
 public class YachtTest {
 

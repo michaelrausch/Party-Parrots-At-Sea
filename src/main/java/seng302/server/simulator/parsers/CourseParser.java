@@ -8,10 +8,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import seng302.server.simulator.mark.CompoundMark;
-import seng302.server.simulator.mark.Corner;
-import seng302.server.simulator.mark.Mark;
-import seng302.server.simulator.mark.RoundingType;
+import seng302.model.mark.CompoundMark;
+import seng302.server.simulator.Corner;
+import seng302.model.mark.Mark;
+import seng302.server.simulator.RoundingType;
 
 /**
  * Parses the race xml file to get course details
@@ -66,7 +66,7 @@ public class CourseParser extends FileParser {
 			for (int i = 0; i < cMarks.getLength(); i++) {
 				CompoundMark cMark = getCompoundMark(cMarks.item(i));
 				if (cMark != null)
-					compoundMarksMap.put(cMark.getMarkID(), cMark);
+					compoundMarksMap.put(cMark.getId(), cMark);
 			}
 
 			return compoundMarksMap;
@@ -87,7 +87,7 @@ public class CourseParser extends FileParser {
 			for (int i = 0; i < marks.getLength(); i++) {
 				Mark mark = getMark(marks.item(i));
 				if (mark != null)
-					cMark.addMark(mark.getSeqID(), mark);
+					cMark.addSubMarks(mark);
 			}
 			return cMark;
 		}

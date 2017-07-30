@@ -1,12 +1,12 @@
-package seng302.utilities;
+package seng302.model;
 
 /**
- * A class represent Geo location (latitude, longitude).
+ * A class represent Geo location (latitude, lnggitude).
  * Created by Haoming on 15/5/2017
  */
 public class GeoPoint {
 
-	double lat, lng;
+	private double lat, lng;
 
 	public GeoPoint(double lat, double lng) {
 		this.lat = lat;

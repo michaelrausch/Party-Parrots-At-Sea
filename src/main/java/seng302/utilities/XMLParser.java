@@ -8,13 +8,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import seng302.model.Corner;
 import seng302.model.Limit;
 import seng302.model.Yacht;
-import seng302.model.mark.GateMark;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
-import seng302.model.mark.MarkType;
-import seng302.model.mark.SingleMark;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 
@@ -249,13 +247,19 @@ public class XMLParser {
     /**
      * Extracts course mark data
      */
-    private static List<Mark> extractCompoundMarks(Element docEle) {
-        List<Mark> allMarks = new ArrayList<>();
+    private static List<CompoundMark> extractCompoundMarks(Element docEle) {
+        List<CompoundMark> allMarks = new ArrayList<>();
         NodeList cMarkList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
+        CompoundMark cMark;
         for (int i = 0; i < cMarkList.getLength(); i++) {
             Node cMarkNode = cMarkList.item(i);
             if (cMarkNode.getNodeName().equals("CompoundMark")) {
-                allMarks.add(createMark(cMarkNode));
+                cMark = new CompoundMark(
+                    XMLParser.getNodeAttributeInt(cMarkNode, "CompoundMarkID"),
+                    XMLParser.getNodeAttributeString(cMarkNode, "Name")
+                );
+                cMark.addSubMarks(createMarks(cMarkNode));
+                allMarks.add(cMark);
             }
         }
         return allMarks;
@@ -264,8 +268,8 @@ public class XMLParser {
     /**
      * Creates marks objects from the given node
      */
-    private static Mark createMark(Node compoundMark) {
-        List<SingleMark> subMarks = new ArrayList<>();
+    private static List<Mark> createMarks(Node compoundMark) {
+        List<Mark> subMarks = new ArrayList<>();
         Integer compoundMarkID = XMLParser.getNodeAttributeInt(compoundMark, "CompoundMarkID");
         String cMarkName = XMLParser.getNodeAttributeString(compoundMark, "Name");
 
@@ -277,17 +281,10 @@ public class XMLParser {
                 String markName = XMLParser.getNodeAttributeString(markNode, "Name");
                 Double targetLat = XMLParser.getNodeAttributeDouble(markNode, "TargetLat");
                 Double targetLng = XMLParser.getNodeAttributeDouble(markNode, "TargetLng");
-                SingleMark mark = new SingleMark(markName, targetLat, targetLng, sourceID,
-                    compoundMarkID);
+                Mark mark = new Mark(markName, targetLat, targetLng, sourceID);
                 subMarks.add(mark);
             }
         }
-        if (subMarks.size() == 1) {
-            return subMarks.get(0);
-        } else {
-            return new GateMark( cMarkName, MarkType.OPEN_GATE, subMarks.get(0), subMarks.get(1),
-                subMarks.get(0).getLatitude(), subMarks.get(0).getLongitude(), compoundMarkID
-            );
-        }
+        return subMarks;
     }
 }

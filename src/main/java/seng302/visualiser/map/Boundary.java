@@ -7,11 +7,11 @@ package seng302.visualiser.map;
  *
  * Created by Haoming on 10/5/17
  */
-class Boundary {
+public class Boundary {
 
 	private double northLat, eastLng, southLat, westLng;
 
-	Boundary(double northLat, double eastLng, double southLat, double westLng) {
+	public Boundary(double northLat, double eastLng, double southLat, double westLng) {
 		this.northLat = northLat;
 		this.eastLng = eastLng;
 		this.southLat = southLat;

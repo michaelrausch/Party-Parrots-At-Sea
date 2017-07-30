@@ -1,7 +1,6 @@
 package seng302.server.simulator;
 
-import seng302.server.simulator.mark.Corner;
-import seng302.utilities.GeoPoint;
+import seng302.model.GeoPoint;
 import seng302.utilities.GeoUtility;
 
 public class Boat {

@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import seng302.server.simulator.Boat;
-import seng302.server.simulator.mark.Corner;
+import seng302.server.simulator.Corner;
 
 /**
  * Parses the race xml file to get course details

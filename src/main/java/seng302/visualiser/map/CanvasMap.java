@@ -4,7 +4,7 @@ import java.net.URL;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javax.net.ssl.HttpsURLConnection;
-import seng302.utilities.GeoPoint;
+import seng302.model.GeoPoint;
 
 /**
  * CanvasMap retrieves a map image with given geo boundary from Google Map server.
@@ -22,12 +22,12 @@ public class CanvasMap {
 
 	private String KEY = "AIzaSyC-5oOShMCY5Oy_9L7guYMPUPFHDMr37wE";
 
-	CanvasMap(Boundary boundary) {
+	public CanvasMap(Boundary boundary) {
 		this.boundary = boundary;
 		calculateOptimalMapSize();
 	}
 
-	Image getMapImage() {
+	public Image getMapImage() {
 		try {
 			URL url = new URL(getRequest());
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

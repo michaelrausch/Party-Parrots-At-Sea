@@ -1,4 +1,6 @@
-package seng302.server.simulator.mark;
+package seng302.server.simulator;
+
+import seng302.model.mark.CompoundMark;
 
 public class Corner {
 
