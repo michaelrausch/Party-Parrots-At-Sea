@@ -20,31 +20,31 @@
     <children>
         <AnchorPane prefHeight="960.0" prefWidth="250.0" style="-fx-background-color: #2C2c36;" GridPane.rowSpan="3">
             <children>
-                <Label layoutX="11.0" layoutY="259.0" text="Team Position" textFill="WHITE" />
+                <Label layoutX="11.0" layoutY="283.0" text="Team Position" textFill="WHITE" />
                 <Label layoutX="13.0" layoutY="432.0" text="Settings" textFill="WHITE" />
-                <Label layoutX="11.0" layoutY="14.0" text="Timer" textFill="WHITE" />
-                <Label layoutX="11.0" layoutY="88.0" text="Wind direction" textFill="WHITE" />
-                <Circle fx:id="windBackgroundCircle" blendMode="DARKEN" fill="#3dcdc8" layoutX="110.0" layoutY="166.0" radius="35.0" stroke="#d7d7d7" strokeType="INSIDE" strokeWidth="3.0" />
-                <Text fx:id="windArrowText" fill="#a8a8a8" layoutX="86.0" layoutY="186.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↓">
+                <Label layoutX="11.0" layoutY="41.0" text="Timer" textFill="WHITE" />
+                <Label layoutX="11.0" layoutY="112.0" text="Wind direction" textFill="WHITE" />
+                <Circle fx:id="windBackgroundCircle" blendMode="DARKEN" fill="#3dcdc8" layoutX="110.0" layoutY="190.0" radius="35.0" stroke="#d7d7d7" strokeType="INSIDE" strokeWidth="3.0" />
+                <Text fx:id="windArrowText" fill="#a8a8a8" layoutX="86.0" layoutY="210.0" strokeType="OUTSIDE" strokeWidth="0.0" text="↓">
                     <font>
                         <Font name="AdobeArabic-Regular" size="55.0" />
                     </font>
                 </Text>
-                <Text fx:id="windDirectionText" fill="#d3d3d3" layoutX="171.0" layoutY="214.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0°" textAlignment="RIGHT">
+                <Text fx:id="windDirectionText" fill="#d3d3d3" layoutX="171.0" layoutY="238.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0°" textAlignment="RIGHT">
                     <font>
                         <Font name="System Bold" size="13.0" />
                     </font>
                 </Text>
-            <Text fx:id="windSpeedText" fill="#d3d3d3" layoutX="12.0" layoutY="213.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0 Knot" textAlignment="RIGHT">
+            <Text fx:id="windSpeedText" fill="#d3d3d3" layoutX="12.0" layoutY="237.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.0 Knot" textAlignment="RIGHT">
                <font>
                   <Font name="System Bold" size="13.0" />
                </font>
             </Text>
                 <CheckBox fx:id="toggleFps" focusTraversable="false" graphicTextGap="0.0" layoutX="21.0" layoutY="453.0" mnemonicParsing="false" prefHeight="18.0" prefWidth="143.0" selected="true" styleClass="ui-checkbox" text="Show FPS" textFill="WHITE" />
-            <VBox fx:id="positionVbox" layoutX="12.0" layoutY="280.0" prefHeight="140.0" prefWidth="200.0" styleClass="text-white" />
-            <Pane layoutX="11.0" layoutY="30.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="51.0" prefWidth="193.0">
+            <VBox fx:id="positionVbox" layoutX="12.0" layoutY="304.0" prefHeight="116.0" prefWidth="200.0" styleClass="text-white" />
+            <Pane layoutX="11.0" layoutY="39.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="51.0" prefWidth="193.0">
                <children>
-                  <Text fx:id="timerLabel" fill="#f8f8f8" layoutX="-26.0" layoutY="34.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" textAlignment="CENTER" wrappingWidth="246.0">
+                  <Text fx:id="timerLabel" fill="#f8f8f8" layoutX="-26.0" layoutY="51.0" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" textAlignment="CENTER" wrappingWidth="246.0">
                      <font>
                         <Font size="25.0" />
                      </font>

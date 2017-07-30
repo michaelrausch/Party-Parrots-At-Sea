@@ -6,7 +6,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
@@ -64,14 +64,31 @@ public class BoatObject extends Group {
      * polygon.
      */
     public BoatObject(double... points) {
+    public BoatGroup(Yacht boat, Color color, double... points) {
+        destinationSet = false;
+        this.boat = boat;
+        initChildren(color, points);
+    }
+
+    /**
+     * Creates the javafx objects that will be the in the group by default.
+     *
+     * @param color The colour of the boat polygon and the trailing line.
+     * @param points An array of co-ordinates x1,y1,x2,y2,x3,y3... that will make up the boat
+     * polygon.
+     */
+    private void initChildren(Color color, double... points) {
+        this.color = color;
         boatPoly = new Polygon(points);
         boatPoly.setFill(colour);
+        boatPoly.setFill(this.color);
         boatPoly.setOnMouseEntered(event -> {
             boatPoly.setFill(Color.FLORALWHITE);
             boatPoly.setStroke(Color.RED);
         });
         boatPoly.setOnMouseExited(event -> {
             boatPoly.setFill(colour);
+            boatPoly.setFill(this.color);
             boatPoly.setStroke(Color.BLACK);
         });
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
@@ -80,6 +97,7 @@ public class BoatObject extends Group {
 
         annotationBox = new AnnotationBox();
         annotationBox.setFill(colour);
+        boatAnnotations = new BoatAnnotations(boat, this.color);
 
         leftLayLine = new Line();
         rightLayline = new Line();
@@ -178,25 +196,44 @@ public class BoatObject extends Group {
      */
     public void setDestination(double newXValue, double newYValue, double rotation,
         double groundSpeed, long timeValid, double frameRate) {
-        if (lastTimeValid == 0) {
-            lastTimeValid = timeValid - 200;
-            moveTo(newXValue, newYValue, rotation);
-        }
-        framesToMove = Math.round((frameRate / (1000.0f / (timeValid - lastTimeValid))));
-        double dx = newXValue - boatPoly.getLayoutX();
-        double dy = newYValue - boatPoly.getLayoutY();
-
-        xIncrement = dx / framesToMove;
-        yIncrement = dy / framesToMove;
 
         destinationSet = true;
+        Double dx = Math.abs(boatPoly.getLayoutX() - newXValue);
+        Double dy = Math.abs(boatPoly.getLayoutY() - newYValue);
+        moveTo(newXValue, newYValue, rotation);
+
 
         rotateTo(rotation);
         wake.setRotation(rotation, groundSpeed);
 //        yacht.setVelocity(groundSpeed);
         lastTimeValid = timeValid;
+        boat.setVelocity(groundSpeed);
         isStopped = false;
         lastRotation = rotation;
+        boatAnnotations.update();
+
+        distanceTravelled += Math.sqrt((dx * dx) + (dy * dy));
+
+        if (distanceTravelled > 10 && isPlayer) {
+            distanceTravelled = 0d;
+
+            if (lastPoint != null) {
+                Line l = new Line(
+                    lastPoint.getX(),
+                    lastPoint.getY(),
+                    boatPoly.getLayoutX(),
+                    boatPoly.getLayoutY()
+                );
+                l.getStrokeDashArray().setAll(3d, 7d);
+                l.setStroke(boat.getColour());
+                l.setCache(true);
+                l.setCacheHint(CacheHint.SPEED);
+                lineGroup.getChildren().add(l);
+            }
+            if (destinationSet) {
+                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+            }
+        }
     }
 
 
@@ -243,6 +280,8 @@ public class BoatObject extends Group {
 
     public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime,
         boolean trail, boolean wake) {
+    public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime, boolean trail, boolean wake) {
+        boatAnnotations.setVisible(teamName, velocity, estTime, legTime);
         this.wake.setVisible(wake);
         this.lineGroup.setVisible(trail);
     }
@@ -297,4 +336,23 @@ public class BoatObject extends Group {
         return isStopped;
     }
 
+    @Override
+    public String toString() {
+        return boat.toString();
+    }
+
+    /**
+     * Sets this boat to appear highlighted
+     */
+    public void setAsPlayer() {
+        boatPoly.getPoints().setAll(
+          -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,
+            0.0, -BOAT_HEIGHT / 1.75,
+            BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75
+        );
+        boatPoly.setStroke(Color.BLACK);
+        boatPoly.setStrokeWidth(3);
+        boatAnnotations.setAsPlayer();
+        isPlayer = true;
+    }
 }

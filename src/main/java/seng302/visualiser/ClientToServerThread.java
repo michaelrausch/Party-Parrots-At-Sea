@@ -18,7 +18,8 @@ import seng302.server.messages.BoatActionMessage;
 import seng302.server.messages.Message;
 
 /**
- * Created by kre39 on 13/07/17.
+ * A class describing a single connection to a Server for the purposes of sending and receiving on
+ * its own thread.
  */
 public class ClientToServerThread implements Runnable {
     private static final int LOG_LEVEL = 1;
@@ -34,9 +35,21 @@ public class ClientToServerThread implements Runnable {
     private int clientId;
 
     private Boolean updateClient = true;
-    private  ByteArrayOutputStream crcBuffer;
+    private ByteArrayOutputStream crcBuffer;
 
-    public ClientToServerThread(String ipAddress, Integer portNumber) throws IOException{
+    /**
+     * Constructor for ClientToServerThread which takes in ipAddress and portNumber and attempts to
+     * connect to the specified ipAddress and port.
+     *
+     * Upon successful socket connection, threeWayHandshake will be preformed and the instance will
+     * be put on a thread and run immediately.
+     *
+     * @param ipAddress a string of ip address to be connected to
+     * @param portNumber an integer port number
+     * @throws Exception SocketConnection if fail to connect to ip address and port number
+     * combination
+     */
+    public ClientToServerThread(String ipAddress, Integer portNumber) throws IOException {
         socket = new Socket(ipAddress, portNumber);
         is = socket.getInputStream();
         os = socket.getOutputStream();
@@ -55,33 +68,35 @@ public class ClientToServerThread implements Runnable {
         thread.start();
     }
 
-    static void clientLog(String message, int logLevel){
-        if(logLevel <= LOG_LEVEL){
-            System.out.println("[CLIENT " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
+    /**
+     * Prints out log messages and the time happened.
+     * Only perform task if log level is below LOG_LEVEL variable.
+     *
+     * @param message a string of message to be printed out
+     * @param logLevel an int for log level
+     */
+    static void clientLog(String message, int logLevel) {
+        if (logLevel <= LOG_LEVEL) {
+            System.out.println(
+                "[CLIENT " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
     }
 
+    /**
+     * Perform the thread loop. It exits the loop if ClientState connected to host
+     * variable is false.
+     */
     public void run() {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
         while(true) { /**REMOVED SOMETHING HERE ClientState.isConnectedToHost() */
             try {
-                //Perform a write if it is time to as delegated by the MainServerThread
-                if (updateClient) {
-                    // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-//                try {
-//                    GameState.outputState(os);
-//                } catch (IOException e) {
-//                    System.out.println("IO error in server thread upon writing to output stream");
-//                }
-                    updateClient = false;
-                }
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
                 //checking if it is the start of the packet
-                if(sync1 == 0x47 && sync2 == 0x83) {
+                if (sync1 == 0x47 && sync2 == 0x83) {
                     int type = readByte();
                     //No. of milliseconds since Jan 1st 1970
                     long timeStamp = Message.bytesToLong(getBytes(6));
@@ -102,7 +117,16 @@ public class ClientToServerThread implements Runnable {
                 }
             } catch (Exception e) {
                 closeSocket();
-                e.printStackTrace();
+                Platform.runLater(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                          Alert alert = new Alert(AlertType.ERROR);
+                                          alert.setHeaderText("Host has disconnected");
+                                          alert.setContentText("Cannot find Server");
+                                          alert.showAndWait();
+                                      }
+                                  });
+                    clientLog("Disconnected from server", 1);
                 return;
             }
         }
@@ -112,7 +136,8 @@ public class ClientToServerThread implements Runnable {
 
 
     /**
-     * Listens for an allocated sourceID and returns it to the server if recieved
+     * Listens for an allocated sourceID and returns it to the server
+     *
      * @return the sourceID allocated to us by the server
      */
     private Integer threeWayHandshake() {
@@ -121,19 +146,21 @@ public class ClientToServerThread implements Runnable {
             try {
                 ourSourceID = is.read();
             } catch (IOException e) {
-                e.printStackTrace();
+                clientLog("Three way handshake failed", 1);
+
             }
             if (ourSourceID != null) {
                 try {
                     os.write(ourSourceID);
                     return ourSourceID;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    clientLog("Three way handshake failed", 1);
                     return null;
                 }
             }
         }
     }
+
 
     /**
      * Send the post-start race course information
@@ -142,8 +169,7 @@ public class ClientToServerThread implements Runnable {
         try {
             os.write(boatActionMessage.getBuffer());
         } catch (IOException e) {
-            clientLog("COULD NOT WRITE TO SERVER", 0);
-            e.printStackTrace();
+            clientLog("Could not write to server", 1);
         }
     }
 
@@ -152,7 +178,7 @@ public class ClientToServerThread implements Runnable {
         try {
             socket.close();
         } catch (IOException e) {
-            clientLog("Failed to close the socket", 0);
+            clientLog("Failed to close the socket", 1);
         }
     }
 
@@ -170,24 +196,24 @@ public class ClientToServerThread implements Runnable {
             currentByte = is.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {
-            e.printStackTrace();
+            clientLog("Read byte failed", 1);
         }
-        if (currentByte == -1){
+        if (currentByte == -1) {
             throw new Exception();
         }
         return currentByte;
     }
 
-    private byte[] getBytes(int n) throws Exception{
+    private byte[] getBytes(int n) throws Exception {
         byte[] bytes = new byte[n];
-        for (int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             bytes[i] = (byte) readByte();
         }
         return bytes;
     }
 
-    private void skipBytes(long n) throws Exception{
-        for (int i=0; i < n; i++){
+    private void skipBytes(long n) throws Exception {
+        for (int i = 0; i < n; i++) {
             readByte();
         }
     }

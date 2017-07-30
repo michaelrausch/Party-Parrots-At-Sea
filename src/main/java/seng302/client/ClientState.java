@@ -3,6 +3,8 @@ package seng302.client;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import seng302.model.Yacht;
+import javafx.stage.Stage;
+import seng302.models.Yacht;
 
 /**
  * Used by the client to store static variables to be used in game.

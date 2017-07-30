@@ -145,7 +145,7 @@
 //            controller.loadState(importantAnnotations);
 //
 //        } catch (IOException e) {
-//            e.printStackTrace();
+//            System.out.println("[RaceViewController] IO exception");
 //        }
 //    }
 //
@@ -287,6 +287,7 @@
 //                    updateWindDirection();
 ////                    updateOrder();
 //                    updateBoatSelectionComboBox();
+//                    updateOrder();
 //                })
 //        );
 //
@@ -383,9 +384,12 @@
 //        }
 //
 //        if (ClientPacketParser.isRaceStarted()) {
+//            /*
 //            for (Yacht boat : ClientPacketParser.getBoatsPos().values()) {
-//                if (participantIDs.contains(boat.getSourceId())) {  // check if the boat is racing
-//                    if (boat.getBoatStatus() == 3) {  // 3 is finish status
+//                System.out.println("Hi tjere" + boat.getBoatName());
+//                if (participantIDs.contains(boat.getSourceId()) || true
+//                        ) {  // check if the boat is racing
+//                    if (boat.getBoatStatus() == 69) {  // 3 is finish status
 //                        Text textToAdd = new Text(boat.getPosition() + ". " +
 //                            boat.getShortName() + " (Finished)");
 //                        textToAdd.setFill(Paint.valueOf("#d3d3d3"));
@@ -397,8 +401,16 @@
 //                        textToAdd.setFill(Paint.valueOf("#d3d3d3"));
 //                        textToAdd.setStyle("");
 //                        positionVbox.getChildren().add(textToAdd);
+//                        System.out.println("Adding " + textToAdd.getText());
 //                    }
 //                }
+//            }
+//            */
+//            for (Yacht boat : ClientPacketParser.getBoats().values()){
+//                Text textToAdd = new Text(boat.getSourceId() + ". " + boat.getShortName() + " ");
+//                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+//                textToAdd.setStyle("");
+//                positionVbox.getChildren().add(textToAdd);
 //            }
 //        } else {
 //            for (Yacht boat : ClientPacketParser.getBoats().values()) {

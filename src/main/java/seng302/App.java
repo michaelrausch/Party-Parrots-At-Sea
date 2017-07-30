@@ -27,9 +27,11 @@ public class App extends Application {
         primaryStage.setOnCloseRequest(e -> {
 //            ClientPacketParser.appClose();
             StreamReceiver.noMoreBytes();
+            ClientPacketParser.appClose();
             System.exit(0);
         });
 
+        ClientState.primaryStage = primaryStage;
     }
 
     public static void main(String[] args) {

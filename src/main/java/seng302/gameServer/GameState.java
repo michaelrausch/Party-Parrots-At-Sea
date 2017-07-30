@@ -13,7 +13,9 @@ import seng302.server.messages.BoatActionType;
  * A Static class to hold information about the current state of the game (model)
  * Created by wmu16 on 10/07/17.
  */
-public class GameState {
+public class GameState implements Runnable {
+
+    private static Integer STATE_UPDATES_PER_SECOND = 60;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -40,8 +42,9 @@ public class GameState {
      */
 
     public GameState(String hostIpAddress) {
-        windDirection = 170d;
+        windDirection = 180d;
         windSpeed = 10000d;
+        this.hostIpAddress = hostIpAddress;
         yachts = new HashMap<>();
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
@@ -52,6 +55,9 @@ public class GameState {
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         yachts = new HashMap<>();
+
+        new Thread(this).start();
+
     }
 
     public static String getHostIpAddress() {
@@ -96,7 +102,15 @@ public class GameState {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
+        if (currentStage == GameStages.RACING){
+            startTime = System.currentTimeMillis();
+        }
+
         GameState.currentStage = currentStage;
+    }
+
+    public static long getStartTime(){
+        return startTime;
     }
 
     public static Double getWindDirection() {
@@ -122,7 +136,6 @@ public class GameState {
             case VMG:
                 playerYacht.turnToVMG();
 //                System.out.println("Snapping to VMG");
-                // TODO: 22/07/17 wmu16 - Add in the vmg calculation code here
                 break;
             case SAILS_IN:
                 playerYacht.toggleSailIn();
@@ -146,17 +159,10 @@ public class GameState {
                 break;
         }
 
-        System.out.println("-----------------------");
-        System.out.println("Sails are in: " + playerYacht.getSailIn());
-        System.out.println("Heading: " + playerYacht.getHeading());
-        System.out.println("Velocity: " + playerYacht.getVelocityMMS() / 1000);
-        System.out.println("Lat: " + playerYacht.getLocation().getLat());
-        System.out.println("Lng: " + playerYacht.getLocation().getLng());
-        System.out.println("-----------------------\n");
+//        printBoatStatus(playerYacht);
     }
 
     public static void update() {
-
         Long timeInterval = System.currentTimeMillis() - previousUpdateTime;
         previousUpdateTime = System.currentTimeMillis();
         for (Yacht yacht : yachts.values()) {
@@ -172,5 +178,39 @@ public class GameState {
     public static Integer getUniquePlayerID() {
         // TODO: 22/07/17 wmu16 - This may not be robust enough and may have to be improved on.
         return yachts.size() + 1;
+    }
+
+
+    /**
+     * A thread to have the game state update itself at certain intervals
+     */
+    @Override
+    public void run() {
+
+        while(true) {
+            try {
+                Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
+            } catch (InterruptedException e) {
+                System.out.println("[GameState] interrupted exception");
+            }
+            if (currentStage == GameStages.PRE_RACE) {
+                update();
+            }
+
+            //RACING
+            if (currentStage == GameStages.RACING) {
+                update();
+            }
+        }
+    }
+
+    private static void printBoatStatus(Yacht playerYacht) {
+        System.out.println("-----------------------");
+        System.out.println("Sails are in: " + playerYacht.getSailIn());
+        System.out.println("Heading: " + playerYacht.getHeading());
+        System.out.println("Velocity: " + playerYacht.getVelocityMMS() / 1000);
+        System.out.println("Lat: " + playerYacht.getLocation().getLat());
+        System.out.println("Lng: " + playerYacht.getLocation().getLng());
+        System.out.println("-----------------------\n");
     }
 }

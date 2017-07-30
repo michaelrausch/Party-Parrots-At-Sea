@@ -51,9 +51,9 @@
 //
 //            return fxmlLoader.getController();
 //        } catch (javafx.fxml.LoadException e) {
-//            e.printStackTrace();
+//            System.out.println("[Controller] FXML load exception");
 //        } catch (IOException e) {
-//            e.printStackTrace();
+//            System.out.println("[Controller] IO exception");
 //        }
 //        return null;
 //    }
@@ -69,6 +69,7 @@
 //    @FXML
 //    public void hostButtonPressed() {
 //        try {
+//            String ipAddress = InetAddress.getLocalHost().getHostAddress();
 //            // get the lobby controller so that we can pass the game server thread to it
 //            new GameState(getLocalHostIp());
 //            MainServerThread mainServerThread = new MainServerThread();
@@ -80,12 +81,12 @@
 //            controller.setClientToServerThread(clientToServerThread);
 //            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
 //            lobbyController.setMainServerThread(mainServerThread);
+//            lobbyController.setController(controller);
 //        } catch (Exception e) {
 //            Alert alert = new Alert(AlertType.ERROR);
 //            alert.setHeaderText("Cannot host");
 //            alert.setContentText("Oops, failed to host, try to restart.");
 //            alert.showAndWait();
-//            e.printStackTrace();
 //        }
 //
 //
@@ -108,8 +109,10 @@
 //            ClientState.setHost(false);
 //            ClientState.setConnectedToHost(true);
 //
+//            ClientState.setHostIp(ipAddress);
 //            controller.setClientToServerThread(clientToServerThread);
-//            setContentPane("/views/LobbyView.fxml");
+//            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
+//            lobbyController.setController(controller);
 //        } catch (Exception e) {
 //            Alert alert = new Alert(AlertType.ERROR);
 //            alert.setHeaderText("Cannot reach the host");
@@ -150,7 +153,7 @@
 //                }
 //            }
 //        } catch (Exception e) {
-//            e.printStackTrace();
+//            System.out.println("[StartScreenController] Exception");
 //        }
 //        if (ipAddress == null) {
 //            System.out.println("[HOST] Cannot obtain local host ip address.");

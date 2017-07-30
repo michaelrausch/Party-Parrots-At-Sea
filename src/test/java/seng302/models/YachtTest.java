@@ -24,4 +24,5 @@ public class YachtTest {
         yachts.add(new Yacht("Yacht 3", "Y3", new GeoPoint(-35.0, -15.5), 20.0));
     }
 
+
 }

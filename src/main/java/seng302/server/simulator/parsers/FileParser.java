@@ -31,7 +31,7 @@ public abstract class FileParser {
             doc.getDocumentElement().normalize();
             return doc;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("[FileParser] Exception");
             return null;
         }
     }
@@ -45,7 +45,7 @@ public abstract class FileParser {
             doc.getDocumentElement().normalize();
             return doc;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("[FileParser] Exception");
         }
         return null;
     }

@@ -45,11 +45,11 @@ public class GameView extends Pane {
     private ObservableList<Node> gameObjects;
     private ImageView mapImage;
 
-    private int BUFFER_SIZE   = 50;
-    private int panelWidth = 1260; // it should be 1280 but, minors 40 to cancel the bias.
-    private int panelHeight = 960;
-    private double canvasWidth = 720;
-    private double canvasHeight = 720;
+    private final int BUFFER_SIZE   = 50;
+    private final int PANEL_WIDTH   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private final int PANEL_HEIGHT  = 960;
+    private final int CANVAS_WIDTH  = 1100;
+    private final int CANVAS_HEIGHT = 920;
     private boolean horizontalInversion = false;
 
     private double distanceScaleFactor;
@@ -154,8 +154,10 @@ public class GameView extends Pane {
             contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
             contentPane.getChildren().addAll(
                 (Pane) FXMLLoader.load(getClass().getResource("/views/FinishScreenView.fxml")));
+        } catch (javafx.fxml.LoadException e) {
+            System.out.println("[Controller] FXML load exception");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("[Controller] IO exception");
         }
     }
 
