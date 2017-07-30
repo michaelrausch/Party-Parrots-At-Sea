@@ -23,13 +23,10 @@ public class BoatObject extends Group {
     //Constants for drawing
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
-    //Variables for boat logic.
-    private boolean isStopped = true;
-    private double xIncrement;
-    private double yIncrement;
-    private long lastTimeValid = 0;
-    private Double lastRotation = 0.0;
-    private long framesToMove;
+
+    private double xVelocity;
+    private double yVelocity;
+    private double lastHeading;
     //Graphical objects
     private Group lineGroup = new Group();
     private Polygon boatPoly;
@@ -38,11 +35,7 @@ public class BoatObject extends Group {
     private Line rightLayline;
     private Double distanceTravelled = 0.0;
     private Point2D lastPoint;
-    private boolean destinationSet;
-    private AnnotationBox annotationBox;
-
     private Paint colour = Color.BLACK;
-
     private Boolean isSelected = true;  //All boats are initialised as selected
 
     /**
@@ -63,7 +56,6 @@ public class BoatObject extends Group {
      */
     public BoatObject(double... points) {
         this.colour = colour;
-        destinationSet = false;
         initChildren(points);
     }
 
@@ -104,7 +96,6 @@ public class BoatObject extends Group {
     public void setFill (Paint value) {
         this.colour = value;
         boatPoly.setFill(colour);
-//        annotationBox.setFill(colour);
     }
 
     /**
@@ -117,8 +108,6 @@ public class BoatObject extends Group {
     private void moveGroupBy(double dx, double dy) {
         boatPoly.setLayoutX(boatPoly.getLayoutX() + dx);
         boatPoly.setLayoutY(boatPoly.getLayoutY() + dy);
-        annotationBox.setLayoutX(annotationBox.getLayoutX() + dx);
-        annotationBox.setLayoutY(annotationBox.getLayoutY() + dy);
         wake.setLayoutX(wake.getLayoutX() + dx);
         wake.setLayoutY(wake.getLayoutY() + dy);
     }
@@ -130,12 +119,10 @@ public class BoatObject extends Group {
      * @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
      */
-    private void moveTo(double x, double y, double rotation) {
+    public void moveTo(double x, double y, double rotation) {
         rotateTo(rotation);
         boatPoly.setLayoutX(x);
         boatPoly.setLayoutY(y);
-        annotationBox.setLayoutX(x);
-        annotationBox.setLayoutY(y);
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(rotation);
@@ -145,17 +132,12 @@ public class BoatObject extends Group {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
     }
 
-    public void move() {
-        double dx = xIncrement * framesToMove;
-        double dy = yIncrement * framesToMove;
+    public void updateLocation() {
+        double dx = xVelocity / 60;
+        double dy = yVelocity / 60;
 
         distanceTravelled += Math.abs(dx) + Math.abs(dy);
-        moveGroupBy(xIncrement, yIncrement);
-        framesToMove = framesToMove - 1;
-
-        if (framesToMove <= 0) {
-            isStopped = true;
-        }
+        moveGroupBy(dx, dy);
 
         if (distanceTravelled > 70) {
             distanceTravelled = 0d;
@@ -173,64 +155,10 @@ public class BoatObject extends Group {
                 l.setCacheHint(CacheHint.SPEED);
                 lineGroup.getChildren().add(l);
             }
-
-            if (destinationSet) {
-                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-            }
+            lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
         }
         wake.updatePosition();
     }
-
-    /**
-     * Sets the destination of the boat and the headng it should have once it reaches
-     *
-     * @param newXValue The X co-ordinate the boat needs to move to.
-     * @param newYValue The Y co-ordinate the boat needs to move to.
-     * @param rotation Rotation to move graphics to.
-     * @param timeValid the time the position values are valid for
-     */
-    public void setDestination(double newXValue, double newYValue, double rotation,
-        double groundSpeed, long timeValid, double frameRate) {
-
-        destinationSet = true;
-        Double dx = Math.abs(boatPoly.getLayoutX() - newXValue);
-        Double dy = Math.abs(boatPoly.getLayoutY() - newYValue);
-        moveTo(newXValue, newYValue, rotation);
-
-
-        rotateTo(rotation);
-        wake.setRotation(rotation, groundSpeed);
-//        yacht.setVelocity(groundSpeed);
-        lastTimeValid = timeValid;
-//        boat.setVelocity(groundSpeed);
-        isStopped = false;
-        lastRotation = rotation;
-//        boatAnnotations.update();
-
-        distanceTravelled += Math.sqrt((dx * dx) + (dy * dy));
-
-        if (distanceTravelled > 10){// && isPlayer) {
-            distanceTravelled = 0d;
-
-            if (lastPoint != null) {
-                Line l = new Line(
-                    lastPoint.getX(),
-                    lastPoint.getY(),
-                    boatPoly.getLayoutX(),
-                    boatPoly.getLayoutY()
-                );
-                l.getStrokeDashArray().setAll(3d, 7d);
-                l.setStroke(this.colour);
-                l.setCache(true);
-                l.setCacheHint(CacheHint.SPEED);
-                lineGroup.getChildren().add(l);
-            }
-            if (destinationSet) {
-                lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-            }
-        }
-    }
-
 
 //    /**
 //     * This function works out if a boat is going upwind or down wind. It looks at the boats current position, the next
@@ -269,7 +197,6 @@ public class BoatObject extends Group {
         this.isSelected = isSelected;
         setLineGroupVisible(isSelected);
         setWakeVisible(isSelected);
-        annotationBox.setVisible(isSelected);
         setLayLinesVisible(isSelected);
     }
 
@@ -313,10 +240,6 @@ public class BoatObject extends Group {
         return lineGroup;
     }
 
-    public Group getAnnotations() {
-        return annotationBox;
-    }
-
     public Double getBoatLayoutX() {
         return boatPoly.getLayoutX();
     }
@@ -326,24 +249,34 @@ public class BoatObject extends Group {
         return boatPoly.getLayoutY();
     }
 
-    public boolean isStopped() {
-        return isStopped;
-    }
-
     /**
      * Sets this boat to appear highlighted
      */
     public void setAsPlayer() {
-//        boatPoly.getPoints().setAll(
-//          -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,
-//            0.0, -BOAT_HEIGHT / 1.75,
-//            BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75
-//        );
-//        boatPoly.setStroke(Color.BLACK);
-//        boatPoly.setStrokeWidth(3);
+        boatPoly.getPoints().setAll(
+          -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,
+            0.0, -BOAT_HEIGHT / 1.75,
+            BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75
+        );
+        boatPoly.setStroke(Color.BLACK);
+        boatPoly.setStrokeWidth(3);
 //        boatAnnotations.setAsPlayer();
 //        isPlayer = true;
     }
 
-    public void updateTrajectory(heading, velocity, scaleFactor)
+    public void setTrajectory(double heading, double velocity) {
+        wake.setRotation(lastHeading - heading, velocity);
+        rotateTo(heading);
+        xVelocity = Math.cos(Math.toRadians(heading)) * velocity;
+        yVelocity = Math.sin(Math.toRadians(heading)) * velocity;
+        lastHeading = heading;
+    }
+
+    public void setTrajectory(double heading, double velocity, double scaleFactorX, double scaleFactorY) {
+//        wake.setRotation(lastHeading - heading, velocity);
+//        rotateTo(heading);
+//        xVelocity = Math.cos(Math.toRadians(heading)) * velocity * scaleFactorX;
+//        yVelocity = Math.sin(Math.toRadians(heading)) * velocity * scaleFactorY;
+        lastHeading = heading;
+    }
 }

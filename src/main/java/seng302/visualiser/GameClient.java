@@ -10,20 +10,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
-import seng302.model.mark.Mark;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.parser.MarkRoundingData;
 import seng302.model.stream.parser.PositionUpdateData;
 import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import seng302.model.stream.parser.RaceStatusData;
-import seng302.utilities.StreamParser;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.server.messages.BoatActionMessage;
+import seng302.server.messages.BoatActionType;
+import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.LobbyController.CloseStatus;
@@ -47,11 +49,14 @@ public class GameClient {
 
     private ObservableList<String> lobbyList = FXCollections.observableArrayList();
 
+    private long lastSendingTime;
+    private int KEY_STROKE_SENDING_FREQUENCY = 50;
+
     public GameClient(Pane holder) {
         this.holderPane = holder;
     }
 
-    public void runAsClient (String ipAddress, Integer portNumber) {
+    public void runAsClient(String ipAddress, Integer portNumber) {
         try {
             socketThread = new ClientToServerThread(ipAddress, portNumber);
         } catch (IOException ioe) {
@@ -66,7 +71,7 @@ public class GameClient {
         socketThread.addStreamObserver(this::parsePackets);
     }
 
-    public void runAsHost (String ipAddress, Integer portNumber) {
+    public void runAsHost(String ipAddress, Integer portNumber) {
         server = new MainServerThread();
         try {
             socketThread = new ClientToServerThread(ipAddress, portNumber);
@@ -87,7 +92,7 @@ public class GameClient {
         });
     }
 
-    private void loadStartScreen () {
+    private void loadStartScreen() {
         socketThread.setSocketToClose();
         socketThread = null;
         if (server != null) {
@@ -95,7 +100,8 @@ public class GameClient {
 //            server.shutDown();
             server = null;
         }
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/StartScreenView.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            getClass().getResource("/views/StartScreenView.fxml"));
         try {
             holderPane.getChildren().clear();
             holderPane.getChildren().add(fxmlLoader.load());
@@ -106,10 +112,11 @@ public class GameClient {
 
     /**
      * Loads a view of the lobby into the clients pane
+     *
      * @param lobbyView fxml file for the desired lobby
      * @return the lobby controller.
      */
-    private LobbyController loadLobby (String lobbyView) {
+    private LobbyController loadLobby(String lobbyView) {
         FXMLLoader fxmlLoader = new FXMLLoader(GameClient.class.getResource(lobbyView));
         try {
             holderPane.getChildren().clear();
@@ -120,22 +127,25 @@ public class GameClient {
         return fxmlLoader.getController();
     }
 
-    private void loadRaceView () {
+    private void loadRaceView() {
 //        allBoatsMap.forEach((id, boat) -> {
 //            if (courseData.getParticipants().contains(id))
 //                racingBoats.put(id, boat);
 //        });
-        FXMLLoader fxmlLoader = new FXMLLoader(RaceViewController.class.getResource("/views/RaceView.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            RaceViewController.class.getResource("/views/RaceView.fxml"));
 //        raceView = fxmlLoader.getController();
         try {
             Node node = fxmlLoader.load();
             Platform.runLater(() -> {
-                    holderPane.getChildren().clear();
-                    holderPane.getChildren().add(node);
+                holderPane.getChildren().clear();
+                holderPane.getChildren().add(node);
             });
         } catch (IOException e) {
             e.printStackTrace();
         }
+        holderPane.getScene().setOnKeyPressed(this::keyPressed);
+        holderPane.getScene().setOnKeyReleased(this::keyReleased);
         raceView = fxmlLoader.getController();
         raceView.loadRace(allBoatsMap, courseData, raceState);
     }
@@ -201,33 +211,34 @@ public class GameClient {
     }
 
     private void startRaceIfAllDataReceived() {
-        if (allXMLReceived())
+        if (allXMLReceived() && raceView == null)
             loadRaceView();
     }
 
-    private boolean allXMLReceived () {
+    private boolean allXMLReceived() {
         return courseData != null && allBoatsMap != null && regattaData != null;
     }
 
     /**
      * Updates the position of a boat. Boat and position are given in the provided data.
-     * @param positionData
      */
     private void updatePosition(PositionUpdateData positionData) {
         if (positionData.getType() == DeviceType.YACHT_TYPE) {
             if (allXMLReceived() && allBoatsMap.containsKey(positionData.getDeviceId())) {
                 Yacht yacht = allBoatsMap.get(positionData.getDeviceId());
                 yacht.updateLocation(positionData.getLat(),
-                    positionData.getLon(), positionData.getHeading(), positionData.getGroundSpeed());
+                    positionData.getLon(), positionData.getHeading(),
+                    positionData.getGroundSpeed());
             }
         } else if (positionData.getType() == DeviceType.MARK_TYPE) {
-            Mark mark = courseData.getCompoundMarks().get(positionData.getDeviceId());
+            //CompoundMark mark = courseData.getCompoundMarks().get(positionData.getDeviceId());
         }
     }
 
     /**
      * Updates the boat as having passed the mark. Boat and mark are given by the ids in the
      * provided data.
+     *
      * @param roundingData Contains data for the rounding of a mark.
      */
     private void updateMarkRounding(MarkRoundingData roundingData) {
@@ -244,7 +255,7 @@ public class GameClient {
         }
     }
 
-    private void processRaceStatusUpdate (RaceStatusData data) {
+    private void processRaceStatusUpdate(RaceStatusData data) {
         if (allXMLReceived()) {
             raceState.updateState(data);
             for (long[] boatData : data.getBoatData()) {
@@ -267,49 +278,55 @@ public class GameClient {
         }
     }
 
-    private void close () {
+    private void close() {
         socketThread.setSocketToClose();
     }
 
-//    /** Handle the key-pressed event from the text field. */
-//    public void keyPressed(KeyEvent e) {
-//        BoatActionMessage boatActionMessage;
-//        switch (e.getCode()){
-//            case SPACE: // align with vmg
-//                boatActionMessage = new BoatActionMessage(BoatActionType.VMG);
-//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
-//                break;
-//            case PAGE_UP: // upwind
-//                boatActionMessage = new BoatActionMessage(BoatActionType.UPWIND);
-//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
-//                break;
-//            case PAGE_DOWN: // downwind
-//                boatActionMessage = new BoatActionMessage(BoatActionType.DOWNWIND);
-//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
-//                break;
-//            case ENTER: // tack/gybe
-//                boatActionMessage = new BoatActionMessage(BoatActionType.TACK_GYBE);
-//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
-//                break;
-//            //TODO Allow a zoom in and zoom out methods
-//            case Z:  // zoom in
-//                System.out.println("Zoom in");
-//                break;
-//            case X:  // zoom out
-//                System.out.println("Zoom out");
-//                break;
-//        }
-//    }
 
-//    public void keyReleased(KeyEvent e) {
-//        switch (e.getCode()) {
-//            //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
-//            case SHIFT:  // sails in/sails out
-//                BoatActionMessage boatActionMessage = new BoatActionMessage(BoatActionType.SAILS_IN);
-//                clientToServerThread.sendBoatActionMessage(boatActionMessage);
-//                break;
-//        }
-//    }
-//
-//    onKeyPressed="#keyPressed" onKeyReleased="#keyReleased"
+    /**
+     * Handle the key-pressed event from the text field.
+     */
+    public void keyPressed(KeyEvent e) {
+        BoatActionMessage boatActionMessage;
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSendingTime > KEY_STROKE_SENDING_FREQUENCY) {
+            lastSendingTime = currentTime;
+            switch (e.getCode()) {
+                case SPACE: // align with vmg
+                    boatActionMessage = new BoatActionMessage(BoatActionType.VMG);
+                    socketThread.sendBoatActionMessage(boatActionMessage);
+                    break;
+                case PAGE_UP: // upwind
+                    boatActionMessage = new BoatActionMessage(BoatActionType.UPWIND);
+                    socketThread.sendBoatActionMessage(boatActionMessage);
+                    break;
+                case PAGE_DOWN: // downwind
+                    boatActionMessage = new BoatActionMessage(BoatActionType.DOWNWIND);
+                    socketThread.sendBoatActionMessage(boatActionMessage);
+                    break;
+                case ENTER: // tack/gybe
+                    boatActionMessage = new BoatActionMessage(BoatActionType.TACK_GYBE);
+                    socketThread.sendBoatActionMessage(boatActionMessage);
+                    break;
+                //TODO Allow a zoom in and zoom out methods
+                case Z:  // zoom in
+                    System.out.println("Zoom in");
+                    break;
+                case X:  // zoom out
+                    System.out.println("Zoom out");
+                    break;
+            }
+        }
+    }
+
+    public void keyReleased(KeyEvent e) {
+        switch (e.getCode()) {
+            //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
+            case SHIFT:  // sails in/sails out
+                BoatActionMessage boatActionMessage = new BoatActionMessage(
+                    BoatActionType.SAILS_IN);
+                socketThread.sendBoatActionMessage(boatActionMessage);
+                break;
+        }
+    }
 }

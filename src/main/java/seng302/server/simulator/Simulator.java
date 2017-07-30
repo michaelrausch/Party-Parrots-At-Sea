@@ -29,8 +29,8 @@ public class Simulator extends Observable implements Runnable {
 		setLegs();
 
 		// set start line's coordinate to boats
-		Double startLat = course.get(0).getCompoundMark().getMark1().getLat();
-		Double startLng = course.get(0).getCompoundMark().getMark1().getLng();
+		Double startLat = course.get(0).getCompoundMark().getSubMark(1).getLat();
+		Double startLng = course.get(0).getCompoundMark().getSubMark(1).getLng();
 		for (Boat boat : boats) {
 			boat.setLat(startLat);
 			boat.setLng(startLng);
@@ -77,7 +77,7 @@ public class Simulator extends Observable implements Runnable {
 			boat.move(boat.getLastPassedCorner().getBearingToNextCorner(), duration);
 
 			GeoPoint boatPos = new GeoPoint(boat.getLat(), boat.getLng());
-			GeoPoint lastMarkPos = boat.getLastPassedCorner().getCompoundMark().getMark1();
+			GeoPoint lastMarkPos = boat.getLastPassedCorner().getCompoundMark().getSubMark(1);
 
 			double distanceFromLastMark = GeoUtility.getDistance(boatPos, lastMarkPos);
 			// if a boat passes its heading mark
@@ -94,13 +94,13 @@ public class Simulator extends Observable implements Runnable {
 
 				// move compensate distance for the mark just passed
 				GeoPoint pos = GeoUtility.getGeoCoordinate(
-						boat.getLastPassedCorner().getCompoundMark().getMark1(),
+						boat.getLastPassedCorner().getCompoundMark().getSubMark(1),
 						boat.getLastPassedCorner().getBearingToNextCorner(),
 						compensateDistance);
 				boat.setLat(pos.getLat());
 				boat.setLng(pos.getLng());
 				distanceFromLastMark = GeoUtility.getDistance(new GeoPoint(boat.getLat(), boat.getLng()),
-						boat.getLastPassedCorner().getCompoundMark().getMark1());
+						boat.getLastPassedCorner().getCompoundMark().getSubMark(1));
 			}
 		}
 		return 0;
@@ -115,15 +115,15 @@ public class Simulator extends Observable implements Runnable {
 		// get the bearing from one mark to the next heading mark
 		for (int i = 0; i < course.size() - 1; i++) {
 
-			Mark mark1 = course.get(i).getCompoundMark().getMark1();
-			Mark mark2 = course.get(i + 1).getCompoundMark().getMark1();
+			Mark mark1 = course.get(i).getCompoundMark().getSubMark(1);
+			Mark mark2 = course.get(i + 1).getCompoundMark().getSubMark(1);
 			course.get(i).setDistanceToNextCorner(GeoUtility.getDistance(mark1, mark2));
 
 			course.get(i).setNextCorner(course.get(i + 1));
 
 			course.get(i).setBearingToNextCorner(
-					GeoUtility.getBearing(course.get(i).getCompoundMark().getMark1(),
-					course.get(i + 1).getCompoundMark().getMark1()));
+					GeoUtility.getBearing(course.get(i).getCompoundMark().getSubMark(1),
+					course.get(i + 1).getCompoundMark().getSubMark(1)));
 		}
 	}
 

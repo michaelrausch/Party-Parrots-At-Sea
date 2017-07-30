@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -37,6 +38,7 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
+import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.visualiser.GameView;
@@ -74,7 +76,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     //Race Data
     private Map<Integer, Yacht> participants;
-    private Map<Integer, Mark> markers;
+    private Map<Integer, CompoundMark> markers;
     private RaceXMLData courseData;
     private GameView gameView;
     private RaceState raceState;
@@ -111,11 +113,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseBoatSelectionComboBox();
 
         gameView = new GameView();
-        gameView.setBoats(new ArrayList<>(participants.values()));
-        gameView.updateBorder(raceData.getCourseLimit());
-        gameView.updateCourse(new ArrayList<>(raceData.getCompoundMarks().values()));
-        gameView.startRace();
+        System.out.println("haha");
+        Platform.runLater(() -> {
+            contentAnchorPane.getChildren().add(gameView);
 
+//        contentAnchorPane.getChildren().add(gameView);
+            System.out.println("hehe");
+            gameView.setBoats(new ArrayList<>(participants.values()));
+            gameView.updateBorder(raceData.getCourseLimit());
+            gameView.updateCourse(
+                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+            );
+            gameView.startRace();
+        });
     }
 
     /**

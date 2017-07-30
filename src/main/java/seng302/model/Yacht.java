@@ -13,7 +13,7 @@ import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import seng302.gameServer.GameState;
-import seng302.model.mark.Mark;
+import seng302.model.mark.CompoundMark;
 
 /**
  * Yacht class for the racing boat.
@@ -53,7 +53,6 @@ public class Yacht {
     private final Double TURN_STEP = 5.0;
     private Double lastHeading;
     private Boolean sailIn;
-    private String position;
     private GeoPoint location;
     private Integer boatStatus;
     private Double velocity;
@@ -66,8 +65,8 @@ public class Yacht {
 //    private ReadOnlyDoubleWrapper headingProperty = new ReadOnlyDoubleWrapper();
 //    private ReadOnlyDoubleWrapper latitudeProperty = new ReadOnlyDoubleWrapper();
 //    private ReadOnlyDoubleWrapper longitudeProperty = new ReadOnlyDoubleWrapper();
-    private Mark lastMarkRounded;
-    private Mark nextMark;
+    private CompoundMark lastMarkRounded;
+    private CompoundMark nextMark;
     private Integer positionInt = 0;
     private Color colour;
 
@@ -122,7 +121,6 @@ public class Yacht {
         this.shortName = shortName;
         this.boatName = boatName;
         this.country = country;
-        this.position = "-";
         this.sailIn = false;
         this.location = new GeoPoint(57.670341, 11.826856);
         this.heading = 120.0;   //In degrees
@@ -373,19 +371,19 @@ public class Yacht {
         return markRoundTime;
     }
 
-    public Mark getLastMarkRounded() {
+    public CompoundMark getLastMarkRounded() {
         return lastMarkRounded;
     }
 
-    public void setLastMarkRounded(Mark lastMarkRounded) {
+    public void setLastMarkRounded(CompoundMark lastMarkRounded) {
         this.lastMarkRounded = lastMarkRounded;
     }
 
-    public void setNextMark(Mark nextMark) {
+    public void setNextMark(CompoundMark nextMark) {
         this.nextMark = nextMark;
     }
 
-    public Mark getNextMark(){
+    public CompoundMark getNextMark(){
         return nextMark;
     }
 

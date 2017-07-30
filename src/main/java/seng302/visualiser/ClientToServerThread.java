@@ -107,19 +107,8 @@ public class ClientToServerThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-        while(socketOpen) { /**REMOVED SOMETHING HERE ClientState.isConnectedToHost() */
-            System.out.println("socket.isConnected() = " + socket.isConnected());
+        while(socketOpen) {
             try {
-                //Perform a write if it is time to as delegated by the MainServerThread
-//                if (updateClient) {
-//                    // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-////                try {
-////                    GameState.outputState(os);
-////                } catch (IOException e) {
-////                    System.out.println("IO error in server thread upon writing to output stream");
-////                }
-//                    updateClient = false;
-//                }
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
@@ -136,9 +125,6 @@ public class ClientToServerThread implements Runnable {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-//                        streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
-//                        for (ClientSocketListener csl : listeners)
-//                            csl.newPacket(new StreamPacket(type, payloadLength, timeStamp, payload));
                         if (streamPackets.size() > 0) {
                             streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
                         } else {

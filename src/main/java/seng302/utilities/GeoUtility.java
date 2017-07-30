@@ -68,7 +68,7 @@ public class GeoUtility {
 		double x = Math.cos(Math.toRadians(p1.getLat())) * Math.sin(Math.toRadians(p2.getLat()))
 			- Math.sin(Math.toRadians(p1.getLat())) * Math.cos(Math.toRadians(p2.getLat())) * Math.cos(dLon);
 
-		return Math.toDegrees(Math.atan2(y, x));
+		return Math.atan2(y, x);
 	}
 
 	/**

@@ -198,7 +198,7 @@ public class XMLParser {
                     new Limit(
                         XMLParser.getNodeAttributeInt(limitNode, "SeqID"),
                         XMLParser.getNodeAttributeDouble(limitNode, "Lat"),
-                        XMLParser.getNodeAttributeDouble(limitNode, "lon")
+                        XMLParser.getNodeAttributeDouble(limitNode, "Lon")
                     )
                 );
             }
