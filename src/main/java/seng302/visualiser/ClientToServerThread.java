@@ -147,6 +147,7 @@ public class ClientToServerThread implements Runnable {
                 clientLog(e.getMessage(), 1);
                 return;
             }
+            System.out.println("streamPackets.size() = " + streamPackets.size());
         }
         closeSocket();
         clientLog("Closed connection to Server", 0);

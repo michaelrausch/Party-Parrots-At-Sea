@@ -43,5 +43,4 @@ public class RaceXMLData {
     public List<Limit> getCourseLimit() {
         return courseLimit;
     }
-
 }

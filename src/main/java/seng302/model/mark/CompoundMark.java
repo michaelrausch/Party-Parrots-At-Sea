@@ -1,6 +1,5 @@
 package seng302.model.mark;
 
-import com.sun.deploy.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +30,13 @@ public class CompoundMark {
 	 */
 	@Override
 	public String toString(){
-		String info = String.format("CompoundMark: %d (%s), [", compoundMarkId, name);
-        info += StringUtils.join(marks, ", ") + "]";
-		return info;
+		String info = String.format(
+			"CompoundMark: %d (%s), [%s", compoundMarkId, name, marks.get(0).toString()
+		);
+		if (marks.size() > 1) {
+			info += String.format(", %s", marks.get(1).toString());
+		}
+		return info + "]";
 	}
 
 	public int getId() {

@@ -3,7 +3,6 @@ package seng302.visualiser.fxObjects;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -80,7 +79,7 @@ public class AnnotationBox extends Group{
     private Map<String, Annotation> annotationsByName = new HashMap<>();
 
     public AnnotationBox() {
-        this.setCache(true);
+//        this.setCache(true);
         background.setX(BACKGROUND_X);
         background.setY(BACKGROUND_Y);
         background.setWidth(backgroundWidth);
@@ -90,8 +89,8 @@ public class AnnotationBox extends Group{
         background.setFill(new Color(1, 1, 1, 0.75));
         background.setStroke(theme);
         background.setStrokeWidth(2);
-        background.setCache(true);
-        background.setCacheHint(CacheHint.SPEED);
+//        background.setCache(true);
+//        background.setCacheHint(CacheHint.SPEED);
         this.getChildren().add(background);
     }
 
@@ -99,11 +98,15 @@ public class AnnotationBox extends Group{
         annotationsByName.put(annotationName, annotation);
         this.getChildren().add(annotation.getText());
         visibleAnnotations++;
+        update();
     }
 
     public void addAnnotation (String annotationName, String annotationText) {
         Text text = getTextObject();
         annotationsByName.put(annotationName, new Annotation(text, annotationText));
+        this.getChildren().add(text);
+        visibleAnnotations++;
+        update();
     }
 
     public <E> void addAnnotation (String annotationName, ObservableValue<E> observable) {
@@ -116,6 +119,7 @@ public class AnnotationBox extends Group{
         annotationsByName.put(annotationName, new Annotation<>(newText, observable, formatter));
         this.getChildren().add(newText);
         visibleAnnotations++;
+        update();
     }
 
     public void setAnnotationVisibility (String annotationName, boolean visibility) {
@@ -144,8 +148,8 @@ public class AnnotationBox extends Group{
     }
 
     public void setLocation (double x, double y) {
-        this.setLayoutX(x);
-        this.setLayoutY(y);
+        this.setTranslateX(x);
+        this.setTranslateY(y);
     }
 
     public void setWidth (double width) {
@@ -172,8 +176,8 @@ public class AnnotationBox extends Group{
         Text text = new Text();
         text.setFill(theme);
         text.setStrokeWidth(2);
-        text.setCacheHint(CacheHint.SPEED);
-        text.setCache(true);
+//        text.setCacheHint(CacheHint.SPEED);
+//        text.setCache(true);
         return text;
     }
 

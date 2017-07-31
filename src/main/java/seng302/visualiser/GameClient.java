@@ -1,6 +1,7 @@
 package seng302.visualiser;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Map;
@@ -12,6 +13,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.model.RaceState;
@@ -173,7 +179,18 @@ public class GameClient {
                     break;
 
                 case RACE_XML:
-                    System.out.println("RACE XML");
+                    try {
+                        TransformerFactory tf = TransformerFactory.newInstance();
+                        Transformer transformer = tf.newTransformer();
+                        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                        StringWriter writer = new StringWriter();
+                        transformer.transform(new DOMSource(StreamParser.extractXmlMessage(packet)),
+                            new StreamResult(writer));
+//                        String output = writer.getBuffer().toString().replaceAll("\n|\r", "");
+                        System.out.println(writer.getBuffer().toString());
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     courseData = XMLParser.parseRace(
                         StreamParser.extractXmlMessage(packet)
                     );
