@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seng302.model.Player;
@@ -77,7 +78,7 @@ public class GameState implements Runnable {
     public static void addPlayer(Player player) {
         players.add(player);
         String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
-        observablePlayers.add(playerText);
+        Platform.runLater(() -> observablePlayers.add(playerText)); //Had to add this to handle javaFX window using array
         playerStringMap.put(player, playerText);
     }
     

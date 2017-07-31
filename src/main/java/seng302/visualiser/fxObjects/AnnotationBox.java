@@ -3,6 +3,7 @@ package seng302.visualiser.fxObjects;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -60,8 +61,8 @@ public class AnnotationBox extends Group{
     }
 
     //Text offset constants
-    private static final double X_OFFSET_TEXT = 18d;
-    private static final double Y_OFFSET_TEXT_INIT = -29d;
+    private static final double X_OFFSET_TEXT = 20d;
+    private static final double Y_OFFSET_TEXT_INIT = -35d;
     private static final double Y_OFFSET_PER_TEXT = 12d;
     //Background constants
     private static final double TEXT_BUFFER = 3;
@@ -71,7 +72,7 @@ public class AnnotationBox extends Group{
     private static final double BACKGROUND_ARC_SIZE = 10;
 
     private int visibleAnnotations = 0;
-    private double backgroundWidth = 125d;
+    private double backgroundWidth = 145d;
 
     private Rectangle background = new Rectangle();
     private Paint theme = Color.BLACK;
@@ -79,7 +80,7 @@ public class AnnotationBox extends Group{
     private Map<String, Annotation> annotationsByName = new HashMap<>();
 
     public AnnotationBox() {
-//        this.setCache(true);
+        this.setCache(true);
         background.setX(BACKGROUND_X);
         background.setY(BACKGROUND_Y);
         background.setWidth(backgroundWidth);
@@ -89,8 +90,8 @@ public class AnnotationBox extends Group{
         background.setFill(new Color(1, 1, 1, 0.75));
         background.setStroke(theme);
         background.setStrokeWidth(2);
-//        background.setCache(true);
-//        background.setCacheHint(CacheHint.SPEED);
+        background.setCache(true);
+        background.setCacheHint(CacheHint.SPEED);
         this.getChildren().add(background);
     }
 
@@ -123,17 +124,18 @@ public class AnnotationBox extends Group{
     }
 
     public void setAnnotationVisibility (String annotationName, boolean visibility) {
-        Text textField = annotationsByName.get(annotationName).text;
-        boolean currentState = textField.visibleProperty().get();
-
-        if (visibility != currentState) {
-            if (visibility)
-                visibleAnnotations++;
-            else
-                visibleAnnotations--;
+        if (annotationsByName.containsKey(annotationName)) {
+            Text textField = annotationsByName.get(annotationName).text;
+            boolean currentState = textField.visibleProperty().get();
+            if (visibility != currentState) {
+                if (visibility)
+                    visibleAnnotations++;
+                else
+                    visibleAnnotations--;
+            }
+            textField.setVisible(visibility);
+            update();
         }
-        textField.setVisible(visibility);
-        update();
     }
 
     public void removeAnnotation (String annotationName) {
@@ -143,13 +145,32 @@ public class AnnotationBox extends Group{
         update();
     }
 
-    public void bindLocation () {
-
-    }
-
     public void setLocation (double x, double y) {
-        this.setTranslateX(x);
-        this.setTranslateY(y);
+//        double dx = x - this.getLayoutX();
+//        double dy = y - this.getLayoutY();
+//        this.relocate(x, y);
+////        this.relocate(x, y);
+//        for (Node n : this.getChildren()) {
+//            n.relocate(
+//                n.getLayoutX() + dx,
+//                n.getLayoutY() + dy
+//            );
+////            n.setLayoutX(n.getLayoutX() + dx);
+////            n.setLayoutY(n.getLayoutY() + dy);
+//        }
+//        update();
+        this.relocate(x + BACKGROUND_X, y + BACKGROUND_Y);
+//        for (int i = 1; i <= visibleAnnotations; i++) {
+//            Text text = (Text) this.getChildren().get(i);
+//            if (text.visibleProperty().get()) {
+//                text.setLayoutX(x + X_OFFSET_TEXT);
+//                text.setLayoutY(y + Y_OFFSET_TEXT_INIT * Y_OFFSET_PER_TEXT * (i + 1));
+//            }
+//        }
+//        moveTexts(x, y);
+//        for (Node n : this.getChildren()) {
+//            n.relocate(x, y);
+//        }
     }
 
     public void setWidth (double width) {
@@ -160,10 +181,19 @@ public class AnnotationBox extends Group{
     private void update () {
         background.setVisible(visibleAnnotations != 0);
         background.setHeight(Math.abs(BACKGROUND_X) + TEXT_BUFFER + BACKGROUND_H_PER_TEXT * visibleAnnotations);
+//        System.out.println("visibleAnnotations = " + visibleAnnotations);
         for (int i = 1; i <= visibleAnnotations; i++) {
             Text text = (Text) this.getChildren().get(i);
-            if (text.visibleProperty().get())
-                text.relocate(X_OFFSET_TEXT, Y_OFFSET_TEXT_INIT * Y_OFFSET_PER_TEXT * (i + 1));
+            if (text.visibleProperty().get()) {
+//                System.out.println("AYY LMAO");
+//                System.out.println("text.getText() = " + text.getText());
+////                System.out
+////                    .println("text.visibleProperty().get() = " + text.visibleProperty().get());
+//                System.out.println(text.getLayoutX());
+//                System.out.println(background.getLayoutX());
+                text.setX(X_OFFSET_TEXT);
+                text.setY(Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * i);
+            }
         }
     }
 
@@ -176,8 +206,8 @@ public class AnnotationBox extends Group{
         Text text = new Text();
         text.setFill(theme);
         text.setStrokeWidth(2);
-//        text.setCacheHint(CacheHint.SPEED);
-//        text.setCache(true);
+        text.setCacheHint(CacheHint.SPEED);
+        text.setCache(true);
         return text;
     }
 

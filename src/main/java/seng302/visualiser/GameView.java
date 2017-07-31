@@ -1,14 +1,11 @@
 package seng302.visualiser;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.animation.AnimationTimer;
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -98,15 +95,6 @@ public class GameView extends Pane {
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
         initializeTimer();
-//        this.widthProperty().addListener(resize -> {
-//            canvasWidth = this.getWidth();
-//            canvasHeight = this.getHeight();
-//            if (borderPoints != null) {
-//                updateBorder(borderPoints);
-//            } else if (course != null) {
-//                updateCourse(course, markSequence);
-//            }
-//        });
     }
 
     private void initializeTimer () {
@@ -201,6 +189,7 @@ public class GameView extends Pane {
             //Create mark dots
             for (Mark mark : cMark.getMarks()) {
                 makeAndBindMarker(mark, colour);
+                System.out.println("hi" + mark.getName());
             }
             //Create gate line
             if (cMark.isGate()) {
@@ -309,13 +298,22 @@ public class GameView extends Pane {
     public void setBoats(List<Yacht> yachts) {
         BoatObject newBoat;
         for (Yacht yacht : yachts) {
+            Paint colour = Colors.getColor();
             newBoat = new BoatObject();
-            newBoat.setFill(Colors.getColor());
+            newBoat.setFill(colour);
             boatObjects.put(yacht, newBoat);
+            createAndBindAnnotationBox(yacht, colour);
+            wakesGroup.getChildren().add(newBoat.getWake());
+            boatObjectGroup.getChildren().add(newBoat);
+            trails.getChildren().add(newBoat.getTrail());
+            // TODO: 1/08/17 Make this less vile to look at.
             yacht.addLocationListener((boat, lat, lon, heading, velocity) ->{
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading);
+//                annotations.get(boat).setLayoutX(p2d.getX());
+//                annotations.get(boat).setLayoutY(p2d.getY());
+//                annotations.get(boat).setLocation(100d, 100d);
                 annotations.get(boat).setLocation(p2d.getX(), p2d.getY());
                 bo.setTrajectory(
                     heading,
@@ -323,13 +321,10 @@ public class GameView extends Pane {
                     metersPerPixelX,
                     metersPerPixelY);
             });
-            createAndBindAnnotationBox(yacht);
-            wakesGroup.getChildren().add(newBoat.getWake());
-            boatObjectGroup.getChildren().add(newBoat);
-            trails.getChildren().add(newBoat.getTrail());
         }
         annotationsGroup.getChildren().addAll(annotations.values());
         gameObjects.addAll(trails);
+        gameObjects.add(wakesGroup);
         gameObjects.addAll(annotationsGroup);
         gameObjects.addAll(boatObjectGroup);
     }
@@ -346,32 +341,33 @@ public class GameView extends Pane {
 //            metersPerPixelY);
 //    }
 
-    private void createAndBindAnnotationBox (Yacht yacht) {
-        AnnotationBox newAnnotation;
-        newAnnotation = new AnnotationBox();
-        newAnnotation.addAnnotation("name", yacht.getShortName());
-//        newAnnotation.addAnnotation("country", boat.getCountry());
+    private void createAndBindAnnotationBox (Yacht yacht, Paint colour) {
+        AnnotationBox newAnnotation = new AnnotationBox();
+        newAnnotation.setFill(colour);
         newAnnotation.addAnnotation(
-            "velocity",
-            yacht.getVelocityProperty(),
-            (velocity) -> String.format("Speed: %.2f ms", velocity.doubleValue())
+            "name", "Player: " + yacht.getShortName()
         );
-        newAnnotation.addAnnotation(
-            "nextMark",
-            yacht.timeTillNextProperty(),
-            (time) -> {
-                DateFormat format = new SimpleDateFormat("mm:ss");
-                return format.format(time);
-            }
-        );
-        newAnnotation.addAnnotation(
-            "lastMark",
-            yacht.timeTillNextProperty(),
-            (time) -> {
-                DateFormat format = new SimpleDateFormat("mm:ss");
-                return format.format(time);
-            }
-        );
+//        newAnnotation.addAnnotation(
+//            "velocity",
+//            yacht.getVelocityProperty(),
+//            (velocity) -> String.format("Speed: %.2f ms", velocity.doubleValue())
+//        );
+//        newAnnotation.addAnnotation(
+//            "nextMark",
+//            yacht.timeTillNextProperty(),
+//            (time) -> {
+//                DateFormat format = new SimpleDateFormat("mm:ss");
+//                return format.format(time);
+//            }
+//        );
+//        newAnnotation.addAnnotation(
+//            "lastMark",
+//            yacht.timeTillNextProperty(),
+//            (time) -> {
+//                DateFormat format = new SimpleDateFormat("mm:ss");
+//                return format.format(time);
+//            }
+//        );
         annotations.put(yacht, newAnnotation);
     }
 
@@ -555,10 +551,6 @@ public class GameView extends Pane {
         fpsDisplay.setVisible(visibility);
     }
 
-    public ReadOnlyBooleanProperty getFPSVisibilityProperty () {
-        return fpsDisplay.visibleProperty();
-    }
-
     public void selectBoat (Yacht selectedYacht) {
         boatObjects.forEach((boat, group) ->
             group.setIsSelected(boat == selectedYacht)
@@ -575,6 +567,10 @@ public class GameView extends Pane {
 
     public void setBoatAsPlayer (Yacht playerYacht) {
         boatObjects.get(playerYacht).setAsPlayer();
-//        annotations.get(playerYacht).setAsPlayer();
+        annotations.get(playerYacht).addAnnotation(
+            "velocity",
+            playerYacht.getVelocityProperty(),
+            (velocity) -> String.format("Speed: %.2f ms", velocity.doubleValue())
+        );
     }
 }

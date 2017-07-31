@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -101,7 +100,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
     }
 
-    public void loadRace (Map<Integer, Yacht> participants, RaceXMLData raceData, RaceState raceState) {
+    public void loadRace (
+        Map<Integer, Yacht> participants, RaceXMLData raceData, RaceState raceState, Yacht player
+    ) {
         this.participants = participants;
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
@@ -113,19 +114,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseBoatSelectionComboBox();
 
         gameView = new GameView();
-        System.out.println("haha");
-        Platform.runLater(() -> {
-            contentAnchorPane.getChildren().add(gameView);
-
-//        contentAnchorPane.getChildren().add(gameView);
-            System.out.println("hehe");
-            gameView.setBoats(new ArrayList<>(participants.values()));
-            gameView.updateBorder(raceData.getCourseLimit());
-            gameView.updateCourse(
-                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
-            );
-            gameView.startRace();
-        });
+        contentAnchorPane.getChildren().add(gameView);
+        gameView.setBoats(new ArrayList<>(participants.values()));
+        gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateCourse(
+            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+        );
+        gameView.setBoatAsPlayer(player);
+        gameView.startRace();
     }
 
     /**
@@ -610,5 +606,4 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         gameView.updateBorder(raceData.getCourseLimit());
     }
-
 }

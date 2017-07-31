@@ -1,21 +1,17 @@
 package seng302.visualiser.controllers;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
@@ -24,7 +20,7 @@ import seng302.gameServer.GameState;
  * A class describing the actions of the lobby screen
  * Created by wmu16 on 10/07/17.
  */
-public class LobbyController implements Initializable {
+public class LobbyController {
 
     public enum CloseStatus {
         LEAVE,
@@ -75,182 +71,67 @@ public class LobbyController implements Initializable {
     @FXML
     private ImageView eighthImageView;
 
-    private static List<ObservableList<String>> competitors = new ArrayList<>();
-    private static ObservableList<String> firstCompetitor = FXCollections.observableArrayList();
-    private static ObservableList<String> secondCompetitor = FXCollections.observableArrayList();
-    private static ObservableList<String> thirdCompetitor = FXCollections.observableArrayList();
-    private static ObservableList<String> fourthCompetitor = FXCollections.observableArrayList();
-    private static ObservableList<String> fifthCompetitor = FXCollections.observableArrayList();
-    private static ObservableList<String> sixthCompetitor = FXCollections.observableArrayList();
-    private static ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
-    private static ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
-//    private ClientStateQueryingRunnable clientStateQueryingRunnable;
-    private static List<ImageView> imageViews;
-    private static List<ListView> listViews;
+    private List<ObservableList<String>> competitors = new ArrayList<>();
+    private ObservableList<String> firstCompetitor = FXCollections.observableArrayList();
+    private ObservableList<String> secondCompetitor = FXCollections.observableArrayList();
+    private ObservableList<String> thirdCompetitor = FXCollections.observableArrayList();
+    private ObservableList<String> fourthCompetitor = FXCollections.observableArrayList();
+    private ObservableList<String> fifthCompetitor = FXCollections.observableArrayList();
+    private ObservableList<String> sixthCompetitor = FXCollections.observableArrayList();
+    private ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
+    private ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
+
+    private List<ImageView> imageViews = new ArrayList<>();
+    private List<ListView> listViews;
 
     private int MAX_NUM_PLAYERS = 8;
 
-    private Boolean switchedPane = false;
-
     private List<LobbyCloseListener> lobbyListeners = new ArrayList<>();
+    private ObservableList<String> players = FXCollections.observableArrayList();
 
-    private void setContentPane(String jfxUrl) {
-        try {
-            AnchorPane contentPane = (AnchorPane) lobbyScreen.getParent();
-            contentPane.getChildren().removeAll();
-            contentPane.getChildren().clear();
-            contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-            contentPane.getChildren()
-                    .addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
-        } catch (javafx.fxml.LoadException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void initialize() {
+        imageViews = new ArrayList<>();
+        Collections
+            .addAll(imageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
+                fifthImageView, sixthImageView, seventhImageView, eighthImageView);
+        listViews = new ArrayList<>();
+        Collections.addAll(listViews, firstListView, secondListView, thirdListView, fourthListView, fifthListView,
+            sixthListView, seventhListView, eighthListView);
+        competitors = new ArrayList<>();
+        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
+            fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
+
+        initialiseImageView();
+    }
+
+    private void initialiseListView() {
+        listViews.forEach(listView -> listView.getItems().clear());
+        imageViews.forEach(gif -> gif.setVisible(false));
+        competitors.forEach(ol -> ol.removeAll());
+        for (int i = 0; i < players.size(); i++) {
+            competitors.get(i).add(players.get(i));
+            listViews.get(i).setItems(competitors.get(i));
+            imageViews.get(i).setVisible(true);
         }
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-//        if (ClientState.isHost()) {
-//            lobbyIpText.setText("Lobby Host IP: " + ClientState.getHostIp());
-//            readyButton.setDisable(false);
-//        }
-//        else {
-//            lobbyIpText.setText("Connected to IP: ");
-//            readyButton.setDisable(true);
-//            readyButton.setVisible(false);
-//        }
-//        initialiseListView();
-//        initialiseLobbyControllerThread();
-//        initialiseImageView();  // parrot gif init
-//        if (ClientState.isHost()) {
-//            lobbyIpText.setText("Lobby Host IP: " + ClientState.getHostIp());
-//            readyButton.setDisable(false);
-//        }
-//        else {
-//            lobbyIpText.setText("Connected to IP: ");
-//            readyButton.setDisable(true);
-//        }
-//
-//        imageViews = new ArrayList<>();
-//        Collections.addAll(imageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
-//                fifthImageView, sixthImageView, seventhImageView, eighthImageView);
-//        listViews = new ArrayList<>();
-//        Collections.addAll(listViews, firstListView, secondListView, thirdListView, fourthListView, fifthListView,
-//                sixthListView, seventhListView, eighthListView);
-//        competitors = new ArrayList<>();
-//        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
-//                fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
-//
-//        initialiseListView();
-//        initialiseImageView();  // parrot gif init
-
-        // set up client state query thread, so that when it receives the race-started packet
-        // it can switch to the race view
-//        ClientStateQueryingRunnable clientStateQueryingRunnable = new ClientStateQueryingRunnable();
-//        clientStateQueryingRunnable.addObserver(this);
-//        Thread clientStateQueryingThread = new Thread(clientStateQueryingRunnable, "Client State querying thread");
-//        clientStateQueryingThread.setDaemon(true);
-//        clientStateQueryingThread.start();
-    }
-
-//    @Override
-//    public void update(Observable o, Object arg) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (arg.equals("game started") && !switchedPane) {
-//                    switchToRaceView();
-//                }
-//                if (arg.equals(("update players"))) {
-//                    initialiseListView();
-//                }
-//            }
-//        });
-//    }
-
-
-
-    private void initialiseListView() {
-//        firstListView.getItems().clear();
-//        secondListView.getItems().clear();
-//        thirdListView.getItems().clear();
-//        fourthListView.getItems().clear();
-//        fifthListView.getItems().clear();
-//        sixthListView.getItems().clear();
-//        seventhListView.getItems().clear();
-//        eighthListView.getItems().clear();
-
-//        listViews.forEach(listView -> listView.getItems().clear());
-//        imageViews.forEach(gif -> gif.setVisible(false));
-//        competitors.forEach(ol -> ol.removeAll());
-//
-//        List<Integer> ids = new ArrayList<>(ClientState.getBoats().keySet());
-//        for (int i = 0; i < ids.size(); i++) {
-//            competitors.get(i).add(String.format("Player ID: %d", ids.get(i)));
-//            listViews.get(i).setItems(competitors.get(i));
-//            imageViews.get(i).setVisible(true);
-//        }
-
-//        firstCompetitor.add(ClientState.getClientSourceId());
-
-//        int competitorIndex = 1;
-//        for (Integer yachtId : ClientState.getBoats().keySet()) {
-//            // break if there are more than 7 competitors
-//            if (competitorIndex >= 8) {
-//                break;
-//            }
-//            if (!yachtId.equals(Integer.parseInt(ClientState.getClientSourceId()))) {
-//                competitors.get(competitorIndex).add(String.valueOf(yachtId));
-//                competitorIndex++;
-//            }
-//        }
-
-//        firstListView.setItems(firstCompetitor);
-//        secondListView.setItems(secondCompetitor);
-//        thirdListView.setItems(thirdCompetitor);
-//        fourthListView.setItems(fourthCompetitor);
-//        fifthListView.setItems(fifthCompetitor);
-//        sixthListView.setItems(sixthCompetitor);
-//        seventhListView.setItems(seventhCompetitor);
-//        eighthListView.setItems(eighthCompetitor);
-//    }
-
-//    private void initialiseLobbyControllerThread() {
-//        Thread thread = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Platform.runLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                    }
-//                });
-//            }
-//        });
-//        thread.start();
-    }
-
     private void initialiseImageView() {
-//        for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
-//            imageViews.get(i).setImage(new Image(getClass().getResourceAsStream("/pics/sail.png")));
-//        }
-//        Image image1 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        firstImageView.setImage(image1);
-//        Image image2 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        secondImageView.setImage(image2);
-//        Image image3 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        thirdImageView.setImage(image3);
-//        Image image4 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        fourthImageView.setImage(image4);
-//        Image image5 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        fifthImageView.setImage(image5);
-//        Image image6 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        sixthImageView.setImage(image6);
-//        Image image7 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        seventhImageView.setImage(image7);
-//        Image image8 = new Image(getClass().getResourceAsStream("/pics/sail.png"));
-//        eighthImageView.setImage(image8);
+        imageViews.add(firstImageView);
+        imageViews.add(secondImageView);
+        imageViews.add(thirdImageView);
+        imageViews.add(fourthImageView);
+        imageViews.add(fifthImageView);
+        imageViews.add(sixthImageView);
+        imageViews.add(seventhImageView);
+        imageViews.add(eighthImageView);
+        for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
+            imageViews.get(i).setImage(
+                new Image(
+                    RaceViewController.class.getResourceAsStream(
+                        "/pics/sail.png")
+                )
+            );
+        }
     }
 
     @FXML
@@ -267,8 +148,6 @@ public class LobbyController implements Initializable {
 
     @FXML
     public void readyButtonPressed() {
-//        setContentPane("/views/RaceView.fxml");
-//        playTheme();
         GameState.setCurrentStage(GameStages.RACING);
         for (LobbyCloseListener readyListener : lobbyListeners)
             readyListener.notify(CloseStatus.READY);
@@ -308,13 +187,13 @@ public class LobbyController implements Initializable {
         lobbyListeners.add(listener);
     }
 
+    // TODO: 1/08/17 could definitely do this in a cleaner way.
     public void setPlayerListSource (ObservableList<String> players) {
-//        if (competitorsListView != null)
-//            competitorsListView.setItems(players);
-//        if (firstListView != null) {
-            firstListView.setItems(players);
-            firstImageView.setVisible(false);
-//        }
+        this.players = players;
+        players.addListener((ListChangeListener<? super String>) (lcl) ->
+            initialiseListView()
+        );
+        initialiseListView();
     }
 
     public void disableReadyButton () {

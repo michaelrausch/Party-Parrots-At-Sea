@@ -130,7 +130,7 @@ public class ClientToServerThread implements Runnable {
                         } else {
                             streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
                             for (ClientSocketListener csl : listeners)
-                                csl.newPacket();
+                                Platform.runLater(csl::newPacket);
                         }
                     } else {
                         clientLog("Packet has been dropped", 1);
@@ -147,7 +147,6 @@ public class ClientToServerThread implements Runnable {
                 clientLog(e.getMessage(), 1);
                 return;
             }
-            System.out.println("streamPackets.size() = " + streamPackets.size());
         }
         closeSocket();
         clientLog("Closed connection to Server", 0);
@@ -246,5 +245,9 @@ public class ClientToServerThread implements Runnable {
 
     public Thread getThread() {
         return thread;
+    }
+
+    public int getClientId () {
+        return clientId;
     }
 }

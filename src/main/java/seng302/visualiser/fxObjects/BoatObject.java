@@ -80,8 +80,8 @@ public class BoatObject extends Group {
             boatPoly.setStroke(Color.BLACK);
         });
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
-//        boatPoly.setCache(true);
-//        boatPoly.setCacheHint(CacheHint.SPEED);
+        boatPoly.setCache(true);
+        boatPoly.setCacheHint(CacheHint.SPEED);
 
 //        annotationBox = new AnnotationBox();
 //        annotationBox.setFill(colour);
@@ -260,8 +260,6 @@ public class BoatObject extends Group {
         );
         boatPoly.setStroke(Color.BLACK);
         boatPoly.setStrokeWidth(3);
-//        boatAnnotations.setAsPlayer();
-//        isPlayer = true;
     }
 
     public void setTrajectory(double heading, double velocity) {
