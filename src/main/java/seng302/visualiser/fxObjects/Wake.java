@@ -1,5 +1,6 @@
 package seng302.visualiser.fxObjects;
 
+import javafx.application.Platform;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -41,7 +42,11 @@ public class Wake extends Group {
             arc.setCache(true);
             arc.setCacheHint(CacheHint.ROTATE);
             arc.setType(ArcType.OPEN);
-            arc.setStroke(new Color(0.18, 0.7, 1.0, 1.0 + (-0.99 / numWakes * i)));
+            arc.setStroke(
+                new Color(
+                    0.18, 0.7, 1.0, 1.0 + (-0.99 / numWakes * i)
+                )
+            );
             arc.setStrokeWidth(3.0);
             arc.setStrokeLineCap(StrokeLineCap.ROUND);
             arc.setFill(new Color(0.0, 0.0, 0.0, 0.0));
@@ -55,7 +60,15 @@ public class Wake extends Group {
 
     void setRotation (double rotation, double velocity) {
 //        if (Math.abs(rotations[0] - rotation) > 20) {
-            rotate(rotation);
+          Platform.runLater(() -> {
+              rotate(rotation);
+              double rad = (14 / numWakes) + velocity;
+              for (Arc arc : arcs) {
+                  arc.setRadiusX(rad);
+                  arc.setRadiusY(rad);
+                  rad += (14 / numWakes) + (velocity / 2.5);
+              }
+          });
 //        } else {
 //            rotations[0] = rotation;
 //            ((Rotate) arcs[0].getTransforms().get(0)).setAngle(rotation);
@@ -78,12 +91,12 @@ public class Wake extends Group {
 //            }
 //        }
 
-        double rad = (14 / numWakes) + velocity;
-        for (Arc arc : arcs) {
-            arc.setRadiusX(rad);
-            arc.setRadiusY(rad);
-            rad += (14 / numWakes) + (velocity / 2.5);
-        }
+//        double rad = (14 / numWakes) + velocity;
+//        for (Arc arc : arcs) {
+//            arc.setRadiusX(rad);
+//            arc.setRadiusY(rad);
+//            rad += (14 / numWakes) + (velocity / 2.5);
+//        }
     }
 
     /**

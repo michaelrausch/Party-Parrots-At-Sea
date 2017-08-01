@@ -16,8 +16,8 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.server.messages.BoatActionMessage;
-import seng302.server.messages.Message;
+import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.Message;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on
@@ -130,7 +130,7 @@ public class ClientToServerThread implements Runnable {
                         } else {
                             streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
                             for (ClientSocketListener csl : listeners)
-                                Platform.runLater(csl::newPacket);
+                                csl.newPacket();
                         }
                     } else {
                         clientLog("Packet has been dropped", 1);
@@ -147,6 +147,7 @@ public class ClientToServerThread implements Runnable {
                 clientLog(e.getMessage(), 1);
                 return;
             }
+//            System.out.println("streamPackets = " + streamPackets.size());
         }
         closeSocket();
         clientLog("Closed connection to Server", 0);

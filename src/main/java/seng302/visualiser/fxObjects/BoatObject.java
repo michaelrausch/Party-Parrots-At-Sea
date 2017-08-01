@@ -1,13 +1,16 @@
 package seng302.visualiser.fxObjects;
 
 import java.util.ArrayList;
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Polyline;
 import javafx.scene.transform.Rotate;
 
 /**
@@ -28,15 +31,16 @@ public class BoatObject extends Group {
     private double yVelocity;
     private double lastHeading;
     //Graphical objects
-    private Group lineGroup = new Group();
+    private Polyline trail = new Polyline();
     private Polygon boatPoly;
     private Wake wake;
     private Line leftLayLine;
     private Line rightLayline;
-    private Double distanceTravelled = 0.0;
+    private double distanceTravelled, lastRotation;
     private Point2D lastPoint;
     private Paint colour = Color.BLACK;
-    private Boolean isSelected = true;  //All boats are initialised as selected
+    private Boolean isSelected, destinationSet;  //All boats are initialised as selected
+    private boolean isPlayer = false;
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
@@ -55,7 +59,6 @@ public class BoatObject extends Group {
      * polygon.
      */
     public BoatObject(double... points) {
-        this.colour = colour;
         initChildren(points);
     }
 
@@ -66,7 +69,6 @@ public class BoatObject extends Group {
      * polygon.
      */
     private void initChildren(double... points) {
-//        this.colour = color;
         boatPoly = new Polygon(points);
         boatPoly.setFill(colour);
         boatPoly.setFill(this.colour);
@@ -88,30 +90,18 @@ public class BoatObject extends Group {
 
         leftLayLine = new Line();
         rightLayline = new Line();
-
+        trail.getStrokeDashArray().setAll(5d, 10d);
+        trail.setCache(true);
         wake = new Wake(0, -BOAT_HEIGHT);
+        wake.setVisible(true);
         super.getChildren().addAll(boatPoly);//, annotationBox);
     }
 
     public void setFill (Paint value) {
         this.colour = value;
         boatPoly.setFill(colour);
+        trail.setStroke(colour);
     }
-
-    /**
-     * Moves the boat and its children annotations from its current coordinates by specified
-     * amounts.
-     *
-     * @param dx The amount to move the X coordinate by
-     * @param dy The amount to move the Y coordinate by
-     */
-    private void moveGroupBy(double dx, double dy) {
-        boatPoly.setLayoutX(boatPoly.getLayoutX() + dx);
-        boatPoly.setLayoutY(boatPoly.getLayoutY() + dy);
-        wake.setLayoutX(wake.getLayoutX() + dx);
-        wake.setLayoutY(wake.getLayoutY() + dy);
-    }
-
 
     /**
      * Moves the boat and its children annotations to coordinates specified
@@ -119,13 +109,35 @@ public class BoatObject extends Group {
      * @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
      */
-    public void moveTo(double x, double y, double rotation) {
-        rotateTo(rotation);
-        boatPoly.setLayoutX(x);
-        boatPoly.setLayoutY(y);
-        wake.setLayoutX(x);
-        wake.setLayoutY(y);
-        wake.rotate(rotation);
+    public void moveTo(double x, double y, double rotation, double velocity) {
+        Double dx = Math.abs(boatPoly.getLayoutX() - x);
+        Double dy = Math.abs(boatPoly.getLayoutY() - y);
+        Platform.runLater(() -> {
+            rotateTo(rotation);
+            boatPoly.setLayoutX(x);
+            boatPoly.setLayoutY(y);
+            wake.setLayoutX(x);
+            wake.setLayoutY(y);
+        });
+        wake.setRotation(rotation, velocity);
+//        rotateTo(rotation);
+//        boatPoly.setLayoutX(x);
+//        boatPoly.setLayoutY(y);
+//        wake.setLayoutX(x);
+//        wake.setLayoutY(y);
+//        wake.rotate(rotation);
+
+//        wake.setRotation(rotation, groundSpeed);
+//        isStopped = false;
+//        destinationSet = true;
+        lastRotation = rotation;
+
+        distanceTravelled += Math.sqrt((dx * dx) + (dy * dy));
+
+        if (distanceTravelled > 15 && isPlayer) {
+            distanceTravelled = 0d;
+            Platform.runLater(() -> trail.getPoints().addAll(x, y));
+        }
     }
 
     private void rotateTo(double rotation) {
@@ -133,31 +145,31 @@ public class BoatObject extends Group {
     }
 
     public void updateLocation() {
-        double dx = xVelocity / 60;
-        double dy = yVelocity / 60;
-
-        distanceTravelled += Math.abs(dx) + Math.abs(dy);
-        moveGroupBy(dx, dy);
-
-        if (distanceTravelled > 70) {
-            distanceTravelled = 0d;
-
-            if (lastPoint != null) {
-                Line l = new Line(
-                    lastPoint.getX(),
-                    lastPoint.getY(),
-                    boatPoly.getLayoutX(),
-                    boatPoly.getLayoutY()
-                );
-                l.getStrokeDashArray().setAll(3d, 7d);
-                l.setStroke(colour);
-                l.setCache(true);
-                l.setCacheHint(CacheHint.SPEED);
-                lineGroup.getChildren().add(l);
-            }
-            lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
-        }
-        wake.updatePosition();
+//        double dx = xVelocity / 60;
+//        double dy = yVelocity / 60;
+//
+//        distanceTravelled += Math.abs(dx) + Math.abs(dy);
+//        moveGroupBy(dx, dy);
+//
+//        if (distanceTravelled > 70) {
+//            distanceTravelled = 0d;
+//
+//            if (lastPoint != null) {
+//                Line l = new Line(
+//                    lastPoint.getX(),
+//                    lastPoint.getY(),
+//                    boatPoly.getLayoutX(),
+//                    boatPoly.getLayoutY()
+//                );
+//                l.getStrokeDashArray().setAll(3d, 7d);
+//                l.setStroke(colour);
+//                l.setCache(true);
+//                l.setCacheHint(CacheHint.SPEED);
+//                lineGroup.getChildren().add(l);
+//            }
+//            lastPoint = new Point2D(boatPoly.getLayoutX(), boatPoly.getLayoutY());
+//        }
+//        wake.updatePosition();
     }
 
 //    /**
@@ -203,16 +215,16 @@ public class BoatObject extends Group {
     public void setVisibility (boolean teamName, boolean velocity, boolean estTime, boolean legTime,
         boolean trail, boolean wake) {
 //        boatAnnotations.setVisible(teamName, velocity, estTime, legTime);
-        this.wake.setVisible(wake);
-        this.lineGroup.setVisible(trail);
+//        this.wake.setVisible(wake);
+        this.trail.setVisible(trail);
     }
 
     public void setLineGroupVisible(Boolean visible) {
-        lineGroup.setVisible(visible);
+        trail.setVisible(visible);
     }
 
     public void setWakeVisible(Boolean visible) {
-        wake.setVisible(visible);
+//        wake.setVisible(visible);
     }
 
     public void setLayLinesVisible(Boolean visible) {
@@ -236,8 +248,8 @@ public class BoatObject extends Group {
         return wake;
     }
 
-    public Group getTrail() {
-        return lineGroup;
+    public Node getTrail() {
+        return trail;
     }
 
     public Double getBoatLayoutX() {
@@ -260,6 +272,7 @@ public class BoatObject extends Group {
         );
         boatPoly.setStroke(Color.BLACK);
         boatPoly.setStrokeWidth(3);
+        isPlayer = true;
     }
 
     public void setTrajectory(double heading, double velocity) {

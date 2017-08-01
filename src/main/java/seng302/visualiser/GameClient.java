@@ -5,13 +5,13 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.TimeZone;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
@@ -22,8 +22,8 @@ import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.server.messages.BoatActionMessage;
-import seng302.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.BoatActionType;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
@@ -62,12 +62,12 @@ public class GameClient {
             ioe.printStackTrace();
             System.out.println("Unable to connect to host...");
         }
-        LobbyController lobbyController = loadLobby("/views/LobbyView.fxml");
+        socketThread.addStreamObserver(this::parsePackets);
+        LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.disableReadyButton();
         lobbyController.setTitle("Connected to host - IP : " + ipAddress + " Port : " + portNumber);
         lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
-        socketThread.addStreamObserver(this::parsePackets);
     }
 
     public void runAsHost(String ipAddress, Integer portNumber) {
@@ -79,8 +79,8 @@ public class GameClient {
             System.out.println("Unable to make local connection to host...");
         }
         socketThread.addStreamObserver(this::parsePackets);
-        LobbyController lobbyController = loadLobby("/views/LobbyView.fxml");
-        lobbyController.setPlayerListSource(GameState.getObservablePlayers());
+        LobbyController lobbyController = loadLobby();
+        lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.setTitle("Hosting Lobby - IP : " + ipAddress + " Port : " + portNumber);
         lobbyController.addCloseListener(exitCause -> {
             if (exitCause == CloseStatus.READY) {
@@ -112,11 +112,10 @@ public class GameClient {
     /**
      * Loads a view of the lobby into the clients pane
      *
-     * @param lobbyView fxml file for the desired lobby
      * @return the lobby controller.
      */
-    private LobbyController loadLobby(String lobbyView) {
-        FXMLLoader fxmlLoader = new FXMLLoader(GameClient.class.getResource(lobbyView));
+    private LobbyController loadLobby() {
+        FXMLLoader fxmlLoader = new FXMLLoader(GameClient.class.getResource("/views/LobbyView.fxml"));
         try {
             holderPane.getChildren().clear();
             holderPane.getChildren().add(fxmlLoader.load());
@@ -130,9 +129,11 @@ public class GameClient {
         FXMLLoader fxmlLoader = new FXMLLoader(
             RaceViewController.class.getResource("/views/RaceView.fxml"));
         try {
-            Node node = fxmlLoader.load();
-            holderPane.getChildren().clear();
-            holderPane.getChildren().add(node);
+            final Node node = fxmlLoader.load();
+            Platform.runLater(() -> {
+                holderPane.getChildren().clear();
+                holderPane.getChildren().add(node);
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -173,13 +174,14 @@ public class GameClient {
                     break;
 
                 case BOAT_XML:
+                    System.out.println("GOT SUM BOATS YAY :)");
                     allBoatsMap = XMLParser.parseBoats(
                         StreamParser.extractXmlMessage(packet)
                     );
                     clientLobbyList.clear();
                     allBoatsMap.forEach((id, boat) -> {
                         clientLobbyList.add(id + " " + boat.getBoatName());
-                        System.out.println(id + " " + boat.getBoatName());
+//                        System.out.println(id + " " + boat.getBoatName());
 
                     });
 //                    startRaceIfAllDataReceived();

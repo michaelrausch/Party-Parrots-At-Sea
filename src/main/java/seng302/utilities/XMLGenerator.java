@@ -9,7 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
-import seng302.server.messages.XMLMessageSubType;
+import seng302.gameServer.server.messages.XMLMessageSubType;
 
 /**
  * An XML generator to generate the Race, Boat, and Regatta XML dynamically

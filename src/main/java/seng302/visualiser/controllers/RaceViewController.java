@@ -3,14 +3,14 @@ package seng302.visualiser.controllers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -33,7 +33,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import javafx.util.StringConverter;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
@@ -81,7 +80,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private RaceState raceState;
 
     private Timeline timerTimeline;
-    private HashMap<Integer, Series<String, Double>> sparkLineData = new HashMap<>();
+    private Timer timer = new Timer();
+    private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
 
     public void initialize() {
@@ -112,9 +112,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseFPSCheckBox();
         initialiseAnnotationSlider();
         initialiseBoatSelectionComboBox();
+        initialiseSparkLine();
 
         gameView = new GameView();
-        contentAnchorPane.getChildren().add(gameView);
+        Platform.runLater(() -> contentAnchorPane.getChildren().add(gameView));
         gameView.setBoats(new ArrayList<>(participants.values()));
         gameView.updateBorder(raceData.getCourseLimit());
         gameView.updateCourse(
@@ -210,32 +211,28 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Used to add any new yachts into the race that may have started late or not have had data received yet
      */
     private void updateSparkLine(){
+        // TODO: 2/08/17 there is about 0 chance of this working. Once we are keeping track of boat positions it can be fixed.
         // Collect the racing yachts that aren't already in the chart
-        List<Yacht> sparkLineCandidates = new ArrayList<>();
-//        participants.forEach((id, yacht) ->{
-//            if (!sparkLineData.containsKey(id) && yacht.getPosition() != null && !yacht.getPosition().equals("-"))
-//                sparkLineCandidates.add(yacht);
-//        });
-        participants.forEach((id, yacht) -> sparkLineCandidates.add(yacht));
-
-        sparklineYAxis.setUpperBound(participants.size() + 1);
-
+        sparkLineData.clear();
+        List<Yacht> sparkLineCandidates = new ArrayList<>(participants.values());
         // Create a new data series for new yachts
-        sparkLineCandidates.stream().filter(yacht -> yacht.getPositionInteger() != null).forEach(yacht -> {
-            Series<String, Double> yachtData = new Series<>();
-            yachtData.setName(yacht.getSourceId().toString());
-            yachtData.getData().add(
-                new XYChart.Data<>(
-                    Integer.toString(yacht.getLegNumber()),
-                    1.0 + participants.size() - yacht.getPositionInteger()
-                )
-            );
-            sparkLineData.put(yacht.getSourceId(), yachtData);
-        });
+        sparkLineCandidates
+            .stream()
+            .filter(yacht -> yacht.getPositionInteger() != null)
+            .forEach(yacht -> {
+                Series<String, Double> yachtData = new Series<>();
+                yachtData.setName(yacht.getSourceId().toString());
+                yachtData.getData().add(
+                    new XYChart.Data<>(
+                        Integer.toString(yacht.getLegNumber()),
+                        1.0 + participants.size() - yacht.getPositionInteger()
+                    )
+                );
+            sparkLineData.add(yachtData);
+            });
 
         // Lambda function to sort the series in order of leg (later legs shown more to the right)
-        List<XYChart.Series<String, Double>> positions = new ArrayList<>(sparkLineData.values());
-        positions.sort((o1, o2) -> {
+        sparkLineData.sort((o1, o2) -> {
             Integer leg1 =  Integer.parseInt(o1.getData().get(o1.getData().size()-1).getXValue());
             Integer leg2 =  Integer.parseInt(o2.getData().get(o2.getData().size()-1).getXValue());
             if (leg2 < leg1){
@@ -244,26 +241,30 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 return -1;
             }
         });
-
         // Adds the new data series to the sparkline (and set the colour of the series)
-        raceSparkLine.setCreateSymbols(false);
-        positions
-            .stream()
-            .filter(spark -> !raceSparkLine.getData().contains(spark))
-            .forEach(spark -> {
-                raceSparkLine.getData().add(spark);
-                spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
-            });
+        Platform.runLater(() -> {
+            sparkLineData
+                .stream()
+                .filter(spark -> !raceSparkLine.getData().contains(spark))
+                .forEach(spark -> {
+                    raceSparkLine.getData().add(spark);
+                    spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
+                });
+        });
     }
 
+    private void initialiseSparkLine() {
+        sparklineYAxis.setUpperBound(participants.size() + 1);
+        raceSparkLine.setCreateSymbols(false);
+    }
 
     /**
      * Updates the yachts sparkline of the desired yacht and using the new leg number
      * @param yacht The yacht to be updated on the sparkline
      * @param legNumber the leg number that the position will be assigned to
      */
-    public void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
-        for (XYChart.Series<String, Double> positionData : sparkLineData.values()) {
+    void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
+        for (XYChart.Series<String, Double> positionData : sparkLineData) {
             positionData.getData().add(
                 new Data<>(
                     Integer.toString(legNumber),
@@ -305,23 +306,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates of each of these attributes are called ONCE EACH SECOND
      */
     private void initializeUpdateTimer() {
-        timerTimeline = new Timeline();
-        timerTimeline.setCycleCount(Timeline.INDEFINITE);
-        // Run timer update every second
-        timerTimeline.getKeyFrames().add(
-            new KeyFrame(Duration.seconds(1),
-                event -> {
-                    updateRaceTime();
-                    updateWindDirection();
-                    updateOrder();
-                    updateBoatSelectionComboBox();
-                    updateSparkLine();
-                })
-        );
-        // Start the timer
-        timerTimeline.playFromStart();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateRaceTime();
+                updateWindDirection();
+                updateOrder();
+                updateSparkLine();
+            }
+        }, 0, 1000);
     }
-
 
     /**
      * Iterates over all corners until ones SeqID matches with the yachts current leg number.
@@ -331,6 +325,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @return The next Mark or null if none found
      */
     private Mark getNextMark(BoatObject bg) {
+        // TODO: 1/08/17 Move to GameView
 //
 //        Integer legNumber = bg.getYacht().getLegNumber();
 //        List<Corner> markSequence = courseData.getMarkSequence();
@@ -346,6 +341,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //                return courseData.getCompoundMarks().get(corner.getCompoundMarkID());
 //            }
 //        }
+//        return null;
         return null;
     }
 
@@ -376,13 +372,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * section
      */
     private void updateOrder() {
-        positionVbox.getChildren().clear();
 //        positionVbox.getChildren().removeAll();
 //        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // list of racing yacht id
         List<Yacht> sorted = new ArrayList<>(participants.values());
         sorted.sort(Comparator.comparingInt(Yacht::getPositionInteger));
+        List<Text> vboxEntries = new ArrayList<>();
 
         for (Yacht yacht : sorted) {
 //            System.out.println("yacht == null  " + String.valueOf(yacht == null));
@@ -390,17 +386,20 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 Text textToAdd = new Text(yacht.getPositionInteger() + ". " +
                     yacht.getShortName() + " (Finished)");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                positionVbox.getChildren().add(textToAdd);
+                vboxEntries.add(textToAdd);
 
             } else {
                 Text textToAdd = new Text(yacht.getPositionInteger() + ". " +
                     yacht.getShortName() + " ");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 textToAdd.setStyle("");
-                positionVbox.getChildren().add(textToAdd);
+                vboxEntries.add(textToAdd);
             }
 //            System.out.println("finished a loop :))))))))))))");
         }
+        Platform.runLater(() ->
+            positionVbox.getChildren().setAll(vboxEntries)
+        );
 //            participants.forEach((id, yacht) ->{
 //                Text textToAdd = new Text(yacht.getPosition() + ". " +
 //                    yacht.getShortName() + " ");
@@ -411,7 +410,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
 
-//    private void updateLaylines(BoatObject bg) {
+    private void updateLaylines(BoatObject bg) {
+        // TODO: 1/08/17 move to GameView
 //
 //        Mark nextMark = getNextMark(bg);
 //        Boolean isUpwind = null;
@@ -472,7 +472,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //                }
 //            }
 //        }
-//    }
+    }
 
 
     private Point2D getPointRotation(Point2D ref, Double distance, Double angle){
@@ -516,17 +516,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             }
         });
     }
-
-    /**
-     * Grabs the yachts currently in the race as from the StreamParser and sets them to be selectable
-     * in the yacht selection combo box
-     */
-    private void updateBoatSelectionComboBox() {
-        ObservableList<Yacht> observableYachts = FXCollections.observableArrayList();
-        observableYachts.addAll(participants.values());
-        yachtSelectionComboBox.setItems(observableYachts);
-    }
-
 
     /**
      * Display the list of yachts in the order they finished the race

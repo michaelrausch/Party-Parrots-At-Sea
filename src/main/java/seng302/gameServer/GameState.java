@@ -9,7 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seng302.model.Player;
 import seng302.model.Yacht;
-import seng302.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatActionType;
 
 /**
  * A Static class to hold information about the current state of the game (model)

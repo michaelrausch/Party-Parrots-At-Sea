@@ -3,6 +3,7 @@ package seng302.visualiser.controllers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -187,13 +188,12 @@ public class LobbyController {
         lobbyListeners.add(listener);
     }
 
-    // TODO: 1/08/17 could definitely do this in a cleaner way.
     public void setPlayerListSource (ObservableList<String> players) {
         this.players = players;
         players.addListener((ListChangeListener<? super String>) (lcl) ->
-            initialiseListView()
+            Platform.runLater(this::initialiseListView)
         );
-        initialiseListView();
+        Platform.runLater(this::initialiseListView);
     }
 
     public void disableReadyButton () {

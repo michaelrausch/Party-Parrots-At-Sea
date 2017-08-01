@@ -2,6 +2,7 @@ package seng302.visualiser.fxObjects;
 
 import java.util.HashMap;
 import java.util.Map;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
@@ -13,7 +14,7 @@ import javafx.scene.text.Text;
 /**
  * Grouping of string objects over a semi transparent background.
  */
-public class AnnotationBox extends Group{
+public class AnnotationBox extends Group {
 
     @FunctionalInterface
     public interface AnnotationFormatter<T> {
@@ -41,7 +42,7 @@ public class AnnotationBox extends Group{
             this.source = source;
             this.format = formatter;
             source.addListener((obs, oldVal, newVal) ->
-                text.setText(format.transformString(newVal))
+                Platform.runLater(() -> text.setText(format.transformString(newVal)))
             );
         }
 
@@ -79,6 +80,9 @@ public class AnnotationBox extends Group{
 
     private Map<String, Annotation> annotationsByName = new HashMap<>();
 
+    /**
+     * Creates an empty annotation box. The box is offset from (0,0) by (17, -38).
+     */
     public AnnotationBox() {
         this.setCache(true);
         background.setX(BACKGROUND_X);
@@ -95,34 +99,51 @@ public class AnnotationBox extends Group{
         this.getChildren().add(background);
     }
 
+    /**
+     * Adds an annotation to the box. Use the name to reference the annotation for removal or\
+     * changing visibility.
+     * @param annotationName the name of the annotation.
+     * @param annotation the annotation.
+     */
     public void addAnnotation (String annotationName, Annotation annotation) {
         annotationsByName.put(annotationName, annotation);
-        this.getChildren().add(annotation.getText());
-        visibleAnnotations++;
-        update();
+        Platform.runLater(() -> {
+            this.getChildren().add(annotation.getText());
+            visibleAnnotations++;
+            update();
+        });
     }
 
+    /**
+     * Adds an annotation with a constant text.
+     * @param annotationName The name of the annotation. Will be used to reference it later.
+     * @param annotationText The desired text.
+     */
     public void addAnnotation (String annotationName, String annotationText) {
         Text text = getTextObject();
-        annotationsByName.put(annotationName, new Annotation(text, annotationText));
-        this.getChildren().add(text);
-        visibleAnnotations++;
-        update();
+        addAnnotation(annotationName, new Annotation(text, annotationText));
     }
 
-    public <E> void addAnnotation (String annotationName, ObservableValue<E> observable) {
-        addAnnotation(annotationName, observable, E::toString);
-    }
-
+    /**
+     * Adds an annotation with the given name. The annotation will contain the value of the given
+     * ObservableValue. The formatter should return a String and takes an object of the same type as
+     * the ObservableValue as a parameter. The String is how you want the annotation to look.
+     * @param annotationName The annotation name.
+     * @param observable The observable value the annotation will display.
+     * @param formatter A formatting function for the observable value.
+     * @param <E> The type of ObservableValue.
+     */
     public <E> void addAnnotation (String annotationName, ObservableValue<E> observable,
         AnnotationFormatter<E> formatter) {
         Text newText = getTextObject();
-        annotationsByName.put(annotationName, new Annotation<>(newText, observable, formatter));
-        this.getChildren().add(newText);
-        visibleAnnotations++;
-        update();
+        addAnnotation(annotationName, new Annotation<>(newText, observable, formatter));
     }
 
+    /**
+     * Sets the visibility of the annotation with the given name if it exists.
+     * @param annotationName The name of the annotation
+     * @param visibility the desired visibility
+     */
     public void setAnnotationVisibility (String annotationName, boolean visibility) {
         if (annotationsByName.containsKey(annotationName)) {
             Text textField = annotationsByName.get(annotationName).text;
@@ -138,68 +159,54 @@ public class AnnotationBox extends Group{
         }
     }
 
+    /**
+     * Removes the annotation with the given name if it exits.
+     * @param annotationName The name given when the annotation was created.
+     */
     public void removeAnnotation (String annotationName) {
-        this.getChildren().remove(annotationsByName.remove(annotationName).getText());
-        annotationsByName.remove(annotationName);
-        visibleAnnotations--;
-        update();
+        if (annotationName.contains(annotationName)) {
+            Platform.runLater(() -> {
+                this.getChildren().remove(annotationsByName.remove(annotationName).getText());
+                visibleAnnotations--;
+                update();
+            });
+            annotationsByName.remove(annotationName);
+        }
     }
 
+    /**
+     * Moves the annotation.
+     * @param x x location
+     * @param y y location
+     */
     public void setLocation (double x, double y) {
-//        double dx = x - this.getLayoutX();
-//        double dy = y - this.getLayoutY();
-//        this.relocate(x, y);
-////        this.relocate(x, y);
-//        for (Node n : this.getChildren()) {
-//            n.relocate(
-//                n.getLayoutX() + dx,
-//                n.getLayoutY() + dy
-//            );
-////            n.setLayoutX(n.getLayoutX() + dx);
-////            n.setLayoutY(n.getLayoutY() + dy);
-//        }
-//        update();
-        this.relocate(x + BACKGROUND_X, y + BACKGROUND_Y);
-//        for (int i = 1; i <= visibleAnnotations; i++) {
-//            Text text = (Text) this.getChildren().get(i);
-//            if (text.visibleProperty().get()) {
-//                text.setLayoutX(x + X_OFFSET_TEXT);
-//                text.setLayoutY(y + Y_OFFSET_TEXT_INIT * Y_OFFSET_PER_TEXT * (i + 1));
-//            }
-//        }
-//        moveTexts(x, y);
-//        for (Node n : this.getChildren()) {
-//            n.relocate(x, y);
-//        }
+        Platform.runLater(()-> this.relocate(x + BACKGROUND_X, y + BACKGROUND_Y));
     }
 
+    /**
+     * Changes the width of the annotation box. Default is 145.
+     * @param width new width.
+     */
     public void setWidth (double width) {
         backgroundWidth = width;
-        background.setWidth(backgroundWidth);
+        Platform.runLater(() -> background.setWidth(backgroundWidth));
     }
 
     private void update () {
         background.setVisible(visibleAnnotations != 0);
         background.setHeight(Math.abs(BACKGROUND_X) + TEXT_BUFFER + BACKGROUND_H_PER_TEXT * visibleAnnotations);
-//        System.out.println("visibleAnnotations = " + visibleAnnotations);
         for (int i = 1; i <= visibleAnnotations; i++) {
             Text text = (Text) this.getChildren().get(i);
             if (text.visibleProperty().get()) {
-//                System.out.println("AYY LMAO");
-//                System.out.println("text.getText() = " + text.getText());
-////                System.out
-////                    .println("text.visibleProperty().get() = " + text.visibleProperty().get());
-//                System.out.println(text.getLayoutX());
-//                System.out.println(background.getLayoutX());
-                text.setX(X_OFFSET_TEXT);
-                text.setY(Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * i);
+                    text.setX(X_OFFSET_TEXT);
+                    text.setY(Y_OFFSET_TEXT_INIT + Y_OFFSET_PER_TEXT * i);
+//                });
             }
         }
     }
 
     /**
-     * Return a text object with caching and a color applied
-     *
+     * Returns a text object for an annotation.
      * @return The text object
      */
     private Text getTextObject() {
@@ -211,6 +218,10 @@ public class AnnotationBox extends Group{
         return text;
     }
 
+    /**
+     * Set the colour of the annotation box's border and text colour.
+     * @param value desired colour.
+     */
     public void setFill (Paint value) {
         theme = value;
         background.setStroke(theme);

@@ -25,16 +25,16 @@ import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.server.messages.BoatActionType;
-import seng302.server.messages.BoatLocationMessage;
-import seng302.server.messages.BoatStatus;
-import seng302.server.messages.BoatSubMessage;
-import seng302.server.messages.Message;
-import seng302.server.messages.RaceStatus;
-import seng302.server.messages.RaceStatusMessage;
-import seng302.server.messages.RaceType;
-import seng302.server.messages.XMLMessage;
-import seng302.server.messages.XMLMessageSubType;
+import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatLocationMessage;
+import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.server.messages.BoatSubMessage;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RaceStatus;
+import seng302.gameServer.server.messages.RaceStatusMessage;
+import seng302.gameServer.server.messages.RaceType;
+import seng302.gameServer.server.messages.XMLMessage;
+import seng302.gameServer.server.messages.XMLMessageSubType;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
