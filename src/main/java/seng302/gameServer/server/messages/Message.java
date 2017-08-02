@@ -172,7 +172,7 @@ public abstract class Message {
      * Convert an integer to an array of bytes
      * @param val The value to add
      * @param len The width of the integer in the buffer
-     * @return
+     * @return A byte array to be sent
      */
     public static byte[] intToByteArray(long val, int len){
         int index = 0;
@@ -191,6 +191,7 @@ public abstract class Message {
      * takes an array of up to 7 bytes in little endian format and
      * returns a positive long constructed from the input bytes
      *
+     * @param bytes the bytes to be converted to long
      * @return a positive long if there is less than 8 bytes -1 otherwise
      */
     public static long bytesToLong(byte[] bytes){

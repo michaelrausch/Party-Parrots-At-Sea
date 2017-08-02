@@ -12,9 +12,16 @@ public class MarkRoundingMessage extends Message{
     private RoundingSide roundingSide;
     private long markId;
 
+
     /**
      * This message is sent when a boat passes a mark, start line, or finish line
      * The purpose of this is to record the time when yachts cross marks
+     * @param ackNumber ackNumber
+     * @param raceId raceId
+     * @param sourceId sourceId
+     * @param roundingBoatStatus roundingBoatStatus
+     * @param roundingSide roundingSide
+     * @param markId markId
      */
     public MarkRoundingMessage(int ackNumber, int raceId, int sourceId, RoundingBoatStatus roundingBoatStatus,
                                RoundingSide roundingSide, int markId){

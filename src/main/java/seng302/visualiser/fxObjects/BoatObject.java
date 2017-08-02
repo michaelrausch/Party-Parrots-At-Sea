@@ -108,6 +108,8 @@ public class BoatObject extends Group {
      *
      * @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
+     * @param rotation The rotation by which the boat moves
+     * @param velocity The velocity the boat is moving
      */
     public void moveTo(double x, double y, double rotation, double velocity) {
         Double dx = Math.abs(boatPoly.getLayoutX() - x);

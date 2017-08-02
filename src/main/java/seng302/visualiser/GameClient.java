@@ -277,6 +277,7 @@ public class GameClient {
 
     /**
      * Handle the key-pressed event from the text field.
+     * @param e The key event triggering this call
      */
     public void keyPressed(KeyEvent e) {
         BoatActionMessage boatActionMessage;

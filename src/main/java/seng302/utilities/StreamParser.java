@@ -413,6 +413,7 @@ public class StreamParser {
      * takes an array of up to 7 bytes and returns a positive
      * long constructed from the input bytes
      *
+     * @param bytes the byte array to conver to Long
      * @return a positive long if there is less than 7 bytes -1 otherwise
      */
     public static long bytesToLong(byte[] bytes) {

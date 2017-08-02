@@ -26,6 +26,7 @@ public final class PolarTable {
      * Iterates through each row of the polar table, in pairs, to extract the row into a hashmap of angle to boat speed.
      * These angle boatspeed hashmaps are then added to an outer hashmap at the end of wind speed key to each row hashmap
      * as a value
+     * @param polarFile polarFile to be parsed
      */
     public static void parsePolarFile(InputStream polarFile) {
         polarTable = new HashMap<>();

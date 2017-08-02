@@ -17,6 +17,7 @@ public class XMLMessage extends Message{
      * XML Message from the AC35 Streaming data spec
      * @param content The XML content
      * @param type The XML Message Sub Type
+     * @param sequenceNum sequenceNum
      */
     public XMLMessage(String content, XMLMessageSubType type, long sequenceNum){
         this.content = content;

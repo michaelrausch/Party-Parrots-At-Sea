@@ -64,7 +64,7 @@ public class ClientToServerThread implements Runnable {
      *
      * @param ipAddress a string of ip address to be connected to
      * @param portNumber an integer port number
-     * @throws Exception SocketConnection if fail to connect to ip address and port number
+     * @throws IOException SocketConnection if fail to connect to ip address and port number
      * combination
      */
     public ClientToServerThread(String ipAddress, Integer portNumber) throws IOException {
@@ -182,6 +182,7 @@ public class ClientToServerThread implements Runnable {
 
     /**
      * Send the post-start race course information
+     * @param boatActionMessage The message to send
      */
     public void sendBoatActionMessage(BoatActionMessage boatActionMessage) {
         try {

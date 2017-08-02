@@ -85,8 +85,10 @@ public class Yacht {
 
     /**
      * Used in EventTest and RaceTest.
-     *
-     * @param boatName Create a yacht object with name.
+     * @param boatName boatName
+     * @param shortName shortName
+     * @param location location
+     * @param heading heading
      */
     public Yacht(String boatName, String shortName, GeoPoint location, Double heading) {
         this.boatName = boatName;
@@ -103,6 +105,7 @@ public class Yacht {
      * @param boatName The name of the team sailing the boat
      * @param boatVelocity The speed of the boat in meters/second
      * @param shortName A shorter version of the teams name
+     * @param id The id for the yacht
      */
     public Yacht(String boatName, double boatVelocity, String shortName, int id) {
         this.boatName = boatName;

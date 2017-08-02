@@ -183,6 +183,7 @@ public class GameView extends Pane {
      * case the course is added relative ot the border.
      *
      * @param newCourse the mark objects that make up the course.
+     * @param sequence The sequence the marks travel through
      */
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
         markerObjects = new HashMap<>();
@@ -307,6 +308,7 @@ public class GameView extends Pane {
 
     /**
      * Draws all the boats.
+     * @param  yachts The yachts to set in the race
      */
     public void setBoats(List<Yacht> yachts) {
         BoatObject newBoat;
