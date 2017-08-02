@@ -13,6 +13,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -88,8 +89,6 @@ public class GameView extends Pane {
     public GameView () {
         gameObjects = this.getChildren();
         // create image view for map, bind panel size to image
-//        mapImage.fitWidthProperty().bind(this.widthProperty());
-//        mapImage.fitHeightProperty().bind(this.heightProperty());
         gameObjects.add(mapImage);
         fpsDisplay.setLayoutX(5);
         fpsDisplay.setLayoutY(20);
@@ -175,6 +174,8 @@ public class GameView extends Pane {
             bottomRightPos.getLat(), originPos.getLng());
         CanvasMap canvasMap = new CanvasMap(boundary);
         mapImage.setImage(canvasMap.getMapImage());
+        mapImage.fitWidthProperty().bind(((AnchorPane) this.getParent()).heightProperty());
+        mapImage.fitHeightProperty().bind(((AnchorPane) this.getParent()).heightProperty());
     }
 
     /**

@@ -44,7 +44,7 @@ public class GeoUtility {
 	 * and end up on a heading of 120°
 	 */
 	public static Double getBearing(GeoPoint p1, GeoPoint p2) {
-		return (getBearingRad(p1, p2) + 360.0) % 360.0;
+		return (Math.toDegrees(getBearingRad(p1, p2)) + 360.0) % 360.0;
 	}
 
 	/**
