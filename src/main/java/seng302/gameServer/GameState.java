@@ -33,10 +33,6 @@ public class GameState implements Runnable {
     public GameState(String hostIpAddress) {
         windDirection = 180d;
         windSpeed = 10000d;
-        yachts = new HashMap<>();
-        players = new ArrayList<>();
-
-
         this.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
@@ -140,13 +136,7 @@ public class GameState implements Runnable {
                 break;
         }
 
-        System.out.println("-----------------------");
-        System.out.println("Sails are in: " + playerYacht.getSailIn());
-        System.out.println("Heading: " + playerYacht.getHeading());
-        System.out.println("Velocity: " + playerYacht.getVelocityMMS() / 1000);
-        System.out.println("Lat: " + playerYacht.getLocation().getLat());
-        System.out.println("Lng: " + playerYacht.getLocation().getLng());
-        System.out.println("-----------------------\n");
+//        printBoatStatus(playerYacht);
     }
 
     public static void update() {
@@ -178,7 +168,7 @@ public class GameState implements Runnable {
             try {
                 Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("[GameState] interrupted exception");
             }
             if (currentStage == GameStages.PRE_RACE) {
                 update();
@@ -189,5 +179,15 @@ public class GameState implements Runnable {
                 update();
             }
         }
+    }
+
+    private static void printBoatStatus(Yacht playerYacht) {
+        System.out.println("-----------------------");
+        System.out.println("Sails are in: " + playerYacht.getSailIn());
+        System.out.println("Heading: " + playerYacht.getHeading());
+        System.out.println("Velocity: " + playerYacht.getVelocityMMS() / 1000);
+        System.out.println("Lat: " + playerYacht.getLocation().getLat());
+        System.out.println("Lng: " + playerYacht.getLocation().getLng());
+        System.out.println("-----------------------\n");
     }
 }

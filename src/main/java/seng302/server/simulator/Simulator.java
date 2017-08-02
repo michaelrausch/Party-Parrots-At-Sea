@@ -65,7 +65,7 @@ public class Simulator extends Observable implements Runnable {
 			try {
 				Thread.sleep(lapse);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				System.out.println("[Simulator] interrupted exception ");
 			}
 		}
 	}

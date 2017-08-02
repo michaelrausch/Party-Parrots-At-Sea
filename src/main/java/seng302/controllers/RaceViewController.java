@@ -145,7 +145,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             controller.loadState(importantAnnotations);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("[RaceViewController] IO exception");
         }
     }
 

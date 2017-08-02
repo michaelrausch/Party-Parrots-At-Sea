@@ -108,7 +108,6 @@ public class ClientPacketParser {
             }
         } catch (NullPointerException e) {
             System.out.println("Error parsing packet");
-//            e.printStackTrace();
         }
     }
 
@@ -287,7 +286,7 @@ public class ClientPacketParser {
             db = dbf.newDocumentBuilder();
             doc = db.parse(new InputSource(new StringReader(xmlMessage)));
         } catch (ParserConfigurationException | IOException | SAXException e) {
-            e.printStackTrace();
+            System.out.println("[ClientPacketParser] ParserConfigurationException | IOException | SAXException");
         }
 
         xmlObject.constructXML(doc, messageType);

@@ -2,6 +2,7 @@ package seng302.client;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javafx.stage.Stage;
 import seng302.models.Yacht;
 
 /**
@@ -17,6 +18,7 @@ public class ClientState {
     private static Map<Integer, Yacht> boats = new ConcurrentHashMap<>();
     private static Boolean boatsUpdated = true;
     private static String clientSourceId = "";
+    public static Stage primaryStage;
 
     public static String getHostIp() {
         return hostIp;

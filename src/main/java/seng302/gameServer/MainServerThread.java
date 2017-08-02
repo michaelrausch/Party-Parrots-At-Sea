@@ -25,6 +25,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
     private static final int LOG_LEVEL = 1;
+    private boolean terminated;
 
     private Thread thread;
 
@@ -38,6 +39,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
             serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
 
+        terminated = false;
         thread = new Thread(this);
         thread.start();
     }
@@ -54,11 +56,11 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         serverListenThread.start();
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
-        while (!thread.isInterrupted()) {
+        while (!terminated) {
             try {
                 Thread.sleep(1000 / CLIENT_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                serverLog("Interrupted exception in Main Server Thread thread sleep", 1);
             }
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
@@ -147,5 +149,9 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
                 }
             }
         }, 0, 500);
+    }
+
+    public void terminate() {
+        terminated = true;
     }
 }

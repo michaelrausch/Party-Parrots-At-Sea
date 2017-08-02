@@ -26,7 +26,7 @@ public class ClientStateQueryingRunnable extends Observable implements Runnable 
             try {
                 Thread.sleep(0);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                continue;
             }
 
             if (ClientState.isRaceStarted() && ClientState.isConnectedToHost()) {

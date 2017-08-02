@@ -27,9 +27,11 @@ public class ServerListenThread extends Thread{
     private void acceptConnection() {
         try {
             Socket thisClient = serverSocket.accept();
-            if (thisClient != null){
+            if (thisClient != null && GameState.getCurrentStage().equals(GameStages.LOBBYING)) {
                 ServerToClientThread thisConnection = new ServerToClientThread(thisClient);
                 delegate.clientConnected(thisConnection);
+            } else {
+                thisClient.close();
             }
         } catch (IOException e) {
             e.getMessage();
