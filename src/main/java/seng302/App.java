@@ -10,9 +10,6 @@ import javafx.stage.Stage;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.client.ClientPacketParser;
-import seng302.client.ClientState;
-import seng302.models.PolarTable;
 import seng302.model.PolarTable;
 
 public class App extends Application {
