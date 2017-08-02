@@ -145,4 +145,42 @@ public abstract class Mark {
     public int getCompoundMarkID() {
         return compoundMarkID;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+
+        if (!(other instanceof Mark)){
+            return false;
+        }
+
+        Mark otherMark = (Mark) other;
+
+        if (otherMark.getLatitude() != getLatitude() || otherMark.getLongitude() != getLongitude()) {
+            return false;
+        }
+
+        if (otherMark.getCompoundMarkID() != getCompoundMarkID()){
+            return false;
+        }
+
+        if (otherMark.getId() != getId()){
+            return false;
+        }
+
+        if (!otherMark.getName().equals(name)){
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return getName().hashCode() + getMarkType().hashCode() +
+                Integer.hashCode(getCompoundMarkID()) + Double.hashCode(getLatitude()) +
+                Double.hashCode(getLongitude());
+    }
 }

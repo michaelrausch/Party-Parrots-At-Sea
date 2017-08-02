@@ -7,8 +7,6 @@ import seng302.utilities.GeoPoint;
 import javax.net.ssl.HttpsURLConnection;
 import java.net.URL;
 
-import java.lang.Math;
-
 /**
  * CanvasMap retrieves a map image with given geo boundary from Google Map server.
  * By passing a rectangle like geo boundary, it returns a map image with the

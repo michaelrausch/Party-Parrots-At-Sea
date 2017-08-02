@@ -1,13 +1,14 @@
 package seng302.gameServer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import seng302.client.ClientPacketParser;
 import seng302.models.Player;
 import seng302.models.Yacht;
 import seng302.server.messages.BoatActionType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -43,7 +44,6 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
 
         new Thread(this).start();
-
     }
 
     public static String getHostIpAddress() {
