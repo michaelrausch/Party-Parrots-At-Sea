@@ -1,7 +1,5 @@
 package seng302.model;
 
-import static seng302.utilities.GeoUtility.getGeoCoordinate;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,6 +12,8 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import seng302.gameServer.GameState;
 import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
+import seng302.utilities.GeoUtility;
 
 /**
  * Yacht class for the racing boat.
@@ -38,11 +38,10 @@ public class Yacht {
 
     private Long estimateTimeAtFinish;
     private Long timeTillNext;
+    private Double distanceToNextMark;
     private Long markRoundTime;
     private CompoundMark nextMark;
     private Double heading;
-    private Double lat;
-    private Double lon;
     private Integer legNumber = 0;
 
     //SERVER SIDE
@@ -110,7 +109,28 @@ public class Yacht {
         }
 
         Double metersCovered = velocity * secondsElapsed;
-        location = getGeoCoordinate(location, heading, metersCovered);
+        location = GeoUtility.getGeoCoordinate(location, heading, metersCovered);
+        distanceToNextMark = calcDistanceToNextMark();
+    }
+
+
+    /**
+     * Calculates the distance to the next mark (closest of the two if a gate mark).
+     *
+     * @return A distance in metres. Returns -1 if there is no next mark
+     */
+    public Double calcDistanceToNextMark() {
+        if (nextMark == null) {
+            return -1d;
+        } else if (nextMark.isGate()) {
+            Mark sub1 = nextMark.getSubMark(1);
+            Mark sub2 = nextMark.getSubMark(2);
+            Double distance1 = GeoUtility.getDistance(location, sub1);
+            Double distance2 = GeoUtility.getDistance(location, sub2);
+            return (distance1 < distance2) ? distance1 : distance2;
+        } else {
+            return GeoUtility.getDistance(location, nextMark.getSubMark(1));
+        }
     }
 
     public void adjustHeading(Double amount) {
@@ -326,19 +346,19 @@ public class Yacht {
     }
 
     public Double getLat() {
-        return lat;
+        return location.getLat();
     }
 
     public void setLat(Double lat) {
-        this.lat = lat;
+        location.setLat(lat);
     }
 
     public Double getLon() {
-        return lon;
+        return location.getLng();
     }
 
     public void setLon(Double lon) {
-        this.lon = lon;
+        location.setLng(lon);
     }
 
     public Double getHeading() {
@@ -392,9 +412,13 @@ public class Yacht {
         this.velocity = velocity;
     }
 
+    public Double getDistanceToNextMark() {
+        return distanceToNextMark;
+    }
+
     public void updateLocation (double lat, double lon, double heading, double velocity) {
-        this.lat = lat;
-        this.lon = lon;
+        location.setLat(lat);
+        location.setLng(lon);
         this.heading = heading;
         this.velocity = velocity;
         updateVelocityProperty(velocity);
