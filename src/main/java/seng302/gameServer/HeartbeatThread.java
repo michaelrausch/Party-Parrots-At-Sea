@@ -1,11 +1,12 @@
 package seng302.gameServer;
 
-import seng302.models.Player;
-import seng302.server.messages.Heartbeat;
-import seng302.server.messages.Message;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
+import seng302.model.Player;
+import seng302.gameServer.server.messages.Heartbeat;
+import seng302.gameServer.server.messages.Message;
 
 /**
  * Send Heartbeat messages to connected player at a specified interval
