@@ -1,28 +1,29 @@
-package seng302.models.mark;
+package seng302.model.mark;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import seng302.models.stream.XMLParser;
-import seng302.models.xml.Race;
-import seng302.models.xml.XMLGenerator;
-import seng302.server.messages.XMLMessageSubType;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Collections;
-import java.util.List;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.utilities.XMLGenerator;
+import seng302.utilities.XMLParser;
 
 /**
  * Class to hold the order of the marks in the race.
  */
 public class MarkOrder {
-    private List<Mark> raceMarkOrder;
+    private List<CompoundMark> raceMarkOrder;
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
 
     public MarkOrder(){
@@ -33,7 +34,7 @@ public class MarkOrder {
      * @return An ordered list of marks in the race
      *         OR null if the mark order could not be loaded
      */
-    public List<Mark> getMarkOrder(){
+    public List<CompoundMark> getMarkOrder(){
         if (raceMarkOrder == null){
             logger.warn("Race order accessed but not instantiated");
             return null;
@@ -48,9 +49,9 @@ public class MarkOrder {
      * @return the next mark
      *         OR null if there is no next mark
      */
-    public Mark getNextMark(Mark previous){
+    public CompoundMark getNextMark(CompoundMark previous){
         for (int i = 0; i < raceMarkOrder.size(); i++){
-            Mark mark = raceMarkOrder.get(i);
+            CompoundMark mark = raceMarkOrder.get(i);
 
             if (i + 1 >= raceMarkOrder.size()){
                 return null;
@@ -60,7 +61,6 @@ public class MarkOrder {
                 return raceMarkOrder.get(i+1);
             }
         }
-
         return null;
     }
 
@@ -69,9 +69,7 @@ public class MarkOrder {
      * @param xml An AC35 RaceXML
      * @return An ordered list of marks in the race
      */
-    private List<Mark> loadRaceOrderFromXML(String xml){
-        XMLParser xmlParser = new XMLParser();
-        XMLParser.RaceXMLObject raceXMLObject;
+    private List<CompoundMark> loadRaceOrderFromXML(String xml){
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
@@ -84,13 +82,14 @@ public class MarkOrder {
             logger.error("Failed to read generated race XML");
             return null;
         }
+        
+        RaceXMLData data = XMLParser.parseRace(doc);
 
-        xmlParser.constructXML(doc , XMLMessageSubType.RACE.getType());
-        raceXMLObject = xmlParser.getRaceXML();
-
-        if (raceXMLObject != null){
+        if (data != null){
             logger.debug("Loaded RaceXML for mark order");
-            return raceXMLObject.getNonDupCompoundMarks();
+            List<CompoundMark> course = new ArrayList<>(data.getCompoundMarks().values());
+            course.sort(Comparator.comparingInt(CompoundMark::getId));
+            return course;
         }
 
         return null;
@@ -110,7 +109,6 @@ public class MarkOrder {
             logger.error("Failed to generate raceXML (for race properties)");
             return;
         }
-
         raceMarkOrder = loadRaceOrderFromXML(raceXML);
     }
 }

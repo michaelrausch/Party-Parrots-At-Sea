@@ -4,8 +4,7 @@ import java.net.URL;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javax.net.ssl.HttpsURLConnection;
-import java.net.URL;
-import java.lang.Math;
+import seng302.model.GeoPoint;
 
 /**
  * CanvasMap retrieves a map image with given geo boundary from Google Map server.
