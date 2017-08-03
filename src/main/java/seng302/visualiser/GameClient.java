@@ -89,6 +89,8 @@ public class GameClient {
                 loadStartScreen();
             }
         });
+
+        server.setGameClient(this);
     }
 
     private void loadStartScreen() {
@@ -174,7 +176,7 @@ public class GameClient {
                     break;
 
                 case BOAT_XML:
-                    System.out.println("GOT SUM BOATS YAY :)");
+//                    System.out.println("GOT SUM BOATS YAY :)");
                     allBoatsMap = XMLParser.parseBoats(
                         StreamParser.extractXmlMessage(packet)
                     );
@@ -321,5 +323,9 @@ public class GameClient {
                 socketThread.sendBoatActionMessage(boatActionMessage);
                 break;
         }
+    }
+
+    public RaceXMLData getCourseData() {
+        return courseData;
     }
 }

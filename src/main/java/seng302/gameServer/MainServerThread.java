@@ -7,7 +7,14 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Timer;
 import java.util.TimerTask;
+import seng302.model.GeoPoint;
 import seng302.model.Player;
+import seng302.model.Yacht;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.utilities.GeoUtility;
+import seng302.visualiser.GameClient;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -24,6 +31,8 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
 
     private ServerSocket serverSocket = null;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
+
+    private GameClient gameClient;
 
     public MainServerThread() {
         try {
@@ -130,6 +139,8 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     }
 
     public void startGame() {
+        initialiseBoatPosition();
+
         Timer t = new Timer();
 
         t.schedule(new TimerTask() {
@@ -145,5 +156,42 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
 
     public void terminate() {
         terminated = true;
+    }
+
+    /**
+     * Pass GameClient to main server thread so it can access the properties inside.
+     *
+     * @param gameClient gameClient
+     */
+    public void setGameClient(GameClient gameClient) {
+        this.gameClient = gameClient;
+    }
+
+    /**
+     * Initialise boats to specific spaced out geopoint behind starting line.
+     */
+    private void initialiseBoatPosition() {
+        System.out.println("ran");
+        RaceXMLData raceXMLData = gameClient.getCourseData();
+        CompoundMark cm = raceXMLData.getCompoundMarks().get(1);
+        GeoPoint geoPoint1 = new GeoPoint(cm.getMarks().get(0).getLat(), cm.getMarks().get(0).getLng());
+        GeoPoint geoPoint2 = new GeoPoint(cm.getMarks().get(1).getLat(), cm.getMarks().get(1).getLng());
+        Double perpendicularAngle = GeoUtility.getBearing(geoPoint1, geoPoint2);
+
+        Double x = geoPoint1.getLat() + Math.sin(perpendicularAngle) * 1000;
+        Double y = geoPoint1.getLng() + Math.cos(perpendicularAngle) * 1000;
+
+        ServerToClientThread stct0 = serverToClientThreads.get(0);
+        Yacht yacht0 = GameState.getYachts().get(stct0.getYacht().getSourceId());
+        ServerToClientThread stct1 = serverToClientThreads.get(1);
+        Yacht yacht1 = GameState.getYachts().get(stct1.getYacht().getSourceId());
+        yacht1.updateLocation(x,y, yacht1.getHeading(), yacht1.getVelocity());
+
+        System.out.println(yacht0.getLat() + " " + yacht0.getLon());
+        System.out.println(yacht1.getLat() + " " + yacht1.getLon());
+
+        for (Yacht yacht : GameState.getYachts().values()) {
+            System.out.println("GS: " + yacht.getLat() + " " + yacht.getLon());
+        }
     }
 }

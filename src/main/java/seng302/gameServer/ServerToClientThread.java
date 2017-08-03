@@ -64,6 +64,8 @@ public class ServerToClientThread implements Runnable, Observer {
 
     private XMLGenerator xml;
 
+    private Yacht yacht;
+
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
         BufferedReader fn;
@@ -98,7 +100,7 @@ public class ServerToClientThread implements Runnable, Observer {
         sourceId = GameState.getUniquePlayerID();
         if (threeWayHandshake(sourceId)) {
             serverLog("Successful handshake. Client allocated id: " + sourceId, 0);
-            Yacht yacht = new Yacht(
+            yacht = new Yacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
             );
 //        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
@@ -365,5 +367,9 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public Yacht getYacht() {
+        return yacht;
     }
 }
