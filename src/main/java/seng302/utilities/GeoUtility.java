@@ -96,8 +96,9 @@ public class GeoUtility {
 		return new GeoPoint(Math.toDegrees(endLat), Math.toDegrees(endLng));
 	}
 
-	/**
-	 * Performs the line function on two points of a line and a test point to test which side of the line that point is
+
+    /**
+     * Performs the line function on two points of a line and a test point to test which side of the line that point is
 	 * on. If the return value is
 	 * return  1, then the point is on one side of the line,
 	 * return -1 then the point is on the other side of the line

@@ -31,8 +31,7 @@ public class YachtTest {
             "HaomingIsOk",
             "NZL");
 
-        yacht.setLat(57.670333);
-        yacht.setLon(11.827833);
+        yacht.setLocation(57.670333, 11.827833);
 
         compoundMark = new CompoundMark(0, "HaomingsMark");
         Mark subMark1 = new Mark("H", 57.671524, 11.844495, 0);
