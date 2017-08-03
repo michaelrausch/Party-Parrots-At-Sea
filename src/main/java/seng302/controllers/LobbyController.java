@@ -97,7 +97,9 @@ public class LobbyController implements Initializable, Observer{
                     .addAll((Pane) FXMLLoader.load(getClass().getResource(jfxUrl)));
         } catch (javafx.fxml.LoadException e) {
             System.out.println("[Controller] FXML load exception");
+            e.printStackTrace();
         } catch (IOException e) {
+
             System.out.println("[Controller] IO exception");
         } catch (NullPointerException e) {
 //            System.out.println("[Controller] Null Pointer Exception");

@@ -11,6 +11,8 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.transform.Rotate;
 import seng302.client.ClientPacketParser;
+import seng302.gameServer.GameStages;
+import seng302.gameServer.GameState;
 import seng302.models.Yacht;
 import seng302.utilities.GeoUtility;
 import seng302.controllers.CanvasController;
@@ -43,6 +45,7 @@ public class BoatGroup extends Group {
     private Group lineGroup = new Group();
     private Polygon boatPoly;
     private Wake wake;
+    private Polygon sail;
     private Line leftLayLine;
     private Line rightLayline;
     private Double distanceTravelled = 0.0;
@@ -52,6 +55,7 @@ public class BoatGroup extends Group {
     private Color color;
     private Boolean isSelected = true;  //All boats are initialised as selected\
     private boolean isPlayer = false;
+    private Double sailState = 0.0;
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
@@ -105,13 +109,31 @@ public class BoatGroup extends Group {
         boatPoly.setCache(true);
         boatPoly.setCacheHint(CacheHint.SPEED);
         boatAnnotations = new BoatAnnotations(boat, this.color);
-
+        sail = new Polygon(0.0,BOAT_HEIGHT / 4,
+                0.0, BOAT_HEIGHT);
+        animateSail();
+        sail.setStrokeWidth(2.0);
+        sail.setStroke(Color.SILVER);
         leftLayLine = new Line();
         rightLayline = new Line();
 
         wake = new Wake(0, -BOAT_HEIGHT);
-        super.getChildren().addAll(boatPoly, boatAnnotations);
+        super.getChildren().addAll(boatPoly, boatAnnotations, sail);
     }
+
+
+    private void animateSail(){
+        Double[] points = new Double[100];
+        for (int i = 0; i < 50; i++) {
+            points[i * 2] = 5 * Math.sin(((Math.PI * i) / 25 + sailState));
+            points[i * 2 + 1] = (BOAT_HEIGHT * i) / 50 + BOAT_HEIGHT / 4;
+        }
+        sailState = sailState + Math.PI / 25;
+        sail.getPoints().clear();
+        sail.getPoints().addAll(points);
+
+    }
+
 
     /**
      * Creates the javafx objects that will be the in the group by default.
@@ -154,6 +176,16 @@ public class BoatGroup extends Group {
         boatPoly.setLayoutY(y);
         boatAnnotations.setLayoutX(x);
         boatAnnotations.setLayoutY(y);
+        sail.setLayoutX(x);
+        sail.setLayoutY(y);
+        if (!boat.getSailIn()) {
+            animateSail();
+        } else {
+            sail.getPoints().clear();
+            sail.getPoints().addAll(0.0,BOAT_HEIGHT / 4,
+                    0.0, BOAT_HEIGHT);
+
+        }
         wake.setLayoutX(x);
         wake.setLayoutY(y);
         wake.rotate(rotation);
@@ -161,6 +193,12 @@ public class BoatGroup extends Group {
 
     private void rotateTo(double rotation) {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
+        //TODO kre39 - Make the sails out angle depend on the facing of the boat
+        if (!boat.getSailIn()) {
+            sail.getTransforms().setAll(new Rotate(GameState.getWindDirection() + 95.0));
+        } else {
+            sail.getTransforms().setAll(new Rotate(GameState.getWindDirection()));
+        }
     }
 
     /**

@@ -124,6 +124,7 @@ public class Yacht {
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
         Double maxBoatSpeed = boatSpeedInKnots / ClientPacketParser.MS_TO_KNOTS * 1000;
+        System.out.println("sailIn = " + sailIn);
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
@@ -170,7 +171,8 @@ public class Yacht {
     }
 
     public void toggleSailIn() {
-        sailIn = !sailIn;
+        this.sailIn = !sailIn;
+        System.out.println("sailIn = " + sailIn);
     }
 
     public void turnUpwind() {
@@ -389,6 +391,7 @@ public class Yacht {
     }
 
     public Boolean getSailIn() {
+        System.out.println("sailIn = " + sailIn);
         return sailIn;
     }
 
