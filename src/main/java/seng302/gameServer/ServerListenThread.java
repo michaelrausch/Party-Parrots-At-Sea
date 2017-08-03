@@ -1,12 +1,8 @@
 package seng302.gameServer;
 
-import seng302.models.Player;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 
 /**
  * A class for a thread to listen to connections

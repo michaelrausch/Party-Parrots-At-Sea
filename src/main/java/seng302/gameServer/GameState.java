@@ -1,5 +1,9 @@
 package seng302.gameServer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import seng302.client.ClientPacketParser;
 import seng302.models.Player;
 import seng302.models.Yacht;
@@ -27,14 +31,29 @@ public class GameState implements Runnable {
     private static Map<Integer, Yacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
+    private static long startTime;
 
-    private static long startTime = System.currentTimeMillis();
-
+    // TODO: 26/07/17 cir27 - Super hackish fix until something more permanent can be made.
+    private static ObservableList<String> observablePlayers = FXCollections.observableArrayList();
+    private static Map<Player, String> playerStringMap = new HashMap<>();
+    /*
+        Ideally I would like to make this class an object instantiated by the server and given to
+        it's created threads if necessary. Outside of that I think the dependencies on it
+        (atm only Yacht & GameClient) can be removed from most other classes. The observable list of
+        players could be pulled directly from the server by the GameClient since it instantiates it
+        and it is reasonable for it to pull data. The current setup of publicly available statics is
+        pretty meh IMO because anything can change it making it unreliable and like people did with
+        the old ServerParser class everything that needs shared just gets thrown in the static
+        collections and things become a real mess.
+     */
 
     public GameState(String hostIpAddress) {
         windDirection = 180d;
         windSpeed = 10000d;
         this.hostIpAddress = hostIpAddress;
+        yachts = new HashMap<>();
+        players = new ArrayList<>();
+        GameState.hostIpAddress = hostIpAddress;
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
@@ -53,13 +72,22 @@ public class GameState implements Runnable {
     public static List<Player> getPlayers() {
         return players;
     }
-    
+
+    public static ObservableList<String> getObservablePlayers () {
+        return observablePlayers;
+    }
+
     public static void addPlayer(Player player) {
         players.add(player);
+        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
+        Platform.runLater(() -> observablePlayers.add(playerText)); //Had to add this to handle javaFX window using array
+        playerStringMap.put(player, playerText);
     }
     
     public static void removePlayer(Player player) {
         players.remove(player);
+        observablePlayers.remove(playerStringMap.get(player));
+        playerStringMap.remove(player);
     }
 
     public static void addYacht(Integer sourceId, Yacht yacht) {
@@ -99,7 +127,7 @@ public class GameState implements Runnable {
     }
 
     public static Double getWindSpeedKnots() {
-        return windSpeed / 1000 * ClientPacketParser.MS_TO_KNOTS;
+        return windSpeed / 1000 * 1.943844492; // TODO: 26/07/17 cir27 - remove magic numbers
     }
 
     public static Map<Integer, Yacht> getYachts() {
@@ -146,7 +174,6 @@ public class GameState implements Runnable {
             yacht.update(timeInterval);
         }
     }
-
 
     /**
      * Generates a new ID based off the size of current players + 1

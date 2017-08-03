@@ -1,6 +1,7 @@
 package seng302.utilities;
 
 import javafx.geometry.Point2D;
+import seng302.model.GeoPoint;
 
 public class GeoUtility {
 
@@ -43,16 +44,31 @@ public class GeoUtility {
 	 * and end up on a heading of 120°
 	 */
 	public static Double getBearing(GeoPoint p1, GeoPoint p2) {
+		return (Math.toDegrees(getBearingRad(p1, p2)) + 360.0) % 360.0;
+	}
 
+	/**
+	 * Calculates the angle between to angular co-ordinates on a sphere in radians.
+	 *
+	 * @param p1 the first geographical position, start point
+	 * @param p2 the second geographical position, end point
+	 * @return the initial bearing in degree from p1 to p2, value range (0 ~ 360 deg.).
+	 * vertical up is 0 deg. horizontal right is 90 deg.
+	 *
+	 * NOTE:
+	 * The final bearing will differ from the initial bearing by varying degrees
+	 * according to distance and latitude (if you were to go from say 35°N,45°E
+	 * (≈ Baghdad) to 35°N,135°E (≈ Osaka), you would start on a heading of 60°
+	 * and end up on a heading of 120°
+	 */
+	public static Double getBearingRad(GeoPoint p1, GeoPoint p2) {
 		double dLon = Math.toRadians(p2.getLng() - p1.getLng());
 
 		double y = Math.sin(dLon) * Math.cos(Math.toRadians(p2.getLat()));
 		double x = Math.cos(Math.toRadians(p1.getLat())) * Math.sin(Math.toRadians(p2.getLat()))
-				- Math.sin(Math.toRadians(p1.getLat())) * Math.cos(Math.toRadians(p2.getLat())) * Math.cos(dLon);
+			- Math.sin(Math.toRadians(p1.getLat())) * Math.cos(Math.toRadians(p2.getLat())) * Math.cos(dLon);
 
-		double bearing = Math.toDegrees(Math.atan2(y, x));
-
-		return (bearing + 360.0) % 360.0;
+		return Math.atan2(y, x);
 	}
 
 	/**
