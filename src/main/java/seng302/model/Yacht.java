@@ -282,9 +282,6 @@ public class Yacht {
         this.velocityProperty.set(velocity);
     }
 
-    public void updateSailsInProperty(Boolean clientSails) {
-        this.clientSailsIn = clientSails;
-    }
 
     public void setMarkRoundingTime(Long markRoundingTime) {
         this.markRoundTime = markRoundingTime;
@@ -407,7 +404,7 @@ public class Yacht {
         this.velocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lon, heading, velocity, this.clientSailsIn);
+            yll.notifyLocation(this, lat, lon, heading, velocity, clientSailsIn);
         }
     }
 

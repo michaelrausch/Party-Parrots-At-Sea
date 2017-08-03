@@ -90,21 +90,14 @@ public class BoatObject extends Group {
 
 //        annotationBox = new AnnotationBox();
 //        annotationBox.setFill(colour);
-        sail = new Polygon(0.0, BOAT_HEIGHT / 4,
-            0.0, BOAT_HEIGHT);
-        sailState = 0;
-        sail.setStrokeWidth(2.0);
-        sail.setStroke(Color.SILVER);
-        sail.setFill(Color.TRANSPARENT);
-        sail.setCache(true);
-        animateSail();
+
         leftLayLine = new Line();
         rightLayline = new Line();
         trail.getStrokeDashArray().setAll(5d, 10d);
         trail.setCache(true);
         wake = new Wake(0, -BOAT_HEIGHT);
         wake.setVisible(true);
-        super.getChildren().addAll(boatPoly, sail);//, annotationBox);
+        super.getChildren().addAll(boatPoly);
     }
 
     public void setFill (Paint value) {
@@ -128,15 +121,16 @@ public class BoatObject extends Group {
             rotateTo(rotation, sailIn);
             boatPoly.setLayoutX(x);
             boatPoly.setLayoutY(y);
-            sail.setLayoutX(x);
-            sail.setLayoutY(y);
-            if (!sailIn) {
+            if (isPlayer && !sailIn) {
                 animateSail();
-            } else {
+                sail.setLayoutX(x);
+                sail.setLayoutY(y);
+            } else if (isPlayer){
                 sail.getPoints().clear();
                 sail.getPoints().addAll(0.0,BOAT_HEIGHT / 4,
                     0.0, BOAT_HEIGHT);
-
+                sail.setLayoutX(x);
+                sail.setLayoutY(y);
             }
             wake.setLayoutX(x);
             wake.setLayoutY(y);
@@ -164,10 +158,10 @@ public class BoatObject extends Group {
 
     private void rotateTo(double rotation, boolean sailsIn) {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
-        if (sailsIn) {
-            sail.getTransforms().setAll(new Rotate(GameState.getWindDirection() + 95.0));
-        } else {
-            sail.getTransforms().setAll(new Rotate(GameState.getWindDirection()));
+        if (isPlayer && sailsIn) {
+            sail.getTransforms().setAll(new Rotate(95.0));
+        } else if (isPlayer){
+            sail.getTransforms().setAll(new Rotate(90.0));
         }
     }
     private void animateSail(){
@@ -311,6 +305,16 @@ public class BoatObject extends Group {
         boatPoly.setStroke(Color.BLACK);
         boatPoly.setStrokeWidth(3);
         isPlayer = true;
+        sail = new Polygon(0.0, BOAT_HEIGHT / 4,
+                0.0, BOAT_HEIGHT);
+        sailState = 0;
+        sail.setStrokeWidth(2.0);
+        sail.setStroke(Color.BLACK);
+        sail.setFill(Color.TRANSPARENT);
+        sail.setCache(true);
+        super.getChildren().clear();
+        super.getChildren().addAll(boatPoly, sail);
+        animateSail();
     }
 
     public void setTrajectory(double heading, double velocity) {
