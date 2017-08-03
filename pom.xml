@@ -39,6 +39,19 @@
 
         <!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
         <dependency>
+            <groupId>info.cukes</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/info.cukes/cucumber-java -->
+        <dependency>
+            <groupId>info.cukes</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
+        <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
             <version>2.3.26-incubating</version>
@@ -56,7 +69,6 @@
             <artifactId>commons-cli</artifactId>
             <version>1.4</version>
         </dependency>
-
     </dependencies>
 
 
