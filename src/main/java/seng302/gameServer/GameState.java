@@ -165,7 +165,7 @@ public class GameState implements Runnable {
 //        printBoatStatus(playerYacht);
     }
 
-    public static void update() {
+    public void update() {
         Long timeInterval = System.currentTimeMillis() - previousUpdateTime;
         previousUpdateTime = System.currentTimeMillis();
         for (Yacht yacht : yachts.values()) {

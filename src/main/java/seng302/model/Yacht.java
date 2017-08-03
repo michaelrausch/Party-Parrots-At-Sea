@@ -28,11 +28,6 @@ public class Yacht {
         void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
     }
 
-    @FunctionalInterface
-    public interface YachtPositionListener {
-        void notifyPosition(int position);
-    }
-
     //BOTH AFAIK
     private String boatType;
     private Integer sourceId;
@@ -44,6 +39,7 @@ public class Yacht {
     private Long estimateTimeAtFinish;
     private Long timeTillNext;
     private Long markRoundTime;
+    private CompoundMark nextMark;
     private Double heading;
     private Double lat;
     private Double lon;
@@ -62,59 +58,9 @@ public class Yacht {
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
-//    private ReadOnlyDoubleWrapper headingProperty = new ReadOnlyDoubleWrapper();
-//    private ReadOnlyDoubleWrapper latitudeProperty = new ReadOnlyDoubleWrapper();
-//    private ReadOnlyDoubleWrapper longitudeProperty = new ReadOnlyDoubleWrapper();
     private CompoundMark lastMarkRounded;
-    private CompoundMark nextMark;
     private Integer positionInt = 0;
     private Color colour;
-
-
-    /**
-     * @param location latlon location of the boat stored in a geopoint
-     * @param heading heading of the boat in degrees from 0 to 365 with 0 being north
-     */
-    public Yacht(GeoPoint location, Double heading) {
-        this.location = location;
-        this.heading = heading;
-        this.velocity = 0.0;
-        this.sailIn = false;
-    }
-
-
-    /**
-     * Used in EventTest and RaceTest.
-     * @param boatName boatName
-     * @param shortName shortName
-     * @param location location
-     * @param heading heading
-     */
-    public Yacht(String boatName, String shortName, GeoPoint location, Double heading) {
-        this.boatName = boatName;
-        this.shortName = shortName;
-        this.location = location;
-        this.heading = heading;
-        this.velocity = 0.0;
-        this.sailIn = false;
-    }
-
-    /**
-     * Used in BoatGroupTest.
-     *
-     * @param boatName The name of the team sailing the boat
-     * @param boatVelocity The speed of the boat in meters/second
-     * @param shortName A shorter version of the teams name
-     * @param id The id for the yacht
-     */
-    public Yacht(String boatName, double boatVelocity, String shortName, int id) {
-        this.boatName = boatName;
-        this.velocity = boatVelocity;
-        this.shortName = shortName;
-        this.sourceId = id;
-        this.sailIn = false;
-    }
-
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
             String boatName, String country) {
@@ -162,17 +108,7 @@ public class Yacht {
                 }
             }
         }
-//        if (sailIn) {
-//            Double secondsElapsed = timeInterval / 1000000.0;
-//            Double windSpeedKnots = GameState.getWindSpeedKnots();
-//            Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
-//            Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-//            velocity = boatSpeedInKnots / 1.943844492 * 1000; // TODO: 26/07/17 cir27 - Remove magic number
-//            Double metersCovered = velocity * secondsElapsed;
-//            location = getGeoCoordinate(location, heading, metersCovered);
-//        } else {
-//            velocity = 0d;
-//        }
+
         Double metersCovered = velocity * secondsElapsed;
         location = getGeoCoordinate(location, heading, metersCovered);
     }
@@ -180,7 +116,6 @@ public class Yacht {
     public void adjustHeading(Double amount) {
         Double newVal = heading + amount;
         lastHeading = heading;
-        // TODO: 24/07/17 wmu16 - '%' in java does remainder, we need modulo. All this must be changed here, this is why we have neg values!
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
 
@@ -457,30 +392,6 @@ public class Yacht {
         this.velocity = velocity;
     }
 
-//    public void updateLatitudeProperty (Double lat) {
-//        latitudeProperty.set(lat);
-//    }
-//
-//    public void updateLongitudeProperty (double lon) {
-//        longitudeProperty.set(lon);
-//    }
-//
-//    public void updateHeadingProperty (double heading) {
-//        headingProperty.set(heading);
-//    }
-//
-//    public ReadOnlyDoubleProperty latitudeProperty () {
-//        return latitudeProperty.getReadOnlyProperty();
-//    }
-//
-//    public ReadOnlyDoubleProperty longitudeProperty () {
-//        return longitudeProperty.getReadOnlyProperty();
-//    }
-//
-//    public ReadOnlyDoubleProperty headingProperty () {
-//        return headingProperty;
-//    }
-
     public void updateLocation (double lat, double lon, double heading, double velocity) {
         this.lat = lat;
         this.lon = lon;
@@ -494,9 +405,5 @@ public class Yacht {
 
     public void addLocationListener (YachtLocationListener listener) {
         locationListeners.add(listener);
-    }
-
-    public void addPositionListener (YachtPositionListener listener) {
-
     }
 }
