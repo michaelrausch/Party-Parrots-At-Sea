@@ -12,6 +12,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.transform.Rotate;
+import seng302.gameServer.GameState;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -30,9 +31,11 @@ public class BoatObject extends Group {
     private double xVelocity;
     private double yVelocity;
     private double lastHeading;
+    private double sailState;
     //Graphical objects
     private Polyline trail = new Polyline();
     private Polygon boatPoly;
+    private Polygon sail;
     private Wake wake;
     private Line leftLayLine;
     private Line rightLayline;
@@ -87,14 +90,21 @@ public class BoatObject extends Group {
 
 //        annotationBox = new AnnotationBox();
 //        annotationBox.setFill(colour);
-
+        sail = new Polygon(0.0, BOAT_HEIGHT / 4,
+            0.0, BOAT_HEIGHT);
+        sailState = 0;
+        sail.setStrokeWidth(2.0);
+        sail.setStroke(Color.SILVER);
+        sail.setFill(Color.TRANSPARENT);
+        sail.setCache(true);
+        animateSail();
         leftLayLine = new Line();
         rightLayline = new Line();
         trail.getStrokeDashArray().setAll(5d, 10d);
         trail.setCache(true);
         wake = new Wake(0, -BOAT_HEIGHT);
         wake.setVisible(true);
-        super.getChildren().addAll(boatPoly);//, annotationBox);
+        super.getChildren().addAll(boatPoly, sail);//, annotationBox);
     }
 
     public void setFill (Paint value) {
@@ -105,19 +115,29 @@ public class BoatObject extends Group {
 
     /**
      * Moves the boat and its children annotations to coordinates specified
-     *
-     * @param x The X coordinate to move the boat to
+     *  @param x The X coordinate to move the boat to
      * @param y The Y coordinate to move the boat to
      * @param rotation The rotation by which the boat moves
      * @param velocity The velocity the boat is moving
+     * @param sailIn
      */
-    public void moveTo(double x, double y, double rotation, double velocity) {
+    public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn) {
         Double dx = Math.abs(boatPoly.getLayoutX() - x);
         Double dy = Math.abs(boatPoly.getLayoutY() - y);
         Platform.runLater(() -> {
-            rotateTo(rotation);
+            rotateTo(rotation, sailIn);
             boatPoly.setLayoutX(x);
             boatPoly.setLayoutY(y);
+            sail.setLayoutX(x);
+            sail.setLayoutY(y);
+            if (!sailIn) {
+                animateSail();
+            } else {
+                sail.getPoints().clear();
+                sail.getPoints().addAll(0.0,BOAT_HEIGHT / 4,
+                    0.0, BOAT_HEIGHT);
+
+            }
             wake.setLayoutX(x);
             wake.setLayoutY(y);
         });
@@ -142,8 +162,24 @@ public class BoatObject extends Group {
         }
     }
 
-    private void rotateTo(double rotation) {
+    private void rotateTo(double rotation, boolean sailsIn) {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
+        if (sailsIn) {
+            sail.getTransforms().setAll(new Rotate(GameState.getWindDirection() + 95.0));
+        } else {
+            sail.getTransforms().setAll(new Rotate(GameState.getWindDirection()));
+        }
+    }
+    private void animateSail(){
+        Double[] points = new Double[100];
+        for (int i = 0; i < 50; i++) {
+            points[i * 2] = 5 * Math.sin(((Math.PI * i) / 25 + sailState));
+            points[i * 2 + 1] = (BOAT_HEIGHT * i) / 25 + BOAT_HEIGHT / 4;
+        }
+        sailState = sailState + Math.PI / 10;
+        sail.getPoints().clear();
+        sail.getPoints().addAll(points);
+
     }
 
     public void updateLocation() {
@@ -279,7 +315,7 @@ public class BoatObject extends Group {
 
     public void setTrajectory(double heading, double velocity) {
         wake.setRotation(lastHeading - heading, velocity);
-        rotateTo(heading);
+        rotateTo(heading, false);
         xVelocity = Math.cos(Math.toRadians(heading)) * velocity;
         yVelocity = Math.sin(Math.toRadians(heading)) * velocity;
         lastHeading = heading;

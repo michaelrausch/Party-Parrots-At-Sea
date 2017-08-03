@@ -319,6 +319,7 @@ public class GameClient {
                 BoatActionMessage boatActionMessage = new BoatActionMessage(
                     BoatActionType.SAILS_IN);
                 socketThread.sendBoatActionMessage(boatActionMessage);
+                raceView.getGameView().getPlayerYacht().toggleClientSail();
                 break;
         }
     }

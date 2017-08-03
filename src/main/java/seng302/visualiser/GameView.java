@@ -80,6 +80,7 @@ public class GameView extends Pane {
     private Double frameRate = 60.0;
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
+    private Yacht playerYacht;
 
     private enum ScaleDirection {
         HORIZONTAL,
@@ -324,10 +325,10 @@ public class GameView extends Pane {
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            yacht.addLocationListener((boat, lat, lon, heading, velocity) ->{
+            yacht.addLocationListener((boat, lat, lon, heading, velocity, sailIn) ->{
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
-                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity);
+                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn);
 //                annotations.get(boat).setLayoutX(p2d.getX());
 //                annotations.get(boat).setLayoutY(p2d.getY());
 //                annotations.get(boat).setLocation(100d, 100d);
@@ -569,7 +570,12 @@ public class GameView extends Pane {
         timer.start();
     }
 
+    public Yacht getPlayerYacht() {
+        return playerYacht;
+    }
+
     public void setBoatAsPlayer (Yacht playerYacht) {
+        this.playerYacht = playerYacht;
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",

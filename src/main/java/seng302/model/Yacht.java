@@ -23,9 +23,10 @@ import seng302.model.mark.CompoundMark;
  */
 public class Yacht {
 
+
     @FunctionalInterface
     public interface YachtLocationListener {
-        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
+        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity, boolean sailIn);
     }
 
     //BOTH AFAIK
@@ -48,7 +49,7 @@ public class Yacht {
     //SERVER SIDE
     private final Double TURN_STEP = 5.0;
     private Double lastHeading;
-    private Boolean sailIn;
+    private Boolean sailIn = false;
     private GeoPoint location;
     private Integer boatStatus;
     private Double velocity;
@@ -61,6 +62,7 @@ public class Yacht {
     private CompoundMark lastMarkRounded;
     private Integer positionInt = 0;
     private Color colour;
+    private Boolean clientSailsIn = false;
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
             String boatName, String country) {
@@ -70,7 +72,6 @@ public class Yacht {
         this.shortName = shortName;
         this.boatName = boatName;
         this.country = country;
-        this.sailIn = false;
         this.location = new GeoPoint(57.670341, 11.826856);
         this.heading = 120.0;   //In degrees
         this.velocity = 0d;     //in mms-1
@@ -281,6 +282,10 @@ public class Yacht {
         this.velocityProperty.set(velocity);
     }
 
+    public void updateSailsInProperty(Boolean clientSails) {
+        this.clientSailsIn = clientSails;
+    }
+
     public void setMarkRoundingTime(Long markRoundingTime) {
         this.markRoundTime = markRoundingTime;
     }
@@ -383,6 +388,9 @@ public class Yacht {
         this.colour = colour;
     }
 
+    public void toggleClientSail() {
+        clientSailsIn = !clientSailsIn;
+    }
 
     public Double getVelocity() {
         return velocity;
@@ -399,7 +407,7 @@ public class Yacht {
         this.velocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lon, heading, velocity);
+            yll.notifyLocation(this, lat, lon, heading, velocity, this.clientSailsIn);
         }
     }
 
