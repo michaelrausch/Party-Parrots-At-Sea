@@ -1,11 +1,12 @@
 package seng302;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
 import javafx.geometry.Point2D;
 import org.junit.Before;
 import org.junit.Test;
 import seng302.utilities.GeoUtility;
-
-import static org.junit.Assert.*;
 
 /**
  * Test Class for the GeometryUtils class

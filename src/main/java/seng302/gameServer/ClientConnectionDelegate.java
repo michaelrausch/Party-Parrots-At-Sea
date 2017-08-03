@@ -1,6 +1,6 @@
 package seng302.gameServer;
 
-import seng302.models.Player;
+import seng302.model.Player;
 
 public interface ClientConnectionDelegate {
     /**
