@@ -406,4 +406,8 @@ public class Yacht {
     public void addLocationListener (YachtLocationListener listener) {
         locationListeners.add(listener);
     }
+
+    public void setLocation(GeoPoint geoPoint) {
+        location = geoPoint;
+    }
 }

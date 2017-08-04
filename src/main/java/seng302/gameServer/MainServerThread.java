@@ -20,7 +20,7 @@ import seng302.visualiser.GameClient;
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread extends Observable implements Runnable, ClientConnectionDelegate{
+public class MainServerThread extends Observable implements Runnable, ClientConnectionDelegate {
 
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
@@ -96,14 +96,16 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     }
 
 
-    static void serverLog(String message, int logLevel){
-        if(logLevel <= LOG_LEVEL){
-            System.out.println("[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
+    static void serverLog(String message, int logLevel) {
+        if (logLevel <= LOG_LEVEL) {
+            System.out.println(
+                "[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
     }
 
     /**
      * A client has tried to connect to the server
+     *
      * @param serverToClientThread The player that connected
      */
     @Override
@@ -117,6 +119,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
 
     /**
      * A player has left the game, remove the player from the GameState
+     *
      * @param player The player that left
      */
     @Override
@@ -168,30 +171,40 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     }
 
     /**
-     * Initialise boats to specific spaced out geopoint behind starting line.
+     * Initialise boats to specific spaced out geopoints behind starting line.
      */
     private void initialiseBoatPosition() {
-        System.out.println("ran");
-        RaceXMLData raceXMLData = gameClient.getCourseData();
-        CompoundMark cm = raceXMLData.getCompoundMarks().get(1);
-        GeoPoint geoPoint1 = new GeoPoint(cm.getMarks().get(0).getLat(), cm.getMarks().get(0).getLng());
-        GeoPoint geoPoint2 = new GeoPoint(cm.getMarks().get(1).getLat(), cm.getMarks().get(1).getLng());
-        Double perpendicularAngle = GeoUtility.getBearing(geoPoint1, geoPoint2);
+        // Getting the start line compound marks
+        CompoundMark cm = gameClient.getCourseData().getCompoundMarks().get(1);
+        GeoPoint startMark1 = new GeoPoint(cm.getMarks().get(0).getLat(),
+            cm.getMarks().get(0).getLng());
+        GeoPoint startMark2 = new GeoPoint(cm.getMarks().get(1).getLat(),
+            cm.getMarks().get(1).getLng());
 
-        Double x = geoPoint1.getLat() + Math.sin(perpendicularAngle) * 1000;
-        Double y = geoPoint1.getLng() + Math.cos(perpendicularAngle) * 1000;
+        // Calculating midpoint
+        Double perpendicularAngle = GeoUtility.getBearing(startMark1, startMark2);
+        Double length = GeoUtility.getDistance(startMark1, startMark2);
+        GeoPoint midpoint = GeoUtility.getGeoCoordinate(startMark1, perpendicularAngle, length / 2);
 
-        ServerToClientThread stct0 = serverToClientThreads.get(0);
-        Yacht yacht0 = GameState.getYachts().get(stct0.getYacht().getSourceId());
-        ServerToClientThread stct1 = serverToClientThreads.get(1);
-        Yacht yacht1 = GameState.getYachts().get(stct1.getYacht().getSourceId());
-        yacht1.updateLocation(x,y, yacht1.getHeading(), yacht1.getVelocity());
-
-        System.out.println(yacht0.getLat() + " " + yacht0.getLon());
-        System.out.println(yacht1.getLat() + " " + yacht1.getLon());
-
+        // Setting each boats position side by side
+        double distanceApart = 0.0005;  // magic number for boat spawn distance apart
+        int boatIndex = 0;
+        int boatSpawnDirection = -1;  // positive for left and negative for right
         for (Yacht yacht : GameState.getYachts().values()) {
-            System.out.println("GS: " + yacht.getLat() + " " + yacht.getLon());
+            Double x =
+                midpoint.getLat() + boatSpawnDirection * boatIndex * Math.sin(perpendicularAngle)
+                    * distanceApart;
+            Double y =
+                midpoint.getLng() + boatSpawnDirection * boatIndex * Math.cos(perpendicularAngle)
+                    * distanceApart;
+            yacht.setLocation(new GeoPoint(x, y));
+
+            if (boatSpawnDirection == -1) {
+                boatSpawnDirection = 1;
+                boatIndex++;
+            } else {
+                boatSpawnDirection = -1;
+            }
         }
     }
 }
