@@ -125,7 +125,7 @@ public class BoatObject extends Group {
                 animateSail();
                 sail.setLayoutX(x);
                 sail.setLayoutY(y);
-            } else if (isPlayer){
+            } else if (isPlayer) {
                 sail.getPoints().clear();
                 sail.getPoints().addAll(0.0,BOAT_HEIGHT / 4,
                     0.0, BOAT_HEIGHT);
@@ -170,7 +170,11 @@ public class BoatObject extends Group {
             points[i * 2] = 5 * Math.sin(((Math.PI * i) / 25 + sailState));
             points[i * 2 + 1] = (BOAT_HEIGHT * i) / 25 + BOAT_HEIGHT / 4;
         }
-        sailState = sailState + Math.PI / 10;
+        if (sailState == - 2 * Math.PI) {
+            sailState = 0;
+        } else {
+            sailState = sailState - Math.PI / 10;
+        }
         sail.getPoints().clear();
         sail.getPoints().addAll(points);
 
