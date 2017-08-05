@@ -9,9 +9,9 @@ public class ColorsTest {
 
     @Test
     public void testNextColor() {
-        Color expectedColors[] = {Color.RED, Color.PERU, Color.SEAGREEN, Color.GREEN, Color.BLUE, Color.PURPLE};
-        for (int i = 0; i<6; i++)
-        {
+        Color expectedColors[] = {Color.RED, Color.PERU, Color.GOLD, Color.GREEN, Color.BLUE,
+            Color.PURPLE, Color.DEEPPINK, Color.GRAY};
+        for (int i = 0; i < 8; i++) {
             Assert.assertEquals(expectedColors[i], Colors.getColor());
         }
     }
