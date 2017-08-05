@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.Player;
 import seng302.model.Yacht;
-import seng302.gameServer.server.messages.BoatActionType;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -30,8 +27,6 @@ public class GameState implements Runnable {
     private static GameStages currentStage;
     private static long startTime;
 
-    // TODO: 26/07/17 cir27 - Super hackish fix until something more permanent can be made.
-    private static ObservableList<String> observablePlayers = FXCollections.observableArrayList();
     private static Map<Player, String> playerStringMap = new HashMap<>();
     /*
         Ideally I would like to make this class an object instantiated by the server and given to
@@ -60,7 +55,6 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
 
         new Thread(this).start();
-
     }
 
     public static String getHostIpAddress() {
@@ -71,20 +65,14 @@ public class GameState implements Runnable {
         return players;
     }
 
-    public static ObservableList<String> getObservablePlayers () {
-        return observablePlayers;
-    }
-
     public static void addPlayer(Player player) {
         players.add(player);
         String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
-        Platform.runLater(() -> observablePlayers.add(playerText)); //Had to add this to handle javaFX window using array
         playerStringMap.put(player, playerText);
     }
     
     public static void removePlayer(Player player) {
         players.remove(player);
-        observablePlayers.remove(playerStringMap.get(player));
         playerStringMap.remove(player);
     }
 
