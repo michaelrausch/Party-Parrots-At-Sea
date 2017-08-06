@@ -1,4 +1,4 @@
-package seng302.v.map;
+package seng302.visualiser.map;
 
 import java.net.URL;
 import java.util.ResourceBundle;

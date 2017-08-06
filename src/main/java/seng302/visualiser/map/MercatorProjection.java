@@ -1,4 +1,4 @@
-package seng302.v.map;
+package seng302.visualiser.map;
 
 import javafx.geometry.Point2D;
 import seng302.model.GeoPoint;

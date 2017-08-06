@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import seng302.model.GeoPoint;
-import seng302.v.map.MercatorProjection;
 
 /**
  * Unit test for Mercator Project class.

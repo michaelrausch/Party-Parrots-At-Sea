@@ -32,8 +32,8 @@ import seng302.visualiser.fxObjects.BoatObject;
 import seng302.visualiser.fxObjects.CourseBoundary;
 import seng302.visualiser.fxObjects.Gate;
 import seng302.visualiser.fxObjects.Marker;
-import seng302.v.map.Boundary;
-import seng302.v.map.CanvasMap;
+import seng302.visualiser.map.Boundary;
+import seng302.visualiser.map.CanvasMap;
 
 /**
  * Created by cir27 on 20/07/17.
@@ -135,7 +135,7 @@ public class GameView extends Pane {
                     }
                 }
 //                Platform.runLater(() ->
-//                    boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation())
+                    boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
 //                );
             }
         };
