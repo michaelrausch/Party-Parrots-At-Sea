@@ -1,7 +1,9 @@
 package seng302.utilities;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import javafx.geometry.Point2D;
 import org.junit.Before;
@@ -30,6 +32,7 @@ public class GeoUtilityTest {
     private GeoPoint p2 = new GeoPoint(57.671524, 11.844495);
     private GeoPoint p3 = new GeoPoint(57.670822, 11.843392);
     private GeoPoint p4 = new GeoPoint(25.694829, 98.392049);
+    private GeoPoint p5 = new GeoPoint(57.671829, 11.842049);
 
     private double toleranceRate = 0.01;
 
@@ -125,4 +128,26 @@ public class GeoUtilityTest {
         assertEquals(expected.getY(), newPoint.getY(), 1E-6);
     }
 
+    @Test
+    public void testIsPointInTriangle() {
+        GeoPoint v1 = new GeoPoint(57.670333, 11.842833);
+        GeoPoint v2 = new GeoPoint(57.671524, 11.844495);
+        GeoPoint v3 = new GeoPoint(57.671829, 11.842049);
+        GeoPoint p1 = new GeoPoint(57.670822, 11.843192); // inside triangle
+        GeoPoint p2 = new GeoPoint(57.670892, 11.843642); // outside triangle
+
+        // benchmark test. 100,000 calculations for 0.336 seconds
+//        long startTime = System.nanoTime();
+//        for (int i = 0; i < 100000; i++) {
+//            assertTrue(GeoUtility.isPointInTriangle(v1, v2, v3, p1));
+//        }
+//        System.out.println((System.nanoTime() - startTime) / 1000000000.0);
+
+        // test for different orders of vertices, which should not affect the result
+        assertTrue(GeoUtility.isPointInTriangle(v2, v1, v3, p1));
+        assertTrue(GeoUtility.isPointInTriangle(v3, v1, v2, p1));
+
+        assertFalse(GeoUtility.isPointInTriangle(v1, v2, v3, p2));
+
+    }
 }
