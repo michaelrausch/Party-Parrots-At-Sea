@@ -7,9 +7,12 @@ import java.util.Map;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.gameServer.server.messages.BoatActionType;
+import seng302.model.mark.CompoundMark;
+import seng302.utilities.GeoUtility;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -71,17 +74,20 @@ public class GameState implements Runnable {
         return players;
     }
 
-    public static ObservableList<String> getObservablePlayers () {
+    public static ObservableList<String> getObservablePlayers() {
         return observablePlayers;
     }
 
     public static void addPlayer(Player player) {
         players.add(player);
-        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
-        Platform.runLater(() -> observablePlayers.add(playerText)); //Had to add this to handle javaFX window using array
+        String playerText =
+            player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player
+                .getYacht().getCountry();
+        Platform.runLater(() -> observablePlayers
+            .add(playerText)); //Had to add this to handle javaFX window using array
         playerStringMap.put(player, playerText);
     }
-    
+
     public static void removePlayer(Player player) {
         players.remove(player);
         observablePlayers.remove(playerStringMap.get(player));
@@ -105,14 +111,14 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
-        if (currentStage == GameStages.RACING){
+        if (currentStage == GameStages.RACING) {
             startTime = System.currentTimeMillis();
         }
 
         GameState.currentStage = currentStage;
     }
 
-    public static long getStartTime(){
+    public static long getStartTime() {
         return startTime;
     }
 
@@ -175,6 +181,7 @@ public class GameState implements Runnable {
 
     /**
      * Generates a new ID based off the size of current players + 1
+     *
      * @return a playerID to be allocated to a new connetion
      */
     public static Integer getUniquePlayerID() {
@@ -189,7 +196,7 @@ public class GameState implements Runnable {
     @Override
     public void run() {
 
-        while(true) {
+        while (true) {
             try {
                 Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
@@ -215,4 +222,38 @@ public class GameState implements Runnable {
         System.out.println("Lng: " + playerYacht.getLocation().getLng());
         System.out.println("-----------------------\n");
     }
+
+//    /**
+//     * Calculates and initialise a yacht given its index in the starting position. Position is
+//     * calculated starting with 0 being the first boat. Position 0 will spawn in the MIDDLE of mark1
+//     * and mark2, position 1 will spawn 50m LEFT of position 0, position 2 will spawn 50m RIGHT of
+//     * position 0, position 3 will spawn 100m LEFT of position 0, and so forth.
+//     *
+//     * @param mark1 first mark of the starting composite mark
+//     * @param mark2 second mark of the starting composite mark
+//     * @param boatIndex boat starting position
+//     * @param yacht yacht to be reposition
+//     */
+//    public static void startBoatInPosition(GeoPoint mark1, GeoPoint mark2, Integer boatIndex,
+//        Yacht yacht) {
+//        // TODO: 6/08/2017 zyt10 - check for mark1 being the right side from heading
+//        // Calculating midpoint
+//        Double perpendicularAngle = GeoUtility.getBearing(mark1, mark2);
+//        Double length = GeoUtility.getDistance(mark1, mark2);
+//        GeoPoint midpoint = GeoUtility.getGeoCoordinate(mark1, perpendicularAngle, length / 2);
+//
+//        // Setting each boats position side by side
+//        double DISTANCEFACTOR = 50.0;  // distance apart in meters
+//        int distanceApart = boatIndex / 2;
+//
+//        if (boatIndex % 2 == 1 && boatIndex != 0) {
+//            distanceApart++;
+//            distanceApart *= 1;
+//        }
+//
+//        GeoPoint spawnMark = GeoUtility
+//            .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCEFACTOR);
+//
+//        yacht.setLocation(spawnMark);
+//    }
 }

@@ -187,24 +187,21 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         GeoPoint midpoint = GeoUtility.getGeoCoordinate(startMark1, perpendicularAngle, length / 2);
 
         // Setting each boats position side by side
-        double distanceApart = 0.0005;  // magic number for boat spawn distance apart
+        double DISTANCEFACTOR = 50.0;  // distance apart in meters
         int boatIndex = 0;
-        int boatSpawnDirection = -1;  // positive for left and negative for right
         for (Yacht yacht : GameState.getYachts().values()) {
-            Double x =
-                midpoint.getLat() + boatSpawnDirection * boatIndex * Math.sin(perpendicularAngle)
-                    * distanceApart;
-            Double y =
-                midpoint.getLng() + boatSpawnDirection * boatIndex * Math.cos(perpendicularAngle)
-                    * distanceApart;
-            yacht.setLocation(new GeoPoint(x, y));
+            int distanceApart = boatIndex / 2;
 
-            if (boatSpawnDirection == -1) {
-                boatSpawnDirection = 1;
-                boatIndex++;
-            } else {
-                boatSpawnDirection = -1;
+            if (boatIndex % 2 == 1 && boatIndex != 0) {
+                distanceApart++;
+                distanceApart *= -1;
             }
+
+            GeoPoint spawnMark = GeoUtility
+                .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCEFACTOR);
+
+            yacht.setLocation(spawnMark);
+            boatIndex++;
         }
     }
 }
