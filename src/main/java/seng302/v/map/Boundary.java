@@ -1,4 +1,4 @@
-package seng302.visualiser.map;
+package seng302.v.map;
 
 /**
  * The Boundary class represents a rectangle territorial boundary on a map. It

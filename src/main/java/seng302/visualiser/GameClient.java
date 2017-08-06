@@ -13,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.MainServerThread;
+import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.StreamPacket;
@@ -22,8 +23,6 @@ import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.gameServer.server.messages.BoatActionMessage;
-import seng302.gameServer.server.messages.BoatActionType;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
@@ -47,9 +46,6 @@ public class GameClient {
     private RaceState raceState = new RaceState();
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
-
-    private long lastSendingTime;
-    private int KEY_STROKE_SENDING_FREQUENCY = 50;
 
     public GameClient(Pane holder) {
         this.holderPane = holder;
@@ -174,17 +170,13 @@ public class GameClient {
                     break;
 
                 case BOAT_XML:
-                    System.out.println("GOT SUM BOATS YAY :)");
                     allBoatsMap = XMLParser.parseBoats(
                         StreamParser.extractXmlMessage(packet)
                     );
                     clientLobbyList.clear();
                     allBoatsMap.forEach((id, boat) -> {
                         clientLobbyList.add(id + " " + boat.getBoatName());
-//                        System.out.println(id + " " + boat.getBoatName());
-
                     });
-//                    startRaceIfAllDataReceived();
                     break;
 
                 case RACE_START_STATUS:
@@ -279,47 +271,34 @@ public class GameClient {
      * Handle the key-pressed event from the text field.
      * @param e The key event triggering this call
      */
-    public void keyPressed(KeyEvent e) {
-        BoatActionMessage boatActionMessage;
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastSendingTime > KEY_STROKE_SENDING_FREQUENCY) {
-            lastSendingTime = currentTime;
-            switch (e.getCode()) {
-                case SPACE: // align with vmg
-                    boatActionMessage = new BoatActionMessage(BoatActionType.VMG);
-                    socketThread.sendBoatActionMessage(boatActionMessage);
-                    break;
-                case PAGE_UP: // upwind
-                    boatActionMessage = new BoatActionMessage(BoatActionType.UPWIND);
-                    socketThread.sendBoatActionMessage(boatActionMessage);
-                    break;
-                case PAGE_DOWN: // downwind
-                    boatActionMessage = new BoatActionMessage(BoatActionType.DOWNWIND);
-                    socketThread.sendBoatActionMessage(boatActionMessage);
-                    break;
-                case ENTER: // tack/gybe
-                    boatActionMessage = new BoatActionMessage(BoatActionType.TACK_GYBE);
-                    socketThread.sendBoatActionMessage(boatActionMessage);
-                    break;
-                //TODO Allow a zoom in and zoom out methods
-                case Z:  // zoom in
-                    System.out.println("Zoom in");
-                    break;
-                case X:  // zoom out
-                    System.out.println("Zoom out");
-                    break;
-            }
+    private void keyPressed(KeyEvent e) {
+        switch (e.getCode()) {
+            case SPACE: // align with vmg
+                socketThread.sendBoatEvent(BoatActionType.VMG); break;
+            case PAGE_UP: // upwind
+                socketThread.sendBoatEvent(BoatActionType.UPWIND); break;
+            case PAGE_DOWN: // downwind
+                socketThread.sendBoatEvent(BoatActionType.DOWNWIND); break;
+            case ENTER: // tack/gybe
+                socketThread.sendBoatEvent(BoatActionType.TACK_GYBE); break;
+            //TODO Allow a zoom in and zoom out methods
+            case Z:  // zoom in
+                System.out.println("Zoom in");
+                break;
+            case X:  // zoom out
+                System.out.println("Zoom out");
+                break;
         }
     }
 
-    public void keyReleased(KeyEvent e) {
+    private void keyReleased(KeyEvent e) {
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
-                BoatActionMessage boatActionMessage = new BoatActionMessage(
-                    BoatActionType.SAILS_IN);
-                socketThread.sendBoatActionMessage(boatActionMessage);
-                break;
+                socketThread.sendBoatEvent(BoatActionType.SAILS_IN); break;
+            case PAGE_UP:
+            case PAGE_DOWN:
+                socketThread.sendBoatEvent(BoatActionType.MAINTAIN_HEADING); break;
         }
     }
 }

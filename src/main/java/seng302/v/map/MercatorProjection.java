@@ -1,4 +1,4 @@
-package seng302.visualiser.map;
+package seng302.v.map;
 
 import javafx.geometry.Point2D;
 import seng302.model.GeoPoint;
@@ -28,7 +28,7 @@ public class MercatorProjection {
 	 * @param geo GeoPoint (lat, lng) location to be projected
 	 * @return the projection Point2D (x, y) on planar
 	 */
-	static Point2D toMapPoint(GeoPoint geo) {
+	public static Point2D toMapPoint(GeoPoint geo) {
 		double x, y;
 		Point2D origin = new Point2D(MERCATOR_RANGE / 2.0, MERCATOR_RANGE / 2.0);
 		x = (origin.getX() + geo.getLng() * pixelsPerLngDegree);

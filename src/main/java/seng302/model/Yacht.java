@@ -48,7 +48,7 @@ public class Yacht {
     private Integer legNumber = 0;
 
     //SERVER SIDE
-    private final Double TURN_STEP = 5.0;
+    static public final Double TURN_STEP = 1.0; //This should be in some utils class somewhere 2bh. Public for tests sake.
     private Double lastHeading;
     private Boolean sailIn;
     private GeoPoint location;

@@ -9,12 +9,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.gameServer.server.messages.BoatActionMessage;
 import seng302.gameServer.server.messages.Message;
@@ -47,11 +50,15 @@ public class ClientToServerThread implements Runnable {
 
     private Socket socket;
     private InputStream is;
+
+    //Output stream
     private OutputStream os;
+    private Timer osTimer = new Timer();
+    private Queue<BoatActionType> eventQueue = new ConcurrentLinkedQueue<>();
+    private boolean upwindFlag = false, downwindFlag = false;
+    static public final int PACKET_SENDING_INTERVAL_MS = 20;
 
     private int clientId;
-
-//    private Boolean updateClient = true;
     private ByteArrayOutputStream crcBuffer;
     private boolean socketOpen = true;
 
@@ -83,6 +90,15 @@ public class ClientToServerThread implements Runnable {
 
         thread = new Thread(this);
         thread.start();
+
+        osTimer.scheduleAtFixedRate(
+            new TimerTask() {
+                @Override
+                public void run() {
+                    processBoatActionQueue();
+                }
+            }, 0, PACKET_SENDING_INTERVAL_MS
+        );
     }
 
     /**
@@ -181,17 +197,41 @@ public class ClientToServerThread implements Runnable {
 
 
     /**
-     * Send the post-start race course information
-     * @param boatActionMessage The message to send
+     * Processes next element in the queue of events to send.
      */
-    public void sendBoatActionMessage(BoatActionMessage boatActionMessage) {
+    private void processBoatActionQueue() {
+        BoatActionType action = eventQueue.poll();
+        if (action != null) {
+            switch (action) {
+                case MAINTAIN_HEADING:
+                    downwindFlag = upwindFlag = false; break;
+                case DOWNWIND:
+                    downwindFlag = true; break;
+                case UPWIND:
+                    upwindFlag = true; break;
+                default:
+                    sendBoatAction(new BoatActionMessage(action)); break;
+            }
+        }
+        if (downwindFlag) {
+            sendBoatAction(new BoatActionMessage(BoatActionType.DOWNWIND));
+        }
+        if (upwindFlag) {
+            sendBoatAction(new BoatActionMessage(BoatActionType.UPWIND));
+        }
+    }
+
+    /**
+     * Sends a boat action of the given message type.
+     * @param message The given message type.
+     */
+    private void sendBoatAction(BoatActionMessage message) {
         try {
-            os.write(boatActionMessage.getBuffer());
+            os.write(message.getBuffer());
         } catch (IOException e) {
             clientLog("Could not write to server", 1);
         }
     }
-
 
     private void closeSocket() {
         try {
@@ -245,11 +285,11 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
-    public Thread getThread() {
-        return thread;
-    }
-
     public int getClientId () {
         return clientId;
+    }
+
+    public void sendBoatEvent(BoatActionType actionType) {
+        eventQueue.add(actionType);
     }
 }
