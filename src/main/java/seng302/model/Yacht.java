@@ -62,7 +62,7 @@ public class Yacht {
     private CompoundMark lastMarkRounded;
     private Integer positionInt = 0;
     private Color colour;
-    private Boolean clientSailsIn = false;
+    private Boolean clientSailsIn = true;
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
             String boatName, String country) {
@@ -395,6 +395,10 @@ public class Yacht {
 
     public void setVelocity(Double velocity) {
         this.velocity = velocity;
+    }
+
+    public Boolean getClientSailsIn(){
+        return clientSailsIn;
     }
 
     public void updateLocation (double lat, double lon, double heading, double velocity) {

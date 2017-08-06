@@ -328,7 +328,7 @@ public class GameView extends Pane {
             yacht.addLocationListener((boat, lat, lon, heading, velocity, sailIn) ->{
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
-                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn);
+                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, 95.0);
 //                annotations.get(boat).setLayoutX(p2d.getX());
 //                annotations.get(boat).setLayoutY(p2d.getY());
 //                annotations.get(boat).setLocation(100d, 100d);
@@ -576,6 +576,7 @@ public class GameView extends Pane {
 
     public void setBoatAsPlayer (Yacht playerYacht) {
         this.playerYacht = playerYacht;
+        this.playerYacht.toggleClientSail();
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",

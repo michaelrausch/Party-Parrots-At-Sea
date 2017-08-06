@@ -12,7 +12,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.transform.Rotate;
-import seng302.gameServer.GameState;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -97,7 +96,16 @@ public class BoatObject extends Group {
         trail.setCache(true);
         wake = new Wake(0, -BOAT_HEIGHT);
         wake.setVisible(true);
-        super.getChildren().addAll(boatPoly);
+
+        sail = new Polygon(0.0,BOAT_HEIGHT / 4,
+            0.0, BOAT_HEIGHT);
+        sailState = 0;
+        sail.setStrokeWidth(2.0);
+        sail.setStroke(Color.BLACK);
+        sail.setFill(Color.TRANSPARENT);
+        sail.setCache(true);
+        super.getChildren().clear();
+        super.getChildren().addAll(boatPoly, sail);
     }
 
     public void setFill (Paint value) {
@@ -114,21 +122,21 @@ public class BoatObject extends Group {
      * @param velocity The velocity the boat is moving
      * @param sailIn
      */
-    public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn) {
+    public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn, double windDir) {
         Double dx = Math.abs(boatPoly.getLayoutX() - x);
         Double dy = Math.abs(boatPoly.getLayoutY() - y);
         Platform.runLater(() -> {
-            rotateTo(rotation, sailIn);
+            rotateTo(rotation, sailIn, windDir);
             boatPoly.setLayoutX(x);
             boatPoly.setLayoutY(y);
-            if (isPlayer && !sailIn) {
-                animateSail();
-                sail.setLayoutX(x);
-                sail.setLayoutY(y);
-            } else if (isPlayer) {
+            if (sailIn) {
                 sail.getPoints().clear();
                 sail.getPoints().addAll(0.0,BOAT_HEIGHT / 4,
                     0.0, BOAT_HEIGHT);
+                sail.setLayoutX(x);
+                sail.setLayoutY(y);
+            } else {
+                animateSail();
                 sail.setLayoutX(x);
                 sail.setLayoutY(y);
             }
@@ -156,11 +164,11 @@ public class BoatObject extends Group {
         }
     }
 
-    private void rotateTo(double rotation, boolean sailsIn) {
+    private void rotateTo(double rotation, boolean sailsIn, double windDir) {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
-        if (isPlayer && sailsIn) {
+        if (sailsIn) {
             sail.getTransforms().setAll(new Rotate(95.0));
-        } else if (isPlayer){
+        } else {
             sail.getTransforms().setAll(new Rotate(90.0));
         }
     }
@@ -309,21 +317,12 @@ public class BoatObject extends Group {
         boatPoly.setStroke(Color.BLACK);
         boatPoly.setStrokeWidth(3);
         isPlayer = true;
-        sail = new Polygon(0.0, BOAT_HEIGHT / 4,
-                0.0, BOAT_HEIGHT);
-        sailState = 0;
-        sail.setStrokeWidth(2.0);
-        sail.setStroke(Color.BLACK);
-        sail.setFill(Color.TRANSPARENT);
-        sail.setCache(true);
-        super.getChildren().clear();
-        super.getChildren().addAll(boatPoly, sail);
         animateSail();
     }
 
-    public void setTrajectory(double heading, double velocity) {
+    public void setTrajectory(double heading, double velocity, double windDir) {
         wake.setRotation(lastHeading - heading, velocity);
-        rotateTo(heading, false);
+        rotateTo(heading, false, windDir);
         xVelocity = Math.cos(Math.toRadians(heading)) * velocity;
         yVelocity = Math.sin(Math.toRadians(heading)) * velocity;
         lastHeading = heading;
