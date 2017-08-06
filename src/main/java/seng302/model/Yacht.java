@@ -28,7 +28,7 @@ public class Yacht {
         void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
     }
 
-    private static final Double ROUNDING_DISTANCE = 15d; // TODO: 3/08/17 wmu16 - Look into this value further
+    private static final Double ROUNDING_DISTANCE = 50d; // TODO: 3/08/17 wmu16 - Look into this value further
 
     //BOTH AFAIK
     private String boatType;
@@ -39,11 +39,10 @@ public class Yacht {
     private String country;
 
     private Long estimateTimeAtFinish;
-    private Long lastMark;
+    private Integer currentMarkSeqID = 1;
     private Long markRoundTime;
     private Double distanceToNextMark;
     private Long timeTillNext;
-    private CompoundMark nextMark;
     private Double heading;
     private Integer legNumber = 0;
 
@@ -58,7 +57,6 @@ public class Yacht {
     private GeoPoint lastLocation;  //For purposes of mark rounding calculations
     private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
     private Boolean hasPassedFirstLine; //The line extrapolated from the next mark to the current mark
-    private Boolean hasPassedSecondLine; //The line extrapolated from the last mark to the current mark
 
     //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
@@ -85,7 +83,6 @@ public class Yacht {
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedFirstLine = false;
-        this.hasPassedSecondLine = false;
     }
 
     /**
@@ -125,24 +122,24 @@ public class Yacht {
         location = GeoUtility.getGeoCoordinate(location, heading, velocity * secondsElapsed);
 
         //CHECK FOR MARK ROUNDING
-        distanceToNextMark = calcDistanceToNextMark();
-        if (distanceToNextMark < ROUNDING_DISTANCE) {
-            hasEnteredRoundingZone = true;
-        }
+        //Algorithm wont currently work on last gate and start gate
+        checkForMarkRounding();
 
         // TODO: 3/08/17 wmu16 - Implement line cross check here
     }
 
 
     /**
-     * Calculates the distance to the next mark (closest of the two if a gate mark).
-     *
+     * Calculates the distance to the next mark (closest of the two if a gate mark). For purposes
+     * of mark rounding
      * @return A distance in metres. Returns -1 if there is no next mark
+     * @throws IndexOutOfBoundsException If the next mark is null (ie the last mark in the race)
+     *         Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
      */
-    public Double calcDistanceToNextMark() {
-        if (nextMark == null) {
-            return -1d;
-        } else if (nextMark.isGate()) {
+    public Double calcDistanceToNextMark() throws IndexOutOfBoundsException {
+        CompoundMark nextMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
+
+        if (nextMark.isGate()) {
             Mark sub1 = nextMark.getSubMark(1);
             Mark sub2 = nextMark.getSubMark(2);
             Double distance1 = GeoUtility.getDistance(location, sub1);
@@ -150,6 +147,62 @@ public class Yacht {
             return (distance1 < distance2) ? distance1 : distance2;
         } else {
             return GeoUtility.getDistance(location, nextMark.getSubMark(1));
+        }
+    }
+
+
+    /**
+     * This algorithm checks for mark rounding. And increments the currentMarSeqID number attribute
+     * of the yacht if so.
+     * The algorithm works by using the last mark, the current mark, the next mark and the change in
+     * boats location, like so:
+     * -Condition 1:
+     *  The boat has entered the mark rounding distance
+     * -Condition 2:
+     *  The boat has passed the line extending from the last mark to the current mark
+     * -Condition 3:
+     *  The boat has passed the line extending from the next mark to the current mark
+     *
+     * A more visual representation of this algorithm can be seen on the Wiki under
+     * 'mark passing algorithm'
+     */
+    private void checkForMarkRounding() {
+        if (!GameState.getMarkOrder().isLastMark(currentMarkSeqID) && currentMarkSeqID != 0) {
+            distanceToNextMark = calcDistanceToNextMark();
+//            System.out.println("distanceToNextMark = " + distanceToNextMark);
+            CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
+            CompoundMark currentMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
+            CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
+
+            //1 TEST FOR ENTERING THE ROUDNING DISTANCE
+            if (distanceToNextMark < ROUNDING_DISTANCE) {
+                hasEnteredRoundingZone = true;
+//                System.out.println("Entered rounding zone!");
+            }
+
+            //If the current mark is a gate mark we need to check both its marks for rounding, thus
+            //we loop
+            for (Mark thisCurrentMark : currentMark.getMarks()) {
+
+                //2 TEST FOR CROSSING NEXT - CURRENT LINE FIRST
+                if (GeoUtility.isPointInTriangle(lastLocation, location, nextMark.getMarks().get(0),
+                    thisCurrentMark)) {
+                    hasPassedFirstLine = true;
+                    System.out.println("Passed first line!");
+                }
+
+                //3 TEST FOR CROSSING PREV - CURRENT LINE SECOND
+                if (GeoUtility.isPointInTriangle(lastLocation, location, prevMark.getMarks().get(0),
+                    thisCurrentMark)) {
+                    if (hasPassedFirstLine && hasEnteredRoundingZone) {
+                        currentMarkSeqID++;
+                        hasPassedFirstLine = false;
+                        hasEnteredRoundingZone = false;
+                        System.out.println("SUCCESFUL ROUDNING!");
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -355,14 +408,6 @@ public class Yacht {
 
     public void setLastMarkRounded(CompoundMark lastMarkRounded) {
         this.lastMarkRounded = lastMarkRounded;
-    }
-
-    public void setNextMark(CompoundMark nextMark) {
-        this.nextMark = nextMark;
-    }
-
-    public CompoundMark getNextMark(){
-        return nextMark;
     }
 
     public GeoPoint getLocation() {
