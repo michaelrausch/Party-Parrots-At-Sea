@@ -200,6 +200,14 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
             GeoPoint spawnMark = GeoUtility
                 .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCEFACTOR);
 
+            if (yacht.getHeading() < perpendicularAngle) {
+                spawnMark = GeoUtility
+                    .getGeoCoordinate(spawnMark, perpendicularAngle + 90, DISTANCEFACTOR);
+            } else {
+                spawnMark = GeoUtility
+                    .getGeoCoordinate(spawnMark, perpendicularAngle + 270, DISTANCEFACTOR);
+            }
+
             yacht.setLocation(spawnMark);
             boatIndex++;
         }
