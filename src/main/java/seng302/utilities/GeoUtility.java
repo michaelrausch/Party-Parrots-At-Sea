@@ -1,7 +1,10 @@
 package seng302.utilities;
 
 import javafx.geometry.Point2D;
+import seng302.gameServer.GameState;
 import seng302.model.GeoPoint;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
 
 public class GeoUtility {
 
@@ -123,6 +126,35 @@ public class GeoUtility {
         } else {
             return 0;
         }
+    }
+
+
+    /**
+     * Checks if a point passes across a line, either direction
+     * See the wiki Mark Rounding algorithm for more info
+     *
+     * @param mark1 One mark of the line
+     * @param mark2 The second mark of the line
+     * @param lastLocation The last location of the point crossing this line
+     * @param location The current location of the point crossing this line
+     * @return True if crossed since last location --> current location, false otherwise
+     */
+    public static Boolean checkCrossedLine(GeoPoint mark1, GeoPoint mark2, GeoPoint lastLocation,
+        GeoPoint location) {
+        //START GATE OR FINISH GATE
+        Double alpha = GeoUtility.getBearing(mark1, lastLocation);
+        Double beta = GeoUtility.getBearing(mark1, mark2);
+        Double theta = GeoUtility.getBearing(mark1, location);
+        alpha = (alpha > 180) ? 360 - alpha : alpha;
+        beta = (beta > 180) ? 360 - beta : beta;
+        theta = (theta > 180) ? 360 - theta : theta;
+
+        if (alpha < beta && theta > beta) {
+            if (!GeoUtility.isPointInTriangle(mark1, lastLocation, location, mark2)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

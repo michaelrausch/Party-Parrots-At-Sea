@@ -10,6 +10,8 @@ import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
@@ -28,7 +30,10 @@ public class Yacht {
         void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
     }
 
+    private Logger logger = LoggerFactory.getLogger(Yacht.class);
+
     private static final Double ROUNDING_DISTANCE = 50d; // TODO: 3/08/17 wmu16 - Look into this value further
+
 
     //BOTH AFAIK
     private String boatType;
@@ -39,7 +44,7 @@ public class Yacht {
     private String country;
 
     private Long estimateTimeAtFinish;
-    private Integer currentMarkSeqID = 1;
+    private Integer currentMarkSeqID = 0;
     private Long markRoundTime;
     private Double distanceToNextMark;
     private Long timeTillNext;
@@ -119,6 +124,7 @@ public class Yacht {
         }
 
         //UPDATE BOAT LOCATION
+        lastLocation = location;
         location = GeoUtility.getGeoCoordinate(location, heading, velocity * secondsElapsed);
 
         //CHECK FOR MARK ROUNDING
@@ -167,11 +173,22 @@ public class Yacht {
      * 'mark passing algorithm'
      */
     private void checkForMarkRounding() {
-        if (!GameState.getMarkOrder().isLastMark(currentMarkSeqID) && currentMarkSeqID != 0) {
+        CompoundMark currentMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
+
+        if (GameState.getMarkOrder().isLastMark(currentMarkSeqID) || currentMarkSeqID == 0) {
+            if (GeoUtility.checkCrossedLine(currentMark.getSubMark(1),
+                currentMark.getSubMark(2), lastLocation, location)) {
+                System.out.println(
+                    "(" + currentMarkSeqID + ") Passed gate: " + currentMark.getMarks().get(0)
+                        .getName()
+                        + " ID(" + currentMark.getId() + ")");
+                currentMarkSeqID++;
+            }
+        } else {
+            //ALL OTHER MARKS
             distanceToNextMark = calcDistanceToNextMark();
 //            System.out.println("distanceToNextMark = " + distanceToNextMark);
             CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
-            CompoundMark currentMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
             CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
 
             //1 TEST FOR ENTERING THE ROUDNING DISTANCE
@@ -188,7 +205,6 @@ public class Yacht {
                 if (GeoUtility.isPointInTriangle(lastLocation, location, nextMark.getMarks().get(0),
                     thisCurrentMark)) {
                     hasPassedFirstLine = true;
-                    System.out.println("Passed first line!");
                 }
 
                 //3 TEST FOR CROSSING PREV - CURRENT LINE SECOND
@@ -198,13 +214,17 @@ public class Yacht {
                         currentMarkSeqID++;
                         hasPassedFirstLine = false;
                         hasEnteredRoundingZone = false;
-                        System.out.println("SUCCESFUL ROUDNING!");
+                        System.out.println(
+                            "(" + currentMarkSeqID + ") Passed mark: " + currentMark.getMarks()
+                                .get(0).getName()
+                                + " ID(" + currentMark.getId() + ")");
                         break;
                     }
                 }
             }
         }
     }
+
 
     public void adjustHeading(Double amount) {
         Double newVal = heading + amount;
