@@ -6,11 +6,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import javafx.geometry.Point2D;
-import org.junit.Before;
 import org.junit.Test;
 import seng302.model.GeoPoint;
-import seng302.model.mark.CompoundMark;
-import seng302.utilities.GeoUtility;
 
 /**
  * http://www.geoplaner.com/ For plotting geo points for visualisation
@@ -161,13 +158,16 @@ public class GeoUtilityTest {
         GeoPoint location1 = new GeoPoint(37.40964, -122.62196);
         GeoPoint location2 = new GeoPoint(37.40910, -122.62189);
         GeoPoint location3 = new GeoPoint(37.40949, -122.62202);
-        GeoPoint location4 = new GeoPoint(34.40955, -122.62176);
-        GeoPoint location5 = new GeoPoint(37.40927, -122.62152);
-        GeoPoint location6 = new GeoPoint(34.40933, -122.62163);
+        GeoPoint location4 = new GeoPoint(37.40927, -122.62152);
 
-        assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location1, location2));
-        assertFalse(GeoUtility.checkCrossedLine(mark1, mark2, location4, location3));
-        assertFalse(GeoUtility.checkCrossedLine(mark1, mark2, location1, location3));
-        assertFalse(GeoUtility.checkCrossedLine(mark1, mark2, location5, location6));
+        // M1 -> M3 enters from CCW side
+        assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location1, location2) == 2);
+        // M1 -> M3 doesn't across
+        assertFalse(GeoUtility.checkCrossedLine(mark1, mark2, location1, location3) > 0);
+        // M2 -> M3 enters from CW side
+        assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location2, location3) == 1);
+        // order changes intersect direction
+        assertTrue(GeoUtility.checkCrossedLine(mark2, mark1, location2, location3) == 2);
+        assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location3, location2) == 2);
     }
 }

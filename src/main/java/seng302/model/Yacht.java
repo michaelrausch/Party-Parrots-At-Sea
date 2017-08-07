@@ -177,7 +177,7 @@ public class Yacht {
 
         if (GameState.getMarkOrder().isLastMark(currentMarkSeqID) || currentMarkSeqID == 0) {
             if (GeoUtility.checkCrossedLine(currentMark.getSubMark(1),
-                currentMark.getSubMark(2), lastLocation, location)) {
+                currentMark.getSubMark(2), lastLocation, location) > 0) {
                 System.out.println(
                     "(" + currentMarkSeqID + ") Passed gate: " + currentMark.getMarks().get(0)
                         .getName()
