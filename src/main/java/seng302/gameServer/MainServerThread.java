@@ -26,6 +26,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
 
     public MainServerThread() {
+        new GameState("localhost");
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {

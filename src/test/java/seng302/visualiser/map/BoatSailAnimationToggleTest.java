@@ -16,12 +16,10 @@ public class BoatSailAnimationToggleTest {
 
     private Yacht yacht;
 
-
     @Before
     public void setup() throws Exception{
         yacht = new Yacht("Yacht", 1, "YACHT", "YAC", "Test Yacht", "NZ");
     }
-
 
     @Test
     public void sailToggleTest() throws Exception {
