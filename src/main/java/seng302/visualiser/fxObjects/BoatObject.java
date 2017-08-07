@@ -131,8 +131,8 @@ public class BoatObject extends Group {
             boatPoly.setLayoutY(y);
             if (sailIn) {
                 sail.getPoints().clear();
-                sail.getPoints().addAll(0.0,BOAT_HEIGHT / 4,
-                    0.0, BOAT_HEIGHT);
+//                sail.getPoints().addAll(0.0, 0.0, 4.0, 1.5, 8.0, 3.0, 12.0, 3.5, 16.0, 3.0, 20.0, 1.5, 24.0, 0.0);
+                sail.getPoints().addAll(0.0, 0.0, 24.0, 0.0);
                 sail.setLayoutX(x);
                 sail.setLayoutY(y);
             } else {
@@ -167,21 +167,30 @@ public class BoatObject extends Group {
     private void rotateTo(double rotation, boolean sailsIn, double windDir) {
         boatPoly.getTransforms().setAll(new Rotate(rotation));
         if (sailsIn) {
-            sail.getTransforms().setAll(new Rotate(95.0));
+            sail.getTransforms().setAll(new Rotate(windDir + 90));
+
+
+
         } else {
-            sail.getTransforms().setAll(new Rotate(90.0));
+            sail.getTransforms().setAll(new Rotate(windDir));
         }
     }
+
+
     private void animateSail(){
-        Double[] points = new Double[100];
+        Double[] points = new Double[200];
+        double amplitude = 2.0;
+        double period = 10;
         for (int i = 0; i < 50; i++) {
-            points[i * 2] = 5 * Math.sin(((Math.PI * i) / 25 + sailState));
-            points[i * 2 + 1] = (BOAT_HEIGHT * i) / 25 + BOAT_HEIGHT / 4;
+            points[i * 2] = amplitude * Math.sin(((Math.PI * i) / period + sailState));
+            points[i * 2 + 1] = (BOAT_HEIGHT * i) / BOAT_HEIGHT / 2;
+            points[199 - (i * 2)] = (BOAT_HEIGHT * i) / BOAT_HEIGHT / 2;
+            points[199 - (i * 2 + 1)] = amplitude * Math.sin(((Math.PI * i) / period + sailState));
         }
         if (sailState == - 2 * Math.PI) {
             sailState = 0;
         } else {
-            sailState = sailState - Math.PI / 10;
+            sailState = sailState - Math.PI / 5;
         }
         sail.getPoints().clear();
         sail.getPoints().addAll(points);

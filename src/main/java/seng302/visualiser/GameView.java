@@ -81,6 +81,7 @@ public class GameView extends Pane {
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
     private Yacht playerYacht;
+    private double windDir = 0.0;
 
     private enum ScaleDirection {
         HORIZONTAL,
@@ -328,7 +329,7 @@ public class GameView extends Pane {
             yacht.addLocationListener((boat, lat, lon, heading, velocity, sailIn) ->{
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
-                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, 95.0);
+                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
 //                annotations.get(boat).setLayoutX(p2d.getX());
 //                annotations.get(boat).setLayoutY(p2d.getY());
 //                annotations.get(boat).setLocation(100d, 100d);
@@ -565,6 +566,12 @@ public class GameView extends Pane {
     public void pauseRace () {
         timer.stop();
     }
+
+
+    public void setWindDir(double windDir) {
+        this.windDir = windDir;
+    }
+
 
     public void startRace () {
         timer.start();

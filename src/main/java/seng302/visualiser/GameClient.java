@@ -250,6 +250,9 @@ public class GameClient {
     private void processRaceStatusUpdate(RaceStatusData data) {
         if (allXMLReceived()) {
             raceState.updateState(data);
+            if (raceView != null) {
+                raceView.getGameView().setWindDir(raceState.getWindDirection());
+            }
             for (long[] boatData : data.getBoatData()) {
                 Yacht yacht = allBoatsMap.get((int) boatData[0]);
                 yacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
