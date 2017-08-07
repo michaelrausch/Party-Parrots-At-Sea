@@ -14,6 +14,7 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import seng302.gameServer.GameState;
 import seng302.model.mark.CompoundMark;
+import seng302.utilities.GeoUtility;
 
 /**
  * Yacht class for the racing boat.
@@ -63,7 +64,7 @@ public class Yacht {
     private Color colour;
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
-            String boatName, String country) {
+        String boatName, String country) {
         this.boatType = boatType;
         this.sourceId = sourceId;
         this.hullID = hullID;
@@ -110,7 +111,15 @@ public class Yacht {
         }
 
         Double metersCovered = velocity * secondsElapsed;
-        location = getGeoCoordinate(location, heading, metersCovered);
+        GeoPoint calculatedPoint = getGeoCoordinate(location, heading, metersCovered);
+
+        // Collision detection. Update boat only if no collision.
+        Yacht collidedYacht = checkCollision(calculatedPoint);
+        if (collidedYacht != null) {
+//            System.out.println("Collision of boat " + this.getSourceId() + " and " + collidedYacht.getSourceId());
+        } else {
+            location = calculatedPoint;
+        }
     }
 
     public void adjustHeading(Double amount) {
@@ -215,12 +224,16 @@ public class Yacht {
 
     public Integer getSourceId() {
         //@TODO Remove and merge with Creating Game Loop
-        if (sourceId == null) return 0;
+        if (sourceId == null) {
+            return 0;
+        }
         return sourceId;
     }
 
     public String getHullID() {
-        if (hullID == null) return "";
+        if (hullID == null) {
+            return "";
+        }
         return hullID;
     }
 
@@ -233,7 +246,9 @@ public class Yacht {
     }
 
     public String getCountry() {
-        if (country == null) return "";
+        if (country == null) {
+            return "";
+        }
         return country;
     }
 
@@ -321,7 +336,7 @@ public class Yacht {
         this.nextMark = nextMark;
     }
 
-    public CompoundMark getNextMark(){
+    public CompoundMark getNextMark() {
         return nextMark;
     }
 
@@ -366,7 +381,7 @@ public class Yacht {
         this.timeSinceLastMarkProperty.set(timeSinceLastMark);
     }
 
-    public ReadOnlyLongProperty timeSinceLastMarkProperty () {
+    public ReadOnlyLongProperty timeSinceLastMarkProperty() {
         return timeSinceLastMarkProperty.getReadOnlyProperty();
     }
 
@@ -392,7 +407,7 @@ public class Yacht {
         this.velocity = velocity;
     }
 
-    public void updateLocation (double lat, double lon, double heading, double velocity) {
+    public void updateLocation(double lat, double lon, double heading, double velocity) {
         this.lat = lat;
         this.lon = lon;
         this.heading = heading;
@@ -403,11 +418,32 @@ public class Yacht {
         }
     }
 
-    public void addLocationListener (YachtLocationListener listener) {
+    public void addLocationListener(YachtLocationListener listener) {
         locationListeners.add(listener);
     }
 
     public void setLocation(GeoPoint geoPoint) {
         location = geoPoint;
+    }
+
+    /**
+     * Collision detection which iterates through all the yachts and check if any yacht collided
+     * with this yacht. Return collided yacht or null if no collision.
+     *
+     * @param calculatedPoint point will the yacht will move next
+     * @return yacht which collided with this yacht
+     */
+    private Yacht checkCollision(GeoPoint calculatedPoint) {
+        Double COLLISIONFACTOR = 25.0;  // Collision detection in meters
+
+        for (Yacht yacht : GameState.getYachts().values()) {
+            if (yacht != this) {
+                Double distance = GeoUtility.getDistance(yacht.getLocation(), calculatedPoint);
+                if (distance < COLLISIONFACTOR) {
+                    return yacht;
+                }
+            }
+        }
+        return null;
     }
 }
