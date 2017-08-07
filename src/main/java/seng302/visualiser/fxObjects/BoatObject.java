@@ -130,9 +130,9 @@ public class BoatObject extends Group {
             boatPoly.setLayoutX(x);
             boatPoly.setLayoutY(y);
             if (sailIn) {
-                sail.getPoints().clear();
+//                sail.getPoints().clear();
 //                sail.getPoints().addAll(0.0, 0.0, 4.0, 1.5, 8.0, 3.0, 12.0, 3.5, 16.0, 3.0, 20.0, 1.5, 24.0, 0.0);
-                sail.getPoints().addAll(0.0, 0.0, 24.0, 0.0);
+//                sail.getPoints().addAll(0.0, 0.0, 24.0, 0.0);
                 sail.setLayoutX(x);
                 sail.setLayoutY(y);
             } else {
@@ -164,13 +164,41 @@ public class BoatObject extends Group {
         }
     }
 
-    private void rotateTo(double rotation, boolean sailsIn, double windDir) {
-        boatPoly.getTransforms().setAll(new Rotate(rotation));
+    private Double normalizeHeading(double heading, double windDirection) {
+        Double normalizedHeading = heading - windDirection;
+        normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360L);
+        return normalizedHeading;
+    }
+
+
+    private void rotateTo(double heading, boolean sailsIn, double windDir) {
+        boatPoly.getTransforms().setAll(new Rotate(heading));
         if (sailsIn) {
-            sail.getTransforms().setAll(new Rotate(windDir + 90));
-
-
-
+            Double sailWindOffset = 30.0;
+            Double upwindAngleLimit = 15.0;
+            Double downwindAngleLimit = 10.0; //Upwind from normalised horizontal
+            Double normalizedHeading = normalizeHeading(heading, windDir);
+            if (normalizedHeading < 180) {
+                sail.getTransforms().setAll(new Rotate(windDir + 90 + sailWindOffset));
+                sail.getPoints().clear();
+                sail.getPoints().addAll(0.0, 0.0, 4.0, -1.5, 8.0, -3.0, 12.0, -3.5, 16.0, -3.0, 20.0, -1.5, 24.0, 0.0);
+                if (normalizedHeading > 90 + sailWindOffset){
+                    sail.getTransforms().setAll(new Rotate(heading + downwindAngleLimit));
+                }
+                if (normalizedHeading < sailWindOffset + upwindAngleLimit){
+                    sail.getTransforms().setAll(new Rotate(heading + 90 - upwindAngleLimit));
+                }
+            } else {
+                sail.getTransforms().setAll(new Rotate(windDir + 90 - sailWindOffset));
+                sail.getPoints().clear();
+                sail.getPoints().addAll(0.0, 0.0, 4.0, 1.5, 8.0, 3.0, 12.0, 3.5, 16.0, 3.0, 20.0, 1.5, 24.0, 0.0);
+                if (normalizedHeading < 270 - sailWindOffset){
+                    sail.getTransforms().setAll(new Rotate(heading + 180 - downwindAngleLimit));
+                }
+                if (normalizedHeading > 360 - (sailWindOffset + upwindAngleLimit)){
+                    sail.getTransforms().setAll(new Rotate(heading + 90 + upwindAngleLimit));
+                }
+            }
         } else {
             sail.getTransforms().setAll(new Rotate(windDir));
         }

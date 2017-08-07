@@ -25,10 +25,8 @@ public class BoatSailAnimationToggleTest {
 
     @Test
     public void sailToggleTest() throws Exception {
-        assertFalse(yacht.getClientSailsIn());
         assertFalse(yacht.getSailIn());
         yacht.toggleClientSail();
-        assertTrue(yacht.getClientSailsIn());
         assertFalse(yacht.getSailIn());
     }
 
