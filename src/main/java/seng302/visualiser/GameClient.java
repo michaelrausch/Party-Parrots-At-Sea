@@ -20,6 +20,7 @@ import seng302.model.stream.parser.MarkRoundingData;
 import seng302.model.stream.parser.PositionUpdateData;
 import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import seng302.model.stream.parser.RaceStatusData;
+import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.gameServer.server.messages.BoatActionMessage;
@@ -117,7 +118,8 @@ public class GameClient {
      * @return the lobby controller.
      */
     private LobbyController loadLobby() {
-        FXMLLoader fxmlLoader = new FXMLLoader(GameClient.class.getResource("/views/LobbyView.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            GameClient.class.getResource("/views/LobbyView.fxml"));
         try {
             holderPane.getChildren().clear();
             holderPane.getChildren().add(fxmlLoader.load());
@@ -200,13 +202,18 @@ public class GameClient {
                 case MARK_ROUNDING:
                     updateMarkRounding(StreamParser.extractMarkRounding(packet));
                     break;
+
+                case YACHT_EVENT_CODE:
+                    showCollisionAlert(StreamParser.extractYachtEventCode(packet));
+                    break;
             }
         }
     }
 
     private void startRaceIfAllDataReceived() {
-        if (allXMLReceived() && raceView == null)
+        if (allXMLReceived() && raceView == null) {
             loadRaceView();
+        }
     }
 
     private boolean allXMLReceived() {
@@ -263,8 +270,9 @@ public class GameClient {
                     int placing = 1;
                     for (Yacht otherYacht : allBoatsMap.values()) {
                         if (otherYacht.getSourceId() != boatData[0] &&
-                            yacht.getLegNumber() <= otherYacht.getLegNumber())
+                            yacht.getLegNumber() <= otherYacht.getLegNumber()) {
                             placing++;
+                        }
                     }
                     yacht.setPositionInteger(placing);
                 }
@@ -279,6 +287,7 @@ public class GameClient {
 
     /**
      * Handle the key-pressed event from the text field.
+     *
      * @param e The key event triggering this call
      */
     public void keyPressed(KeyEvent e) {
@@ -327,5 +336,15 @@ public class GameClient {
 
     public RaceXMLData getCourseData() {
         return courseData;
+    }
+
+    /**
+     * Tells race view to show a collision animation.
+     */
+    private void showCollisionAlert(YachtEventData yachtEventData) {
+        // 1 is used by team 28 to show collision
+        if (yachtEventData.getEventId() == 1) {
+            raceView.showCollision(yachtEventData.getSubjectId());
+        }
     }
 }
