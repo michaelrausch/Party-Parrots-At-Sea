@@ -193,7 +193,7 @@ public class GeoUtility {
      * @param point the point to be tested
      * @return true if the point is on the RHS of the line
      */
-    private static Boolean isClockwise(GeoPoint v1, GeoPoint v2, GeoPoint point) {
+    public static Boolean isClockwise(GeoPoint v1, GeoPoint v2, GeoPoint point) {
         return getBearingDiff(getBearing(v1, v2), getBearing(v1, point)) < 180;
     }
 
