@@ -305,9 +305,11 @@ public class GameClient {
                     break;
                 //TODO Allow a zoom in and zoom out methods
                 case Z:  // zoom in
+                    raceView.getGameView().zoomIn();
                     System.out.println("Zoom in");
                     break;
                 case X:  // zoom out
+                    raceView.getGameView().zoomOut();
                     System.out.println("Zoom out");
                     break;
             }
