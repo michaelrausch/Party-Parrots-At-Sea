@@ -133,8 +133,8 @@ public class GeoUtility {
      * @param lastLocation The last location of the point crossing this line
      * @param location The current location of the point crossing this line
      * @return 0 if two line segment doesn't intersect, otherwise 1 if they intersect and
-     * lastLocation is on RHS of the line segment (mark1 -> mark2) or 2 if lastLocation on LHS of
-     * the line segment (mark1 -> mark2)
+     * lastLocation is on RHS of the line segment (mark1 to mark2) or 2 if lastLocation on LHS of
+     * the line segment (mark1 to mark2)
      */
     public static Integer checkCrossedLine(GeoPoint mark1, GeoPoint mark2, GeoPoint lastLocation,
         GeoPoint location) {
@@ -185,7 +185,7 @@ public class GeoUtility {
 
     /**
      * Check if a geo point ins on the right hand side of the line segment, which
-     * formed by two geo points v1 -> v2. (Algorithm: point is clockwise to the
+     * formed by two geo points v1 to v2. (Algorithm: point is clockwise to the
      * line if the bearing difference is less than 180 deg.)
      *
      * @param v1 one end of the line segment
@@ -208,7 +208,7 @@ public class GeoUtility {
      * @return true if the fourth point is inside the triangle
      */
     public static Boolean isPointInTriangle(GeoPoint v1, GeoPoint v2, GeoPoint v3, GeoPoint point) {
-        // true, if diff of bearing from (v1->v2) to (v1->p) is less than 180 deg
+        // true, if diff of bearing from (v1 to v2) to (v1 to p) is less than 180 deg
         boolean isCW = isClockwise(v1, v2, point);
 
         if (isClockwise(v2, v3, point) != isCW) {
