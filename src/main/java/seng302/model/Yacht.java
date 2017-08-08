@@ -14,6 +14,7 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import seng302.gameServer.GameState;
 import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 
 /**
@@ -29,6 +30,8 @@ public class Yacht {
         void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
     }
 
+    private static final Double ROUNDING_DISTANCE = 15d; // TODO: 3/08/17 wmu16 - Look into this value further
+
     //BOTH AFAIK
     private String boatType;
     private Integer sourceId;
@@ -38,12 +41,12 @@ public class Yacht {
     private String country;
 
     private Long estimateTimeAtFinish;
-    private Long timeTillNext;
+    private Long lastMark;
     private Long markRoundTime;
+    private Double distanceToNextMark;
+    private Long timeTillNext;
     private CompoundMark nextMark;
     private Double heading;
-    private Double lat;
-    private Double lon;
     private Integer legNumber = 0;
 
     //SERVER SIDE
@@ -53,6 +56,11 @@ public class Yacht {
     private GeoPoint location;
     private Integer boatStatus;
     private Double velocity;
+    //MARK ROUNDING INFO
+    private GeoPoint lastLocation;  //For purposes of mark rounding calculations
+    private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
+    private Boolean hasPassedFirstLine; //The line extrapolated from the next mark to the current mark
+    private Boolean hasPassedSecondLine; //The line extrapolated from the last mark to the current mark
 
     //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
@@ -73,8 +81,13 @@ public class Yacht {
         this.country = country;
         this.sailIn = false;
         this.location = new GeoPoint(57.670341, 11.826856);
+        this.lastLocation = location;
         this.heading = 120.0;   //In degrees
         this.velocity = 0d;     //in mms-1
+
+        this.hasEnteredRoundingZone = false;
+        this.hasPassedFirstLine = false;
+        this.hasPassedSecondLine = false;
     }
 
     /**
@@ -119,6 +132,34 @@ public class Yacht {
 //            System.out.println("Collision of boat " + this.getSourceId() + " and " + collidedYacht.getSourceId());
         } else {
             location = calculatedPoint;
+        }
+
+        //CHECK FOR MARK ROUNDING
+        distanceToNextMark = calcDistanceToNextMark();
+        if (distanceToNextMark < ROUNDING_DISTANCE) {
+            hasEnteredRoundingZone = true;
+        }
+
+        // TODO: 3/08/17 wmu16 - Implement line cross check here
+    }
+
+
+    /**
+     * Calculates the distance to the next mark (closest of the two if a gate mark).
+     *
+     * @return A distance in metres. Returns -1 if there is no next mark
+     */
+    public Double calcDistanceToNextMark() {
+        if (nextMark == null) {
+            return -1d;
+        } else if (nextMark.isGate()) {
+            Mark sub1 = nextMark.getSubMark(1);
+            Mark sub2 = nextMark.getSubMark(2);
+            Double distance1 = GeoUtility.getDistance(location, sub1);
+            Double distance2 = GeoUtility.getDistance(location, sub2);
+            return (distance1 < distance2) ? distance1 : distance2;
+        } else {
+            return GeoUtility.getDistance(location, nextMark.getSubMark(1));
         }
     }
 
@@ -340,20 +381,21 @@ public class Yacht {
         return nextMark;
     }
 
-    public Double getLat() {
-        return lat;
+    public GeoPoint getLocation() {
+        return location;
     }
 
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
-        this.lon = lon;
+    /**
+     * Sets the current location of the boat in lat and long whilst preserving the last location
+     *
+     * @param lat Latitude
+     * @param lng Longitude
+     */
+    public void setLocation(Double lat, Double lng) {
+        lastLocation.setLat(location.getLat());
+        lastLocation.setLng(location.getLng());
+        location.setLat(lat);
+        location.setLng(lng);
     }
 
     public Double getHeading() {
@@ -371,10 +413,6 @@ public class Yacht {
     @Override
     public String toString() {
         return boatName;
-    }
-
-    public GeoPoint getLocation() {
-        return location;
     }
 
     public void updateTimeSinceLastMarkProperty(long timeSinceLastMark) {
@@ -407,14 +445,17 @@ public class Yacht {
         this.velocity = velocity;
     }
 
-    public void updateLocation(double lat, double lon, double heading, double velocity) {
-        this.lat = lat;
-        this.lon = lon;
+    public Double getDistanceToNextMark() {
+        return distanceToNextMark;
+    }
+
+    public void updateLocation(double lat, double lng, double heading, double velocity) {
+        setLocation(lat, lng);
         this.heading = heading;
         this.velocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lon, heading, velocity);
+            yll.notifyLocation(this, lat, lng, heading, velocity);
         }
     }
 

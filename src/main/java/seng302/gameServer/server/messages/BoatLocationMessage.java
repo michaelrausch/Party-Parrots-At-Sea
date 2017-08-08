@@ -1,6 +1,7 @@
 package seng302.gameServer.server.messages;
 
 public class BoatLocationMessage extends Message {
+
     private final int MESSAGE_SIZE = 56;
 
     private long messageVersionNumber;
@@ -28,6 +29,7 @@ public class BoatLocationMessage extends Message {
 
     /**
      * Describes the location, altitude and sensor data from the boat.
+     *
      * @param sourceId ID of the boat
      * @param sequenceNum Sequence number of the message
      * @param latitude The boats latitude
@@ -35,7 +37,8 @@ public class BoatLocationMessage extends Message {
      * @param heading The boats heading
      * @param boatSpeed The boats speed
      */
-    public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude, double heading, long boatSpeed){
+    public BoatLocationMessage(int sourceId, int sequenceNum, double latitude, double longitude,
+        double heading, long boatSpeed) {
         messageVersionNumber = 1;
         time = System.currentTimeMillis();
         this.sourceId = sourceId;
@@ -49,7 +52,7 @@ public class BoatLocationMessage extends Message {
         this.roll = 0;
         this.boatSpeed = boatSpeed;
         this.COG = 2;
-        this.SOG = boatSpeed ;
+        this.SOG = boatSpeed;
         this.apparentWindSpeed = 0;
         this.apparentWindAngle = 0;
         this.trueWindSpeed = 0;
@@ -63,7 +66,7 @@ public class BoatLocationMessage extends Message {
         allocateBuffer();
         writeHeaderToBuffer();
 
-        long headingToSend = (long)((heading/360.0) * 65535.0);
+        long headingToSend = (long) ((heading / 360.0) * 65535.0);
 
         putByte((byte) messageVersionNumber);
         putInt(time, 6);
@@ -94,56 +97,62 @@ public class BoatLocationMessage extends Message {
 
     /**
      * Convert binary latitude or longitude to floating point number
+     *
      * @param binaryPackedLatLon Binary packed lat OR lon
      * @return Floating point lat/lon
      */
-    public static double binaryPackedToLatLon(long binaryPackedLatLon){
-        return (double)binaryPackedLatLon * 180.0 / 2147483648.0;
+    public static double binaryPackedToLatLon(long binaryPackedLatLon) {
+        return (double) binaryPackedLatLon * 180.0 / 2147483648.0;
     }
 
     /**
      * Convert binary packed heading to floating point number
+     *
      * @param binaryPackedHeading Binary packed heading
      * @return heading as a decimal
      */
-    public static double binaryPackedHeadingToDouble(long binaryPackedHeading){
-        return (double)binaryPackedHeading * 360.0 / 65536.0;
+    public static double binaryPackedHeadingToDouble(long binaryPackedHeading) {
+        return (double) binaryPackedHeading * 360.0 / 65536.0;
     }
 
     /**
      * Convert binary packed wind angle to floating point number
+     *
      * @param binaryPackedWindAngle Binary packed wind angle
      * @return wind angle as a decimal
      */
-    public static double binaryPackedWindAngleToDouble(long binaryPackedWindAngle){
-        return (double)binaryPackedWindAngle*180.0/32768.0;
+    public static double binaryPackedWindAngleToDouble(long binaryPackedWindAngle) {
+        return (double) binaryPackedWindAngle * 180.0 / 32768.0;
     }
 
     /**
      * Convert a latitude or longitude to a binary packed long
+     *
      * @param latLon A floating point latitude/longitude
      * @return A binary packed lat/lon
      */
-    public static long latLonToBinaryPackedLong(double latLon){
-        return (long)((536870912 * latLon) / 45);
+    public static long latLonToBinaryPackedLong(double latLon) {
+        return (long) ((536870912 * latLon) / 45);
     }
 
     /**
      * Convert a heading to a binary packed long
+     *
      * @param heading A floating point heading
      * @return A binary packed heading
      */
-    public static long headingToBinaryPackedLong(double heading){
-        return (long)((8192*heading)/45);
+    public static long headingToBinaryPackedLong(double heading) {
+        return (long) ((8192 * heading) / 45);
     }
 
     /**
      * Convert a wind angle to a binary packed long
+     *
      * @param windAngle Floating point wind angle
      * @return A binary packed wind angle
      */
-    public static long windAngleToBinaryPackedLong(double windAngle){
-        return (long)((8192*windAngle)/45);
+    public static long windAngleToBinaryPackedLong(double windAngle) {
+        return (long) ((8192 * windAngle) / 45);
     }
 
     @Override
