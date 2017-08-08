@@ -86,4 +86,46 @@ public class CompoundMark {
     public List<Mark> getMarks () {
         return marks;
     }
+
+
+//	@Override
+//	public boolean equals(Object other) {
+//		if (other == null) {
+//			return false;
+//		}
+//
+//		if (!(other instanceof Mark)){
+//			return false;
+//		}
+//
+//		Mark otherMark = (Mark) other;
+//
+//		if (otherMark.getLat() != getLat() || otherMark.getLongitude() != getLongitude()) {
+//			return false;
+//		}
+//
+//		if (otherMark.getCompoundMarkID() != getCompoundMarkID()){
+//			return false;
+//		}
+//
+//		if (otherMark.getId() != getId()){
+//			return false;
+//		}
+//
+//		if (!otherMark.getName().equals(name)){
+//			return false;
+//		}
+//
+//		return true;
+//	}
+
+	@Override
+	public int hashCode() {
+    	int hash = 0;
+    	for (Mark mark : marks) {
+    		hash += Double.hashCode(mark.getSourceID()) + Double.hashCode(mark.getLat())
+				+ Double.hashCode(mark.getLng()) + mark.getName().hashCode();
+		}
+		return hash + getName().hashCode() + Integer.hashCode(getId());
+	}
 }
