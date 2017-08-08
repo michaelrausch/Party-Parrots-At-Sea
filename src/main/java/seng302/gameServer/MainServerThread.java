@@ -11,8 +11,6 @@ import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.mark.CompoundMark;
-import seng302.model.mark.Mark;
-import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.GameClient;
 
@@ -142,7 +140,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     }
 
     public void startGame() {
-        initialiseBoatPosition();
+        initialiseBoatPositions();
 
         Timer t = new Timer();
 
@@ -173,7 +171,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     /**
      * Initialise boats to specific spaced out geopoints behind starting line.
      */
-    private void initialiseBoatPosition() {
+    private void initialiseBoatPositions() {
         // Getting the start line compound marks
         CompoundMark cm = gameClient.getCourseData().getCompoundMarks().get(1);
         GeoPoint startMark1 = new GeoPoint(cm.getMarks().get(0).getLat(),

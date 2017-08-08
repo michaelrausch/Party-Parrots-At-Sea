@@ -222,38 +222,4 @@ public class GameState implements Runnable {
         System.out.println("Lng: " + playerYacht.getLocation().getLng());
         System.out.println("-----------------------\n");
     }
-
-//    /**
-//     * Calculates and initialise a yacht given its index in the starting position. Position is
-//     * calculated starting with 0 being the first boat. Position 0 will spawn in the MIDDLE of mark1
-//     * and mark2, position 1 will spawn 50m LEFT of position 0, position 2 will spawn 50m RIGHT of
-//     * position 0, position 3 will spawn 100m LEFT of position 0, and so forth.
-//     *
-//     * @param mark1 first mark of the starting composite mark
-//     * @param mark2 second mark of the starting composite mark
-//     * @param boatIndex boat starting position
-//     * @param yacht yacht to be reposition
-//     */
-//    public static void startBoatInPosition(GeoPoint mark1, GeoPoint mark2, Integer boatIndex,
-//        Yacht yacht) {
-//        // TODO: 6/08/2017 zyt10 - check for mark1 being the right side from heading
-//        // Calculating midpoint
-//        Double perpendicularAngle = GeoUtility.getBearing(mark1, mark2);
-//        Double length = GeoUtility.getDistance(mark1, mark2);
-//        GeoPoint midpoint = GeoUtility.getGeoCoordinate(mark1, perpendicularAngle, length / 2);
-//
-//        // Setting each boats position side by side
-//        double DISTANCEFACTOR = 50.0;  // distance apart in meters
-//        int distanceApart = boatIndex / 2;
-//
-//        if (boatIndex % 2 == 1 && boatIndex != 0) {
-//            distanceApart++;
-//            distanceApart *= 1;
-//        }
-//
-//        GeoPoint spawnMark = GeoUtility
-//            .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCEFACTOR);
-//
-//        yacht.setLocation(spawnMark);
-//    }
 }
