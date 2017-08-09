@@ -54,6 +54,9 @@ public class Yacht {
     private GeoPoint location;
     private Integer boatStatus;
     private Double velocity;
+    private Boolean isAuto;
+    private Double autoHeading;
+
     //MARK ROUNDING INFO
     private GeoPoint lastLocation;  //For purposes of mark rounding calculations
     private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
@@ -78,6 +81,7 @@ public class Yacht {
         this.boatName = boatName;
         this.country = country;
         this.sailIn = false;
+        this.isAuto = false;
         this.location = new GeoPoint(57.670341, 11.826856);
         this.lastLocation = location;
         this.heading = 120.0;   //In degrees
@@ -121,6 +125,13 @@ public class Yacht {
             }
         }
 
+        if (isAuto) {
+            turnTowardsHeading(autoHeading);
+            if (Math.abs(heading - autoHeading) <= 5) {
+                isAuto = false;
+            }
+        }
+
         //UPDATE BOAT LOCATION
         location = GeoUtility.getGeoCoordinate(location, heading, velocity * secondsElapsed);
 
@@ -159,9 +170,18 @@ public class Yacht {
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
 
+    /**
+     * Should tell boat to auto pilot towards the autopilot heading.
+     */
     public void tackGybe(Double windDirection) {
         Double normalizedHeading = normalizeHeading();
-        adjustHeading(-2 * normalizedHeading);
+        setAutoPilot(-2 * normalizedHeading);
+    }
+
+    private void setAutoPilot(Double thisHeading) {
+        isAuto = true;
+        Double newVal = heading + thisHeading;
+        autoHeading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
 
     public void toggleSailIn() {
