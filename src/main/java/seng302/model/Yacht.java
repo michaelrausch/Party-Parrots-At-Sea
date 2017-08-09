@@ -33,7 +33,7 @@ public class Yacht {
     }
 
     private static final Double ROUNDING_DISTANCE = 15d; // TODO: 3/08/17 wmu16 - Look into this value further
-    private static final Double COLLISION_DISTANCE = ROUNDING_DISTANCE - 8d;
+    public static final Double MARK_COLLISION_DISTANCE = ROUNDING_DISTANCE - 8d;
     private static final Double BOUNCE_FACTOR = 0.0001;
     private static final Integer COLLISION_UPDATE_INTERVAL = 100;
 
@@ -100,7 +100,7 @@ public class Yacht {
         Set<Mark> marksInRace = GameState.getMarks();
 
         for (Mark mark : marksInRace){
-            if (GeoUtility.getDistance(getLocation(), new GeoPoint(mark.getLat(), mark.getLng())) <=  COLLISION_DISTANCE){
+            if (GeoUtility.getDistance(getLocation(), new GeoPoint(mark.getLat(), mark.getLng())) <=  MARK_COLLISION_DISTANCE){
                 return mark;
             }
         }

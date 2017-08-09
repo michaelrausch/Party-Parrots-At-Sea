@@ -49,7 +49,9 @@ public class UpdateYachtTest {
 
             // Making sure no collision
             Double distance = GeoUtility.getDistance(yacht1.getLocation(), geoPoint2);
-            Assert.assertTrue(distance > 10.0);
+
+            // Using mark collision distance as it will be smaller than boat collision distance
+            Assert.assertTrue(distance > Yacht.MARK_COLLISION_DISTANCE);
         }
     }
 
