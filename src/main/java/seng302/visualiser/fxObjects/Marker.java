@@ -1,19 +1,33 @@
 package seng302.visualiser.fxObjects;
 
+import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
 /**
  * Visual object for a mark.
  */
-public class Marker extends Circle {
+public class Marker extends Group {
+
+    Circle mark = new Circle();
+    Group enterArrow;
+    Group exitArrow;
 
     public Marker() {
-        super.setRadius(5);
+        mark.setRadius(5);
     }
 
     public Marker(Paint colour) {
         this();
-        super.setFill(colour);
+        mark.setFill(colour);
+    }
+
+    public void showEnterArrow () {
+        Platform.runLater(() -> this.getChildren().setAll(enterArrow));
+    }
+
+    public void showExitArrow () {
+        Platform.runLater(() -> this.getChildren().setAll(exitArrow));
     }
 }
