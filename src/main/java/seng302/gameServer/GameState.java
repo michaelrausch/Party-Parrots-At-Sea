@@ -1,9 +1,7 @@
 package seng302.gameServer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,6 +11,8 @@ import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
+import seng302.model.mark.MarkOrder;
 import seng302.utilities.GeoUtility;
 
 /**
@@ -33,6 +33,7 @@ public class GameState implements Runnable {
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static long startTime;
+    private static Set<Mark> marks;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
     /*
@@ -62,10 +63,16 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
 
         new Thread(this).start();
+
+        marks = new MarkOrder().getAllMarks();
     }
 
     public static String getHostIpAddress() {
         return hostIpAddress;
+    }
+
+    public static Set<Mark> getMarks(){
+        return Collections.unmodifiableSet(marks);
     }
 
     public static List<Player> getPlayers() {

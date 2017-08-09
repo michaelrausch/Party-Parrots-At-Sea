@@ -15,10 +15,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class to hold the order of the marks in the race.
@@ -26,6 +23,7 @@ import java.util.Map;
 public class MarkOrder {
     private List<Mark> raceMarkOrder;
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
+    private Set<Mark> allMarks;
 
     public MarkOrder(){
         loadRaceProperties();
@@ -67,6 +65,10 @@ public class MarkOrder {
         return nextRacePosition;
     }
 
+    public Set<Mark> getAllMarks(){
+        return Collections.unmodifiableSet(allMarks);
+    }
+
     /**
      * Loads the race order from an XML string
      * @param xml An AC35 RaceXML
@@ -77,6 +79,7 @@ public class MarkOrder {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Document doc;
+        allMarks = new HashSet<>();
 
         try {
             db = dbf.newDocumentBuilder();
@@ -97,6 +100,7 @@ public class MarkOrder {
             for (Corner corner : corners){
                 CompoundMark compoundMark = marks.get(corner.getCompoundMarkID());
                 course.add(compoundMark.getMarks().get(0));
+                allMarks.addAll(compoundMark.getMarks());
             }
 
             return course;

@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
@@ -31,6 +33,9 @@ public class Yacht {
     }
 
     private static final Double ROUNDING_DISTANCE = 15d; // TODO: 3/08/17 wmu16 - Look into this value further
+    private static final Double COLLISION_DISTANCE = ROUNDING_DISTANCE - 8d;
+    private static final Double BOUNCE_FACTOR = 0.0001;
+    private static final Integer COLLISION_UPDATE_INTERVAL = 100;
 
     //BOTH AFAIK
     private String boatType;
@@ -61,6 +66,7 @@ public class Yacht {
     private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
     private Boolean hasPassedFirstLine; //The line extrapolated from the next mark to the current mark
     private Boolean hasPassedSecondLine; //The line extrapolated from the last mark to the current mark
+    private Long lastCollisionUpdate;
 
     //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
@@ -88,6 +94,18 @@ public class Yacht {
         this.hasEnteredRoundingZone = false;
         this.hasPassedFirstLine = false;
         this.hasPassedSecondLine = false;
+    }
+
+    public Mark markCollidedWith(){
+        Set<Mark> marksInRace = GameState.getMarks();
+
+        for (Mark mark : marksInRace){
+            if (GeoUtility.getDistance(getLocation(), new GeoPoint(mark.getLat(), mark.getLng())) <=  COLLISION_DISTANCE){
+                return mark;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -126,11 +144,18 @@ public class Yacht {
         Double metersCovered = velocity * secondsElapsed;
         GeoPoint calculatedPoint = getGeoCoordinate(location, heading, metersCovered);
 
-        // Collision detection. Update boat only if no collision.
-        Yacht collidedYacht = checkCollision(calculatedPoint);
-        if (collidedYacht != null) {
-//            System.out.println("Collision of boat " + this.getSourceId() + " and " + collidedYacht.getSourceId());
-        } else {
+        if (shouldDoCollisionUpdate()){
+            Yacht collidedYacht = checkCollision(calculatedPoint);
+
+            if (collidedYacht != null || markCollidedWith() != null) {
+                location = calculateBounceBack(new GeoPoint(markCollidedWith().getLat(), markCollidedWith().getLng()));
+            } else {
+                location = calculatedPoint;
+            }
+
+            lastCollisionUpdate = System.currentTimeMillis();
+        }
+        else {
             location = calculatedPoint;
         }
 
@@ -141,6 +166,45 @@ public class Yacht {
         }
 
         // TODO: 3/08/17 wmu16 - Implement line cross check here
+    }
+
+    /**
+     * @return true if COLLISION_UPDATE_INTERVAL has elapsed since the last collision update
+     */
+    private Boolean shouldDoCollisionUpdate(){
+        if (lastCollisionUpdate == null) {
+            lastCollisionUpdate = System.currentTimeMillis();
+        }
+
+        return System.currentTimeMillis() - lastCollisionUpdate > COLLISION_UPDATE_INTERVAL;
+    }
+
+    /**
+     * Calculate the new position of the boat after it has had a collision
+     * @return The boats new position
+     */
+    private GeoPoint calculateBounceBack(GeoPoint collidedWith){
+        Double lat = location.getLat();
+        Double lon = location.getLng();
+
+        Double heading = GeoUtility.getBearing(location, collidedWith);
+
+
+        if (heading >= 0 && heading <= 180){
+            lat -= BOUNCE_FACTOR;
+        }
+        else{
+            lat += BOUNCE_FACTOR;
+        }
+
+        if (heading >= 90 && heading <= 360-90){
+            lon += BOUNCE_FACTOR;
+        }
+        else{
+            lon -= BOUNCE_FACTOR;
+        }
+
+        return new GeoPoint(lat, lon);
     }
 
 
