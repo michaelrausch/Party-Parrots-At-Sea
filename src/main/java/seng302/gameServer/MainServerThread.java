@@ -8,6 +8,7 @@ import java.util.Observable;
 import java.util.Timer;
 import java.util.TimerTask;
 import seng302.model.Player;
+import seng302.model.PolarTable;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -31,7 +32,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         } catch (IOException e) {
             serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
-
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
         terminated = false;
         thread = new Thread(this);
         thread.start();

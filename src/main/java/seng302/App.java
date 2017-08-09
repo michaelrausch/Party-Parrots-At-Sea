@@ -67,8 +67,6 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
-
         Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
         primaryStage.setTitle("RaceVision");
         Scene scene = new Scene(root, 1530, 960);

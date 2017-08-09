@@ -49,10 +49,8 @@ public class GameState implements Runnable {
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
-        yachts = new HashMap<>();
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
-        yachts = new HashMap<>();
 
         new Thread(this).start();
     }
@@ -67,7 +65,8 @@ public class GameState implements Runnable {
 
     public static void addPlayer(Player player) {
         players.add(player);
-        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
+        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName()
+            + " " + player.getYacht().getCountry();
         playerStringMap.put(player, playerText);
     }
     
