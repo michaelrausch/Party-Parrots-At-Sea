@@ -3,7 +3,6 @@ package seng302.visualiser.fxObjects;
 import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
-import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -85,7 +84,7 @@ public class BoatObject extends Group {
         });
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
         boatPoly.setCache(true);
-        boatPoly.setCacheHint(CacheHint.SPEED);
+//        boatPoly.setCacheHint(CacheHint.SPEED);
 
 //        annotationBox = new AnnotationBox();
 //        annotationBox.setFill(colour);

@@ -115,11 +115,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseSparkLine();
 
         gameView = new GameView();
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(gameView));
-        gameView.setBoats(new ArrayList<>(participants.values()));
-        gameView.updateBorder(raceData.getCourseLimit());
-        gameView.updateCourse(
-            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
+            gameView.setBoats(new ArrayList<>(participants.values()));
+            gameView.updateBorder(raceData.getCourseLimit());
+            gameView.updateCourse(
+                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
         gameView.setBoatAsPlayer(player);
         gameView.startRace();

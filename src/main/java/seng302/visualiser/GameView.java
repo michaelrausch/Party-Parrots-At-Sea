@@ -9,14 +9,10 @@ import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -93,18 +89,14 @@ public class GameView extends Pane {
 
     public void zoomOut() {
         scaleFactor = 0.95;
-        for (Node child : getChildren()) {
-            child.setScaleX(child.getScaleX() * scaleFactor);
-            child.setScaleY(child.getScaleY() * scaleFactor);
-        }
+        this.setScaleX(this.getScaleX() * scaleFactor);
+        this.setScaleY(this.getScaleY() * scaleFactor);
     }
 
     public void zoomIn() {
         scaleFactor =  1.05;
-        for (Node child : getChildren()) {
-            child.setScaleX(child.getScaleX() * scaleFactor);
-            child.setScaleY(child.getScaleY() * scaleFactor);
-        }
+        this.setScaleX(this.getScaleX() * scaleFactor);
+        this.setScaleY(this.getScaleY() * scaleFactor);
     }
 
     private enum ScaleDirection {
@@ -122,45 +114,6 @@ public class GameView extends Pane {
         gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
-//
-//        this.setOnKeyPressed(new EventHandler<KeyEvent>() {
-//            @Override public void handle(KeyEvent event) {
-//                event.consume();
-//                switch (event.getCode()) {
-//                    case Z:
-//                        scaleFactor = scaleFactor * 1.2;
-//                        break;
-//                    case X:
-//                        scaleFactor = scaleFactor * 0.8;
-//                        break;
-//                }
-//                if (event.getCode() == KeyCode.Z || event.getCode() == KeyCode.X) {
-//                    for (Node child : getChildren()) {
-//                        child.setScaleX(child.getScaleX() * scaleFactor);
-//                        child.setScaleY(child.getScaleY() * scaleFactor);
-//                    }
-//                }
-//            }
-//        });
-//
-//        this.setOnScroll(new EventHandler<ScrollEvent>() {
-//            @Override public void handle(ScrollEvent event) {
-//                event.consume();
-//                if (event.getDeltaY() == 0) {
-//                    return;
-//                }
-//
-//                double scaleFactor =
-//                        (event.getDeltaY() > 0)
-//                                ? SCALE_DELTA
-//                                : 1/SCALE_DELTA;
-//                for (Node child : getChildren()) {
-//                    child.setScaleX(child.getScaleX() * scaleFactor);
-//                    child.setScaleY(child.getScaleY() * scaleFactor);
-//                }
-//            }
-//        });
-
         initializeTimer();
     }
 
@@ -393,9 +346,6 @@ public class GameView extends Pane {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
-//                annotations.get(boat).setLayoutX(p2d.getX());
-//                annotations.get(boat).setLayoutY(p2d.getY());
-//                annotations.get(boat).setLocation(100d, 100d);
                 annotations.get(boat).setLocation(p2d.getX(), p2d.getY());
                 bo.setTrajectory(
                     heading,
@@ -410,7 +360,6 @@ public class GameView extends Pane {
             gameObjects.addAll(wakes);
             gameObjects.addAll(annotationsGroup);
             gameObjects.addAll(boatObjectGroup);
-
         });
 
     }
