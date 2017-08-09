@@ -48,8 +48,8 @@ public class UpdateYachtTest {
             Assert.assertTrue(moved > 0);
 
             // Making sure no collision
-            double distance = GeoUtility.getDistance(yacht1.getLocation(), geoPoint2);
-            Assert.assertTrue(distance > 25.0);
+            Double distance = GeoUtility.getDistance(yacht1.getLocation(), geoPoint2);
+            Assert.assertTrue(distance > 10.0);
         }
     }
 
