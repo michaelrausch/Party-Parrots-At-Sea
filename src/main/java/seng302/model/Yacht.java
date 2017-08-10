@@ -32,8 +32,6 @@ public class Yacht {
 
     private Logger logger = LoggerFactory.getLogger(Yacht.class);
 
-
-    private static final Integer SPEED_MULTIPLIER = 4;
     private static final Double ROUNDING_DISTANCE = 50d; // TODO: 3/08/17 wmu16 - Look into this value further
 
 
@@ -109,7 +107,7 @@ public class Yacht {
         Double windSpeedKnots = GameState.getWindSpeedKnots();
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000 * SPEED_MULTIPLIER;
+        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000;
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
@@ -302,7 +300,7 @@ public class Yacht {
                 currentMarkSeqID++;
                 finishedRace = true;
                 logMarkRounding(currentMark);
-                System.out.println("YAY YOU FINISHED!");
+                logger.debug(sourceId + " finished");
                 // TODO: 8/08/17 wmu16 - Do something!
             }
         }
@@ -666,10 +664,13 @@ public class Yacht {
         if (currentMark.isGate()) {
             typeString = "gate";
         }
-        System.out.println(
-            "(" + currentMarkSeqID + ") Passed " + typeString + ": " + currentMark.getMarks().get(0)
-                .getName()
-                + " ID(" + currentMark.getId() + ")");
+        logger.debug(
+            String.format("BoatID %d passed %s %s with id %d. Now on leg %d",
+                sourceId,
+                typeString,
+                currentMark.getMarks().get(0).getName(),
+                currentMark.getId(),
+                currentMarkSeqID));
     }
 
     public void addLocationListener (YachtLocationListener listener) {
