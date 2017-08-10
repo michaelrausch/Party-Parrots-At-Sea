@@ -6,12 +6,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import javafx.geometry.Point2D;
-import org.junit.Before;
 import org.junit.Test;
 import seng302.model.GeoPoint;
-import seng302.utilities.GeoUtility;
 
 /**
+ * http://www.geoplaner.com/ For plotting geo points for visualisation
  * To test methods in GeoUtility.
  * Use this site to calculate distances
  * https://rechneronline.de/geo-coordinates/#distance
@@ -149,5 +148,33 @@ public class GeoUtilityTest {
 
         assertFalse(GeoUtility.isPointInTriangle(v1, v2, v3, p2));
 
+    }
+
+
+    @Test
+    public void testCheckCrossedGate() {
+        GeoPoint mark1 = new GeoPoint(37.40937, -122.62233);
+        GeoPoint mark2 = new GeoPoint(37.40938, -122.62154);
+        GeoPoint location1 = new GeoPoint(37.40964, -122.62196);
+        GeoPoint location2 = new GeoPoint(37.40910, -122.62189);
+        GeoPoint location3 = new GeoPoint(37.40949, -122.62202);
+        GeoPoint location4 = new GeoPoint(37.40927, -122.62152);
+
+        // M1 -> M3 enters from CCW side
+        assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location1, location2) == 2);
+        // M1 -> M3 doesn't across
+        assertFalse(GeoUtility.checkCrossedLine(mark1, mark2, location1, location3) > 0);
+        // M2 -> M3 enters from CW side
+        assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location2, location3) == 1);
+        // order changes intersect direction
+        assertTrue(GeoUtility.checkCrossedLine(mark2, mark1, location2, location3) == 2);
+        assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location3, location2) == 2);
+    }
+
+    @Test
+    public void testDirtyMiddlePoint() {
+        GeoPoint result = GeoUtility.getDirtyMidPoint(p1, p2);
+        assertEquals(57.6709285, result.getLat(), result.getLat() * toleranceRate);
+        assertEquals(11.836164, result.getLng(), result.getLng() * toleranceRate);
     }
 }
