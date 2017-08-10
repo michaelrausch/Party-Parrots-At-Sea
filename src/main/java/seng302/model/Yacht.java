@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.Observable;
 
 import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
@@ -25,7 +26,7 @@ import static seng302.utilities.GeoUtility.getGeoCoordinate;
  * Class created to store more variables (eg. boat statuses) compared to the XMLParser boat class,
  * also done outside Boat class because some old variables are not used anymore.
  */
-public class Yacht {
+public class Yacht extends Observable {
 
     @FunctionalInterface
     public interface YachtLocationListener {
@@ -148,8 +149,15 @@ public class Yacht {
         if (shouldDoCollisionUpdate()){
             Yacht collidedYacht = checkCollision(calculatedPoint);
 
-            if (collidedYacht != null || markCollidedWith() != null) {
+            if (collidedYacht != null) {
+                location = calculateBounceBack(new GeoPoint(collidedYacht.getLocation().getLat(),
+                    collidedYacht.getLocation().getLng()));
+                setChanged();
+                notifyObservers(this.sourceId);
+            } else if (markCollidedWith() != null) {
                 location = calculateBounceBack(new GeoPoint(markCollidedWith().getLat(), markCollidedWith().getLng()));
+                setChanged();
+                notifyObservers(this.sourceId);
             } else {
                 location = calculatedPoint;
             }

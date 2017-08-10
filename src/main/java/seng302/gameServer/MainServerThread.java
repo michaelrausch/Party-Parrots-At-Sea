@@ -1,10 +1,12 @@
 package seng302.gameServer;
 
+import com.sun.corba.se.spi.activation.Server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 import seng302.model.GeoPoint;
@@ -18,7 +20,8 @@ import seng302.visualiser.GameClient;
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread extends Observable implements Runnable, ClientConnectionDelegate {
+public class MainServerThread extends Observable implements Runnable, ClientConnectionDelegate,
+    Observer {
 
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
@@ -112,7 +115,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         serverToClientThreads.add(serverToClientThread);
         this.addObserver(serverToClientThread);
         setChanged();
-        notifyObservers();
+        notifyObservers("send setup message");
     }
 
     /**
@@ -136,11 +139,12 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
             }
         }
         setChanged();
-        notifyObservers();
+        notifyObservers("send setup message");
     }
 
     public void startGame() {
         initialiseBoatPositions();
+        setupYachtObserver();
 
         Timer t = new Timer();
 
@@ -208,6 +212,19 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
 
             yacht.setLocation(spawnMark);
             boatIndex++;
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            serverToClientThread.sendCollisionMessage((Integer) arg);
+        }
+    }
+
+    private void setupYachtObserver() {
+        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+            serverToClientThread.getYacht().addObserver(this);
         }
     }
 }

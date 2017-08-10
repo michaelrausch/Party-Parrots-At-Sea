@@ -6,13 +6,16 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -24,6 +27,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import seng302.model.Colors;
@@ -616,26 +620,32 @@ public class GameView extends Pane {
      */
     public void drawCollision(GeoPoint collisionPoint) {
         System.out.println("ran");
-        Point2D point = findScaledXY(collisionPoint);
-        Circle circle = new Circle(point.getX(), point.getY(), 10.0, Color.RED);
-        gameObjects.add(circle);
+        Platform.runLater(() -> {
+            Point2D point = findScaledXY(collisionPoint);
+            double circleRadius = 0.0;
+            Circle circle = new Circle(point.getX(), point.getY(), circleRadius, Color.RED);
+            gameObjects.add(circle);
 
-        Timeline timeline = new Timeline();
-        timeline.setCycleCount(1);
-        EventHandler<ActionEvent> blink = (ActionEvent event) -> {
-            if (circle.getFill() == Color.RED) {
-                circle.setFill(Color.TRANSPARENT);
-            } else {
-                circle.setFill(Color.RED);
-            }
-            System.out.println("beep boop");
-        };
+            circle.setFill(Color.TRANSPARENT);
+            circle.setStroke(Color.RED);
+            circle.setStrokeWidth(3);
 
-        KeyFrame keyframe = new KeyFrame(Duration.millis(200), blink);
+            Timeline timeline = new Timeline();
+            timeline.setCycleCount(1);
 
-        timeline.getKeyFrames().add(keyframe);
-        timeline.play();
+            KeyFrame keyframe1 = new KeyFrame(Duration.ZERO,
+                new KeyValue(circle.radiusProperty(), 0),
+                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
+            KeyFrame keyFrame2 = new KeyFrame(new Duration(1000),
+                new KeyValue(circle.radiusProperty(), 50),
+                new KeyValue(circle.strokeProperty(), Color.RED));
+            KeyFrame keyFrame3 = new KeyFrame(new Duration(1500),
+                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
 
-//        gameObjects.remove(circle);
+            timeline.getKeyFrames().addAll(keyframe1, keyFrame2, keyFrame3);
+            timeline.play();
+
+            timeline.setOnFinished(event -> gameObjects.remove(circle));
+        });
     }
 }

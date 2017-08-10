@@ -342,8 +342,8 @@ public class GameClient {
      * Tells race view to show a collision animation.
      */
     private void showCollisionAlert(YachtEventData yachtEventData) {
-        // 1 is used by team 28 to show collision
-        if (yachtEventData.getEventId() == 1) {
+        // 33 is the agreed code to show collision
+        if (yachtEventData.getEventId() == 33) {
             raceView.showCollision(yachtEventData.getSubjectId());
         }
     }

@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.gameServer.server.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.PacketType;
@@ -126,7 +127,9 @@ public class ServerToClientThread implements Runnable, Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        sendSetupMessages();
+        if (arg.equals("send setup message")) {
+            sendSetupMessages();
+        }
     }
 
     public void run() {
@@ -371,5 +374,9 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public Yacht getYacht() {
         return yacht;
+    }
+
+    public void sendCollisionMessage(Integer yachtId) {
+        sendMessage(new YachtEventCodeMessage(yachtId));
     }
 }
