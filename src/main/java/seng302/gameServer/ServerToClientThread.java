@@ -1,12 +1,16 @@
 package seng302.gameServer;
 
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import seng302.gameServer.server.messages.*;
+import seng302.model.Player;
+import seng302.model.Yacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.utilities.XMLGenerator;
+
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.time.LocalDateTime;
@@ -18,15 +22,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-
-import seng302.gameServer.server.messages.*;
-import seng302.model.Player;
-import seng302.model.Yacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -79,30 +74,26 @@ public class ServerToClientThread implements Runnable, Observer {
         String fName = "";
         BufferedReader ln;
         String lName = "";
-        try {
-            is = socket.getInputStream();
-            os = socket.getOutputStream();
-            fn = new BufferedReader(
-                    new InputStreamReader(
-                            ServerToClientThread.class.getResourceAsStream(
-                                    "/server_config/CSV_Database_of_First_Names.csv"
-                            )
-                    )
-            );
-            List<String> all = fn.lines().collect(Collectors.toList());
-            fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-            ln = new BufferedReader(
-                    new InputStreamReader(
-                            ServerToClientThread.class.getResourceAsStream(
-                                    "/server_config/CSV_Database_of_Last_Names.csv"
-                            )
-                    )
-            );
-            all = ln.lines().collect(Collectors.toList());
-            lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-        } catch (IOException e) {
-            serverLog("IO error in server thread upon grabbing streams", 1);
-        }
+
+        fn = new BufferedReader(
+                new InputStreamReader(
+                        ServerToClientThread.class.getResourceAsStream(
+                                "/server_config/CSV_Database_of_First_Names.csv"
+                        )
+                )
+        );
+        List<String> all = fn.lines().collect(Collectors.toList());
+        fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
+        ln = new BufferedReader(
+                new InputStreamReader(
+                        ServerToClientThread.class.getResourceAsStream(
+                                "/server_config/CSV_Database_of_Last_Names.csv"
+                        )
+                )
+        );
+        all = ln.lines().collect(Collectors.toList());
+        lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
+
 
         Yacht yacht = new Yacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
