@@ -18,6 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+
+import seng302.gameServer.server.messages.*;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.PacketType;
@@ -25,16 +27,6 @@ import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.gameServer.server.messages.BoatActionType;
-import seng302.gameServer.server.messages.BoatLocationMessage;
-import seng302.gameServer.server.messages.BoatStatus;
-import seng302.gameServer.server.messages.BoatSubMessage;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.RaceStatus;
-import seng302.gameServer.server.messages.RaceStatusMessage;
-import seng302.gameServer.server.messages.RaceType;
-import seng302.gameServer.server.messages.XMLMessage;
-import seng302.gameServer.server.messages.XMLMessageSubType;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -62,10 +54,27 @@ public class ServerToClientThread implements Runnable, Observer {
     private Integer seqNo;
     private Integer sourceId;
 
+    private ClientType clientType;
+    private Boolean isRegistered = false;
+
     private XMLGenerator xml;
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
+        seqNo = 0;
+
+        try{
+            is = socket.getInputStream();
+            os = socket.getOutputStream();
+        } catch (IOException e) {
+            return;
+        }
+
+        thread = new Thread(this);
+        thread.start();
+    }
+
+    private void setUpYacht(){
         BufferedReader fn;
         String fName = "";
         BufferedReader ln;
@@ -74,45 +83,33 @@ public class ServerToClientThread implements Runnable, Observer {
             is = socket.getInputStream();
             os = socket.getOutputStream();
             fn = new BufferedReader(
-                new InputStreamReader(
-                    ServerToClientThread.class.getResourceAsStream(
-                        "/server_config/CSV_Database_of_First_Names.csv"
+                    new InputStreamReader(
+                            ServerToClientThread.class.getResourceAsStream(
+                                    "/server_config/CSV_Database_of_First_Names.csv"
+                            )
                     )
-                )
             );
             List<String> all = fn.lines().collect(Collectors.toList());
             fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
             ln = new BufferedReader(
-                new InputStreamReader(
-                    ServerToClientThread.class.getResourceAsStream(
-                        "/server_config/CSV_Database_of_Last_Names.csv"
+                    new InputStreamReader(
+                            ServerToClientThread.class.getResourceAsStream(
+                                    "/server_config/CSV_Database_of_Last_Names.csv"
+                            )
                     )
-                )
             );
             all = ln.lines().collect(Collectors.toList());
             lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
         } catch (IOException e) {
             serverLog("IO error in server thread upon grabbing streams", 1);
         }
-        //Attempt threeway handshake with connection
-        sourceId = GameState.getUniquePlayerID();
-        if (threeWayHandshake(sourceId)) {
-            serverLog("Successful handshake. Client allocated id: " + sourceId, 0);
-            Yacht yacht = new Yacht(
-                "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
-            );
-//        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
-            GameState.addYacht(sourceId, yacht);
-            GameState.addPlayer(new Player(socket, yacht));
-        } else {
-            serverLog("Unsuccessful handshake. Connection rejected", 1);
-            closeSocket();
-            return;
-        }
 
-        seqNo = 0;
-        thread = new Thread(this);
-        thread.start();
+        Yacht yacht = new Yacht(
+                "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
+        );
+
+        GameState.addYacht(sourceId, yacht);
+        GameState.addPlayer(new Player(socket, yacht));
     }
 
     static void serverLog(String message, int logLevel) {
@@ -127,10 +124,38 @@ public class ServerToClientThread implements Runnable, Observer {
         sendSetupMessages();
     }
 
+    private void completeRegistration(ClientType clientType) throws IOException {
+        // Fail if not a player
+        if (!clientType.equals(ClientType.PLAYER)){
+            RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(0, RegistrationResponseStatus.FAILURE_GENERAL);
+            os.write(responseMessage.getBuffer());
+            return;
+        }
+
+        if (GameState.getPlayers().size() >= GameState.MAX_PLAYERS){
+            RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(0, RegistrationResponseStatus.FAILURE_FULL);
+            os.write(responseMessage.getBuffer());
+            return;
+        }
+
+        Integer sourceId = GameState.getUniquePlayerID();
+        RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(sourceId, RegistrationResponseStatus.SUCCESS_PLAYING);
+
+        this.clientType = clientType;
+        this.sourceId = sourceId;
+        setUpYacht();
+
+        isRegistered = true;
+        os.write(responseMessage.getBuffer());
+        sendSetupMessages();
+
+    }
+
     public void run() {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
+
 
         while (socket.isConnected()) {
 
@@ -169,9 +194,16 @@ public class ServerToClientThread implements Runnable, Observer {
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
                                 BoatActionType actionType = ServerPacketParser
-                                    .extractBoatAction(
-                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                        .extractBoatAction(
+                                                new StreamPacket(type, payloadLength, timeStamp, payload));
                                 GameState.updateBoat(sourceId, actionType);
+                                break;
+
+                            case RACE_REGISTRATION_REQUEST:
+                                ClientType requestedType = ServerPacketParser.extractClientType(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+
+                                completeRegistration(requestedType);
                                 break;
                         }
                     } else {
@@ -230,23 +262,6 @@ public class ServerToClientThread implements Runnable, Observer {
      * @return A boolean indicating if it was a successful handshake
      */
     private Boolean threeWayHandshake(Integer id) {
-        Integer confirmationID = null;
-        Integer identificationAttempt = 0;
-        while (!userIdentified) {
-            try {
-                os.write(id);                                         //Send out new ID looking for echo
-                confirmationID = is.read();
-            } catch (IOException e) {
-                serverLog("Three way handshake failed", 1);
-            }
-
-            if (id.equals(confirmationID)) {                          //ID is echoed back. Connection is a client
-                return true;
-            } else if (identificationAttempt > MAX_ID_ATTEMPTS) {     //No response. not a client. tidy up and go home.
-                return false;
-            }
-            identificationAttempt++;
-        }
 
         return true;
     }
