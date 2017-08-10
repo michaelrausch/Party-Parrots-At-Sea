@@ -131,9 +131,7 @@ public class Yacht {
             }
         }
 
-        if (isAuto) {
-            runAutoPilot();
-        }
+        runAutoPilot();
 
         //UPDATE BOAT LOCATION
         lastLocation = location;
@@ -353,15 +351,13 @@ public class Yacht {
      * Moves the boat towards the given heading when the auto pilot was set. Disables the auto pilot
      * in the event that the boat is within the range of 1 turn step of its goal.
      */
-    private void runAutoPilot() {
-        if (autoHeading == null) {
-            isAuto = false;
-            // TODO: 10/08/17 possibly throw some sort of exception here maybe? autopilot shouldn't be true if there's no heading.
-        }
-        turnTowardsHeading(autoHeading);
-        if (Math.abs(heading - autoHeading)
-            <= TURN_STEP) { //Cancel when within 1 turn step of target.
-            isAuto = false;
+    public void runAutoPilot() {
+        if (isAuto) {
+            turnTowardsHeading(autoHeading);
+            if (Math.abs(heading - autoHeading)
+                <= TURN_STEP) { //Cancel when within 1 turn step of target.
+                isAuto = false;
+            }
         }
     }
 
@@ -438,8 +434,7 @@ public class Yacht {
 
             // Take optimal heading and turn into a boat heading rather than a wind heading.
             optimalHeading =
-                optimalHeading + (double) Math
-                    .floorMod(GameState.getWindDirection().longValue(), 360L);
+                optimalHeading + GameState.getWindDirection();
 
             setAutoPilot(optimalHeading);
         }
