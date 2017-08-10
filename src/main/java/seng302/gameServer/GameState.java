@@ -20,6 +20,7 @@ public class GameState implements Runnable {
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
 
     private static Integer STATE_UPDATES_PER_SECOND = 60;
+    public static Integer MAX_PLAYERS = 8;
 
     private static Long previousUpdateTime;
     public static Double windDirection;

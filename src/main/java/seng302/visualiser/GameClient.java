@@ -62,6 +62,7 @@ public class GameClient {
             ioe.printStackTrace();
             System.out.println("Unable to connect to host...");
         }
+
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);
