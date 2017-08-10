@@ -61,9 +61,6 @@ public class YachtTest {
         Double downwindRight = downwind;
         Double downwindLeft = 360 - downwindRight;
 
-        System.out.println(
-            String.format("%f %f %f %f", upwindLeft, upwindRight, downwindLeft, downwindRight));
-
         values.put(190d, upwindRight);
         values.put(170d, upwindLeft);
         values.put(10d, downwindLeft);
