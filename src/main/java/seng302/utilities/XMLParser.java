@@ -256,9 +256,9 @@ public class XMLParser {
             if (cMarkNode.getNodeName().equals("CompoundMark")) {
                 cMark = new CompoundMark(
                     XMLParser.getNodeAttributeInt(cMarkNode, "CompoundMarkID"),
-                    XMLParser.getNodeAttributeString(cMarkNode, "Name")
+                    XMLParser.getNodeAttributeString(cMarkNode, "Name"),
+                    createMarks(cMarkNode)
                 );
-                cMark.addSubMarks(createMarks(cMarkNode));
                 allMarks.add(cMark);
             }
         }

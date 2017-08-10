@@ -64,8 +64,7 @@ public class Yacht {
     //MARK ROUNDING INFO
     private GeoPoint lastLocation;  //For purposes of mark rounding calculations
     private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
-    private Boolean hasPassedFirstLine; //The line extrapolated from the next mark to the current mark
-    private Boolean hasPassedSecondLine;
+    private Boolean hasPassedLine;
     private Boolean hasPassedThroughGate;
     private Boolean finishedRace;
 
@@ -93,8 +92,7 @@ public class Yacht {
         this.velocity = 0d;     //in mms-1
 
         this.hasEnteredRoundingZone = false;
-        this.hasPassedFirstLine = false;
-        this.hasPassedSecondLine = false;
+        this.hasPassedLine = false;
         this.hasPassedThroughGate = false;
         this.finishedRace = false;
     }
@@ -193,13 +191,13 @@ public class Yacht {
      * @param currentMark The current gate
      */
     private void checkStartLineCrossing(CompoundMark currentMark) {
-        Integer crossedLine = GeoUtility.checkCrossedLine(currentMark.getSubMark(1),
-            currentMark.getSubMark(2), lastLocation, location);
+        Mark mark1 = currentMark.getSubMark(1);
+        Mark mark2 = currentMark.getSubMark(2);
+        CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
+
+        Integer crossedLine = GeoUtility.checkCrossedLine(mark1, mark2, lastLocation, location);
         if (crossedLine > 0) {
-            CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
-            Boolean isClockwiseCross = GeoUtility.isClockwise(currentMark.getSubMark(1),
-                currentMark.getSubMark(2),
-                nextMark.getSubMark(1));
+            Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, nextMark.getMidPoint());
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
                 currentMarkSeqID++;
                 logMarkRounding(currentMark);
@@ -211,49 +209,31 @@ public class Yacht {
     /**
      * This algorithm checks for mark rounding. And increments the currentMarSeqID number attribute
      * of the yacht if so.
-     * The algorithm works by using the last mark, the current mark, the next mark and the change in
-     * boats location, like so:
-     * -Condition 1:
-     * The boat has entered the mark rounding distance
-     * -Condition 2:
-     * The boat has passed the line extending from the last mark to the current mark
-     * -Condition 3:
-     * The boat has passed the line extending from the next mark to the current mark
-     *
-     * A more visual representation of this algorithm can be seen on the Wiki under
+     * A visual representation of this algorithm can be seen on the Wiki under
      * 'mark passing algorithm'
      */
     private void checkMarkRounding(CompoundMark currentMark) {
         distanceToCurrentMark = calcDistanceToCurrentMark();
-        CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
-        CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
+        GeoPoint nextPoint = GameState.getMarkOrder().getNextMark(currentMarkSeqID).getMidPoint();
+        GeoPoint prevPoint = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID)
+            .getMidPoint();
+        GeoPoint midPoint = GeoUtility.getDirtyMidPoint(nextPoint, prevPoint);
 
         //1 TEST FOR ENTERING THE ROUNDING DISTANCE
         if (distanceToCurrentMark < ROUNDING_DISTANCE) {
             hasEnteredRoundingZone = true;
         }
 
-        //If the current mark is a gate mark we need to check both its marks for rounding, thus
-        //we loop
+        //In case current mark is a gate, loop through all marks just in case
         for (Mark thisCurrentMark : currentMark.getMarks()) {
-            //2 TEST FOR CROSSING NEXT - CURRENT LINE FIRST
-            if (GeoUtility
-                .isPointInTriangle(lastLocation, location, nextMark.getMarks().get(0),
-                    thisCurrentMark)) {
-                hasPassedFirstLine = true;
-            }
-            //3 TEST FOR CROSSING PREV - CURRENT LINE SECOND
-            if (GeoUtility
-                .isPointInTriangle(lastLocation, location, prevMark.getMarks().get(0),
-                    thisCurrentMark)) {
-                hasPassedSecondLine = true;
+            if (GeoUtility.isPointInTriangle(lastLocation, location, midPoint, thisCurrentMark)) {
+                hasPassedLine = true;
             }
         }
 
-        if (hasPassedSecondLine && hasPassedFirstLine && hasEnteredRoundingZone) {
+        if (hasPassedLine && hasEnteredRoundingZone) {
             currentMarkSeqID++;
-            hasPassedFirstLine = false;
-            hasPassedSecondLine = false;
+            hasPassedLine = false;
             hasEnteredRoundingZone = false;
             hasPassedThroughGate = false;
             logMarkRounding(currentMark);
@@ -267,29 +247,28 @@ public class Yacht {
      * @param currentMark The current gate
      */
     private void checkGateRounding(CompoundMark currentMark) {
-        Integer crossedLine = GeoUtility.checkCrossedLine(currentMark.getSubMark(1),
-            currentMark.getSubMark(2), lastLocation, location);
+        Mark mark1 = currentMark.getSubMark(1);
+        Mark mark2 = currentMark.getSubMark(2);
+        CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
+        CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
+
+        Integer crossedLine = GeoUtility.checkCrossedLine(mark1, mark2, lastLocation, location);
 
         //We have crossed the line
         if (crossedLine > 0) {
-            CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
-            Boolean isClockwiseCross = GeoUtility.isClockwise(currentMark.getSubMark(1),
-                currentMark.getSubMark(2),
-                prevMark.getSubMark(1));
+            Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
+
+            //Check we cross the line in the correct direction
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 hasPassedThroughGate = true;
             }
         }
 
-        Boolean prevMarkSide = GeoUtility.isClockwise(currentMark.getSubMark(1),
-            currentMark.getSubMark(2),
-            GameState.getMarkOrder().getPreviousMark(currentMarkSeqID).getSubMark(1));
-
-        Boolean nextMarkSide = GeoUtility.isClockwise(currentMark.getSubMark(1),
-            currentMark.getSubMark(2),
-            GameState.getMarkOrder().getNextMark(currentMarkSeqID).getSubMark(1));
+        Boolean prevMarkSide = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
+        Boolean nextMarkSide = GeoUtility.isClockwise(mark1, mark2, nextMark.getMidPoint());
 
         if (hasPassedThroughGate) {
+            //Check if we need to round this gate after passing through
             if (prevMarkSide == nextMarkSide) {
                 checkMarkRounding(currentMark);
             } else {
@@ -300,18 +279,18 @@ public class Yacht {
     }
 
     /**
-     * If we pass the finish gate in the correct direction // TODO: 8/08/17 wmu16 - do something
+     * If we pass the finish gate in the correct direction
      *
      * @param currentMark The current gate
      */
     private void checkFinishLineCrossing(CompoundMark currentMark) {
-        Integer crossedLine = GeoUtility.checkCrossedLine(currentMark.getSubMark(1),
-            currentMark.getSubMark(2), lastLocation, location);
+        Mark mark1 = currentMark.getSubMark(1);
+        Mark mark2 = currentMark.getSubMark(2);
+        CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
+
+        Integer crossedLine = GeoUtility.checkCrossedLine(mark1, mark2, lastLocation, location);
         if (crossedLine > 0) {
-            CompoundMark previousMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
-            Boolean isClockwiseCross = GeoUtility.isClockwise(currentMark.getSubMark(1),
-                currentMark.getSubMark(2),
-                previousMark.getSubMark(1));
+            Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 currentMarkSeqID++;
                 finishedRace = true;

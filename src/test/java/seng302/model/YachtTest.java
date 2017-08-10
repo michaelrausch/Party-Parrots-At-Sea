@@ -2,6 +2,8 @@ package seng302.model;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import seng302.model.mark.CompoundMark;
@@ -33,11 +35,12 @@ public class YachtTest {
 
         yacht.setLocation(57.670333, 11.827833);
 
-        compoundMark = new CompoundMark(0, "HaomingsMark");
+        List<Mark> subMarks = new ArrayList<>();
         Mark subMark1 = new Mark("H", 57.671524, 11.844495, 0);
         Mark subMark2 = new Mark("H", 57.670822, 11.843392, 0);
-        compoundMark.addSubMarks(subMark1, subMark2);
-
+        subMarks.add(subMark1);
+        subMarks.add(subMark2);
+        compoundMark = new CompoundMark(0, "HaomingsMark", subMarks);
     }
 
 

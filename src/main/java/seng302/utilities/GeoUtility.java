@@ -45,6 +45,19 @@ public class GeoUtility {
         return (Math.toDegrees(getBearingRad(p1, p2)) + 360.0) % 360.0;
     }
 
+
+    /**
+     * WARNING: this function DOES NOT account for wrapping around on lats / longs etc.
+     * SO BE CAREFUL IN USING THIS FUNCTION
+     *
+     * @param p1 GeoPoint 1
+     * @param p2 GeoPoint 2
+     * @return GeoPoint midPoint
+     */
+    public static GeoPoint getDirtyMidPoint(GeoPoint p1, GeoPoint p2) {
+        return new GeoPoint((p1.getLat() + p2.getLat()) / 2, (p1.getLng() + p2.getLng()) / 2);
+    }
+
     /**
      * Calculates the angle between to angular co-ordinates on a sphere in radians.
      *

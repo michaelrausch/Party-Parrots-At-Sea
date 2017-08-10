@@ -79,18 +79,19 @@ public class CourseParser extends FileParser {
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element e = (Element) node;
 			Integer markID = Integer.valueOf(e.getAttribute("CompoundMarkID"));
-
 			String name = e.getAttribute("Name");
-			CompoundMark cMark = new CompoundMark(markID, name);
 
 			NodeList marks = e.getElementsByTagName("Mark");
-			for (int i = 0; i < marks.getLength(); i++) {
+            List<Mark> subMarks = new ArrayList<>();
+            for (int i = 0; i < marks.getLength(); i++) {
 				Mark mark = getMark(marks.item(i));
-				if (mark != null)
-					cMark.addSubMarks(mark);
+                if (mark != null) {
+                    subMarks.add(mark);
+                }
 			}
-			return cMark;
-		}
+
+            return new CompoundMark(markID, name, subMarks);
+        }
 		System.out.println("Failed to create compound mark.");
 		return null;
 	}
