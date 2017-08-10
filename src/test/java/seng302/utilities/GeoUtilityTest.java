@@ -170,4 +170,11 @@ public class GeoUtilityTest {
         assertTrue(GeoUtility.checkCrossedLine(mark2, mark1, location2, location3) == 2);
         assertTrue(GeoUtility.checkCrossedLine(mark1, mark2, location3, location2) == 2);
     }
+
+    @Test
+    public void testDirtyMiddlePoint() {
+        GeoPoint result = GeoUtility.getDirtyMidPoint(p1, p2);
+        assertEquals(57.6709285, result.getLat(), result.getLat() * toleranceRate);
+        assertEquals(11.836164, result.getLng(), result.getLng() * toleranceRate);
+    }
 }
