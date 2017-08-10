@@ -47,7 +47,7 @@ public class YachtTest {
 //    @Test
 //    public void testDistanceToNextMark() {
 //        Double actual, expected;
-//        actual = yacht.calcDistanceToNextMark();
+//        actual = yacht.calcDistanceToCurrentMark();
 //        expected = 927d;
 //        assertEquals(expected, actual, expected * toleranceRatio);
 //    }

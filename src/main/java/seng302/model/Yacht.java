@@ -32,6 +32,8 @@ public class Yacht {
 
     private Logger logger = LoggerFactory.getLogger(Yacht.class);
 
+
+    private static final Integer SPEED_MULTIPLIER = 4;
     private static final Double ROUNDING_DISTANCE = 50d; // TODO: 3/08/17 wmu16 - Look into this value further
 
 
@@ -46,7 +48,7 @@ public class Yacht {
     private Long estimateTimeAtFinish;
     private Integer currentMarkSeqID = 0;
     private Long markRoundTime;
-    private Double distanceToNextMark;
+    private Double distanceToCurrentMark;
     private Long timeTillNext;
     private Double heading;
     private Integer legNumber = 0;
@@ -63,7 +65,9 @@ public class Yacht {
     private GeoPoint lastLocation;  //For purposes of mark rounding calculations
     private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
     private Boolean hasPassedFirstLine; //The line extrapolated from the next mark to the current mark
+    private Boolean hasPassedSecondLine;
     private Boolean hasPassedThroughGate;
+    private Boolean finishedRace;
 
     //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
@@ -90,7 +94,9 @@ public class Yacht {
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedFirstLine = false;
+        this.hasPassedSecondLine = false;
         this.hasPassedThroughGate = false;
+        this.finishedRace = false;
     }
 
     /**
@@ -102,7 +108,7 @@ public class Yacht {
         Double windSpeedKnots = GameState.getWindSpeedKnots();
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000;
+        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000 * SPEED_MULTIPLIER;
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
@@ -131,8 +137,9 @@ public class Yacht {
         location = GeoUtility.getGeoCoordinate(location, heading, velocity * secondsElapsed);
 
         //CHECK FOR MARK ROUNDING
-        //Algorithm wont currently work on last gate and start gate
-        checkForLegProgression();
+        if (!finishedRace) {
+            checkForLegProgression();
+        }
 
         // TODO: 3/08/17 wmu16 - Implement line cross check here
     }
@@ -145,7 +152,7 @@ public class Yacht {
      * @throws IndexOutOfBoundsException If the next mark is null (ie the last mark in the race)
      *         Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
      */
-    public Double calcDistanceToNextMark() throws IndexOutOfBoundsException {
+    public Double calcDistanceToCurrentMark() throws IndexOutOfBoundsException {
         CompoundMark nextMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
 
         if (nextMark.isGate()) {
@@ -194,8 +201,8 @@ public class Yacht {
                 currentMark.getSubMark(2),
                 nextMark.getSubMark(1));
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
-                logMarkRounding(currentMark);
                 currentMarkSeqID++;
+                logMarkRounding(currentMark);
             }
         }
     }
@@ -217,12 +224,12 @@ public class Yacht {
      * 'mark passing algorithm'
      */
     private void checkMarkRounding(CompoundMark currentMark) {
-        distanceToNextMark = calcDistanceToNextMark();
+        distanceToCurrentMark = calcDistanceToCurrentMark();
         CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
         CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
 
         //1 TEST FOR ENTERING THE ROUNDING DISTANCE
-        if (distanceToNextMark < ROUNDING_DISTANCE) {
+        if (distanceToCurrentMark < ROUNDING_DISTANCE) {
             hasEnteredRoundingZone = true;
         }
 
@@ -239,15 +246,17 @@ public class Yacht {
             if (GeoUtility
                 .isPointInTriangle(lastLocation, location, prevMark.getMarks().get(0),
                     thisCurrentMark)) {
-                if (hasPassedFirstLine && hasEnteredRoundingZone) {
-                    currentMarkSeqID++;
-                    hasPassedFirstLine = false;
-                    hasEnteredRoundingZone = false;
-                    hasPassedThroughGate = false;
-                    logMarkRounding(currentMark);
-                    break;
-                }
+                hasPassedSecondLine = true;
             }
+        }
+
+        if (hasPassedSecondLine && hasPassedFirstLine && hasEnteredRoundingZone) {
+            currentMarkSeqID++;
+            hasPassedFirstLine = false;
+            hasPassedSecondLine = false;
+            hasEnteredRoundingZone = false;
+            hasPassedThroughGate = false;
+            logMarkRounding(currentMark);
         }
     }
 
@@ -272,8 +281,21 @@ public class Yacht {
             }
         }
 
+        Boolean prevMarkSide = GeoUtility.isClockwise(currentMark.getSubMark(1),
+            currentMark.getSubMark(2),
+            GameState.getMarkOrder().getPreviousMark(currentMarkSeqID).getSubMark(1));
+
+        Boolean nextMarkSide = GeoUtility.isClockwise(currentMark.getSubMark(1),
+            currentMark.getSubMark(2),
+            GameState.getMarkOrder().getNextMark(currentMarkSeqID).getSubMark(1));
+
         if (hasPassedThroughGate) {
-            checkMarkRounding(currentMark);
+            if (prevMarkSide == nextMarkSide) {
+                checkMarkRounding(currentMark);
+            } else {
+                currentMarkSeqID++;
+                logMarkRounding(currentMark);
+            }
         }
     }
 
@@ -291,7 +313,10 @@ public class Yacht {
                 currentMark.getSubMark(2),
                 previousMark.getSubMark(1));
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
+                currentMarkSeqID++;
+                finishedRace = true;
                 logMarkRounding(currentMark);
+                System.out.println("YAY YOU FINISHED!");
                 // TODO: 8/08/17 wmu16 - Do something!
             }
         }
@@ -376,7 +401,6 @@ public class Yacht {
     }
 
     private void turnTowardsHeading(Double newHeading) {
-        System.out.println(newHeading);
         if (heading < 90 && newHeading > 270) {
             adjustHeading(-TURN_STEP);
         } else {
@@ -566,8 +590,8 @@ public class Yacht {
         this.velocity = velocity;
     }
 
-    public Double getDistanceToNextMark() {
-        return distanceToNextMark;
+    public Double getDistanceToCurrentMark() {
+        return distanceToCurrentMark;
     }
 
     public void updateLocation(double lat, double lng, double heading, double velocity) {
