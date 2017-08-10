@@ -48,7 +48,7 @@ public class Yacht {
     private Integer legNumber = 0;
 
     //SERVER SIDE
-    private final Double TURN_STEP = 5.0;
+    private final Double TURN_STEP = 3.0;
     private Double lastHeading;
     private Boolean sailIn;
     private GeoPoint location;
@@ -102,6 +102,7 @@ public class Yacht {
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
         Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000;
+        // TODO: 10/08/17 ajm412: this acceleration stuff should be its own method, and shouldn't have all these magic numbers, could possibly be modelled better.
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
@@ -112,7 +113,6 @@ public class Yacht {
             }
 
         } else { // Deceleration
-
             if (velocity > 0d) {
                 if (maxBoatSpeed != 0d) {
                     velocity -= maxBoatSpeed / 600;
@@ -126,10 +126,7 @@ public class Yacht {
         }
 
         if (isAuto) {
-            turnTowardsHeading(autoHeading);
-            if (Math.abs(heading - autoHeading) <= 5) {
-                isAuto = false;
-            }
+            runAutoPilot();
         }
 
         //UPDATE BOAT LOCATION
@@ -143,7 +140,6 @@ public class Yacht {
 
         // TODO: 3/08/17 wmu16 - Implement line cross check here
     }
-
 
     /**
      * Calculates the distance to the next mark (closest of the two if a gate mark).
@@ -164,6 +160,12 @@ public class Yacht {
         }
     }
 
+    /**
+     * Adjusts the heading of the boat by a given amount, while recording the boats
+     * last heading.
+     *
+     * @param amount the amount by which to adjust the boat heading.
+     */
     public void adjustHeading(Double amount) {
         Double newVal = heading + amount;
         lastHeading = heading;
@@ -171,17 +173,46 @@ public class Yacht {
     }
 
     /**
-     * Should tell boat to auto pilot towards the autopilot heading.
+     * Swaps the boats direction from one side of the wind to the other.
      */
     public void tackGybe(Double windDirection) {
         Double normalizedHeading = normalizeHeading();
-        setAutoPilot(-2 * normalizedHeading);
+        Double newVal = (-2 * normalizedHeading) + heading;
+        //newVal += heading;
+        Double newHeading = (double) Math.floorMod(newVal.longValue(), 360L);
+        setAutoPilot(newHeading);
     }
 
+    /**
+     * Enables the boats auto pilot feature, which will move the boat towards a given heading.
+     * @param thisHeading The heading to move the boat towards.
+     */
     private void setAutoPilot(Double thisHeading) {
         isAuto = true;
-        Double newVal = heading + thisHeading;
-        autoHeading = (double) Math.floorMod(newVal.longValue(), 360L);
+        autoHeading = thisHeading;
+    }
+
+    /**
+     * Disables the auto pilot function.
+     */
+    public void disableAutoPilot() {
+        isAuto = false;
+    }
+
+    /**
+     * Moves the boat towards the given heading when the auto pilot was set. Disables the auto pilot
+     * in the event that the boat is within the range of 1 turn step of its goal.
+     */
+    private void runAutoPilot() {
+        if (autoHeading == null) {
+            isAuto = false;
+            // TODO: 10/08/17 possibly throw some sort of exception here maybe? autopilot shouldn't be true if there's no heading.
+        }
+        turnTowardsHeading(autoHeading);
+        if (Math.abs(heading - autoHeading)
+            <= TURN_STEP) { //Cancel when within 1 turn step of target.
+            isAuto = false;
+        }
     }
 
     public void toggleSailIn() {
@@ -231,6 +262,7 @@ public class Yacht {
     }
 
     public void turnToVMG() {
+        // TODO: 10/08/17 ajm412: The way this works is absolute rubbish. Needs to determine upwind/downwind, then which side of the wind, then move to the correct values.
         Double normalizedHeading = normalizeHeading();
         Double optimalHeading;
         HashMap<Double, Double> optimalPolarMap;
@@ -242,27 +274,37 @@ public class Yacht {
             optimalPolarMap = PolarTable.getOptimalUpwindVMG(GameState.getWindSpeedKnots());
             optimalHeading = optimalPolarMap.keySet().iterator().next();
         }
-        // Take optimal heading and turn into correct
+
+        // Take optimal heading and turn into a boat heading rather than a wind heading.
         optimalHeading =
             optimalHeading + (double) Math.floorMod(GameState.getWindDirection().longValue(), 360L);
 
-        turnTowardsHeading(optimalHeading);
-
+        setAutoPilot(optimalHeading);
     }
 
+    /**
+     * Takes a given heading and rotates the boat towards that heading.
+     * This does not care about being upwind or downwind, just which direction will reach a given
+     * heading faster.
+     *
+     * @param newHeading The heading to turn the yacht towards.
+     */
     private void turnTowardsHeading(Double newHeading) {
         System.out.println(newHeading);
-        if (heading < 90 && newHeading > 270) {
-            adjustHeading(-TURN_STEP);
+        Double newVal = heading - newHeading;
+        if (Math.floorMod(newVal.longValue(), 360L) > 180) {
+            adjustHeading(TURN_STEP);
         } else {
-            if (heading < newHeading) {
-                adjustHeading(TURN_STEP);
-            } else {
-                adjustHeading(-TURN_STEP);
-            }
+            adjustHeading(-TURN_STEP);
         }
     }
 
+    /**
+     * Returns a heading normalized for the wind direction. Heading direction into the wind is 0,
+     * directly away is 180.
+     *
+     * @return The normalized heading accounting for wind direction.
+     */
     private Double normalizeHeading() {
         Double normalizedHeading = heading - GameState.windDirection;
         normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360L);
@@ -431,7 +473,6 @@ public class Yacht {
         this.timeTillNext = timeTillNext;
     }
 
-
     public Color getColour() {
         return colour;
     }
@@ -439,7 +480,6 @@ public class Yacht {
     public void setColour(Color colour) {
         this.colour = colour;
     }
-
 
     public Double getVelocity() {
         return velocity;
