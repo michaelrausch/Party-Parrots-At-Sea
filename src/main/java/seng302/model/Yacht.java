@@ -176,11 +176,14 @@ public class Yacht {
      * Swaps the boats direction from one side of the wind to the other.
      */
     public void tackGybe(Double windDirection) {
-        Double normalizedHeading = normalizeHeading();
-        Double newVal = (-2 * normalizedHeading) + heading;
-        //newVal += heading;
-        Double newHeading = (double) Math.floorMod(newVal.longValue(), 360L);
-        setAutoPilot(newHeading);
+        if (isAuto) {
+            disableAutoPilot();
+        } else {
+            Double normalizedHeading = normalizeHeading();
+            Double newVal = (-2 * normalizedHeading) + heading;
+            Double newHeading = (double) Math.floorMod(newVal.longValue(), 360L);
+            setAutoPilot(newHeading);
+        }
     }
 
     /**
@@ -220,6 +223,7 @@ public class Yacht {
     }
 
     public void turnUpwind() {
+        disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
@@ -241,6 +245,7 @@ public class Yacht {
     }
 
     public void turnDownwind() {
+        disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
@@ -261,25 +266,36 @@ public class Yacht {
         }
     }
 
+    /**
+     * Takes the VMG from the polartable for upwind or downwind depending on the boats direction,
+     * and uses this to calculate a heading to move the yacht towards.
+     */
     public void turnToVMG() {
-        // TODO: 10/08/17 ajm412: The way this works is absolute rubbish. Needs to determine upwind/downwind, then which side of the wind, then move to the correct values.
-        Double normalizedHeading = normalizeHeading();
-        Double optimalHeading;
-        HashMap<Double, Double> optimalPolarMap;
-
-        if (normalizedHeading >= 90 && normalizedHeading <= 270) { // Downwind
-            optimalPolarMap = PolarTable.getOptimalDownwindVMG(GameState.getWindSpeedKnots());
-            optimalHeading = optimalPolarMap.keySet().iterator().next();
+        if (isAuto) {
+            disableAutoPilot();
         } else {
-            optimalPolarMap = PolarTable.getOptimalUpwindVMG(GameState.getWindSpeedKnots());
+            Double normalizedHeading = normalizeHeading();
+            Double optimalHeading;
+            HashMap<Double, Double> optimalPolarMap;
+
+            if (normalizedHeading >= 90 && normalizedHeading <= 270) { // Downwind
+                optimalPolarMap = PolarTable.getOptimalDownwindVMG(GameState.getWindSpeedKnots());
+            } else {
+                optimalPolarMap = PolarTable.getOptimalUpwindVMG(GameState.getWindSpeedKnots());
+            }
             optimalHeading = optimalPolarMap.keySet().iterator().next();
+
+            if (normalizedHeading > 180) {
+                optimalHeading = 360 - optimalHeading;
+            }
+
+            // Take optimal heading and turn into a boat heading rather than a wind heading.
+            optimalHeading =
+                optimalHeading + (double) Math
+                    .floorMod(GameState.getWindDirection().longValue(), 360L);
+
+            setAutoPilot(optimalHeading);
         }
-
-        // Take optimal heading and turn into a boat heading rather than a wind heading.
-        optimalHeading =
-            optimalHeading + (double) Math.floorMod(GameState.getWindDirection().longValue(), 360L);
-
-        setAutoPilot(optimalHeading);
     }
 
     /**
@@ -290,7 +306,6 @@ public class Yacht {
      * @param newHeading The heading to turn the yacht towards.
      */
     private void turnTowardsHeading(Double newHeading) {
-        System.out.println(newHeading);
         Double newVal = heading - newHeading;
         if (Math.floorMod(newVal.longValue(), 360L) > 180) {
             adjustHeading(TURN_STEP);
