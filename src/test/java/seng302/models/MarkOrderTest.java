@@ -42,9 +42,6 @@ public class MarkOrderTest {
     @Test
     public void testGetNextMark() {
         currentSeqID = 4;
-        for (CompoundMark mark : markOrder.getMarkOrder()) {
-            System.out.println(mark.getName());
-        }
         CompoundMark nextMark = markOrder.getMarkOrder().get(4 + 1);
         assertEquals(nextMark, markOrder.getNextMark(currentSeqID));
 
