@@ -1,14 +1,5 @@
 package seng302.model;
 
-import static seng302.utilities.GeoUtility.getGeoCoordinate;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
@@ -18,6 +9,15 @@ import seng302.gameServer.GameState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import static seng302.utilities.GeoUtility.getGeoCoordinate;
 
 /**
  * Yacht class for the racing boat.
@@ -33,8 +33,9 @@ public class Yacht {
     }
 
     private static final Double ROUNDING_DISTANCE = 15d; // TODO: 3/08/17 wmu16 - Look into this value further
-    public static final Double MARK_COLLISION_DISTANCE = ROUNDING_DISTANCE - 8d;
-    private static final Double BOUNCE_FACTOR = 0.0001;
+    public static final Double MARK_COLLISION_DISTANCE = 15d;
+    public static final Double YACHT_COLLISION_DISTANCE = 25.0;
+    private static final Double BOUNCE_DISTANCE = 20.0;
     private static final Integer COLLISION_UPDATE_INTERVAL = 100;
 
     //BOTH AFAIK
@@ -184,27 +185,13 @@ public class Yacht {
      * @return The boats new position
      */
     private GeoPoint calculateBounceBack(GeoPoint collidedWith){
-        Double lat = location.getLat();
-        Double lon = location.getLng();
-
         Double heading = GeoUtility.getBearing(location, collidedWith);
 
+        // Invert heading
+        heading -= 180;
+        Integer newHeading = Math.floorMod(heading.intValue(), 360);
 
-        if (heading >= 0 && heading <= 180){
-            lat -= BOUNCE_FACTOR;
-        }
-        else{
-            lat += BOUNCE_FACTOR;
-        }
-
-        if (heading >= 90 && heading <= 360-90){
-            lon += BOUNCE_FACTOR;
-        }
-        else{
-            lon -= BOUNCE_FACTOR;
-        }
-
-        return new GeoPoint(lat, lon);
+        return GeoUtility.getGeoCoordinate(location, newHeading.doubleValue(), BOUNCE_DISTANCE);
     }
 
 
@@ -539,12 +526,12 @@ public class Yacht {
      * @return yacht which collided with this yacht
      */
     private Yacht checkCollision(GeoPoint calculatedPoint) {
-        Double COLLISIONFACTOR = 25.0;  // Collision detection in meters
+          // Collision detection in meters
 
         for (Yacht yacht : GameState.getYachts().values()) {
             if (yacht != this) {
                 Double distance = GeoUtility.getDistance(yacht.getLocation(), calculatedPoint);
-                if (distance < COLLISIONFACTOR) {
+                if (distance < YACHT_COLLISION_DISTANCE) {
                     return yacht;
                 }
             }
