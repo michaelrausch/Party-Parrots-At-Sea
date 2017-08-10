@@ -178,7 +178,6 @@ public class GameClient {
                     break;
 
                 case BOAT_XML:
-//                    System.out.println("GOT SUM BOATS YAY :)");
                     allBoatsMap = XMLParser.parseBoats(
                         StreamParser.extractXmlMessage(packet)
                     );

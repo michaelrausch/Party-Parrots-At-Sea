@@ -21,7 +21,7 @@ import java.util.*;
  * Class to hold the order of the marks in the race.
  */
 public class MarkOrder {
-    private List<Mark> raceMarkOrder;
+    private List<CompoundMark> raceMarkOrder;
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
     private Set<Mark> allMarks;
 
@@ -33,7 +33,7 @@ public class MarkOrder {
      * @return An ordered list of marks in the race
      *         OR null if the mark order could not be loaded
      */
-    public List<Mark> getMarkOrder(){
+    public List<CompoundMark> getMarkOrder(){
         if (raceMarkOrder == null){
             logger.warn("Race order accessed but not instantiated");
             return null;
@@ -43,26 +43,35 @@ public class MarkOrder {
     }
 
     /**
-     * Returns the mark in the race after the previous mark
-     * @param position The current race position
-     * @return the next race position
-     *         OR null if there is no position
+     * @param seqID The seqID of the current mark the boat is heading to
+     * @return A Boolean indicating if this coming mark is the last one (finish line)
      */
-    public RacePosition getNextPosition(RacePosition position){
-        Mark previousMark = position.getNextMark();
-        Mark nextMark;
+    public Boolean isLastMark(Integer seqID) {
+        return seqID == raceMarkOrder.size() - 1;
+    }
 
-        if (position.getPositionIndex() + 1 >= raceMarkOrder.size() - 1){
-            RacePosition nextRacePosition = new RacePosition(raceMarkOrder.size() - 1, null, previousMark);
-            nextRacePosition.setFinishingLeg();
+    /**
+     * @param currentSeqID The seqID of the current mark the boat is heading to
+     * @return The mark last passed
+     * @throws IndexOutOfBoundsException if there is no next mark.
+     *         Check seqID != 0 first
+     */
+    public CompoundMark getPreviousMark(Integer currentSeqID) throws IndexOutOfBoundsException{
+        return raceMarkOrder.get(currentSeqID - 1);
+    }
 
-            return nextRacePosition;
-        }
+    public CompoundMark getCurrentMark(Integer currentSeqID) {
+        return raceMarkOrder.get(currentSeqID);
+    }
 
-        Integer nextPositionIndex = position.getPositionIndex() + 1;
-        RacePosition nextRacePosition = new RacePosition(nextPositionIndex, raceMarkOrder.get(nextPositionIndex), previousMark);
-
-        return nextRacePosition;
+    /**
+     * @param currentSeqID The seqID of the current mark the boat is heading to
+     * @return The mark following the mark that the boat is heading to
+     * @throws IndexOutOfBoundsException if there is no next mark.
+     *         Check using {@link #isLastMark(Integer)}
+     */
+    public CompoundMark getNextMark(Integer currentSeqID) throws IndexOutOfBoundsException{
+        return raceMarkOrder.get(currentSeqID + 1);
     }
 
     public Set<Mark> getAllMarks(){
@@ -74,7 +83,7 @@ public class MarkOrder {
      * @param xml An AC35 RaceXML
      * @return An ordered list of marks in the race
      */
-    private List<Mark> loadRaceOrderFromXML(String xml){
+    private List<CompoundMark> loadRaceOrderFromXML(String xml){
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
@@ -95,26 +104,15 @@ public class MarkOrder {
             logger.debug("Loaded RaceXML for mark order");
             List<Corner> corners = data.getMarkSequence();
             Map<Integer, CompoundMark> marks = data.getCompoundMarks();
-            List<Mark> course = new ArrayList<>();
+            List<CompoundMark> course = new ArrayList<>();
 
             for (Corner corner : corners){
                 CompoundMark compoundMark = marks.get(corner.getCompoundMarkID());
-                course.add(compoundMark.getMarks().get(0));
+                course.add(compoundMark);
                 allMarks.addAll(compoundMark.getMarks());
             }
 
             return course;
-        }
-
-        return null;
-    }
-
-    /**
-     * @return The first position in the race
-     */
-    public RacePosition getFirstPosition(){
-        if (raceMarkOrder.size() > 0){
-            return new RacePosition(-1, raceMarkOrder.get(0), null);
         }
 
         return null;

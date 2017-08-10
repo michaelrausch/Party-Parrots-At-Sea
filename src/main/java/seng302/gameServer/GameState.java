@@ -1,5 +1,7 @@
 package seng302.gameServer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import javafx.application.Platform;
@@ -9,10 +11,9 @@ import seng302.model.GeoPoint;
 import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.Player;
 import seng302.model.Yacht;
-import seng302.gameServer.server.messages.BoatActionType;
+import seng302.model.mark.MarkOrder;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
-import seng302.model.mark.MarkOrder;
 import seng302.utilities.GeoUtility;
 
 /**
@@ -20,6 +21,8 @@ import seng302.utilities.GeoUtility;
  * Created by wmu16 on 10/07/17.
  */
 public class GameState implements Runnable {
+
+    private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
 
     private static Integer STATE_UPDATES_PER_SECOND = 60;
 
@@ -32,6 +35,7 @@ public class GameState implements Runnable {
     private static Map<Integer, Yacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
+    private static MarkOrder markOrder;
     private static long startTime;
     private static Set<Mark> marks;
 
@@ -61,8 +65,9 @@ public class GameState implements Runnable {
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         yachts = new HashMap<>();
+        markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
 
-        new Thread(this).start();
+        new Thread(this).start();   //Run the auto updates on the game state
 
         marks = new MarkOrder().getAllMarks();
     }
@@ -114,7 +119,11 @@ public class GameState implements Runnable {
         GameState.currentStage = currentStage;
     }
 
-    public static long getStartTime() {
+    public static MarkOrder getMarkOrder() {
+        return markOrder;
+    }
+
+    public static long getStartTime(){
         return startTime;
     }
 
