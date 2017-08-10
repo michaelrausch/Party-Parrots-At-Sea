@@ -10,6 +10,8 @@ import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
@@ -28,7 +30,12 @@ public class Yacht {
         void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
     }
 
-    private static final Double ROUNDING_DISTANCE = 15d; // TODO: 3/08/17 wmu16 - Look into this value further
+    private Logger logger = LoggerFactory.getLogger(Yacht.class);
+
+
+    private static final Integer SPEED_MULTIPLIER = 4;
+    private static final Double ROUNDING_DISTANCE = 50d; // TODO: 3/08/17 wmu16 - Look into this value further
+
 
     //BOTH AFAIK
     private String boatType;
@@ -39,16 +46,15 @@ public class Yacht {
     private String country;
 
     private Long estimateTimeAtFinish;
-    private Long lastMark;
+    private Integer currentMarkSeqID = 0;
     private Long markRoundTime;
-    private Double distanceToNextMark;
+    private Double distanceToCurrentMark;
     private Long timeTillNext;
-    private CompoundMark nextMark;
     private Double heading;
     private Integer legNumber = 0;
 
     //SERVER SIDE
-    private final Double TURN_STEP = 3.0;
+    private final Double TURN_STEP = 5.0;
     private Double lastHeading;
     private Boolean sailIn;
     private GeoPoint location;
@@ -60,8 +66,9 @@ public class Yacht {
     //MARK ROUNDING INFO
     private GeoPoint lastLocation;  //For purposes of mark rounding calculations
     private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
-    private Boolean hasPassedFirstLine; //The line extrapolated from the next mark to the current mark
-    private Boolean hasPassedSecondLine; //The line extrapolated from the last mark to the current mark
+    private Boolean hasPassedLine;
+    private Boolean hasPassedThroughGate;
+    private Boolean finishedRace;
 
     //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
@@ -88,8 +95,9 @@ public class Yacht {
         this.velocity = 0d;     //in mms-1
 
         this.hasEnteredRoundingZone = false;
-        this.hasPassedFirstLine = false;
-        this.hasPassedSecondLine = false;
+        this.hasPassedLine = false;
+        this.hasPassedThroughGate = false;
+        this.finishedRace = false;
     }
 
     /**
@@ -101,8 +109,7 @@ public class Yacht {
         Double windSpeedKnots = GameState.getWindSpeedKnots();
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000;
-        // TODO: 10/08/17 ajm412: this acceleration stuff should be its own method, and shouldn't have all these magic numbers, could possibly be modelled better.
+        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000 * SPEED_MULTIPLIER;
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
@@ -113,6 +120,7 @@ public class Yacht {
             }
 
         } else { // Deceleration
+
             if (velocity > 0d) {
                 if (maxBoatSpeed != 0d) {
                     velocity -= maxBoatSpeed / 600;
@@ -130,26 +138,29 @@ public class Yacht {
         }
 
         //UPDATE BOAT LOCATION
+        lastLocation = location;
         location = GeoUtility.getGeoCoordinate(location, heading, velocity * secondsElapsed);
 
         //CHECK FOR MARK ROUNDING
-        distanceToNextMark = calcDistanceToNextMark();
-        if (distanceToNextMark < ROUNDING_DISTANCE) {
-            hasEnteredRoundingZone = true;
+        if (!finishedRace) {
+            checkForLegProgression();
         }
 
         // TODO: 3/08/17 wmu16 - Implement line cross check here
     }
 
+
     /**
-     * Calculates the distance to the next mark (closest of the two if a gate mark).
-     *
+     * Calculates the distance to the next mark (closest of the two if a gate mark). For purposes
+     * of mark rounding
      * @return A distance in metres. Returns -1 if there is no next mark
+     * @throws IndexOutOfBoundsException If the next mark is null (ie the last mark in the race)
+     *         Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
      */
-    public Double calcDistanceToNextMark() {
-        if (nextMark == null) {
-            return -1d;
-        } else if (nextMark.isGate()) {
+    public Double calcDistanceToCurrentMark() throws IndexOutOfBoundsException {
+        CompoundMark nextMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
+
+        if (nextMark.isGate()) {
             Mark sub1 = nextMark.getSubMark(1);
             Mark sub2 = nextMark.getSubMark(2);
             Double distance1 = GeoUtility.getDistance(location, sub1);
@@ -159,6 +170,144 @@ public class Yacht {
             return GeoUtility.getDistance(location, nextMark.getSubMark(1));
         }
     }
+
+
+    /**
+     * 4 Different cases of progression in the race
+     * 1 - Passing the start line
+     * 2 - Passing any in-race Gate
+     * 3 - Passing any in-race Mark
+     * 4 - Passing the finish line
+     */
+    private void checkForLegProgression() {
+        CompoundMark currentMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
+        if (currentMarkSeqID == 0) {
+            checkStartLineCrossing(currentMark);
+        } else if (GameState.getMarkOrder().isLastMark(currentMarkSeqID)) {
+            checkFinishLineCrossing(currentMark);
+        } else if (currentMark.isGate()) {
+            checkGateRounding(currentMark);
+        } else {
+            checkMarkRounding(currentMark);
+        }
+    }
+
+    /**
+     * If we pass the start line gate in the correct direction, progress
+     *
+     * @param currentMark The current gate
+     */
+    private void checkStartLineCrossing(CompoundMark currentMark) {
+        Mark mark1 = currentMark.getSubMark(1);
+        Mark mark2 = currentMark.getSubMark(2);
+        CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
+
+        Integer crossedLine = GeoUtility.checkCrossedLine(mark1, mark2, lastLocation, location);
+        if (crossedLine > 0) {
+            Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, nextMark.getMidPoint());
+            if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
+                currentMarkSeqID++;
+                logMarkRounding(currentMark);
+            }
+        }
+    }
+
+
+    /**
+     * This algorithm checks for mark rounding. And increments the currentMarSeqID number attribute
+     * of the yacht if so.
+     * A visual representation of this algorithm can be seen on the Wiki under
+     * 'mark passing algorithm'
+     */
+    private void checkMarkRounding(CompoundMark currentMark) {
+        distanceToCurrentMark = calcDistanceToCurrentMark();
+        GeoPoint nextPoint = GameState.getMarkOrder().getNextMark(currentMarkSeqID).getMidPoint();
+        GeoPoint prevPoint = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID)
+            .getMidPoint();
+        GeoPoint midPoint = GeoUtility.getDirtyMidPoint(nextPoint, prevPoint);
+
+        //1 TEST FOR ENTERING THE ROUNDING DISTANCE
+        if (distanceToCurrentMark < ROUNDING_DISTANCE) {
+            hasEnteredRoundingZone = true;
+        }
+
+        //In case current mark is a gate, loop through all marks just in case
+        for (Mark thisCurrentMark : currentMark.getMarks()) {
+            if (GeoUtility.isPointInTriangle(lastLocation, location, midPoint, thisCurrentMark)) {
+                hasPassedLine = true;
+            }
+        }
+
+        if (hasPassedLine && hasEnteredRoundingZone) {
+            currentMarkSeqID++;
+            hasPassedLine = false;
+            hasEnteredRoundingZone = false;
+            hasPassedThroughGate = false;
+            logMarkRounding(currentMark);
+        }
+    }
+
+
+    /**
+     * Checks if a gate line has been crossed and in the correct direction
+     *
+     * @param currentMark The current gate
+     */
+    private void checkGateRounding(CompoundMark currentMark) {
+        Mark mark1 = currentMark.getSubMark(1);
+        Mark mark2 = currentMark.getSubMark(2);
+        CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
+        CompoundMark nextMark = GameState.getMarkOrder().getNextMark(currentMarkSeqID);
+
+        Integer crossedLine = GeoUtility.checkCrossedLine(mark1, mark2, lastLocation, location);
+
+        //We have crossed the line
+        if (crossedLine > 0) {
+            Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
+
+            //Check we cross the line in the correct direction
+            if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
+                hasPassedThroughGate = true;
+            }
+        }
+
+        Boolean prevMarkSide = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
+        Boolean nextMarkSide = GeoUtility.isClockwise(mark1, mark2, nextMark.getMidPoint());
+
+        if (hasPassedThroughGate) {
+            //Check if we need to round this gate after passing through
+            if (prevMarkSide == nextMarkSide) {
+                checkMarkRounding(currentMark);
+            } else {
+                currentMarkSeqID++;
+                logMarkRounding(currentMark);
+            }
+        }
+    }
+
+    /**
+     * If we pass the finish gate in the correct direction
+     *
+     * @param currentMark The current gate
+     */
+    private void checkFinishLineCrossing(CompoundMark currentMark) {
+        Mark mark1 = currentMark.getSubMark(1);
+        Mark mark2 = currentMark.getSubMark(2);
+        CompoundMark prevMark = GameState.getMarkOrder().getPreviousMark(currentMarkSeqID);
+
+        Integer crossedLine = GeoUtility.checkCrossedLine(mark1, mark2, lastLocation, location);
+        if (crossedLine > 0) {
+            Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
+            if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
+                currentMarkSeqID++;
+                finishedRace = true;
+                logMarkRounding(currentMark);
+                System.out.println("YAY YOU FINISHED!");
+                // TODO: 8/08/17 wmu16 - Do something!
+            }
+        }
+    }
+
 
     /**
      * Adjusts the heading of the boat by a given amount, while recording the boats
@@ -434,14 +583,6 @@ public class Yacht {
         this.lastMarkRounded = lastMarkRounded;
     }
 
-    public void setNextMark(CompoundMark nextMark) {
-        this.nextMark = nextMark;
-    }
-
-    public CompoundMark getNextMark(){
-        return nextMark;
-    }
-
     public GeoPoint getLocation() {
         return location;
     }
@@ -488,6 +629,7 @@ public class Yacht {
         this.timeTillNext = timeTillNext;
     }
 
+
     public Color getColour() {
         return colour;
     }
@@ -495,6 +637,7 @@ public class Yacht {
     public void setColour(Color colour) {
         this.colour = colour;
     }
+
 
     public Double getVelocity() {
         return velocity;
@@ -504,8 +647,8 @@ public class Yacht {
         this.velocity = velocity;
     }
 
-    public Double getDistanceToNextMark() {
-        return distanceToNextMark;
+    public Double getDistanceToCurrentMark() {
+        return distanceToCurrentMark;
     }
 
     public void updateLocation(double lat, double lng, double heading, double velocity) {
@@ -516,6 +659,17 @@ public class Yacht {
         for (YachtLocationListener yll : locationListeners) {
             yll.notifyLocation(this, lat, lng, heading, velocity);
         }
+    }
+
+    private void logMarkRounding(CompoundMark currentMark) {
+        String typeString = "mark";
+        if (currentMark.isGate()) {
+            typeString = "gate";
+        }
+        System.out.println(
+            "(" + currentMarkSeqID + ") Passed " + typeString + ": " + currentMark.getMarks().get(0)
+                .getName()
+                + " ID(" + currentMark.getId() + ")");
     }
 
     public void addLocationListener (YachtLocationListener listener) {
