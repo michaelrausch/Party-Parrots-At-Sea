@@ -40,9 +40,9 @@ public class Yacht extends Observable {
     private static final Double ROUNDING_DISTANCE = 50d; // TODO: 3/08/17 wmu16 - Look into this value further
     public static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
-    private static final Double BOUNCE_DISTANCE = 20.0;
+    private static final Double BOUNCE_DISTANCE_MARK = 20.0;
+    private static final Double BOUNCE_DISTANCE_YACHT = 30.0;
     private static final Integer COLLISION_UPDATE_INTERVAL = 100;
-
 
 
     //BOTH AFAIK
@@ -106,11 +106,12 @@ public class Yacht extends Observable {
         this.finishedRace = false;
     }
 
-    public Mark markCollidedWith(){
+    public Mark markCollidedWith() {
         Set<Mark> marksInRace = GameState.getMarks();
 
-        for (Mark mark : marksInRace){
-            if (GeoUtility.getDistance(getLocation(), new GeoPoint(mark.getLat(), mark.getLng())) <=  MARK_COLLISION_DISTANCE){
+        for (Mark mark : marksInRace) {
+            if (GeoUtility.getDistance(getLocation(), new GeoPoint(mark.getLat(), mark.getLng()))
+                <= MARK_COLLISION_DISTANCE) {
                 return mark;
             }
         }
@@ -154,16 +155,18 @@ public class Yacht extends Observable {
         Double metersCovered = velocity * secondsElapsed;
         GeoPoint calculatedPoint = getGeoCoordinate(location, heading, metersCovered);
 
-        if (shouldDoCollisionUpdate()){
+        if (shouldDoCollisionUpdate()) {
             Yacht collidedYacht = checkCollision(calculatedPoint);
 
             if (collidedYacht != null) {
                 location = calculateBounceBack(new GeoPoint(collidedYacht.getLocation().getLat(),
-                    collidedYacht.getLocation().getLng()));
+                    collidedYacht.getLocation().getLng()), BOUNCE_DISTANCE_YACHT);
                 setChanged();
                 notifyObservers(this.sourceId);
             } else if (markCollidedWith() != null) {
-                location = calculateBounceBack(new GeoPoint(markCollidedWith().getLat(), markCollidedWith().getLng()));
+                location = calculateBounceBack(
+                    new GeoPoint(markCollidedWith().getLat(), markCollidedWith().getLng()),
+                    BOUNCE_DISTANCE_MARK);
                 setChanged();
                 notifyObservers(this.sourceId);
             } else {
@@ -171,8 +174,7 @@ public class Yacht extends Observable {
             }
 
             lastCollisionUpdate = System.currentTimeMillis();
-        }
-        else {
+        } else {
             location = calculatedPoint;
         }
 
@@ -187,7 +189,7 @@ public class Yacht extends Observable {
     /**
      * @return true if COLLISION_UPDATE_INTERVAL has elapsed since the last collision update
      */
-    private Boolean shouldDoCollisionUpdate(){
+    private Boolean shouldDoCollisionUpdate() {
         if (lastCollisionUpdate == null) {
             lastCollisionUpdate = System.currentTimeMillis();
         }
@@ -197,25 +199,27 @@ public class Yacht extends Observable {
 
     /**
      * Calculate the new position of the boat after it has had a collision
+     *
      * @return The boats new position
      */
-    private GeoPoint calculateBounceBack(GeoPoint collidedWith){
+    private GeoPoint calculateBounceBack(GeoPoint collidedWith, Double bounceDistance) {
         Double heading = GeoUtility.getBearing(location, collidedWith);
 
         // Invert heading
         heading -= 180;
         Integer newHeading = Math.floorMod(heading.intValue(), 360);
 
-        return GeoUtility.getGeoCoordinate(location, newHeading.doubleValue(), BOUNCE_DISTANCE);
+        return GeoUtility.getGeoCoordinate(location, newHeading.doubleValue(), bounceDistance);
     }
 
 
     /**
      * Calculates the distance to the next mark (closest of the two if a gate mark). For purposes
      * of mark rounding
+     *
      * @return A distance in metres. Returns -1 if there is no next mark
      * @throws IndexOutOfBoundsException If the next mark is null (ie the last mark in the race)
-     *         Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
+     * Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
      */
     public Double calcDistanceToCurrentMark() throws IndexOutOfBoundsException {
         CompoundMark nextMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
@@ -686,12 +690,23 @@ public class Yacht extends Observable {
      * @return yacht which collided with this yacht
      */
     private Yacht checkCollision(GeoPoint calculatedPoint) {
-          // Collision detection in meters
+        // Basic right of way calculation. (Might be wrong)
+        Boolean rightOfWay;
+        Double windDirection = GameState.getWindDirection();
+        if (windDirection >= 180) {
+            Double angle = windDirection - 180;
+            rightOfWay = getHeading() > windDirection || getHeading() <= angle;
+        } else {
+            Double angle = 180 - windDirection;
+            rightOfWay = getHeading() > windDirection && getHeading() < 360 - angle;
+        }
 
         for (Yacht yacht : GameState.getYachts().values()) {
             if (yacht != this) {
                 Double distance = GeoUtility.getDistance(yacht.getLocation(), calculatedPoint);
-                if (distance < YACHT_COLLISION_DISTANCE) {
+                if (distance < YACHT_COLLISION_DISTANCE && !rightOfWay) {
+                    return this;
+                } else if (distance < YACHT_COLLISION_DISTANCE && rightOfWay) {
                     return yacht;
                 }
             }

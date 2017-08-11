@@ -619,7 +619,6 @@ public class GameView extends Pane {
      * @param collisionPoint yacht collision point
      */
     public void drawCollision(GeoPoint collisionPoint) {
-        System.out.println("ran");
         Platform.runLater(() -> {
             Point2D point = findScaledXY(collisionPoint);
             double circleRadius = 0.0;

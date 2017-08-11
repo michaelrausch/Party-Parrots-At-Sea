@@ -611,8 +611,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param subjectId source id of offending yacht
      */
     public void showCollision(Long subjectId) {
-        System.out.println("showcollision " + subjectId);
-        System.out.println(participants.get((int) (long) subjectId).getLocation());
         gameView.drawCollision(participants.get((int) (long) subjectId).getLocation());
     }
 }
