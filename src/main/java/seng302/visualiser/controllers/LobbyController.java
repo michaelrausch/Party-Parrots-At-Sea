@@ -1,8 +1,7 @@
 package seng302.visualiser.controllers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -16,6 +15,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.model.RaceState;
+import seng302.visualiser.GameClient;
 
 /**
  * A class describing the actions of the lobby screen
@@ -72,6 +73,12 @@ public class LobbyController {
     @FXML
     private ImageView eighthImageView;
 
+    @FXML
+    private Text timeUntilStart;
+
+    @FXML
+    private Text courseNameText;
+
     private List<ObservableList<String>> competitors = new ArrayList<>();
     private ObservableList<String> firstCompetitor = FXCollections.observableArrayList();
     private ObservableList<String> secondCompetitor = FXCollections.observableArrayList();
@@ -84,6 +91,7 @@ public class LobbyController {
 
     private List<ImageView> imageViews = new ArrayList<>();
     private List<ListView> listViews;
+    private RaceState raceState;
 
     private int MAX_NUM_PLAYERS = 8;
 
@@ -103,6 +111,8 @@ public class LobbyController {
             fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
 
         initialiseImageView();
+
+        timeUntilStart.setText("");
     }
 
     private void initialiseListView() {
@@ -149,9 +159,12 @@ public class LobbyController {
 
     @FXML
     public void readyButtonPressed() {
-        GameState.setCurrentStage(GameStages.RACING);
-        for (LobbyCloseListener readyListener : lobbyListeners)
-            readyListener.notify(CloseStatus.READY);
+        GameState.setCurrentStage(GameStages.PRE_RACE);
+        return;
+        // Do countdown logic here
+
+        //for (LobbyCloseListener readyListener : lobbyListeners)
+        //    readyListener.notify(CloseStatus.READY);
     }
 
 
@@ -184,6 +197,10 @@ public class LobbyController {
         lobbyIpText.setText(title);
     }
 
+    public void setCourseName(String courseName){
+        courseNameText.setText(courseName);
+    }
+
     public void addCloseListener(LobbyCloseListener listener) {
         lobbyListeners.add(listener);
     }
@@ -194,6 +211,12 @@ public class LobbyController {
             Platform.runLater(this::initialiseListView)
         );
         Platform.runLater(this::initialiseListView);
+    }
+
+    public void updateRaceState(RaceState raceState){
+        System.out.println(raceState.getTimeTillStart());
+        this.raceState = raceState;
+        timeUntilStart.setText(raceState.getTimeTillStartStr());
     }
 
     public void disableReadyButton () {

@@ -135,7 +135,6 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-
                 for (ServerToClientThread serverToClientThread : serverToClientThreads) {
                     serverToClientThread.sendRaceStatusMessage();
                 }

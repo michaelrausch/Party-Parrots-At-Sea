@@ -20,7 +20,7 @@ public class RaceState {
     private long raceTime;
     private long expectedStartTime;
     private boolean isRaceStarted = false;
-//    long timeTillStart;
+    long timeTillStart;
 
     public RaceState() {
     }
@@ -38,8 +38,7 @@ public class RaceState {
     }
 
     public void updateState (RaceStartData data) {
-//        this.timeTillStart = data.getRaceStartTime();
-        System.out.println(data.getRaceStartTime());
+        this.timeTillStart = data.getRaceStartTime();
     }
 
     public String getRaceTimeStr () {
@@ -48,6 +47,10 @@ public class RaceState {
 
     public long getTimeTillStart () {
         return (expectedStartTime - raceTime) / 1000;
+    }
+
+    public String getTimeTillStartStr () {
+        return DATE_TIME_FORMAT.format(getTimeTillStart() * 1000);
     }
 
     public double getWindSpeed() {

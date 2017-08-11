@@ -62,6 +62,8 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
 
+        startTime = System.currentTimeMillis() + 20000;
+
         new Thread(this).start();   //Run the auto updates on the game state
     }
 
@@ -101,10 +103,6 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
-        if (currentStage == GameStages.RACING){
-            startTime = System.currentTimeMillis();
-        }
-
         GameState.currentStage = currentStage;
     }
 
@@ -195,7 +193,7 @@ public class GameState implements Runnable {
             } catch (InterruptedException e) {
                 System.out.println("[GameState] interrupted exception");
             }
-            if (currentStage == GameStages.PRE_RACE) {
+            if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.LOBBYING) {
                 update();
             }
 

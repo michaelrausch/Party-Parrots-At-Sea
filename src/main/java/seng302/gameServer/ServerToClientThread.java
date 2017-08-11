@@ -228,7 +228,7 @@ public class ServerToClientThread implements Runnable, Observer {
         }
 
         //@TODO calculate lat/lng values
-        xml.setRegatta(new Regatta("RaceVision Test Game", 57.6679590, 11.8503233));
+        xml.setRegatta(new Regatta("Party Parrot Test Server", "Bermuda Test Course",  57.6679590, 11.8503233));
         xml.setRace(race);
 
         XMLMessage xmlMessage;
@@ -246,6 +246,7 @@ public class ServerToClientThread implements Runnable, Observer {
     }
 
     public void updateClient() {
+        sendRaceStatusMessage();
         sendBoatLocationPackets();
         updateClient = true;
     }
@@ -376,6 +377,14 @@ public class ServerToClientThread implements Runnable, Observer {
         sendMessage(new RaceStatusMessage(1, raceStatus, GameState.getStartTime(), GameState.getWindDirection(),
             GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
             RaceType.MATCH_RACE, 1, boatSubMessages));
+
+        if (GameState.getCurrentStage() == GameStages.PRE_RACE || GameState.getCurrentStage() == GameStages.LOBBYING){
+            Long raceStartTime = GameState.getStartTime();
+
+            sendMessage(new RaceStartStatusMessage(1, raceStartTime ,
+                    1, RaceStartNotificationType.SET_RACE_START_TIME));
+        }
+
     }
 
     public Socket getSocket() {

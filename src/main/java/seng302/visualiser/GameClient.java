@@ -45,6 +45,7 @@ public class GameClient {
     private RegattaXMLData regattaData;
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
+    private LobbyController lobbyController;
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
@@ -67,8 +68,10 @@ public class GameClient {
         LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.disableReadyButton();
-        lobbyController.setTitle("Connected to host - IP : " + ipAddress + " Port : " + portNumber);
+        lobbyController.setTitle(regattaData.getRegattaName());
+        lobbyController.setCourseName(regattaData.getCourseName());
         lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
+        this.lobbyController = lobbyController;
     }
 
     public void runAsHost(String ipAddress, Integer portNumber) {
@@ -82,7 +85,8 @@ public class GameClient {
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);
-        lobbyController.setTitle("Hosting Lobby - IP : " + ipAddress + " Port : " + portNumber);
+        lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
+        lobbyController.setCourseName(regattaData.getCourseName());
         lobbyController.addCloseListener(exitCause -> {
             if (exitCause == CloseStatus.READY) {
                 server.startGame();
@@ -90,6 +94,8 @@ public class GameClient {
                 loadStartScreen();
             }
         });
+
+        this.lobbyController = lobbyController;
     }
 
     private void loadStartScreen() {
@@ -151,13 +157,18 @@ public class GameClient {
             switch (packet.getType()) {
                 case RACE_STATUS:
                     processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
-                    startRaceIfAllDataReceived();
+
+                    if (raceState.getTimeTillStart() <= 5){
+                        startRaceIfAllDataReceived();
+                    }
+
                     break;
 
                 case REGATTA_XML:
                     regattaData = XMLParser.parseRegatta(
                         StreamParser.extractXmlMessage(packet)
                     );
+
                     raceState.setTimeZone(
                         TimeZone.getTimeZone(
                             ZoneId.ofOffset("UTC", ZoneOffset.ofHours(regattaData.getUtcOffset()))
@@ -189,6 +200,7 @@ public class GameClient {
 
                 case RACE_START_STATUS:
                     raceState.updateState(StreamParser.extractRaceStartStatus(packet));
+                    if (lobbyController != null) lobbyController.updateRaceState(raceState);
                     break;
 
                 case BOAT_LOCATION:
