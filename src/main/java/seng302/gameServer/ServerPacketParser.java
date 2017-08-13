@@ -10,11 +10,11 @@ import seng302.gameServer.server.messages.BoatAction;
 
 public class ServerPacketParser {
 
-    public static BoatActionType extractBoatAction(StreamPacket packet) {
+    public static BoatAction extractBoatAction(StreamPacket packet) {
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         long actionTypeValue = Message.bytesToLong(Arrays.copyOfRange(payload, 0, 1));
-        return BoatActionType.getType((int) actionTypeValue);
+        return BoatAction.getType((int) actionTypeValue);
     }
 
     public static ClientType extractClientType(StreamPacket packet){

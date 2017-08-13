@@ -7,7 +7,6 @@ import java.util.Map;
 import seng302.gameServer.server.messages.BoatAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.mark.MarkOrder;

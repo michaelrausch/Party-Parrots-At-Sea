@@ -15,7 +15,6 @@ import seng302.visualiser.ClientToServerThread;
 /**
  * Test for checking how regularly packets are sent from ClientToServer Thread.
  */
-//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RegularPacketsTest {
 
     private MainServerThread serverThread;
@@ -30,7 +29,7 @@ public class RegularPacketsTest {
     }
 
     @Test
-    public void Test1PacketsSentAtRegularIntervals () throws Exception {
+    public void packetsSentAtRegularIntervals () throws Exception {
         final double TEST_DISTANCE = 10.0;
         serverThread.startGame();
         SleepThreadMaxDelay();
@@ -51,7 +50,7 @@ public class RegularPacketsTest {
     }
 
     @Test
-    public void Test2ArbitraryPacketSentOnRelease() throws Exception {
+    public void testArbitraryPacketSent() throws Exception {
         serverThread.startGame();
         SleepThreadMaxDelay();
         Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
@@ -59,21 +58,6 @@ public class RegularPacketsTest {
         clientThread.sendBoatAction(BoatAction.SAILS_IN);
         SleepThreadMaxDelay();
         Assert.assertEquals(startState, !yacht.getSailIn());
-    }
-
-    @Test
-    public void Test3ArbitraryPacketSentOnPress() throws Exception {
-        serverThread.startGame();
-        SleepThreadMaxDelay();
-        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
-        double heading = yacht.getHeading();
-        double windDirection = GameState.getWindDirection();
-        Yacht testYacht = new Yacht("", 0, "", "", "", "");
-        testYacht.setHeading(heading);
-        testYacht.tackGybe(windDirection);
-        clientThread.sendBoatAction(BoatAction.TACK_GYBE);
-        SleepThreadMaxDelay();
-        Assert.assertEquals(testYacht.getHeading(), yacht.getHeading(), 1);
     }
 
     /**
@@ -90,7 +74,7 @@ public class RegularPacketsTest {
         serverThread.terminate();
         clientThread.setSocketToClose();
         GameState.setCurrentStage(GameStages.LOBBYING);
-        SleepThreadMaxDelay(); //Make sure socket is closed.
-        SleepThreadMaxDelay();
+        for (int i = 0; i<6; i++)
+            SleepThreadMaxDelay(); //Make sure socket is closed.
     }
 }

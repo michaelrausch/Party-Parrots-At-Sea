@@ -18,9 +18,17 @@ import java.util.zip.Checksum;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import seng302.model.stream.packets.StreamPacket;
+import javafx.scene.control.ButtonType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.ClientType;
 import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RegistrationRequestMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on

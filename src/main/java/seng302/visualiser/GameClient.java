@@ -14,8 +14,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
-import seng302.gameServer.server.messages.BoatActionMessage;
-import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.StreamPacket;
@@ -32,7 +30,8 @@ import seng302.visualiser.controllers.LobbyController.CloseStatus;
 import seng302.visualiser.controllers.RaceViewController;
 
 /**
- * Created by cir27 on 20/07/17.
+ * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
+ * with a JavaFX Pane to insert itself into.
  */
 public class GameClient {
 
@@ -49,10 +48,20 @@ public class GameClient {
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
+    /**
+     * Create an instance of the game client. Does not do anything untill run with runAsClient()
+     * runAsHost().
+     * @param holder The JavaFX Pane that the visual elements for the race will be inserted into.
+     */
     public GameClient(Pane holder) {
         this.holderPane = holder;
     }
 
+    /**
+     * Connect to a game at the given address and starts the visualiser.
+     * @param ipAddress IP to connect to.
+     * @param portNumber Port to connect to.
+     */
     public void runAsClient(String ipAddress, Integer portNumber) {
         try {
             socketThread = new ClientToServerThread(ipAddress, portNumber);
@@ -69,6 +78,11 @@ public class GameClient {
         lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
     }
 
+    /**
+     * Connect to a game as the host at the given address and starts the visualiser.
+     * @param ipAddress IP to connect to.
+     * @param portNumber Port to connect to.
+     */
     public void runAsHost(String ipAddress, Integer portNumber) {
         server = new MainServerThread();
         try {

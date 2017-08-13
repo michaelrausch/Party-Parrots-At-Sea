@@ -1,16 +1,12 @@
 package seng302.gameServer;
 
 
-import seng302.gameServer.server.messages.*;
-import seng302.model.Player;
-import seng302.model.Yacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.time.LocalDateTime;
@@ -22,6 +18,19 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatLocationMessage;
+import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.server.messages.BoatSubMessage;
+import seng302.gameServer.server.messages.ClientType;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RaceStatus;
+import seng302.gameServer.server.messages.RaceStatusMessage;
+import seng302.gameServer.server.messages.RaceType;
+import seng302.gameServer.server.messages.RegistrationResponseMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
+import seng302.gameServer.server.messages.XMLMessage;
+import seng302.gameServer.server.messages.XMLMessageSubType;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.PacketType;
@@ -29,16 +38,6 @@ import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.gameServer.server.messages.BoatAction;
-import seng302.gameServer.server.messages.BoatLocationMessage;
-import seng302.gameServer.server.messages.BoatStatus;
-import seng302.gameServer.server.messages.BoatSubMessage;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.RaceStatus;
-import seng302.gameServer.server.messages.RaceStatusMessage;
-import seng302.gameServer.server.messages.RaceType;
-import seng302.gameServer.server.messages.XMLMessage;
-import seng302.gameServer.server.messages.XMLMessageSubType;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -201,7 +200,7 @@ public class ServerToClientThread implements Runnable, Observer {
                         //System.out.println("RECEIVED A PACKET");
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
-                                BoatActionType actionType = ServerPacketParser
+                                BoatAction actionType = ServerPacketParser
                                         .extractBoatAction(
                                                 new StreamPacket(type, payloadLength, timeStamp, payload));
                                 GameState.updateBoat(sourceId, actionType);
