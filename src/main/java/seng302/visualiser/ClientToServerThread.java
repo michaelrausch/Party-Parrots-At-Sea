@@ -155,6 +155,7 @@ public class ClientToServerThread implements Runnable {
                     }
                 }
             } catch (ByteReadException e) {
+                e.printStackTrace();
                 closeSocket();
                 Platform.runLater(() -> {
                     Alert alert = new Alert(AlertType.ERROR);
