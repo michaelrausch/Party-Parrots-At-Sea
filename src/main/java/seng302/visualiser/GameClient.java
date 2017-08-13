@@ -215,6 +215,7 @@ public class GameClient {
      * Updates the position of a boat. Boat and position are given in the provided data.
      */
     private void updatePosition(PositionUpdateData positionData) {
+        raceView.getGameView().trackBoat();
         if (positionData.getType() == DeviceType.YACHT_TYPE) {
             if (allXMLReceived() && allBoatsMap.containsKey(positionData.getDeviceId())) {
                 Yacht yacht = allBoatsMap.get(positionData.getDeviceId());
@@ -306,11 +307,9 @@ public class GameClient {
                 //TODO Allow a zoom in and zoom out methods
                 case Z:  // zoom in
                     raceView.getGameView().zoomIn();
-                    System.out.println("Zoom in");
                     break;
                 case X:  // zoom out
                     raceView.getGameView().zoomOut();
-                    System.out.println("Zoom out");
                     break;
             }
         }

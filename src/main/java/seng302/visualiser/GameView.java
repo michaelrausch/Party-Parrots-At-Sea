@@ -88,20 +88,39 @@ public class GameView extends Pane {
     double scaleFactor = 1;
 
     public void zoomOut() {
-        scaleFactor = 0.95;
-        this.setScaleX(this.getScaleX() * scaleFactor);
-        this.setScaleY(this.getScaleY() * scaleFactor);
+        scaleFactor = 0.05;
+        this.setScaleX(this.getScaleX() - scaleFactor);
+        this.setScaleY(this.getScaleY() - scaleFactor);
     }
 
     public void zoomIn() {
-        scaleFactor =  1.05;
-        this.setScaleX(this.getScaleX() * scaleFactor);
-        this.setScaleY(this.getScaleY() * scaleFactor);
+        scaleFactor =  0.05;
+        this.setScaleX(this.getScaleX() + scaleFactor);
+        this.setScaleY(this.getScaleY() + scaleFactor);
     }
 
     private enum ScaleDirection {
         HORIZONTAL,
         VERTICAL
+    }
+
+    public void trackBoat() {
+        if (this.getScaleX() > 1) {
+            double x = boatObjects.get(playerYacht).getBoatLayoutX();
+            double y = boatObjects.get(playerYacht).getBoatLayoutY();
+//        System.out.println("x = " + x);
+//        System.out.println("y = " + y);
+//        this.setRotate(-playerYacht.getHeading());
+            Point2D displacementX = findScaledXY(maxLonPoint);
+            Point2D displacementY = findScaledXY(maxLatPoint);
+            this.setLayoutX(-x + 250 + canvasWidth/2);
+            this.setLayoutY(-y + canvasHeight/2);
+        } else {
+            this.setLayoutX(0);
+            this.setLayoutY(0);
+        }
+        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutX());
+        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutY());
     }
 
     public GameView () {
