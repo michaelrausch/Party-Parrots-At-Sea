@@ -37,12 +37,12 @@ public class YachtTest {
         for (Double begin : values.keySet()) {
             y1.setHeading(begin);
             y1.tackGybe(windDirection);
-            for (int i = 0; i < 50; i++) {
+
+            for (int i = 0; i < 200; i++) {
                 y1.runAutoPilot();
             }
             assertEquals(values.get(begin), y1.getHeading(), 5.0);
         }
-
     }
 
     @Test
@@ -70,7 +70,7 @@ public class YachtTest {
             System.out.println(begin);
             y1.setHeading(begin);
             y1.turnToVMG();
-            for (int i = 0; i < 50; i++) {
+            for (int i = 0; i < 200; i++) {
                 y1.runAutoPilot();
                 System.out.println(y1.getHeading());
             }
