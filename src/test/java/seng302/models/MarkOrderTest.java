@@ -1,15 +1,14 @@
 package seng302.models;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import seng302.model.mark.CompoundMark;
-import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
 
 public class MarkOrderTest {
     private static MarkOrder markOrder;

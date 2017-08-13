@@ -1,5 +1,14 @@
 package seng302.model.mark;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -10,20 +19,11 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Class to hold the order of the marks in the race.
  */
 public class MarkOrder {
+
     private List<CompoundMark> raceMarkOrder;
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
 
@@ -35,7 +35,7 @@ public class MarkOrder {
      * @return An ordered list of marks in the race
      *         OR null if the mark order could not be loaded
      */
-    public List<CompoundMark> getMarkOrder(){
+    public List<CompoundMark> getMarkOrder() {
         if (raceMarkOrder == null){
             logger.warn("Race order accessed but not instantiated");
             return null;
@@ -55,10 +55,9 @@ public class MarkOrder {
     /**
      * @param currentSeqID The seqID of the current mark the boat is heading to
      * @return The mark last passed
-     * @throws IndexOutOfBoundsException if there is no next mark.
-     *         Check seqID != 0 first
+     * @throws IndexOutOfBoundsException if there is no next mark. Check seqID != 0 first
      */
-    public CompoundMark getPreviousMark(Integer currentSeqID) throws IndexOutOfBoundsException{
+    public CompoundMark getPreviousMark(Integer currentSeqID) throws IndexOutOfBoundsException {
         return raceMarkOrder.get(currentSeqID - 1);
     }
 
@@ -69,10 +68,10 @@ public class MarkOrder {
     /**
      * @param currentSeqID The seqID of the current mark the boat is heading to
      * @return The mark following the mark that the boat is heading to
-     * @throws IndexOutOfBoundsException if there is no next mark.
-     *         Check using {@link #isLastMark(Integer)}
+     * @throws IndexOutOfBoundsException if there is no next mark. Check using {@link
+     * #isLastMark(Integer)}
      */
-    public CompoundMark getNextMark(Integer currentSeqID) throws IndexOutOfBoundsException{
+    public CompoundMark getNextMark(Integer currentSeqID) throws IndexOutOfBoundsException {
         return raceMarkOrder.get(currentSeqID + 1);
     }
 
@@ -81,7 +80,7 @@ public class MarkOrder {
      * @param xml An AC35 RaceXML
      * @return An ordered list of marks in the race
      */
-    private List<CompoundMark> loadRaceOrderFromXML(String xml){
+    private List<CompoundMark> loadRaceOrderFromXML(String xml) {
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
