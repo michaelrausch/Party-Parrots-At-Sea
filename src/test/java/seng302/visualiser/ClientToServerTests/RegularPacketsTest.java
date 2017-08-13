@@ -71,8 +71,8 @@ public class RegularPacketsTest {
 
     @After
     public void teardown () throws Exception {
-        serverThread.terminate();
         clientThread.setSocketToClose();
+        serverThread.terminate();
         GameState.setCurrentStage(GameStages.LOBBYING);
         for (int i = 0; i<20; i++)
             SleepThreadMaxDelay(); //Make sure socket is closed and toolkit remade.

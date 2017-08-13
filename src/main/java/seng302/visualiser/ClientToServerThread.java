@@ -157,14 +157,12 @@ public class ClientToServerThread implements Runnable {
             } catch (ByteReadException e) {
                 e.printStackTrace();
                 closeSocket();
-                if (Platform.isFxApplicationThread()) {
-                    Platform.runLater(() -> {
-                        Alert alert = new Alert(AlertType.ERROR);
-                        alert.setHeaderText("Host has disconnected");
-                        alert.setContentText("Cannot find Server");
-                        alert.showAndWait();
-                    });
-                }
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setHeaderText("Host has disconnected");
+                    alert.setContentText("Cannot find Server");
+                    alert.showAndWait();
+                });
                 clientLog(e.getMessage(), 1);
                 return;
             }
