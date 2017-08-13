@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -27,11 +29,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.AnnotationBox;
-import seng302.visualiser.fxObjects.BoatObject;
-import seng302.visualiser.fxObjects.CourseBoundary;
-import seng302.visualiser.fxObjects.Gate;
-import seng302.visualiser.fxObjects.Marker;
+import seng302.visualiser.fxObjects.*;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
 
@@ -222,8 +220,8 @@ public class GameView extends Pane {
         //Move the Markers to initial position.
         markerObjects.forEach(((mark, marker) -> {
             Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
-            marker.setCenterX(p2d.getX());
-            marker.setCenterY(p2d.getY());
+            marker.setLayoutX(p2d.getX());
+            marker.setLayoutY(p2d.getY());
         }));
         Platform.runLater(() -> {
             markers.getChildren().clear();
@@ -240,11 +238,12 @@ public class GameView extends Pane {
      */
     private void makeAndBindMarker(Mark observableMark, Paint colour) {
         Marker marker = new Marker(colour);
+        marker.constructArrows(MarkArrowFactory.RoundingSide.PORT, ThreadLocalRandom.current().nextDouble(91, 180), ThreadLocalRandom.current().nextDouble(1, 90));
         markerObjects.put(observableMark, marker);
         observableMark.addPositionListener((mark, lat, lon) -> {
             Point2D p2d = findScaledXY(lat, lon);
-            markerObjects.get(mark).setCenterX(p2d.getX());
-            markerObjects.get(mark).setCenterY(p2d.getY());
+            markerObjects.get(mark).setLayoutX(p2d.getX());
+            markerObjects.get(mark).setLayoutY(p2d.getY());
         });
     }
 
@@ -259,16 +258,16 @@ public class GameView extends Pane {
     private Gate makeAndBindGate(Marker m1, Marker m2, Paint colour) {
         Gate gate = new Gate(colour);
         gate.startXProperty().bind(
-            m1.centerXProperty()
+            m1.layoutXProperty()
         );
         gate.startYProperty().bind(
-            m1.centerYProperty()
+            m1.layoutYProperty()
         );
         gate.endXProperty().bind(
-            m2.centerXProperty()
+            m2.layoutXProperty()
         );
         gate.endYProperty().bind(
-            m2.centerYProperty()
+            m2.layoutYProperty()
         );
         return  gate;
     }
