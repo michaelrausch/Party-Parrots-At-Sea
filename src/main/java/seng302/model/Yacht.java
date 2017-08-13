@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
@@ -13,20 +15,24 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
+import seng302.gameServer.server.messages.MarkRoundingMessage;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RoundingBoatStatus;
+import seng302.gameServer.server.messages.RoundingSide;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 
 /**
- * Yacht class for the racing boat.
- *
- * Class created to store more variables (eg. boat statuses) compared to the XMLParser boat class,
- * also done outside Boat class because some old variables are not used anymore.
+ * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
+ * compared to the XMLParser boat class, also done outside Boat class because some old variables are
+ * not used anymore.
  */
-public class Yacht {
+public class Yacht extends Observable {
 
     @FunctionalInterface
     public interface YachtLocationListener {
+
         void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
     }
 
@@ -78,7 +84,7 @@ public class Yacht {
     private Color colour;
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
-            String boatName, String country) {
+        String boatName, String country) {
         this.boatType = boatType;
         this.sourceId = sourceId;
         this.hullID = hullID;
@@ -145,13 +151,32 @@ public class Yacht {
         // TODO: 3/08/17 wmu16 - Implement line cross check here
     }
 
+    /**
+     * Add ServerToClientThread as the observer, this observer pattern mainly server for the boat
+     * rounding package.
+     */
+    @Override
+    public void addObserver(Observer o) {
+        super.addObserver(o);
+    }
+
+    private void sendMarkRoundingMessage(Integer passedMarkSeqID) {
+        // TODO: 13/8/17 figure out the rounding side, rounded mark source ID and boat status.
+        Message markRoundingMessage = new MarkRoundingMessage(0, 0,
+            getSourceId(), RoundingBoatStatus.RACING, RoundingSide.UNKNOWN,
+            GameState.getMarkOrder().getCurrentMark(passedMarkSeqID).getSubMark(1).getSourceID());
+        logger.debug("Sending mark rounding message...");
+        setChanged();
+        notifyObservers(markRoundingMessage);
+    }
 
     /**
-     * Calculates the distance to the next mark (closest of the two if a gate mark). For purposes
-     * of mark rounding
+     * Calculates the distance to the next mark (closest of the two if a gate mark). For purposes of
+     * mark rounding
+     *
      * @return A distance in metres. Returns -1 if there is no next mark
      * @throws IndexOutOfBoundsException If the next mark is null (ie the last mark in the race)
-     *         Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
+     * Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
      */
     public Double calcDistanceToCurrentMark() throws IndexOutOfBoundsException {
         CompoundMark nextMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
@@ -169,11 +194,8 @@ public class Yacht {
 
 
     /**
-     * 4 Different cases of progression in the race
-     * 1 - Passing the start line
-     * 2 - Passing any in-race Gate
-     * 3 - Passing any in-race Mark
-     * 4 - Passing the finish line
+     * 4 Different cases of progression in the race 1 - Passing the start line 2 - Passing any
+     * in-race Gate 3 - Passing any in-race Mark 4 - Passing the finish line
      */
     private void checkForLegProgression() {
         CompoundMark currentMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
@@ -202,6 +224,7 @@ public class Yacht {
         if (crossedLine > 0) {
             Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, nextMark.getMidPoint());
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
+                sendMarkRoundingMessage(currentMarkSeqID);
                 currentMarkSeqID++;
                 logMarkRounding(currentMark);
             }
@@ -211,8 +234,7 @@ public class Yacht {
 
     /**
      * This algorithm checks for mark rounding. And increments the currentMarSeqID number attribute
-     * of the yacht if so.
-     * A visual representation of this algorithm can be seen on the Wiki under
+     * of the yacht if so. A visual representation of this algorithm can be seen on the Wiki under
      * 'mark passing algorithm'
      */
     private void checkMarkRounding(CompoundMark currentMark) {
@@ -275,6 +297,7 @@ public class Yacht {
             if (prevMarkSide == nextMarkSide) {
                 checkMarkRounding(currentMark);
             } else {
+                sendMarkRoundingMessage(currentMarkSeqID);
                 currentMarkSeqID++;
                 logMarkRounding(currentMark);
             }
@@ -295,6 +318,7 @@ public class Yacht {
         if (crossedLine > 0) {
             Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
+                sendMarkRoundingMessage(currentMarkSeqID);
                 currentMarkSeqID++;
                 finishedRace = true;
                 logMarkRounding(currentMark);
@@ -306,8 +330,7 @@ public class Yacht {
 
 
     /**
-     * Adjusts the heading of the boat by a given amount, while recording the boats
-     * last heading.
+     * Adjusts the heading of the boat by a given amount, while recording the boats last heading.
      *
      * @param amount the amount by which to adjust the boat heading.
      */
@@ -333,6 +356,7 @@ public class Yacht {
 
     /**
      * Enables the boats auto pilot feature, which will move the boat towards a given heading.
+     *
      * @param thisHeading The heading to move the boat towards.
      */
     private void setAutoPilot(Double thisHeading) {
@@ -441,9 +465,8 @@ public class Yacht {
     }
 
     /**
-     * Takes a given heading and rotates the boat towards that heading.
-     * This does not care about being upwind or downwind, just which direction will reach a given
-     * heading faster.
+     * Takes a given heading and rotates the boat towards that heading. This does not care about
+     * being upwind or downwind, just which direction will reach a given heading faster.
      *
      * @param newHeading The heading to turn the yacht towards.
      */
@@ -474,12 +497,16 @@ public class Yacht {
 
     public Integer getSourceId() {
         //@TODO Remove and merge with Creating Game Loop
-        if (sourceId == null) return 0;
+        if (sourceId == null) {
+            return 0;
+        }
         return sourceId;
     }
 
     public String getHullID() {
-        if (hullID == null) return "";
+        if (hullID == null) {
+            return "";
+        }
         return hullID;
     }
 
@@ -492,7 +519,9 @@ public class Yacht {
     }
 
     public String getCountry() {
-        if (country == null) return "";
+        if (country == null) {
+            return "";
+        }
         return country;
     }
 
@@ -614,7 +643,7 @@ public class Yacht {
         this.timeSinceLastMarkProperty.set(timeSinceLastMark);
     }
 
-    public ReadOnlyLongProperty timeSinceLastMarkProperty () {
+    public ReadOnlyLongProperty timeSinceLastMarkProperty() {
         return timeSinceLastMarkProperty.getReadOnlyProperty();
     }
 
@@ -668,7 +697,7 @@ public class Yacht {
                 currentMarkSeqID));
     }
 
-    public void addLocationListener (YachtLocationListener listener) {
+    public void addLocationListener(YachtLocationListener listener) {
         locationListeners.add(listener);
     }
 }

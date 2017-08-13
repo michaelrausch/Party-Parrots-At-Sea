@@ -1,16 +1,12 @@
 package seng302.gameServer;
 
 
-import seng302.gameServer.server.messages.*;
-import seng302.model.Player;
-import seng302.model.Yacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.time.LocalDateTime;
@@ -22,6 +18,26 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatLocationMessage;
+import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.server.messages.BoatSubMessage;
+import seng302.gameServer.server.messages.ClientType;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RaceStatus;
+import seng302.gameServer.server.messages.RaceStatusMessage;
+import seng302.gameServer.server.messages.RaceType;
+import seng302.gameServer.server.messages.RegistrationResponseMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
+import seng302.gameServer.server.messages.XMLMessage;
+import seng302.gameServer.server.messages.XMLMessageSubType;
+import seng302.model.Player;
+import seng302.model.Yacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -99,6 +115,7 @@ public class ServerToClientThread implements Runnable, Observer {
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
 
+        yacht.addObserver(this); // TODO: yacht can notify mark rounding message hyi25 13/8/17
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(new Player(socket, yacht));
     }
@@ -112,7 +129,11 @@ public class ServerToClientThread implements Runnable, Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        sendSetupMessages();
+        if (arg != null) {
+            sendMessage((Message) arg);
+        } else {
+            sendSetupMessages();
+        }
     }
 
     private void completeRegistration(ClientType clientType) throws IOException {
