@@ -450,9 +450,9 @@ public class Yacht {
     private void turnTowardsHeading(Double newHeading) {
         Double newVal = heading - newHeading;
         if (Math.floorMod(newVal.longValue(), 360L) > 180) {
-            adjustHeading(TURN_STEP);
+            adjustHeading(TURN_STEP / 5);
         } else {
-            adjustHeading(-TURN_STEP);
+            adjustHeading(-TURN_STEP / 5);
         }
     }
 

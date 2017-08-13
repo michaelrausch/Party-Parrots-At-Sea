@@ -49,7 +49,7 @@ public class GameClient {
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
     /**
-     * Create an instance of the game client. Does not do anything untill run with runAsClient()
+     * Create an instance of the game client. Does not do anything until run with runAsClient()
      * runAsHost().
      * @param holder The JavaFX Pane that the visual elements for the race will be inserted into.
      */
@@ -106,10 +106,8 @@ public class GameClient {
 
     private void loadStartScreen() {
         socketThread.setSocketToClose();
-        socketThread = null;
         if (server != null) {
-            // TODO: 26/07/17 cir27 - handle disconnecting
-//            server.shutDown();
+            server.terminate();
             server = null;
         }
         FXMLLoader fxmlLoader = new FXMLLoader(
@@ -191,9 +189,9 @@ public class GameClient {
                         StreamParser.extractXmlMessage(packet)
                     );
                     clientLobbyList.clear();
-                    allBoatsMap.forEach((id, boat) -> {
-                        clientLobbyList.add(id + " " + boat.getBoatName());
-                    });
+                    allBoatsMap.forEach((id, boat) ->
+                        clientLobbyList.add(id + " " + boat.getBoatName())
+                    );
                     break;
 
                 case RACE_START_STATUS:

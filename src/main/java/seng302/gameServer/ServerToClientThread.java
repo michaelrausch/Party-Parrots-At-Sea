@@ -12,8 +12,6 @@ import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
@@ -44,7 +42,15 @@ import seng302.utilities.XMLGenerator;
  * its own thread. All server threads created and owned by the server thread handler which can
  * trigger client updates on its threads Created by wmu16 on 13/07/17.
  */
-public class ServerToClientThread implements Runnable, Observer {
+public class ServerToClientThread implements Runnable {
+
+    /**
+     * Called to notify listeners when this thread receives a connection correctly.
+     */
+    @FunctionalInterface
+    interface ConnectionListener {
+        void notifyConnection ();
+    }
 
     private static final Integer LOG_LEVEL = 1;
     private static final Integer MAX_ID_ATTEMPTS = 10;
@@ -57,8 +63,6 @@ public class ServerToClientThread implements Runnable, Observer {
 
     private ByteArrayOutputStream crcBuffer;
 
-    private Boolean userIdentified = false;
-    private Boolean connected = true;
     private Boolean updateClient = true;
 //    private Boolean initialisedRace = true;
 
@@ -69,6 +73,8 @@ public class ServerToClientThread implements Runnable, Observer {
     private Boolean isRegistered = false;
 
     private XMLGenerator xml;
+
+    private List<ConnectionListener> connectionListeners = new ArrayList<>();
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
@@ -85,7 +91,7 @@ public class ServerToClientThread implements Runnable, Observer {
         thread.start();
     }
 
-    private void setUpYacht(){
+    private void setUpPlayer(){
         BufferedReader fn;
         String fName = "";
         BufferedReader ln;
@@ -114,7 +120,6 @@ public class ServerToClientThread implements Runnable, Observer {
         Yacht yacht = new Yacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
-
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(new Player(socket, yacht));
     }
@@ -124,11 +129,6 @@ public class ServerToClientThread implements Runnable, Observer {
             System.out.println(
                 "[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
         }
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        sendSetupMessages();
     }
 
     private void completeRegistration(ClientType clientType) throws IOException {
@@ -150,12 +150,14 @@ public class ServerToClientThread implements Runnable, Observer {
 
         this.clientType = clientType;
         this.sourceId = sourceId;
-        setUpYacht();
-
         isRegistered = true;
         os.write(responseMessage.getBuffer());
-        sendSetupMessages();
 
+        setUpPlayer();
+
+        for (ConnectionListener listener : connectionListeners) {
+            listener.notifyConnection();
+        }
     }
 
     public void run() {
@@ -226,7 +228,7 @@ public class ServerToClientThread implements Runnable, Observer {
         }
     }
 
-    private void sendSetupMessages() {
+    public void sendSetupMessages() {
         xml = new XMLGenerator();
         Race race = new Race();
 
@@ -257,22 +259,6 @@ public class ServerToClientThread implements Runnable, Observer {
         updateClient = true;
     }
 
-
-    /**
-     * Tries to confirm the connection just accepted.
-     * Sends ID, expects that ID echoed for confirmation,
-     * if so, sends a confirmation packet back to that connection
-     * Creates a player instance with that ID and this thread and adds it to the GameState
-     * If not, close the socket and end the threads execution
-     *
-     * @param id the id to try and assign to the connection
-     * @return A boolean indicating if it was a successful handshake
-     */
-    private Boolean threeWayHandshake(Integer id) {
-
-        return true;
-    }
-
     private void closeSocket() {
         try {
             socket.close();
@@ -280,7 +266,6 @@ public class ServerToClientThread implements Runnable, Observer {
             System.out.println("IO error in server thread upon trying to close socket");
         }
     }
-
 
     private int readByte() throws Exception {
         int currentByte = -1;
@@ -353,7 +338,6 @@ public class ServerToClientThread implements Runnable, Observer {
     public void sendRaceStatusMessage() {
         // variables taken from GameServerThread
 
-
         List<BoatSubMessage> boatSubMessages = new ArrayList<>();
         BoatStatus boatStatus;
         RaceStatus raceStatus;
@@ -387,5 +371,13 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public void addConnectionListener(ConnectionListener listener) {
+        connectionListeners.add(listener);
+    }
+
+    public void removeConnectionListener(ConnectionListener listener) {
+        connectionListeners.remove(listener);
     }
 }
