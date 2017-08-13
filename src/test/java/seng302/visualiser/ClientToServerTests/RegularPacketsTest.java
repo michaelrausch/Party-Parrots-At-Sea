@@ -1,11 +1,15 @@
 package seng302.visualiser.ClientToServerTests;
 
+import java.util.ArrayList;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
+import seng302.gameServer.server.messages.BoatAction;
+import seng302.model.Yacht;
 import seng302.visualiser.ClientToServerThread;
 
 /**
@@ -47,13 +51,13 @@ public class RegularPacketsTest {
 
     @Test
     public void testArbitraryPacketSent() throws Exception {
-//        serverThread.startGame();
-//        SleepThreadMaxDelay();
-//        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
-//        boolean startState = yacht.getSailIn();
-//        clientThread.sendBoatAction(BoatAction.SAILS_IN);
-//        SleepThreadMaxDelay();
-//        Assert.assertEquals(startState, !yacht.getSailIn());
+        serverThread.startGame();
+        SleepThreadMaxDelay();
+        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
+        boolean startState = yacht.getSailIn();
+        clientThread.sendBoatAction(BoatAction.SAILS_IN);
+        SleepThreadMaxDelay();
+        Assert.assertEquals(startState, !yacht.getSailIn());
     }
 
     /**
