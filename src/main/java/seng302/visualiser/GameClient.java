@@ -14,6 +14,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.StreamPacket;
@@ -58,6 +60,7 @@ public class GameClient {
             ioe.printStackTrace();
             System.out.println("Unable to connect to host...");
         }
+
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);

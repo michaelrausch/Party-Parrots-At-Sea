@@ -1,8 +1,9 @@
 package seng302.model.mark;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import seng302.model.GeoPoint;
+import seng302.utilities.GeoUtility;
 
 public class CompoundMark {
 
@@ -10,18 +11,17 @@ public class CompoundMark {
 	private String name;
 
 	private List<Mark> marks = new ArrayList<>();
+    private GeoPoint midPoint;
 
-	public CompoundMark(int markID, String name) {
-		this.compoundMarkId = markID;
-		this.name = name;
-	}
-
-	public void addSubMarks(Mark... marks) {
-		this.marks.addAll(Arrays.asList(marks));
-	}
-
-	public void addSubMarks(List<Mark> marks) {
-	    this.marks.addAll(marks);
+    public CompoundMark(int markID, String name, List<Mark> marks) {
+        this.compoundMarkId = markID;
+        this.name = name;
+        this.marks.addAll(marks);
+        if (marks.size() > 1) {
+            this.midPoint = GeoUtility.getDirtyMidPoint(marks.get(0), marks.get(1));
+        } else {
+            this.midPoint = marks.get(0);
+        }
     }
 
 	/**
@@ -69,6 +69,16 @@ public class CompoundMark {
     }
 
     /**
+     * NOTE: This is a 'dirty' mid point as it is simply calculated as an xy point would be.
+     * NO CHECKING FOR LAT / LNG WRAPPING IS DONE IN CREATION OF THIS MIDPOINT
+     *
+     * @return GeoPoint of the midpoint of the two marks, or the one mark if there is only one
+     */
+    public GeoPoint getMidPoint() {
+        return midPoint;
+    }
+
+    /**
      * Returns whether or not this CompoundMark is a Gate. It is generally cleaner to program to a
      * specific singleMark or the list of marks.
      *
@@ -86,38 +96,6 @@ public class CompoundMark {
     public List<Mark> getMarks () {
         return marks;
     }
-
-
-//	@Override
-//	public boolean equals(Object other) {
-//		if (other == null) {
-//			return false;
-//		}
-//
-//		if (!(other instanceof Mark)){
-//			return false;
-//		}
-//
-//		Mark otherMark = (Mark) other;
-//
-//		if (otherMark.getLat() != getLat() || otherMark.getLongitude() != getLongitude()) {
-//			return false;
-//		}
-//
-//		if (otherMark.getCompoundMarkID() != getCompoundMarkID()){
-//			return false;
-//		}
-//
-//		if (otherMark.getId() != getId()){
-//			return false;
-//		}
-//
-//		if (!otherMark.getName().equals(name)){
-//			return false;
-//		}
-//
-//		return true;
-//	}
 
 	@Override
 	public int hashCode() {

@@ -312,7 +312,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 updateRaceTime();
                 updateWindDirection();
                 updateOrder();
-                updateSparkLine();
+//                updateSparkLine();
             }
         }, 0, 1000);
     }
