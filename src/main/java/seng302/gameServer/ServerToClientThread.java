@@ -63,7 +63,6 @@ public class ServerToClientThread implements Runnable {
 
     private ByteArrayOutputStream crcBuffer;
 
-    private Boolean updateClient = true;
 //    private Boolean initialisedRace = true;
 
     private Integer seqNo;
@@ -169,20 +168,6 @@ public class ServerToClientThread implements Runnable {
         while (socket.isConnected()) {
 
             try {
-                //Perform a write if it is time to as delegated by the MainServerThread
-                if (updateClient) {
-                    // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-//                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
-//                    sendMessage(chatterMessage);
-//                try {
-//                    GameState.outputState(os);
-//                } catch (IOException e) {
-//                    System.out.println("IO error in server thread upon writing to output stream");
-//                }
-//                    sendBoatLocationPackets();
-                    updateClient = false;
-                }
-
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
@@ -256,7 +241,6 @@ public class ServerToClientThread implements Runnable {
 
     public void updateClient() {
         sendBoatLocationPackets();
-        updateClient = true;
     }
 
     private void closeSocket() {
@@ -317,7 +301,6 @@ public class ServerToClientThread implements Runnable {
     private void sendBoatLocationPackets() {
         ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
         for (Yacht yacht : yachts) {
-//            System.out.println("[SERVER] Lat: " + yacht.getLocation().getLat() + " Lon: " + yacht.getLocation().getLng());
             BoatLocationMessage boatLocationMessage =
                 new BoatLocationMessage(
                     yacht.getSourceId(),
