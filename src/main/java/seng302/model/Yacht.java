@@ -43,7 +43,7 @@ public class Yacht extends Observable {
     private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     private static final Double BOUNCE_DISTANCE_YACHT = 30.0;
     private static final Integer COLLISION_UPDATE_INTERVAL = 100;
-
+    private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     //BOTH AFAIK
     private String boatType;
@@ -132,7 +132,7 @@ public class Yacht extends Observable {
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
-                velocity += maxBoatSpeed / 15;  // Acceleration
+                velocity += maxBoatSpeed / 120;  // Acceleration
             }
             if (velocity > maxBoatSpeed) {
                 velocity = maxBoatSpeed;        // Prevent the boats from exceeding top speed
@@ -159,14 +159,18 @@ public class Yacht extends Observable {
             Yacht collidedYacht = checkCollision(calculatedPoint);
 
             if (collidedYacht != null) {
-                location = calculateBounceBack(new GeoPoint(collidedYacht.getLocation().getLat(),
-                    collidedYacht.getLocation().getLng()), BOUNCE_DISTANCE_YACHT);
+                location = calculateBounceBackYacht(this, collidedYacht, BOUNCE_DISTANCE_YACHT);
+                velocity *= COLLISION_VELOCITY_PENALTY;
+                collidedYacht.setLocation(
+                    calculateBounceBackYacht(collidedYacht, this, BOUNCE_DISTANCE_YACHT));
+                collidedYacht.setVelocity(collidedYacht.getVelocity() * COLLISION_VELOCITY_PENALTY);
                 setChanged();
                 notifyObservers(this.sourceId);
             } else if (markCollidedWith() != null) {
                 location = calculateBounceBack(
                     new GeoPoint(markCollidedWith().getLat(), markCollidedWith().getLng()),
                     BOUNCE_DISTANCE_MARK);
+                velocity *= COLLISION_VELOCITY_PENALTY;
                 setChanged();
                 notifyObservers(this.sourceId);
             } else {
@@ -210,6 +214,19 @@ public class Yacht extends Observable {
         Integer newHeading = Math.floorMod(heading.intValue(), 360);
 
         return GeoUtility.getGeoCoordinate(location, newHeading.doubleValue(), bounceDistance);
+    }
+
+    private GeoPoint calculateBounceBackYacht(Yacht collidingYacht, Yacht collidedYacht,
+        Double bounceDistance) {
+        Double heading = GeoUtility
+            .getBearing(collidingYacht.getLocation(), collidedYacht.getLocation());
+
+        heading -= 180;
+        Integer faultYachtHeading = Math.floorMod(heading.intValue(), 360);
+
+        return GeoUtility
+            .getGeoCoordinate(collidingYacht.getLocation(), faultYachtHeading.doubleValue(),
+                bounceDistance);
     }
 
 
@@ -690,23 +707,11 @@ public class Yacht extends Observable {
      * @return yacht which collided with this yacht
      */
     private Yacht checkCollision(GeoPoint calculatedPoint) {
-        // Basic right of way calculation. (Might be wrong)
-        Boolean rightOfWay;
-        Double windDirection = GameState.getWindDirection();
-        if (windDirection >= 180) {
-            Double angle = windDirection - 180;
-            rightOfWay = getHeading() > windDirection || getHeading() <= angle;
-        } else {
-            Double angle = 180 - windDirection;
-            rightOfWay = getHeading() > windDirection && getHeading() < 360 - angle;
-        }
 
         for (Yacht yacht : GameState.getYachts().values()) {
             if (yacht != this) {
                 Double distance = GeoUtility.getDistance(yacht.getLocation(), calculatedPoint);
-                if (distance < YACHT_COLLISION_DISTANCE && !rightOfWay) {
-                    return this;
-                } else if (distance < YACHT_COLLISION_DISTANCE && rightOfWay) {
+                if (distance < YACHT_COLLISION_DISTANCE) {
                     return yacht;
                 }
             }
