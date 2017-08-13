@@ -15,7 +15,7 @@ public class CompoundMark {
 
     public CompoundMark(int markID, String name, List<Mark> marks) {
         this.compoundMarkId = markID;
-		this.name = name;
+        this.name = name;
         this.marks.addAll(marks);
         if (marks.size() > 1) {
             this.midPoint = GeoUtility.getDirtyMidPoint(marks.get(0), marks.get(1));
