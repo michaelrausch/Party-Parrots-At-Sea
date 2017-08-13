@@ -17,7 +17,9 @@ public enum MessageType {
     MARK_ROUNDING(38),
     COURSE_WIND(44),
     AVERAGE_WIND(47),
-    BOAT_ACTION(100);
+    BOAT_ACTION(100),
+    REGISTRATION_REQUEST(101),
+    REGISTRATION_RESPONSE(102);
 
     private int code;
 
@@ -32,4 +34,6 @@ public enum MessageType {
     int getCode(){
         return this.code;
     }
+
+
 }

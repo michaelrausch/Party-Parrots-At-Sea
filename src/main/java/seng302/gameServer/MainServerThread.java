@@ -44,6 +44,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         HeartbeatThread heartbeatThread;
 
         serverListenThread = new ServerListenThread(serverSocket, this);
+
         heartbeatThread = new HeartbeatThread(this);
 
         heartbeatThread.start();
@@ -102,9 +103,11 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     public void clientConnected(ServerToClientThread serverToClientThread) {
         serverLog("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         serverToClientThreads.add(serverToClientThread);
-        this.addObserver(serverToClientThread);
-        setChanged();
-        notifyObservers();
+        serverToClientThread.addConnectionListener(() -> {
+            for (ServerToClientThread thread : serverToClientThreads) {
+                thread.sendSetupMessages();
+            }
+        });
     }
 
     /**
@@ -121,11 +124,15 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         serverLog("Player " + player.getYacht().getSourceId() + "'s socket disconnected", 0);
         GameState.removeYacht(player.getYacht().getSourceId());
         GameState.removePlayer(player);
+        ServerToClientThread closedConnection = null;
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             if (serverToClientThread.getSocket() == player.getSocket()) {
-                this.deleteObserver(serverToClientThread);
+                closedConnection = serverToClientThread;
+            } else {
+                serverToClientThread.sendSetupMessages();
             }
         }
+        serverToClientThreads.remove(closedConnection);
         setChanged();
         notifyObservers();
     }

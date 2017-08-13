@@ -19,7 +19,9 @@ public enum PacketType {
     COURSE_WIND,
     AVG_WIND,
     BOAT_ACTION,
-    OTHER;
+    OTHER,
+    RACE_REGISTRATION_REQUEST,
+    RACE_REGISTRATION_RESPONSE;
 
     public static PacketType assignPacketType(int packetType, byte[] payload){
         switch(packetType){
@@ -56,6 +58,10 @@ public enum PacketType {
                 return AVG_WIND;
             case 100:
                 return BOAT_ACTION;
+            case 101:
+                return RACE_REGISTRATION_REQUEST;
+            case 102:
+                return RACE_REGISTRATION_RESPONSE;
             default:
         }
         return OTHER;
