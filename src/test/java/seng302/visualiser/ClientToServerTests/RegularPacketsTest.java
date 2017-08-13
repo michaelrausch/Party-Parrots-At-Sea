@@ -74,7 +74,7 @@ public class RegularPacketsTest {
         serverThread.terminate();
         clientThread.setSocketToClose();
         GameState.setCurrentStage(GameStages.LOBBYING);
-        for (int i = 0; i<6; i++)
-            SleepThreadMaxDelay(); //Make sure socket is closed.
+        for (int i = 0; i<20; i++)
+            SleepThreadMaxDelay(); //Make sure socket is closed and toolkit remade.
     }
 }

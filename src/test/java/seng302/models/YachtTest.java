@@ -67,12 +67,10 @@ public class YachtTest {
         values.put(350d, downwindRight);
 
         for (Double begin : values.keySet()) {
-            System.out.println(begin);
             y1.setHeading(begin);
             y1.turnToVMG();
             for (int i = 0; i < 200; i++) {
                 y1.runAutoPilot();
-                System.out.println(y1.getHeading());
             }
             y1.disableAutoPilot();
             assertEquals(values.get(begin), y1.getHeading(), 5.0);
