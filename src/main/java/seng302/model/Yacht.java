@@ -585,7 +585,7 @@ public class Yacht {
         this.velocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lng, heading, velocity);
+            yll.notifyLocation(this, lat, lng, heading, velocity, clientSailsIn);
         }
     }
 
