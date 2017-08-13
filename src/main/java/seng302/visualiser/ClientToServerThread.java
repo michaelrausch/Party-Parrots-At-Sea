@@ -17,10 +17,10 @@ import java.util.zip.Checksum;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import seng302.gameServer.server.messages.BoatActionType;
-import seng302.model.stream.packets.StreamPacket;
 import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.Message;
+import seng302.model.stream.packets.StreamPacket;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on
@@ -53,10 +53,10 @@ public class ClientToServerThread implements Runnable {
 
     //Output stream
     private OutputStream os;
-    private Timer osTimer = new Timer();
-    private Queue<BoatActionType> eventQueue = new ConcurrentLinkedQueue<>();
-    private boolean upwindFlag = false, downwindFlag = false;
-    static public final int PACKET_SENDING_INTERVAL_MS = 20;
+    private Timer upWindPacketTimer = new Timer();
+    private Timer downWindPacketTimer = new Timer();
+    private boolean upwindTimerFlag = false, downwindTimerFlag = false;
+    static public final int PACKET_SENDING_INTERVAL_MS = 100;
 
     private int clientId;
     private ByteArrayOutputStream crcBuffer;
@@ -90,15 +90,6 @@ public class ClientToServerThread implements Runnable {
 
         thread = new Thread(this);
         thread.start();
-
-        osTimer.scheduleAtFixedRate(
-            new TimerTask() {
-                @Override
-                public void run() {
-                    processBoatActionQueue();
-                }
-            }, 0, PACKET_SENDING_INTERVAL_MS
-        );
     }
 
     /**
@@ -163,7 +154,6 @@ public class ClientToServerThread implements Runnable {
                 clientLog(e.getMessage(), 1);
                 return;
             }
-//            System.out.println("streamPackets = " + streamPackets.size());
         }
         closeSocket();
         clientLog("Closed connection to Server", 0);
@@ -195,30 +185,66 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
+    /**
+     * Sends packets for the given boat action. Special cases are: \n
+     * - DOWNWIND = Packets are sent every ClientToServerThread.PACKET_SENDING_INTERVAL_MS
+     * - UPWIND = Packets are sent every ClientToServerThread.PACKET_SENDING_INTERVAL_MS
+     * - MAINTAIN_HEADING = DOWNWIND and UPWIND packets stop being sent.
+     * @param actionType The boat action that will dictate packets sent.
+     */
+    public void sendBoatAction(BoatAction actionType) {
+        switch (actionType) {
+            case MAINTAIN_HEADING:
+                if (upwindTimerFlag) {
+                    cancelTimer(upWindPacketTimer);
+                    upwindTimerFlag = false;
+                    upWindPacketTimer = new Timer();
+                }
+                if (downwindTimerFlag) {
+                    cancelTimer(downWindPacketTimer);
+                    downwindTimerFlag = false;
+                    downWindPacketTimer = new Timer();
+                }
+                break;
+            case DOWNWIND:
+                if (!downwindTimerFlag) {
+                    downwindTimerFlag = true;
+                    downWindPacketTimer.scheduleAtFixedRate(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                sendBoatAction(new BoatActionMessage(BoatAction.DOWNWIND));
+                            }
+                        }, 0, PACKET_SENDING_INTERVAL_MS
+                    );
+                }
+                break;
+            case UPWIND:
+                if (!upwindTimerFlag) {
+                    upwindTimerFlag = true;
+                    upWindPacketTimer.scheduleAtFixedRate(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                sendBoatAction(new BoatActionMessage(BoatAction.UPWIND));
+                            }
+                        }, 0, PACKET_SENDING_INTERVAL_MS
+                    );
+                }
+                break;
+            default:
+                sendBoatAction(new BoatActionMessage(actionType));
+                break;
+        }
+    }
 
     /**
-     * Processes next element in the queue of events to send.
+     * Cancels a packet sending timer.
+     * @param timer The timer to cancel.
      */
-    private void processBoatActionQueue() {
-        BoatActionType action = eventQueue.poll();
-        if (action != null) {
-            switch (action) {
-                case MAINTAIN_HEADING:
-                    downwindFlag = upwindFlag = false; break;
-                case DOWNWIND:
-                    downwindFlag = true; break;
-                case UPWIND:
-                    upwindFlag = true; break;
-                default:
-                    sendBoatAction(new BoatActionMessage(action)); break;
-            }
-        }
-        if (downwindFlag) {
-            sendBoatAction(new BoatActionMessage(BoatActionType.DOWNWIND));
-        }
-        if (upwindFlag) {
-            sendBoatAction(new BoatActionMessage(BoatActionType.UPWIND));
-        }
+    private void cancelTimer (Timer timer) {
+        timer.cancel();
+        timer.purge();
     }
 
     /**
@@ -289,7 +315,4 @@ public class ClientToServerThread implements Runnable {
         return clientId;
     }
 
-    public void sendBoatEvent(BoatActionType actionType) {
-        eventQueue.add(actionType);
-    }
 }

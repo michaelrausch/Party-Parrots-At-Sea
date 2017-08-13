@@ -2,17 +2,17 @@ package seng302.gameServer;
 
 import java.util.Arrays;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatAction;
 
 
 public class ServerPacketParser {
 
 
-    public static BoatActionType extractBoatAction(StreamPacket packet) {
+    public static BoatAction extractBoatAction(StreamPacket packet) {
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         long actionTypeValue = bytesToLong(Arrays.copyOfRange(payload, 0, 1));
-        return BoatActionType.getType((int) actionTypeValue);
+        return BoatAction.getType((int) actionTypeValue);
     }
 
     /**

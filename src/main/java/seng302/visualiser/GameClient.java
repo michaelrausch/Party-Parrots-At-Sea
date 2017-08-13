@@ -13,7 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.MainServerThread;
-import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.StreamPacket;
@@ -274,13 +274,13 @@ public class GameClient {
     private void keyPressed(KeyEvent e) {
         switch (e.getCode()) {
             case SPACE: // align with vmg
-                socketThread.sendBoatEvent(BoatActionType.VMG); break;
+                socketThread.sendBoatAction(BoatAction.VMG); break;
             case PAGE_UP: // upwind
-                socketThread.sendBoatEvent(BoatActionType.UPWIND); break;
+                socketThread.sendBoatAction(BoatAction.UPWIND); break;
             case PAGE_DOWN: // downwind
-                socketThread.sendBoatEvent(BoatActionType.DOWNWIND); break;
+                socketThread.sendBoatAction(BoatAction.DOWNWIND); break;
             case ENTER: // tack/gybe
-                socketThread.sendBoatEvent(BoatActionType.TACK_GYBE); break;
+                socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
             //TODO Allow a zoom in and zoom out methods
             case Z:  // zoom in
                 System.out.println("Zoom in");
@@ -295,10 +295,10 @@ public class GameClient {
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
-                socketThread.sendBoatEvent(BoatActionType.SAILS_IN); break;
+                socketThread.sendBoatAction(BoatAction.SAILS_IN); break;
             case PAGE_UP:
             case PAGE_DOWN:
-                socketThread.sendBoatEvent(BoatActionType.MAINTAIN_HEADING); break;
+                socketThread.sendBoatAction(BoatAction.MAINTAIN_HEADING); break;
         }
     }
 }

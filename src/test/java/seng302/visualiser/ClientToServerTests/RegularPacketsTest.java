@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
-import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.Yacht;
 import seng302.visualiser.ClientToServerThread;
 
 /**
  * Test for checking how regularly packets are sent from ClientToServer Thread.
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RegularPacketsTest {
 
     private MainServerThread serverThread;
@@ -39,12 +37,12 @@ public class RegularPacketsTest {
         Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
         double startAngle = yacht.getHeading();
         long startTime = System.currentTimeMillis();
-        clientThread.sendBoatEvent(BoatActionType.UPWIND);
+        clientThread.sendBoatAction(BoatAction.UPWIND);
         Thread.sleep(200);
         while (Math.abs(yacht.getHeading() - startAngle) < TEST_DISTANCE) {
-            //Wait for yacht to move
+            Thread.sleep(1);
         }
-        clientThread.sendBoatEvent(BoatActionType.MAINTAIN_HEADING);
+        clientThread.sendBoatAction(BoatAction.MAINTAIN_HEADING);
         long endTime = System.currentTimeMillis();
         SleepThreadMaxDelay();
         //Allowed to be two loops of delay due to loop delay and processing delay at client + server ends.
@@ -58,7 +56,7 @@ public class RegularPacketsTest {
         SleepThreadMaxDelay();
         Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
         boolean startState = yacht.getSailIn();
-        clientThread.sendBoatEvent(BoatActionType.SAILS_IN);
+        clientThread.sendBoatAction(BoatAction.SAILS_IN);
         SleepThreadMaxDelay();
         Assert.assertEquals(startState, !yacht.getSailIn());
     }
@@ -73,7 +71,7 @@ public class RegularPacketsTest {
         Yacht testYacht = new Yacht("", 0, "", "", "", "");
         testYacht.setHeading(heading);
         testYacht.tackGybe(windDirection);
-        clientThread.sendBoatEvent(BoatActionType.TACK_GYBE);
+        clientThread.sendBoatAction(BoatAction.TACK_GYBE);
         SleepThreadMaxDelay();
         Assert.assertEquals(testYacht.getHeading(), yacht.getHeading(), 1);
     }
@@ -88,9 +86,11 @@ public class RegularPacketsTest {
     }
 
     @After
-    public void teardown () {
+    public void teardown () throws Exception {
         serverThread.terminate();
         clientThread.setSocketToClose();
         GameState.setCurrentStage(GameStages.LOBBYING);
+        SleepThreadMaxDelay(); //Make sure socket is closed.
+        SleepThreadMaxDelay();
     }
 }

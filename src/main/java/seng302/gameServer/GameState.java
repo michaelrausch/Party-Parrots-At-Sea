@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.Player;
 import seng302.model.Yacht;
 
@@ -119,7 +119,7 @@ public class GameState implements Runnable {
         return yachts;
     }
 
-    public static void updateBoat(Integer sourceId, BoatActionType actionType) {
+    public static void updateBoat(Integer sourceId, BoatAction actionType) {
         Yacht playerYacht = yachts.get(sourceId);
 //        System.out.println("-----------------------");
         switch (actionType) {
