@@ -71,6 +71,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Button selectAnnotationBtn;
     @FXML
     private ComboBox<Yacht> yachtSelectionComboBox;
+    @FXML
+    private Text fpsDisplay;
 
     //Race Data
     private Map<Integer, Yacht> participants;
@@ -115,6 +117,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseSparkLine();
 
         gameView = new GameView();
+        gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
             gameView.setBoats(new ArrayList<>(participants.values()));
             gameView.updateBorder(raceData.getCourseLimit());

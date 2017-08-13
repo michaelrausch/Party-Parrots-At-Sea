@@ -119,18 +119,14 @@ public class GameView extends Pane {
             this.setLayoutX(0);
             this.setLayoutY(0);
         }
-        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutX());
-        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutY());
+//        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutX());
+//        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutY());
     }
 
     public GameView () {
         gameObjects = this.getChildren();
         // create image view for map, bind panel size to image
         gameObjects.add(mapImage);
-        fpsDisplay.setLayoutX(5);
-        fpsDisplay.setLayoutY(20);
-        fpsDisplay.setStrokeWidth(2);
-        gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
         initializeTimer();
@@ -630,5 +626,10 @@ public class GameView extends Pane {
             gameObjects.add(annotations.get(playerYacht));
         });
 
+    }
+
+    public void setFrameRateFXText(Text fpsDisplay) {
+        this.fpsDisplay = null;
+        this.fpsDisplay = fpsDisplay;
     }
 }
