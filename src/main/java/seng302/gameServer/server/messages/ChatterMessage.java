@@ -1,8 +1,6 @@
 package seng302.gameServer.server.messages;
 
-/**
- * Created by kre39 on 20/07/17.
- */
+
 public class ChatterMessage extends Message {
 
     private final long MESSAGE_VERSION_NUMBER = 1;
