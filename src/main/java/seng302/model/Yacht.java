@@ -653,7 +653,7 @@ public class Yacht {
         return clientSailsIn;
     }
 
-    public void updateLocation (double lat, double lng, double heading, double velocity) {
+    public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
         this.velocity = velocity;

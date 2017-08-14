@@ -9,10 +9,14 @@ import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -53,6 +57,8 @@ public class GameView extends Pane {
     private double referencePointX, referencePointY;
     private double metersPerPixelX, metersPerPixelY;
 
+    final double SCALE_DELTA = 1.1;
+
     private Text fpsDisplay = new Text();
     private Polygon raceBorder = new CourseBoundary();
 
@@ -83,6 +89,24 @@ public class GameView extends Pane {
     private Yacht playerYacht;
     private double windDir = 0.0;
 
+    double scaleFactor = 1;
+
+    public void zoomOut() {
+        scaleFactor = 0.95;
+        for (Node child : getChildren()) {
+            child.setScaleX(child.getScaleX() * scaleFactor);
+            child.setScaleY(child.getScaleY() * scaleFactor);
+        }
+    }
+
+    public void zoomIn() {
+        scaleFactor =  1.05;
+        for (Node child : getChildren()) {
+            child.setScaleX(child.getScaleX() * scaleFactor);
+            child.setScaleY(child.getScaleY() * scaleFactor);
+        }
+    }
+
     private enum ScaleDirection {
         HORIZONTAL,
         VERTICAL
@@ -98,6 +122,45 @@ public class GameView extends Pane {
         gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
+//
+//        this.setOnKeyPressed(new EventHandler<KeyEvent>() {
+//            @Override public void handle(KeyEvent event) {
+//                event.consume();
+//                switch (event.getCode()) {
+//                    case Z:
+//                        scaleFactor = scaleFactor * 1.2;
+//                        break;
+//                    case X:
+//                        scaleFactor = scaleFactor * 0.8;
+//                        break;
+//                }
+//                if (event.getCode() == KeyCode.Z || event.getCode() == KeyCode.X) {
+//                    for (Node child : getChildren()) {
+//                        child.setScaleX(child.getScaleX() * scaleFactor);
+//                        child.setScaleY(child.getScaleY() * scaleFactor);
+//                    }
+//                }
+//            }
+//        });
+//
+//        this.setOnScroll(new EventHandler<ScrollEvent>() {
+//            @Override public void handle(ScrollEvent event) {
+//                event.consume();
+//                if (event.getDeltaY() == 0) {
+//                    return;
+//                }
+//
+//                double scaleFactor =
+//                        (event.getDeltaY() > 0)
+//                                ? SCALE_DELTA
+//                                : 1/SCALE_DELTA;
+//                for (Node child : getChildren()) {
+//                    child.setScaleX(child.getScaleX() * scaleFactor);
+//                    child.setScaleY(child.getScaleY() * scaleFactor);
+//                }
+//            }
+//        });
+
         initializeTimer();
     }
 
@@ -347,7 +410,9 @@ public class GameView extends Pane {
             gameObjects.addAll(wakes);
             gameObjects.addAll(annotationsGroup);
             gameObjects.addAll(boatObjectGroup);
+
         });
+
     }
 
     private void createAndBindAnnotationBox (Yacht yacht, Paint colour) {
@@ -593,5 +658,6 @@ public class GameView extends Pane {
             annotationsGroup.getChildren().remove(annotations.get(playerYacht));
             gameObjects.add(annotations.get(playerYacht));
         });
+
     }
 }

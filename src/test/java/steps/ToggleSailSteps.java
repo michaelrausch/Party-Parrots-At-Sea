@@ -12,6 +12,8 @@ import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.Yacht;
 import seng302.visualiser.ClientToServerThread;
 
+import java.util.ArrayList;
+
 /**
  * Created by kre39 on 7/08/17.
  */
@@ -41,11 +43,7 @@ public class ToggleSailSteps {
     public void the_user_has_pressed(String arg1) throws Throwable {
         startTime = System.currentTimeMillis();
         if (arg1 == "shift") {
-            if (sailsIn) {
-                client.sendBoatAction(BoatAction.SAILS_OUT);
-            } else {
-                client.sendBoatAction(BoatAction.SAILS_IN);
-            }
+            client.sendBoatAction(BoatAction.SAILS_IN);
         }
     }
 
