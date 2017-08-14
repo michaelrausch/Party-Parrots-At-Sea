@@ -12,8 +12,6 @@ import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
@@ -21,6 +19,26 @@ import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatLocationMessage;
+import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.server.messages.BoatSubMessage;
+import seng302.gameServer.server.messages.ClientType;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RaceStatus;
+import seng302.gameServer.server.messages.RaceStatusMessage;
+import seng302.gameServer.server.messages.RaceType;
+import seng302.gameServer.server.messages.RegistrationResponseMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
+import seng302.gameServer.server.messages.XMLMessage;
+import seng302.gameServer.server.messages.XMLMessageSubType;
+import seng302.model.Player;
+import seng302.model.Yacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.utilities.XMLGenerator;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatLocationMessage;
 import seng302.gameServer.server.messages.BoatStatus;
 import seng302.gameServer.server.messages.BoatSubMessage;
@@ -48,6 +66,14 @@ import seng302.utilities.XMLGenerator;
  */
 public class ServerToClientThread implements Runnable, Observer {
 
+    /**
+     * Called to notify listeners when this thread receives a connection correctly.
+     */
+    @FunctionalInterface
+    interface ConnectionListener {
+        void notifyConnection ();
+    }
+
     private Logger logger = LoggerFactory.getLogger(ServerToClientThread.class);
 
     private Thread thread;
@@ -66,6 +92,8 @@ public class ServerToClientThread implements Runnable, Observer {
 
     private XMLGenerator xml;
 
+    private List<ConnectionListener> connectionListeners = new ArrayList<>();
+
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
         seqNo = 0;
@@ -81,7 +109,7 @@ public class ServerToClientThread implements Runnable, Observer {
         thread.start();
     }
 
-    private void setUpYacht(){
+    private void setUpPlayer(){
         BufferedReader fn;
         String fName = "";
         BufferedReader ln;
@@ -144,12 +172,14 @@ public class ServerToClientThread implements Runnable, Observer {
 
         this.clientType = clientType;
         this.sourceId = sourceId;
-        setUpYacht();
-
         isRegistered = true;
         os.write(responseMessage.getBuffer());
-        sendSetupMessages();
 
+        setUpPlayer();
+
+        for (ConnectionListener listener : connectionListeners) {
+            listener.notifyConnection();
+        }
     }
 
     public void run() {
@@ -180,7 +210,7 @@ public class ServerToClientThread implements Runnable, Observer {
                         //System.out.println("RECEIVED A PACKET");
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
-                                BoatActionType actionType = ServerPacketParser
+                                BoatAction actionType = ServerPacketParser
                                         .extractBoatAction(
                                                 new StreamPacket(type, payloadLength, timeStamp, payload));
                                 GameState.updateBoat(sourceId, actionType);
@@ -206,7 +236,7 @@ public class ServerToClientThread implements Runnable, Observer {
         }
     }
 
-    private void sendSetupMessages() {
+    public void sendSetupMessages() {
         xml = new XMLGenerator();
         Race race = new Race();
 
@@ -239,7 +269,6 @@ public class ServerToClientThread implements Runnable, Observer {
             System.out.println("IO error in server thread upon trying to close socket");
         }
     }
-
 
     private int readByte() throws Exception {
         int currentByte = -1;
@@ -291,7 +320,6 @@ public class ServerToClientThread implements Runnable, Observer {
     public void sendBoatLocationPackets() {
         ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
         for (Yacht yacht : yachts) {
-//            System.out.println("[SERVER] Lat: " + yacht.getLocation().getLat() + " Lon: " + yacht.getLocation().getLng());
             BoatLocationMessage boatLocationMessage =
                 new BoatLocationMessage(
                     yacht.getSourceId(),
@@ -311,7 +339,6 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public void sendRaceStatusMessage() {
         // variables taken from GameServerThread
-
 
         List<BoatSubMessage> boatSubMessages = new ArrayList<>();
         BoatStatus boatStatus;
@@ -346,5 +373,13 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public void addConnectionListener(ConnectionListener listener) {
+        connectionListeners.add(listener);
+    }
+
+    public void removeConnectionListener(ConnectionListener listener) {
+        connectionListeners.remove(listener);
     }
 }

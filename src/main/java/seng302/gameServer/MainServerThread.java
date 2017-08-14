@@ -8,6 +8,7 @@ import java.util.Observable;
 import java.util.Timer;
 import java.util.TimerTask;
 import seng302.model.Player;
+import seng302.model.PolarTable;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -31,7 +32,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         } catch (IOException e) {
             serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
-
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
         terminated = false;
         thread = new Thread(this);
         thread.start();
@@ -43,6 +44,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         HeartbeatThread heartbeatThread;
 
         serverListenThread = new ServerListenThread(serverSocket, this);
+
         heartbeatThread = new HeartbeatThread(this);
 
         heartbeatThread.start();
@@ -101,9 +103,11 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
     public void clientConnected(ServerToClientThread serverToClientThread) {
         serverLog("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         serverToClientThreads.add(serverToClientThread);
-        this.addObserver(serverToClientThread);
-        setChanged();
-        notifyObservers();
+        serverToClientThread.addConnectionListener(() -> {
+            for (ServerToClientThread thread : serverToClientThreads) {
+                thread.sendSetupMessages();
+            }
+        });
     }
 
     /**
@@ -120,11 +124,15 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         serverLog("Player " + player.getYacht().getSourceId() + "'s socket disconnected", 0);
         GameState.removeYacht(player.getYacht().getSourceId());
         GameState.removePlayer(player);
+        ServerToClientThread closedConnection = null;
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             if (serverToClientThread.getSocket() == player.getSocket()) {
-                this.deleteObserver(serverToClientThread);
+                closedConnection = serverToClientThread;
+            } else {
+                serverToClientThread.sendSetupMessages();
             }
         }
+        serverToClientThreads.remove(closedConnection);
         setChanged();
         notifyObservers();
     }

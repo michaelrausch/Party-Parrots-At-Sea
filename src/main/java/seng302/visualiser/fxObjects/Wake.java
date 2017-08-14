@@ -52,7 +52,7 @@ public class Wake extends Group {
             arc.setFill(new Color(0.0, 0.0, 0.0, 0.0));
             arcs[i] = arc;
             arc.getTransforms().setAll(
-                    new Rotate(1)
+                new Rotate(1)
             );
         }
         super.getChildren().addAll(arcs);
@@ -60,15 +60,15 @@ public class Wake extends Group {
 
     void setRotation (double rotation, double velocity) {
 //        if (Math.abs(rotations[0] - rotation) > 20) {
-          Platform.runLater(() -> {
-              rotate(rotation);
-              double rad = (14 / numWakes) + velocity;
-              for (Arc arc : arcs) {
-                  arc.setRadiusX(rad);
-                  arc.setRadiusY(rad);
-                  rad += (14 / numWakes) + (velocity / 2.5);
-              }
-          });
+        Platform.runLater(() -> {
+            rotate(rotation);
+            double rad = (14 / numWakes) + velocity;
+            for (Arc arc : arcs) {
+                arc.setRadiusX(rad);
+                arc.setRadiusY(rad);
+                rad += (14 / numWakes) + (velocity / 2.5);
+            }
+        });
 //        } else {
 //            rotations[0] = rotation;
 //            ((Rotate) arcs[0].getTransforms().get(0)).setAngle(rotation);
