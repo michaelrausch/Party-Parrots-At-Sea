@@ -8,10 +8,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import seng302.model.mark.CompoundMark;
 import seng302.gameServer.server.simulator.Corner;
-import seng302.model.mark.Mark;
 import seng302.gameServer.server.simulator.RoundingType;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
 
 /**
  * Parses the race xml file to get course details
@@ -79,21 +79,22 @@ public class CourseParser extends FileParser {
 		if (node.getNodeType() == Node.ELEMENT_NODE) {
 			Element e = (Element) node;
 			Integer markID = Integer.valueOf(e.getAttribute("CompoundMarkID"));
-
 			String name = e.getAttribute("Name");
-			CompoundMark cMark = new CompoundMark(markID, name);
 
 			NodeList marks = e.getElementsByTagName("Mark");
-			for (int i = 0; i < marks.getLength(); i++) {
-				Mark mark = getMark(marks.item(i));
-				if (mark != null)
-					cMark.addSubMarks(mark);
-			}
-			return cMark;
-		}
-		System.out.println("Failed to create compound mark.");
-		return null;
-	}
+            List<Mark> subMarks = new ArrayList<>();
+            for (int i = 0; i < marks.getLength(); i++) {
+                Mark mark = getMark(marks.item(i));
+                if (mark != null) {
+                    subMarks.add(mark);
+                }
+            }
+
+            return new CompoundMark(markID, name, subMarks);
+        }
+        System.out.println("Failed to create compound mark.");
+        return null;
+    }
 
 
 	private Mark getMark(Node node) {

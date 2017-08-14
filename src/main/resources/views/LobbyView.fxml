@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
@@ -11,6 +16,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
+
 <GridPane fx:id="lobbyScreen" nodeOrientation="LEFT_TO_RIGHT" prefHeight="960.0" prefWidth="1530.0" style="-fx-background-color: #2C2c36;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.LobbyController">
     <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
@@ -53,41 +59,14 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <ListView fx:id="firstListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin>
-            </ListView>
-            <ListView fx:id="secondListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin>
-            </ListView>
-            <ListView fx:id="thirdListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin></ListView>
-            <ListView fx:id="fourthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="4">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin>
-            </ListView>
-            <ListView fx:id="eighthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin></ListView>
-            <ListView fx:id="fifthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin></ListView>
-            <ListView fx:id="sixthListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin></ListView>
-            <ListView fx:id="seventhListView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
-               <GridPane.margin>
-                  <Insets bottom="10.0" left="40.0" right="40.0" top="10.0" />
-               </GridPane.margin></ListView>
+            <TextArea fx:id="playerFourTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <TextArea fx:id="playerEightTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+            <TextArea fx:id="playerSevenTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+            <TextArea fx:id="playerThreeTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <TextArea fx:id="playerSixTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+            <TextArea fx:id="playerFiveTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+            <TextArea fx:id="playerOneTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <TextArea fx:id="playerTwoTxt" editable="false" maxHeight="211.0" maxWidth="175.0" minHeight="211.0" minWidth="175.0" prefHeight="211.0" prefWidth="175.0" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
             <ImageView fx:id="firstImageView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="BOTTOM">
                <GridPane.margin>
                   <Insets bottom="10.0" />

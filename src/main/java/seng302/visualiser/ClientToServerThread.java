@@ -7,17 +7,28 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import seng302.model.stream.packets.StreamPacket;
+import javafx.scene.control.ButtonType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.ClientType;
 import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RegistrationRequestMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on
@@ -49,9 +60,17 @@ public class ClientToServerThread implements Runnable {
 
     private Socket socket;
     private InputStream is;
-    private OutputStream os;
 
-    private int clientId;
+    private Logger logger = LoggerFactory.getLogger(ClientToServerThread.class);
+
+    //Output stream
+    private OutputStream os;
+    private Timer upWindPacketTimer = new Timer();
+    private Timer downWindPacketTimer = new Timer();
+    private boolean upwindTimerFlag = false, downwindTimerFlag = false;
+    static public final int PACKET_SENDING_INTERVAL_MS = 100;
+
+    private int clientId = -1;
 
 //    private Boolean updateClient = true;
     private ByteArrayOutputStream crcBuffer;
@@ -73,15 +92,8 @@ public class ClientToServerThread implements Runnable {
         socket = new Socket(ipAddress, portNumber);
         is = socket.getInputStream();
         os = socket.getOutputStream();
-        Integer allocatedID = threeWayHandshake();
-        if (allocatedID != null) {
-            clientId = allocatedID;
-            clientLog("Successful handshake. Allocated ID: " + clientId, 1);
-        } else {
-            clientLog("Unsuccessful handshake", 1);
-            closeSocket();
-            return;
-        }
+
+        sendRegistrationRequest();
 
         thread = new Thread(this);
         thread.start();
@@ -130,15 +142,22 @@ public class ClientToServerThread implements Runnable {
                         if (streamPackets.size() > 0) {
                             streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
                         } else {
-                            streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
-                            for (ClientSocketListener csl : listeners)
-                                csl.newPacket();
+                            if (PacketType.RACE_REGISTRATION_RESPONSE == PacketType.assignPacketType(type, payload)){
+                                processRegistrationResponse(new StreamPacket(type, payloadLength, timeStamp, payload));
+                            }
+                            else {
+                                if (clientId == -1) continue; // Do not continue if not registered
+                                streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
+                                for (ClientSocketListener csl : listeners)
+                                    csl.newPacket();
+                            }
                         }
                     } else {
                         clientLog("Packet has been dropped", 1);
                     }
                 }
             } catch (ByteReadException e) {
+                e.printStackTrace();
                 closeSocket();
                 Platform.runLater(() -> {
                     Alert alert = new Alert(AlertType.ERROR);
@@ -149,7 +168,6 @@ public class ClientToServerThread implements Runnable {
                 clientLog(e.getMessage(), 1);
                 return;
             }
-//            System.out.println("streamPackets = " + streamPackets.size());
         }
         closeSocket();
         clientLog("Closed connection to Server", 0);
@@ -157,43 +175,127 @@ public class ClientToServerThread implements Runnable {
 
 
     /**
-     * Listens for an allocated sourceID and returns it to the server
-     *
-     * @return the sourceID allocated to us by the server
+     * Sends a request to the server asking for a source ID
      */
-    private Integer threeWayHandshake() {
-        Integer ourSourceID = null;
-        while (true) {
-            try {
-                ourSourceID = is.read();
-            } catch (IOException e) {
-                clientLog("Three way handshake failed", 1);
-            }
-            if (ourSourceID != null) {
-                try {
-                    os.write(ourSourceID);
-                    return ourSourceID;
-                } catch (IOException e) {
-                    clientLog("Three way handshake failed", 1);
-                    return null;
-                }
-            }
+    private void sendRegistrationRequest() {
+        RegistrationRequestMessage requestMessage = new RegistrationRequestMessage(ClientType.PLAYER);
+
+        try {
+            os.write(requestMessage.getBuffer());
+        } catch (IOException e) {
+            logger.error("Could not send registration request. Exiting");
+            System.exit(1);
         }
     }
-
 
     /**
-     * Send the post-start race course information
-     * @param boatActionMessage The message to send
+     * Accepts a response to the registration request message, and updates the client OR quits
+     * @param packet The registration requests packet
      */
-    public void sendBoatActionMessage(BoatActionMessage boatActionMessage) {
-        try {
-            os.write(boatActionMessage.getBuffer());
-        } catch (IOException e) {
-            clientLog("Could not write to server", 1);
+    private void processRegistrationResponse(StreamPacket packet){
+        int sourceId = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 0, 3));
+        int statusCode = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 4,5));
+
+        RegistrationResponseStatus status = RegistrationResponseStatus.getResponseStatus(statusCode);
+
+        if (status.equals(RegistrationResponseStatus.SUCCESS_PLAYING)){
+            clientId = sourceId;
+
+            return;
+        }
+
+        logger.error("Server Denied Connection, Exiting");
+
+        final String alertErrorText;
+
+        if (status.equals(RegistrationResponseStatus.FAILURE_FULL)){
+            alertErrorText = "Server is full";
+        }
+        else{
+            alertErrorText = "Could not connect to server";
+        }
+
+        Platform.runLater(() -> {
+            new Alert(AlertType.ERROR, alertErrorText, ButtonType.OK).showAndWait();
+            System.exit(1);
+        });
+    }
+
+    /**
+     * Sends packets for the given boat action. Special cases are: \n
+     * - DOWNWIND = Packets are sent every ClientToServerThread.PACKET_SENDING_INTERVAL_MS
+     * - UPWIND = Packets are sent every ClientToServerThread.PACKET_SENDING_INTERVAL_MS
+     * - MAINTAIN_HEADING = DOWNWIND and UPWIND packets stop being sent.
+     * @param actionType The boat action that will dictate packets sent.
+     */
+    public void sendBoatAction(BoatAction actionType) {
+        switch (actionType) {
+            case MAINTAIN_HEADING:
+                if (upwindTimerFlag) {
+                    cancelTimer(upWindPacketTimer);
+                    upwindTimerFlag = false;
+                    upWindPacketTimer = new Timer();
+                }
+                if (downwindTimerFlag) {
+                    cancelTimer(downWindPacketTimer);
+                    downwindTimerFlag = false;
+                    downWindPacketTimer = new Timer();
+                }
+                break;
+            case DOWNWIND:
+                if (!downwindTimerFlag) {
+                    downwindTimerFlag = true;
+                    downWindPacketTimer.scheduleAtFixedRate(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                sendBoatAction(new BoatActionMessage(BoatAction.DOWNWIND));
+                            }
+                        }, 0, PACKET_SENDING_INTERVAL_MS
+                    );
+                }
+                break;
+            case UPWIND:
+                if (!upwindTimerFlag) {
+                    upwindTimerFlag = true;
+                    upWindPacketTimer.scheduleAtFixedRate(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                sendBoatAction(new BoatActionMessage(BoatAction.UPWIND));
+                            }
+                        }, 0, PACKET_SENDING_INTERVAL_MS
+                    );
+                }
+                break;
+            default:
+                sendBoatAction(new BoatActionMessage(actionType));
+                break;
         }
     }
 
+    /**
+     * Cancels a packet sending timer.
+     * @param timer The timer to cancel.
+     */
+    private void cancelTimer (Timer timer) {
+        timer.cancel();
+        timer.purge();
+    }
+
+    /**
+     * Sends a boat action of the given message type.
+     * @param message The given message type.
+     */
+    private void sendBoatAction(BoatActionMessage message) {
+        if (clientId != -1) {
+            try {
+                os.write(message.getBuffer());
+            } catch (IOException e) {
+                clientLog("Could not write to server", 1);
+            }
+        }
+    }
 
     private void closeSocket() {
         try {
@@ -247,11 +349,8 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
-    public Thread getThread() {
-        return thread;
-    }
-
     public int getClientId () {
         return clientId;
     }
+
 }
