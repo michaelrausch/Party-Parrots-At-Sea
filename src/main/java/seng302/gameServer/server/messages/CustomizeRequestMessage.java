@@ -4,25 +4,31 @@ package seng302.gameServer.server.messages;
 public class CustomizeRequestMessage extends Message {
 
 
-    private static int MESSAGE_LENGTH = 2;
+    private static int MESSAGE_LENGTH = 6;
 
     //Message fields
-    private Double sourceID;
     private CustomizeRequestType customizeType;
+    private Integer payloadLength;
 
-    public CustomizeRequestMessage(CustomizeRequestType customizeType, Double sourceID) {
-        setHeader(
-            new Header(MessageType.CUSTOMIZATION_REQUEST, sourceID.intValue(), (short) getSize()));
+    public CustomizeRequestMessage(CustomizeRequestType customizeType, double sourceID,
+        byte[] payload) {
+        setHeader(new Header(MessageType.CUSTOMIZATION_REQUEST, 1, (short) getSize()));
 
         allocateBuffer();
         writeHeaderToBuffer();
 
+        payloadLength = payload.length;
+        putInt((int) sourceID, 4);
+        putInt((int) customizeType.getType(), 2);
+        putBytes(payload);
 
+        writeCRC();
+        rewind();
     }
 
     @Override
     public int getSize() {
-        return MESSAGE_LENGTH; // placeholder
+        return MESSAGE_LENGTH + payloadLength; // placeholder
     }
 
 
