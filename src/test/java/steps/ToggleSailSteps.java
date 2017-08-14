@@ -34,7 +34,11 @@ public class ToggleSailSteps {
         mst = new MainServerThread();
         client = new ClientToServerThread("localhost", 4942);
         GameState.setCurrentStage(GameStages.RACING);
+        Thread.sleep(200); // Sleep needed to help the threads all be up to speed with each other
+        Yacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
+        Assert.assertFalse(yacht.getSailIn());
     }
+
 
     @When("^the user has pressed \"([^\"]*)\"$")
     public void the_user_has_pressed(String arg1) throws Throwable {
@@ -50,7 +54,12 @@ public class ToggleSailSteps {
 
     @Then("^the sails are \"([^\"]*)\"$")
     public void the_sails_are(String arg1) throws Throwable {
-        //Yacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
-        //Assert.assertTrue(yacht.getSailIn());
+        Thread.sleep(200); // Sleep needed to help the threads all be up to speed with each other
+        Yacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
+        if (arg1 == "in") {
+            Assert.assertTrue(yacht.getSailIn());
+        } else {
+            Assert.assertFalse(yacht.getSailIn());
+        }
     }
 }

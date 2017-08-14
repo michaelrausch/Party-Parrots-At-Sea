@@ -13,6 +13,8 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.MainServerThread;
+import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.RaceState;
 import seng302.model.Yacht;
 import seng302.model.stream.packets.StreamPacket;
@@ -22,8 +24,6 @@ import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.gameServer.server.messages.BoatActionMessage;
-import seng302.gameServer.server.messages.BoatActionType;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
@@ -62,6 +62,7 @@ public class GameClient {
             ioe.printStackTrace();
             System.out.println("Unable to connect to host...");
         }
+
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);
@@ -174,7 +175,6 @@ public class GameClient {
                     break;
 
                 case BOAT_XML:
-                    System.out.println("GOT SUM BOATS YAY :)");
                     allBoatsMap = XMLParser.parseBoats(
                         StreamParser.extractXmlMessage(packet)
                     );
