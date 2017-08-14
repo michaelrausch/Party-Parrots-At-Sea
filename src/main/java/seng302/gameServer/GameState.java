@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import seng302.gameServer.server.messages.BoatAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.gameServer.server.messages.BoatActionType;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.mark.MarkOrder;
@@ -56,7 +56,6 @@ public class GameState implements Runnable {
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
-        yachts = new HashMap<>();
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         yachts = new HashMap<>();
@@ -75,7 +74,8 @@ public class GameState implements Runnable {
 
     public static void addPlayer(Player player) {
         players.add(player);
-        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
+        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName()
+            + " " + player.getYacht().getCountry();
         playerStringMap.put(player, playerText);
     }
     
@@ -132,7 +132,7 @@ public class GameState implements Runnable {
         return yachts;
     }
 
-    public static void updateBoat(Integer sourceId, BoatActionType actionType) {
+    public static void updateBoat(Integer sourceId, BoatAction actionType) {
         Yacht playerYacht = yachts.get(sourceId);
 //        System.out.println("-----------------------");
         switch (actionType) {
