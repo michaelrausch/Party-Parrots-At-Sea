@@ -27,7 +27,7 @@ public class MarkRoundingMessage extends Message{
      */
     public MarkRoundingMessage(int ackNumber, int raceId, int sourceId, RoundingBoatStatus roundingBoatStatus,
         RoundingSide roundingSide, MarkType markType, int markId) {
-        this.time = System.currentTimeMillis() / 1000L;
+        this.time = System.currentTimeMillis();
         this.ackNumber = ackNumber;
         this.raceId = raceId;
         this.sourceId = sourceId;

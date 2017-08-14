@@ -7,6 +7,8 @@ import java.util.Map;
 import seng302.gameServer.server.messages.BoatAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.MarkRoundingMessage;
+import seng302.gameServer.server.messages.Message;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.mark.MarkOrder;
@@ -17,7 +19,13 @@ import seng302.model.mark.MarkOrder;
  */
 public class GameState implements Runnable {
 
-    private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
+    @FunctionalInterface
+    interface MarkPassingListener {
+
+        void markPassing(Message message);
+    }
+
+    private Logger logger = LoggerFactory.getLogger(GameState.class);
 
     private static Integer STATE_UPDATES_PER_SECOND = 60;
     public static Integer MAX_PLAYERS = 8;
@@ -33,6 +41,8 @@ public class GameState implements Runnable {
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
+
+    private static List<MarkPassingListener> markListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
     /*
@@ -53,13 +63,13 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
-        players = new ArrayList<>();
+        ;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
-        yachts = new HashMap<>();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
+        markListeners = new ArrayList<>();
 
         new Thread(this).start();   //Run the auto updates on the game state
     }
@@ -214,5 +224,13 @@ public class GameState implements Runnable {
         System.out.println("Lat: " + playerYacht.getLocation().getLat());
         System.out.println("Lng: " + playerYacht.getLocation().getLng());
         System.out.println("-----------------------\n");
+    }
+
+    public static void addMarkPassListener(MarkPassingListener listener) {
+        markListeners.add(listener);
+    }
+
+    public static void removeMarkPassListenr(MarkPassingListener listener) {
+        markListeners.remove(listener);
     }
 }
