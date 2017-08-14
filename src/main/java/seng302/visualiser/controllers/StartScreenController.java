@@ -66,7 +66,7 @@ public class StartScreenController implements Initializable {
      */
     @FXML
     public void hostButtonPressed() {
-        new GameState(getLocalHostIp());
+//        new GameState(getLocalHostIp());
         gameClient = new GameClient(holder);
         gameClient.runAsHost(getLocalHostIp(), 4942);
 //        try {
