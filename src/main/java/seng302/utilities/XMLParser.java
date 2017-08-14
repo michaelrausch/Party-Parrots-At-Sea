@@ -277,11 +277,12 @@ public class XMLParser {
         for (int i = 0; i < childMarks.getLength(); i++) {
             Node markNode = childMarks.item(i);
             if (markNode.getNodeName().equals("Mark")) {
+                Integer seqID = XMLParser.getNodeAttributeInt(markNode, "SeqID");
                 Integer sourceID = XMLParser.getNodeAttributeInt(markNode, "SourceID");
                 String markName = XMLParser.getNodeAttributeString(markNode, "Name");
                 Double targetLat = XMLParser.getNodeAttributeDouble(markNode, "TargetLat");
                 Double targetLng = XMLParser.getNodeAttributeDouble(markNode, "TargetLng");
-                Mark mark = new Mark(markName, targetLat, targetLng, sourceID);
+                Mark mark = new Mark(markName, seqID, targetLat, targetLng, sourceID);
                 subMarks.add(mark);
             }
         }

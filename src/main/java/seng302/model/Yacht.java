@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
 import seng302.gameServer.server.messages.MarkRoundingMessage;
+import seng302.gameServer.server.messages.MarkType;
 import seng302.gameServer.server.messages.Message;
 import seng302.gameServer.server.messages.RoundingBoatStatus;
 import seng302.gameServer.server.messages.RoundingSide;
@@ -70,6 +71,7 @@ public class Yacht extends Observable {
     //MARK ROUNDING INFO
     private GeoPoint lastLocation;  //For purposes of mark rounding calculations
     private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
+    private Mark closestCurrentMark;
     private Boolean hasPassedLine;
     private Boolean hasPassedThroughGate;
     private Boolean finishedRace;
@@ -113,7 +115,7 @@ public class Yacht extends Observable {
         Double windSpeedKnots = GameState.getWindSpeedKnots();
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000;
+        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000 * 2;
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
@@ -160,14 +162,39 @@ public class Yacht extends Observable {
         super.addObserver(o);
     }
 
-    private void sendMarkRoundingMessage(Integer passedMarkSeqID) {
+    private void sendMarkRoundingMessage() {
+        CompoundMark currentMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
+        MarkType markType = (currentMark.isGate()) ? MarkType.GATE : MarkType.ROUNDING_MARK;
+
         // TODO: 13/8/17 figure out the rounding side, rounded mark source ID and boat status.
         Message markRoundingMessage = new MarkRoundingMessage(0, 0,
-            getSourceId(), RoundingBoatStatus.RACING, RoundingSide.UNKNOWN,
-            GameState.getMarkOrder().getCurrentMark(passedMarkSeqID).getSubMark(1).getSourceID());
-        logger.debug("Sending mark rounding message...");
+            sourceId, RoundingBoatStatus.RACING, closestCurrentMark.getRoundingSide(), markType,
+            closestCurrentMark.getSourceID());
         setChanged();
         notifyObservers(markRoundingMessage);
+        logMarkRounding(currentMark);
+
+        hasPassedLine = false;
+        hasEnteredRoundingZone = false;
+        hasPassedThroughGate = false;
+        currentMarkSeqID++;
+    }
+
+    private void logMarkRounding(CompoundMark currentMark) {
+        logger.debug(
+            String.format("Sending Mark Rounding Message:\n"
+                    + "AckNumber %d\n"
+                    + "RaceID %d\n"
+                    + "BoatSourceID %d\n"
+                    + "BoatStatus %s\n"
+                    + "Rounding Side %s\n"
+                    + "MarkSeqID %d",
+                0,
+                0,
+                sourceId,
+                RoundingBoatStatus.RACING.name(),
+                closestCurrentMark.getRoundingSide().getName(),
+                currentMark.getSubMark(1).getSourceID()));
     }
 
     /**
@@ -186,8 +213,15 @@ public class Yacht extends Observable {
             Mark sub2 = nextMark.getSubMark(2);
             Double distance1 = GeoUtility.getDistance(location, sub1);
             Double distance2 = GeoUtility.getDistance(location, sub2);
-            return (distance1 < distance2) ? distance1 : distance2;
+            if (distance1 < distance2) {
+                closestCurrentMark = sub1;
+                return distance1;
+            } else {
+                closestCurrentMark = sub2;
+                return distance2;
+            }
         } else {
+            closestCurrentMark = nextMark.getSubMark(1);
             return GeoUtility.getDistance(location, nextMark.getSubMark(1));
         }
     }
@@ -224,9 +258,8 @@ public class Yacht extends Observable {
         if (crossedLine > 0) {
             Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, nextMark.getMidPoint());
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
-                sendMarkRoundingMessage(currentMarkSeqID);
-                currentMarkSeqID++;
-                logMarkRounding(currentMark);
+                closestCurrentMark = mark1;
+                sendMarkRoundingMessage();
             }
         }
     }
@@ -257,11 +290,7 @@ public class Yacht extends Observable {
         }
 
         if (hasPassedLine && hasEnteredRoundingZone) {
-            currentMarkSeqID++;
-            hasPassedLine = false;
-            hasEnteredRoundingZone = false;
-            hasPassedThroughGate = false;
-            logMarkRounding(currentMark);
+            sendMarkRoundingMessage();
         }
     }
 
@@ -297,9 +326,7 @@ public class Yacht extends Observable {
             if (prevMarkSide == nextMarkSide) {
                 checkMarkRounding(currentMark);
             } else {
-                sendMarkRoundingMessage(currentMarkSeqID);
-                currentMarkSeqID++;
-                logMarkRounding(currentMark);
+                sendMarkRoundingMessage();
             }
         }
     }
@@ -318,12 +345,10 @@ public class Yacht extends Observable {
         if (crossedLine > 0) {
             Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
-                sendMarkRoundingMessage(currentMarkSeqID);
-                currentMarkSeqID++;
+                closestCurrentMark = mark1;
+                sendMarkRoundingMessage();
                 finishedRace = true;
-                logMarkRounding(currentMark);
                 logger.debug(sourceId + " finished");
-                // TODO: 8/08/17 wmu16 - Do something!
             }
         }
     }
@@ -681,20 +706,6 @@ public class Yacht extends Observable {
         for (YachtLocationListener yll : locationListeners) {
             yll.notifyLocation(this, lat, lng, heading, velocity);
         }
-    }
-
-    private void logMarkRounding(CompoundMark currentMark) {
-        String typeString = "mark";
-        if (currentMark.isGate()) {
-            typeString = "gate";
-        }
-        logger.debug(
-            String.format("BoatID %d passed %s %s with id %d. Now on leg %d",
-                sourceId,
-                typeString,
-                currentMark.getMarks().get(0).getName(),
-                currentMark.getId(),
-                currentMarkSeqID));
     }
 
     public void addLocationListener(YachtLocationListener listener) {

@@ -82,7 +82,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
 
     public void updateClients() {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-            serverToClientThread.updateClient();
+            serverToClientThread.sendBoatLocationPackets();
         }
     }
 

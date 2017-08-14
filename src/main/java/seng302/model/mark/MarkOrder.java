@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import seng302.gameServer.server.messages.RoundingSide;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.XMLGenerator;
@@ -104,6 +105,7 @@ public class MarkOrder {
 
             for (Corner corner : corners){
                 CompoundMark compoundMark = marks.get(corner.getCompoundMarkID());
+                compoundMark.setRoundingSide(RoundingSide.getRoundingSide(corner.getRounding()));
                 course.add(compoundMark);
             }
 

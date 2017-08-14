@@ -201,6 +201,16 @@ public class GameView extends Pane {
             for (Mark mark : cMark.getMarks()) {
                 makeAndBindMarker(mark, colour);
             }
+
+            //UNCOMMENT THIS TO HIGHLIGHT SUBMARKS 1 and 2 RED AND GREEN RESPECTIVELY FOR DEBUG
+            //(instead of above for loop)
+//            for (Mark mark : cMark.getMarks()) {
+//                if (mark.getSeqID() == 1) {
+//                    makeAndBindMarker(mark, Color.RED);
+//                } else {
+//                    makeAndBindMarker(mark, Color.GREEN);
+//                }
+//            }
             //Create gate line
             if (cMark.isGate()) {
                 for (int i = 1; i < cMark.getMarks().size(); i++) {
