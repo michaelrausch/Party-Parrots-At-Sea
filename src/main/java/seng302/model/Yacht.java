@@ -115,7 +115,7 @@ public class Yacht extends Observable {
         Double windSpeedKnots = GameState.getWindSpeedKnots();
         Double trueWindAngle = Math.abs(GameState.getWindDirection() - heading);
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(windSpeedKnots, trueWindAngle);
-        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000 * 2;
+        Double maxBoatSpeed = boatSpeedInKnots / 1.943844492 * 1000;
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
