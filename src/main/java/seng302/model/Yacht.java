@@ -25,9 +25,10 @@ import seng302.utilities.GeoUtility;
  */
 public class Yacht {
 
+
     @FunctionalInterface
     public interface YachtLocationListener {
-        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
+        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity, boolean sailIn);
     }
 
     private Logger logger = LoggerFactory.getLogger(Yacht.class);
@@ -54,7 +55,7 @@ public class Yacht {
     //SERVER SIDE
     public static final Double TURN_STEP = 5.0; //This should be in some utils class somewhere 2bh. Public for tests sake.
     private Double lastHeading;
-    private Boolean sailIn;
+    private Boolean sailIn = false;
     private GeoPoint location;
     private Integer boatStatus;
     private Double velocity;
@@ -76,6 +77,7 @@ public class Yacht {
     private CompoundMark lastMarkRounded;
     private Integer positionInt = 0;
     private Color colour;
+    private Boolean clientSailsIn = true;
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
             String boatName, String country) {
@@ -631,6 +633,9 @@ public class Yacht {
         this.colour = colour;
     }
 
+    public void toggleClientSail() {
+        clientSailsIn = !clientSailsIn;
+    }
 
     public Double getVelocity() {
         return velocity;
@@ -644,13 +649,17 @@ public class Yacht {
         return distanceToCurrentMark;
     }
 
+    public Boolean getClientSailsIn(){
+        return clientSailsIn;
+    }
+
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
         this.velocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lng, heading, velocity);
+            yll.notifyLocation(this, lat, lng, heading, velocity, clientSailsIn);
         }
     }
 

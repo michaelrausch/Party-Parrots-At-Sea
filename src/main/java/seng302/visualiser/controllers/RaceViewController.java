@@ -595,4 +595,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         gameView.updateBorder(raceData.getCourseLimit());
     }
+
+    public GameView getGameView() {
+        return gameView;
+    }
 }

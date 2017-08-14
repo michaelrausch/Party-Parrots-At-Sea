@@ -257,6 +257,8 @@ public class GameClient {
     private void processRaceStatusUpdate(RaceStatusData data) {
         if (allXMLReceived()) {
             raceState.updateState(data);
+            if (raceView != null)
+            raceView.getGameView().setWindDir(raceState.getWindDirection());
             for (long[] boatData : data.getBoatData()) {
                 Yacht yacht = allBoatsMap.get((int) boatData[0]);
                 yacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
@@ -310,7 +312,9 @@ public class GameClient {
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
-                socketThread.sendBoatAction(BoatAction.SAILS_IN); break;
+                socketThread.sendBoatAction(BoatAction.SAILS_IN);
+                raceView.getGameView().getPlayerYacht().toggleClientSail();
+                break;
             case PAGE_UP:
             case PAGE_DOWN:
                 socketThread.sendBoatAction(BoatAction.MAINTAIN_HEADING); break;
