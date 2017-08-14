@@ -3,17 +3,14 @@ package steps;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import java.util.ArrayList;
 import org.junit.Assert;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
-import seng302.gameServer.server.messages.BoatActionMessage;
-import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.Yacht;
 import seng302.visualiser.ClientToServerThread;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Created by kre39 on 7/08/17.
@@ -45,9 +42,9 @@ public class ToggleSailSteps {
         startTime = System.currentTimeMillis();
         if (arg1 == "shift") {
             if (sailsIn) {
-                client.sendBoatActionMessage(new BoatActionMessage(BoatActionType.SAILS_OUT));
+                client.sendBoatAction(BoatAction.SAILS_OUT);
             } else {
-                client.sendBoatActionMessage(new BoatActionMessage(BoatActionType.SAILS_IN));
+                client.sendBoatAction(BoatAction.SAILS_IN);
             }
         }
     }
