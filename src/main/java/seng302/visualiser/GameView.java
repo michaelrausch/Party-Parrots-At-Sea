@@ -200,7 +200,7 @@ public class GameView extends Pane {
                     }
                 }
 //                Platform.runLater(() ->
-//                    boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation())
+                    boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
 //                );
             }
         };
@@ -559,7 +559,6 @@ public class GameView extends Pane {
         distanceFromReference = GeoUtility.getDistance(
             minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
         );
-//        System.out.println("distanceFromReference = " + distanceFromReference);
         if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
             xAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
             yAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
@@ -579,8 +578,6 @@ public class GameView extends Pane {
         if(horizontalInversion) {
             xAxisLocation = canvasWidth - bufferSize - (xAxisLocation - bufferSize);
         }
-//        System.out.println("yAxisLocation = " + yAxisLocation + " " + unscaledLat);
-//        System.out.println("xAxisLocation = " + xAxisLocation + " " + unscaledLon);
         return new Point2D(xAxisLocation, yAxisLocation);
     }
 

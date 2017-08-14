@@ -53,7 +53,7 @@ public class Yacht {
     private Integer legNumber = 0;
 
     //SERVER SIDE
-    private final Double TURN_STEP = 5.0;
+    public static final Double TURN_STEP = 5.0; //This should be in some utils class somewhere 2bh. Public for tests sake.
     private Double lastHeading;
     private Boolean sailIn = false;
     private GeoPoint location;
@@ -452,9 +452,9 @@ public class Yacht {
     private void turnTowardsHeading(Double newHeading) {
         Double newVal = heading - newHeading;
         if (Math.floorMod(newVal.longValue(), 360L) > 180) {
-            adjustHeading(TURN_STEP);
+            adjustHeading(TURN_STEP / 5);
         } else {
-            adjustHeading(-TURN_STEP);
+            adjustHeading(-TURN_STEP / 5);
         }
     }
 
