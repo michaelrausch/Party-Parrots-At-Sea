@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -19,7 +21,12 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.gameServer.server.messages.*;
+import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatActionMessage;
+import seng302.gameServer.server.messages.ClientType;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RegistrationRequestMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 
@@ -51,8 +58,15 @@ public class ClientToServerThread implements Runnable {
 
     private Socket socket;
     private InputStream is;
-    private OutputStream os;
+
     private Logger logger = LoggerFactory.getLogger(ClientToServerThread.class);
+
+    //Output stream
+    private OutputStream os;
+    private Timer upWindPacketTimer = new Timer();
+    private Timer downWindPacketTimer = new Timer();
+    private boolean upwindTimerFlag = false, downwindTimerFlag = false;
+    static public final int PACKET_SENDING_INTERVAL_MS = 100;
 
     private int clientId = -1;
 
@@ -141,6 +155,7 @@ public class ClientToServerThread implements Runnable {
                     }
                 }
             } catch (ByteReadException e) {
+                e.printStackTrace();
                 closeSocket();
                 Platform.runLater(() -> {
                     Alert alert = new Alert(AlertType.ERROR);
@@ -151,7 +166,6 @@ public class ClientToServerThread implements Runnable {
                 clientLog(e.getMessage(), 1);
                 return;
             }
-//            System.out.println("streamPackets = " + streamPackets.size());
         }
         closeSocket();
         clientLog("Closed connection to Server", 0);
@@ -205,21 +219,81 @@ public class ClientToServerThread implements Runnable {
         });
     }
 
-
     /**
-     * Send the post-start race course information
-     * @param boatActionMessage The message to send
+     * Sends packets for the given boat action. Special cases are: \n
+     * - DOWNWIND = Packets are sent every ClientToServerThread.PACKET_SENDING_INTERVAL_MS
+     * - UPWIND = Packets are sent every ClientToServerThread.PACKET_SENDING_INTERVAL_MS
+     * - MAINTAIN_HEADING = DOWNWIND and UPWIND packets stop being sent.
+     * @param actionType The boat action that will dictate packets sent.
      */
-    public void sendBoatActionMessage(BoatActionMessage boatActionMessage) {
-        if (clientId == -1) return;
-
-        try {
-            os.write(boatActionMessage.getBuffer());
-        } catch (IOException e) {
-            clientLog("Could not write to server", 1);
+    public void sendBoatAction(BoatAction actionType) {
+        switch (actionType) {
+            case MAINTAIN_HEADING:
+                if (upwindTimerFlag) {
+                    cancelTimer(upWindPacketTimer);
+                    upwindTimerFlag = false;
+                    upWindPacketTimer = new Timer();
+                }
+                if (downwindTimerFlag) {
+                    cancelTimer(downWindPacketTimer);
+                    downwindTimerFlag = false;
+                    downWindPacketTimer = new Timer();
+                }
+                break;
+            case DOWNWIND:
+                if (!downwindTimerFlag) {
+                    downwindTimerFlag = true;
+                    downWindPacketTimer.scheduleAtFixedRate(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                sendBoatAction(new BoatActionMessage(BoatAction.DOWNWIND));
+                            }
+                        }, 0, PACKET_SENDING_INTERVAL_MS
+                    );
+                }
+                break;
+            case UPWIND:
+                if (!upwindTimerFlag) {
+                    upwindTimerFlag = true;
+                    upWindPacketTimer.scheduleAtFixedRate(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                sendBoatAction(new BoatActionMessage(BoatAction.UPWIND));
+                            }
+                        }, 0, PACKET_SENDING_INTERVAL_MS
+                    );
+                }
+                break;
+            default:
+                sendBoatAction(new BoatActionMessage(actionType));
+                break;
         }
     }
 
+    /**
+     * Cancels a packet sending timer.
+     * @param timer The timer to cancel.
+     */
+    private void cancelTimer (Timer timer) {
+        timer.cancel();
+        timer.purge();
+    }
+
+    /**
+     * Sends a boat action of the given message type.
+     * @param message The given message type.
+     */
+    private void sendBoatAction(BoatActionMessage message) {
+        if (clientId != -1) {
+            try {
+                os.write(message.getBuffer());
+            } catch (IOException e) {
+                clientLog("Could not write to server", 1);
+            }
+        }
+    }
 
     private void closeSocket() {
         try {
@@ -273,11 +347,8 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
-    public Thread getThread() {
-        return thread;
-    }
-
     public int getClientId () {
         return clientId;
     }
+
 }

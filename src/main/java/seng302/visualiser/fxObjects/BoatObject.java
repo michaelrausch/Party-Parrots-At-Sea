@@ -268,7 +268,7 @@ public class BoatObject extends Group {
      */
     public void setAsPlayer() {
         boatPoly.getPoints().setAll(
-          -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,
+            -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,
             0.0, -BOAT_HEIGHT / 1.75,
             BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75
         );
