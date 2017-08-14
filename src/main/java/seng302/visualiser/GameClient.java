@@ -222,7 +222,6 @@ public class GameClient {
      * Updates the position of a boat. Boat and position are given in the provided data.
      */
     private void updatePosition(PositionUpdateData positionData) {
-        raceView.getGameView().trackBoat();
         if (positionData.getType() == DeviceType.YACHT_TYPE) {
             if (allXMLReceived() && allBoatsMap.containsKey(positionData.getDeviceId())) {
                 Yacht yacht = allBoatsMap.get(positionData.getDeviceId());
@@ -230,6 +229,7 @@ public class GameClient {
                     positionData.getLon(), positionData.getHeading(),
                     positionData.getGroundSpeed());
             }
+            raceView.getGameView().trackBoat();
         } else if (positionData.getType() == DeviceType.MARK_TYPE) {
             //CompoundMark mark = courseData.getCompoundMarks().get(positionData.getDeviceId());
         }

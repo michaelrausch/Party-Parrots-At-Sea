@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -19,6 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import seng302.gameServer.server.simulator.Boat;
 import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -66,6 +68,7 @@ public class GameView extends Pane {
     private Map<Yacht, BoatObject> boatObjects = new HashMap<>();
     private Map<Yacht, AnnotationBox> annotations = new HashMap<>();
     private ObservableList<Node> gameObjects;
+    private BoatObject selectedBoat = null;
     private Group annotationsGroup = new Group();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
@@ -106,21 +109,27 @@ public class GameView extends Pane {
 
     public void trackBoat() {
         if (this.getScaleX() > 1) {
-            double x = boatObjects.get(playerYacht).getBoatLayoutX();
-            double y = boatObjects.get(playerYacht).getBoatLayoutY();
-//        System.out.println("x = " + x);
-//        System.out.println("y = " + y);
-//        this.setRotate(-playerYacht.getHeading());
-            Point2D displacementX = findScaledXY(maxLonPoint);
-            Point2D displacementY = findScaledXY(maxLatPoint);
-            this.setLayoutX(-x + 250 + canvasWidth/2);
-            this.setLayoutY(-y + canvasHeight/2);
+            boolean isBoatSelected = false;
+            for (BoatObject boat : boatObjects.values()) {
+                if (boat.getSelected()) {
+                    isBoatSelected = true;
+                    selectedBoat = boat;
+                    double x = boat.getBoatLayoutX();
+                    double y = boat.getBoatLayoutY();
+                    double displacementX = this.getWidth();
+                    double displacementY = this.getHeight();
+                    this.setLayoutX((-x + ((displacementX)/2.0)) * this.getScaleX());
+                    this.setLayoutY((-y + ((displacementY)/2.0)) * this.getScaleY());
+                }
+            }
+            if (!isBoatSelected) {
+                this.setLayoutX(0);
+                this.setLayoutY(0);
+            }
         } else {
             this.setLayoutX(0);
             this.setLayoutY(0);
         }
-//        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutX());
-//        System.out.println("boatObjects = " + boatObjects.get(playerYacht).getBoatLayoutY());
     }
 
     public GameView () {
@@ -584,6 +593,7 @@ public class GameView extends Pane {
     }
 
     public void selectBoat (Yacht selectedYacht) {
+        selectedBoat = boatObjects.get(selectedYacht);
         boatObjects.forEach((boat, group) ->
             group.setIsSelected(boat == selectedYacht)
         );
