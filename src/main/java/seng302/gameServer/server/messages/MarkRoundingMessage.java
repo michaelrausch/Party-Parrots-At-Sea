@@ -20,7 +20,7 @@ public class MarkRoundingMessage extends Message{
      * The purpose of this is to record the time when yachts cross marks
      * @param ackNumber ackNumber
      * @param raceId raceId
-     * @param sourceId sourceId
+     * @param sourceId boatSourceId
      * @param roundingBoatStatus roundingBoatStatus
      * @param roundingSide roundingSide
      * @param markId markId

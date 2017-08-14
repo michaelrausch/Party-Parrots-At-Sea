@@ -34,6 +34,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
             serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
+        GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this);
         thread.start();
@@ -89,7 +90,7 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         }
     }
 
-    public void broadcastMessage(Message message) {
+    private void broadcastMessage(Message message) {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.sendMessage(message);
         }

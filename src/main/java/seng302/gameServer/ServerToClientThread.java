@@ -308,7 +308,7 @@ public class ServerToClientThread implements Runnable, Observer {
                     yacht.getLocation().getLat(),
                     yacht.getLocation().getLng(),
                     yacht.getHeading(),
-                    yacht.getVelocity().longValue());
+                    yacht.getCurrentVelocity().longValue());
 
             sendMessage(boatLocationMessage);
         }
