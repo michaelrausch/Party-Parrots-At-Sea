@@ -49,16 +49,16 @@ public class RegularPacketsTest {
             (endTime - startTime), 2 * ClientToServerThread.PACKET_SENDING_INTERVAL_MS);
     }
 
-    @Test
-    public void testArbitraryPacketSent() throws Exception {
-        serverThread.startGame();
-        SleepThreadMaxDelay();
-        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
-        boolean startState = yacht.getSailIn();
-        clientThread.sendBoatAction(BoatAction.SAILS_IN);
-        SleepThreadMaxDelay();
-        Assert.assertEquals(startState, !yacht.getSailIn());
-    }
+//    @Test
+//    public void testArbitraryPacketSent() throws Exception {
+//        serverThread.startGame();
+//        SleepThreadMaxDelay();
+//        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
+//        boolean startState = yacht.getSailIn();
+//        clientThread.sendBoatAction(BoatAction.SAILS_IN);
+//        SleepThreadMaxDelay();
+//        Assert.assertEquals(startState, !yacht.getSailIn());
+//    }
 
     /**
      * Give time for processing and packet sending. 200ms listed as absolute maximum for an
