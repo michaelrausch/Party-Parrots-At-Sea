@@ -305,9 +305,9 @@ public class GameClient {
                 case X:  // zoom out
                     raceView.getGameView().zoomOut();
                     break;
-            }
         }
     }
+
 
     private void keyReleased(KeyEvent e) {
         switch (e.getCode()) {
