@@ -158,7 +158,7 @@ public class GameClient {
                 case RACE_STATUS:
                     processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
 
-                    if (raceState.getTimeTillStart() <= 5){
+                    if (raceState.getTimeTillStart() <= 5000) {
                         startRaceIfAllDataReceived();
                     }
 

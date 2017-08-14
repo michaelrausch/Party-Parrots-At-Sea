@@ -359,12 +359,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the clock for the race
      */
     private void updateRaceTime() {
-        if (!raceState.isRaceStarted()) {
-            timerLabel.setFill(Color.RED);
-            timerLabel.setText("Race Finished!");
-        } else {
-            timerLabel.setText(raceState.getRaceTimeStr());
-        }
+//        if (!raceState.isRaceStarted()) {
+//            timerLabel.setFill(Color.RED);
+//            timerLabel.setText("Race Finished!");
+//        } else {
+        timerLabel.setText(raceState.getRaceTimeStr());
+//        }
     }
 
     /**

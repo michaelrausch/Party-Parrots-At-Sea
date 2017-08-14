@@ -17,7 +17,7 @@ public class RaceState {
 
     private double windSpeed;
     private double windDirection;
-    private long raceTime;
+    private long serverSystemTime;
     private long expectedStartTime;
     private boolean isRaceStarted = false;
     long timeTillStart;
@@ -28,7 +28,7 @@ public class RaceState {
     public void updateState (RaceStatusData data) {
         this.windSpeed = data.getWindSpeed();
         this.windDirection = data.getWindDirection();
-        this.raceTime = data.getCurrentTime();
+        this.serverSystemTime = data.getCurrentTime();
         this.expectedStartTime = data.getExpectedStartTime();
         this.isRaceStarted = data.isRaceStarted();
     }
@@ -42,15 +42,16 @@ public class RaceState {
     }
 
     public String getRaceTimeStr () {
-        return DATE_TIME_FORMAT.format(raceTime);
+        long raceTime = serverSystemTime - expectedStartTime;
+        if (raceTime < 0) {
+            return "-" + DATE_TIME_FORMAT.format(-1 * (raceTime - 1000));
+        } else {
+            return DATE_TIME_FORMAT.format(serverSystemTime - expectedStartTime);
+        }
     }
 
     public long getTimeTillStart () {
-        return (expectedStartTime - raceTime) / 1000;
-    }
-
-    public String getTimeTillStartStr () {
-        return DATE_TIME_FORMAT.format(getTimeTillStart() * 1000);
+        return (expectedStartTime - serverSystemTime);
     }
 
     public double getWindSpeed() {
@@ -62,11 +63,7 @@ public class RaceState {
     }
 
     public long getRaceTime() {
-        return raceTime;
-    }
-
-    public long getExpectedStartTime() {
-        return expectedStartTime;
+        return serverSystemTime;
     }
 
     public boolean isRaceStarted () {

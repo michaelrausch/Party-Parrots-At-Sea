@@ -214,9 +214,8 @@ public class LobbyController {
     }
 
     public void updateRaceState(RaceState raceState){
-        System.out.println(raceState.getTimeTillStart());
         this.raceState = raceState;
-        timeUntilStart.setText(raceState.getTimeTillStartStr());
+        timeUntilStart.setText(raceState.getRaceTimeStr());
     }
 
     public void disableReadyButton () {
