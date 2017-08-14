@@ -1,6 +1,6 @@
 package seng302.gameServer.server.messages;
 
-
+// TODO: 14/08/17 ajm412: this may eventually need adjusting due to conforming to the agreed spec.
 public class CustomizeRequestMessage extends Message {
 
 
@@ -22,7 +22,7 @@ public class CustomizeRequestMessage extends Message {
 
     @Override
     public int getSize() {
-        return 1; // placeholder
+        return MESSAGE_LENGTH; // placeholder
     }
 
 
