@@ -62,7 +62,7 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
 
-        startTime = System.currentTimeMillis() + 20000;
+        startTime = System.currentTimeMillis() + 60000;
 
         new Thread(this).start();   //Run the auto updates on the game state
     }
@@ -166,6 +166,9 @@ public class GameState implements Runnable {
     public void update() {
         Long timeInterval = System.currentTimeMillis() - previousUpdateTime;
         previousUpdateTime = System.currentTimeMillis();
+        if (System.currentTimeMillis() > startTime) {
+            GameState.setCurrentStage(GameStages.RACING);
+        }
         for (Yacht yacht : yachts.values()) {
             yacht.update(timeInterval);
         }

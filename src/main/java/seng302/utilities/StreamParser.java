@@ -59,6 +59,7 @@ public class StreamParser {
         long currentTime = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload, 7, 11));
         int raceStatus = payload[11];
+        System.out.println(raceStatus);
         long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
         long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
         long rawWindSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));

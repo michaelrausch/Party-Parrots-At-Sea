@@ -59,6 +59,11 @@ public class ServerToClientThread implements Runnable, Observer {
 
     private XMLGenerator xml;
 
+    private static final int PRESTART_TIME = 60 * -1000;
+    private static final int WARNING_TIME = 30 * -1000;
+    private static final int PREPATORY_TIME = 10 * -1000;
+
+
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
         seqNo = 0;
@@ -211,8 +216,6 @@ public class ServerToClientThread implements Runnable, Observer {
                     }
                 }
             } catch (Exception e) {
-                // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected
-//                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
                 closeSocket();
                 return;
             }
@@ -368,11 +371,25 @@ public class ServerToClientThread implements Runnable, Observer {
             boatSubMessages.add(m);
         }
 
-        if (GameState.getCurrentStage() == GameStages.RACING) {
-            raceStatus = RaceStatus.STARTED;
+        long timeTillStart = System.currentTimeMillis() - GameState.getStartTime();
+
+        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+            raceStatus = RaceStatus.PRESTART;
+        } else if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
+            raceStatus = RaceStatus.PRESTART;
+
+            if (timeTillStart > WARNING_TIME) {
+                raceStatus = RaceStatus.WARNING;
+            }
+
+            if (timeTillStart > PREPATORY_TIME) {
+                raceStatus = RaceStatus.PREPARATORY;
+            }
         } else {
-            raceStatus = RaceStatus.WARNING;
+            raceStatus = RaceStatus.STARTED;
         }
+
+        System.out.println("raceStatus.ger = " + raceStatus.getCode());
 
         sendMessage(new RaceStatusMessage(1, raceStatus, GameState.getStartTime(), GameState.getWindDirection(),
             GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
