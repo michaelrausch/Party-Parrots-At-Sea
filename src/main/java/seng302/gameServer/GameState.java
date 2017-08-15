@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import seng302.gameServer.server.messages.BoatAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.server.messages.BoatAction;
@@ -19,6 +21,13 @@ import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
+import seng302.utilities.GeoUtility;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import seng302.model.GeoPoint;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 
 /**
@@ -50,6 +59,7 @@ public class GameState implements Runnable {
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
+    private static Set<Mark> marks;
 
     private static List<MarkPassingListener> markListeners;
 
@@ -81,10 +91,16 @@ public class GameState implements Runnable {
         markListeners = new ArrayList<>();
 
         new Thread(this).start();   //Run the auto updates on the game state
+
+        marks = new MarkOrder().getAllMarks();
     }
 
     public static String getHostIpAddress() {
         return hostIpAddress;
+    }
+
+    public static Set<Mark> getMarks(){
+        return Collections.unmodifiableSet(marks);
     }
 
     public static List<Player> getPlayers() {
@@ -97,7 +113,7 @@ public class GameState implements Runnable {
             + " " + player.getYacht().getCountry();
         playerStringMap.put(player, playerText);
     }
-    
+
     public static void removePlayer(Player player) {
         players.remove(player);
         playerStringMap.remove(player);
@@ -120,7 +136,7 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
-        if (currentStage == GameStages.RACING){
+        if (currentStage == GameStages.RACING) {
             startTime = System.currentTimeMillis();
         }
 
