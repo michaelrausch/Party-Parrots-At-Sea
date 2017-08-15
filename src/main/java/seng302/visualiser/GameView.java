@@ -9,10 +9,14 @@ import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -53,6 +57,8 @@ public class GameView extends Pane {
     private double referencePointX, referencePointY;
     private double metersPerPixelX, metersPerPixelY;
 
+    final double SCALE_DELTA = 1.1;
+
     private Text fpsDisplay = new Text();
     private Polygon raceBorder = new CourseBoundary();
 
@@ -80,6 +86,26 @@ public class GameView extends Pane {
     private Double frameRate = 60.0;
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
+    private ClientYacht playerYacht;
+    private double windDir = 0.0;
+
+    double scaleFactor = 1;
+
+    public void zoomOut() {
+        scaleFactor = 0.95;
+        for (Node child : getChildren()) {
+            child.setScaleX(child.getScaleX() * scaleFactor);
+            child.setScaleY(child.getScaleY() * scaleFactor);
+        }
+    }
+
+    public void zoomIn() {
+        scaleFactor =  1.05;
+        for (Node child : getChildren()) {
+            child.setScaleX(child.getScaleX() * scaleFactor);
+            child.setScaleY(child.getScaleY() * scaleFactor);
+        }
+    }
 
     private enum ScaleDirection {
         HORIZONTAL,
@@ -96,6 +122,45 @@ public class GameView extends Pane {
         gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
+//
+//        this.setOnKeyPressed(new EventHandler<KeyEvent>() {
+//            @Override public void handle(KeyEvent event) {
+//                event.consume();
+//                switch (event.getCode()) {
+//                    case Z:
+//                        scaleFactor = scaleFactor * 1.2;
+//                        break;
+//                    case X:
+//                        scaleFactor = scaleFactor * 0.8;
+//                        break;
+//                }
+//                if (event.getCode() == KeyCode.Z || event.getCode() == KeyCode.X) {
+//                    for (Node child : getChildren()) {
+//                        child.setScaleX(child.getScaleX() * scaleFactor);
+//                        child.setScaleY(child.getScaleY() * scaleFactor);
+//                    }
+//                }
+//            }
+//        });
+//
+//        this.setOnScroll(new EventHandler<ScrollEvent>() {
+//            @Override public void handle(ScrollEvent event) {
+//                event.consume();
+//                if (event.getDeltaY() == 0) {
+//                    return;
+//                }
+//
+//                double scaleFactor =
+//                        (event.getDeltaY() > 0)
+//                                ? SCALE_DELTA
+//                                : 1/SCALE_DELTA;
+//                for (Node child : getChildren()) {
+//                    child.setScaleX(child.getScaleX() * scaleFactor);
+//                    child.setScaleY(child.getScaleY() * scaleFactor);
+//                }
+//            }
+//        });
+
         initializeTimer();
     }
 
@@ -201,16 +266,6 @@ public class GameView extends Pane {
             for (Mark mark : cMark.getMarks()) {
                 makeAndBindMarker(mark, colour);
             }
-
-            //UNCOMMENT THIS TO HIGHLIGHT SUBMARKS 1 and 2 RED AND GREEN RESPECTIVELY FOR DEBUG
-            //(instead of above for loop)
-//            for (Mark mark : cMark.getMarks()) {
-//                if (mark.getSeqID() == 1) {
-//                    makeAndBindMarker(mark, Color.RED);
-//                } else {
-//                    makeAndBindMarker(mark, Color.GREEN);
-//                }
-//            }
             //Create gate line
             if (cMark.isGate()) {
                 for (int i = 1; i < cMark.getMarks().size(); i++) {
@@ -334,10 +389,10 @@ public class GameView extends Pane {
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            clientYacht.addLocationListener((boat, lat, lon, heading, velocity) -> {
+            clientYacht.addLocationListener((boat, lat, lon, heading, velocity, sailIn) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
-                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity);
+                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
 //                annotations.get(boat).setLayoutX(p2d.getX());
 //                annotations.get(boat).setLayoutY(p2d.getY());
 //                annotations.get(boat).setLocation(100d, 100d);
@@ -572,11 +627,23 @@ public class GameView extends Pane {
         timer.stop();
     }
 
+
+    public void setWindDir(double windDir) {
+        this.windDir = windDir;
+    }
+
+
     public void startRace () {
         timer.start();
     }
 
-    public void setBoatAsPlayer(ClientYacht playerYacht) {
+    public ClientYacht getPlayerYacht() {
+        return playerYacht;
+    }
+
+    public void setBoatAsPlayer (ClientYacht playerYacht) {
+        this.playerYacht = playerYacht;
+        this.playerYacht.toggleClientSail();
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",
