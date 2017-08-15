@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import seng302.gameServer.server.messages.BoatAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.MarkRoundingMessage;
 import seng302.gameServer.server.messages.MarkType;
 import seng302.gameServer.server.messages.Message;
@@ -14,7 +14,7 @@ import seng302.gameServer.server.messages.RoundingBoatStatus;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
-import seng302.model.Yacht;
+import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
@@ -44,7 +44,7 @@ public class GameState implements Runnable {
 
     private static String hostIpAddress;
     private static List<Player> players;
-    private static Map<Integer, Yacht> yachts;
+    private static Map<Integer, ServerYacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
@@ -102,7 +102,7 @@ public class GameState implements Runnable {
         playerStringMap.remove(player);
     }
 
-    public static void addYacht(Integer sourceId, Yacht yacht) {
+    public static void addYacht(Integer sourceId, ServerYacht yacht) {
         yachts.put(sourceId, yacht);
     }
 
@@ -146,7 +146,7 @@ public class GameState implements Runnable {
         return GeoUtility.mmsToKnots(windSpeed); // TODO: 26/07/17 cir27 - remove magic numbers
     }
 
-    public static Map<Integer, Yacht> getYachts() {
+    public static Map<Integer, ServerYacht> getYachts() {
         return yachts;
     }
 
@@ -185,7 +185,7 @@ public class GameState implements Runnable {
     }
 
     public static void updateBoat(Integer sourceId, BoatAction actionType) {
-        Yacht playerYacht = yachts.get(sourceId);
+        ServerYacht playerYacht = yachts.get(sourceId);
         switch (actionType) {
             case VMG:
                 playerYacht.turnToVMG();
@@ -215,7 +215,7 @@ public class GameState implements Runnable {
     public void update() {
         Double timeInterval = (System.currentTimeMillis() - previousUpdateTime) / 1000000.0;
         previousUpdateTime = System.currentTimeMillis();
-        for (Yacht yacht : yachts.values()) {
+        for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
@@ -226,12 +226,11 @@ public class GameState implements Runnable {
     }
 
 
-    private void updateVelocity(Yacht yacht) {
+    private void updateVelocity(ServerYacht yacht) {
         Double velocity = yacht.getCurrentVelocity();
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
         Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
-        yacht.setCurrentMaxVelocity(maxBoatSpeed);
 
         if (yacht.getSailIn() && yacht.getCurrentVelocity() <= maxBoatSpeed && maxBoatSpeed != 0d) {
             if (velocity < maxBoatSpeed) {
@@ -263,7 +262,7 @@ public class GameState implements Runnable {
      * @throws IndexOutOfBoundsException If the next mark is null (ie the last mark in the race)
      * Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
      */
-    private Double calcDistanceToCurrentMark(Yacht yacht) throws IndexOutOfBoundsException {
+    private Double calcDistanceToCurrentMark(ServerYacht yacht) throws IndexOutOfBoundsException {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
         GeoPoint location = yacht.getLocation();
@@ -292,7 +291,7 @@ public class GameState implements Runnable {
      * in-race Gate 3 - Passing any in-race Mark 4 - Passing the finish line
      * @param yacht the current yacht to check for progression
      */
-    private void checkForLegProgression(Yacht yacht) {
+    private void checkForLegProgression(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
 
@@ -324,7 +323,7 @@ public class GameState implements Runnable {
      *
      * @param yacht The current yacht to check for
      */
-    private Boolean checkStartLineCrossing(Yacht yacht) {
+    private Boolean checkStartLineCrossing(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
         GeoPoint lastLocation = yacht.getLastLocation();
@@ -354,7 +353,7 @@ public class GameState implements Runnable {
      *
      * @param yacht The current yacht to check for
      */
-    private Boolean checkMarkRounding(Yacht yacht) {
+    private Boolean checkMarkRounding(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
         GeoPoint lastLocation = yacht.getLastLocation();
@@ -383,7 +382,7 @@ public class GameState implements Runnable {
      *
      * @param yacht The current yacht to check for
      */
-    private Boolean checkGateRounding(Yacht yacht) {
+    private Boolean checkGateRounding(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
         GeoPoint lastLocation = yacht.getLastLocation();
@@ -426,7 +425,7 @@ public class GameState implements Runnable {
      *
      * @param yacht The current yacht to check for
      */
-    private Boolean checkFinishLineCrossing(Yacht yacht) {
+    private Boolean checkFinishLineCrossing(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
         GeoPoint lastLocation = yacht.getLastLocation();
@@ -450,7 +449,7 @@ public class GameState implements Runnable {
         return false;
     }
 
-    private void sendMarkRoundingMessage(Yacht yacht) {
+    private void sendMarkRoundingMessage(ServerYacht yacht) {
         Integer sourceID = yacht.getSourceId();
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
@@ -468,7 +467,7 @@ public class GameState implements Runnable {
     }
 
 
-    private void logMarkRounding(Yacht yacht) {
+    private void logMarkRounding(ServerYacht yacht) {
         Mark roundingMark = yacht.getClosestCurrentMark();
 
         logger.debug(

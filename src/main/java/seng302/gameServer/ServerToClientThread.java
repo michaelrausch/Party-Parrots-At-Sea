@@ -19,6 +19,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatLocationMessage;
 import seng302.gameServer.server.messages.BoatStatus;
 import seng302.gameServer.server.messages.BoatSubMessage;
@@ -32,13 +33,12 @@ import seng302.gameServer.server.messages.RegistrationResponseStatus;
 import seng302.gameServer.server.messages.XMLMessage;
 import seng302.gameServer.server.messages.XMLMessageSubType;
 import seng302.model.Player;
-import seng302.model.Yacht;
+import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.gameServer.server.messages.BoatAction;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -115,8 +115,7 @@ public class ServerToClientThread implements Runnable, Observer {
         all = ln.lines().collect(Collectors.toList());
         lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
 
-
-        Yacht yacht = new Yacht(
+        ServerYacht yacht = new ServerYacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
 
@@ -221,7 +220,7 @@ public class ServerToClientThread implements Runnable, Observer {
         xml = new XMLGenerator();
         Race race = new Race();
 
-        for (Yacht yacht : GameState.getYachts().values()) {
+        for (ServerYacht yacht : GameState.getYachts().values()) {
             race.addBoat(yacht);
         }
 
@@ -299,8 +298,8 @@ public class ServerToClientThread implements Runnable, Observer {
 
 
     public void sendBoatLocationPackets() {
-        ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        for (Yacht yacht : yachts) {
+        ArrayList<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
+        for (ServerYacht yacht : yachts) {
             BoatLocationMessage boatLocationMessage =
                 new BoatLocationMessage(
                     yacht.getSourceId(),
@@ -326,7 +325,7 @@ public class ServerToClientThread implements Runnable, Observer {
         RaceStatus raceStatus;
 
         for (Player player : GameState.getPlayers()) {
-            Yacht y = player.getYacht();
+            ServerYacht y = player.getYacht();
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
                 boatStatus = BoatStatus.PRESTART;
