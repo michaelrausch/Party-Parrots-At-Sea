@@ -1,6 +1,7 @@
 package seng302.visualiser.fxObjects;
 
 import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -21,6 +22,12 @@ import javafx.scene.transform.Rotate;
  * maximised.
  */
 public class BoatObject extends Group {
+
+    @FunctionalInterface
+    public interface SelectedBoatListener {
+
+        void notifySelected(BoatObject boatObject, Boolean isSelected);
+    }
 
     //Constants for drawing
     private static final double BOAT_HEIGHT = 15d;
@@ -43,6 +50,8 @@ public class BoatObject extends Group {
     private Boolean isSelected = false, destinationSet;  //All boats are initialised as selected
     private Boolean isBeingTracked = false;
     private boolean isPlayer = false;
+
+    private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
@@ -287,6 +296,7 @@ public class BoatObject extends Group {
 //    }
 
     public void setIsSelected(Boolean isSelected) {
+        updateListener(isSelected);
         this.isSelected = isSelected;
         this.isBeingTracked = isSelected;
         setLineGroupVisible(isSelected);
@@ -380,5 +390,15 @@ public class BoatObject extends Group {
 //        xVelocity = Math.cos(Math.toRadians(heading)) * velocity * scaleFactorX;
 //        yVelocity = Math.sin(Math.toRadians(heading)) * velocity * scaleFactorY;
         lastHeading = heading;
+    }
+
+    private void updateListener(Boolean isSelected) {
+        for (SelectedBoatListener sbl : selectedBoatListenerListeners) {
+            sbl.notifySelected(this, isSelected);
+        }
+    }
+
+    public void addSelectedBoatListener(SelectedBoatListener sbl) {
+        selectedBoatListenerListeners.add(sbl);
     }
 }

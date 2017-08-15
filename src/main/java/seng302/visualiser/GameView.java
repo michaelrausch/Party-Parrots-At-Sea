@@ -107,29 +107,36 @@ public class GameView extends Pane {
         VERTICAL
     }
 
-    public void trackBoat() {
-        if (this.getScaleX() > 1) {
-            boolean isBoatSelected = false;
-            for (BoatObject boat : boatObjects.values()) {
-                if (boat.getSelected()) {
-                    isBoatSelected = true;
-                    selectedBoat = boat;
-                    double x = boat.getBoatLayoutX();
-                    double y = boat.getBoatLayoutY();
-                    double displacementX = this.getWidth();
-                    double displacementY = this.getHeight();
-//                    double displacementX = 1200d;
-//                    double displacementY = 900d;
-                    System.out.println("displacementY = " + displacementY);
-                    System.out.println("displacementX = " + displacementX);
-                    this.setLayoutX((-x + (displacementX/2.0)) * this.getScaleX());
-                    this.setLayoutY((-y + (displacementY/2.0)) * this.getScaleY());
-                }
-            }
-            if (!isBoatSelected) {
-                this.setLayoutX(0);
-                this.setLayoutY(0);
-            }
+    private void trackBoat() {
+        if (selectedBoat != null) {
+            double x = selectedBoat.getBoatLayoutX();
+            double y = selectedBoat.getBoatLayoutY();
+            double displacementX = this.getWidth();
+            double displacementY = this.getHeight();
+            this.setLayoutX((-x + (displacementX / 2.0)) * this.getScaleX());
+            this.setLayoutY((-y + (displacementY / 2.0)) * this.getScaleY());
+
+//            boolean isBoatSelected = false;
+//            for (BoatObject boat : boatObjects.values()) {
+//                if (boat.getSelected()) {
+//                    isBoatSelected = true;
+//                    selectedBoat = boat;
+//                    double x = boat.getBoatLayoutX();
+//                    double y = boat.getBoatLayoutY();
+//                    double displacementX = this.getWidth();
+//                    double displacementY = this.getHeight();
+////                    double displacementX = 1200d;
+////                    double displacementY = 900d;
+////                    System.out.println("displacementY = " + displacementY);
+////                    System.out.println("displacementX = " + displacementX);
+//                    this.setLayoutX((-x + (displacementX/2.0)) * this.getScaleX());
+//                    this.setLayoutY((-y + (displacementY/2.0)) * this.getScaleY());
+//                }
+//            }
+//            if (!isBoatSelected) {
+//                this.setLayoutX(0);
+//                this.setLayoutY(0);
+//            }
         } else {
             this.setLayoutX(0);
             this.setLayoutY(0);
@@ -181,9 +188,7 @@ public class GameView extends Pane {
                         lastTime = now;
                     }
                 }
-//                Platform.runLater(() ->
-                    boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
-//                );
+                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
             }
         };
     }
@@ -353,6 +358,22 @@ public class GameView extends Pane {
 //        drawGoogleMap();
     }
 
+    private void setSelectedBoat(BoatObject bo, Boolean isSelected) {
+        if (this.selectedBoat == bo && !isSelected) {
+            this.selectedBoat = null;
+            boatObjects.forEach((boat, group) ->
+                group.setIsSelected(false)
+            );
+        } else if (isSelected) {
+            this.selectedBoat = bo;
+            for (BoatObject group : boatObjects.values()) {
+                if (group != bo) {
+                    group.setIsSelected(false);
+                }
+            }
+        }
+    }
+
     /**
      * Draws all the boats.
      * @param  yachts The yachts to set in the race
@@ -363,6 +384,7 @@ public class GameView extends Pane {
         for (Yacht yacht : yachts) {
             Paint colour = Colors.getColor();
             newBoat = new BoatObject();
+            newBoat.addSelectedBoatListener(this::setSelectedBoat);
             newBoat.setFill(colour);
             boatObjects.put(yacht, newBoat);
             createAndBindAnnotationBox(yacht, colour);
@@ -598,7 +620,6 @@ public class GameView extends Pane {
     }
 
     public void selectBoat (Yacht selectedYacht) {
-        selectedBoat = boatObjects.get(selectedYacht);
         boatObjects.forEach((boat, group) ->
             group.setIsSelected(boat == selectedYacht)
         );
