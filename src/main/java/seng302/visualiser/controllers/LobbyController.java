@@ -14,6 +14,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.visualiser.GameView;
 
 /**
  * A class describing the actions of the lobby screen
@@ -72,6 +73,7 @@ public class LobbyController {
     private List<TextArea> listViews = new ArrayList<>();
 
     private int MAX_NUM_PLAYERS = 8;
+    private Integer playerID;
 
     private List<LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private ObservableList<String> players;
@@ -98,6 +100,9 @@ public class LobbyController {
         //Update players if one added.
         for (int i = 0; i < players.size(); i++) {
             listViews.get(i).setText(players.get(i));
+            if (playerID == (i + 1)) {
+                listViews.get(i).setText(listViews.get(i).getText() + " (YOU)");
+            }
             imageViews.get(i).setVisible(true);
         }
         //Update empty text fields if player left.
@@ -120,6 +125,11 @@ public class LobbyController {
             );
             viewer.setVisible(false);
         }
+    }
+
+    @FXML
+    public void customize() {
+        System.out.println(playerID);
     }
 
     @FXML
@@ -152,6 +162,10 @@ public class LobbyController {
             Platform.runLater(this::updatePlayers)
         );
         Platform.runLater(this::updatePlayers);
+    }
+
+    public void setPlayerID(Integer id) {
+        playerID = id;
     }
 
     public void disableReadyButton () {

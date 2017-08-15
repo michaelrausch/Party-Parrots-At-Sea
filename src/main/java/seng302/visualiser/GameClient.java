@@ -72,7 +72,6 @@ public class GameClient {
 
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
-        lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.disableReadyButton();
         lobbyController.setTitle("Connected to host - IP : " + ipAddress + " Port : " + portNumber);
         lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
@@ -93,7 +92,6 @@ public class GameClient {
         }
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
-        lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.setTitle("Hosting Lobby - IP : " + ipAddress + " Port : " + portNumber);
         lobbyController.addCloseListener(exitCause -> {
             if (exitCause == CloseStatus.READY) {
@@ -133,7 +131,11 @@ public class GameClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return fxmlLoader.getController();
+        LobbyController lobbyController = fxmlLoader.getController();
+        lobbyController.setPlayerListSource(clientLobbyList);
+        lobbyController.setPlayerID(socketThread.getClientId());
+
+        return lobbyController;
     }
 
     private void loadRaceView() {

@@ -35,6 +35,7 @@
       <GridPane prefHeight="166.0" prefWidth="1530.0" GridPane.rowIndex="2">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
@@ -42,7 +43,8 @@
         </rowConstraints>
          <children>
             <Button fx:id="readyButton" focusTraversable="false" mnemonicParsing="false" onAction="#readyButtonPressed" prefWidth="101.0" text="Ready" GridPane.halignment="CENTER" />
-            <Button focusTraversable="false" mnemonicParsing="false" onAction="#leaveLobbyButtonPressed" text="Leave Lobby" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#leaveLobbyButtonPressed" text="Leave Lobby" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#customize" text="Customization" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
          </children>
       </GridPane>
       <GridPane GridPane.rowIndex="1">
