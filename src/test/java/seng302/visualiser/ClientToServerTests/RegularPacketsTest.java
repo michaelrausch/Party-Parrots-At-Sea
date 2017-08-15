@@ -10,7 +10,6 @@ import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.ServerYacht;
-import seng302.model.Yacht;
 import seng302.visualiser.ClientToServerThread;
 
 /**
@@ -46,7 +45,8 @@ public class RegularPacketsTest {
         long endTime = System.currentTimeMillis();
         SleepThreadMaxDelay();
         //Allowed to be two loops of delay due to loop delay and processing delay at client + server ends.
-        Assert.assertEquals(TEST_DISTANCE / Yacht.TURN_STEP * ClientToServerThread.PACKET_SENDING_INTERVAL_MS,
+        Assert.assertEquals(
+            TEST_DISTANCE / ServerYacht.TURN_STEP * ClientToServerThread.PACKET_SENDING_INTERVAL_MS,
             (endTime - startTime), 2 * ClientToServerThread.PACKET_SENDING_INTERVAL_MS);
     }
 
