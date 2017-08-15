@@ -630,7 +630,6 @@ public class GameView extends Pane {
 
     public void setBoatAsPlayer (ClientYacht playerYacht) {
         this.playerYacht = playerYacht;
-        this.playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",
