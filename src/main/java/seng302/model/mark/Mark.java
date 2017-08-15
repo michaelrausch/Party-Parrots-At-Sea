@@ -2,6 +2,7 @@ package seng302.model.mark;
 
 import java.util.ArrayList;
 import java.util.List;
+import seng302.gameServer.server.messages.RoundingSide;
 import seng302.model.GeoPoint;
 
 /**
@@ -19,11 +20,13 @@ public class Mark extends GeoPoint {
     private String name;
     private int sourceID;
     private List<PositionListener> positionListeners = new ArrayList<>();
+    private RoundingSide roundingSide;
 
-    public Mark(String name, double lat, double lng, int sourceID) {
+    public Mark(String name, int seqID, double lat, double lng, int sourceID) {
         super(lat, lng);
         this.name = name;
         this.sourceID = sourceID;
+        this.seqID = seqID;
     }
 
     /**
@@ -39,10 +42,6 @@ public class Mark extends GeoPoint {
         return seqID;
     }
 
-    public void setSeqID(int seqID) {
-        this.seqID = seqID;
-    }
-
     public String getName() {
         return name;
     }
@@ -53,6 +52,14 @@ public class Mark extends GeoPoint {
 
     public int getSourceID() {
         return sourceID;
+    }
+
+    public RoundingSide getRoundingSide() {
+        return roundingSide;
+    }
+
+    public void setRoundingSide(RoundingSide roundingSide) {
+        this.roundingSide = roundingSide;
     }
 
     public void setSourceID(int sourceID) {

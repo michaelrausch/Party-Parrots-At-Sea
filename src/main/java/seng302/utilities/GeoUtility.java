@@ -6,6 +6,7 @@ import seng302.model.GeoPoint;
 public class GeoUtility {
 
     private static double EARTH_RADIUS = 6378.137;
+    private static Double MS_TO_KNOTS = 1.943844492;
 
     /**
      * Calculates the euclidean distance between two markers on the canvas using xy coordinates
@@ -43,6 +44,19 @@ public class GeoUtility {
      */
     public static Double getBearing(GeoPoint p1, GeoPoint p2) {
         return (Math.toDegrees(getBearingRad(p1, p2)) + 360.0) % 360.0;
+    }
+
+
+    /**
+     * WARNING: this function DOES NOT account for wrapping around on lats / longs etc.
+     * SO BE CAREFUL IN USING THIS FUNCTION
+     *
+     * @param p1 GeoPoint 1
+     * @param p2 GeoPoint 2
+     * @return GeoPoint midPoint
+     */
+    public static GeoPoint getDirtyMidPoint(GeoPoint p1, GeoPoint p2) {
+        return new GeoPoint((p1.getLat() + p2.getLat()) / 2, (p1.getLng() + p2.getLng()) / 2);
     }
 
     /**
@@ -93,7 +107,6 @@ public class GeoUtility {
         return new GeoPoint(Math.toDegrees(endLat), Math.toDegrees(endLng));
     }
 
-
     /**
      * Performs the line function on two points of a line and a test point to test which side of the
      * line that point is on. If the return value is return  1, then the point is on one side of the
@@ -125,6 +138,31 @@ public class GeoUtility {
         }
     }
 
+    /**
+     * Checks if the line formed by lastLocation and location doesn't intersect the line segment
+     * formed by mark1 and mark2 See the wiki Mark Rounding algorithm for more info
+     *
+     * @param mark1 One mark of the line
+     * @param mark2 The second mark of the line
+     * @param lastLocation The last location of the point crossing this line
+     * @param location The current location of the point crossing this line
+     * @return 0 if two line segment doesn't intersect, otherwise 1 if they intersect and
+     * lastLocation is on RHS of the line segment (mark1 to mark2) or 2 if lastLocation on LHS of
+     * the line segment (mark1 to mark2)
+     */
+    public static Integer checkCrossedLine(GeoPoint mark1, GeoPoint mark2, GeoPoint lastLocation,
+        GeoPoint location) {
+        boolean enteredDirection = isClockwise(mark1, mark2, lastLocation);
+        boolean exitedDirection = isClockwise(mark1, mark2, location);
+        if (enteredDirection != exitedDirection) {
+            if (!isPointInTriangle(mark1, lastLocation, location, mark2)
+                && !isPointInTriangle(mark2, lastLocation, location, mark1)) {
+
+                return enteredDirection ? 1 : 2;
+            }
+        }
+        return 0;
+    }
 
     /**
      * Given a point and a vector (angle and vector length) Will create a new point, that vector
@@ -155,8 +193,22 @@ public class GeoUtility {
      * @param bearing2 the bearing of v2
      * @return the difference of bearing from v1 to v2
      */
-    private static double getBearingDiff(double bearing1, double bearing2) {
+    private static Double getBearingDiff(double bearing1, double bearing2) {
         return ((360 - bearing1) + bearing2) % 360;
+    }
+
+    /**
+     * Check if a geo point ins on the right hand side of the line segment, which
+     * formed by two geo points v1 to v2. (Algorithm: point is clockwise to the
+     * line if the bearing difference is less than 180 deg.)
+     *
+     * @param v1 one end of the line segment
+     * @param v2 another end of the line segment
+     * @param point the point to be tested
+     * @return true if the point is on the RHS of the line
+     */
+    public static Boolean isClockwise(GeoPoint v1, GeoPoint v2, GeoPoint point) {
+        return getBearingDiff(getBearing(v1, v2), getBearing(v1, point)) < 180;
     }
 
     /**
@@ -169,18 +221,34 @@ public class GeoUtility {
      * @param point the point to be tested
      * @return true if the fourth point is inside the triangle
      */
-    public static boolean isPointInTriangle(GeoPoint v1, GeoPoint v2, GeoPoint v3, GeoPoint point) {
-        // true, if diff of bearing from (v1->v2) to (v1->p) is less than 180 deg
-        boolean sideFlag = getBearingDiff(getBearing(v1, v2), getBearing(v1, point)) < 180;
+    public static Boolean isPointInTriangle(GeoPoint v1, GeoPoint v2, GeoPoint v3, GeoPoint point) {
+        // true, if diff of bearing from (v1 to v2) to (v1 to p) is less than 180 deg
+        boolean isCW = isClockwise(v1, v2, point);
 
-        if ((getBearingDiff(getBearing(v2, v3), getBearing(v2, point)) < 180) != sideFlag) {
+        if (isClockwise(v2, v3, point) != isCW) {
             return false;
         }
 
-        if ((getBearingDiff(getBearing(v3, v1), getBearing(v3, point)) < 180) != sideFlag) {
+        if (isClockwise(v3, v1, point) != isCW) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * @param boatSpeedInKnots Speed in knots
+     * @return The Boat speed in millimeters per second
+     */
+    public static Double knotsToMMS(Double boatSpeedInKnots) {
+        return boatSpeedInKnots / MS_TO_KNOTS * 1000;
+    }
+
+    /**
+     * @param boatSpeedInMMS Speed in millimeters per second
+     * @return The Boat speed in knots
+     */
+    public static Double mmsToKnots(Double boatSpeedInMMS) {
+        return boatSpeedInMMS / 1000 * MS_TO_KNOTS;
     }
 }

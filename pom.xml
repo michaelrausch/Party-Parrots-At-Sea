@@ -69,8 +69,8 @@
             <artifactId>commons-cli</artifactId>
             <version>1.4</version>
         </dependency>
-    </dependencies>
 
+    </dependencies>
 
     <build>
         <plugins>

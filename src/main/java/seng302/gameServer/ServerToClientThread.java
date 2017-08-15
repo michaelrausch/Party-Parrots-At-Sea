@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -18,23 +17,28 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.YachtEventCodeMessage;
 import seng302.model.Player;
-import seng302.model.Yacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.gameServer.server.messages.BoatActionType;
+import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatLocationMessage;
-import seng302.gameServer.server.messages.BoatStatus;
 import seng302.gameServer.server.messages.BoatSubMessage;
+import seng302.gameServer.server.messages.ClientType;
 import seng302.gameServer.server.messages.Message;
 import seng302.gameServer.server.messages.RaceStatus;
 import seng302.gameServer.server.messages.RaceStatusMessage;
 import seng302.gameServer.server.messages.RaceType;
+import seng302.gameServer.server.messages.RegistrationResponseMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
 import seng302.gameServer.server.messages.XMLMessage;
 import seng302.gameServer.server.messages.XMLMessageSubType;
+import seng302.model.ServerYacht;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -43,8 +47,15 @@ import seng302.gameServer.server.messages.XMLMessageSubType;
  */
 public class ServerToClientThread implements Runnable, Observer {
 
-    private static final Integer LOG_LEVEL = 1;
-    private static final Integer MAX_ID_ATTEMPTS = 10;
+    /**
+     * Called to notify listeners when this thread receives a connection correctly.
+     */
+    @FunctionalInterface
+    interface ConnectionListener {
+        void notifyConnection ();
+    }
+
+    private Logger logger = LoggerFactory.getLogger(ServerToClientThread.class);
 
     private Thread thread;
 
@@ -54,77 +65,103 @@ public class ServerToClientThread implements Runnable, Observer {
 
     private ByteArrayOutputStream crcBuffer;
 
-    private Boolean userIdentified = false;
-    private Boolean connected = true;
-    private Boolean updateClient = true;
-//    private Boolean initialisedRace = true;
-
     private Integer seqNo;
     private Integer sourceId;
 
+    private ClientType clientType;
+    private Boolean isRegistered = false;
+
     private XMLGenerator xml;
+
+    private List<ConnectionListener> connectionListeners = new ArrayList<>();
+
+    private ServerYacht yacht;
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
-        BufferedReader fn;
-        String fName = "";
-        BufferedReader ln;
-        String lName = "";
-        try {
+        seqNo = 0;
+
+        try{
             is = socket.getInputStream();
             os = socket.getOutputStream();
-            fn = new BufferedReader(
-                new InputStreamReader(
-                    ServerToClientThread.class.getResourceAsStream(
-                        "/server_config/CSV_Database_of_First_Names.csv"
-                    )
-                )
-            );
-            List<String> all = fn.lines().collect(Collectors.toList());
-            fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-            ln = new BufferedReader(
-                new InputStreamReader(
-                    ServerToClientThread.class.getResourceAsStream(
-                        "/server_config/CSV_Database_of_Last_Names.csv"
-                    )
-                )
-            );
-            all = ln.lines().collect(Collectors.toList());
-            lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
         } catch (IOException e) {
-            serverLog("IO error in server thread upon grabbing streams", 1);
-        }
-        //Attempt threeway handshake with connection
-        sourceId = GameState.getUniquePlayerID();
-        if (threeWayHandshake(sourceId)) {
-            serverLog("Successful handshake. Client allocated id: " + sourceId, 0);
-            Yacht yacht = new Yacht(
-                "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
-            );
-//        Yacht yacht = new Yacht("Kappa", "Kap", new GeoPoint(57.6708220, 11.8321340), 90.0);
-            GameState.addYacht(sourceId, yacht);
-            GameState.addPlayer(new Player(socket, yacht));
-        } else {
-            serverLog("Unsuccessful handshake. Connection rejected", 1);
-            closeSocket();
             return;
         }
 
-        seqNo = 0;
         thread = new Thread(this);
         thread.start();
     }
 
-    static void serverLog(String message, int logLevel) {
-        if (logLevel <= LOG_LEVEL) {
-            System.out.println(
-                "[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
-        }
+    private void setUpPlayer(){
+        BufferedReader fn;
+        String fName = "";
+        BufferedReader ln;
+        String lName = "";
+
+        fn = new BufferedReader(
+                new InputStreamReader(
+                        ServerToClientThread.class.getResourceAsStream(
+                                "/server_config/CSV_Database_of_First_Names.csv"
+                        )
+                )
+        );
+        List<String> all = fn.lines().collect(Collectors.toList());
+        fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
+        ln = new BufferedReader(
+                new InputStreamReader(
+                        ServerToClientThread.class.getResourceAsStream(
+                                "/server_config/CSV_Database_of_Last_Names.csv"
+                        )
+                )
+        );
+        all = ln.lines().collect(Collectors.toList());
+        lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
+
+        ServerYacht yacht = new ServerYacht(
+                "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
+        );
+
+        yacht.addObserver(this); // TODO: yacht can notify mark rounding message hyi25 13/8/17
+        GameState.addYacht(sourceId, yacht);
+        GameState.addPlayer(new Player(socket, yacht));
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        sendSetupMessages();
+        if (arg != null) {
+            sendMessage((Message) arg);
+        } else {
+            sendSetupMessages();
+        }
+    }
+
+    private void completeRegistration(ClientType clientType) throws IOException {
+        // Fail if not a player
+        if (!clientType.equals(ClientType.PLAYER)){
+            RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(0, RegistrationResponseStatus.FAILURE_GENERAL);
+            os.write(responseMessage.getBuffer());
+            return;
+        }
+
+        if (GameState.getPlayers().size() >= GameState.MAX_PLAYERS){
+            RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(0, RegistrationResponseStatus.FAILURE_FULL);
+            os.write(responseMessage.getBuffer());
+            return;
+        }
+
+        Integer sourceId = GameState.getUniquePlayerID();
+        RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(sourceId, RegistrationResponseStatus.SUCCESS_PLAYING);
+
+        this.clientType = clientType;
+        this.sourceId = sourceId;
+        isRegistered = true;
+        os.write(responseMessage.getBuffer());
+
+        setUpPlayer();
+
+        for (ConnectionListener listener : connectionListeners) {
+            listener.notifyConnection();
+        }
     }
 
     public void run() {
@@ -135,20 +172,6 @@ public class ServerToClientThread implements Runnable, Observer {
         while (socket.isConnected()) {
 
             try {
-                //Perform a write if it is time to as delegated by the MainServerThread
-                if (updateClient) {
-                    // TODO: 13/07/17 wmu16 - Write out game state - some function that would write all appropriate messages to this output stream
-//                    ChatterMessage chatterMessage = new ChatterMessage(4, 14, "Hello, it's me");
-//                    sendMessage(chatterMessage);
-//                try {
-//                    GameState.outputState(os);
-//                } catch (IOException e) {
-//                    System.out.println("IO error in server thread upon writing to output stream");
-//                }
-//                    sendBoatLocationPackets();
-                    updateClient = false;
-                }
-
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
                 sync2 = readByte();
@@ -168,14 +191,21 @@ public class ServerToClientThread implements Runnable, Observer {
                         //System.out.println("RECEIVED A PACKET");
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
-                                BoatActionType actionType = ServerPacketParser
-                                    .extractBoatAction(
-                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                BoatAction actionType = ServerPacketParser
+                                        .extractBoatAction(
+                                                new StreamPacket(type, payloadLength, timeStamp, payload));
                                 GameState.updateBoat(sourceId, actionType);
+                                break;
+
+                            case RACE_REGISTRATION_REQUEST:
+                                ClientType requestedType = ServerPacketParser.extractClientType(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+
+                                completeRegistration(requestedType);
                                 break;
                         }
                     } else {
-                        serverLog("Packet has been dropped", 1);
+                        logger.warn("Packet has been dropped", 1);
                     }
                 }
             } catch (Exception e) {
@@ -187,11 +217,11 @@ public class ServerToClientThread implements Runnable, Observer {
         }
     }
 
-    private void sendSetupMessages() {
+    public void sendSetupMessages() {
         xml = new XMLGenerator();
         Race race = new Race();
 
-        for (Yacht yacht : GameState.getYachts().values()) {
+        for (ServerYacht yacht : GameState.getYachts().values()) {
             race.addBoat(yacht);
         }
 
@@ -213,44 +243,6 @@ public class ServerToClientThread implements Runnable, Observer {
         sendMessage(xmlMessage);
     }
 
-    public void updateClient() {
-        sendBoatLocationPackets();
-        updateClient = true;
-    }
-
-
-    /**
-     * Tries to confirm the connection just accepted.
-     * Sends ID, expects that ID echoed for confirmation,
-     * if so, sends a confirmation packet back to that connection
-     * Creates a player instance with that ID and this thread and adds it to the GameState
-     * If not, close the socket and end the threads execution
-     *
-     * @param id the id to try and assign to the connection
-     * @return A boolean indicating if it was a successful handshake
-     */
-    private Boolean threeWayHandshake(Integer id) {
-        Integer confirmationID = null;
-        Integer identificationAttempt = 0;
-        while (!userIdentified) {
-            try {
-                os.write(id);                                         //Send out new ID looking for echo
-                confirmationID = is.read();
-            } catch (IOException e) {
-                serverLog("Three way handshake failed", 1);
-            }
-
-            if (id.equals(confirmationID)) {                          //ID is echoed back. Connection is a client
-                return true;
-            } else if (identificationAttempt > MAX_ID_ATTEMPTS) {     //No response. not a client. tidy up and go home.
-                return false;
-            }
-            identificationAttempt++;
-        }
-
-        return true;
-    }
-
     private void closeSocket() {
         try {
             socket.close();
@@ -258,7 +250,6 @@ public class ServerToClientThread implements Runnable, Observer {
             System.out.println("IO error in server thread upon trying to close socket");
         }
     }
-
 
     private int readByte() throws Exception {
         int currentByte = -1;
@@ -268,7 +259,7 @@ public class ServerToClientThread implements Runnable, Observer {
             crcBuffer.write(currentByte);
         } catch (IOException e) {
             e.printStackTrace();
-            serverLog("Socket read failed", 1);
+            logger.warn("Socket read failed", 1);
         }
         if (currentByte == -1) {
             throw new Exception();
@@ -297,7 +288,7 @@ public class ServerToClientThread implements Runnable, Observer {
             //serverLog("Player " + sourceId + " side socket disconnected", 1);
             return;
         } catch (IOException e) {
-            serverLog("Message send failed", 1);
+            logger.warn("Message send failed", 1);
         }
     }
 
@@ -307,10 +298,9 @@ public class ServerToClientThread implements Runnable, Observer {
     }
 
 
-    private void sendBoatLocationPackets() {
-        ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        for (Yacht yacht : yachts) {
-//            System.out.println("[SERVER] Lat: " + yacht.getLocation().getLat() + " Lon: " + yacht.getLocation().getLng());
+    public void sendBoatLocationPackets() {
+        ArrayList<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
+        for (ServerYacht yacht : yachts) {
             BoatLocationMessage boatLocationMessage =
                 new BoatLocationMessage(
                     yacht.getSourceId(),
@@ -318,7 +308,7 @@ public class ServerToClientThread implements Runnable, Observer {
                     yacht.getLocation().getLat(),
                     yacht.getLocation().getLng(),
                     yacht.getHeading(),
-                    yacht.getVelocity().longValue());
+                    yacht.getCurrentVelocity().longValue());
 
             sendMessage(boatLocationMessage);
         }
@@ -331,24 +321,14 @@ public class ServerToClientThread implements Runnable, Observer {
     public void sendRaceStatusMessage() {
         // variables taken from GameServerThread
 
-
         List<BoatSubMessage> boatSubMessages = new ArrayList<>();
-        BoatStatus boatStatus;
         RaceStatus raceStatus;
 
         for (Player player : GameState.getPlayers()) {
-            Yacht y = player.getYacht();
-
-            if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
-                boatStatus = BoatStatus.PRESTART;
-            } else if (GameState.getCurrentStage() == GameStages.RACING) {
-                boatStatus = BoatStatus.RACING;
-            } else {
-                boatStatus = BoatStatus.UNDEFINED;
-            }
-
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), boatStatus, 0, 0, 0, 1234l,
-                1234l);
+            ServerYacht y = player.getYacht();
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(), 0,
+                0, 0, 1234L,
+                1234L);
             boatSubMessages.add(m);
         }
 
@@ -365,5 +345,21 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public ServerYacht getYacht() {
+        return yacht;
+    }
+
+    public void sendCollisionMessage(Integer yachtId) {
+        sendMessage(new YachtEventCodeMessage(yachtId));
+    }
+
+    public void addConnectionListener(ConnectionListener listener) {
+        connectionListeners.add(listener);
+    }
+
+    public void removeConnectionListener(ConnectionListener listener) {
+        connectionListeners.remove(listener);
     }
 }

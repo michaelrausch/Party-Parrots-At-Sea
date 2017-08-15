@@ -4,15 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
@@ -34,27 +32,25 @@ public class LobbyController {
     }
 
     @FXML
-    private GridPane lobbyScreen;
-    @FXML
     private Text lobbyIpText;
     @FXML
     private Button readyButton;
     @FXML
-    private ListView<String> firstListView;
+    private TextArea playerOneTxt;
     @FXML
-    private ListView secondListView;
+    private TextArea playerTwoTxt;
     @FXML
-    private ListView thirdListView;
+    private TextArea playerThreeTxt;
     @FXML
-    private ListView fourthListView;
+    private TextArea playerFourTxt;
     @FXML
-    private ListView fifthListView;
+    private TextArea playerFiveTxt;
     @FXML
-    private ListView sixthListView;
+    private TextArea playerSixTxt;
     @FXML
-    private ListView seventhListView;
+    private TextArea playerSevenTxt;
     @FXML
-    private ListView eighthListView;
+    private TextArea playerEightTxt;
     @FXML
     private ImageView firstImageView;
     @FXML
@@ -72,79 +68,67 @@ public class LobbyController {
     @FXML
     private ImageView eighthImageView;
 
-    private List<ObservableList<String>> competitors = new ArrayList<>();
-    private ObservableList<String> firstCompetitor = FXCollections.observableArrayList();
-    private ObservableList<String> secondCompetitor = FXCollections.observableArrayList();
-    private ObservableList<String> thirdCompetitor = FXCollections.observableArrayList();
-    private ObservableList<String> fourthCompetitor = FXCollections.observableArrayList();
-    private ObservableList<String> fifthCompetitor = FXCollections.observableArrayList();
-    private ObservableList<String> sixthCompetitor = FXCollections.observableArrayList();
-    private ObservableList<String> seventhCompetitor = FXCollections.observableArrayList();
-    private ObservableList<String> eighthCompetitor = FXCollections.observableArrayList();
-
     private List<ImageView> imageViews = new ArrayList<>();
-    private List<ListView> listViews;
+    private List<TextArea> listViews = new ArrayList<>();
 
     private int MAX_NUM_PLAYERS = 8;
 
     private List<LobbyCloseListener> lobbyListeners = new ArrayList<>();
-    private ObservableList<String> players = FXCollections.observableArrayList();
+    private ObservableList<String> players;
 
+    /**
+     * Add all FXObjects to lists and initialize images.
+     */
     public void initialize() {
-        imageViews = new ArrayList<>();
-        Collections
-            .addAll(imageViews, firstImageView, secondImageView, thirdImageView, fourthImageView,
-                fifthImageView, sixthImageView, seventhImageView, eighthImageView);
-        listViews = new ArrayList<>();
-        Collections.addAll(listViews, firstListView, secondListView, thirdListView, fourthListView, fifthListView,
-            sixthListView, seventhListView, eighthListView);
-        competitors = new ArrayList<>();
-        Collections.addAll(competitors, firstCompetitor, secondCompetitor, thirdCompetitor,
-            fourthCompetitor, fifthCompetitor, sixthCompetitor, seventhCompetitor, eighthCompetitor);
-
+        Collections.addAll(listViews,
+            playerOneTxt, playerTwoTxt, playerThreeTxt, playerFourTxt, playerFiveTxt, playerSixTxt,
+            playerSevenTxt, playerEightTxt
+        );
+        Collections.addAll(imageViews,
+            firstImageView, secondImageView, thirdImageView, fourthImageView,
+            fifthImageView, sixthImageView, seventhImageView, eighthImageView
+        );
         initialiseImageView();
     }
 
-    private void initialiseListView() {
-        listViews.forEach(listView -> listView.getItems().clear());
-        imageViews.forEach(gif -> gif.setVisible(false));
-        competitors.forEach(ol -> ol.removeAll());
+    /**
+     * Updates player names.
+     */
+    private void updatePlayers() {
+        //Update players if one added.
         for (int i = 0; i < players.size(); i++) {
-            competitors.get(i).add(players.get(i));
-            listViews.get(i).setItems(competitors.get(i));
+            listViews.get(i).setText(players.get(i));
             imageViews.get(i).setVisible(true);
+        }
+        //Update empty text fields if player left.
+        for (int i = MAX_NUM_PLAYERS-1; i >= players.size(); i--) {
+            listViews.get(i).setText("");
+            imageViews.get(i).setVisible(false);
         }
     }
 
+    /**
+     * Sets all images and hides them till players join.
+     */
     private void initialiseImageView() {
-        imageViews.add(firstImageView);
-        imageViews.add(secondImageView);
-        imageViews.add(thirdImageView);
-        imageViews.add(fourthImageView);
-        imageViews.add(fifthImageView);
-        imageViews.add(sixthImageView);
-        imageViews.add(seventhImageView);
-        imageViews.add(eighthImageView);
-        for (int i = 0; i < MAX_NUM_PLAYERS; i++) {
-            imageViews.get(i).setImage(
+        for (ImageView viewer : imageViews) {
+            viewer.setImage(
                 new Image(
                     RaceViewController.class.getResourceAsStream(
                         "/pics/sail.png")
                 )
             );
+            viewer.setVisible(false);
         }
     }
 
     @FXML
     public void leaveLobbyButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function!
-//        setContentPane("/views/StartScreenView.fxml");
         GameState.setCurrentStage(GameStages.CANCELLED);
         // TODO: 20/07/17 wmu16 - Implement some way of terminating the game
-//        ClientState.setConnectedToHost(false);
         for (LobbyCloseListener readyListener : lobbyListeners)
             readyListener.notify(CloseStatus.LEAVE);
-
     }
 
     @FXML
@@ -154,32 +138,6 @@ public class LobbyController {
             readyListener.notify(CloseStatus.READY);
     }
 
-
-//    private static MediaPlayer mediaPlayer;
-//
-//    private void playTheme() {
-//        Random random = new Random(System.currentTimeMillis());
-//        Integer rand = random.nextInt();
-//        if(rand == 10) {
-//            URL file = getClass().getResource("/music/Disturbed - down with the sickness.mp3");
-//            Media hit = new Media(file.toString());
-//            mediaPlayer = new MediaPlayer(hit);
-//            mediaPlayer.play();
-//        } else if(rand == 9) {
-//            URL file = getClass().getResource("/music/Owl City - Fireflies.mp3");
-//            Media hit = new Media(file.toString());
-//            mediaPlayer = new MediaPlayer(hit);
-//            mediaPlayer.play();
-//        }
-//    }
-
-//    private void switchToRaceView() {
-//        if (!switchedPane) {
-//            switchedPane = true;
-//            setContentPane("/views/RaceView.fxml");
-//        }
-//    }
-// TODO: 26/07/17 cir27 - Could probably be done in a cleaner way.
     public void setTitle (String title) {
         lobbyIpText.setText(title);
     }
@@ -191,12 +149,13 @@ public class LobbyController {
     public void setPlayerListSource (ObservableList<String> players) {
         this.players = players;
         players.addListener((ListChangeListener<? super String>) (lcl) ->
-            Platform.runLater(this::initialiseListView)
+            Platform.runLater(this::updatePlayers)
         );
-        Platform.runLater(this::initialiseListView);
+        Platform.runLater(this::updatePlayers);
     }
 
     public void disableReadyButton () {
         readyButton.setDisable(true);
+        readyButton.setVisible(false);
     }
 }

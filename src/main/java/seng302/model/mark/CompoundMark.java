@@ -1,27 +1,27 @@
 package seng302.model.mark;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import seng302.gameServer.server.messages.RoundingSide;
+import seng302.model.GeoPoint;
+import seng302.utilities.GeoUtility;
 
 public class CompoundMark {
 
 	private int compoundMarkId;
 	private String name;
-
 	private List<Mark> marks = new ArrayList<>();
+    private GeoPoint midPoint;
 
-	public CompoundMark(int markID, String name) {
-		this.compoundMarkId = markID;
-		this.name = name;
-	}
-
-	public void addSubMarks(Mark... marks) {
-		this.marks.addAll(Arrays.asList(marks));
-	}
-
-	public void addSubMarks(List<Mark> marks) {
-	    this.marks.addAll(marks);
+    public CompoundMark(int markID, String name, List<Mark> marks) {
+        this.compoundMarkId = markID;
+        this.name = name;
+        this.marks.addAll(marks);
+        if (marks.size() > 1) {
+            this.midPoint = GeoUtility.getDirtyMidPoint(marks.get(0), marks.get(1));
+        } else {
+            this.midPoint = marks.get(0);
+        }
     }
 
 	/**
@@ -55,6 +55,27 @@ public class CompoundMark {
 		this.name = name;
 	}
 
+    public void setRoundingSide(RoundingSide roundingSide) {
+        switch (roundingSide) {
+            case SP:
+                getSubMark(1).setRoundingSide(RoundingSide.STARBOARD);
+                getSubMark(2).setRoundingSide(RoundingSide.PORT);
+                break;
+            case PS:
+                getSubMark(1).setRoundingSide(RoundingSide.PORT);
+                getSubMark(2).setRoundingSide(RoundingSide.STARBOARD);
+                break;
+            case PORT:
+                getSubMark(1).setRoundingSide(RoundingSide.PORT);
+                break;
+            case STARBOARD:
+                getSubMark(1).setRoundingSide(RoundingSide.STARBOARD);
+                break;
+
+
+        }
+    }
+
     /**
      * Returns the mark contained in the compound mark. Marks are numbered 1 to n;
      * @param singleMarkId the id of the desired mark contained in this compound mark.
@@ -66,6 +87,16 @@ public class CompoundMark {
         } catch (IndexOutOfBoundsException e) {
 	        return null;
         }
+    }
+
+    /**
+     * NOTE: This is a 'dirty' mid point as it is simply calculated as an xy point would be.
+     * NO CHECKING FOR LAT / LNG WRAPPING IS DONE IN CREATION OF THIS MIDPOINT
+     *
+     * @return GeoPoint of the midpoint of the two marks, or the one mark if there is only one
+     */
+    public GeoPoint getMidPoint() {
+        return midPoint;
     }
 
     /**
@@ -86,38 +117,6 @@ public class CompoundMark {
     public List<Mark> getMarks () {
         return marks;
     }
-
-
-//	@Override
-//	public boolean equals(Object other) {
-//		if (other == null) {
-//			return false;
-//		}
-//
-//		if (!(other instanceof Mark)){
-//			return false;
-//		}
-//
-//		Mark otherMark = (Mark) other;
-//
-//		if (otherMark.getLat() != getLat() || otherMark.getLongitude() != getLongitude()) {
-//			return false;
-//		}
-//
-//		if (otherMark.getCompoundMarkID() != getCompoundMarkID()){
-//			return false;
-//		}
-//
-//		if (otherMark.getId() != getId()){
-//			return false;
-//		}
-//
-//		if (!otherMark.getName().equals(name)){
-//			return false;
-//		}
-//
-//		return true;
-//	}
 
 	@Override
 	public int hashCode() {
