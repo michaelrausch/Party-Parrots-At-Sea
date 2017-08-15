@@ -24,9 +24,8 @@ public class ClientYacht extends Observable {
 
     @FunctionalInterface
     public interface YachtLocationListener {
-
         void notifyLocation(ClientYacht clientYacht, double lat, double lon, double heading,
-            double velocity);
+            Boolean sailsIn, double velocity);
     }
 
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
@@ -41,6 +40,7 @@ public class ClientYacht extends Observable {
     private String country;
 
     private Long estimateTimeAtFinish;
+    private Boolean sailIn = false;
     private Integer currentMarkSeqID = 0;
     private Long markRoundTime;
     private Long timeTillNext;
@@ -189,6 +189,11 @@ public class ClientYacht extends Observable {
         return location;
     }
 
+    public void toggleSail() {
+        sailIn = !sailIn;
+    }
+    //// TODO: 15/08/17 asd
+
     /**
      * Sets the current location of the boat in lat and long whilst preserving the last location
      *
@@ -249,11 +254,15 @@ public class ClientYacht extends Observable {
 //        this.currentVelocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lng, heading, velocity);
+            yll.notifyLocation(this, lat, lng, heading, sailIn, velocity);
         }
     }
 
     public void addLocationListener(YachtLocationListener listener) {
         locationListeners.add(listener);
+    }
+
+    public boolean getSailIn () {
+        return sailIn;
     }
 }

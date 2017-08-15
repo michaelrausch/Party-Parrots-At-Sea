@@ -1,29 +1,25 @@
 package seng302.gameServer;
 
-import com.sun.corba.se.spi.activation.Server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 import seng302.gameServer.server.messages.Message;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
-import seng302.model.Yacht;
+import seng302.model.PolarTable;
+import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.GameClient;
-import seng302.model.PolarTable;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
  * Created by wmu16 on 13/07/17.
  */
-public class MainServerThread extends Observable implements Runnable, ClientConnectionDelegate,
-    Observer {
+public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
@@ -158,8 +154,6 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
 
     public void startGame() {
         initialiseBoatPositions();
-        setupYachtObserver();
-
         Timer t = new Timer();
 
         t.schedule(new TimerTask() {
@@ -203,9 +197,9 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
         GeoPoint midpoint = GeoUtility.getGeoCoordinate(startMark1, perpendicularAngle, length / 2);
 
         // Setting each boats position side by side
-        double DISTANCEFACTOR = 50.0;  // distance apart in meters
+        double DISTANCE_FACTOR = 50.0;  // distance apart in meters
         int boatIndex = 0;
-        for (Yacht yacht : GameState.getYachts().values()) {
+        for (ServerYacht yacht : GameState.getYachts().values()) {
             int distanceApart = boatIndex / 2;
 
             if (boatIndex % 2 == 1 && boatIndex != 0) {
@@ -214,31 +208,18 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
             }
 
             GeoPoint spawnMark = GeoUtility
-                .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCEFACTOR);
+                .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCE_FACTOR);
 
             if (yacht.getHeading() < perpendicularAngle) {
                 spawnMark = GeoUtility
-                    .getGeoCoordinate(spawnMark, perpendicularAngle + 90, DISTANCEFACTOR);
+                    .getGeoCoordinate(spawnMark, perpendicularAngle + 90, DISTANCE_FACTOR);
             } else {
                 spawnMark = GeoUtility
-                    .getGeoCoordinate(spawnMark, perpendicularAngle + 270, DISTANCEFACTOR);
+                    .getGeoCoordinate(spawnMark, perpendicularAngle + 270, DISTANCE_FACTOR);
             }
 
             yacht.setLocation(spawnMark);
             boatIndex++;
-        }
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-            serverToClientThread.sendCollisionMessage((Integer) arg);
-        }
-    }
-
-    private void setupYachtObserver() {
-        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-            serverToClientThread.getYacht().addObserver(this);
         }
     }
 }

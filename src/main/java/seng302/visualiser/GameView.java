@@ -6,31 +6,22 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
-import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import seng302.model.ClientYacht;
 import javafx.util.Duration;
@@ -96,7 +87,7 @@ public class GameView extends Pane {
     private Double frameRate = 60.0;
     private int frameTimeIndex = 0;
     private boolean arrayFilled = false;
-    private Yacht playerYacht;
+    private ClientYacht playerYacht;
     private double windDir = 0.0;
 
     double scaleFactor = 1;
@@ -370,7 +361,7 @@ public class GameView extends Pane {
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            clientYacht.addLocationListener((boat, lat, lon, heading, velocity, sailIn) -> {
+            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
@@ -639,7 +630,7 @@ public class GameView extends Pane {
 
     public void setBoatAsPlayer (ClientYacht playerYacht) {
         this.playerYacht = playerYacht;
-        this.playerYacht.toggleClientSail();
+        this.playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",

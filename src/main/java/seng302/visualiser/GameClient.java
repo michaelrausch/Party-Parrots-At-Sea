@@ -347,7 +347,7 @@ public class GameClient {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
                 socketThread.sendBoatAction(BoatAction.SAILS_IN);
-                raceView.getGameView().getPlayerYacht().toggleClientSail();
+                raceView.getGameView().getPlayerYacht().toggleSail();
                 break;
             case PAGE_UP:
             case PAGE_DOWN:
