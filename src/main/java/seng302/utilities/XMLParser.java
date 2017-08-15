@@ -8,8 +8,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import seng302.model.ClientYacht;
 import seng302.model.Limit;
-import seng302.model.Yacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -125,8 +125,8 @@ public class XMLParser {
      * @param doc XML Document Object
      * @return Mapping of sourceIds to Boats.
      */
-    public static Map<Integer, Yacht> parseBoats(Document doc){
-        Map<Integer, Yacht> competingBoats = new HashMap<>();
+    public static Map<Integer, ClientYacht> parseBoats(Document doc) {
+        Map<Integer, ClientYacht> competingBoats = new HashMap<>();
 
         Element docEle = doc.getDocumentElement();
 
@@ -135,7 +135,8 @@ public class XMLParser {
             Node currentBoat = boatsList.item(i);
             if (currentBoat.getNodeName().equals("Boat")) {
 //                    Boat boat = new Boat(currentBoat);
-                Yacht yacht = new Yacht(XMLParser.getNodeAttributeString(currentBoat, "Type"),
+                ClientYacht yacht = new ClientYacht(
+                    XMLParser.getNodeAttributeString(currentBoat, "Type"),
                     XMLParser.getNodeAttributeInt(currentBoat, "SourceID"),
                     XMLParser.getNodeAttributeString(currentBoat, "HullNum"),
                     XMLParser.getNodeAttributeString(currentBoat, "ShortName"),

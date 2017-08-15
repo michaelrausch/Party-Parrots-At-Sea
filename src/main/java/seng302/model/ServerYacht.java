@@ -16,7 +16,7 @@ import seng302.utilities.GeoUtility;
  */
 public class ServerYacht extends Observable {
 
-    private Logger logger = LoggerFactory.getLogger(Yacht.class);
+    private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
     public static final Double TURN_STEP = 5.0;
 
@@ -264,18 +264,16 @@ public class ServerYacht extends Observable {
         return sourceId;
     }
 
-    // TODO: 15/08/17 EXTREME BUG DO NOT DELETE THIS FUNCTION BREAKS PROGRAM IDK WHY ¯\_(ツ)_/¯
+    // TODO: 15/08/17 This method is implicitly called from the XML generator for boats DO NOT DELETE
     public String getHullID() {
-        System.out.println("HullId");
         if (hullID == null) {
             return "";
         }
         return hullID;
     }
 
-    // TODO: 15/08/17 EXTREME BUG DO NOT DELETE THIS FUNCTION BREAKS PROGRAM IDK WHY ¯\_(ツ)_/¯
+    // TODO: 15/08/17 This method is implicitly called from the XML generator for boats DO NOT DELETE
     public String getShortName() {
-        System.out.println("shortName");
         return shortName;
     }
 

@@ -34,8 +34,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
+import seng302.model.ClientYacht;
 import seng302.model.RaceState;
-import seng302.model.Yacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
@@ -70,10 +70,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Button selectAnnotationBtn;
     @FXML
-    private ComboBox<Yacht> yachtSelectionComboBox;
+    private ComboBox<ClientYacht> yachtSelectionComboBox;
 
     //Race Data
-    private Map<Integer, Yacht> participants;
+    private Map<Integer, ClientYacht> participants;
     private Map<Integer, CompoundMark> markers;
     private RaceXMLData courseData;
     private GameView gameView;
@@ -101,7 +101,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void loadRace (
-        Map<Integer, Yacht> participants, RaceXMLData raceData, RaceState raceState, Yacht player
+        Map<Integer, ClientYacht> participants, RaceXMLData raceData, RaceState raceState,
+        ClientYacht player
     ) {
         this.participants = participants;
         this.courseData = raceData;
@@ -214,7 +215,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         // TODO: 2/08/17 there is about 0 chance of this working. Once we are keeping track of boat positions it can be fixed.
         // Collect the racing yachts that aren't already in the chart
         sparkLineData.clear();
-        List<Yacht> sparkLineCandidates = new ArrayList<>(participants.values());
+        List<ClientYacht> sparkLineCandidates = new ArrayList<>(participants.values());
         // Create a new data series for new yachts
         sparkLineCandidates
             .stream()
@@ -260,15 +261,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * Updates the yachts sparkline of the desired yacht and using the new leg number
-     * @param yacht The yacht to be updated on the sparkline
+     * @param clientYacht The yacht to be updated on the sparkline
      * @param legNumber the leg number that the position will be assigned to
      */
-    void updateYachtPositionSparkline(Yacht yacht, Integer legNumber){
+    void updateYachtPositionSparkline(ClientYacht clientYacht, Integer legNumber) {
         for (XYChart.Series<String, Double> positionData : sparkLineData) {
             positionData.getData().add(
                 new Data<>(
                     Integer.toString(legNumber),
-                    1.0 + participants.size() - yacht.getPositionInteger()
+                    1.0 + participants.size() - clientYacht.getPositionInteger()
                 )
             );
         }
@@ -376,21 +377,21 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         // list of racing yacht id
-        List<Yacht> sorted = new ArrayList<>(participants.values());
-        sorted.sort(Comparator.comparingInt(Yacht::getPositionInteger));
+        List<ClientYacht> sorted = new ArrayList<>(participants.values());
+        sorted.sort(Comparator.comparingInt(ClientYacht::getPositionInteger));
         List<Text> vboxEntries = new ArrayList<>();
 
-        for (Yacht yacht : sorted) {
+        for (ClientYacht clientYacht : sorted) {
 //            System.out.println("yacht == null  " + String.valueOf(yacht == null));
-            if (yacht.getBoatStatus() == 3) {  // 3 is finish status
-                Text textToAdd = new Text(yacht.getPositionInteger() + ". " +
-                    yacht.getShortName() + " (Finished)");
+            if (clientYacht.getBoatStatus() == 3) {  // 3 is finish status
+                Text textToAdd = new Text(clientYacht.getPositionInteger() + ". " +
+                    clientYacht.getShortName() + " (Finished)");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 vboxEntries.add(textToAdd);
 
             } else {
-                Text textToAdd = new Text(yacht.getPositionInteger() + ". " +
-                    yacht.getShortName() + " ");
+                Text textToAdd = new Text(clientYacht.getPositionInteger() + ". " +
+                    clientYacht.getShortName() + " ");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 textToAdd.setStyle("");
                 vboxEntries.add(textToAdd);
@@ -575,9 +576,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     /**
      * Sets all the annotations of the selected yacht to be visible and all others to be hidden
      *
-     * @param yacht The yacht for which we want to view all annotations
+     * @param clientYacht The yacht for which we want to view all annotations
      */
-    private void setSelectedBoat(Yacht yacht) {
+    private void setSelectedBoat(ClientYacht clientYacht) {
 //        for (BoatObject bg : gameViewController.getBoatGroups()) {
 //            //We need to iterate over all race groups to get the matching yacht group belonging to this yacht if we
 //            //are to toggle its annotations, there is no other backwards knowledge of a yacht to its yachtgroup.

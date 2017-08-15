@@ -20,15 +20,16 @@ import seng302.model.mark.CompoundMark;
  * compared to the XMLParser boat class, also done outside Boat class because some old variables are
  * not used anymore.
  */
-public class Yacht extends Observable {
+public class ClientYacht extends Observable {
 
     @FunctionalInterface
     public interface YachtLocationListener {
 
-        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
+        void notifyLocation(ClientYacht clientYacht, double lat, double lon, double heading,
+            double velocity);
     }
 
-    private Logger logger = LoggerFactory.getLogger(Yacht.class);
+    private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
 
     //BOTH AFAIK
@@ -58,7 +59,7 @@ public class Yacht extends Observable {
     private Integer positionInt = 0;
     private Color colour;
 
-    public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
+    public ClientYacht(String boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
         this.sourceId = sourceId;

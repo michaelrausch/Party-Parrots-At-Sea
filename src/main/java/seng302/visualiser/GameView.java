@@ -19,10 +19,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import seng302.model.ClientYacht;
 import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
-import seng302.model.Yacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -61,8 +61,8 @@ public class GameView extends Pane {
     private List<Limit> borderPoints;
     private Map<Mark, Marker> markerObjects;
 
-    private Map<Yacht, BoatObject> boatObjects = new HashMap<>();
-    private Map<Yacht, AnnotationBox> annotations = new HashMap<>();
+    private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
+    private Map<ClientYacht, AnnotationBox> annotations = new HashMap<>();
     private ObservableList<Node> gameObjects;
     private Group annotationsGroup = new Group();
     private Group wakesGroup = new Group();
@@ -318,23 +318,23 @@ public class GameView extends Pane {
 
     /**
      * Draws all the boats.
-     * @param  yachts The yachts to set in the race
+     * @param  clientYachts The yachts to set in the race
      */
-    public void setBoats(List<Yacht> yachts) {
+    public void setBoats(List<ClientYacht> clientYachts) {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
-        for (Yacht yacht : yachts) {
+        for (ClientYacht clientYacht : clientYachts) {
             Paint colour = Colors.getColor();
             newBoat = new BoatObject();
             newBoat.setFill(colour);
-            boatObjects.put(yacht, newBoat);
-            createAndBindAnnotationBox(yacht, colour);
+            boatObjects.put(clientYacht, newBoat);
+            createAndBindAnnotationBox(clientYacht, colour);
 //            wakesGroup.getChildren().add(newBoat.getWake());
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            yacht.addLocationListener((boat, lat, lon, heading, velocity) ->{
+            clientYacht.addLocationListener((boat, lat, lon, heading, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity);
@@ -358,11 +358,11 @@ public class GameView extends Pane {
         });
     }
 
-    private void createAndBindAnnotationBox (Yacht yacht, Paint colour) {
+    private void createAndBindAnnotationBox(ClientYacht clientYacht, Paint colour) {
         AnnotationBox newAnnotation = new AnnotationBox();
         newAnnotation.setFill(colour);
         newAnnotation.addAnnotation(
-            "name", "Player: " + yacht.getShortName()
+            "name", "Player: " + clientYacht.getShortName()
         );
 //        newAnnotation.addAnnotation(
 //            "velocity",
@@ -385,7 +385,7 @@ public class GameView extends Pane {
 //                return format.format(time);
 //            }
 //        );
-        annotations.put(yacht, newAnnotation);
+        annotations.put(clientYacht, newAnnotation);
     }
 
     private void drawFps(Double fps){
@@ -562,9 +562,9 @@ public class GameView extends Pane {
         fpsDisplay.setVisible(visibility);
     }
 
-    public void selectBoat (Yacht selectedYacht) {
+    public void selectBoat(ClientYacht selectedClientYacht) {
         boatObjects.forEach((boat, group) ->
-            group.setIsSelected(boat == selectedYacht)
+            group.setIsSelected(boat == selectedClientYacht)
         );
     }
 
@@ -576,7 +576,7 @@ public class GameView extends Pane {
         timer.start();
     }
 
-    public void setBoatAsPlayer (Yacht playerYacht) {
+    public void setBoatAsPlayer(ClientYacht playerYacht) {
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",

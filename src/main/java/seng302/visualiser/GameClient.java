@@ -14,8 +14,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
+import seng302.model.ClientYacht;
 import seng302.model.RaceState;
-import seng302.model.Yacht;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.parser.MarkRoundingData;
 import seng302.model.stream.parser.PositionUpdateData;
@@ -41,7 +41,7 @@ public class GameClient {
 
     private RaceViewController raceView;
 
-    private Map<Integer, Yacht> allBoatsMap;
+    private Map<Integer, ClientYacht> allBoatsMap;
     private RegattaXMLData regattaData;
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
@@ -151,7 +151,7 @@ public class GameClient {
         holderPane.getScene().setOnKeyPressed(this::keyPressed);
         holderPane.getScene().setOnKeyReleased(this::keyReleased);
         raceView = fxmlLoader.getController();
-        Yacht player = allBoatsMap.get(socketThread.getClientId());
+        ClientYacht player = allBoatsMap.get(socketThread.getClientId());
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
     }
 
@@ -224,8 +224,8 @@ public class GameClient {
     private void updatePosition(PositionUpdateData positionData) {
         if (positionData.getType() == DeviceType.YACHT_TYPE) {
             if (allXMLReceived() && allBoatsMap.containsKey(positionData.getDeviceId())) {
-                Yacht yacht = allBoatsMap.get(positionData.getDeviceId());
-                yacht.updateLocation(positionData.getLat(),
+                ClientYacht clientYacht = allBoatsMap.get(positionData.getDeviceId());
+                clientYacht.updateLocation(positionData.getLat(),
                     positionData.getLon(), positionData.getHeading(),
                     positionData.getGroundSpeed());
             }
@@ -242,11 +242,11 @@ public class GameClient {
      */
     private void updateMarkRounding(MarkRoundingData roundingData) {
         if (allXMLReceived()) {
-            Yacht yacht = allBoatsMap.get(roundingData.getBoatId());
-            yacht.setMarkRoundingTime(roundingData.getTimeStamp());
-            yacht.updateTimeSinceLastMarkProperty(
+            ClientYacht clientYacht = allBoatsMap.get(roundingData.getBoatId());
+            clientYacht.setMarkRoundingTime(roundingData.getTimeStamp());
+            clientYacht.updateTimeSinceLastMarkProperty(
                 raceState.getRaceTime() - roundingData.getTimeStamp());
-            yacht.setLastMarkRounded(
+            clientYacht.setLastMarkRounded(
                 courseData.getCompoundMarks().get(
                     roundingData.getMarkId()
                 )
@@ -258,20 +258,20 @@ public class GameClient {
         if (allXMLReceived()) {
             raceState.updateState(data);
             for (long[] boatData : data.getBoatData()) {
-                Yacht yacht = allBoatsMap.get((int) boatData[0]);
-                yacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
-                yacht.setEstimateTimeAtFinish(boatData[2]);
+                ClientYacht clientYacht = allBoatsMap.get((int) boatData[0]);
+                clientYacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
+                clientYacht.setEstimateTimeAtFinish(boatData[2]);
                 int legNumber = (int) boatData[3];
-                yacht.setLegNumber(legNumber);
-                yacht.setBoatStatus((int) boatData[4]);
-                if (legNumber != yacht.getLegNumber()) {
+                clientYacht.setLegNumber(legNumber);
+                clientYacht.setBoatStatus((int) boatData[4]);
+                if (legNumber != clientYacht.getLegNumber()) {
                     int placing = 1;
-                    for (Yacht otherYacht : allBoatsMap.values()) {
-                        if (otherYacht.getSourceId() != boatData[0] &&
-                            yacht.getLegNumber() <= otherYacht.getLegNumber())
+                    for (ClientYacht otherClientYacht : allBoatsMap.values()) {
+                        if (otherClientYacht.getSourceId() != boatData[0] &&
+                            clientYacht.getLegNumber() <= otherClientYacht.getLegNumber())
                             placing++;
                     }
-                    yacht.setPositionInteger(placing);
+                    clientYacht.setPositionInteger(placing);
                 }
             }
         }
