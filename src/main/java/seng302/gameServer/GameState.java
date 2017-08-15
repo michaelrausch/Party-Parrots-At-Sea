@@ -43,10 +43,9 @@ public class GameState implements Runnable {
     public static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
     public static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
-    private static final Double BOUNCE_DISTANCE_MARK = 20.0;
-    private static final Double BOUNCE_DISTANCE_YACHT = 30.0;
-    private static final Integer COLLISION_UPDATE_INTERVAL = 100;
-    private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
+    public static final Double BOUNCE_DISTANCE_MARK = 20.0;
+    public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
+    public static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -244,7 +243,7 @@ public class GameState implements Runnable {
     }
 
 
-    private void checkForCollision(ServerYacht serverYacht) {
+    public static void checkForCollision(ServerYacht serverYacht) {
         ServerYacht collidedYacht = checkCollision(serverYacht);
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
@@ -259,7 +258,7 @@ public class GameState implements Runnable {
             );
             collidedYacht.setCurrentVelocity(
                 collidedYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
-            );;
+            );
             notifyMessageListeners(
                 new YachtEventCodeMessage(serverYacht.getSourceId())
             );
@@ -504,7 +503,7 @@ public class GameState implements Runnable {
     }
 
 
-    private Mark markCollidedWith(ServerYacht yacht) {
+    private static Mark markCollidedWith(ServerYacht yacht) {
         Set<Mark> marksInRace = GameState.getMarks();
         for (Mark mark : marksInRace) {
             if (GeoUtility.getDistance(yacht.getLocation(), mark)
@@ -520,7 +519,7 @@ public class GameState implements Runnable {
      *
      * @return The boats new position
      */
-    private GeoPoint calculateBounceBack(ServerYacht yacht, GeoPoint collidedWith, Double bounceDistance) {
+    private static GeoPoint calculateBounceBack(ServerYacht yacht, GeoPoint collidedWith, Double bounceDistance) {
         Double heading = GeoUtility.getBearing(yacht.getLocation(), collidedWith);
         // Invert heading
         heading -= 180;
@@ -534,7 +533,7 @@ public class GameState implements Runnable {
      *
      * @return yacht to compare to all other yachts.
      */
-    private ServerYacht checkCollision(ServerYacht yacht) {
+    private static ServerYacht checkCollision(ServerYacht yacht) {
 
         for (ServerYacht otherYacht : GameState.getYachts().values()) {
             if (otherYacht != yacht) {
@@ -562,7 +561,7 @@ public class GameState implements Runnable {
         notifyMessageListeners(markRoundingMessage);
     }
 
-    private void notifyMessageListeners(Message message) {
+    private static void notifyMessageListeners(Message message) {
         for (NewMessageListener mpl : markListeners) {
             mpl.notify(message);
         }
