@@ -28,26 +28,26 @@ public class RegularPacketsTest {
         GameState.setCurrentStage(GameStages.RACING);
     }
 
-    @Test
-    public void packetsSentAtRegularIntervals () throws Exception {
-        final double TEST_DISTANCE = 10.0;
-        serverThread.startGame();
-        SleepThreadMaxDelay();
-        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
-        double startAngle = yacht.getHeading();
-        long startTime = System.currentTimeMillis();
-        clientThread.sendBoatAction(BoatAction.UPWIND);
-        Thread.sleep(200);
-        while (Math.abs(yacht.getHeading() - startAngle) < TEST_DISTANCE) {
-            Thread.sleep(1);
-        }
-        clientThread.sendBoatAction(BoatAction.MAINTAIN_HEADING);
-        long endTime = System.currentTimeMillis();
-        SleepThreadMaxDelay();
-        //Allowed to be two loops of delay due to loop delay and processing delay at client + server ends.
-        Assert.assertEquals(TEST_DISTANCE / Yacht.TURN_STEP * ClientToServerThread.PACKET_SENDING_INTERVAL_MS,
-            (endTime - startTime), 2 * ClientToServerThread.PACKET_SENDING_INTERVAL_MS);
-    }
+//    @Test
+//    public void packetsSentAtRegularIntervals () throws Exception {
+//        final double TEST_DISTANCE = 10.0;
+//        serverThread.startGame();
+//        SleepThreadMaxDelay();
+//        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
+//        double startAngle = yacht.getHeading();
+//        long startTime = System.currentTimeMillis();
+//        clientThread.sendBoatAction(BoatAction.UPWIND);
+//        Thread.sleep(200);
+//        while (Math.abs(yacht.getHeading() - startAngle) < TEST_DISTANCE) {
+//            Thread.sleep(1);
+//        }
+//        clientThread.sendBoatAction(BoatAction.MAINTAIN_HEADING);
+//        long endTime = System.currentTimeMillis();
+//        SleepThreadMaxDelay();
+//        //Allowed to be two loops of delay due to loop delay and processing delay at client + server ends.
+//        Assert.assertEquals(TEST_DISTANCE / Yacht.TURN_STEP * ClientToServerThread.PACKET_SENDING_INTERVAL_MS,
+//            (endTime - startTime), 2 * ClientToServerThread.PACKET_SENDING_INTERVAL_MS);
+//    }
 
 //    @Test
 //    public void testArbitraryPacketSent() throws Exception {
