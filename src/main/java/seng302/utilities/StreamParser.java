@@ -119,12 +119,12 @@ public class StreamParser {
 //                    placing += 1;
 //                }
 //            }
-//            updatingBoat.setPosition(placing.toString());
+//            updatingBoat.setPlacing(placing.toString());
 //            updatingBoat.setLegNumber(leg);
 //            boatsPos.putIfAbsent(placing, updatingBoat);
 //            boatsPos.replace(placing, updatingBoat);
 //        } else if(updatingBoat.getLegNumber() == null){
-//            updatingBoat.setPosition("1");
+//            updatingBoat.setPlacing("1");
 //            updatingBoat.setLegNumber(leg);
 //        }
 //    }

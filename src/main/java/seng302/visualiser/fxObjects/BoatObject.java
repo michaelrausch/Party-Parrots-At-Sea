@@ -11,6 +11,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.transform.Rotate;
 
 /**
@@ -352,7 +353,8 @@ public class BoatObject extends Group {
             BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75
         );
         boatPoly.setStroke(Color.BLACK);
-        boatPoly.setStrokeWidth(3);
+        boatPoly.setStrokeWidth(2);
+        boatPoly.setStrokeLineCap(StrokeLineCap.ROUND);
         isPlayer = true;
         animateSail();
     }

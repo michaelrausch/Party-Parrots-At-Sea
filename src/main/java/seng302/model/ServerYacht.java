@@ -6,7 +6,7 @@ import java.util.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
-import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.messages.BoatStatus;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 

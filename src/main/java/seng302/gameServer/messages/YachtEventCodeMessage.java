@@ -1,4 +1,4 @@
-package seng302.gameServer.server.messages;
+package seng302.gameServer.messages;
 
 /**
  * Created by zyt10 on 10/08/17.

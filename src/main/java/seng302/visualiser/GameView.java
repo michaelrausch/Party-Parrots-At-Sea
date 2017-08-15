@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -25,8 +24,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import seng302.model.ClientYacht;
 import javafx.util.Duration;
+import seng302.model.ClientYacht;
 import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -34,7 +33,12 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.*;
+import seng302.visualiser.fxObjects.AnnotationBox;
+import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.CourseBoundary;
+import seng302.visualiser.fxObjects.Gate;
+import seng302.visualiser.fxObjects.MarkArrowFactory;
+import seng302.visualiser.fxObjects.Marker;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
 
@@ -74,6 +78,7 @@ public class GameView extends Pane {
     private Group boatObjectGroup = new Group();
     private Group trails = new Group();
     private Group markers = new Group();
+    private List<CompoundMark> course = new ArrayList<>();
 
     private ImageView mapImage = new ImageView();
 
@@ -212,6 +217,20 @@ public class GameView extends Pane {
      */
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
         markerObjects = new HashMap<>();
+
+        for (Corner corner : sequence) { //Makes course out of all compound marks.
+            for (CompoundMark compoundMark : newCourse) {
+                if (corner.getCompoundMarkID() == compoundMark.getId()) {
+                    course.add(compoundMark);
+                }
+            }
+        }
+        int j = 0;
+        for (CompoundMark cm : course) {
+            System.out.println(cm.getId() + " " + j++);
+            System.out.println(cm.toString());
+        }
+
         final List<Gate> gates = new ArrayList<>();
         Paint colour = Color.BLACK;
         //Creates new markers
@@ -344,23 +363,23 @@ public class GameView extends Pane {
 
     /**
      * Draws all the boats.
-     * @param  clientYachts The yachts to set in the race
+     * @param  yachts The yachts to set in the race
      */
-    public void setBoats(List<ClientYacht> clientYachts) {
+    public void setBoats(List<ClientYacht> yachts) {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
-        for (ClientYacht clientYacht : clientYachts) {
+        for (ClientYacht yacht : yachts) {
             Paint colour = Colors.getColor();
             newBoat = new BoatObject();
             newBoat.setFill(colour);
-            boatObjects.put(clientYacht, newBoat);
-            createAndBindAnnotationBox(clientYacht, colour);
+            boatObjects.put(yacht, newBoat);
+            createAndBindAnnotationBox(yacht, colour);
 //            wakesGroup.getChildren().add(newBoat.getWake());
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
+            yacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
@@ -384,11 +403,11 @@ public class GameView extends Pane {
         });
     }
 
-    private void createAndBindAnnotationBox(ClientYacht clientYacht, Paint colour) {
+    private void createAndBindAnnotationBox(ClientYacht yacht, Paint colour) {
         AnnotationBox newAnnotation = new AnnotationBox();
         newAnnotation.setFill(colour);
         newAnnotation.addAnnotation(
-            "name", "Player: " + clientYacht.getShortName()
+            "name", "Player: " + yacht.getShortName()
         );
 //        newAnnotation.addAnnotation(
 //            "velocity",
@@ -411,7 +430,7 @@ public class GameView extends Pane {
 //                return format.format(time);
 //            }
 //        );
-        annotations.put(clientYacht, newAnnotation);
+        annotations.put(yacht, newAnnotation);
     }
 
     private void drawFps(Double fps) {
@@ -613,7 +632,6 @@ public class GameView extends Pane {
         timer.stop();
     }
 
-
     public void setWindDir(double windDir) {
         this.windDir = windDir;
     }
@@ -626,11 +644,18 @@ public class GameView extends Pane {
         return playerYacht;
     }
 
-
     public void setBoatAsPlayer (ClientYacht playerYacht) {
         this.playerYacht = playerYacht;
         this.playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
+        CompoundMark currentMark = course.get(playerYacht.getLegNumber());
+        for (Mark mark : currentMark.getMarks()) {
+            markerObjects.get(mark).showExitArrow();
+        }
+        CompoundMark destination = course.get(playerYacht.getLegNumber() + 1);
+        for (Mark mark : destination.getMarks()) {
+            markerObjects.get(mark).showEnterArrow();
+        }
         annotations.get(playerYacht).addAnnotation(
             "velocity",
             playerYacht.getVelocityProperty(),
@@ -642,6 +667,24 @@ public class GameView extends Pane {
             annotationsGroup.getChildren().remove(annotations.get(playerYacht));
             gameObjects.add(annotations.get(playerYacht));
         });
+        playerYacht.addMarkRoundingListener(this::updateMarkArrows);
+    }
+
+    private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
+        //Only show arrows for this and next leg.
+        for (Mark mark : compoundMark.getMarks()) {
+            markerObjects.get(mark).showExitArrow();
+        }
+        CompoundMark nextMark = course.get(legNumber);
+        for (Mark mark : nextMark.getMarks()) {
+            markerObjects.get(mark).showEnterArrow();
+        }
+        if (legNumber - 2 >= 0) {
+            CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
+            for (Mark mark : lastMark.getMarks()) {
+                markerObjects.get(mark).hideAllArows();
+            }
+        }
     }
 
     /**
@@ -651,32 +694,30 @@ public class GameView extends Pane {
      * @param collisionPoint yacht collision point
      */
     public void drawCollision(GeoPoint collisionPoint) {
-        Platform.runLater(() -> {
-            Point2D point = findScaledXY(collisionPoint);
-            double circleRadius = 0.0;
-            Circle circle = new Circle(point.getX(), point.getY(), circleRadius, Color.RED);
-            gameObjects.add(circle);
+        Point2D point = findScaledXY(collisionPoint);
+        double circleRadius = 0.0;
+        Circle circle = new Circle(point.getX(), point.getY(), circleRadius, Color.RED);
 
-            circle.setFill(Color.TRANSPARENT);
-            circle.setStroke(Color.RED);
-            circle.setStrokeWidth(3);
+        circle.setFill(Color.TRANSPARENT);
+        circle.setStroke(Color.RED);
+        circle.setStrokeWidth(3);
 
-            Timeline timeline = new Timeline();
-            timeline.setCycleCount(1);
+        Timeline timeline = new Timeline();
+        timeline.setCycleCount(1);
 
-            KeyFrame keyframe1 = new KeyFrame(Duration.ZERO,
-                new KeyValue(circle.radiusProperty(), 0),
-                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
-            KeyFrame keyFrame2 = new KeyFrame(new Duration(1000),
-                new KeyValue(circle.radiusProperty(), 50),
-                new KeyValue(circle.strokeProperty(), Color.RED));
-            KeyFrame keyFrame3 = new KeyFrame(new Duration(1500),
-                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
+        KeyFrame keyframe1 = new KeyFrame(Duration.ZERO,
+            new KeyValue(circle.radiusProperty(), 0),
+            new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
+        KeyFrame keyFrame2 = new KeyFrame(new Duration(1000),
+            new KeyValue(circle.radiusProperty(), 50),
+            new KeyValue(circle.strokeProperty(), Color.RED));
+        KeyFrame keyFrame3 = new KeyFrame(new Duration(1500),
+            new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
 
-            timeline.getKeyFrames().addAll(keyframe1, keyFrame2, keyFrame3);
-            timeline.play();
+        timeline.getKeyFrames().addAll(keyframe1, keyFrame2, keyFrame3);
 
-            timeline.setOnFinished(event -> gameObjects.remove(circle));
-        });
+        Platform.runLater(() -> gameObjects.add(circle));
+        timeline.setOnFinished(event -> Platform.runLater(() -> gameObjects.remove(circle)));
+        timeline.play();
     }
 }

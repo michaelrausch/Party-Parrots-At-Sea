@@ -1,4 +1,4 @@
-package seng302.gameServer.server.messages;
+package seng302.gameServer.messages;
 
 /**
  * The types of race start status messages

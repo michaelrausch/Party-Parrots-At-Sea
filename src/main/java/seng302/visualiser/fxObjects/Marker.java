@@ -32,15 +32,29 @@ public class Marker extends Group {
     public void constructArrows(MarkArrowFactory.RoundingSide roundingSide, double entryAngle, double exitAngle) {
         enterArrow = MarkArrowFactory.constructEntryArrow(roundingSide, entryAngle, exitAngle, colour);
         exitArrow = MarkArrowFactory.constructExitArrow(roundingSide, exitAngle, colour);
-        Platform.runLater(() -> this.getChildren().add(enterArrow));
-//        Platform.runLater(() -> this.getChildren().add(exitArrow));
     }
 
     public void showEnterArrow () {
-        Platform.runLater(() -> this.getChildren().setAll(enterArrow));
+        if (!this.getChildren().contains(enterArrow)) {
+            Platform.runLater(() -> {
+                this.getChildren().remove(exitArrow);
+                this.getChildren().add(enterArrow);
+            });
+        }
     }
 
     public void showExitArrow () {
-        Platform.runLater(() -> this.getChildren().setAll(exitArrow));
+        if (!this.getChildren().contains(exitArrow)) {
+            Platform.runLater(() -> {
+                this.getChildren().remove(enterArrow);
+                this.getChildren().add(exitArrow);
+            });
+        }
+    }
+
+    public void hideAllArows () {
+        Platform.runLater(() -> {
+            this.getChildren().removeAll(enterArrow, exitArrow);
+        });
     }
 }

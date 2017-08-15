@@ -1,4 +1,4 @@
-package seng302.gameServer.server.messages;
+package seng302.gameServer.messages;
 
 public class Heartbeat extends Message {
     private final int MESSAGE_SIZE = 4;

@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.gameServer.server.messages.BoatAction;
-import seng302.gameServer.server.messages.BoatStatus;
-import seng302.gameServer.server.messages.MarkRoundingMessage;
-import seng302.gameServer.server.messages.MarkType;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.RoundingBoatStatus;
-import seng302.gameServer.server.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.MarkRoundingMessage;
+import seng302.gameServer.messages.MarkType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RoundingBoatStatus;
+import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
@@ -283,7 +283,7 @@ public class GameState implements Runnable {
         Double velocity = yacht.getCurrentVelocity();
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * 3;
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (velocity < maxBoatSpeed - 500) {
@@ -556,7 +556,7 @@ public class GameState implements Runnable {
         // TODO: 13/8/17 figure out the rounding side, rounded mark source ID and boat status.
         Message markRoundingMessage = new MarkRoundingMessage(0, 0,
             sourceID, RoundingBoatStatus.RACING, roundingMark.getRoundingSide(), markType,
-            roundingMark.getSourceID());
+            currentMarkSeqID + 1);
 
         notifyMessageListeners(markRoundingMessage);
     }

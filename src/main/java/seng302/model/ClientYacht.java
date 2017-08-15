@@ -8,6 +8,8 @@ import java.util.Observable;
 import java.util.Observer;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
@@ -26,6 +28,11 @@ public class ClientYacht extends Observable {
     public interface YachtLocationListener {
         void notifyLocation(ClientYacht clientYacht, double lat, double lon, double heading,
             Boolean sailsIn, double velocity);
+    }
+
+    @FunctionalInterface
+    public interface MarkRoundingListener {
+        void notifyRounding(ClientYacht yacht, CompoundMark markPassed, int legNumber);
     }
 
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
@@ -52,11 +59,12 @@ public class ClientYacht extends Observable {
 
     //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
+    private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
+    private ReadOnlyIntegerWrapper placingProperty = new ReadOnlyIntegerWrapper();
     private CompoundMark lastMarkRounded;
-    private Integer positionInt = 0;
     private Color colour;
 
     public ClientYacht(String boatType, Integer sourceId, String hullID, String shortName,
@@ -145,12 +153,16 @@ public class ClientYacht extends Observable {
         this.estimateTimeAtFinish = estimateTimeAtFinish;
     }
 
-    public Integer getPositionInteger() {
-        return positionInt;
+    public Integer getPlacing() {
+        return placingProperty.get();
     }
 
-    public void setPositionInteger(Integer position) {
-        this.positionInt = position;
+    public void setPlacing(Integer position) {
+        placingProperty.set(position);
+    }
+
+    public ReadOnlyIntegerProperty placingProperty() {
+        return placingProperty.getReadOnlyProperty();
     }
 
     public void updateVelocityProperty(double velocity) {
@@ -239,14 +251,6 @@ public class ClientYacht extends Observable {
         this.colour = colour;
     }
 
-//    public Double getCurrentVelocity() {
-//        return currentVelocity;
-//    }
-//
-//    public void setCurrentVelocity(Double currentVelocity) {
-//        this.currentVelocity = currentVelocity;
-//    }
-
 
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
@@ -262,7 +266,25 @@ public class ClientYacht extends Observable {
         locationListeners.add(listener);
     }
 
+    public void addMarkRoundingListener(MarkRoundingListener listener) {
+        markRoundingListeners.add(listener);
+    }
+
+    public void removeMarkRoundingListener(MarkRoundingListener listener) {
+        markRoundingListeners.remove(listener);
+    }
+
     public boolean getSailIn () {
         return sailIn;
+    }
+
+    public void roundMark(CompoundMark mark, long markRoundTime, long timeSinceLastMark) {
+        this.markRoundTime = markRoundTime;
+        timeSinceLastMarkProperty.set(timeSinceLastMark);
+        lastMarkRounded = mark;
+        legNumber += 1;
+        for (MarkRoundingListener listener : markRoundingListeners) {
+            listener.notifyRounding(this, lastMarkRounded, legNumber);
+        }
     }
 }

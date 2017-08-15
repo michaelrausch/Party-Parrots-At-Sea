@@ -4,9 +4,9 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 import org.junit.Test;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.XMLMessage;
-import seng302.gameServer.server.messages.XMLMessageSubType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
 
 public class TestMessage {
     private static int XML_MESSAGE_LEN = 14;

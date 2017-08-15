@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.messages.Message;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;

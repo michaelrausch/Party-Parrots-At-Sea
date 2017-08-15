@@ -63,7 +63,7 @@ public class FinishScreenViewController implements Initializable {
 
     public void setFinishers(List<ClientYacht> participants) {
         List<ClientYacht> sorted = new ArrayList<>(participants);
-        sorted.sort(Comparator.comparingInt(ClientYacht::getPositionInteger));
+        sorted.sort(Comparator.comparingInt(ClientYacht::getPlacing));
         finishOrderTable.getItems().setAll(sorted);
     }
 
