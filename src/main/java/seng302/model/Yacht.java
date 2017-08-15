@@ -1,10 +1,5 @@
 package seng302.model;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
@@ -17,14 +12,23 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.Observable;
+
+import static seng302.utilities.GeoUtility.getGeoCoordinate;
+
 /**
  * Yacht class for the racing boat.
  *
  * Class created to store more variables (eg. boat statuses) compared to the XMLParser boat class,
  * also done outside Boat class because some old variables are not used anymore.
  */
-public class Yacht {
-
+public class Yacht extends Observable {
 
     @FunctionalInterface
     public interface YachtLocationListener {
@@ -34,7 +38,12 @@ public class Yacht {
     private Logger logger = LoggerFactory.getLogger(Yacht.class);
 
     private static final Double ROUNDING_DISTANCE = 50d; // TODO: 3/08/17 wmu16 - Look into this value further
-
+    public static final Double MARK_COLLISION_DISTANCE = 15d;
+    public static final Double YACHT_COLLISION_DISTANCE = 25.0;
+    private static final Double BOUNCE_DISTANCE_MARK = 20.0;
+    private static final Double BOUNCE_DISTANCE_YACHT = 30.0;
+    private static final Integer COLLISION_UPDATE_INTERVAL = 100;
+    private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     //BOTH AFAIK
     private String boatType;
@@ -68,6 +77,7 @@ public class Yacht {
     private Boolean hasPassedLine;
     private Boolean hasPassedThroughGate;
     private Boolean finishedRace;
+    private Long lastCollisionUpdate;
 
     //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
@@ -80,7 +90,7 @@ public class Yacht {
     private Boolean clientSailsIn = true;
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
-            String boatName, String country) {
+        String boatName, String country) {
         this.boatType = boatType;
         this.sourceId = sourceId;
         this.hullID = hullID;
@@ -100,6 +110,19 @@ public class Yacht {
         this.finishedRace = false;
     }
 
+    public Mark markCollidedWith() {
+        Set<Mark> marksInRace = GameState.getMarks();
+
+        for (Mark mark : marksInRace) {
+            if (GeoUtility.getDistance(getLocation(), new GeoPoint(mark.getLat(), mark.getLng()))
+                <= MARK_COLLISION_DISTANCE) {
+                return mark;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @param timeInterval since last update in milliseconds
      */
@@ -113,7 +136,7 @@ public class Yacht {
         if (sailIn && velocity <= maxBoatSpeed && maxBoatSpeed != 0d) {
 
             if (velocity < maxBoatSpeed) {
-                velocity += maxBoatSpeed / 15;  // Acceleration
+                velocity += maxBoatSpeed / 120;  // Acceleration
             }
             if (velocity > maxBoatSpeed) {
                 velocity = maxBoatSpeed;        // Prevent the boats from exceeding top speed
@@ -138,6 +161,35 @@ public class Yacht {
         //UPDATE BOAT LOCATION
         lastLocation = location;
         location = GeoUtility.getGeoCoordinate(location, heading, velocity * secondsElapsed);
+        Double metersCovered = velocity * secondsElapsed;
+        GeoPoint calculatedPoint = getGeoCoordinate(location, heading, metersCovered);
+
+        if (shouldDoCollisionUpdate()) {
+            Yacht collidedYacht = checkCollision(calculatedPoint);
+
+            if (collidedYacht != null) {
+                location = calculateBounceBackYacht(this, collidedYacht, BOUNCE_DISTANCE_YACHT);
+                velocity *= COLLISION_VELOCITY_PENALTY;
+                collidedYacht.setLocation(
+                    calculateBounceBackYacht(collidedYacht, this, BOUNCE_DISTANCE_YACHT));
+                collidedYacht.setVelocity(collidedYacht.getVelocity() * COLLISION_VELOCITY_PENALTY);
+                setChanged();
+                notifyObservers(this.sourceId);
+            } else if (markCollidedWith() != null) {
+                location = calculateBounceBack(
+                    new GeoPoint(markCollidedWith().getLat(), markCollidedWith().getLng()),
+                    BOUNCE_DISTANCE_MARK);
+                velocity *= COLLISION_VELOCITY_PENALTY;
+                setChanged();
+                notifyObservers(this.sourceId);
+            } else {
+                location = calculatedPoint;
+            }
+
+            lastCollisionUpdate = System.currentTimeMillis();
+        } else {
+            location = calculatedPoint;
+        }
 
         //CHECK FOR MARK ROUNDING
         if (!finishedRace) {
@@ -147,13 +199,53 @@ public class Yacht {
         // TODO: 3/08/17 wmu16 - Implement line cross check here
     }
 
+    /**
+     * @return true if COLLISION_UPDATE_INTERVAL has elapsed since the last collision update
+     */
+    private Boolean shouldDoCollisionUpdate() {
+        if (lastCollisionUpdate == null) {
+            lastCollisionUpdate = System.currentTimeMillis();
+        }
+
+        return System.currentTimeMillis() - lastCollisionUpdate > COLLISION_UPDATE_INTERVAL;
+    }
+
+    /**
+     * Calculate the new position of the boat after it has had a collision
+     *
+     * @return The boats new position
+     */
+    private GeoPoint calculateBounceBack(GeoPoint collidedWith, Double bounceDistance) {
+        Double heading = GeoUtility.getBearing(location, collidedWith);
+
+        // Invert heading
+        heading -= 180;
+        Integer newHeading = Math.floorMod(heading.intValue(), 360);
+
+        return GeoUtility.getGeoCoordinate(location, newHeading.doubleValue(), bounceDistance);
+    }
+
+    private GeoPoint calculateBounceBackYacht(Yacht collidingYacht, Yacht collidedYacht,
+        Double bounceDistance) {
+        Double heading = GeoUtility
+            .getBearing(collidingYacht.getLocation(), collidedYacht.getLocation());
+
+        heading -= 180;
+        Integer faultYachtHeading = Math.floorMod(heading.intValue(), 360);
+
+        return GeoUtility
+            .getGeoCoordinate(collidingYacht.getLocation(), faultYachtHeading.doubleValue(),
+                bounceDistance);
+    }
+
 
     /**
      * Calculates the distance to the next mark (closest of the two if a gate mark). For purposes
      * of mark rounding
+     *
      * @return A distance in metres. Returns -1 if there is no next mark
      * @throws IndexOutOfBoundsException If the next mark is null (ie the last mark in the race)
-     *         Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
+     * Check first using {@link seng302.model.mark.MarkOrder#isLastMark(Integer)}
      */
     public Double calcDistanceToCurrentMark() throws IndexOutOfBoundsException {
         CompoundMark nextMark = GameState.getMarkOrder().getCurrentMark(currentMarkSeqID);
@@ -476,12 +568,16 @@ public class Yacht {
 
     public Integer getSourceId() {
         //@TODO Remove and merge with Creating Game Loop
-        if (sourceId == null) return 0;
+        if (sourceId == null) {
+            return 0;
+        }
         return sourceId;
     }
 
     public String getHullID() {
-        if (hullID == null) return "";
+        if (hullID == null) {
+            return "";
+        }
         return hullID;
     }
 
@@ -494,7 +590,9 @@ public class Yacht {
     }
 
     public String getCountry() {
-        if (country == null) return "";
+        if (country == null) {
+            return "";
+        }
         return country;
     }
 
@@ -616,7 +714,7 @@ public class Yacht {
         this.timeSinceLastMarkProperty.set(timeSinceLastMark);
     }
 
-    public ReadOnlyLongProperty timeSinceLastMarkProperty () {
+    public ReadOnlyLongProperty timeSinceLastMarkProperty() {
         return timeSinceLastMarkProperty.getReadOnlyProperty();
     }
 
@@ -677,7 +775,31 @@ public class Yacht {
                 currentMarkSeqID));
     }
 
-    public void addLocationListener (YachtLocationListener listener) {
+    public void addLocationListener(YachtLocationListener listener) {
         locationListeners.add(listener);
+    }
+
+    public void setLocation(GeoPoint geoPoint) {
+        location = geoPoint;
+    }
+
+    /**
+     * Collision detection which iterates through all the yachts and check if any yacht collided
+     * with this yacht. Return collided yacht or null if no collision.
+     *
+     * @param calculatedPoint point will the yacht will move next
+     * @return yacht which collided with this yacht
+     */
+    private Yacht checkCollision(GeoPoint calculatedPoint) {
+
+        for (Yacht yacht : GameState.getYachts().values()) {
+            if (yacht != this) {
+                Double distance = GeoUtility.getDistance(yacht.getLocation(), calculatedPoint);
+                if (distance < YACHT_COLLISION_DISTANCE) {
+                    return yacht;
+                }
+            }
+        }
+        return null;
     }
 }

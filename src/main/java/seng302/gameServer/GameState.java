@@ -1,15 +1,20 @@
 package seng302.gameServer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import seng302.gameServer.server.messages.BoatAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.model.Player;
 import seng302.model.Yacht;
 import seng302.model.mark.MarkOrder;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import seng302.model.GeoPoint;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Mark;
+import seng302.utilities.GeoUtility;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -33,6 +38,7 @@ public class GameState implements Runnable {
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
+    private static Set<Mark> marks;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
     /*
@@ -58,14 +64,19 @@ public class GameState implements Runnable {
         isRaceStarted = false;
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
-        yachts = new HashMap<>();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
 
         new Thread(this).start();   //Run the auto updates on the game state
+
+        marks = new MarkOrder().getAllMarks();
     }
 
     public static String getHostIpAddress() {
         return hostIpAddress;
+    }
+
+    public static Set<Mark> getMarks(){
+        return Collections.unmodifiableSet(marks);
     }
 
     public static List<Player> getPlayers() {
@@ -78,7 +89,7 @@ public class GameState implements Runnable {
             + " " + player.getYacht().getCountry();
         playerStringMap.put(player, playerText);
     }
-    
+
     public static void removePlayer(Player player) {
         players.remove(player);
         playerStringMap.remove(player);
@@ -101,7 +112,7 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
-        if (currentStage == GameStages.RACING){
+        if (currentStage == GameStages.RACING) {
             startTime = System.currentTimeMillis();
         }
 
@@ -175,6 +186,7 @@ public class GameState implements Runnable {
 
     /**
      * Generates a new ID based off the size of current players + 1
+     *
      * @return a playerID to be allocated to a new connetion
      */
     public static Integer getUniquePlayerID() {
@@ -189,7 +201,7 @@ public class GameState implements Runnable {
     @Override
     public void run() {
 
-        while(true) {
+        while (true) {
             try {
                 Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {

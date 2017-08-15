@@ -16,6 +16,14 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.gameServer.server.messages.YachtEventCodeMessage;
+import seng302.model.Player;
+import seng302.model.Yacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.utilities.XMLGenerator;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatLocationMessage;
 import seng302.gameServer.server.messages.BoatStatus;
@@ -29,13 +37,6 @@ import seng302.gameServer.server.messages.RegistrationResponseMessage;
 import seng302.gameServer.server.messages.RegistrationResponseStatus;
 import seng302.gameServer.server.messages.XMLMessage;
 import seng302.gameServer.server.messages.XMLMessageSubType;
-import seng302.model.Player;
-import seng302.model.Yacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -74,6 +75,8 @@ public class ServerToClientThread implements Runnable {
     private XMLGenerator xml;
 
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
+
+    private Yacht yacht;
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
@@ -115,8 +118,7 @@ public class ServerToClientThread implements Runnable {
         all = ln.lines().collect(Collectors.toList());
         lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
 
-
-        Yacht yacht = new Yacht(
+        yacht = new Yacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
         GameState.addYacht(sourceId, yacht);
@@ -163,7 +165,6 @@ public class ServerToClientThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-
 
         while (socket.isConnected()) {
 
@@ -258,7 +259,6 @@ public class ServerToClientThread implements Runnable {
             currentByte = is.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {
-            e.printStackTrace();
             serverLog("Socket read failed", 1);
         }
         if (currentByte == -1) {
@@ -354,6 +354,14 @@ public class ServerToClientThread implements Runnable {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public Yacht getYacht() {
+        return yacht;
+    }
+
+    public void sendCollisionMessage(Integer yachtId) {
+        sendMessage(new YachtEventCodeMessage(yachtId));
     }
 
     public void addConnectionListener(ConnectionListener listener) {
