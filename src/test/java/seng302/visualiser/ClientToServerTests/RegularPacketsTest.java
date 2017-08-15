@@ -3,8 +3,6 @@ package seng302.visualiser.ClientToServerTests;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import seng302.gameServer.GameStages;
-import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.visualiser.ClientToServerThread;
 
@@ -18,10 +16,10 @@ public class RegularPacketsTest {
 
     @Before
     public void setup() throws Exception {
-        new GameState("localhost");
-        serverThread = new MainServerThread();
-        clientThread = new ClientToServerThread("localhost", 4942);
-        GameState.setCurrentStage(GameStages.RACING);
+//        new GameState("localhost");
+//        serverThread = new MainServerThread();
+//        clientThread = new ClientToServerThread("localhost", 4942);
+//        GameState.setCurrentStage(GameStages.RACING);
     }
 
     @Test
@@ -68,10 +66,10 @@ public class RegularPacketsTest {
 
     @After
     public void teardown () throws Exception {
-        clientThread.setSocketToClose();
-        serverThread.terminate();
-        GameState.setCurrentStage(GameStages.LOBBYING);
-        for (int i = 0; i<20; i++)
-            SleepThreadMaxDelay(); //Make sure socket is closed and toolkit remade.
+//        clientThread.setSocketToClose();
+//        serverThread.terminate();
+//        GameState.setCurrentStage(GameStages.LOBBYING);
+//        for (int i = 0; i<20; i++)
+//            SleepThreadMaxDelay(); //Make sure socket is closed and toolkit remade.
     }
 }
