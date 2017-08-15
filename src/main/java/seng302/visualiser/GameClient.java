@@ -21,6 +21,7 @@ import seng302.model.stream.parser.MarkRoundingData;
 import seng302.model.stream.parser.PositionUpdateData;
 import seng302.model.stream.parser.PositionUpdateData.DeviceType;
 import seng302.model.stream.parser.RaceStatusData;
+import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.StreamParser;
@@ -102,6 +103,8 @@ public class GameClient {
                 loadStartScreen();
             }
         });
+
+        server.setGameClient(this);
     }
 
     private void loadStartScreen() {
@@ -126,7 +129,8 @@ public class GameClient {
      * @return the lobby controller.
      */
     private LobbyController loadLobby() {
-        FXMLLoader fxmlLoader = new FXMLLoader(GameClient.class.getResource("/views/LobbyView.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            GameClient.class.getResource("/views/LobbyView.fxml"));
         try {
             holderPane.getChildren().clear();
             holderPane.getChildren().add(fxmlLoader.load());
@@ -153,6 +157,20 @@ public class GameClient {
         raceView = fxmlLoader.getController();
         ClientYacht player = allBoatsMap.get(socketThread.getClientId());
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
+    }
+
+    private void loadFinishScreenView() {
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            getClass().getResource("/views/FinishScreenView.fxml"));
+        try {
+            final Node finishScreenFX = fxmlLoader.load();
+            Platform.runLater(() -> {
+                holderPane.getChildren().clear();
+                holderPane.getChildren().add(finishScreenFX);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void parsePackets() {
@@ -205,13 +223,18 @@ public class GameClient {
                 case MARK_ROUNDING:
                     updateMarkRounding(StreamParser.extractMarkRounding(packet));
                     break;
+
+                case YACHT_EVENT_CODE:
+                    showCollisionAlert(StreamParser.extractYachtEventCode(packet));
+                    break;
             }
         }
     }
 
     private void startRaceIfAllDataReceived() {
-        if (allXMLReceived() && raceView == null)
+        if (allXMLReceived() && raceView == null) {
             loadRaceView();
+        }
     }
 
     private boolean allXMLReceived() {
@@ -257,8 +280,19 @@ public class GameClient {
     private void processRaceStatusUpdate(RaceStatusData data) {
         if (allXMLReceived()) {
             raceState.updateState(data);
-            if (raceView != null)
-            raceView.getGameView().setWindDir(raceState.getWindDirection());
+            if (raceView != null) {
+                raceView.getGameView().setWindDir(raceState.getWindDirection());
+            }
+            boolean raceFinished = true;
+            for (ClientYacht yacht : allBoatsMap.values()) {
+                if (yacht.getBoatStatus() != 3) {
+                    raceFinished = false;
+                }
+            }
+            if (raceFinished == true) {
+                loadFinishScreenView();
+            }
+
             for (long[] boatData : data.getBoatData()) {
                 ClientYacht clientYacht = allBoatsMap.get((int) boatData[0]);
                 clientYacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
@@ -313,11 +347,25 @@ public class GameClient {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
                 socketThread.sendBoatAction(BoatAction.SAILS_IN);
-                raceView.getGameView().getPlayerYacht().toggleClientSail();
+                raceView.getGameView().getPlayerYacht().toggleSail();
                 break;
             case PAGE_UP:
             case PAGE_DOWN:
                 socketThread.sendBoatAction(BoatAction.MAINTAIN_HEADING); break;
+        }
+    }
+
+    public RaceXMLData getCourseData() {
+        return courseData;
+    }
+
+    /**
+     * Tells race view to show a collision animation.
+     */
+    private void showCollisionAlert(YachtEventData yachtEventData) {
+        // 33 is the agreed code to show collision
+        if (yachtEventData.getEventId() == 33) {
+            raceView.showCollision(yachtEventData.getSubjectId());
         }
     }
 }

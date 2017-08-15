@@ -1,6 +1,7 @@
 package seng302.visualiser.map;
 
 import static junit.framework.TestCase.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,8 +22,8 @@ public class BoatSailAnimationToggleTest {
     @Test
     public void sailToggleTest() throws Exception {
         assertFalse(yacht.getSailIn());
-        yacht.toggleClientSail();
-        assertFalse(yacht.getSailIn());
+        yacht.toggleSail();
+        assertTrue(yacht.getSailIn());
     }
 
 }

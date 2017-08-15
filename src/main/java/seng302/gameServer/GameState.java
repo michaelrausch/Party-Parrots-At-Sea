@@ -1,9 +1,11 @@
 package seng302.gameServer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.server.messages.BoatAction;
@@ -12,6 +14,7 @@ import seng302.gameServer.server.messages.MarkRoundingMessage;
 import seng302.gameServer.server.messages.MarkType;
 import seng302.gameServer.server.messages.Message;
 import seng302.gameServer.server.messages.RoundingBoatStatus;
+import seng302.gameServer.server.messages.YachtEventCodeMessage;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
@@ -29,8 +32,8 @@ import seng302.utilities.GeoUtility;
 public class GameState implements Runnable {
 
     @FunctionalInterface
-    interface MarkPassingListener {
-        void markPassing(Message message);
+    interface NewMessageListener {
+        void notify(Message message);
     }
 
     private Logger logger = LoggerFactory.getLogger(GameState.class);
@@ -38,6 +41,11 @@ public class GameState implements Runnable {
     private static final Integer STATE_UPDATES_PER_SECOND = 60;
     public static Integer MAX_PLAYERS = 8;
     public static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
+    public static final Double MARK_COLLISION_DISTANCE = 15d;
+    public static final Double YACHT_COLLISION_DISTANCE = 25.0;
+    public static final Double BOUNCE_DISTANCE_MARK = 20.0;
+    public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
+    public static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -50,8 +58,9 @@ public class GameState implements Runnable {
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
+    private static Set<Mark> marks;
 
-    private static List<MarkPassingListener> markListeners;
+    private static List<NewMessageListener> markListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
     /*
@@ -81,10 +90,16 @@ public class GameState implements Runnable {
         markListeners = new ArrayList<>();
 
         new Thread(this).start();   //Run the auto updates on the game state
+
+        marks = new MarkOrder().getAllMarks();
     }
 
     public static String getHostIpAddress() {
         return hostIpAddress;
+    }
+
+    public static Set<Mark> getMarks(){
+        return Collections.unmodifiableSet(marks);
     }
 
     public static List<Player> getPlayers() {
@@ -97,7 +112,7 @@ public class GameState implements Runnable {
             + " " + player.getYacht().getCountry();
         playerStringMap.put(player, playerText);
     }
-    
+
     public static void removePlayer(Player player) {
         players.remove(player);
         playerStringMap.remove(player);
@@ -120,7 +135,7 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
-        if (currentStage == GameStages.RACING){
+        if (currentStage == GameStages.RACING) {
             startTime = System.currentTimeMillis();
         }
 
@@ -221,7 +236,44 @@ public class GameState implements Runnable {
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
             if (!yacht.getFinishedRace()) {
+                checkForCollision(yacht);
                 checkForLegProgression(yacht);
+            }
+        }
+    }
+
+
+    public static void checkForCollision(ServerYacht serverYacht) {
+        ServerYacht collidedYacht = checkCollision(serverYacht);
+        if (collidedYacht != null) {
+            GeoPoint originalLocation = serverYacht.getLocation();
+            serverYacht.setLocation(
+                calculateBounceBack(serverYacht, originalLocation, BOUNCE_DISTANCE_YACHT)
+            );
+            serverYacht.setCurrentVelocity(
+                serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+            );
+            collidedYacht.setLocation(
+                calculateBounceBack(collidedYacht, originalLocation, BOUNCE_DISTANCE_YACHT)
+            );
+            collidedYacht.setCurrentVelocity(
+                collidedYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+            );
+            notifyMessageListeners(
+                new YachtEventCodeMessage(serverYacht.getSourceId())
+            );
+        } else {
+            Mark collidedMark = markCollidedWith(serverYacht);
+            if (collidedMark != null) {
+                serverYacht.setLocation(
+                    calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
+                );
+                serverYacht.setCurrentVelocity(
+                    serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+                );
+                notifyMessageListeners(
+                    new YachtEventCodeMessage(serverYacht.getSourceId())
+                );
             }
         }
     }
@@ -235,7 +287,7 @@ public class GameState implements Runnable {
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (velocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity(maxBoatSpeed / 150);
+                yacht.changeVelocity(maxBoatSpeed / 100);
             } else if (velocity > maxBoatSpeed + 500) {
                 yacht.changeVelocity(-maxBoatSpeed / 100);
             } else {
@@ -316,6 +368,7 @@ public class GameState implements Runnable {
             }
         }
     }
+
 
     /**
      * If we pass the start line gate in the correct direction, progress
@@ -449,6 +502,50 @@ public class GameState implements Runnable {
         return false;
     }
 
+
+    private static Mark markCollidedWith(ServerYacht yacht) {
+        Set<Mark> marksInRace = GameState.getMarks();
+        for (Mark mark : marksInRace) {
+            if (GeoUtility.getDistance(yacht.getLocation(), mark)
+                <= MARK_COLLISION_DISTANCE) {
+                return mark;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Calculate the new position of the boat after it has had a collision
+     *
+     * @return The boats new position
+     */
+    private static GeoPoint calculateBounceBack(ServerYacht yacht, GeoPoint collidedWith, Double bounceDistance) {
+        Double heading = GeoUtility.getBearing(yacht.getLocation(), collidedWith);
+        // Invert heading
+        heading -= 180;
+        Integer newHeading = Math.floorMod(heading.intValue(), 360);
+        return GeoUtility.getGeoCoordinate(yacht.getLocation(), newHeading.doubleValue(), bounceDistance);
+    }
+
+    /**
+     * Collision detection which iterates through all the yachts and check if any yacht collided
+     * with this yacht. Return collided yacht or null if no collision.
+     *
+     * @return yacht to compare to all other yachts.
+     */
+    private static ServerYacht checkCollision(ServerYacht yacht) {
+
+        for (ServerYacht otherYacht : GameState.getYachts().values()) {
+            if (otherYacht != yacht) {
+                Double distance = GeoUtility.getDistance(otherYacht.getLocation(), yacht.getLocation());
+                if (distance < YACHT_COLLISION_DISTANCE) {
+                    return otherYacht;
+                }
+            }
+        }
+        return null;
+    }
+
     private void sendMarkRoundingMessage(ServerYacht yacht) {
         Integer sourceID = yacht.getSourceId();
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
@@ -461,11 +558,14 @@ public class GameState implements Runnable {
             sourceID, RoundingBoatStatus.RACING, roundingMark.getRoundingSide(), markType,
             roundingMark.getSourceID());
 
-        for (MarkPassingListener mpl : markListeners) {
-            mpl.markPassing(markRoundingMessage);
-        }
+        notifyMessageListeners(markRoundingMessage);
     }
 
+    private static void notifyMessageListeners(Message message) {
+        for (NewMessageListener mpl : markListeners) {
+            mpl.notify(message);
+        }
+    }
 
     private void logMarkRounding(ServerYacht yacht) {
         Mark roundingMark = yacht.getClosestCurrentMark();
@@ -475,7 +575,7 @@ public class GameState implements Runnable {
     }
 
 
-    public static void addMarkPassListener(MarkPassingListener listener) {
+    public static void addMarkPassListener(NewMessageListener listener) {
         markListeners.add(listener);
     }
 }

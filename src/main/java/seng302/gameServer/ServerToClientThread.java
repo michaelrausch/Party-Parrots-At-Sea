@@ -19,9 +19,15 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.YachtEventCodeMessage;
+import seng302.model.Player;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.utilities.XMLGenerator;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatLocationMessage;
-import seng302.gameServer.server.messages.BoatStatus;
 import seng302.gameServer.server.messages.BoatSubMessage;
 import seng302.gameServer.server.messages.ClientType;
 import seng302.gameServer.server.messages.Message;
@@ -32,13 +38,7 @@ import seng302.gameServer.server.messages.RegistrationResponseMessage;
 import seng302.gameServer.server.messages.RegistrationResponseStatus;
 import seng302.gameServer.server.messages.XMLMessage;
 import seng302.gameServer.server.messages.XMLMessageSubType;
-import seng302.model.Player;
 import seng302.model.ServerYacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -74,6 +74,8 @@ public class ServerToClientThread implements Runnable, Observer {
     private XMLGenerator xml;
 
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
+
+    private ServerYacht yacht;
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
@@ -166,7 +168,6 @@ public class ServerToClientThread implements Runnable, Observer {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-
 
         while (socket.isConnected()) {
 
@@ -344,6 +345,14 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public Socket getSocket() {
         return socket;
+    }
+
+    public ServerYacht getYacht() {
+        return yacht;
+    }
+
+    public void sendCollisionMessage(Integer yachtId) {
+        sendMessage(new YachtEventCodeMessage(yachtId));
     }
 
     public void addConnectionListener(ConnectionListener listener) {

@@ -17,13 +17,9 @@ import seng302.visualiser.ClientToServerThread;
  */
 public class ToggleSailSteps {
 
-
     MainServerThread mst;
     ClientToServerThread client;
-    boolean sailsIn = false;
     long startTime;
-
-
 
     @Given("^The game is running$")
     public void the_game_is_running() throws Throwable {

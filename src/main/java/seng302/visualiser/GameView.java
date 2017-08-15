@@ -7,23 +7,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import seng302.model.ClientYacht;
+import javafx.util.Duration;
 import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -44,10 +45,10 @@ import seng302.visualiser.map.CanvasMap;
  */
 public class GameView extends Pane {
 
-    private double bufferSize   = 50;
-    private double panelWidth   = 1260; // it should be 1280 but, minors 40 to cancel the bias.
-    private double panelHeight  = 960;
-    private double canvasWidth  = 1100;
+    private double bufferSize = 50;
+    private double panelWidth = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private double panelHeight = 960;
+    private double canvasWidth = 1100;
     private double canvasHeight = 920;
     private boolean horizontalInversion = false;
 
@@ -112,7 +113,7 @@ public class GameView extends Pane {
         VERTICAL
     }
 
-    public GameView () {
+    public GameView() {
         gameObjects = this.getChildren();
         // create image view for map, bind panel size to image
         gameObjects.add(mapImage);
@@ -122,49 +123,10 @@ public class GameView extends Pane {
         gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
-//
-//        this.setOnKeyPressed(new EventHandler<KeyEvent>() {
-//            @Override public void handle(KeyEvent event) {
-//                event.consume();
-//                switch (event.getCode()) {
-//                    case Z:
-//                        scaleFactor = scaleFactor * 1.2;
-//                        break;
-//                    case X:
-//                        scaleFactor = scaleFactor * 0.8;
-//                        break;
-//                }
-//                if (event.getCode() == KeyCode.Z || event.getCode() == KeyCode.X) {
-//                    for (Node child : getChildren()) {
-//                        child.setScaleX(child.getScaleX() * scaleFactor);
-//                        child.setScaleY(child.getScaleY() * scaleFactor);
-//                    }
-//                }
-//            }
-//        });
-//
-//        this.setOnScroll(new EventHandler<ScrollEvent>() {
-//            @Override public void handle(ScrollEvent event) {
-//                event.consume();
-//                if (event.getDeltaY() == 0) {
-//                    return;
-//                }
-//
-//                double scaleFactor =
-//                        (event.getDeltaY() > 0)
-//                                ? SCALE_DELTA
-//                                : 1/SCALE_DELTA;
-//                for (Node child : getChildren()) {
-//                    child.setScaleX(child.getScaleX() * scaleFactor);
-//                    child.setScaleY(child.getScaleY() * scaleFactor);
-//                }
-//            }
-//        });
-
         initializeTimer();
     }
 
-    private void initializeTimer () {
+    private void initializeTimer() {
         Arrays.fill(frameTimes, 1_000_000_000 / 60);
         timer = new AnimationTimer() {
             private long lastTime = 0;
@@ -207,8 +169,8 @@ public class GameView extends Pane {
     }
 
     /**
-     * First find the top right and bottom left points' geo locations, then retrieve
-     * map from google to display on image view.  - Haoming 22/5/2017
+     * First find the top right and bottom left points' geo locations, then retrieve map from google
+     * to display on image view.  - Haoming 22/5/2017
      */
     private void drawGoogleMap() {
         findMetersPerPixel();
@@ -266,13 +228,23 @@ public class GameView extends Pane {
             for (Mark mark : cMark.getMarks()) {
                 makeAndBindMarker(mark, colour);
             }
+
+            //UNCOMMENT THIS TO HIGHLIGHT SUBMARKS 1 and 2 RED AND GREEN RESPECTIVELY FOR DEBUG
+            //(instead of above for loop)
+//            for (Mark mark : cMark.getMarks()) {
+//                if (mark.getSeqID() == 1) {
+//                    makeAndBindMarker(mark, Color.RED);
+//                } else {
+//                    makeAndBindMarker(mark, Color.GREEN);
+//                }
+//            }
             //Create gate line
             if (cMark.isGate()) {
                 for (int i = 1; i < cMark.getMarks().size(); i++) {
                     gates.add(
                         makeAndBindGate(
                             markerObjects.get(cMark.getSubMark(i)),
-                            markerObjects.get(cMark.getSubMark(i+1)),
+                            markerObjects.get(cMark.getSubMark(i + 1)),
                             colour
                         )
                     );
@@ -335,7 +307,7 @@ public class GameView extends Pane {
         gate.endYProperty().bind(
             m2.centerYProperty()
         );
-        return  gate;
+        return gate;
     }
 
     /**
@@ -389,7 +361,7 @@ public class GameView extends Pane {
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            clientYacht.addLocationListener((boat, lat, lon, heading, velocity, sailIn) -> {
+            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
@@ -443,25 +415,25 @@ public class GameView extends Pane {
         annotations.put(clientYacht, newAnnotation);
     }
 
-    private void drawFps(Double fps){
+    private void drawFps(Double fps) {
         Platform.runLater(() -> fpsDisplay.setText(String.format("%d FPS", Math.round(fps))));
     }
 
     /**
-     * Sets the class variables minLatPoint, maxLatPoint, minLonPoint, maxLonPoint to the point
-     * with the leftmost point, rightmost point, southern most point and northern most point
+     * Sets the class variables minLatPoint, maxLatPoint, minLonPoint, maxLonPoint to the point with
+     * the leftmost point, rightmost point, southern most point and northern most point
      * respectively.
      */
     private void findMinMaxPoint(List<GeoPoint> points) {
         List<GeoPoint> sortedPoints = new ArrayList<>(points);
         sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLat));
         minLatPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
-        GeoPoint maxLat = sortedPoints.get(sortedPoints.size()-1);
+        GeoPoint maxLat = sortedPoints.get(sortedPoints.size() - 1);
         maxLatPoint = new GeoPoint(maxLat.getLat(), maxLat.getLng());
 
         sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLng));
         minLonPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
-        GeoPoint maxLon = sortedPoints.get(sortedPoints.size()-1);
+        GeoPoint maxLon = sortedPoints.get(sortedPoints.size() - 1);
         maxLonPoint = new GeoPoint(maxLon.getLat(), maxLon.getLng());
         if (maxLonPoint.getLng() - minLonPoint.getLng() > 180) {
             horizontalInversion = true;
@@ -481,15 +453,19 @@ public class GameView extends Pane {
 
         if (scaleDirection == ScaleDirection.HORIZONTAL) {
             referenceAngle = Math.abs(
-                    GeoUtility.getBearingRad(referencePoint, minLonPoint)
+                GeoUtility.getBearingRad(referencePoint, minLonPoint)
             );
-            referencePointX = bufferSize + distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility.getDistance(referencePoint, minLonPoint);
+            referencePointX =
+                bufferSize + distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
+                    .getDistance(referencePoint, minLonPoint);
             referenceAngle = Math.abs(GeoUtility.getDistance(referencePoint, maxLatPoint));
-            referencePointY  = canvasHeight - (bufferSize + bufferSize);
-            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility.getDistance(referencePoint, maxLatPoint);
-            referencePointY  = referencePointY / 2;
+            referencePointY = canvasHeight - (bufferSize + bufferSize);
+            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
+                .getDistance(referencePoint, maxLatPoint);
+            referencePointY = referencePointY / 2;
             referencePointY += bufferSize;
-            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility.getDistance(referencePoint, maxLatPoint);
+            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
+                .getDistance(referencePoint, maxLatPoint);
         } else {
             referencePointY = canvasHeight - bufferSize;
             referenceAngle = Math.abs(
@@ -497,11 +473,14 @@ public class GameView extends Pane {
                     GeoUtility.getDistance(referencePoint, minLonPoint)
                 )
             );
-            referencePointX  = bufferSize;
-            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility.getDistance(referencePoint, minLonPoint);
-            referencePointX += ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor)) / 2;
+            referencePointX = bufferSize;
+            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
+                .getDistance(referencePoint, minLonPoint);
+            referencePointX +=
+                ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor))
+                    / 2;
         }
-        if(horizontalInversion) {
+        if (horizontalInversion) {
             referencePointX = canvasWidth - bufferSize - (referencePointX - bufferSize);
         }
     }
@@ -514,12 +493,12 @@ public class GameView extends Pane {
     private double scaleRaceExtremities() {
 
         double vertAngle = Math.abs(
-                GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
+            GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
         );
         double vertDistance =
             Math.cos(vertAngle) * GeoUtility.getDistance(minLatPoint, maxLatPoint);
         double horiAngle = Math.abs(
-                GeoUtility.getBearingRad(minLonPoint, maxLonPoint)
+            GeoUtility.getBearingRad(minLonPoint, maxLonPoint)
         );
         if (horiAngle <= (Math.PI / 2)) {
             horiAngle = (Math.PI / 2) - horiAngle;
@@ -545,35 +524,43 @@ public class GameView extends Pane {
         return findScaledXY(unscaled.getLat(), unscaled.getLng());
     }
 
-    private Point2D findScaledXY (double unscaledLat, double unscaledLon) {
+    private Point2D findScaledXY(double unscaledLat, double unscaledLon) {
         double distanceFromReference;
         double angleFromReference;
         double xAxisLocation = referencePointX;
         double yAxisLocation = referencePointY;
 
         angleFromReference = GeoUtility.getBearingRad(
-                minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
+            minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
         );
         distanceFromReference = GeoUtility.getDistance(
             minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
         );
         if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
-            xAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation += Math
+                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            yAxisLocation -= Math
+                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
         } else if (angleFromReference >= 0) {
             angleFromReference = angleFromReference - Math.PI / 2;
-            xAxisLocation += Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation += Math
+                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            yAxisLocation += Math
+                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         } else if (angleFromReference < 0 && angleFromReference >= -Math.PI / 2) {
             angleFromReference = Math.abs(angleFromReference);
-            xAxisLocation -= Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation -= Math
+                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            yAxisLocation -= Math
+                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
         } else {
             angleFromReference = Math.abs(angleFromReference) - Math.PI / 2;
-            xAxisLocation -= Math.round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += Math.round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation -= Math
+                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            yAxisLocation += Math
+                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
         }
-        if(horizontalInversion) {
+        if (horizontalInversion) {
             xAxisLocation = canvasWidth - bufferSize - (xAxisLocation - bufferSize);
         }
         return new Point2D(xAxisLocation, yAxisLocation);
@@ -600,7 +587,7 @@ public class GameView extends Pane {
         metersPerPixelY = dVertical / dy;
     }
 
-    public void setAnnotationVisibilities (boolean teamName, boolean velocity, boolean estTime,
+    public void setAnnotationVisibilities(boolean teamName, boolean velocity, boolean estTime,
         boolean legTime, boolean trail, boolean wake) {
         for (BoatObject boatObject : boatObjects.values()) {
             boatObject.setVisibility(teamName, velocity, estTime, legTime, trail, wake);
@@ -613,7 +600,7 @@ public class GameView extends Pane {
         }
     }
 
-    public void setFPSVisibility (boolean visibility) {
+    public void setFPSVisibility(boolean visibility) {
         fpsDisplay.setVisible(visibility);
     }
 
@@ -623,7 +610,7 @@ public class GameView extends Pane {
         );
     }
 
-    public void pauseRace () {
+    public void pauseRace() {
         timer.stop();
     }
 
@@ -632,8 +619,7 @@ public class GameView extends Pane {
         this.windDir = windDir;
     }
 
-
-    public void startRace () {
+    public void startRace() {
         timer.start();
     }
 
@@ -641,9 +627,10 @@ public class GameView extends Pane {
         return playerYacht;
     }
 
+
     public void setBoatAsPlayer (ClientYacht playerYacht) {
         this.playerYacht = playerYacht;
-        this.playerYacht.toggleClientSail();
+        this.playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",
@@ -655,6 +642,42 @@ public class GameView extends Pane {
             gameObjects.add(boatObjects.get(playerYacht));
             annotationsGroup.getChildren().remove(annotations.get(playerYacht));
             gameObjects.add(annotations.get(playerYacht));
+        });
+    }
+
+    /**
+     * Given yacht geopoint by race view controller, drawCollision will calculate canvas X and Y and
+     * display a flashing red circle on collision point.
+     *
+     * @param collisionPoint yacht collision point
+     */
+    public void drawCollision(GeoPoint collisionPoint) {
+        Platform.runLater(() -> {
+            Point2D point = findScaledXY(collisionPoint);
+            double circleRadius = 0.0;
+            Circle circle = new Circle(point.getX(), point.getY(), circleRadius, Color.RED);
+            gameObjects.add(circle);
+
+            circle.setFill(Color.TRANSPARENT);
+            circle.setStroke(Color.RED);
+            circle.setStrokeWidth(3);
+
+            Timeline timeline = new Timeline();
+            timeline.setCycleCount(1);
+
+            KeyFrame keyframe1 = new KeyFrame(Duration.ZERO,
+                new KeyValue(circle.radiusProperty(), 0),
+                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
+            KeyFrame keyFrame2 = new KeyFrame(new Duration(1000),
+                new KeyValue(circle.radiusProperty(), 50),
+                new KeyValue(circle.strokeProperty(), Color.RED));
+            KeyFrame keyFrame3 = new KeyFrame(new Duration(1500),
+                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
+
+            timeline.getKeyFrames().addAll(keyframe1, keyFrame2, keyFrame3);
+            timeline.play();
+
+            timeline.setOnFinished(event -> gameObjects.remove(circle));
         });
     }
 }

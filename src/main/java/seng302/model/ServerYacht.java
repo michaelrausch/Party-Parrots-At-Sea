@@ -92,6 +92,10 @@ public class ServerYacht extends Observable {
         location = GeoUtility.getGeoCoordinate(location, heading, currentVelocity * secondsElapsed);
     }
 
+    public void setLocation(GeoPoint geoPoint) {
+        location = geoPoint;
+    }
+
     /**
      * Add ServerToClientThread as the observer, this observer pattern mainly server for the boat
      * rounding package.
@@ -386,4 +390,6 @@ public class ServerYacht extends Observable {
     public Boolean hasPassedLine() {
         return hasPassedLine;
     }
+
+
 }
