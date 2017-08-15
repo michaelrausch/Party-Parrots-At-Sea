@@ -623,7 +623,6 @@ public class GameView extends Pane {
         timer.start();
     }
 
-    public void setBoatAsPlayer(Yacht playerYacht) {
     public Yacht getPlayerYacht() {
         return playerYacht;
     }

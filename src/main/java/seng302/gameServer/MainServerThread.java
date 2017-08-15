@@ -146,8 +146,6 @@ public class MainServerThread extends Observable implements Runnable, ClientConn
             }
         }
         serverToClientThreads.remove(closedConnection);
-        setChanged();
-        notifyObservers("send setup message");
     }
 
     public void startGame() {

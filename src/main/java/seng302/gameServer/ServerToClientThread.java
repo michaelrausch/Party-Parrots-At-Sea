@@ -37,13 +37,6 @@ import seng302.gameServer.server.messages.RegistrationResponseMessage;
 import seng302.gameServer.server.messages.RegistrationResponseStatus;
 import seng302.gameServer.server.messages.XMLMessage;
 import seng302.gameServer.server.messages.XMLMessageSubType;
-import seng302.model.Player;
-import seng302.model.Yacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -121,23 +114,11 @@ public class ServerToClientThread implements Runnable {
                                 "/server_config/CSV_Database_of_Last_Names.csv"
                         )
                 )
-            );
-            all = ln.lines().collect(Collectors.toList());
-            lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-        } catch (IOException e) {
-            serverLog("IO error in server thread upon grabbing streams", 1);
-        }
-        //Attempt threeway handshake with connection
-        sourceId = GameState.getUniquePlayerID();
-        if (threeWayHandshake(sourceId)) {
-            serverLog("Successful handshake. Client allocated id: " + sourceId, 0);
-            yacht = new Yacht(
         );
         all = ln.lines().collect(Collectors.toList());
         lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
 
-
-        Yacht yacht = new Yacht(
+        yacht = new Yacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
         GameState.addYacht(sourceId, yacht);
@@ -148,13 +129,6 @@ public class ServerToClientThread implements Runnable {
         if (logLevel <= LOG_LEVEL) {
             System.out.println(
                 "[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
-        }
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        if (arg.equals("send setup message")) {
-            sendSetupMessages();
         }
     }
 
