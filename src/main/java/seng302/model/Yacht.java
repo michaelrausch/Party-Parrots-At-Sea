@@ -32,7 +32,7 @@ public class Yacht extends Observable {
 
     @FunctionalInterface
     public interface YachtLocationListener {
-        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
+        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity, boolean sailIn);
     }
 
     private Logger logger = LoggerFactory.getLogger(Yacht.class);
@@ -62,12 +62,14 @@ public class Yacht extends Observable {
     private Integer legNumber = 0;
 
     //SERVER SIDE
-    private final Double TURN_STEP = 5.0;
+    public static final Double TURN_STEP = 5.0; //This should be in some utils class somewhere 2bh. Public for tests sake.
     private Double lastHeading;
-    private Boolean sailIn;
+    private Boolean sailIn = false;
     private GeoPoint location;
     private Integer boatStatus;
     private Double velocity;
+    private Boolean isAuto;
+    private Double autoHeading;
 
     //MARK ROUNDING INFO
     private GeoPoint lastLocation;  //For purposes of mark rounding calculations
@@ -85,6 +87,7 @@ public class Yacht extends Observable {
     private CompoundMark lastMarkRounded;
     private Integer positionInt = 0;
     private Color colour;
+    private Boolean clientSailsIn = true;
 
     public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
@@ -95,6 +98,7 @@ public class Yacht extends Observable {
         this.boatName = boatName;
         this.country = country;
         this.sailIn = false;
+        this.isAuto = false;
         this.location = new GeoPoint(57.670341, 11.826856);
         this.lastLocation = location;
         this.heading = 120.0;   //In degrees
@@ -152,6 +156,11 @@ public class Yacht extends Observable {
             }
         }
 
+        runAutoPilot();
+
+        //UPDATE BOAT LOCATION
+        lastLocation = location;
+        location = GeoUtility.getGeoCoordinate(location, heading, velocity * secondsElapsed);
         Double metersCovered = velocity * secondsElapsed;
         GeoPoint calculatedPoint = getGeoCoordinate(location, heading, metersCovered);
 
@@ -390,15 +399,60 @@ public class Yacht extends Observable {
     }
 
 
+    /**
+     * Adjusts the heading of the boat by a given amount, while recording the boats
+     * last heading.
+     *
+     * @param amount the amount by which to adjust the boat heading.
+     */
     public void adjustHeading(Double amount) {
         Double newVal = heading + amount;
         lastHeading = heading;
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
 
+    /**
+     * Swaps the boats direction from one side of the wind to the other.
+     */
     public void tackGybe(Double windDirection) {
-        Double normalizedHeading = normalizeHeading();
-        adjustHeading(-2 * normalizedHeading);
+        if (isAuto) {
+            disableAutoPilot();
+        } else {
+            Double normalizedHeading = normalizeHeading();
+            Double newVal = (-2 * normalizedHeading) + heading;
+            Double newHeading = (double) Math.floorMod(newVal.longValue(), 360L);
+            setAutoPilot(newHeading);
+        }
+    }
+
+    /**
+     * Enables the boats auto pilot feature, which will move the boat towards a given heading.
+     * @param thisHeading The heading to move the boat towards.
+     */
+    private void setAutoPilot(Double thisHeading) {
+        isAuto = true;
+        autoHeading = thisHeading;
+    }
+
+    /**
+     * Disables the auto pilot function.
+     */
+    public void disableAutoPilot() {
+        isAuto = false;
+    }
+
+    /**
+     * Moves the boat towards the given heading when the auto pilot was set. Disables the auto pilot
+     * in the event that the boat is within the range of 1 turn step of its goal.
+     */
+    public void runAutoPilot() {
+        if (isAuto) {
+            turnTowardsHeading(autoHeading);
+            if (Math.abs(heading - autoHeading)
+                <= TURN_STEP) { //Cancel when within 1 turn step of target.
+                isAuto = false;
+            }
+        }
     }
 
     public void toggleSailIn() {
@@ -406,6 +460,7 @@ public class Yacht extends Observable {
     }
 
     public void turnUpwind() {
+        disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
@@ -427,6 +482,7 @@ public class Yacht extends Observable {
     }
 
     public void turnDownwind() {
+        disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
@@ -447,38 +503,59 @@ public class Yacht extends Observable {
         }
     }
 
+    /**
+     * Takes the VMG from the polartable for upwind or downwind depending on the boats direction,
+     * and uses this to calculate a heading to move the yacht towards.
+     */
     public void turnToVMG() {
-        Double normalizedHeading = normalizeHeading();
-        Double optimalHeading;
-        HashMap<Double, Double> optimalPolarMap;
-
-        if (normalizedHeading >= 90 && normalizedHeading <= 270) { // Downwind
-            optimalPolarMap = PolarTable.getOptimalDownwindVMG(GameState.getWindSpeedKnots());
-            optimalHeading = optimalPolarMap.keySet().iterator().next();
+        if (isAuto) {
+            disableAutoPilot();
         } else {
-            optimalPolarMap = PolarTable.getOptimalUpwindVMG(GameState.getWindSpeedKnots());
-            optimalHeading = optimalPolarMap.keySet().iterator().next();
-        }
-        // Take optimal heading and turn into correct
-        optimalHeading =
-            optimalHeading + (double) Math.floorMod(GameState.getWindDirection().longValue(), 360L);
+            Double normalizedHeading = normalizeHeading();
+            Double optimalHeading;
+            HashMap<Double, Double> optimalPolarMap;
 
-        turnTowardsHeading(optimalHeading);
-
-    }
-
-    private void turnTowardsHeading(Double newHeading) {
-        if (heading < 90 && newHeading > 270) {
-            adjustHeading(-TURN_STEP);
-        } else {
-            if (heading < newHeading) {
-                adjustHeading(TURN_STEP);
+            if (normalizedHeading >= 90 && normalizedHeading <= 270) { // Downwind
+                optimalPolarMap = PolarTable.getOptimalDownwindVMG(GameState.getWindSpeedKnots());
             } else {
-                adjustHeading(-TURN_STEP);
+                optimalPolarMap = PolarTable.getOptimalUpwindVMG(GameState.getWindSpeedKnots());
             }
+            optimalHeading = optimalPolarMap.keySet().iterator().next();
+
+            if (normalizedHeading > 180) {
+                optimalHeading = 360 - optimalHeading;
+            }
+
+            // Take optimal heading and turn into a boat heading rather than a wind heading.
+            optimalHeading =
+                optimalHeading + GameState.getWindDirection();
+
+            setAutoPilot(optimalHeading);
         }
     }
 
+    /**
+     * Takes a given heading and rotates the boat towards that heading.
+     * This does not care about being upwind or downwind, just which direction will reach a given
+     * heading faster.
+     *
+     * @param newHeading The heading to turn the yacht towards.
+     */
+    private void turnTowardsHeading(Double newHeading) {
+        Double newVal = heading - newHeading;
+        if (Math.floorMod(newVal.longValue(), 360L) > 180) {
+            adjustHeading(TURN_STEP / 5);
+        } else {
+            adjustHeading(-TURN_STEP / 5);
+        }
+    }
+
+    /**
+     * Returns a heading normalized for the wind direction. Heading direction into the wind is 0,
+     * directly away is 180.
+     *
+     * @return The normalized heading accounting for wind direction.
+     */
     private Double normalizeHeading() {
         Double normalizedHeading = heading - GameState.windDirection;
         normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360L);
@@ -654,6 +731,9 @@ public class Yacht extends Observable {
         this.colour = colour;
     }
 
+    public void toggleClientSail() {
+        clientSailsIn = !clientSailsIn;
+    }
 
     public Double getVelocity() {
         return velocity;
@@ -667,13 +747,17 @@ public class Yacht extends Observable {
         return distanceToCurrentMark;
     }
 
+    public Boolean getClientSailsIn(){
+        return clientSailsIn;
+    }
+
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
         this.velocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lng, heading, velocity);
+            yll.notifyLocation(this, lat, lng, heading, velocity, clientSailsIn);
         }
     }
 

@@ -243,7 +243,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             }
         });
         // Adds the new data series to the sparkline (and set the colour of the series)
-        Platform.runLater(() -> {
+        Platform.runLater(() ->
             sparkLineData
                 .stream()
                 .filter(spark -> !raceSparkLine.getData().contains(spark))
@@ -251,8 +251,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     raceSparkLine.getData().add(spark);
                     spark.getNode().lookup(".chart-series-line")
                         .setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
-                });
-        });
+                })
+        );
     }
 
     private void initialiseSparkLine() {
@@ -612,5 +612,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     public void showCollision(Long subjectId) {
         gameView.drawCollision(participants.get((int) (long) subjectId).getLocation());
+    }
+
+    public GameView getGameView() {
+        return gameView;
     }
 }

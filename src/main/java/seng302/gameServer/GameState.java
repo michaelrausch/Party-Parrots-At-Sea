@@ -1,17 +1,17 @@
 package seng302.gameServer;
 
+
+import java.util.*;
+import seng302.gameServer.server.messages.BoatAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.*;
-
+import seng302.model.Player;
+import seng302.model.Yacht;
+import seng302.model.mark.MarkOrder;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seng302.model.GeoPoint;
-import seng302.gameServer.server.messages.BoatActionType;
-import seng302.model.Player;
-import seng302.model.Yacht;
-import seng302.model.mark.MarkOrder;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
@@ -25,6 +25,7 @@ public class GameState implements Runnable {
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
 
     private static Integer STATE_UPDATES_PER_SECOND = 60;
+    public static Integer MAX_PLAYERS = 8;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -61,10 +62,8 @@ public class GameState implements Runnable {
         players = new ArrayList<>();
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
-        yachts = new HashMap<>();
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
-        yachts = new HashMap<>();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
 
         new Thread(this).start();   //Run the auto updates on the game state
@@ -86,7 +85,8 @@ public class GameState implements Runnable {
 
     public static void addPlayer(Player player) {
         players.add(player);
-        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName() + " " + player.getYacht().getCountry();
+        String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName()
+            + " " + player.getYacht().getCountry();
         playerStringMap.put(player, playerText);
     }
 
@@ -143,7 +143,7 @@ public class GameState implements Runnable {
         return yachts;
     }
 
-    public static void updateBoat(Integer sourceId, BoatActionType actionType) {
+    public static void updateBoat(Integer sourceId, BoatAction actionType) {
         Yacht playerYacht = yachts.get(sourceId);
 //        System.out.println("-----------------------");
         switch (actionType) {
