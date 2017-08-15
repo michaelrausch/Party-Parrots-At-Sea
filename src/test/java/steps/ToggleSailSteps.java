@@ -9,10 +9,8 @@ import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
-import seng302.model.Yacht;
+import seng302.model.ServerYacht;
 import seng302.visualiser.ClientToServerThread;
-
-import java.util.ArrayList;
 
 /**
  * Created by kre39 on 7/08/17.
@@ -24,7 +22,6 @@ public class ToggleSailSteps {
     ClientToServerThread client;
     boolean sailsIn = false;
     long startTime;
-    private Yacht yacht;
 
 
 
@@ -34,7 +31,7 @@ public class ToggleSailSteps {
         client = new ClientToServerThread("localhost", 4942);
         GameState.setCurrentStage(GameStages.RACING);
         Thread.sleep(200); // Sleep needed to help the threads all be up to speed with each other
-        Yacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
+        ServerYacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
         Assert.assertFalse(yacht.getSailIn());
     }
 
@@ -50,7 +47,7 @@ public class ToggleSailSteps {
     @Then("^the sails are \"([^\"]*)\"$")
     public void the_sails_are(String arg1) throws Throwable {
         Thread.sleep(200); // Sleep needed to help the threads all be up to speed with each other
-        Yacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
+        ServerYacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
         if (arg1 == "in") {
             Assert.assertTrue(yacht.getSailIn());
         } else {
