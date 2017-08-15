@@ -159,8 +159,11 @@ public class GameClient {
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/views/FinishScreenView.fxml"));
         try {
-            holderPane.getChildren().clear();
-            holderPane.getChildren().add(fxmlLoader.load());
+            final Node finishScreenFX = fxmlLoader.load();
+            Platform.runLater(() -> {
+                holderPane.getChildren().clear();
+                holderPane.getChildren().add(finishScreenFX);
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
