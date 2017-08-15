@@ -1,21 +1,11 @@
 package seng302.model;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.ReadOnlyDoubleWrapper;
-import javafx.beans.property.ReadOnlyLongProperty;
-import javafx.beans.property.ReadOnlyLongWrapper;
-import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
-import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 
@@ -24,18 +14,12 @@ import seng302.utilities.GeoUtility;
  * compared to the XMLParser boat class, also done outside Boat class because some old variables are
  * not used anymore.
  */
-public class Yacht extends Observable {
+public class ServerYacht extends Observable {
 
-    @FunctionalInterface
-    public interface YachtLocationListener {
+    private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
-        void notifyLocation(Yacht yacht, double lat, double lon, double heading, double velocity);
-    }
+    public static final Double TURN_STEP = 5.0;
 
-    private Logger logger = LoggerFactory.getLogger(Yacht.class);
-
-
-    //BOTH AFAIK
     private String boatType;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
@@ -43,43 +27,24 @@ public class Yacht extends Observable {
     private String boatName;
     private String country;
 
-    private Long estimateTimeAtFinish;
-    private Integer currentMarkSeqID = 0;
-    private Long markRoundTime;
-    private Double distanceToCurrentMark;
-    private Long timeTillNext;
-    private Double heading;
-    private Integer legNumber = 0;
-
-    //SERVER SIDE
-    public static final Double TURN_STEP = 5.0; //This should be in some utils class somewhere 2bh. Public for tests sake.
     private Double lastHeading;
     private Boolean sailIn;
+    private Double heading;
     private GeoPoint location;
-    private Integer boatStatus;
     private Double currentVelocity;
-    private Double currentMaxVelocity;
     private Boolean isAuto;
     private Double autoHeading;
 
-    //MARK ROUNDING INFO
-    private GeoPoint lastLocation;  //For purposes of mark rounding calculations
-    private Boolean hasEnteredRoundingZone; //The distance that the boat must be from the mark to round
+    private Integer currentMarkSeqID = 0;
+    private GeoPoint lastLocation;
+    private Boolean hasEnteredRoundingZone;
     private Mark closestCurrentMark;
     private Boolean hasPassedLine;
     private Boolean hasPassedThroughGate;
     private Boolean finishedRace;
 
-    //CLIENT SIDE
-    private List<YachtLocationListener> locationListeners = new ArrayList<>();
-    private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
-    private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
-    private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
-    private CompoundMark lastMarkRounded;
-    private Integer positionInt = 0;
-    private Color colour;
 
-    public Yacht(String boatType, Integer sourceId, String hullID, String shortName,
+    public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
         this.sourceId = sourceId;
@@ -103,6 +68,7 @@ public class Yacht extends Observable {
 
     /**
      * Changes the boats current currentVelocity by a set amount, positive or negative
+     *
      * @param velocityChange The ammount to change the currentVelocity by, in mms-1
      */
     public void changeVelocity(Double velocityChange) {
@@ -127,7 +93,6 @@ public class Yacht extends Observable {
     public void addObserver(Observer o) {
         super.addObserver(o);
     }
-
 
     /**
      * Adjusts the heading of the boat by a given amount, while recording the boats last heading.
@@ -291,10 +256,6 @@ public class Yacht extends Observable {
         return normalizedHeading;
     }
 
-    public String getBoatType() {
-        return boatType;
-    }
-
     public Integer getSourceId() {
         //@TODO Remove and merge with Creating Game Loop
         if (sourceId == null) {
@@ -303,6 +264,7 @@ public class Yacht extends Observable {
         return sourceId;
     }
 
+    // TODO: 15/08/17 This method is implicitly called from the XML generator for boats DO NOT DELETE
     public String getHullID() {
         if (hullID == null) {
             return "";
@@ -310,6 +272,7 @@ public class Yacht extends Observable {
         return hullID;
     }
 
+    // TODO: 15/08/17 This method is implicitly called from the XML generator for boats DO NOT DELETE
     public String getShortName() {
         return shortName;
     }
@@ -325,102 +288,11 @@ public class Yacht extends Observable {
         return country;
     }
 
-    public Integer getBoatStatus() {
-        return boatStatus;
-    }
-
-    public void setBoatStatus(Integer boatStatus) {
-        this.boatStatus = boatStatus;
-    }
-
-    public Integer getLegNumber() {
-        return legNumber;
-    }
-
-    public void setLegNumber(Integer legNumber) {
-//        if (colour != null  && position != "-" && legNumber != this.legNumber) {
-//            RaceViewController.updateYachtPositionSparkline(this, legNumber);
-//        }
-        this.legNumber = legNumber;
-    }
-
-    public void setEstimateTimeTillNextMark(Long estimateTimeTillNextMark) {
-        timeTillNext = estimateTimeTillNextMark;
-    }
-
-    public String getEstimateTimeAtFinish() {
-        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        return format.format(estimateTimeAtFinish);
-    }
-
-    public void setEstimateTimeAtFinish(Long estimateTimeAtFinish) {
-        this.estimateTimeAtFinish = estimateTimeAtFinish;
-    }
-
-    public Integer getPositionInteger() {
-        return positionInt;
-    }
-
-    public void setPositionInteger(Integer position) {
-        this.positionInt = position;
-    }
-
-    public void updateVelocityProperty(double velocity) {
-        this.velocityProperty.set(velocity);
-    }
-
-    public void setMarkRoundingTime(Long markRoundingTime) {
-        this.markRoundTime = markRoundingTime;
-    }
-
-    public ReadOnlyDoubleProperty getVelocityProperty() {
-        return velocityProperty.getReadOnlyProperty();
-    }
-
-    public double getVelocityMMS() {
-        return currentVelocity;
-    }
-
-    public ReadOnlyLongProperty timeTillNextProperty() {
-        return timeTillNextProperty.getReadOnlyProperty();
-    }
-
-    public Double getVelocityKnots() {
-        return currentVelocity / 1000 * 1.943844492; // TODO: 26/07/17 cir27 - remove magic number
-    }
-
-    public Long getTimeTillNext() {
-        return timeTillNext;
-    }
-
-    public Long getMarkRoundTime() {
-        return markRoundTime;
-    }
-
-    public CompoundMark getLastMarkRounded() {
-        return lastMarkRounded;
-    }
-
-    public void setLastMarkRounded(CompoundMark lastMarkRounded) {
-        this.lastMarkRounded = lastMarkRounded;
-    }
 
     public GeoPoint getLocation() {
         return location;
     }
 
-    /**
-     * Sets the current location of the boat in lat and long whilst preserving the last location
-     *
-     * @param lat Latitude
-     * @param lng Longitude
-     */
-    public void setLocation(Double lat, Double lng) {
-        lastLocation.setLat(location.getLat());
-        lastLocation.setLng(location.getLng());
-        location.setLat(lat);
-        location.setLng(lng);
-    }
 
     public Double getHeading() {
         return heading;
@@ -439,26 +311,6 @@ public class Yacht extends Observable {
         return boatName;
     }
 
-    public void updateTimeSinceLastMarkProperty(long timeSinceLastMark) {
-        this.timeSinceLastMarkProperty.set(timeSinceLastMark);
-    }
-
-    public ReadOnlyLongProperty timeSinceLastMarkProperty() {
-        return timeSinceLastMarkProperty.getReadOnlyProperty();
-    }
-
-    public void setTimeTillNext(Long timeTillNext) {
-        this.timeTillNext = timeTillNext;
-    }
-
-
-    public Color getColour() {
-        return colour;
-    }
-
-    public void setColour(Color colour) {
-        this.colour = colour;
-    }
 
     public void setIsFinished(Boolean isFinished) {
         finishedRace = isFinished;
@@ -518,31 +370,5 @@ public class Yacht extends Observable {
 
     public Boolean hasPassedLine() {
         return hasPassedLine;
-    }
-
-    public Double getDistanceToCurrentMark() {
-        return distanceToCurrentMark;
-    }
-
-    public Double getCurrentMaxVelocity() {
-        return currentMaxVelocity;
-    }
-
-    public void setCurrentMaxVelocity(Double currentMaxVelocity) {
-        this.currentMaxVelocity = currentMaxVelocity;
-    }
-
-    public void updateLocation(double lat, double lng, double heading, double velocity) {
-        setLocation(lat, lng);
-        this.heading = heading;
-        this.currentVelocity = velocity;
-        updateVelocityProperty(velocity);
-        for (YachtLocationListener yll : locationListeners) {
-            yll.notifyLocation(this, lat, lng, heading, velocity);
-        }
-    }
-
-    public void addLocationListener(YachtLocationListener listener) {
-        locationListeners.add(listener);
     }
 }
