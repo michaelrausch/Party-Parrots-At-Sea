@@ -70,6 +70,7 @@ public class ClientYacht extends Observable {
         this.location = new GeoPoint(57.670341, 11.826856);
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;
+        this.boatStatus = 1;
     }
 
     /**

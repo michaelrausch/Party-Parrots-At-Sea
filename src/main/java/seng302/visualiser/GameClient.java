@@ -155,6 +155,17 @@ public class GameClient {
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
     }
 
+    private void loadFinishScreenView() {
+        FXMLLoader fxmlLoader = new FXMLLoader(
+            getClass().getResource("/views/FinishScreenView.fxml"));
+        try {
+            holderPane.getChildren().clear();
+            holderPane.getChildren().add(fxmlLoader.load());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void parsePackets() {
         while (socketThread.getPacketQueue().peek() != null) {
             StreamPacket packet = socketThread.getPacketQueue().poll();
@@ -257,6 +268,17 @@ public class GameClient {
     private void processRaceStatusUpdate(RaceStatusData data) {
         if (allXMLReceived()) {
             raceState.updateState(data);
+
+            boolean raceFinished = true;
+            for (ClientYacht yacht : allBoatsMap.values()) {
+                if (yacht.getBoatStatus() != 3) {
+                    raceFinished = false;
+                }
+            }
+            if (raceFinished == true) {
+                loadFinishScreenView();
+            }
+
             for (long[] boatData : data.getBoatData()) {
                 ClientYacht clientYacht = allBoatsMap.get((int) boatData[0]);
                 clientYacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);

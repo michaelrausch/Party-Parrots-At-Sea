@@ -79,7 +79,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private GameView gameView;
     private RaceState raceState;
 
-    private Timeline timerTimeline;
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
@@ -396,7 +395,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 textToAdd.setStyle("");
                 vboxEntries.add(textToAdd);
             }
-//            System.out.println("finished a loop :))))))))))))");
         }
         Platform.runLater(() ->
             positionVbox.getChildren().setAll(vboxEntries)
