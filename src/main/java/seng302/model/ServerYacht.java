@@ -6,6 +6,7 @@ import java.util.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
+import seng302.gameServer.server.messages.BoatStatus;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 
@@ -20,23 +21,28 @@ public class ServerYacht extends Observable {
 
     public static final Double TURN_STEP = 5.0;
 
+    //Boat info
     private String boatType;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
     private String boatName;
     private String country;
+    private BoatStatus boatStatus;
 
+
+    //Location
     private Double lastHeading;
     private Boolean sailIn;
     private Double heading;
+    private GeoPoint lastLocation;
     private GeoPoint location;
     private Double currentVelocity;
     private Boolean isAuto;
     private Double autoHeading;
 
+    //Mark Rounding
     private Integer currentMarkSeqID = 0;
-    private GeoPoint lastLocation;
     private Boolean hasEnteredRoundingZone;
     private Mark closestCurrentMark;
     private Boolean hasPassedLine;
@@ -47,6 +53,7 @@ public class ServerYacht extends Observable {
     public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
+        this.boatStatus = BoatStatus.PRESTART;
         this.sourceId = sourceId;
         this.hullID = hullID;
         this.shortName = shortName;
@@ -354,6 +361,14 @@ public class ServerYacht extends Observable {
 
     public void setHasPassedThroughGate(Boolean hasPassedThroughGate) {
         this.hasPassedThroughGate = hasPassedThroughGate;
+    }
+
+    public BoatStatus getBoatStatus() {
+        return boatStatus;
+    }
+
+    public void setBoatStatus(BoatStatus boatStatus) {
+        this.boatStatus = boatStatus;
     }
 
     public void incrementMarkSeqID() {

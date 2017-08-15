@@ -7,6 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatStatus;
 import seng302.gameServer.server.messages.MarkRoundingMessage;
 import seng302.gameServer.server.messages.MarkType;
 import seng302.gameServer.server.messages.Message;
@@ -306,7 +307,7 @@ public class GameState implements Runnable {
 
         if (hasProgressed) {
             sendMarkRoundingMessage(yacht);
-//            logMarkRounding(yacht);
+            logMarkRounding(yacht);
             yacht.setHasPassedLine(false);
             yacht.setHasEnteredRoundingZone(false);
             yacht.setHasPassedThroughGate(false);
@@ -336,6 +337,7 @@ public class GameState implements Runnable {
             Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, nextMark.getMidPoint());
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
+                yacht.setBoatStatus(BoatStatus.RACING);
                 return true;
             }
         }
@@ -439,7 +441,7 @@ public class GameState implements Runnable {
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
                 yacht.setIsFinished(true);
-                logger.debug(yacht.getSourceId() + " finished");
+                yacht.setBoatStatus(BoatStatus.FINISHED);
                 return true;
             }
         }
@@ -467,20 +469,8 @@ public class GameState implements Runnable {
 
     private void logMarkRounding(ServerYacht yacht) {
         Mark roundingMark = yacht.getClosestCurrentMark();
-
         logger.debug(
-            String.format("Sending Mark Rounding Message:\n"
-                    + "AckNumber %d\n"
-                    + "RaceID %d\n"
-                    + "BoatSourceID %d\n"
-                    + "BoatStatus %s\n"
-                    + "Rounding Side %s\n"
-                    + "MarkSeqID %d",
-                0,
-                0,
-                yacht.getSourceId(),
-                RoundingBoatStatus.RACING.name(),
-                roundingMark.getRoundingSide().getName(),
+            String.format("Yacht srcID(%d) passed Mark srcID(%d)", yacht.getSourceId(),
                 roundingMark.getSourceID()));
     }
 

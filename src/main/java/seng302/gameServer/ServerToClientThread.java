@@ -321,22 +321,13 @@ public class ServerToClientThread implements Runnable, Observer {
         // variables taken from GameServerThread
 
         List<BoatSubMessage> boatSubMessages = new ArrayList<>();
-        BoatStatus boatStatus;
         RaceStatus raceStatus;
 
         for (Player player : GameState.getPlayers()) {
             ServerYacht y = player.getYacht();
-
-            if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
-                boatStatus = BoatStatus.PRESTART;
-            } else if (GameState.getCurrentStage() == GameStages.RACING) {
-                boatStatus = BoatStatus.RACING;
-            } else {
-                boatStatus = BoatStatus.UNDEFINED;
-            }
-
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), boatStatus, 0, 0, 0, 1234l,
-                1234l);
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(), 0,
+                0, 0, 1234L,
+                1234L);
             boatSubMessages.add(m);
         }
 
