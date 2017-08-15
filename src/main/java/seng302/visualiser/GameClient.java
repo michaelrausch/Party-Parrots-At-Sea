@@ -229,7 +229,6 @@ public class GameClient {
                     positionData.getLon(), positionData.getHeading(),
                     positionData.getGroundSpeed());
             }
-            raceView.getGameView().trackBoat();
         } else if (positionData.getType() == DeviceType.MARK_TYPE) {
             //CompoundMark mark = courseData.getCompoundMarks().get(positionData.getDeviceId());
         }

@@ -91,15 +91,15 @@ public class GameView extends Pane {
     double scaleFactor = 1;
 
     public void zoomOut() {
-        scaleFactor = 0.05;
-        this.setScaleX(this.getScaleX() - scaleFactor);
-        this.setScaleY(this.getScaleY() - scaleFactor);
+        scaleFactor = 0.95;
+        this.setScaleX(this.getScaleX() * scaleFactor);
+        this.setScaleY(this.getScaleY() * scaleFactor);
     }
 
     public void zoomIn() {
-        scaleFactor =  0.05;
-        this.setScaleX(this.getScaleX() + scaleFactor);
-        this.setScaleY(this.getScaleY() + scaleFactor);
+        scaleFactor =  1.05;
+        this.setScaleX(this.getScaleX() * scaleFactor);
+        this.setScaleY(this.getScaleY() * scaleFactor);
     }
 
     private enum ScaleDirection {
@@ -118,8 +118,12 @@ public class GameView extends Pane {
                     double y = boat.getBoatLayoutY();
                     double displacementX = this.getWidth();
                     double displacementY = this.getHeight();
-                    this.setLayoutX((-x + ((displacementX)/2.0)) * this.getScaleX());
-                    this.setLayoutY((-y + ((displacementY)/2.0)) * this.getScaleY());
+//                    double displacementX = 1200d;
+//                    double displacementY = 900d;
+                    System.out.println("displacementY = " + displacementY);
+                    System.out.println("displacementX = " + displacementX);
+                    this.setLayoutX((-x + (displacementX/2.0)) * this.getScaleX());
+                    this.setLayoutY((-y + (displacementY/2.0)) * this.getScaleY());
                 }
             }
             if (!isBoatSelected) {
@@ -153,6 +157,7 @@ public class GameView extends Pane {
 
             @Override
             public void handle(long now) {
+                trackBoat();
                 if (lastTime == 0) {
                     lastTime = now;
                 } else {
