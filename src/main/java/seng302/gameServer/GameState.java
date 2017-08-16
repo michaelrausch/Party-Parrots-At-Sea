@@ -291,12 +291,13 @@ public class GameState implements Runnable {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
         Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        System.out.println(maxBoatSpeed);
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (velocity < maxBoatSpeed - 500) {
                 yacht.changeVelocity(maxBoatSpeed / 100);
             } else if (velocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-maxBoatSpeed / 100);
+                yacht.changeVelocity(-velocity / 200);
             } else {
                 yacht.setCurrentVelocity(maxBoatSpeed);
             }
