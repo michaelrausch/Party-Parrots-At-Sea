@@ -18,10 +18,10 @@ public class Regatta {
   private Integer utcOffset;
   private Double magneticVariation;
 
-  public Regatta(String name, Double latitude, Double longitude) {
+  public Regatta(String name, String courseName, Double latitude, Double longitude) {
       this.name = name;
       this.id = DEFAULT_REGATTA_ID;
-      this.courseName = name;
+      this.courseName = courseName;
 
       this.latitude = latitude;
       this.longitude = longitude;

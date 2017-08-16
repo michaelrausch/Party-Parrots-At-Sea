@@ -218,8 +218,6 @@ public class ServerToClientThread implements Runnable, Observer {
                     }
                 }
             } catch (Exception e) {
-                // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected
-//                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
                 closeSocket();
                 return;
             }
@@ -235,7 +233,7 @@ public class ServerToClientThread implements Runnable, Observer {
         }
 
         //@TODO calculate lat/lng values
-        xml.setRegatta(new Regatta("RaceVision Test Game", 57.6679590, 11.8503233));
+        xml.setRegatta(new Regatta("Party Parrot Test Server", "Bermuda Test Course",  57.6679590, 11.8503233));
         xml.setRace(race);
 
         XMLMessage xmlMessage;

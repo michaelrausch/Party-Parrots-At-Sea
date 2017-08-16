@@ -1,11 +1,7 @@
 package seng302.visualiser.controllers;
 
-import com.sun.deploy.util.SessionState.Client;
-import com.sun.media.jfxmedia.logging.Logger;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -21,6 +17,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.model.RaceState;
+import seng302.visualiser.GameClient;
 import seng302.visualiser.ClientToServerThread;
 import seng302.visualiser.GameView;
 
@@ -76,9 +74,14 @@ public class LobbyController {
     private ImageView seventhImageView;
     @FXML
     private ImageView eighthImageView;
+    @FXML
+    private Text timeUntilStart;
+    @FXML
+    private Text courseNameText;
 
     private List<ImageView> imageViews = new ArrayList<>();
     private List<TextArea> listViews = new ArrayList<>();
+    private RaceState raceState;
 
     private ClientToServerThread socketThread;
 
@@ -101,6 +104,8 @@ public class LobbyController {
             fifthImageView, sixthImageView, seventhImageView, eighthImageView
         );
         initialiseImageView();
+
+        timeUntilStart.setText("Waiting For Host...");
     }
 
     /**
@@ -169,13 +174,19 @@ public class LobbyController {
 
     @FXML
     public void readyButtonPressed() {
-        GameState.setCurrentStage(GameStages.RACING);
+        GameState.setCurrentStage(GameStages.PRE_RACE);
+        // Do countdown logic here
+
         for (LobbyCloseListener readyListener : lobbyListeners)
             readyListener.notify(CloseStatus.READY);
     }
 
     public void setTitle (String title) {
         lobbyIpText.setText(title);
+    }
+
+    public void setCourseName(String courseName){
+        courseNameText.setText(courseName);
     }
 
     public void addCloseListener(LobbyCloseListener listener) {
@@ -192,6 +203,11 @@ public class LobbyController {
 
     public void setPlayerID(Integer id) {
         playerID = id;
+    }
+
+    public void updateRaceState(RaceState raceState){
+        this.raceState = raceState;
+        timeUntilStart.setText("Starting in: " + raceState.getRaceTimeStr());
     }
 
     public void disableReadyButton () {

@@ -60,7 +60,7 @@ public class ServerYacht extends Observable {
         this.country = country;
         this.sailIn = false;
         this.isAuto = false;
-        this.location = new GeoPoint(57.670341, 11.826856);
+        this.location = new GeoPoint(57.67046, 11.83751);
         this.lastLocation = location;
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;     //in mms-1

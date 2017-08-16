@@ -12,6 +12,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.ClientYacht;
@@ -46,6 +47,7 @@ public class GameClient {
     private RegattaXMLData regattaData;
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
+    private LobbyController lobbyController;
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
@@ -74,8 +76,18 @@ public class GameClient {
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
         lobbyController.disableReadyButton();
-        lobbyController.setTitle("Connected to host - IP : " + ipAddress + " Port : " + portNumber);
+
+        if (regattaData != null){
+            lobbyController.setTitle(regattaData.getRegattaName());
+            lobbyController.setCourseName(regattaData.getCourseName());
+        }
+        else{
+            lobbyController.setTitle(ipAddress);
+            lobbyController.setCourseName("");
+        }
+
         lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
+        this.lobbyController = lobbyController;
     }
 
     /**
@@ -93,15 +105,28 @@ public class GameClient {
         }
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
-        lobbyController.setTitle("Hosting Lobby - IP : " + ipAddress + " Port : " + portNumber);
+        lobbyController.setPlayerListSource(clientLobbyList);
+
+        if (regattaData != null){
+            lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
+            lobbyController.setCourseName(regattaData.getCourseName());
+        }
+        else{
+            lobbyController.setTitle("Hosting: " + ipAddress);
+            lobbyController.setCourseName("");
+        }
+
         lobbyController.addCloseListener(exitCause -> {
             if (exitCause == CloseStatus.READY) {
+                GameState.resetStartTime();
+                lobbyController.disableReadyButton();
                 server.startGame();
             } else if (exitCause == CloseStatus.LEAVE) {
                 loadStartScreen();
             }
         });
 
+        this.lobbyController = lobbyController;
         server.setGameClient(this);
     }
 
@@ -182,13 +207,18 @@ public class GameClient {
             switch (packet.getType()) {
                 case RACE_STATUS:
                     processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
-                    startRaceIfAllDataReceived();
+
+                    if (raceState.getTimeTillStart() <= 5000) {
+                        startRaceIfAllDataReceived();
+                    }
+
                     break;
 
                 case REGATTA_XML:
                     regattaData = XMLParser.parseRegatta(
                         StreamParser.extractXmlMessage(packet)
                     );
+
                     raceState.setTimeZone(
                         TimeZone.getTimeZone(
                             ZoneId.ofOffset("UTC", ZoneOffset.ofHours(regattaData.getUtcOffset()))
@@ -217,6 +247,7 @@ public class GameClient {
 
                 case RACE_START_STATUS:
                     raceState.updateState(StreamParser.extractRaceStartStatus(packet));
+                    if (lobbyController != null) lobbyController.updateRaceState(raceState);
                     break;
 
                 case BOAT_LOCATION:
