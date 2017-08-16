@@ -6,6 +6,7 @@ import seng302.model.GeoPoint;
 public class GeoUtility {
 
     private static double EARTH_RADIUS = 6378.137;
+    private static Double MS_TO_KNOTS = 1.943844492;
 
     /**
      * Calculates the euclidean distance between two markers on the canvas using xy coordinates
@@ -233,5 +234,21 @@ public class GeoUtility {
         }
 
         return true;
+    }
+
+    /**
+     * @param boatSpeedInKnots Speed in knots
+     * @return The Boat speed in millimeters per second
+     */
+    public static Double knotsToMMS(Double boatSpeedInKnots) {
+        return boatSpeedInKnots / MS_TO_KNOTS * 1000;
+    }
+
+    /**
+     * @param boatSpeedInMMS Speed in millimeters per second
+     * @return The Boat speed in knots
+     */
+    public static Double mmsToKnots(Double boatSpeedInMMS) {
+        return boatSpeedInMMS / 1000 * MS_TO_KNOTS;
     }
 }

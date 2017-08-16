@@ -177,4 +177,16 @@ public class GeoUtilityTest {
         assertEquals(57.6709285, result.getLat(), result.getLat() * toleranceRate);
         assertEquals(11.836164, result.getLng(), result.getLng() * toleranceRate);
     }
+
+    @Test
+    public void testKnotsToMMS() {
+        Double result = GeoUtility.knotsToMMS(1.94384);
+        assertEquals(1000, result, result * toleranceRate);
+    }
+
+    @Test
+    public void testMMSToKnots() {
+        Double result = GeoUtility.mmsToKnots(1000.0);
+        assertEquals(1.94384, result, result * toleranceRate);
+    }
 }

@@ -9,16 +9,25 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.YachtEventCodeMessage;
+import seng302.model.Player;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.utilities.XMLGenerator;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatLocationMessage;
-import seng302.gameServer.server.messages.BoatStatus;
 import seng302.gameServer.server.messages.BoatSubMessage;
 import seng302.gameServer.server.messages.ClientType;
 import seng302.gameServer.server.messages.Message;
@@ -29,20 +38,14 @@ import seng302.gameServer.server.messages.RegistrationResponseMessage;
 import seng302.gameServer.server.messages.RegistrationResponseStatus;
 import seng302.gameServer.server.messages.XMLMessage;
 import seng302.gameServer.server.messages.XMLMessageSubType;
-import seng302.model.Player;
-import seng302.model.Yacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
+import seng302.model.ServerYacht;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
  * its own thread. All server threads created and owned by the server thread handler which can
  * trigger client updates on its threads Created by wmu16 on 13/07/17.
  */
-public class ServerToClientThread implements Runnable {
+public class ServerToClientThread implements Runnable, Observer {
 
     /**
      * Called to notify listeners when this thread receives a connection correctly.
@@ -52,8 +55,7 @@ public class ServerToClientThread implements Runnable {
         void notifyConnection ();
     }
 
-    private static final Integer LOG_LEVEL = 1;
-    private static final Integer MAX_ID_ATTEMPTS = 10;
+    private Logger logger = LoggerFactory.getLogger(ServerToClientThread.class);
 
     private Thread thread;
 
@@ -62,8 +64,6 @@ public class ServerToClientThread implements Runnable {
     private Socket socket;
 
     private ByteArrayOutputStream crcBuffer;
-
-//    private Boolean initialisedRace = true;
 
     private Integer seqNo;
     private Integer sourceId;
@@ -74,6 +74,8 @@ public class ServerToClientThread implements Runnable {
     private XMLGenerator xml;
 
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
+
+    private ServerYacht yacht;
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
@@ -86,7 +88,7 @@ public class ServerToClientThread implements Runnable {
             return;
         }
 
-        thread = new Thread(this);
+        thread = new Thread(this, "ServerToClient");
         thread.start();
     }
 
@@ -115,18 +117,21 @@ public class ServerToClientThread implements Runnable {
         all = ln.lines().collect(Collectors.toList());
         lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
 
-
-        Yacht yacht = new Yacht(
+        ServerYacht yacht = new ServerYacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
+
+        yacht.addObserver(this); // TODO: yacht can notify mark rounding message hyi25 13/8/17
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(new Player(socket, yacht));
     }
 
-    static void serverLog(String message, int logLevel) {
-        if (logLevel <= LOG_LEVEL) {
-            System.out.println(
-                "[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
+    @Override
+    public void update(Observable o, Object arg) {
+        if (arg != null) {
+            sendMessage((Message) arg);
+        } else {
+            sendSetupMessages();
         }
     }
 
@@ -164,7 +169,6 @@ public class ServerToClientThread implements Runnable {
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
 
-
         while (socket.isConnected()) {
 
             try {
@@ -201,7 +205,7 @@ public class ServerToClientThread implements Runnable {
                                 break;
                         }
                     } else {
-                        serverLog("Packet has been dropped", 1);
+                        logger.warn("Packet has been dropped", 1);
                     }
                 }
             } catch (Exception e) {
@@ -217,7 +221,7 @@ public class ServerToClientThread implements Runnable {
         xml = new XMLGenerator();
         Race race = new Race();
 
-        for (Yacht yacht : GameState.getYachts().values()) {
+        for (ServerYacht yacht : GameState.getYachts().values()) {
             race.addBoat(yacht);
         }
 
@@ -239,10 +243,6 @@ public class ServerToClientThread implements Runnable {
         sendMessage(xmlMessage);
     }
 
-    public void updateClient() {
-        sendBoatLocationPackets();
-    }
-
     private void closeSocket() {
         try {
             socket.close();
@@ -259,7 +259,7 @@ public class ServerToClientThread implements Runnable {
             crcBuffer.write(currentByte);
         } catch (IOException e) {
             e.printStackTrace();
-            serverLog("Socket read failed", 1);
+            logger.warn("Socket read failed", 1);
         }
         if (currentByte == -1) {
             throw new Exception();
@@ -288,7 +288,7 @@ public class ServerToClientThread implements Runnable {
             //serverLog("Player " + sourceId + " side socket disconnected", 1);
             return;
         } catch (IOException e) {
-            serverLog("Message send failed", 1);
+            logger.warn("Message send failed", 1);
         }
     }
 
@@ -298,9 +298,9 @@ public class ServerToClientThread implements Runnable {
     }
 
 
-    private void sendBoatLocationPackets() {
-        ArrayList<Yacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        for (Yacht yacht : yachts) {
+    public void sendBoatLocationPackets() {
+        ArrayList<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
+        for (ServerYacht yacht : yachts) {
             BoatLocationMessage boatLocationMessage =
                 new BoatLocationMessage(
                     yacht.getSourceId(),
@@ -308,7 +308,7 @@ public class ServerToClientThread implements Runnable {
                     yacht.getLocation().getLat(),
                     yacht.getLocation().getLng(),
                     yacht.getHeading(),
-                    yacht.getVelocity().longValue());
+                    yacht.getCurrentVelocity().longValue());
 
             sendMessage(boatLocationMessage);
         }
@@ -318,42 +318,16 @@ public class ServerToClientThread implements Runnable {
         return thread;
     }
 
-    public void sendRaceStatusMessage() {
-        // variables taken from GameServerThread
-
-        List<BoatSubMessage> boatSubMessages = new ArrayList<>();
-        BoatStatus boatStatus;
-        RaceStatus raceStatus;
-
-        for (Player player : GameState.getPlayers()) {
-            Yacht y = player.getYacht();
-
-            if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
-                boatStatus = BoatStatus.PRESTART;
-            } else if (GameState.getCurrentStage() == GameStages.RACING) {
-                boatStatus = BoatStatus.RACING;
-            } else {
-                boatStatus = BoatStatus.UNDEFINED;
-            }
-
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), boatStatus, 0, 0, 0, 1234l,
-                1234l);
-            boatSubMessages.add(m);
-        }
-
-        if (GameState.getCurrentStage() == GameStages.RACING) {
-            raceStatus = RaceStatus.STARTED;
-        } else {
-            raceStatus = RaceStatus.WARNING;
-        }
-
-        sendMessage(new RaceStatusMessage(1, raceStatus, GameState.getStartTime(), GameState.getWindDirection(),
-            GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
-            RaceType.MATCH_RACE, 1, boatSubMessages));
-    }
-
     public Socket getSocket() {
         return socket;
+    }
+
+    public ServerYacht getYacht() {
+        return yacht;
+    }
+
+    public void sendCollisionMessage(Integer yachtId) {
+        sendMessage(new YachtEventCodeMessage(yachtId));
     }
 
     public void addConnectionListener(ConnectionListener listener) {
