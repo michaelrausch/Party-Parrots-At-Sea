@@ -365,13 +365,14 @@ public class GameClient {
                 socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
             //TODO Allow a zoom in and zoom out methods
             case Z:  // zoom in
-                System.out.println("Zoom in");
+                raceView.getGameView().zoomIn();
                 break;
             case X:  // zoom out
-                System.out.println("Zoom out");
+                raceView.getGameView().zoomOut();
                 break;
         }
     }
+
 
     private void keyReleased(KeyEvent e) {
         switch (e.getCode()) {
