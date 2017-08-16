@@ -23,9 +23,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import seng302.model.ClientYacht;
 import javafx.util.Duration;
-import seng302.model.Colors;
+import seng302.model.ClientYacht;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
@@ -351,7 +350,7 @@ public class GameView extends Pane {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
         for (ClientYacht clientYacht : clientYachts) {
-            Paint colour = Colors.getColor();
+            Paint colour = clientYacht.getColour();
             newBoat = new BoatObject();
             newBoat.setFill(colour);
             boatObjects.put(clientYacht, newBoat);

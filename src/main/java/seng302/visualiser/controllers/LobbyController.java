@@ -1,7 +1,10 @@
 package seng302.visualiser.controllers;
 
-import java.util.*;
-
+import com.sun.media.jfxmedia.logging.Logger;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -18,9 +21,7 @@ import javafx.stage.Stage;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.RaceState;
-import seng302.visualiser.GameClient;
 import seng302.visualiser.ClientToServerThread;
-import seng302.visualiser.GameView;
 
 /**
  * A class describing the actions of the lobby screen
@@ -153,6 +154,7 @@ public class LobbyController {
             cc.setServerThread(this.socketThread);
             customizeStage.setTitle("Customize Boat");
             customizeStage.setScene(new Scene(root, 700, 450));
+            cc.setStage(customizeStage); // pass the stage through so it can be closed later.
             customizeStage.show();
         } catch (IOException e) {
             Logger.logMsg(4, "Failed to load Customization View from resources.");

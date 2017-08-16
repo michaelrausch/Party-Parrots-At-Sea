@@ -211,6 +211,7 @@ public class ServerToClientThread implements Runnable, Observer {
                                         new StreamPacket(type, payloadLength, timeStamp, payload));
                                 GameState.customizePlayer(sourceID, requestType,
                                     Arrays.copyOfRange(payload, 6, payload.length));
+                                sendSetupMessages();
                                 break;
                         }
                     } else {

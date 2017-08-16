@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.scene.paint.Color;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
@@ -578,9 +579,14 @@ public class GameState implements Runnable {
 
         if (requestType.equals(CustomizeRequestType.NAME)) {
             String name = new String(customizeData);
-            System.out.println(playerYacht.getBoatName());
             playerYacht.setBoatName(name);
-            System.out.println(playerYacht.getBoatName());
+        } else if (requestType.equals(CustomizeRequestType.COLOR)) {
+            System.out.println(customizeData.length);
+            int red = customizeData[0] & 0xFF;
+            int green = customizeData[1] & 0xFF;
+            int blue = customizeData[2] & 0xFF;
+            Color yachtColor = Color.rgb(red, green, blue);
+            playerYacht.setBoatColor(yachtColor);
         }
     }
 

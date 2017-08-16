@@ -3,6 +3,7 @@ package seng302.model;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
@@ -29,6 +30,8 @@ public class ServerYacht extends Observable {
     private String boatName;
     private String country;
     private BoatStatus boatStatus;
+
+    private Color boatColor;
 
 
     //Location
@@ -65,6 +68,7 @@ public class ServerYacht extends Observable {
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;     //in mms-1
         this.currentMarkSeqID = 0;
+        this.boatColor = Color.rgb(0, 0, 0);
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
@@ -385,5 +389,12 @@ public class ServerYacht extends Observable {
         return hasPassedLine;
     }
 
+    public void setBoatColor(Color color) {
+        this.boatColor = color;
+    }
+
+    public Color getBoatColor() {
+        return boatColor;
+    }
 
 }

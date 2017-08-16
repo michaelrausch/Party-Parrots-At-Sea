@@ -1,6 +1,5 @@
 package seng302.gameServer;
 
-import gherkin.lexer.Fi;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
@@ -8,8 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import seng302.gameServer.server.messages.*;
+import seng302.gameServer.server.messages.BoatSubMessage;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RaceStartNotificationType;
+import seng302.gameServer.server.messages.RaceStartStatusMessage;
+import seng302.gameServer.server.messages.RaceStatus;
+import seng302.gameServer.server.messages.RaceStatusMessage;
+import seng302.gameServer.server.messages.RaceType;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
@@ -71,6 +75,14 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 Thread.sleep(1000 / CLIENT_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
                 serverLog("Interrupted exception in Main Server Thread thread sleep", 1);
+            }
+
+            if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+                // TODO: 16/08/17 ajm412: This can probably be done in a nicer way via those fancy functional interfaces.
+                for (ServerToClientThread thread : serverToClientThreads) {
+                    thread.sendSetupMessages();
+                }
+
             }
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
