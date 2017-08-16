@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.server.messages.CustomizeRequestType;
 import seng302.gameServer.server.messages.MarkRoundingMessage;
 import seng302.gameServer.server.messages.MarkType;
 import seng302.gameServer.server.messages.Message;
@@ -509,6 +510,18 @@ public class GameState implements Runnable {
         return false;
     }
 
+    public static void customizePlayer(long playerID, CustomizeRequestType requestType,
+        byte[] customizeData) {
+        System.out.println(playerID + " " + requestType.toString());
+        ServerYacht playerYacht = yachts.get((int) playerID);
+
+        if (requestType.equals(CustomizeRequestType.NAME)) {
+            String name = new String(customizeData);
+            System.out.println(playerYacht.getBoatName());
+            playerYacht.setBoatName(name);
+            System.out.println(playerYacht.getBoatName());
+        }
+    }
 
     private static Mark markCollidedWith(ServerYacht yacht) {
         Set<Mark> marksInRace = GameState.getMarks();

@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -19,26 +20,23 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatLocationMessage;
+import seng302.gameServer.server.messages.ClientType;
+import seng302.gameServer.server.messages.CustomizeRequestType;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RegistrationResponseMessage;
+import seng302.gameServer.server.messages.RegistrationResponseStatus;
+import seng302.gameServer.server.messages.XMLMessage;
+import seng302.gameServer.server.messages.XMLMessageSubType;
 import seng302.gameServer.server.messages.YachtEventCodeMessage;
 import seng302.model.Player;
+import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.gameServer.server.messages.BoatAction;
-import seng302.gameServer.server.messages.BoatLocationMessage;
-import seng302.gameServer.server.messages.BoatSubMessage;
-import seng302.gameServer.server.messages.ClientType;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.RaceStatus;
-import seng302.gameServer.server.messages.RaceStatusMessage;
-import seng302.gameServer.server.messages.RaceType;
-import seng302.gameServer.server.messages.RegistrationResponseMessage;
-import seng302.gameServer.server.messages.RegistrationResponseStatus;
-import seng302.gameServer.server.messages.XMLMessage;
-import seng302.gameServer.server.messages.XMLMessageSubType;
-import seng302.model.ServerYacht;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -206,6 +204,14 @@ public class ServerToClientThread implements Runnable, Observer {
 
                             case RACE_CUSTOMIZATION_REQUEST:
                                 System.out.println("CUSTOMIZATION RECEIVED");
+                                Long sourceID = Message
+                                    .bytesToLong(Arrays.copyOfRange(payload, 0, 3));
+                                CustomizeRequestType requestType = ServerPacketParser
+                                    .extractCustomizationType(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                GameState.customizePlayer(sourceID, requestType,
+                                    Arrays.copyOfRange(payload, 6, payload.length));
+                                break;
                         }
                     } else {
                         logger.warn("Packet has been dropped", 1);

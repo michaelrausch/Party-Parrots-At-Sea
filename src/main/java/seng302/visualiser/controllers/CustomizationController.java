@@ -32,6 +32,9 @@ public class CustomizationController {
     public void submitCustomization() {
         System.out.println("Attempting to send");
         socketThread.sendCustomizationRequest(CustomizeRequestType.NAME, nameField.getText().getBytes());
+        // TODO: 16/08/17 ajm412: Turn colors into byte array.
+        socketThread.sendCustomizationRequest(CustomizeRequestType.COLOR,
+            boatColorPicker.getValue().toString().getBytes());
     }
 
 

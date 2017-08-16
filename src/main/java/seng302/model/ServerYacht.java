@@ -298,6 +298,10 @@ public class ServerYacht extends Observable {
         return country;
     }
 
+    public void setBoatName(String name) {
+        boatName = name;
+        shortName = name.split(" ")[0];
+    }
 
     public GeoPoint getLocation() {
         return location;
