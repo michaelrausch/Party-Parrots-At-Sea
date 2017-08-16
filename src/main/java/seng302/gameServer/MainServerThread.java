@@ -1,12 +1,18 @@
 package seng302.gameServer;
 
+import gherkin.lexer.Fi;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import seng302.gameServer.server.messages.BoatSubMessage;
 import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RaceStatus;
+import seng302.gameServer.server.messages.RaceStatusMessage;
+import seng302.gameServer.server.messages.RaceType;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
@@ -43,7 +49,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
         GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
-        thread = new Thread(this);
+        thread = new Thread(this, "MainServer");
         thread.start();
     }
 
@@ -77,7 +83,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-
+                terminate();
             }
         }
 
@@ -159,12 +165,35 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-
-                for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-                    serverToClientThread.sendRaceStatusMessage();
-                }
+                broadcastMessage(makeRaceStatusMessage());
             }
         }, 0, 500);
+    }
+
+    private RaceStatusMessage makeRaceStatusMessage() {
+        // variables taken from GameServerThread
+
+        List<BoatSubMessage> boatSubMessages = new ArrayList<>();
+        RaceStatus raceStatus;
+
+        for (Player player : GameState.getPlayers()) {
+            ServerYacht y = player.getYacht();
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(), 0,
+                0, 0, 1234L,
+                1234L);
+            boatSubMessages.add(m);
+        }
+
+        if (GameState.getCurrentStage() == GameStages.RACING) {
+            raceStatus = RaceStatus.STARTED;
+        } else {
+            raceStatus = RaceStatus.WARNING;
+        }
+
+        return new RaceStatusMessage(1, raceStatus, GameState.getStartTime(),
+            GameState.getWindDirection(),
+            GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
+            RaceType.MATCH_RACE, 1, boatSubMessages);
     }
 
     public void terminate() {

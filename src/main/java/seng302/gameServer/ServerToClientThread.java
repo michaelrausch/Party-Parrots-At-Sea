@@ -88,7 +88,7 @@ public class ServerToClientThread implements Runnable, Observer {
             return;
         }
 
-        thread = new Thread(this);
+        thread = new Thread(this, "ServerToClient");
         thread.start();
     }
 
@@ -316,31 +316,6 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public Thread getThread() {
         return thread;
-    }
-
-    public void sendRaceStatusMessage() {
-        // variables taken from GameServerThread
-
-        List<BoatSubMessage> boatSubMessages = new ArrayList<>();
-        RaceStatus raceStatus;
-
-        for (Player player : GameState.getPlayers()) {
-            ServerYacht y = player.getYacht();
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(), 0,
-                0, 0, 1234L,
-                1234L);
-            boatSubMessages.add(m);
-        }
-
-        if (GameState.getCurrentStage() == GameStages.RACING) {
-            raceStatus = RaceStatus.STARTED;
-        } else {
-            raceStatus = RaceStatus.WARNING;
-        }
-
-        sendMessage(new RaceStatusMessage(1, raceStatus, GameState.getStartTime(), GameState.getWindDirection(),
-            GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
-            RaceType.MATCH_RACE, 1, boatSubMessages));
     }
 
     public Socket getSocket() {
