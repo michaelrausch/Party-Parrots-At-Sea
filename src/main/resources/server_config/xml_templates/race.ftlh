@@ -35,6 +35,14 @@
     <CompoundMarkSequence>
         <Corner SeqID="1" CompoundMarkID="1" Rounding="PS" ZoneSize="3" />
         <Corner SeqID="2" CompoundMarkID="2" Rounding="Port" ZoneSize="3" />
+        <Corner SeqID="3" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
+        <Corner SeqID="4" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
+        <Corner SeqID="5" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
+        <Corner SeqID="6" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
+        <Corner SeqID="7" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
+        <Corner SeqID="8" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
+        <Corner SeqID="9" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
+        <Corner SeqID="10" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
         <Corner SeqID="11" CompoundMarkID="5" Rounding="PS" ZoneSize="3" />
     </CompoundMarkSequence>
     <CourseLimit>

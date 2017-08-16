@@ -1,5 +1,6 @@
 package seng302.gameServer;
 
+import gherkin.lexer.Fi;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
@@ -48,7 +49,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
         GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
-        thread = new Thread(this);
+        thread = new Thread(this, "MainServer");
         thread.start();
     }
 
@@ -82,7 +83,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-
+                terminate();
             }
         }
 

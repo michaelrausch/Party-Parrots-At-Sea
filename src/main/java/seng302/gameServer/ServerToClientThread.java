@@ -88,7 +88,7 @@ public class ServerToClientThread implements Runnable, Observer {
             return;
         }
 
-        thread = new Thread(this);
+        thread = new Thread(this, "ServerToClient");
         thread.start();
     }
 

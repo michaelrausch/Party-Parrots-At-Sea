@@ -42,12 +42,11 @@ public class ServerYacht extends Observable {
     private Double autoHeading;
 
     //Mark Rounding
-    private Integer currentMarkSeqID = 0;
+    private Integer currentMarkSeqID;
     private Boolean hasEnteredRoundingZone;
     private Mark closestCurrentMark;
     private Boolean hasPassedLine;
     private Boolean hasPassedThroughGate;
-    private Boolean finishedRace;
 
 
     public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
@@ -65,11 +64,11 @@ public class ServerYacht extends Observable {
         this.lastLocation = location;
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;     //in mms-1
+        this.currentMarkSeqID = 0;
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
         this.hasPassedThroughGate = false;
-        this.finishedRace = false;
     }
 
 
@@ -320,15 +319,6 @@ public class ServerYacht extends Observable {
     @Override
     public String toString() {
         return boatName;
-    }
-
-
-    public void setIsFinished(Boolean isFinished) {
-        finishedRace = isFinished;
-    }
-
-    public Boolean getFinishedRace() {
-        return finishedRace;
     }
 
     public Double getCurrentVelocity() {

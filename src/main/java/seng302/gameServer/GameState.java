@@ -89,7 +89,7 @@ public class GameState implements Runnable {
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         markListeners = new ArrayList<>();
 
-        new Thread(this).start();   //Run the auto updates on the game state
+        new Thread(this, "GameState").start();   //Run the auto updates on the game state
 
         marks = new MarkOrder().getAllMarks();
     }
@@ -184,7 +184,7 @@ public class GameState implements Runnable {
     @Override
     public void run() {
 
-        while (true) {
+        while (currentStage != GameStages.FINISHED) {
             try {
                 Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
@@ -229,16 +229,23 @@ public class GameState implements Runnable {
      * Called periodically in this GameState thread to update the GameState values
      */
     public void update() {
+        Boolean raceFinished = true;
+
         Double timeInterval = (System.currentTimeMillis() - previousUpdateTime) / 1000000.0;
         previousUpdateTime = System.currentTimeMillis();
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
-            if (!yacht.getFinishedRace()) {
+            if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkForCollision(yacht);
                 checkForLegProgression(yacht);
+                raceFinished = false;
             }
+        }
+
+        if (raceFinished) {
+            currentStage = GameStages.FINISHED;
         }
     }
 
@@ -283,7 +290,7 @@ public class GameState implements Runnable {
         Double velocity = yacht.getCurrentVelocity();
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * 3;
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (velocity < maxBoatSpeed - 500) {
@@ -345,6 +352,7 @@ public class GameState implements Runnable {
     private void checkForLegProgression(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
+//        System.out.println(yacht.getCurrentMarkSeqID());
 
         Boolean hasProgressed;
         if (currentMarkSeqID == 0) {
@@ -493,7 +501,6 @@ public class GameState implements Runnable {
             Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
-                yacht.setIsFinished(true);
                 yacht.setBoatStatus(BoatStatus.FINISHED);
                 return true;
             }
