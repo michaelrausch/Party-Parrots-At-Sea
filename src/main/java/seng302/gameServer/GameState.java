@@ -89,6 +89,9 @@ public class GameState implements Runnable {
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         markListeners = new ArrayList<>();
 
+        resetStartTime();
+
+        new Thread(this).start();   //Run the auto updates on the game state
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
 
         marks = new MarkOrder().getAllMarks();
@@ -135,10 +138,6 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
-        if (currentStage == GameStages.RACING) {
-            startTime = System.currentTimeMillis();
-        }
-
         GameState.currentStage = currentStage;
     }
 
@@ -148,6 +147,10 @@ public class GameState implements Runnable {
 
     public static long getStartTime(){
         return startTime;
+    }
+
+    public static void resetStartTime(){
+        startTime = System.currentTimeMillis() + MainServerThread.TIME_TILL_START;
     }
 
     public static Double getWindDirection() {
@@ -190,7 +193,7 @@ public class GameState implements Runnable {
             } catch (InterruptedException e) {
                 System.out.println("[GameState] interrupted exception");
             }
-            if (currentStage == GameStages.PRE_RACE) {
+            if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.RACING) {
                 update();
             }
 
@@ -233,6 +236,9 @@ public class GameState implements Runnable {
 
         Double timeInterval = (System.currentTimeMillis() - previousUpdateTime) / 1000000.0;
         previousUpdateTime = System.currentTimeMillis();
+        if (System.currentTimeMillis() > startTime) {
+            GameState.setCurrentStage(GameStages.RACING);
+        }
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
             yacht.runAutoPilot();
