@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatStatus;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -27,6 +28,7 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
+import seng302.visualiser.controllers.FinishScreenViewController;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.LobbyController.CloseStatus;
 import seng302.visualiser.controllers.RaceViewController;
@@ -195,6 +197,9 @@ public class GameClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        FinishScreenViewController controller = fxmlLoader.getController();
+        controller.setFinishers(raceState.getPlayerPositions());
     }
 
     private void parsePackets() {
@@ -239,6 +244,7 @@ public class GameClient {
                     allBoatsMap.forEach((id, boat) ->
                         clientLobbyList.add(id + " " + boat.getBoatName())
                     );
+                    raceState.setBoats(allBoatsMap.values());
                     break;
 
                 case RACE_START_STATUS:
@@ -315,13 +321,9 @@ public class GameClient {
             }
             boolean raceFinished = true;
             for (ClientYacht yacht : allBoatsMap.values()) {
-                if (yacht.getBoatStatus() != 3) {
+                if (yacht.getBoatStatus() != BoatStatus.FINISHED.getCode()) {
                     raceFinished = false;
                 }
-            }
-            if (raceFinished == true) {
-                close();
-                loadFinishScreenView();
             }
 
             for (long[] boatData : data.getBoatData()) {
@@ -329,18 +331,24 @@ public class GameClient {
                 clientYacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
                 clientYacht.setEstimateTimeAtFinish(boatData[2]);
                 int legNumber = (int) boatData[3];
-                clientYacht.setLegNumber(legNumber);
                 clientYacht.setBoatStatus((int) boatData[4]);
                 if (legNumber != clientYacht.getLegNumber()) {
-                    int placing = 1;
-                    for (ClientYacht otherClientYacht : allBoatsMap.values()) {
-                        if (otherClientYacht.getSourceId() != boatData[0] &&
-                            clientYacht.getLegNumber() <= otherClientYacht.getLegNumber())
-                            placing++;
-                    }
-                    clientYacht.setPositionInteger(placing);
+                    clientYacht.setLegNumber(legNumber);
+                    updatePlayerPositions();
                 }
             }
+
+            if (raceFinished) {
+                close();
+                loadFinishScreenView();
+            }
+        }
+    }
+
+    private void updatePlayerPositions() {
+        raceState.sortPlayers();
+        for (ClientYacht yacht : raceState.getPlayerPositions()) {
+            yacht.setPosition(raceState.getPlayerPositions().indexOf(yacht) + 1);
         }
     }
 
