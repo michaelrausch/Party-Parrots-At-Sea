@@ -71,6 +71,7 @@ public class GameView extends Pane {
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private Map<ClientYacht, AnnotationBox> annotations = new HashMap<>();
     private ObservableList<Node> gameObjects;
+    private BoatObject selectedBoat = null;
     private Group annotationsGroup = new Group();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
@@ -93,18 +94,18 @@ public class GameView extends Pane {
     double scaleFactor = 1;
 
     public void zoomOut() {
-        scaleFactor = 0.95;
-        for (Node child : getChildren()) {
-            child.setScaleX(child.getScaleX() * scaleFactor);
-            child.setScaleY(child.getScaleY() * scaleFactor);
+        scaleFactor = 0.1;
+        if (this.getScaleX() > 0.5) {
+            this.setScaleX(this.getScaleX() - scaleFactor);
+            this.setScaleY(this.getScaleY() - scaleFactor);
         }
     }
 
     public void zoomIn() {
-        scaleFactor =  1.05;
-        for (Node child : getChildren()) {
-            child.setScaleX(child.getScaleX() * scaleFactor);
-            child.setScaleY(child.getScaleY() * scaleFactor);
+        scaleFactor = 0.10;
+        if (this.getScaleX() < 2.5) {
+            this.setScaleX(this.getScaleX() + scaleFactor);
+            this.setScaleY(this.getScaleY() + scaleFactor);
         }
     }
 
@@ -113,14 +114,25 @@ public class GameView extends Pane {
         VERTICAL
     }
 
-    public GameView() {
+
+    private void trackBoat() {
+        if (selectedBoat != null) {
+            double x = selectedBoat.getBoatLayoutX();
+            double y = selectedBoat.getBoatLayoutY();
+            double displacementX = this.getWidth();
+            double displacementY = this.getHeight();
+            this.setLayoutX((-x + (displacementX / 2.0)) * this.getScaleX());
+            this.setLayoutY((-y + (displacementY / 2.0)) * this.getScaleY());
+        } else {
+            this.setLayoutX(0);
+            this.setLayoutY(0);
+        }
+    }
+
+    public GameView () {
         gameObjects = this.getChildren();
         // create image view for map, bind panel size to image
         gameObjects.add(mapImage);
-        fpsDisplay.setLayoutX(5);
-        fpsDisplay.setLayoutY(20);
-        fpsDisplay.setStrokeWidth(2);
-        gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
         initializeTimer();
@@ -138,6 +150,7 @@ public class GameView extends Pane {
 
             @Override
             public void handle(long now) {
+                trackBoat();
                 if (lastTime == 0) {
                     lastTime = now;
                 } else {
@@ -161,9 +174,7 @@ public class GameView extends Pane {
                         lastTime = now;
                     }
                 }
-//                Platform.runLater(() ->
-                    boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
-//                );
+                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
             }
         };
     }
@@ -343,6 +354,22 @@ public class GameView extends Pane {
 //        drawGoogleMap();
     }
 
+    private void setSelectedBoat(BoatObject bo, Boolean isSelected) {
+        if (this.selectedBoat == bo && !isSelected) {
+            this.selectedBoat = null;
+            boatObjects.forEach((boat, group) ->
+                group.setIsSelected(false)
+            );
+        } else if (isSelected) {
+            this.selectedBoat = bo;
+            for (BoatObject group : boatObjects.values()) {
+                if (group != bo) {
+                    group.setIsSelected(false);
+                }
+            }
+        }
+    }
+
     /**
      * Draws all the boats.
      * @param  clientYachts The yachts to set in the race
@@ -353,6 +380,7 @@ public class GameView extends Pane {
         for (ClientYacht clientYacht : clientYachts) {
             Paint colour = Colors.getColor();
             newBoat = new BoatObject();
+            newBoat.addSelectedBoatListener(this::setSelectedBoat);
             newBoat.setFill(colour);
             boatObjects.put(clientYacht, newBoat);
             createAndBindAnnotationBox(clientYacht, colour);
@@ -365,9 +393,6 @@ public class GameView extends Pane {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
-//                annotations.get(boat).setLayoutX(p2d.getX());
-//                annotations.get(boat).setLayoutY(p2d.getY());
-//                annotations.get(boat).setLocation(100d, 100d);
                 annotations.get(boat).setLocation(p2d.getX(), p2d.getY());
                 bo.setTrajectory(
                     heading,
@@ -630,6 +655,7 @@ public class GameView extends Pane {
 
     public void setBoatAsPlayer (ClientYacht playerYacht) {
         this.playerYacht = playerYacht;
+        playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
         annotations.get(playerYacht).addAnnotation(
             "velocity",
@@ -678,5 +704,10 @@ public class GameView extends Pane {
 
             timeline.setOnFinished(event -> gameObjects.remove(circle));
         });
+    }
+
+    public void setFrameRateFXText(Text fpsDisplay) {
+        this.fpsDisplay = null;
+        this.fpsDisplay = fpsDisplay;
     }
 }
