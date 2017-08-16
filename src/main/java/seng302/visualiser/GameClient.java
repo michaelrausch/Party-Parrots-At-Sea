@@ -198,7 +198,7 @@ public class GameClient {
         }
 
         FinishScreenViewController controller = fxmlLoader.getController();
-        controller.setFinishers(allBoatsMap.values());
+        controller.setFinishers(raceState.getPlayerPositions());
     }
 
     private void parsePackets() {
@@ -338,6 +338,11 @@ public class GameClient {
                 if (legNumber != clientYacht.getLegNumber()) {
                     clientYacht.setLegNumber(legNumber);
                     raceState.sortPlayers();
+//                    System.out.println("ORDER:");
+//                    for (ClientYacht clientYacht1 : raceState.getPlayerPositions()) {
+//                        System.out.println(clientYacht1.getShortName());
+//                    }
+//                    System.out.println();
                 }
             }
         }

@@ -437,6 +437,7 @@ public class GameState implements Runnable {
         }
 
         if (hasProgressed) {
+            yacht.incrementLegNumber();
             sendMarkRoundingMessage(yacht);
             logMarkRounding(yacht);
             yacht.setHasPassedLine(false);
@@ -444,7 +445,6 @@ public class GameState implements Runnable {
             yacht.setHasPassedThroughGate(false);
             if (!markOrder.isLastMark(currentMarkSeqID)) {
                 yacht.incrementMarkSeqID();
-                yacht.incrementLegNumber();
             }
         }
     }

@@ -83,10 +83,11 @@ public class RaceState {
     }
 
     public void sortPlayers() {
-        playerPositions.sort(Comparator.comparingInt(ClientYacht::getLegNumber));
+        playerPositions.sort((yacht1, yacht2) -> Integer.compare(yacht2.getLegNumber(),
+            yacht1.getLegNumber()));
     }
 
     public ObservableList<ClientYacht> getPlayerPositions() {
-        return FXCollections.unmodifiableObservableList(playerPositions);
+        return playerPositions;
     }
 }

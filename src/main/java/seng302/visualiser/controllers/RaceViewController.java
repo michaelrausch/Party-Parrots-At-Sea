@@ -394,17 +394,17 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private void updateOrder(ObservableList<ClientYacht> yachts) {
         List<Text> vboxEntries = new ArrayList<>();
 
-        for (ClientYacht clientYacht : yachts) {
+        for (int i = 0; i < yachts.size(); i++) {
 //            System.out.println("yacht == null  " + String.valueOf(yacht == null));
-            if (clientYacht.getBoatStatus() == 3) {  // 3 is finish status
-                Text textToAdd = new Text(clientYacht.getPositionInteger() + ". " +
-                    clientYacht.getShortName() + " (Finished)");
+            if (yachts.get(i).getBoatStatus() == 3) {  // 3 is finish status
+                Text textToAdd = new Text(i + 1 + ". " +
+                    yachts.get(i).getShortName() + " (Finished)");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 vboxEntries.add(textToAdd);
 
             } else {
-                Text textToAdd = new Text(clientYacht.getPositionInteger() + ". " +
-                    clientYacht.getShortName() + " ");
+                Text textToAdd = new Text(i + 1 + ". " +
+                    yachts.get(i).getShortName() + " ");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 textToAdd.setStyle("");
                 vboxEntries.add(textToAdd);
