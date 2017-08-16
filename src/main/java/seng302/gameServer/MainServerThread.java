@@ -227,7 +227,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         for (Player player : GameState.getPlayers()) {
             ServerYacht y = player.getYacht();
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(), 0,
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(),
+                y.getLegNumber(),
                 0, 0, 1234L,
                 1234L);
             boatSubMessages.add(m);

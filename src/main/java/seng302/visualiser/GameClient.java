@@ -243,6 +243,7 @@ public class GameClient {
                     allBoatsMap.forEach((id, boat) ->
                         clientLobbyList.add(id + " " + boat.getBoatName())
                     );
+                    raceState.setBoats(allBoatsMap.values());
                     break;
 
                 case RACE_START_STATUS:
@@ -323,7 +324,7 @@ public class GameClient {
                     raceFinished = false;
                 }
             }
-            if (raceFinished == true) {
+            if (raceFinished) {
                 close();
                 loadFinishScreenView();
             }
@@ -333,16 +334,10 @@ public class GameClient {
                 clientYacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
                 clientYacht.setEstimateTimeAtFinish(boatData[2]);
                 int legNumber = (int) boatData[3];
-                clientYacht.setLegNumber(legNumber);
                 clientYacht.setBoatStatus((int) boatData[4]);
                 if (legNumber != clientYacht.getLegNumber()) {
-                    int placing = 1;
-                    for (ClientYacht otherClientYacht : allBoatsMap.values()) {
-                        if (otherClientYacht.getSourceId() != boatData[0] &&
-                            clientYacht.getLegNumber() <= otherClientYacht.getLegNumber())
-                            placing++;
-                    }
-                    clientYacht.setPositionInteger(placing);
+                    clientYacht.setLegNumber(legNumber);
+                    raceState.sortPlayers();
                 }
             }
         }

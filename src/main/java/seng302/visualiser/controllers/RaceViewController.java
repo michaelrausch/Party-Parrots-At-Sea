@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -117,6 +119,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseBoatSelectionComboBox();
         initialiseSparkLine();
 
+        raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
+            while (c.next()) {
+                if (c.wasPermutated()) {
+                    updateOrder(raceState.getPlayerPositions());
+                }
+            }
+        });
+
+        updateOrder(raceState.getPlayerPositions());
         gameView = new GameView();
         gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
@@ -318,7 +329,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             public void run() {
                 updateRaceTime();
                 updateWind();
-                updateOrder();
 //                updateSparkLine();
             }
         }, 0, 1000);
@@ -381,16 +391,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the order of the yachts as from the StreamParser and sets them in the yacht order
      * section
      */
-    private void updateOrder() {
-//        positionVbox.getChildren().removeAll();
-//        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-
-        // list of racing yacht id
-        List<ClientYacht> sorted = new ArrayList<>(participants.values());
-        sorted.sort(Comparator.comparingInt(ClientYacht::getPositionInteger));
+    private void updateOrder(ObservableList<ClientYacht> yachts) {
         List<Text> vboxEntries = new ArrayList<>();
 
-        for (ClientYacht clientYacht : sorted) {
+        for (ClientYacht clientYacht : yachts) {
 //            System.out.println("yacht == null  " + String.valueOf(yacht == null));
             if (clientYacht.getBoatStatus() == 3) {  // 3 is finish status
                 Text textToAdd = new Text(clientYacht.getPositionInteger() + ". " +

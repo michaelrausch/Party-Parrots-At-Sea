@@ -95,13 +95,8 @@ public class StreamParser {
             boatID = bytesToLong(
                 Arrays.copyOfRange(payload, 24 + (i * 20), 28 + (i * 20)));
             boatStatus = (int) payload[28 + (i * 20)];
-
-//            setBoatLegPosition(boat, (int) payload[29 + (i * 20)]);
-//            boat.setPenaltiesAwarded((int) payload[30 + (i * 20)]);
-//            boat.setPenaltiesServed((int) payload[31 + (i * 20)]);
             estTimeAtNextMark = bytesToLong(
                 Arrays.copyOfRange(payload, 32 + (i * 20), 38 + (i * 20)));
-//            boat.setEstimateTimeTillNextMark(estTimeAtNextMark);
             estTimeAtFinish = bytesToLong(
                 Arrays.copyOfRange(payload, 38 + (i * 20), 44 + (i * 20)));
             leg = (int) payload[29 + (i * 20)];
