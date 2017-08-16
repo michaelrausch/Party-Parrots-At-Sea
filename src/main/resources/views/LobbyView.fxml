@@ -27,11 +27,6 @@
       <RowConstraints maxHeight="100.0" minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
     </rowConstraints>
    <children>
-      <Text fx:id="lobbyIpText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Lobby: IP" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER">
-         <font>
-            <Font size="29.0" />
-         </font>
-      </Text>
       <GridPane prefHeight="166.0" prefWidth="1530.0" GridPane.rowIndex="2">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -107,6 +102,31 @@
                   <Insets bottom="10.0" />
                </GridPane.margin>
             </ImageView>
+         </children>
+      </GridPane>
+      <GridPane>
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints maxHeight="134.0" minHeight="10.0" prefHeight="32.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="134.0" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="134.0" minHeight="10.0" prefHeight="32.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="79.0" minHeight="10.0" prefHeight="52.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="79.0" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Text fx:id="lobbyIpText" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Server Name" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+               <font>
+                  <Font size="29.0" />
+               </font>
+            </Text>
+            <Text fx:id="timeUntilStart" fill="#f8f8f8" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Text>
+            <Text fx:id="courseNameText" fill="#e1e1e1" strokeType="OUTSIDE" strokeWidth="0.0" text="Course Name" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
          </children>
       </GridPane>
    </children>

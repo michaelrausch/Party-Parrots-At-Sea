@@ -24,10 +24,11 @@ public class RaceState {
 //    private final DateFormat DATE_TIME_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     private final DateFormat DATE_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private double windSpeed;
-    private ReadOnlyDoubleWrapper windDirection = new ReadOnlyDoubleWrapper();
-    private long raceTime;
+    private double windDirection;
+    private long serverSystemTime;
     private long expectedStartTime;
     private boolean isRaceStarted = false;
+    long timeTillStart;
     private List<ClientYacht> collisions = new ArrayList<>();
     private List<CollisionListener> collisionListeners = new ArrayList<>();
 
@@ -36,8 +37,8 @@ public class RaceState {
 
     public void updateState (RaceStatusData data) {
         this.windSpeed = data.getWindSpeed();
-        this.windDirection.set(data.getWindDirection());
-        this.raceTime = data.getCurrentTime();
+        this.windDirection = data.getWindDirection();
+        this.serverSystemTime = data.getCurrentTime();
         this.expectedStartTime = data.getExpectedStartTime();
         this.isRaceStarted = data.isRaceStarted();
     }
@@ -47,16 +48,20 @@ public class RaceState {
     }
 
     public void updateState (RaceStartData data) {
-//        this.timeTillStart = data.getRaceStartTime();
-        System.out.println(data.getRaceStartTime());
+        this.timeTillStart = data.getRaceStartTime();
     }
 
     public String getRaceTimeStr () {
-        return DATE_TIME_FORMAT.format(raceTime);
+        long raceTime = serverSystemTime - expectedStartTime;
+        if (raceTime < 0) {
+            return "-" + DATE_TIME_FORMAT.format(-1 * (raceTime - 1000));
+        } else {
+            return DATE_TIME_FORMAT.format(serverSystemTime - expectedStartTime);
+        }
     }
 
     public long getTimeTillStart () {
-        return (expectedStartTime - raceTime) / 1000;
+        return (expectedStartTime - serverSystemTime);
     }
 
     public double getWindSpeed() {
@@ -68,11 +73,7 @@ public class RaceState {
     }
 
     public long getRaceTime() {
-        return raceTime;
-    }
-
-    public long getExpectedStartTime() {
-        return expectedStartTime;
+        return serverSystemTime;
     }
 
     public boolean isRaceStarted () {

@@ -71,7 +71,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Button selectAnnotationBtn;
     @FXML
     private ComboBox<ClientYacht> yachtSelectionComboBox;
-
+    @FXML
+    private Text fpsDisplay;
     //Race Data
     private Map<Integer, ClientYacht> participants;
     private Map<Integer, CompoundMark> markers;
@@ -115,11 +116,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseSparkLine();
 
         gameView = new GameView();
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(gameView));
-        gameView.setBoats(new ArrayList<>(participants.values()));
-        gameView.updateBorder(raceData.getCourseLimit());
-        gameView.updateCourse(
-            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+        gameView.setFrameRateFXText(fpsDisplay);
+        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
+            gameView.setBoats(new ArrayList<>(participants.values()));
+            gameView.updateBorder(raceData.getCourseLimit());
+            gameView.updateCourse(
+                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
         gameView.setBoatAsPlayer(player);
         gameView.startRace();
@@ -370,12 +372,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the clock for the race
      */
     private void updateRaceTime() {
-        if (!raceState.isRaceStarted()) {
-            timerLabel.setFill(Color.RED);
-            timerLabel.setText("Race Finished!");
-        } else {
-            timerLabel.setText(raceState.getRaceTimeStr());
-        }
+//        if (!raceState.isRaceStarted()) {
+//            timerLabel.setFill(Color.RED);
+//            timerLabel.setText("Race Finished!");
+//        } else {
+        timerLabel.setText(raceState.getRaceTimeStr());
+//        }
     }
 
     /**

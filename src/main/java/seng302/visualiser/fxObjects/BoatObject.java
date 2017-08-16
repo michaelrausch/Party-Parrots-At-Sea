@@ -1,9 +1,9 @@
 package seng302.visualiser.fxObjects;
 
 import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
-import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -24,6 +24,12 @@ import javafx.scene.transform.Rotate;
  */
 public class BoatObject extends Group {
 
+    @FunctionalInterface
+    public interface SelectedBoatListener {
+
+        void notifySelected(BoatObject boatObject, Boolean isSelected);
+    }
+
     //Constants for drawing
     private static final double BOAT_HEIGHT = 15d;
     private static final double BOAT_WIDTH = 10d;
@@ -42,8 +48,10 @@ public class BoatObject extends Group {
     private double distanceTravelled, lastRotation;
     private Point2D lastPoint;
     private Paint colour = Color.BLACK;
-    private Boolean isSelected, destinationSet;  //All boats are initialised as selected
+    private Boolean isSelected = false, destinationSet;  //All boats are initialised as selected
     private boolean isPlayer = false;
+
+    private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
@@ -86,7 +94,7 @@ public class BoatObject extends Group {
         });
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
         boatPoly.setCache(true);
-        boatPoly.setCacheHint(CacheHint.SPEED);
+//        boatPoly.setCacheHint(CacheHint.SPEED);
 
 //        annotationBox = new AnnotationBox();
 //        annotationBox.setFill(colour);
@@ -288,6 +296,7 @@ public class BoatObject extends Group {
 //    }
 
     public void setIsSelected(Boolean isSelected) {
+        updateListener(isSelected);
         this.isSelected = isSelected;
         setLineGroupVisible(isSelected);
         setWakeVisible(isSelected);
@@ -367,11 +376,25 @@ public class BoatObject extends Group {
         lastHeading = heading;
     }
 
+    public Boolean getSelected() {
+        return isSelected;
+    }
+
     public void setTrajectory(double heading, double velocity, double scaleFactorX, double scaleFactorY) {
 //        wake.setRotation(lastHeading - heading, velocity);
 //        rotateTo(heading);
 //        xVelocity = Math.cos(Math.toRadians(heading)) * velocity * scaleFactorX;
 //        yVelocity = Math.sin(Math.toRadians(heading)) * velocity * scaleFactorY;
         lastHeading = heading;
+    }
+
+    private void updateListener(Boolean isSelected) {
+        for (SelectedBoatListener sbl : selectedBoatListenerListeners) {
+            sbl.notifySelected(this, isSelected);
+        }
+    }
+
+    public void addSelectedBoatListener(SelectedBoatListener sbl) {
+        selectedBoatListenerListeners.add(sbl);
     }
 }

@@ -6,16 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatStatus;
-import seng302.gameServer.messages.MarkRoundingMessage;
-import seng302.gameServer.messages.MarkType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RoundingBoatStatus;
-import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.server.messages.MarkRoundingMessage;
+import seng302.gameServer.server.messages.MarkType;
+import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.server.messages.RoundingBoatStatus;
+import seng302.gameServer.server.messages.YachtEventCodeMessage;
 import seng302.model.GeoPoint;
+import seng302.model.Limit;
 import seng302.model.Player;
 import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
@@ -23,6 +26,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.XMLParser;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -33,6 +37,7 @@ public class GameState implements Runnable {
 
     @FunctionalInterface
     interface NewMessageListener {
+
         void notify(Message message);
     }
 
@@ -59,6 +64,7 @@ public class GameState implements Runnable {
     private static MarkOrder markOrder;
     private static long startTime;
     private static Set<Mark> marks;
+    private static List<Limit> courseLimit;
 
     private static List<NewMessageListener> markListeners;
 
@@ -81,7 +87,7 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
-        ;
+
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
         //set this when game stage changes to prerace
@@ -89,16 +95,34 @@ public class GameState implements Runnable {
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         markListeners = new ArrayList<>();
 
-        new Thread(this).start();   //Run the auto updates on the game state
+        resetStartTime();
+
+        new Thread(this, "GameState").start();   //Run the auto updates on the game state
 
         marks = new MarkOrder().getAllMarks();
+        setCourseLimit("/server_config/race.xml");
+    }
+
+    private void setCourseLimit(String url) {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder;
+        Document document = null;
+        try {
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            document = documentBuilder.parse(new InputSource(getClass().getResourceAsStream(url)));
+        } catch (Exception e) {
+            // sorry, we have to catch general one, otherwise we have to catch five different exceptions.
+            logger.trace("Failed to load course limit for boundary collision detection.", e);
+        }
+        courseLimit = XMLParser.parseRace(document).getCourseLimit();
     }
 
     public static String getHostIpAddress() {
         return hostIpAddress;
     }
 
-    public static Set<Mark> getMarks(){
+    public static Set<Mark> getMarks() {
         return Collections.unmodifiableSet(marks);
     }
 
@@ -135,10 +159,6 @@ public class GameState implements Runnable {
     }
 
     public static void setCurrentStage(GameStages currentStage) {
-        if (currentStage == GameStages.RACING) {
-            startTime = System.currentTimeMillis();
-        }
-
         GameState.currentStage = currentStage;
     }
 
@@ -146,8 +166,12 @@ public class GameState implements Runnable {
         return markOrder;
     }
 
-    public static long getStartTime(){
+    public static long getStartTime() {
         return startTime;
+    }
+
+    public static void resetStartTime(){
+        startTime = System.currentTimeMillis() + MainServerThread.TIME_TILL_START;
     }
 
     public static Double getWindDirection() {
@@ -184,13 +208,13 @@ public class GameState implements Runnable {
     @Override
     public void run() {
 
-        while (true) {
+        while (currentStage != GameStages.FINISHED) {
             try {
                 Thread.sleep(1000 / STATE_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
                 System.out.println("[GameState] interrupted exception");
             }
-            if (currentStage == GameStages.PRE_RACE) {
+            if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.RACING) {
                 update();
             }
 
@@ -229,22 +253,51 @@ public class GameState implements Runnable {
      * Called periodically in this GameState thread to update the GameState values
      */
     public void update() {
+        Boolean raceFinished = true;
+
         Double timeInterval = (System.currentTimeMillis() - previousUpdateTime) / 1000000.0;
         previousUpdateTime = System.currentTimeMillis();
+        if (System.currentTimeMillis() > startTime) {
+            GameState.setCurrentStage(GameStages.RACING);
+        }
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
-            if (!yacht.getFinishedRace()) {
-                checkForCollision(yacht);
+            if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
+                checkCollision(yacht);
                 checkForLegProgression(yacht);
+                raceFinished = false;
             }
+        }
+
+        if (raceFinished) {
+            currentStage = GameStages.FINISHED;
         }
     }
 
+    /**
+     * Check if the yacht has crossed the course limit
+     *
+     * @param yacht the yacht to be tested
+     * @return a boolean value of if there is a boundary collision
+     */
+    private static Boolean checkBoundaryCollision(ServerYacht yacht) {
+        for (int i = 0; i < courseLimit.size() - 1; i++) {
+            if (GeoUtility.checkCrossedLine(courseLimit.get(i), courseLimit.get(i + 1),
+                yacht.getLastLocation(), yacht.getLocation()) != 0) {
+                return true;
+            }
+        }
+        if (GeoUtility.checkCrossedLine(courseLimit.get(courseLimit.size() - 1), courseLimit.get(0),
+            yacht.getLastLocation(), yacht.getLocation()) != 0) {
+            return true;
+        }
+        return false;
+    }
 
-    public static void checkForCollision(ServerYacht serverYacht) {
-        ServerYacht collidedYacht = checkCollision(serverYacht);
+    public static void checkCollision(ServerYacht serverYacht) {
+        ServerYacht collidedYacht = checkYachtCollision(serverYacht);
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
             serverYacht.setLocation(
@@ -263,10 +316,21 @@ public class GameState implements Runnable {
                 new YachtEventCodeMessage(serverYacht.getSourceId())
             );
         } else {
-            Mark collidedMark = markCollidedWith(serverYacht);
+            Mark collidedMark = checkMarkCollision(serverYacht);
             if (collidedMark != null) {
                 serverYacht.setLocation(
                     calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
+                );
+                serverYacht.setCurrentVelocity(
+                    serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+                );
+                notifyMessageListeners(
+                    new YachtEventCodeMessage(serverYacht.getSourceId())
+                );
+            } else if (checkBoundaryCollision(serverYacht)) {
+                serverYacht.setLocation(
+                    calculateBounceBack(serverYacht, serverYacht.getLocation(),
+                        BOUNCE_DISTANCE_YACHT)
                 );
                 serverYacht.setCurrentVelocity(
                     serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
@@ -289,7 +353,7 @@ public class GameState implements Runnable {
             if (velocity < maxBoatSpeed - 500) {
                 yacht.changeVelocity(maxBoatSpeed / 100);
             } else if (velocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-maxBoatSpeed / 100);
+                yacht.changeVelocity(-velocity / 200);
             } else {
                 yacht.setCurrentVelocity(maxBoatSpeed);
             }
@@ -298,7 +362,7 @@ public class GameState implements Runnable {
                 yacht.changeVelocity(-velocity / 200);
             } else if (velocity > 100) {
                 yacht.changeVelocity(-velocity / 50);
-            } else if (velocity <= 100){
+            } else if (velocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }
         }
@@ -340,11 +404,13 @@ public class GameState implements Runnable {
     /**
      * 4 Different cases of progression in the race 1 - Passing the start line 2 - Passing any
      * in-race Gate 3 - Passing any in-race Mark 4 - Passing the finish line
+     *
      * @param yacht the current yacht to check for progression
      */
     private void checkForLegProgression(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
+//        System.out.println(yacht.getCurrentMarkSeqID());
 
         Boolean hasProgressed;
         if (currentMarkSeqID == 0) {
@@ -493,7 +559,6 @@ public class GameState implements Runnable {
             Boolean isClockwiseCross = GeoUtility.isClockwise(mark1, mark2, prevMark.getMidPoint());
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
-                yacht.setIsFinished(true);
                 yacht.setBoatStatus(BoatStatus.FINISHED);
                 return true;
             }
@@ -503,7 +568,7 @@ public class GameState implements Runnable {
     }
 
 
-    private static Mark markCollidedWith(ServerYacht yacht) {
+    private static Mark checkMarkCollision(ServerYacht yacht) {
         Set<Mark> marksInRace = GameState.getMarks();
         for (Mark mark : marksInRace) {
             if (GeoUtility.getDistance(yacht.getLocation(), mark)
@@ -519,12 +584,14 @@ public class GameState implements Runnable {
      *
      * @return The boats new position
      */
-    private static GeoPoint calculateBounceBack(ServerYacht yacht, GeoPoint collidedWith, Double bounceDistance) {
-        Double heading = GeoUtility.getBearing(yacht.getLocation(), collidedWith);
+    private static GeoPoint calculateBounceBack(ServerYacht yacht, GeoPoint collidedWith,
+        Double bounceDistance) {
+        Double heading = GeoUtility.getBearing(yacht.getLastLocation(), collidedWith);
         // Invert heading
         heading -= 180;
         Integer newHeading = Math.floorMod(heading.intValue(), 360);
-        return GeoUtility.getGeoCoordinate(yacht.getLocation(), newHeading.doubleValue(), bounceDistance);
+        return GeoUtility
+            .getGeoCoordinate(yacht.getLocation(), newHeading.doubleValue(), bounceDistance);
     }
 
     /**
@@ -533,11 +600,12 @@ public class GameState implements Runnable {
      *
      * @return yacht to compare to all other yachts.
      */
-    private static ServerYacht checkCollision(ServerYacht yacht) {
+    private static ServerYacht checkYachtCollision(ServerYacht yacht) {
 
         for (ServerYacht otherYacht : GameState.getYachts().values()) {
             if (otherYacht != yacht) {
-                Double distance = GeoUtility.getDistance(otherYacht.getLocation(), yacht.getLocation());
+                Double distance = GeoUtility
+                    .getDistance(otherYacht.getLocation(), yacht.getLocation());
                 if (distance < YACHT_COLLISION_DISTANCE) {
                     return otherYacht;
                 }
