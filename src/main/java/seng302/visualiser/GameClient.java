@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.server.messages.BoatStatus;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -320,13 +321,9 @@ public class GameClient {
             }
             boolean raceFinished = true;
             for (ClientYacht yacht : allBoatsMap.values()) {
-                if (yacht.getBoatStatus() != 3) {
+                if (yacht.getBoatStatus() != BoatStatus.FINISHED.getCode()) {
                     raceFinished = false;
                 }
-            }
-            if (raceFinished) {
-                close();
-                loadFinishScreenView();
             }
 
             for (long[] boatData : data.getBoatData()) {
@@ -337,14 +334,21 @@ public class GameClient {
                 clientYacht.setBoatStatus((int) boatData[4]);
                 if (legNumber != clientYacht.getLegNumber()) {
                     clientYacht.setLegNumber(legNumber);
-                    raceState.sortPlayers();
-//                    System.out.println("ORDER:");
-//                    for (ClientYacht clientYacht1 : raceState.getPlayerPositions()) {
-//                        System.out.println(clientYacht1.getShortName());
-//                    }
-//                    System.out.println();
+                    updatePlayerPositions();
                 }
             }
+
+            if (raceFinished) {
+                close();
+                loadFinishScreenView();
+            }
+        }
+    }
+
+    private void updatePlayerPositions() {
+        raceState.sortPlayers();
+        for (ClientYacht yacht : raceState.getPlayerPositions()) {
+            yacht.setPosition(raceState.getPlayerPositions().indexOf(yacht) + 1);
         }
     }
 
