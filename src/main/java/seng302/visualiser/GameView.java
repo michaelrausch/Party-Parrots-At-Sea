@@ -96,14 +96,18 @@ public class GameView extends Pane {
 
     public void zoomOut() {
         scaleFactor = 0.1;
-        this.setScaleX(this.getScaleX() - scaleFactor);
-        this.setScaleY(this.getScaleY() - scaleFactor);
+        if (this.getScaleX() > 0.5) {
+            this.setScaleX(this.getScaleX() - scaleFactor);
+            this.setScaleY(this.getScaleY() - scaleFactor);
+        }
     }
 
     public void zoomIn() {
-        scaleFactor =  0.10;
-        this.setScaleX(this.getScaleX() + scaleFactor);
-        this.setScaleY(this.getScaleY() + scaleFactor);
+        scaleFactor = 0.10;
+        if (this.getScaleX() < 3) {
+            this.setScaleX(this.getScaleX() + scaleFactor);
+            this.setScaleY(this.getScaleY() + scaleFactor);
+        }
     }
 
     private enum ScaleDirection {
@@ -118,39 +122,8 @@ public class GameView extends Pane {
             double y = selectedBoat.getBoatLayoutY();
             double displacementX = this.getWidth();
             double displacementY = this.getHeight();
-//            this.setLayoutX((-x) );
-//            this.setLayoutY((-y) );
-
-//            System.out.println("displacementX = " + displacementX);
-//            System.out.println("panelWidth = " + panelWidth);
-//            System.out.println("displacementY = " + displacementY);
-//            System.out.println("panelHeight = " + panelHeight);
             this.setLayoutX((-x + (displacementX / 2.0)) * this.getScaleX());
             this.setLayoutY((-y + (displacementY / 2.0)) * this.getScaleY());
-//            this.setLayoutX((-x + (canvasWidth / 2.0)) * this.getScaleX());
-//            this.setLayoutY((-y + (canvasHeight / 2.0)) * this.getScaleY());
-
-//            boolean isBoatSelected = false;
-//            for (BoatObject boat : boatObjects.values()) {
-//                if (boat.getSelected()) {
-//                    isBoatSelected = true;
-//                    selectedBoat = boat;
-//                    double x = boat.getBoatLayoutX();
-//                    double y = boat.getBoatLayoutY();
-//                    double displacementX = this.getWidth();
-//                    double displacementY = this.getHeight();
-////                    double displacementX = 1200d;
-////                    double displacementY = 900d;
-////                    System.out.println("displacementY = " + displacementY);
-////                    System.out.println("displacementX = " + displacementX);
-//                    this.setLayoutX((-x + (displacementX/2.0)) * this.getScaleX());
-//                    this.setLayoutY((-y + (displacementY/2.0)) * this.getScaleY());
-//                }
-//            }
-//            if (!isBoatSelected) {
-//                this.setLayoutX(0);
-//                this.setLayoutY(0);
-//            }
         } else {
             this.setLayoutX(0);
             this.setLayoutY(0);
