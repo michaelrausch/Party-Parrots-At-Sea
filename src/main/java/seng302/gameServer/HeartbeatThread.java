@@ -13,7 +13,7 @@ import seng302.gameServer.server.messages.Message;
  * Will call .clientDisconnected on the delegate when a heartbeat message
  * cannot be sent to a player
  */
-public class HeartbeatThread extends Thread{
+public class HeartbeatThread implements Runnable {
     private final int HEARTBEAT_PERIOD = 200;
     private ClientConnectionDelegate delegate;
     private Integer seqNum;
@@ -23,6 +23,9 @@ public class HeartbeatThread extends Thread{
         this.delegate =  delegate;
         seqNum = 0;
         disconnectedPlayers = new Stack<>();
+
+        Thread thread = new Thread(this, "HeartBeat");
+        thread.start();
     }
 
     /**

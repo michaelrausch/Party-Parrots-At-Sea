@@ -91,7 +91,6 @@ public class GameState implements Runnable {
 
         resetStartTime();
 
-        new Thread(this).start();   //Run the auto updates on the game state
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
 
         marks = new MarkOrder().getAllMarks();

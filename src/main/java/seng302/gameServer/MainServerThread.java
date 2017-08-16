@@ -56,14 +56,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
 
     public void run() {
-        ServerListenThread serverListenThread;
-        HeartbeatThread heartbeatThread;
 
-        serverListenThread = new ServerListenThread(serverSocket, this);
-        heartbeatThread = new HeartbeatThread(this);
-
-        heartbeatThread.start();
-        serverListenThread.start();
+        new HeartbeatThread(this);
+        new ServerListenThread(serverSocket, this);
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!terminated) {
