@@ -239,27 +239,10 @@ public class GameView extends Pane {
                 }
             }
         }
-//        System.out.println("<seq>");
-//        for (Corner corner : sequence) {
-//            for (CompoundMark cm : newCourse) {
-//                if (cm.getId() == corner.getCompoundMarkID()) {
-//                    System.out.println(cm);
-//                    System.out.println(corner.getSeqID());
-//                }
-//            }
-//        }
-//        System.out.println("</seq>");
-//
-//        for (CompoundMark cm : course) {
-//            System.out.println(cm);
-//        }
 
         // TODO: 16/08/17 Updating mark roundings here. It should not happen here. Nor should it be done this way.
         for (Corner corner : sequence){
-//            System.out.println("corner.getSeqID() = " + corner.getSeqID());
             CompoundMark compoundMark = course.get(corner.getSeqID() - 1);
-//            System.out.println(" = " + RoundingSide.getRoundingSide(corner.getRounding()));
-//            System.out.println("compoundMark = " + compoundMark);
             compoundMark.setRoundingSide(
                 RoundingSide.getRoundingSide(corner.getRounding())
             );
@@ -315,18 +298,13 @@ public class GameView extends Pane {
             }
             GeoPoint nextMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
             // TODO: 16/08/17 This comparison is cancer and deserves to die.
-            System.out.println("course.get(i).getMarks() = " + course.get(i).getMarks());
             for (Mark mark : course.get(i).getMarks()) {
                 markerObjects.get(mark).addArrows(
                     mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                     GeoUtility.getBearing(lastMarkAv, mark),
                     GeoUtility.getBearing(mark, nextMarkAv)
-//                    GeoUtility.getBearing(mark, nextMarkAv),
-//                    GeoUtility.getBearing(lastMarkAv, mark)
                 );
-//                System.out.println(mark.getName() + " " + GeoUtility.getBearing(lastMarkAv, mark) + " " + GeoUtility.getBearing(mark, nextMarkAv));
             }
-            System.out.println("end");
         }
 
         // TODO: 16/08/17 Make this cleaner
@@ -341,15 +319,10 @@ public class GameView extends Pane {
         }
         GeoPoint firstMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
         for (Mark mark : course.get(0).getMarks()) {
-            System.out.println("thing " + GeoUtility.getBearing(mark, firstMarkAv));
-            System.out.println(mark);
-            System.out.println(mark.getRoundingSide());
             markerObjects.get(mark).addArrows(
                 mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                 0d, //90
                 GeoUtility.getBearing(mark, firstMarkAv)
-//                GeoUtility.getBearing(mark, mark),
-//                GeoUtility.getBearing(mark, firstMarkAv)
             );
         }
         //Last Mark case
@@ -779,15 +752,9 @@ public class GameView extends Pane {
         playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
         CompoundMark currentMark = course.get(playerYacht.getLegNumber());
-        System.out.println("currentMark = " + currentMark);
         for (Mark mark : currentMark.getMarks()) {
             markerObjects.get(mark).showNextExitArrow();
         }
-//        CompoundMark destination = course.get(playerYacht.getLegNumber() + 1);
-//        System.out.println("destination = " + destination);
-//        for (Mark mark : destination.getMarks()) {
-//            markerObjects.get(mark).showNextEnterArrow();
-//        }
         annotations.get(playerYacht).addAnnotation(
             "velocity",
             playerYacht.getVelocityProperty(),
@@ -804,19 +771,27 @@ public class GameView extends Pane {
 
     private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
         //Only show arrows for this and next leg.
-        for (Mark mark : compoundMark.getMarks()) {
-            markerObjects.get(mark).showNextExitArrow();
+        if (legNumber - 2 >= 0) {
+            CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
         }
-        if (legNumber < course.size()) {
-            CompoundMark nextMark = course.get(legNumber);
+        if (compoundMark != null) {
+            for (Mark mark : compoundMark.getMarks()) {
+                markerObjects.get(mark).showNextExitArrow();
+            }
+        }
+        CompoundMark nextMark = null;
+        if (legNumber < course.size() - 1) {
+            nextMark = course.get(legNumber);
             for (Mark mark : nextMark.getMarks()) {
                 markerObjects.get(mark).showNextEnterArrow();
             }
         }
         if (legNumber - 2 >= 0) {
             CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
-            for (Mark mark : lastMark.getMarks()) {
-                markerObjects.get(mark).hideAllArrows();
+            if (lastMark != nextMark) {
+                for (Mark mark : lastMark.getMarks()) {
+                    markerObjects.get(mark).hideAllArrows();
+                }
             }
         }
     }

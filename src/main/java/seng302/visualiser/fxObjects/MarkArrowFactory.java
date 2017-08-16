@@ -36,24 +36,20 @@ public class MarkArrowFactory {
      */
     public static Group constructEntryArrow (RoundingSide roundingSide, double angleOfEntry,
                                              double angleOfExit, Paint colour) {
+        if (roundingSide == RoundingSide.PORT && angleOfEntry < angleOfExit && Math.abs(angleOfExit - angleOfEntry) < 180) {
+            return makeInteriorAngle(roundingSide, angleOfExit, angleOfEntry, colour);
+        } else if (roundingSide == RoundingSide.STARBOARD && angleOfEntry > angleOfExit && -Math.abs(angleOfEntry - angleOfExit) > -180) {
+            return makeInteriorAngle(roundingSide, angleOfExit, angleOfEntry, colour);
+        }
+
         angleOfEntry = 180 - angleOfEntry;
         Group arrow = new Group();
         Group exitSection = constructExitArrow(roundingSide, angleOfExit, colour);
         angleOfExit = 180 - angleOfExit;
-//        double minAngle = Math.min(angleOfEntry, angleOfExit);
-//        double arcLen = Math.max(angleOfEntry, angleOfExit) - minAngle;
-//        Arc roundSection = new Arc(
-//                0, 0, MARK_ARROW_SEPARATION, MARK_ARROW_SEPARATION,
-//                angleOfEntry, 180 - (angleOfEntry - angleOfExit)
-//        );
-        System.out.println(angleOfEntry);
-        System.out.println(angleOfExit);
-        System.out.println(angleOfExit - angleOfEntry);
         Arc roundSection = new Arc(
             0, 0, MARK_ARROW_SEPARATION, MARK_ARROW_SEPARATION,
             (roundingSide == RoundingSide.PORT ? -180 : 0) + angleOfEntry,
-//            roundingSide == RoundingSide.PORT ? Math.abs(angleOfExit - angleOfEntry) : angleOfExit - angleOfEntry
-            roundingSide == RoundingSide.PORT ? angleOfExit- angleOfEntry : angleOfEntry - angleOfExit
+            roundingSide == RoundingSide.PORT ? Math.abs(angleOfExit - angleOfEntry) : -Math.abs(angleOfEntry - angleOfExit)
         );
         roundSection.setStrokeWidth(STROKE_WIDTH);
         roundSection.setType(ArcType.OPEN);
@@ -62,8 +58,40 @@ public class MarkArrowFactory {
         Polygon entrySection = constructLineSegment(
                 roundingSide == RoundingSide.PORT ? RoundingSide.STARBOARD : RoundingSide.PORT, 180 + angleOfEntry, colour
         );
-//        Polygon entrySection = new Polygon();
         arrow.getChildren().addAll(exitSection, roundSection, entrySection);
+        return arrow;
+    }
+
+    private static Group makeInteriorAngle (RoundingSide roundingSide, double angleOfExit, double angleOfEntry, Paint colour) {
+        Group arrow = new Group();
+        Polygon lineSegment;
+        angleOfEntry = Math.toRadians(360 - angleOfEntry);
+        angleOfExit = Math.toRadians(180 - angleOfExit);
+        int multiplier = roundingSide == RoundingSide.STARBOARD ? -1 : 1;
+        double xStart = multiplier * MARK_ARROW_SEPARATION * Math.sin(angleOfEntry + Math.PI / 2);
+        double yStart = multiplier * MARK_ARROW_SEPARATION * Math.cos(angleOfEntry + Math.PI / 2);
+        xStart = xStart + (ARROW_LENGTH * Math.sin(angleOfEntry));
+        yStart = yStart + (ARROW_LENGTH * Math.cos(angleOfEntry));
+        multiplier = roundingSide == RoundingSide.STARBOARD ? 1 : -1;
+        double xEnd = multiplier * MARK_ARROW_SEPARATION * Math.sin(angleOfExit + Math.PI / 2);
+        double yEnd = multiplier * MARK_ARROW_SEPARATION * Math.cos(angleOfExit + Math.PI / 2);
+        xEnd = xEnd + (ARROW_LENGTH * Math.sin(angleOfExit));
+        yEnd = yEnd + (ARROW_LENGTH * Math.cos(angleOfExit));
+        lineSegment = new Polygon(
+            xStart, yStart,
+            xEnd, yEnd
+        );
+        lineSegment.setStroke(colour);
+        lineSegment.setFill(Color.BLUE);
+        lineSegment.setStrokeWidth(STROKE_WIDTH);
+        lineSegment.setStrokeLineCap(StrokeLineCap.ROUND);
+        Polyline arrowHead = constructArrowHead(
+            90 + Math.toDegrees(Math.atan2(yStart - yEnd, xEnd - xStart)),
+            colour
+        );
+        arrowHead.setLayoutX(xEnd);
+        arrowHead.setLayoutY(yEnd);
+        arrow.getChildren().addAll(lineSegment, arrowHead);
         return arrow;
     }
 
@@ -89,9 +117,6 @@ public class MarkArrowFactory {
         Polygon lineSegment;
         angle = Math.toRadians(angle);
         int multiplier = roundingSide == RoundingSide.STARBOARD ? 1 : -1;
-//        System.out.println("rounding side " + roundingSide);
-//        System.out.println("multiplier = " + multiplier);
-//        int multiplier = 1;
         double xStart = multiplier * MARK_ARROW_SEPARATION * Math.sin(angle + Math.PI / 2);
         double yStart = multiplier * MARK_ARROW_SEPARATION * Math.cos(angle + Math.PI / 2);
         double xEnd = xStart + (ARROW_LENGTH * Math.sin(angle));

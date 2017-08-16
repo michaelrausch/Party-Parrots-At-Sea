@@ -56,6 +56,10 @@ public class Marker extends Group {
         exitArrows.add(
             MarkArrowFactory.constructExitArrow(roundingSide, exitAngle, colour)
         );
+//        Platform.runLater(() -> {
+//            this.getChildren().add(enterArrows.get(enterArrows.size()-1));
+//            this.getChildren().add(exitArrows.get(exitArrows.size()-1));
+//        });
     }
 
     /**
@@ -76,6 +80,8 @@ public class Marker extends Group {
 
     private void showArrow(List<Group> arrowList, int arrowListIndex) {
         if (arrowListIndex < arrowList.size()) {
+            if (arrowListIndex == 1) {;
+            }
             Platform.runLater(() -> {
                 this.getChildren().remove(1);
                 this.getChildren().add(arrowList.get(arrowListIndex));
@@ -87,6 +93,6 @@ public class Marker extends Group {
      * Hides all arrows.
      */
     public void hideAllArrows() {
-        Platform.runLater(() -> this.getChildren().setAll(mark));
+        Platform.runLater(() -> this.getChildren().setAll(mark, new Group()));
     }
 }
