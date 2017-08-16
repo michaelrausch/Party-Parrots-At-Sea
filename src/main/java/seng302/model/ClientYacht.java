@@ -38,13 +38,13 @@ public class ClientYacht extends Observable {
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
 
-    //BOTH AFAIK
     private String boatType;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
     private String boatName;
     private String country;
+    private Integer position;
 
     private Long estimateTimeAtFinish;
     private Boolean sailIn = true;
@@ -57,7 +57,6 @@ public class ClientYacht extends Observable {
     private Integer boatStatus;
     private Double currentVelocity;
 
-    //CLIENT SIDE
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
     private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
@@ -199,6 +198,14 @@ public class ClientYacht extends Observable {
 
     public GeoPoint getLocation() {
         return location;
+    }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
     }
 
     public void toggleSail() {

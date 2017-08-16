@@ -4,9 +4,15 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Observable;
 import java.util.TimeZone;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import seng302.model.stream.parser.RaceStartData;
 import seng302.model.stream.parser.RaceStatusData;
 
@@ -29,10 +35,12 @@ public class RaceState {
     private long expectedStartTime;
     private boolean isRaceStarted = false;
     long timeTillStart;
+    private ObservableList<ClientYacht> playerPositions;
     private List<ClientYacht> collisions = new ArrayList<>();
     private List<CollisionListener> collisionListeners = new ArrayList<>();
 
     public RaceState() {
+        playerPositions = FXCollections.observableArrayList();
     }
 
     public void updateState (RaceStatusData data) {
@@ -82,6 +90,19 @@ public class RaceState {
 
     public boolean isRaceStarted () {
         return isRaceStarted;
+    }
+
+    public void setBoats(Collection<ClientYacht> clientYachts) {
+        playerPositions.setAll(clientYachts);
+    }
+
+    public void sortPlayers() {
+        playerPositions.sort((yacht1, yacht2) -> Integer.compare(yacht2.getLegNumber(),
+            yacht1.getLegNumber()));
+    }
+
+    public ObservableList<ClientYacht> getPlayerPositions() {
+        return playerPositions;
     }
 
     public void storeCollision(ClientYacht yacht) {

@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -73,6 +75,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ComboBox<ClientYacht> yachtSelectionComboBox;
     @FXML
     private Text fpsDisplay;
+    @FXML
+    private Text windSpeedText;
+
     //Race Data
     private Map<Integer, ClientYacht> participants;
     private Map<Integer, CompoundMark> markers;
@@ -102,8 +107,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void loadRace (
-        Map<Integer, ClientYacht> participants, RaceXMLData raceData, RaceState raceState, ClientYacht player
-    ) {
+        Map<Integer, ClientYacht> participants, RaceXMLData raceData, RaceState raceState,
+        ClientYacht player) {
+
         this.participants = participants;
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
@@ -115,6 +121,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseBoatSelectionComboBox();
         initialiseSparkLine();
 
+        raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
+            while (c.next()) {
+                if (c.wasPermutated()) {
+                    updateOrder(raceState.getPlayerPositions());
+                }
+            }
+        });
+
+        updateOrder(raceState.getPlayerPositions());
         gameView = new GameView();
         gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
@@ -126,6 +141,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         gameView.enableZoom();
         gameView.setBoatAsPlayer(player);
         gameView.startRace();
+
         raceState.addCollisionListener(gameView::drawCollision);
         raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
             gameView.setWindDir(newDirection.doubleValue());
@@ -279,7 +295,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param yacht The yacht to be updated on the sparkline
      * @param legNumber the leg number that the position will be assigned to
      */
-    void updateClientYachtPositionSparkline(ClientYacht yacht, Integer legNumber){
+    void updateYachtPositionSparkline(ClientYacht yacht, Integer legNumber){
         for (XYChart.Series<String, Double> positionData : sparkLineData) {
             positionData.getData().add(
                 new Data<>(
@@ -363,9 +379,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the wind direction arrow and text as from info from the StreamParser
      * @param direction the from north angle of the wind.
      */
-    private void updateWindDirection(double direction) {
-        windDirectionText.setText(String.format("%.1f°", direction));
-        windArrowText.setRotate(direction);
+    private void updateWind() {
+        windDirectionText.setText(String.format("%.1f°", raceState.getWindDirection()));
+        windArrowText.setRotate(raceState.getWindDirection());
+        windSpeedText.setText("Speed: " + String.format("%.1f", raceState.getWindSpeed()) + " Knots");
     }
 
 
@@ -385,21 +402,20 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the order of the yachts as from the StreamParser and sets them in the yacht order
      * section
      */
-    private void updateOrder() {
-        List<ClientYacht> sorted = new ArrayList<>(participants.values());
-        sorted.sort(Comparator.comparingInt(ClientYacht::getPlacing));
+    private void updateOrder(ObservableList<ClientYacht> yachts) {
         List<Text> vboxEntries = new ArrayList<>();
 
-        for (ClientYacht yacht : sorted) {
-            if (yacht.getBoatStatus() == 3) {  // 3 is finish status
-                Text textToAdd = new Text(yacht.getPlacing() + ". " +
-                    yacht.getShortName() + " (Finished)");
+        for (int i = 0; i < yachts.size(); i++) {
+//            System.out.println("yacht == null  " + String.valueOf(yacht == null));
+            if (yachts.get(i).getBoatStatus() == 3) {  // 3 is finish status
+                Text textToAdd = new Text(i + 1 + ". " +
+                    yachts.get(i).getShortName() + " (Finished)");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 vboxEntries.add(textToAdd);
 
             } else {
-                Text textToAdd = new Text(yacht.getPlacing() + ". " +
-                    yacht.getShortName() + " ");
+                Text textToAdd = new Text(i + 1 + ". " +
+                    yachts.get(i).getShortName() + " ");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 textToAdd.setStyle("");
                 vboxEntries.add(textToAdd);
@@ -476,16 +492,17 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
 
-    private Point2D getPointRotation(Point2D ref, Double distance, Double angle){
-        Double newX = ref.getX() + (ref.getX() + distance -ref.getX())*Math.cos(angle) - (ref.getY() + distance -ref.getY())*Math.sin(angle);
-        Double newY = ref.getY() + (ref.getX() + distance -ref.getX())*Math.sin(angle) + (ref.getY() + distance -ref.getY())*Math.cos(angle);
+    private Point2D getPointRotation(Point2D ref, Double distance, Double angle) {
+        Double newX = ref.getX() + (ref.getX() + distance - ref.getX()) * Math.cos(angle)
+            - (ref.getY() + distance - ref.getY()) * Math.sin(angle);
+        Double newY = ref.getY() + (ref.getX() + distance - ref.getX()) * Math.sin(angle)
+            + (ref.getY() + distance - ref.getY()) * Math.cos(angle);
 
         return new Point2D(newX, newY);
     }
 
 
     public Line  makeLeftLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
-
         Point2D ep = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
         Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
         return line;
@@ -541,7 +558,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             TimeUnit.MILLISECONDS.toHours(milliseconds),
             TimeUnit.MILLISECONDS.toMinutes(milliseconds) % 60, //Modulus 60 minutes per hour
             TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60  //Modulus 60 seconds per minute
-            );
+        );
     }
 
     private void setAnnotations(Integer annotationLevel) {
