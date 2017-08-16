@@ -1,4 +1,4 @@
-package seng302.gameServer.server.messages;
+package seng302.gameServer.messages;
 
 import java.util.List;
 import java.util.zip.CRC32;
@@ -39,7 +39,7 @@ public class RaceStatusMessage extends Message{
         this.raceId = raceId;
         this.raceStatus = raceStatus;
         this.expectedStartTime = expectedStartTime;
-        this.raceWindDirection = raceWindDirection * windDirFactor;
+        this.raceWindDirection = raceWindDirection * windDirFactor+100.0;
         this.windSpeed = windSpeed;
         this.numBoatsInRace = numBoatsInRace;
         this.raceType = raceType;

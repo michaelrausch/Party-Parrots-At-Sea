@@ -1,18 +1,20 @@
 package seng302.gameServer;
 
-import gherkin.lexer.Fi;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import seng302.gameServer.server.messages.BoatSubMessage;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.RaceStatus;
-import seng302.gameServer.server.messages.RaceStatusMessage;
-import seng302.gameServer.server.messages.RaceType;
+import seng302.gameServer.messages.BoatSubMessage;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RaceStartNotificationType;
+import seng302.gameServer.messages.RaceStartStatusMessage;
+import seng302.gameServer.messages.RaceStatus;
+import seng302.gameServer.messages.RaceStatusMessage;
+import seng302.gameServer.messages.RaceType;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
@@ -28,8 +30,17 @@ import seng302.visualiser.GameClient;
 public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private static final int PORT = 4942;
-    private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
+    private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
     private static final int LOG_LEVEL = 1;
+    private static final int WARNING_TIME = 10 * -1000;
+    private static final int PREPATORY_TIME = 5 * -1000;
+    public static final int TIME_TILL_START = 10 * 1000;
+
+    private static final int MAX_WIND_SPEED = 12000;
+    private static final int MIN_WIND_SPEED = 8000;
+
+    public static int windSpeed = 1000;
+
     private boolean terminated;
 
     private Thread thread;
@@ -50,19 +61,15 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");
+        startUpdatingWind();
         thread.start();
     }
 
 
     public void run() {
-        ServerListenThread serverListenThread;
-        HeartbeatThread heartbeatThread;
 
-        serverListenThread = new ServerListenThread(serverSocket, this);
-        heartbeatThread = new HeartbeatThread(this);
-
-        heartbeatThread.start();
-        serverListenThread.start();
+        new HeartbeatThread(this);
+        new ServerListenThread(serverSocket, this);
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!terminated) {
@@ -106,6 +113,45 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.sendMessage(message);
         }
+    }
+
+    private static void updateWind(){
+        Integer direction = GameState.getWindDirection().intValue();
+        Integer windSpeed = GameState.getWindSpeedMMS().intValue();
+
+        Random random = new Random();
+
+        if (Math.floorMod(random.nextInt(), 2) == 0){
+            direction += random.nextInt(4);
+            windSpeed += random.nextInt(100) + 500;
+        }
+        else{
+            direction -= random.nextInt(4);
+            windSpeed -= random.nextInt(100) + 500;
+        }
+
+        direction = Math.floorMod(direction, 360);
+
+        if (windSpeed > MAX_WIND_SPEED){
+            windSpeed -= random.nextInt(1000);
+        }
+
+        if (windSpeed <= MIN_WIND_SPEED){
+            windSpeed += random.nextInt(1000);
+        }
+
+        GameState.setWindSpeed(Double.valueOf(windSpeed));
+        GameState.setWindDirection(direction.doubleValue());
+    }
+
+    private static void startUpdatingWind(){
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateWind();
+            }
+        }, 0, 500);
     }
 
 
@@ -166,8 +212,19 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             @Override
             public void run() {
                 broadcastMessage(makeRaceStatusMessage());
+                if (GameState.getCurrentStage() == GameStages.PRE_RACE || GameState.getCurrentStage() == GameStages.LOBBYING) {
+                    broadcastMessage(makeRaceStartMessage());
+                }
             }
         }, 0, 500);
+    }
+
+
+    private RaceStartStatusMessage makeRaceStartMessage() {
+        Long raceStartTime = GameState.getStartTime();
+
+        return new RaceStartStatusMessage(1, raceStartTime ,
+                1, RaceStartNotificationType.SET_RACE_START_TIME);
     }
 
     private RaceStatusMessage makeRaceStatusMessage() {
@@ -178,16 +235,29 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         for (Player player : GameState.getPlayers()) {
             ServerYacht y = player.getYacht();
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(), 0,
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(),
+                y.getLegNumber(),
                 0, 0, 1234L,
                 1234L);
             boatSubMessages.add(m);
         }
 
-        if (GameState.getCurrentStage() == GameStages.RACING) {
-            raceStatus = RaceStatus.STARTED;
+        long timeTillStart = System.currentTimeMillis() - GameState.getStartTime();
+
+        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+            raceStatus = RaceStatus.PRESTART;
+        } else if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
+            raceStatus = RaceStatus.PRESTART;
+
+            if (timeTillStart > WARNING_TIME) {
+                raceStatus = RaceStatus.WARNING;
+            }
+
+            if (timeTillStart > PREPATORY_TIME) {
+                raceStatus = RaceStatus.PREPARATORY;
+            }
         } else {
-            raceStatus = RaceStatus.WARNING;
+            raceStatus = RaceStatus.STARTED;
         }
 
         return new RaceStatusMessage(1, raceStatus, GameState.getStartTime(),

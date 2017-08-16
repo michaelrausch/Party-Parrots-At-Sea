@@ -19,25 +19,25 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.gameServer.server.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.gameServer.server.messages.BoatAction;
-import seng302.gameServer.server.messages.BoatLocationMessage;
-import seng302.gameServer.server.messages.BoatSubMessage;
-import seng302.gameServer.server.messages.ClientType;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.RaceStatus;
-import seng302.gameServer.server.messages.RaceStatusMessage;
-import seng302.gameServer.server.messages.RaceType;
-import seng302.gameServer.server.messages.RegistrationResponseMessage;
-import seng302.gameServer.server.messages.RegistrationResponseStatus;
-import seng302.gameServer.server.messages.XMLMessage;
-import seng302.gameServer.server.messages.XMLMessageSubType;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.BoatSubMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RaceStatus;
+import seng302.gameServer.messages.RaceStatusMessage;
+import seng302.gameServer.messages.RaceType;
+import seng302.gameServer.messages.RegistrationResponseMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.model.ServerYacht;
 
 /**
@@ -209,8 +209,6 @@ public class ServerToClientThread implements Runnable, Observer {
                     }
                 }
             } catch (Exception e) {
-                // TODO: 24/07/17 zyt10 - fix a logic here when a client disconnected
-//                serverLog("ERROR OCCURRED, CLOSING SERVER CONNECTION: " + socket.getRemoteSocketAddress().toString(), 1);
                 closeSocket();
                 return;
             }
@@ -226,7 +224,7 @@ public class ServerToClientThread implements Runnable, Observer {
         }
 
         //@TODO calculate lat/lng values
-        xml.setRegatta(new Regatta("RaceVision Test Game", 57.6679590, 11.8503233));
+        xml.setRegatta(new Regatta("Party Parrot Test Server", "Bermuda Test Course",  57.6679590, 11.8503233));
         xml.setRace(race);
 
         XMLMessage xmlMessage;

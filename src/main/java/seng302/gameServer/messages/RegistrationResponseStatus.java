@@ -1,4 +1,4 @@
-package seng302.gameServer.server.messages;
+package seng302.gameServer.messages;
 
 public enum RegistrationResponseStatus {
     SUCCESS_SPECTATING(0x00),

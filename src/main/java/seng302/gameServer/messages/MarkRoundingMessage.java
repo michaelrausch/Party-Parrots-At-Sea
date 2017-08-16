@@ -1,6 +1,4 @@
-package seng302.gameServer.server.messages;
-
-import seng302.gameServer.GameState;
+package seng302.gameServer.messages;
 
 public class MarkRoundingMessage extends Message{
     private final long MESSAGE_VERSION_NUMBER = 1;

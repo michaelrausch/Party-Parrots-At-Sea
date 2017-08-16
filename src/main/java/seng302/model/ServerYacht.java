@@ -6,7 +6,7 @@ import java.util.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
-import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.messages.BoatStatus;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 
@@ -40,6 +40,7 @@ public class ServerYacht extends Observable {
     private Double currentVelocity;
     private Boolean isAuto;
     private Double autoHeading;
+    private Integer legNumber;
 
     //Mark Rounding
     private Integer currentMarkSeqID;
@@ -60,11 +61,12 @@ public class ServerYacht extends Observable {
         this.country = country;
         this.sailIn = false;
         this.isAuto = false;
-        this.location = new GeoPoint(57.670341, 11.826856);
+        this.location = new GeoPoint(57.67046, 11.83751);
         this.lastLocation = location;
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;     //in mms-1
         this.currentMarkSeqID = 0;
+        this.legNumber = 0;
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
@@ -381,5 +383,12 @@ public class ServerYacht extends Observable {
         return hasPassedLine;
     }
 
+    public void incrementLegNumber() {
+        legNumber++;
+    }
+
+    public Integer getLegNumber() {
+        return legNumber;
+    }
 
 }

@@ -2,10 +2,10 @@ package seng302.gameServer;
 
 import java.util.Arrays;
 
-import seng302.gameServer.server.messages.ClientType;
-import seng302.gameServer.server.messages.Message;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.Message;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.messages.BoatAction;
 
 
 public class ServerPacketParser {

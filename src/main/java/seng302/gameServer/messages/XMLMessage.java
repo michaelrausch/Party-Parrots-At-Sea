@@ -1,4 +1,4 @@
-package seng302.gameServer.server.messages;
+package seng302.gameServer.messages;
 
 public class XMLMessage extends Message{
     private final MessageType MESSAGE_TYPE = MessageType.XML_MESSAGE;

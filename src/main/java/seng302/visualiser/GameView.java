@@ -16,6 +16,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -23,8 +25,9 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import seng302.model.ClientYacht;
 import javafx.util.Duration;
+import seng302.gameServer.messages.RoundingSide;
+import seng302.model.ClientYacht;
 import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -36,6 +39,7 @@ import seng302.visualiser.fxObjects.AnnotationBox;
 import seng302.visualiser.fxObjects.BoatObject;
 import seng302.visualiser.fxObjects.CourseBoundary;
 import seng302.visualiser.fxObjects.Gate;
+import seng302.visualiser.fxObjects.MarkArrowFactory;
 import seng302.visualiser.fxObjects.Marker;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
@@ -71,11 +75,13 @@ public class GameView extends Pane {
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private Map<ClientYacht, AnnotationBox> annotations = new HashMap<>();
     private ObservableList<Node> gameObjects;
+    private BoatObject selectedBoat = null;
     private Group annotationsGroup = new Group();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
     private Group trails = new Group();
     private Group markers = new Group();
+    private List<CompoundMark> course = new ArrayList<>();
 
     private ImageView mapImage = new ImageView();
 
@@ -92,19 +98,19 @@ public class GameView extends Pane {
 
     double scaleFactor = 1;
 
-    public void zoomOut() {
-        scaleFactor = 0.95;
-        for (Node child : getChildren()) {
-            child.setScaleX(child.getScaleX() * scaleFactor);
-            child.setScaleY(child.getScaleY() * scaleFactor);
+    private void zoomOut() {
+        scaleFactor = 0.1;
+        if (this.getScaleX() > 0.5) {
+            this.setScaleX(this.getScaleX() - scaleFactor);
+            this.setScaleY(this.getScaleY() - scaleFactor);
         }
     }
 
-    public void zoomIn() {
-        scaleFactor =  1.05;
-        for (Node child : getChildren()) {
-            child.setScaleX(child.getScaleX() * scaleFactor);
-            child.setScaleY(child.getScaleY() * scaleFactor);
+    private void zoomIn() {
+        scaleFactor = 0.10;
+        if (this.getScaleX() < 2.5) {
+            this.setScaleX(this.getScaleX() + scaleFactor);
+            this.setScaleY(this.getScaleY() + scaleFactor);
         }
     }
 
@@ -113,14 +119,25 @@ public class GameView extends Pane {
         VERTICAL
     }
 
-    public GameView() {
+
+    private void trackBoat() {
+        if (selectedBoat != null) {
+            double x = selectedBoat.getBoatLayoutX();
+            double y = selectedBoat.getBoatLayoutY();
+            double displacementX = this.getWidth();
+            double displacementY = this.getHeight();
+            this.setLayoutX((-x + (displacementX / 2.0)) * this.getScaleX());
+            this.setLayoutY((-y + (displacementY / 2.0)) * this.getScaleY());
+        } else {
+            this.setLayoutX(0);
+            this.setLayoutY(0);
+        }
+    }
+
+    public GameView () {
         gameObjects = this.getChildren();
         // create image view for map, bind panel size to image
         gameObjects.add(mapImage);
-        fpsDisplay.setLayoutX(5);
-        fpsDisplay.setLayoutY(20);
-        fpsDisplay.setStrokeWidth(2);
-        gameObjects.add(fpsDisplay);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
         initializeTimer();
@@ -138,6 +155,7 @@ public class GameView extends Pane {
 
             @Override
             public void handle(long now) {
+                trackBoat();
                 if (lastTime == 0) {
                     lastTime = now;
                 } else {
@@ -161,9 +179,7 @@ public class GameView extends Pane {
                         lastTime = now;
                     }
                 }
-//                Platform.runLater(() ->
-                    boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
-//                );
+                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
             }
         };
     }
@@ -205,6 +221,7 @@ public class GameView extends Pane {
         mapImage.fitHeightProperty().bind(((AnchorPane) this.getParent()).heightProperty());
     }
 
+    // TODO: 16/08/17 Break up this function
     /**
      * Adds a course to the GameView. The view is scaled accordingly unless a border is set in which
      * case the course is added relative ot the border.
@@ -214,6 +231,23 @@ public class GameView extends Pane {
      */
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
         markerObjects = new HashMap<>();
+
+        for (Corner corner : sequence) { //Makes course out of all compound marks.
+            for (CompoundMark compoundMark : newCourse) {
+                if (corner.getCompoundMarkID() == compoundMark.getId()) {
+                    course.add(compoundMark);
+                }
+            }
+        }
+
+        // TODO: 16/08/17 Updating mark roundings here. It should not happen here. Nor should it be done this way.
+        for (Corner corner : sequence){
+            CompoundMark compoundMark = course.get(corner.getSeqID() - 1);
+            compoundMark.setRoundingSide(
+                RoundingSide.getRoundingSide(corner.getRounding())
+            );
+        }
+
         final List<Gate> gates = new ArrayList<>();
         Paint colour = Color.BLACK;
         //Creates new markers
@@ -228,16 +262,6 @@ public class GameView extends Pane {
             for (Mark mark : cMark.getMarks()) {
                 makeAndBindMarker(mark, colour);
             }
-
-            //UNCOMMENT THIS TO HIGHLIGHT SUBMARKS 1 and 2 RED AND GREEN RESPECTIVELY FOR DEBUG
-            //(instead of above for loop)
-//            for (Mark mark : cMark.getMarks()) {
-//                if (mark.getSeqID() == 1) {
-//                    makeAndBindMarker(mark, Color.RED);
-//                } else {
-//                    makeAndBindMarker(mark, Color.GREEN);
-//                }
-//            }
             //Create gate line
             if (cMark.isGate()) {
                 for (int i = 1; i < cMark.getMarks().size(); i++) {
@@ -252,6 +276,73 @@ public class GameView extends Pane {
             }
             colour = Color.BLACK;
         }
+
+        //Creating mark arrows.
+        for (int i=1; i < sequence.size()-1; i++) { //General case.
+            double averageLat = 0;
+            double averageLng = 0;
+            int numMarks = 0;
+            for (Mark mark : course.get(i-1).getMarks()) {
+                numMarks += 1;
+                averageLat += mark.getLat();
+                averageLng += mark.getLng();
+            }
+            GeoPoint lastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+            numMarks = 0;
+            averageLat = 0;
+            averageLng = 0;
+            for (Mark mark : course.get(i+1).getMarks()) {
+                numMarks += 1;
+                averageLat += mark.getLat();
+                averageLng += mark.getLng();
+            }
+            GeoPoint nextMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+            // TODO: 16/08/17 This comparison is cancer and deserves to die.
+            for (Mark mark : course.get(i).getMarks()) {
+                markerObjects.get(mark).addArrows(
+                    mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
+                    GeoUtility.getBearing(lastMarkAv, mark),
+                    GeoUtility.getBearing(mark, nextMarkAv)
+                );
+            }
+        }
+
+        // TODO: 16/08/17 Make this cleaner
+        //First mark case
+        double averageLat = 0;
+        double averageLng = 0;
+        int numMarks = 0;
+        for (Mark mark : course.get(1).getMarks()) {
+            numMarks += 1;
+            averageLat += mark.getLat();
+            averageLng += mark.getLng();
+        }
+        GeoPoint firstMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+        for (Mark mark : course.get(0).getMarks()) {
+            markerObjects.get(mark).addArrows(
+                mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
+                0d, //90
+                GeoUtility.getBearing(mark, firstMarkAv)
+            );
+        }
+        //Last Mark case
+        numMarks = 0;
+        averageLat = 0;
+        averageLng = 0;
+        for (Mark mark : course.get(course.size()-2).getMarks()) {
+            numMarks += 1;
+            averageLat += mark.getLat();
+            averageLng += mark.getLng();
+        }
+        GeoPoint secondToLastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+        for (Mark mark : course.get(course.size()-1).getMarks()) {
+            markerObjects.get(mark).addArrows(
+                mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
+                GeoUtility.getBearing(secondToLastMarkAv, mark),
+                GeoUtility.getBearing(mark, mark)
+            );
+        }
+
         //Scale race to markers if there is no border.
         if (borderPoints == null) {
             rescaleRace(new ArrayList<>(markerObjects.keySet()));
@@ -259,8 +350,8 @@ public class GameView extends Pane {
         //Move the Markers to initial position.
         markerObjects.forEach(((mark, marker) -> {
             Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
-            marker.setCenterX(p2d.getX());
-            marker.setCenterY(p2d.getY());
+            marker.setLayoutX(p2d.getX());
+            marker.setLayoutY(p2d.getY());
         }));
         Platform.runLater(() -> {
             markers.getChildren().clear();
@@ -277,11 +368,12 @@ public class GameView extends Pane {
      */
     private void makeAndBindMarker(Mark observableMark, Paint colour) {
         Marker marker = new Marker(colour);
+//        marker.addArrows(MarkArrowFactory.RoundingSide.PORT, ThreadLocalRandom.current().nextDouble(91, 180), ThreadLocalRandom.current().nextDouble(1, 90));
         markerObjects.put(observableMark, marker);
         observableMark.addPositionListener((mark, lat, lon) -> {
             Point2D p2d = findScaledXY(lat, lon);
-            markerObjects.get(mark).setCenterX(p2d.getX());
-            markerObjects.get(mark).setCenterY(p2d.getY());
+            markerObjects.get(mark).setLayoutX(p2d.getX());
+            markerObjects.get(mark).setLayoutY(p2d.getY());
         });
     }
 
@@ -296,16 +388,16 @@ public class GameView extends Pane {
     private Gate makeAndBindGate(Marker m1, Marker m2, Paint colour) {
         Gate gate = new Gate(colour);
         gate.startXProperty().bind(
-            m1.centerXProperty()
+            m1.layoutXProperty()
         );
         gate.startYProperty().bind(
-            m1.centerYProperty()
+            m1.layoutYProperty()
         );
         gate.endXProperty().bind(
-            m2.centerXProperty()
+            m2.layoutXProperty()
         );
         gate.endYProperty().bind(
-            m2.centerYProperty()
+            m2.layoutYProperty()
         );
         return gate;
     }
@@ -330,6 +422,21 @@ public class GameView extends Pane {
         raceBorder.getPoints().setAll(boundaryPoints);
     }
 
+    // TODO: 16/08/17 initialize zooming internal to GameView only
+    /**
+     * Enables zoom. Has to be called after this is added to a scene.
+     */
+    public void enableZoom () {
+        if (this.getScene() != null) {
+            this.getScene().addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
+                if (event.getCode() == KeyCode.Z) {
+                    zoomIn();
+                } else if (event.getCode() == KeyCode.X) {
+                    zoomOut();
+                }
+            });
+        }
+    }
     /**
      * Rescales the race to the size of the window.
      *
@@ -343,31 +450,45 @@ public class GameView extends Pane {
 //        drawGoogleMap();
     }
 
+    private void setSelectedBoat(BoatObject bo, Boolean isSelected) {
+        if (this.selectedBoat == bo && !isSelected) {
+            this.selectedBoat = null;
+            boatObjects.forEach((boat, group) ->
+                group.setIsSelected(false)
+            );
+        } else if (isSelected) {
+            this.selectedBoat = bo;
+            for (BoatObject group : boatObjects.values()) {
+                if (group != bo) {
+                    group.setIsSelected(false);
+                }
+            }
+        }
+    }
+
     /**
      * Draws all the boats.
-     * @param  clientYachts The yachts to set in the race
+     * @param  yachts The yachts to set in the race
      */
-    public void setBoats(List<ClientYacht> clientYachts) {
+    public void setBoats(List<ClientYacht> yachts) {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
-        for (ClientYacht clientYacht : clientYachts) {
+        for (ClientYacht yacht : yachts) {
             Paint colour = Colors.getColor();
             newBoat = new BoatObject();
+            newBoat.addSelectedBoatListener(this::setSelectedBoat);
             newBoat.setFill(colour);
-            boatObjects.put(clientYacht, newBoat);
-            createAndBindAnnotationBox(clientYacht, colour);
+            boatObjects.put(yacht, newBoat);
+            createAndBindAnnotationBox(yacht, colour);
 //            wakesGroup.getChildren().add(newBoat.getWake());
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
+            yacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
-//                annotations.get(boat).setLayoutX(p2d.getX());
-//                annotations.get(boat).setLayoutY(p2d.getY());
-//                annotations.get(boat).setLocation(100d, 100d);
                 annotations.get(boat).setLocation(p2d.getX(), p2d.getY());
                 bo.setTrajectory(
                     heading,
@@ -385,11 +506,11 @@ public class GameView extends Pane {
         });
     }
 
-    private void createAndBindAnnotationBox(ClientYacht clientYacht, Paint colour) {
+    private void createAndBindAnnotationBox(ClientYacht yacht, Paint colour) {
         AnnotationBox newAnnotation = new AnnotationBox();
         newAnnotation.setFill(colour);
         newAnnotation.addAnnotation(
-            "name", "Player: " + clientYacht.getShortName()
+            "name", "Player: " + yacht.getShortName()
         );
 //        newAnnotation.addAnnotation(
 //            "velocity",
@@ -412,7 +533,7 @@ public class GameView extends Pane {
 //                return format.format(time);
 //            }
 //        );
-        annotations.put(clientYacht, newAnnotation);
+        annotations.put(yacht, newAnnotation);
     }
 
     private void drawFps(Double fps) {
@@ -614,7 +735,6 @@ public class GameView extends Pane {
         timer.stop();
     }
 
-
     public void setWindDir(double windDir) {
         this.windDir = windDir;
     }
@@ -627,10 +747,14 @@ public class GameView extends Pane {
         return playerYacht;
     }
 
-
     public void setBoatAsPlayer (ClientYacht playerYacht) {
         this.playerYacht = playerYacht;
+        playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
+        CompoundMark currentMark = course.get(playerYacht.getLegNumber());
+        for (Mark mark : currentMark.getMarks()) {
+            markerObjects.get(mark).showNextExitArrow();
+        }
         annotations.get(playerYacht).addAnnotation(
             "velocity",
             playerYacht.getVelocityProperty(),
@@ -642,6 +766,31 @@ public class GameView extends Pane {
             annotationsGroup.getChildren().remove(annotations.get(playerYacht));
             gameObjects.add(annotations.get(playerYacht));
         });
+        playerYacht.addMarkRoundingListener(this::updateMarkArrows);
+    }
+
+    private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
+        //Only show arrows for this and next leg.
+        if (compoundMark != null) {
+            for (Mark mark : compoundMark.getMarks()) {
+                markerObjects.get(mark).showNextExitArrow();
+            }
+        }
+        CompoundMark nextMark = null;
+        if (legNumber < course.size() - 1) {
+            nextMark = course.get(legNumber);
+            for (Mark mark : nextMark.getMarks()) {
+                markerObjects.get(mark).showNextEnterArrow();
+            }
+        }
+        if (legNumber - 2 >= 0) {
+            CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
+            if (lastMark != nextMark) {
+                for (Mark mark : lastMark.getMarks()) {
+                    markerObjects.get(mark).hideAllArrows();
+                }
+            }
+        }
     }
 
     /**
@@ -651,32 +800,35 @@ public class GameView extends Pane {
      * @param collisionPoint yacht collision point
      */
     public void drawCollision(GeoPoint collisionPoint) {
-        Platform.runLater(() -> {
-            Point2D point = findScaledXY(collisionPoint);
-            double circleRadius = 0.0;
-            Circle circle = new Circle(point.getX(), point.getY(), circleRadius, Color.RED);
-            gameObjects.add(circle);
+        Point2D point = findScaledXY(collisionPoint);
+        double circleRadius = 0.0;
+        Circle circle = new Circle(point.getX(), point.getY(), circleRadius, Color.RED);
 
-            circle.setFill(Color.TRANSPARENT);
-            circle.setStroke(Color.RED);
-            circle.setStrokeWidth(3);
+        circle.setFill(Color.TRANSPARENT);
+        circle.setStroke(Color.RED);
+        circle.setStrokeWidth(3);
 
-            Timeline timeline = new Timeline();
-            timeline.setCycleCount(1);
+        Timeline timeline = new Timeline();
+        timeline.setCycleCount(1);
 
-            KeyFrame keyframe1 = new KeyFrame(Duration.ZERO,
-                new KeyValue(circle.radiusProperty(), 0),
-                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
-            KeyFrame keyFrame2 = new KeyFrame(new Duration(1000),
-                new KeyValue(circle.radiusProperty(), 50),
-                new KeyValue(circle.strokeProperty(), Color.RED));
-            KeyFrame keyFrame3 = new KeyFrame(new Duration(1500),
-                new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
+        KeyFrame keyframe1 = new KeyFrame(Duration.ZERO,
+            new KeyValue(circle.radiusProperty(), 0),
+            new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
+        KeyFrame keyFrame2 = new KeyFrame(new Duration(1000),
+            new KeyValue(circle.radiusProperty(), 50),
+            new KeyValue(circle.strokeProperty(), Color.RED));
+        KeyFrame keyFrame3 = new KeyFrame(new Duration(1500),
+            new KeyValue(circle.strokeProperty(), Color.TRANSPARENT));
 
-            timeline.getKeyFrames().addAll(keyframe1, keyFrame2, keyFrame3);
-            timeline.play();
+        timeline.getKeyFrames().addAll(keyframe1, keyFrame2, keyFrame3);
 
-            timeline.setOnFinished(event -> gameObjects.remove(circle));
-        });
+        Platform.runLater(() -> gameObjects.add(circle));
+        timeline.setOnFinished(event -> Platform.runLater(() -> gameObjects.remove(circle)));
+        timeline.play();
+    }
+
+    public void setFrameRateFXText(Text fpsDisplay) {
+        this.fpsDisplay = null;
+        this.fpsDisplay = fpsDisplay;
     }
 }

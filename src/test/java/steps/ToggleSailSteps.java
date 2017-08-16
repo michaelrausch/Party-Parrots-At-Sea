@@ -8,7 +8,7 @@ import org.junit.Assert;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
-import seng302.gameServer.server.messages.BoatAction;
+import seng302.gameServer.messages.BoatAction;
 import seng302.model.ServerYacht;
 import seng302.visualiser.ClientToServerThread;
 

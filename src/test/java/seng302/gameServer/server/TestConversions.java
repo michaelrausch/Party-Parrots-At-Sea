@@ -3,7 +3,7 @@ package seng302.gameServer.server;
 import static junit.framework.TestCase.assertEquals;
 
 import org.junit.Test;
-import seng302.gameServer.server.messages.BoatLocationMessage;
+import seng302.gameServer.messages.BoatLocationMessage;
 
 /**
  * Test conversions used by the boat location messages

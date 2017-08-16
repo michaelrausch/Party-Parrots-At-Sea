@@ -3,8 +3,8 @@ package seng302.gameServer.server;
 import static junit.framework.TestCase.assertTrue;
 
 import org.junit.Test;
-import seng302.gameServer.server.messages.Header;
-import seng302.gameServer.server.messages.MessageType;
+import seng302.gameServer.messages.Header;
+import seng302.gameServer.messages.MessageType;
 
 /**
  * Tests message header

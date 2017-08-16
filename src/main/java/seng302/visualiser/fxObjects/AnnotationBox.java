@@ -95,7 +95,7 @@ public class AnnotationBox extends Group {
         background.setStroke(theme);
         background.setStrokeWidth(2);
         background.setCache(true);
-        background.setCacheHint(CacheHint.SPEED);
+        background.setCacheHint(CacheHint.SCALE);
         this.getChildren().add(background);
     }
 
@@ -213,7 +213,7 @@ public class AnnotationBox extends Group {
         Text text = new Text();
         text.setFill(theme);
         text.setStrokeWidth(2);
-        text.setCacheHint(CacheHint.SPEED);
+//        text.setCacheHint(CacheHint.QUALITY);
         text.setCache(true);
         return text;
     }
