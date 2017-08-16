@@ -40,7 +40,7 @@ public class ClientYacht extends Observable {
     private String country;
 
     private Long estimateTimeAtFinish;
-    private Boolean sailIn = false;
+    private Boolean sailIn = true;
     private Integer currentMarkSeqID = 0;
     private Long markRoundTime;
     private Long timeTillNext;
