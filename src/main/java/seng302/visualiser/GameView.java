@@ -294,7 +294,7 @@ public class GameView extends Pane {
      */
     private void makeAndBindMarker(Mark observableMark, Paint colour) {
         Marker marker = new Marker(colour);
-        marker.constructArrows(MarkArrowFactory.RoundingSide.PORT, ThreadLocalRandom.current().nextDouble(91, 180), ThreadLocalRandom.current().nextDouble(1, 90));
+        marker.addArrows(MarkArrowFactory.RoundingSide.PORT, ThreadLocalRandom.current().nextDouble(91, 180), ThreadLocalRandom.current().nextDouble(1, 90));
         markerObjects.put(observableMark, marker);
         observableMark.addPositionListener((mark, lat, lon) -> {
             Point2D p2d = findScaledXY(lat, lon);
@@ -650,11 +650,11 @@ public class GameView extends Pane {
         boatObjects.get(playerYacht).setAsPlayer();
         CompoundMark currentMark = course.get(playerYacht.getLegNumber());
         for (Mark mark : currentMark.getMarks()) {
-            markerObjects.get(mark).showExitArrow();
+            markerObjects.get(mark).showNextExitArrow();
         }
         CompoundMark destination = course.get(playerYacht.getLegNumber() + 1);
         for (Mark mark : destination.getMarks()) {
-            markerObjects.get(mark).showEnterArrow();
+            markerObjects.get(mark).showNextEnterArrow();
         }
         annotations.get(playerYacht).addAnnotation(
             "velocity",
@@ -673,16 +673,16 @@ public class GameView extends Pane {
     private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
         //Only show arrows for this and next leg.
         for (Mark mark : compoundMark.getMarks()) {
-            markerObjects.get(mark).showExitArrow();
+            markerObjects.get(mark).showNextExitArrow();
         }
         CompoundMark nextMark = course.get(legNumber);
         for (Mark mark : nextMark.getMarks()) {
-            markerObjects.get(mark).showEnterArrow();
+            markerObjects.get(mark).showNextEnterArrow();
         }
         if (legNumber - 2 >= 0) {
             CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
             for (Mark mark : lastMark.getMarks()) {
-                markerObjects.get(mark).hideAllArows();
+                markerObjects.get(mark).hideAllArrows();
             }
         }
     }
