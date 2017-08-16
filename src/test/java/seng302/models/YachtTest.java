@@ -21,7 +21,7 @@ public class YachtTest {
 
     @BeforeClass
     public static void setUp() {
-        y1 = new ServerYacht("Yacht", 101, "Y1", "Y1", "Yacht 1", "C1");
+        y1 = new ServerYacht("Yacht", 1, "Y1", "Y1", "Yacht 1", "C1");
         gs = new GameState("localhost");
     }
 
