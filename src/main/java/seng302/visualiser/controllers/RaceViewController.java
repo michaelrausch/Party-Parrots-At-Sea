@@ -128,6 +128,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             gameView.setWindDir(newDirection.doubleValue());
             updateWindDirection(newDirection.doubleValue());
         });
+        updateWindDirection(raceState.windDirectionProperty().doubleValue());
+        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
         for (ClientYacht yacht : participants.values()) {
             yacht.placingProperty().addListener((obs, oldPlacing, newPlacing) -> {
                 updateOrder();

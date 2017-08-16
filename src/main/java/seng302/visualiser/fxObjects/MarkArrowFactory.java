@@ -6,6 +6,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 
+// TODO: 16/08/17 this class used to be well written... FeelsBadMan. Maybe lose the ternary operators.
 /**
  * Factory class for making rounding arrows for mark objects out of JavaFX objects.
  */
@@ -35,21 +36,33 @@ public class MarkArrowFactory {
      */
     public static Group constructEntryArrow (RoundingSide roundingSide, double angleOfEntry,
                                              double angleOfExit, Paint colour) {
+        angleOfEntry = 180 - angleOfEntry;
         Group arrow = new Group();
         Group exitSection = constructExitArrow(roundingSide, angleOfExit, colour);
-        double minAngle = Math.min(angleOfEntry, angleOfExit);
-        double arcLen = Math.max(angleOfEntry, angleOfExit) - minAngle;
+        angleOfExit = 180 - angleOfExit;
+//        double minAngle = Math.min(angleOfEntry, angleOfExit);
+//        double arcLen = Math.max(angleOfEntry, angleOfExit) - minAngle;
+//        Arc roundSection = new Arc(
+//                0, 0, MARK_ARROW_SEPARATION, MARK_ARROW_SEPARATION,
+//                angleOfEntry, 180 - (angleOfEntry - angleOfExit)
+//        );
+        System.out.println(angleOfEntry);
+        System.out.println(angleOfExit);
+        System.out.println(angleOfExit - angleOfEntry);
         Arc roundSection = new Arc(
-                0, 0, MARK_ARROW_SEPARATION, MARK_ARROW_SEPARATION,
-                angleOfEntry, 180 - (angleOfEntry - angleOfExit)
+            0, 0, MARK_ARROW_SEPARATION, MARK_ARROW_SEPARATION,
+            (roundingSide == RoundingSide.PORT ? -180 : 0) + angleOfEntry,
+//            roundingSide == RoundingSide.PORT ? Math.abs(angleOfExit - angleOfEntry) : angleOfExit - angleOfEntry
+            roundingSide == RoundingSide.PORT ? angleOfExit- angleOfEntry : angleOfEntry - angleOfExit
         );
         roundSection.setStrokeWidth(STROKE_WIDTH);
         roundSection.setType(ArcType.OPEN);
         roundSection.setStroke(colour);
         roundSection.setFill(new Color(0,0,0,0));
         Polygon entrySection = constructLineSegment(
-                roundingSide == RoundingSide.PORT ? RoundingSide.STARBOARD : RoundingSide.PORT, angleOfEntry, colour
+                roundingSide == RoundingSide.PORT ? RoundingSide.STARBOARD : RoundingSide.PORT, 180 + angleOfEntry, colour
         );
+//        Polygon entrySection = new Polygon();
         arrow.getChildren().addAll(exitSection, roundSection, entrySection);
         return arrow;
     }
@@ -62,6 +75,7 @@ public class MarkArrowFactory {
      * @return The group containing all the JavaFX objects.
      */
     public static Group constructExitArrow (RoundingSide roundingSide, double angle, Paint colour) {
+        angle = 180 - angle;
         Group arrow = new Group();
         Polygon arrowBody = constructLineSegment(roundingSide, angle, colour);
         Polyline arrowHead = constructArrowHead(angle, colour);
@@ -74,7 +88,10 @@ public class MarkArrowFactory {
     private static Polygon constructLineSegment (RoundingSide roundingSide, double angle, Paint colour) {
         Polygon lineSegment;
         angle = Math.toRadians(angle);
-        int multiplier = roundingSide == RoundingSide.PORT ? -1 : 1;
+        int multiplier = roundingSide == RoundingSide.STARBOARD ? 1 : -1;
+//        System.out.println("rounding side " + roundingSide);
+//        System.out.println("multiplier = " + multiplier);
+//        int multiplier = 1;
         double xStart = multiplier * MARK_ARROW_SEPARATION * Math.sin(angle + Math.PI / 2);
         double yStart = multiplier * MARK_ARROW_SEPARATION * Math.cos(angle + Math.PI / 2);
         double xEnd = xStart + (ARROW_LENGTH * Math.sin(angle));

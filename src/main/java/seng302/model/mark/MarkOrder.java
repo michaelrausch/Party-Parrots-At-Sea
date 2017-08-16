@@ -104,10 +104,11 @@ public class MarkOrder {
             List<Corner> corners = data.getMarkSequence();
             Map<Integer, CompoundMark> marks = data.getCompoundMarks();
             List<CompoundMark> course = new ArrayList<>();
-
             for (Corner corner : corners){
                 CompoundMark compoundMark = marks.get(corner.getCompoundMarkID());
-                compoundMark.setRoundingSide(RoundingSide.getRoundingSide(corner.getRounding()));
+                compoundMark.setRoundingSide(
+                    RoundingSide.getRoundingSide(corner.getRounding())
+                );
                 course.add(compoundMark);
                 allMarks.addAll(compoundMark.getMarks());
             }

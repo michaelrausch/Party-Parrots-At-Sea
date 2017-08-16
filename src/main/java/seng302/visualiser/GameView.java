@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -25,6 +24,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
 import seng302.model.Colors;
 import seng302.model.GeoPoint;
@@ -208,6 +208,7 @@ public class GameView extends Pane {
         mapImage.fitHeightProperty().bind(((AnchorPane) this.getParent()).heightProperty());
     }
 
+    // TODO: 16/08/17 Break up this function
     /**
      * Adds a course to the GameView. The view is scaled accordingly unless a border is set in which
      * case the course is added relative ot the border.
@@ -225,10 +226,30 @@ public class GameView extends Pane {
                 }
             }
         }
-        int j = 0;
-        for (CompoundMark cm : course) {
-            System.out.println(cm.getId() + " " + j++);
-            System.out.println(cm.toString());
+//        System.out.println("<seq>");
+//        for (Corner corner : sequence) {
+//            for (CompoundMark cm : newCourse) {
+//                if (cm.getId() == corner.getCompoundMarkID()) {
+//                    System.out.println(cm);
+//                    System.out.println(corner.getSeqID());
+//                }
+//            }
+//        }
+//        System.out.println("</seq>");
+//
+//        for (CompoundMark cm : course) {
+//            System.out.println(cm);
+//        }
+
+        // TODO: 16/08/17 Updating mark roundings here. It should not happen here. Nor should it be done this way.
+        for (Corner corner : sequence){
+//            System.out.println("corner.getSeqID() = " + corner.getSeqID());
+            CompoundMark compoundMark = course.get(corner.getSeqID() - 1);
+//            System.out.println(" = " + RoundingSide.getRoundingSide(corner.getRounding()));
+//            System.out.println("compoundMark = " + compoundMark);
+            compoundMark.setRoundingSide(
+                RoundingSide.getRoundingSide(corner.getRounding())
+            );
         }
 
         final List<Gate> gates = new ArrayList<>();
@@ -245,16 +266,6 @@ public class GameView extends Pane {
             for (Mark mark : cMark.getMarks()) {
                 makeAndBindMarker(mark, colour);
             }
-
-            //UNCOMMENT THIS TO HIGHLIGHT SUBMARKS 1 and 2 RED AND GREEN RESPECTIVELY FOR DEBUG
-            //(instead of above for loop)
-//            for (Mark mark : cMark.getMarks()) {
-//                if (mark.getSeqID() == 1) {
-//                    makeAndBindMarker(mark, Color.RED);
-//                } else {
-//                    makeAndBindMarker(mark, Color.GREEN);
-//                }
-//            }
             //Create gate line
             if (cMark.isGate()) {
                 for (int i = 1; i < cMark.getMarks().size(); i++) {
@@ -269,6 +280,83 @@ public class GameView extends Pane {
             }
             colour = Color.BLACK;
         }
+
+        //Creating mark arrows.
+        for (int i=1; i < sequence.size()-1; i++) { //General case.
+            double averageLat = 0;
+            double averageLng = 0;
+            int numMarks = 0;
+            for (Mark mark : course.get(i-1).getMarks()) {
+                numMarks += 1;
+                averageLat += mark.getLat();
+                averageLng += mark.getLng();
+            }
+            GeoPoint lastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+            numMarks = 0;
+            averageLat = 0;
+            averageLng = 0;
+            for (Mark mark : course.get(i+1).getMarks()) {
+                numMarks += 1;
+                averageLat += mark.getLat();
+                averageLng += mark.getLng();
+            }
+            GeoPoint nextMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+            // TODO: 16/08/17 This comparison is cancer and deserves to die.
+            System.out.println("course.get(i).getMarks() = " + course.get(i).getMarks());
+            for (Mark mark : course.get(i).getMarks()) {
+                markerObjects.get(mark).addArrows(
+                    mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
+                    GeoUtility.getBearing(lastMarkAv, mark),
+                    GeoUtility.getBearing(mark, nextMarkAv)
+//                    GeoUtility.getBearing(mark, nextMarkAv),
+//                    GeoUtility.getBearing(lastMarkAv, mark)
+                );
+//                System.out.println(mark.getName() + " " + GeoUtility.getBearing(lastMarkAv, mark) + " " + GeoUtility.getBearing(mark, nextMarkAv));
+            }
+            System.out.println("end");
+        }
+
+        // TODO: 16/08/17 Make this cleaner
+        //First mark case
+        double averageLat = 0;
+        double averageLng = 0;
+        int numMarks = 0;
+        for (Mark mark : course.get(1).getMarks()) {
+            numMarks += 1;
+            averageLat += mark.getLat();
+            averageLng += mark.getLng();
+        }
+        GeoPoint firstMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+        for (Mark mark : course.get(0).getMarks()) {
+            System.out.println("thing " + GeoUtility.getBearing(mark, firstMarkAv));
+            System.out.println(mark);
+            System.out.println(mark.getRoundingSide());
+            markerObjects.get(mark).addArrows(
+                mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
+                0d, //90
+                GeoUtility.getBearing(mark, firstMarkAv)
+//                GeoUtility.getBearing(mark, mark),
+//                GeoUtility.getBearing(mark, firstMarkAv)
+            );
+        }
+        //Last Mark case
+        numMarks = 0;
+        averageLat = 0;
+        averageLng = 0;
+        for (Mark mark : course.get(course.size()-2).getMarks()) {
+            numMarks += 1;
+            averageLat += mark.getLat();
+            averageLng += mark.getLng();
+        }
+        GeoPoint secondToLastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
+        for (Mark mark : course.get(course.size()-1).getMarks()) {
+            markerObjects.get(mark).addArrows(
+                mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
+                GeoUtility.getBearing(secondToLastMarkAv, mark),
+                GeoUtility.getBearing(mark, mark)
+            );
+        }
+
         //Scale race to markers if there is no border.
         if (borderPoints == null) {
             rescaleRace(new ArrayList<>(markerObjects.keySet()));
@@ -294,7 +382,7 @@ public class GameView extends Pane {
      */
     private void makeAndBindMarker(Mark observableMark, Paint colour) {
         Marker marker = new Marker(colour);
-        marker.addArrows(MarkArrowFactory.RoundingSide.PORT, ThreadLocalRandom.current().nextDouble(91, 180), ThreadLocalRandom.current().nextDouble(1, 90));
+//        marker.addArrows(MarkArrowFactory.RoundingSide.PORT, ThreadLocalRandom.current().nextDouble(91, 180), ThreadLocalRandom.current().nextDouble(1, 90));
         markerObjects.put(observableMark, marker);
         observableMark.addPositionListener((mark, lat, lon) -> {
             Point2D p2d = findScaledXY(lat, lon);
@@ -649,13 +737,15 @@ public class GameView extends Pane {
         this.playerYacht.toggleSail();
         boatObjects.get(playerYacht).setAsPlayer();
         CompoundMark currentMark = course.get(playerYacht.getLegNumber());
+        System.out.println("currentMark = " + currentMark);
         for (Mark mark : currentMark.getMarks()) {
             markerObjects.get(mark).showNextExitArrow();
         }
-        CompoundMark destination = course.get(playerYacht.getLegNumber() + 1);
-        for (Mark mark : destination.getMarks()) {
-            markerObjects.get(mark).showNextEnterArrow();
-        }
+//        CompoundMark destination = course.get(playerYacht.getLegNumber() + 1);
+//        System.out.println("destination = " + destination);
+//        for (Mark mark : destination.getMarks()) {
+//            markerObjects.get(mark).showNextEnterArrow();
+//        }
         annotations.get(playerYacht).addAnnotation(
             "velocity",
             playerYacht.getVelocityProperty(),
@@ -676,6 +766,7 @@ public class GameView extends Pane {
             markerObjects.get(mark).showNextExitArrow();
         }
         CompoundMark nextMark = course.get(legNumber);
+        System.out.println("nextMark = " + nextMark);
         for (Mark mark : nextMark.getMarks()) {
             markerObjects.get(mark).showNextEnterArrow();
         }
