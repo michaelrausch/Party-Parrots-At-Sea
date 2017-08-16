@@ -189,7 +189,7 @@ public class GameState implements Runnable {
             } catch (InterruptedException e) {
                 System.out.println("[GameState] interrupted exception");
             }
-            if (currentStage == GameStages.PRE_RACE || curentStage == GameStages.RACING) {
+            if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.RACING) {
                 update();
             }
 
@@ -245,10 +245,6 @@ public class GameState implements Runnable {
                 raceFinished = false;
             }
         }
-        for (Yacht yacht : yachts.values()) {
-            yacht.update(timeInterval);
-        }
-    }
 
         if (raceFinished) {
             currentStage = GameStages.FINISHED;

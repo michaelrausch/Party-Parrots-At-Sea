@@ -142,11 +142,10 @@ public class LobbyController {
     @FXML
     public void readyButtonPressed() {
         GameState.setCurrentStage(GameStages.PRE_RACE);
-        return;
         // Do countdown logic here
 
-        //for (LobbyCloseListener readyListener : lobbyListeners)
-        //    readyListener.notify(CloseStatus.READY);
+        for (LobbyCloseListener readyListener : lobbyListeners)
+            readyListener.notify(CloseStatus.READY);
     }
 
     public void setTitle (String title) {

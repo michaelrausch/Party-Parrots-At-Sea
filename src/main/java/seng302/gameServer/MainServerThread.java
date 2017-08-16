@@ -8,11 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import seng302.gameServer.server.messages.BoatSubMessage;
-import seng302.gameServer.server.messages.Message;
-import seng302.gameServer.server.messages.RaceStatus;
-import seng302.gameServer.server.messages.RaceStatusMessage;
-import seng302.gameServer.server.messages.RaceType;
+
+import seng302.gameServer.server.messages.*;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
@@ -30,6 +27,10 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
     private static final int LOG_LEVEL = 1;
+    private static final int PRESTART_TIME = 60 * -1000;
+    private static final int WARNING_TIME = 30 * -1000;
+    private static final int PREPATORY_TIME = 10 * -1000;
+
     private boolean terminated;
 
     private Thread thread;
@@ -166,8 +167,19 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             @Override
             public void run() {
                 broadcastMessage(makeRaceStatusMessage());
+                if (GameState.getCurrentStage() == GameStages.PRE_RACE || GameState.getCurrentStage() == GameStages.LOBBYING) {
+                    broadcastMessage(makeRaceStartMessage());
+                }
             }
         }, 0, 500);
+    }
+
+
+    private RaceStartStatusMessage makeRaceStartMessage() {
+        Long raceStartTime = GameState.getStartTime();
+
+        return new RaceStartStatusMessage(1, raceStartTime ,
+                1, RaceStartNotificationType.SET_RACE_START_TIME);
     }
 
     private RaceStatusMessage makeRaceStatusMessage() {
@@ -184,10 +196,22 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             boatSubMessages.add(m);
         }
 
-        if (GameState.getCurrentStage() == GameStages.RACING) {
-            raceStatus = RaceStatus.STARTED;
+        long timeTillStart = System.currentTimeMillis() - GameState.getStartTime();
+
+        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+            raceStatus = RaceStatus.PRESTART;
+        } else if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
+            raceStatus = RaceStatus.PRESTART;
+
+            if (timeTillStart > WARNING_TIME) {
+                raceStatus = RaceStatus.WARNING;
+            }
+
+            if (timeTillStart > PREPATORY_TIME) {
+                raceStatus = RaceStatus.PREPARATORY;
+            }
         } else {
-            raceStatus = RaceStatus.WARNING;
+            raceStatus = RaceStatus.STARTED;
         }
 
         return new RaceStatusMessage(1, raceStatus, GameState.getStartTime(),

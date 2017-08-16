@@ -73,11 +73,6 @@ public class ServerToClientThread implements Runnable, Observer {
 
     private XMLGenerator xml;
 
-    private static final int PRESTART_TIME = 60 * -1000;
-    private static final int WARNING_TIME = 30 * -1000;
-    private static final int PREPATORY_TIME = 10 * -1000;
-
-
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
 
     private ServerYacht yacht;
