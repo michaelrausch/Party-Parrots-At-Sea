@@ -263,20 +263,20 @@ public class GameClient {
         if (allXMLReceived()) {
             ClientYacht yacht = allBoatsMap.get(roundingData.getBoatId());
             int placing = 1;
-            int originalPlacing = yacht.getPlacing();
+//            int originalPlacing = yacht.getPlacing();
             for (ClientYacht otherYacht : allBoatsMap.values()) {
                 if (otherYacht != yacht && yacht.getLegNumber() + 1 <= otherYacht.getLegNumber()) {
                     placing++;
                 }
             }
-            if (placing != originalPlacing) {
+//            if (placing != originalPlacing) {
                 yacht.setPlacing(placing);
                 for (ClientYacht otherYacht : allBoatsMap.values()) {
                     if (otherYacht.getPlacing() < placing) {
                         otherYacht.setPlacing(otherYacht.getPlacing() + 1);
                     }
                 }
-            }
+//            }
             yacht.roundMark(
                 courseData.getCompoundMarks().get(roundingData.getMarkId()),
                 roundingData.getTimeStamp(),

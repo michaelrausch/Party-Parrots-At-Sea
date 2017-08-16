@@ -765,10 +765,11 @@ public class GameView extends Pane {
         for (Mark mark : compoundMark.getMarks()) {
             markerObjects.get(mark).showNextExitArrow();
         }
-        CompoundMark nextMark = course.get(legNumber);
-        System.out.println("nextMark = " + nextMark);
-        for (Mark mark : nextMark.getMarks()) {
-            markerObjects.get(mark).showNextEnterArrow();
+        if (legNumber < course.size()) {
+            CompoundMark nextMark = course.get(legNumber);
+            for (Mark mark : nextMark.getMarks()) {
+                markerObjects.get(mark).showNextEnterArrow();
+            }
         }
         if (legNumber - 2 >= 0) {
             CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
