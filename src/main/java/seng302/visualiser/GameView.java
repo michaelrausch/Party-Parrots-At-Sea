@@ -24,7 +24,6 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import seng302.gameServer.server.simulator.Boat;
 import seng302.model.ClientYacht;
 import javafx.util.Duration;
 import seng302.model.Colors;
