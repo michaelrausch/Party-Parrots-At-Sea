@@ -20,12 +20,11 @@ public class CustomizationController {
     @FXML
     private Button customizeSubmit;
 
+    private LobbyController lc;
     private ClientToServerThread socketThread;
     private Stage windowStage;
 
     public void initialize() {
-
-        boatColorPicker.setValue(new Color(0.0, 0.0, 0.0, 1.0));
 
     }
 
@@ -51,7 +50,12 @@ public class CustomizationController {
         colorArray[2] = (byte) blue;
 
         socketThread.sendCustomizationRequest(CustomizeRequestType.COLOR, colorArray);
+        lc.setPlayersColor(color);
         windowStage.close();
+    }
+
+    public void setLobbyController(LobbyController lc) {
+        this.lc = lc;
     }
 
     public void setStage(Stage stage) {
@@ -60,6 +64,10 @@ public class CustomizationController {
 
     public void setPlayerName(String name) {
         this.nameField.setText(name);
+    }
+
+    public void setPlayerColor(Color playerColor) {
+        this.boatColorPicker.setValue(playerColor);
     }
 
 

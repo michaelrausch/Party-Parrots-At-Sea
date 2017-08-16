@@ -16,10 +16,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.model.Colors;
 import seng302.model.RaceState;
 import seng302.visualiser.ClientToServerThread;
 
@@ -85,6 +87,8 @@ public class LobbyController {
     private RaceState raceState;
 
     private ClientToServerThread socketThread;
+
+    private Color playersColor;
 
     private int MAX_NUM_PLAYERS = 8;
     private Integer playerID;
@@ -154,9 +158,16 @@ public class LobbyController {
             CustomizationController cc = fxmlLoader.getController();
             cc.setServerThread(this.socketThread);
             cc.setPlayerName(this.players.get(playerID - 1));
+
+            if (this.playersColor == null) {
+                this.playersColor = Colors.getColor(playerID - 1);
+            }
+
+            cc.setPlayerColor(this.playersColor);
             customizeStage.setTitle("Customize Boat");
             customizeStage.setScene(new Scene(root, 700, 450));
             cc.setStage(customizeStage); // pass the stage through so it can be closed later.
+            cc.setLobbyController(this);
             customizeStage.show();
         } catch (IOException e) {
             Logger.logMsg(4, "Failed to load Customization View from resources.");
@@ -218,4 +229,9 @@ public class LobbyController {
         readyButton.setDisable(true);
         readyButton.setVisible(false);
     }
+
+    public void setPlayersColor(Color playerColor) {
+        this.playersColor = playerColor;
+    }
+
 }

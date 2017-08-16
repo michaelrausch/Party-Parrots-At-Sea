@@ -68,7 +68,7 @@ public class ServerYacht extends Observable {
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;     //in mms-1
         this.currentMarkSeqID = 0;
-        this.boatColor = Color.rgb(0, 0, 0);
+        this.boatColor = Colors.getColor(sourceId - 1);
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;

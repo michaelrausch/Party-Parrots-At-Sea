@@ -186,7 +186,6 @@ public class ServerToClientThread implements Runnable, Observer {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-                        //System.out.println("RECEIVED A PACKET");
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
                                 BoatAction actionType = ServerPacketParser
@@ -203,7 +202,6 @@ public class ServerToClientThread implements Runnable, Observer {
                                 break;
 
                             case RACE_CUSTOMIZATION_REQUEST:
-                                System.out.println("CUSTOMIZATION RECEIVED");
                                 Long sourceID = Message
                                     .bytesToLong(Arrays.copyOfRange(payload, 0, 3));
                                 CustomizeRequestType requestType = ServerPacketParser
@@ -212,6 +210,7 @@ public class ServerToClientThread implements Runnable, Observer {
                                 GameState.customizePlayer(sourceID, requestType,
                                     Arrays.copyOfRange(payload, 6, payload.length));
                                 GameState.setCustomizationFlag();
+                                //// TODO: 17/08/2017 ajm412: Send a response packet here. 
                                 break;
                         }
                     } else {
