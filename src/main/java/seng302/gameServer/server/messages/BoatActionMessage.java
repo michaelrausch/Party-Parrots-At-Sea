@@ -6,9 +6,9 @@ package seng302.gameServer.server.messages;
 public class BoatActionMessage extends Message{
     private final MessageType MESSAGE_TYPE = MessageType.BOAT_ACTION;
     private final int MESSAGE_SIZE = 1;
-    private BoatActionType actionType;
+    private BoatAction actionType;
 
-    public BoatActionMessage(BoatActionType actionType) {
+    public BoatActionMessage(BoatAction actionType) {
         this.actionType = actionType;
         setHeader(new Header(MessageType.BOAT_ACTION, 0, (short) 1)); // the second variable is the source id
         allocateBuffer();

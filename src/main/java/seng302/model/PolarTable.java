@@ -71,8 +71,6 @@ public final class PolarTable {
         } catch (IOException e) {
             System.out.println("[PolarTable] IO exception");
         }
-
-
     }
 
 
@@ -155,7 +153,6 @@ public final class PolarTable {
     public static Double getClosestWindSpeedInPolar(Double thisWindSpeed) {
         Double smallestDif = Double.POSITIVE_INFINITY;
         Double closestWind = 0d;
-
         for (Double polarWindSpeed : polarTable.keySet()) {
             Double difference = Math.abs(polarWindSpeed - thisWindSpeed);
             if (difference < smallestDif) {

@@ -42,7 +42,6 @@ public class HeartbeatThread extends Thread{
      */
     private void sendHeartbeatToAllPlayers(){
         Message heartbeat = new Heartbeat(seqNum);
-
         for (Player player : GameState.getPlayers()){
             if (!player.getSocket().isConnected()) {
                 playerLostConnection(player);
@@ -54,7 +53,6 @@ public class HeartbeatThread extends Thread{
                 playerLostConnection(player);
             }
         }
-
         updateDelegate();
         seqNum++;
     }
@@ -71,7 +69,6 @@ public class HeartbeatThread extends Thread{
 
     public void run(){
         Timer t = new Timer();
-
         t.schedule(new TimerTask() {
             @Override
             public void run() {

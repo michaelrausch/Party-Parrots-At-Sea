@@ -4,13 +4,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import seng302.model.Yacht;
+import seng302.model.ServerYacht;
 
 /**
  * A Race object that can be parsed into XML
  */
 public class Race {
-    private List<Yacht> yachts;
+
+    private List<ServerYacht> yachts;
     private LocalDateTime startTime;
 
     public Race(){
@@ -22,7 +23,7 @@ public class Race {
      * Add a boat to the race
      * @param yacht The boat to add
      */
-    public void addBoat(Yacht yacht){
+    public void addBoat(ServerYacht yacht) {
         yachts.add(yacht);
     }
 
@@ -30,7 +31,7 @@ public class Race {
      * Get a list of boats in the race
      * @return A List of boats
      */
-    public List<Yacht> getBoats(){
+    public List<ServerYacht> getBoats() {
         return Collections.unmodifiableList(yachts);
     }
 

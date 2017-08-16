@@ -17,24 +17,24 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import seng302.model.Yacht;
+import seng302.model.ClientYacht;
 
 public class FinishScreenViewController implements Initializable {
 
     @FXML
     private GridPane finishScreenGridPane;
     @FXML
-    private TableView<Yacht> finishOrderTable;
+    private TableView<ClientYacht> finishOrderTable;
     @FXML
-    private TableColumn<Yacht, String> posCol;
+    private TableColumn<ClientYacht, String> posCol;
     @FXML
-    private TableColumn<Yacht, String> boatNameCol;
+    private TableColumn<ClientYacht, String> boatNameCol;
     @FXML
-    private TableColumn<Yacht, String> shortNameCol;
+    private TableColumn<ClientYacht, String> shortNameCol;
     @FXML
-    private TableColumn<Yacht, String> countryCol;
+    private TableColumn<ClientYacht, String> countryCol;
 
-    ObservableList<Yacht> data = FXCollections.observableArrayList();
+    ObservableList<ClientYacht> data = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -61,9 +61,9 @@ public class FinishScreenViewController implements Initializable {
         finishOrderTable.refresh();
     }
 
-    public void setFinishers (List<Yacht> participants) {
-        List<Yacht> sorted = new ArrayList<>(participants);
-        sorted.sort(Comparator.comparingInt(Yacht::getPositionInteger));
+    public void setFinishers(List<ClientYacht> participants) {
+        List<ClientYacht> sorted = new ArrayList<>(participants);
+        sorted.sort(Comparator.comparingInt(ClientYacht::getPositionInteger));
         finishOrderTable.getItems().setAll(sorted);
     }
 

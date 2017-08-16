@@ -1,4 +1,4 @@
-package seng302.visualizer.annotations;
+package seng302.visualiser.annotations;
 
 import static org.junit.Assert.assertEquals;
 

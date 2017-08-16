@@ -2,6 +2,7 @@ package seng302.model.mark;
 
 import java.util.ArrayList;
 import java.util.List;
+import seng302.gameServer.server.messages.RoundingSide;
 import seng302.model.GeoPoint;
 import seng302.utilities.GeoUtility;
 
@@ -9,13 +10,12 @@ public class CompoundMark {
 
 	private int compoundMarkId;
 	private String name;
-
 	private List<Mark> marks = new ArrayList<>();
     private GeoPoint midPoint;
 
     public CompoundMark(int markID, String name, List<Mark> marks) {
         this.compoundMarkId = markID;
-		this.name = name;
+        this.name = name;
         this.marks.addAll(marks);
         if (marks.size() > 1) {
             this.midPoint = GeoUtility.getDirtyMidPoint(marks.get(0), marks.get(1));
@@ -54,6 +54,27 @@ public class CompoundMark {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+    public void setRoundingSide(RoundingSide roundingSide) {
+        switch (roundingSide) {
+            case SP:
+                getSubMark(1).setRoundingSide(RoundingSide.STARBOARD);
+                getSubMark(2).setRoundingSide(RoundingSide.PORT);
+                break;
+            case PS:
+                getSubMark(1).setRoundingSide(RoundingSide.PORT);
+                getSubMark(2).setRoundingSide(RoundingSide.STARBOARD);
+                break;
+            case PORT:
+                getSubMark(1).setRoundingSide(RoundingSide.PORT);
+                break;
+            case STARBOARD:
+                getSubMark(1).setRoundingSide(RoundingSide.STARBOARD);
+                break;
+
+
+        }
+    }
 
     /**
      * Returns the mark contained in the compound mark. Marks are numbered 1 to n;

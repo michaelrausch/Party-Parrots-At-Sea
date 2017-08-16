@@ -1,6 +1,8 @@
 package seng302.model.mark;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +26,8 @@ public class CompoundMarkTest {
 
     @Before
     public void setUp() throws Exception {
-        mark1 = new Mark("Mark1", 57.670333, 11.842833, 0);
-        mark2 = new Mark("Mark2", 57.671524, 11.844495, 1);
+        mark1 = new Mark("Mark1", 1, 57.670333, 11.842833, 0);
+        mark2 = new Mark("Mark2", 2, 57.671524, 11.844495, 1);
 
         List<Mark> gateMarks = new ArrayList<Mark>();
         gateMarks.add(mark1);

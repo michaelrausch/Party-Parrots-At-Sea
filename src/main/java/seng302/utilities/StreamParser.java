@@ -13,15 +13,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.parser.MarkRoundingData;
-import seng302.model.stream.parser.PositionUpdateData;
+import seng302.model.stream.parser.*;
 import seng302.model.stream.parser.PositionUpdateData.DeviceType;
-import seng302.model.stream.parser.RaceStartData;
-import seng302.model.stream.parser.RaceStatusData;
 
 /**
- * StreamParser is a utilities class for taking byte data, formatted according to the AC35
- * streaming protocol, and parsing it into basic data types or collections.
+ * StreamParser is a utilities class for taking byte data, formatted according to the AC35 streaming
+ * protocol, and parsing it into basic data types or collections.
  *
  * Created by kre39 on 23/04/17.
  */
@@ -34,8 +31,9 @@ public class StreamParser {
      * @return the packet sequence number if the packet is of type HEARTBEAT, null otherwise.
      */
     public static Long extractHeartBeat(StreamPacket packet) {
-        if (packet.getType() != PacketType.HEARTBEAT)
+        if (packet.getType() != PacketType.HEARTBEAT) {
             return null;
+        }
         long heartbeat = bytesToLong(packet.getPayload());
         System.out.println("heartbeat = " + heartbeat);
         return heartbeat;
@@ -52,17 +50,17 @@ public class StreamParser {
      * containing the parsed packet data.
      */
     public static RaceStatusData extractRaceStatus(StreamPacket packet) {
-        if (packet.getType() != PacketType.RACE_STATUS)
+        if (packet.getType() != PacketType.RACE_STATUS) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         long currentTime = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
         long raceId = bytesToLong(Arrays.copyOfRange(payload, 7, 11));
         int raceStatus = payload[11];
-        System.out.println(raceStatus);
-        long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload,12,18));
-        long windDir = bytesToLong(Arrays.copyOfRange(payload,18,20));
-        long rawWindSpeed = bytesToLong(Arrays.copyOfRange(payload,20,22));
+        long expectedStartTime = bytesToLong(Arrays.copyOfRange(payload, 12, 18));
+        long windDir = bytesToLong(Arrays.copyOfRange(payload, 18, 20));
+        long rawWindSpeed = bytesToLong(Arrays.copyOfRange(payload, 20, 22));
 
 //        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 //        currentTime = format.format((new Date(currentTime)))
@@ -70,7 +68,6 @@ public class StreamParser {
         RaceStatusData data = new RaceStatusData(
             windDir, rawWindSpeed, raceStatus, currentTime, expectedStartTime
         );
-
 
 //        long timeTillStart =
 //            ((new Date(expectedStartTime)).getTime() - (new Date(currentTime)).getTime()) / 1000;
@@ -111,7 +108,7 @@ public class StreamParser {
 //            boat.setEstimateTimeAtFinish(estTimeAtFinish);
             data.addBoatData(boatID, estTimeAtNextMark, estTimeAtFinish, leg, boatStatus);
         }
-        return  data;
+        return data;
     }
 
 //    private static void setBoatLegPosition(Yacht updatingBoat, Integer leg){
@@ -140,8 +137,9 @@ public class StreamParser {
      * DISPLAY_TEXT_MESSAGE.
      */
     public static List<String> extractDisplayMessage(StreamPacket packet) {
-        if (packet.getType() != PacketType.DISPLAY_TEXT_MESSAGE)
+        if (packet.getType() != PacketType.DISPLAY_TEXT_MESSAGE) {
             return null;
+        }
         List<String> message = new ArrayList<>();
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
@@ -167,10 +165,11 @@ public class StreamParser {
      * XML_MESSAGE.
      */
     public static Document extractXmlMessage(StreamPacket packet) {
-        if ( packet.getType() != PacketType.RACE_XML &&
-             packet.getType() != PacketType.REGATTA_XML &&
-             packet.getType() != PacketType.BOAT_XML )
+        if (packet.getType() != PacketType.RACE_XML &&
+            packet.getType() != PacketType.REGATTA_XML &&
+            packet.getType() != PacketType.BOAT_XML) {
             return null;
+        }
 
         byte[] payload = packet.getPayload();
         int messageType = payload[9];
@@ -195,8 +194,8 @@ public class StreamParser {
      * Extracts the race start status from the packet and returns it as a long array.
      *
      * @param packet Packet parsed in to use the payload
-     * @return An array of form [raceID, raceStartTime, notificationType, timeStamp] or null if
-     * the packet type is not of RACE_START_STATUS.
+     * @return An array of form [raceID, raceStartTime, notificationType, timeStamp] or null if the
+     * packet type is not of RACE_START_STATUS.
      */
     public static RaceStartData extractRaceStartStatus(StreamPacket packet) {
         if (packet.getType() != PacketType.RACE_START_STATUS) {
@@ -213,23 +212,25 @@ public class StreamParser {
 
     /**
      * Parses the the byte array in a StreamPacket for yacht events to retrieve the necessary info
-     * and returns it a an array of longs.
+     * and returns it as YachtEventData.
      *
      * @param packet Packet parsed in to use the payload
-     * @return the event data in the form [boatID, incidentID, eventID, timeStamp]. Returns null if
-     * the packet is not of type YACHT_EVENT_CODE.
+     * @return the event data in the form of YachtEventData. Returns null if the packet is not of
+     * type YACHT_EVENT_CODE.
      */
-    public static long[] extractYachtEventCode(StreamPacket packet) {
-        if (packet.getType() != PacketType.YACHT_EVENT_CODE)
+    public static YachtEventData extractYachtEventCode(StreamPacket packet) {
+        if (packet.getType() != PacketType.YACHT_EVENT_CODE) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         long timeStamp = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
+        long ackNumber = bytesToLong(Arrays.copyOfRange(payload, 7, 9));
         long raceId = bytesToLong(Arrays.copyOfRange(payload, 9, 13));
         long subjectId = bytesToLong(Arrays.copyOfRange(payload, 13, 17));
         long incidentId = bytesToLong(Arrays.copyOfRange(payload, 17, 21));
         int eventId = payload[21];
-        return new long[] {subjectId, incidentId, eventId, timeStamp};
+        return new YachtEventData(subjectId, incidentId, eventId, timeStamp);
     }
 
     /**
@@ -240,15 +241,16 @@ public class StreamParser {
      * Returns null if the packet is not of type YACHT_ACTION_CODE.
      */
     public static long[] extractYachtActionCode(StreamPacket packet) {
-        if (packet.getType() != PacketType.YACHT_ACTION_CODE)
+        if (packet.getType() != PacketType.YACHT_ACTION_CODE) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         long timeStamp = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
         long subjectId = bytesToLong(Arrays.copyOfRange(payload, 9, 13));
         long incidentId = bytesToLong(Arrays.copyOfRange(payload, 13, 17));
         int eventId = payload[17];
-        return new long[] {subjectId, incidentId, eventId, timeStamp};
+        return new long[]{subjectId, incidentId, eventId, timeStamp};
     }
 
     /**
@@ -259,8 +261,9 @@ public class StreamParser {
      * CHATTER_TEXT.
      */
     public static String extractChatterText(StreamPacket packet) {
-        if (packet.getType() != PacketType.CHATTER_TEXT)
+        if (packet.getType() != PacketType.CHATTER_TEXT) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         int messageType = payload[1];
@@ -277,8 +280,9 @@ public class StreamParser {
      * is not of type BOAT_LOCATION.
      */
     public static PositionUpdateData extractBoatLocation(StreamPacket packet) {
-        if (packet.getType() != PacketType.BOAT_LOCATION)
+        if (packet.getType() != PacketType.BOAT_LOCATION) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int deviceType = (int) payload[15];
         long timeValid = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
@@ -294,10 +298,11 @@ public class StreamParser {
         double groundSpeed = bytesToLong(Arrays.copyOfRange(payload, 38, 40)) / 1000.0;
 
         DeviceType type;
-        if (deviceType == 1)
+        if (deviceType == 1) {
             type = DeviceType.YACHT_TYPE;
-        else
+        } else {
             type = DeviceType.MARK_TYPE;
+        }
 
         return new PositionUpdateData((int) boatId, type, lat, lon, heading, groundSpeed);
     }
@@ -310,8 +315,9 @@ public class StreamParser {
      * if packet is not of type MARK_ROUNDING.
      */
     public static MarkRoundingData extractMarkRounding(StreamPacket packet) {
-        if (packet.getType() != PacketType.MARK_ROUNDING)
+        if (packet.getType() != PacketType.MARK_ROUNDING) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         long timeStamp = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
@@ -326,16 +332,17 @@ public class StreamParser {
     }
 
     /**
-     * Returns a list containing the string value of data within the given stream packet for
-     * course wind.
+     * Returns a list containing the string value of data within the given stream packet for course
+     * wind.
      *
      * @param packet The packet containing the payload
      * @return the string values of the wind packet. Returns null if the packet is not of type
      * COURSE_WIND.
      */
     public static List<String> extractCourseWind(StreamPacket packet) {
-        if (packet.getType() != PacketType.COURSE_WIND)
+        if (packet.getType() != PacketType.COURSE_WIND) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         int selectedWindId = payload[1];
@@ -367,13 +374,13 @@ public class StreamParser {
      * Returns the parsed data from a StreamPacket for average wind data.
      *
      * @param packet The packet containing the payload
-     * @return The wind data in the form
-     * [rawPeriod, rawSamplePeriod, period2, speed2, period3, speed3, period4, speed4, timestamp]
-     * or null if the packet is not of type AVG_WIND.
+     * @return The wind data in the form [rawPeriod, rawSamplePeriod, period2, speed2, period3,
+     * speed3, period4, speed4, timestamp] or null if the packet is not of type AVG_WIND.
      */
     public static long[] extractAvgWind(StreamPacket packet) {
-        if (packet.getType() != PacketType.AVG_WIND)
+        if (packet.getType() != PacketType.AVG_WIND) {
             return null;
+        }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         long timeStamp = bytesToLong(Arrays.copyOfRange(payload, 1, 7));
@@ -385,7 +392,7 @@ public class StreamParser {
         long speed3 = bytesToLong(Arrays.copyOfRange(payload, 17, 19));
         long period4 = bytesToLong(Arrays.copyOfRange(payload, 19, 21));
         long speed4 = bytesToLong(Arrays.copyOfRange(payload, 21, 23));
-        return new long[] {
+        return new long[]{
             rawPeriod, rawSamplePeriod, period2, speed2, period3, speed3, period4, speed4, timeStamp
         };
     }
@@ -411,8 +418,7 @@ public class StreamParser {
     }
 
     /**
-     * takes an array of up to 7 bytes and returns a positive
-     * long constructed from the input bytes
+     * takes an array of up to 7 bytes and returns a positive long constructed from the input bytes
      *
      * @param bytes the byte array to conver to Long
      * @return a positive long if there is less than 7 bytes -1 otherwise

@@ -8,8 +8,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import seng302.model.ClientYacht;
 import seng302.model.Limit;
-import seng302.model.Yacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -125,8 +125,8 @@ public class XMLParser {
      * @param doc XML Document Object
      * @return Mapping of sourceIds to Boats.
      */
-    public static Map<Integer, Yacht> parseBoats(Document doc){
-        Map<Integer, Yacht> competingBoats = new HashMap<>();
+    public static Map<Integer, ClientYacht> parseBoats(Document doc) {
+        Map<Integer, ClientYacht> competingBoats = new HashMap<>();
 
         Element docEle = doc.getDocumentElement();
 
@@ -135,7 +135,8 @@ public class XMLParser {
             Node currentBoat = boatsList.item(i);
             if (currentBoat.getNodeName().equals("Boat")) {
 //                    Boat boat = new Boat(currentBoat);
-                Yacht yacht = new Yacht(XMLParser.getNodeAttributeString(currentBoat, "Type"),
+                ClientYacht yacht = new ClientYacht(
+                    XMLParser.getNodeAttributeString(currentBoat, "Type"),
                     XMLParser.getNodeAttributeInt(currentBoat, "SourceID"),
                     XMLParser.getNodeAttributeString(currentBoat, "HullNum"),
                     XMLParser.getNodeAttributeString(currentBoat, "ShortName"),
@@ -277,11 +278,12 @@ public class XMLParser {
         for (int i = 0; i < childMarks.getLength(); i++) {
             Node markNode = childMarks.item(i);
             if (markNode.getNodeName().equals("Mark")) {
+                Integer seqID = XMLParser.getNodeAttributeInt(markNode, "SeqID");
                 Integer sourceID = XMLParser.getNodeAttributeInt(markNode, "SourceID");
                 String markName = XMLParser.getNodeAttributeString(markNode, "Name");
                 Double targetLat = XMLParser.getNodeAttributeDouble(markNode, "TargetLat");
                 Double targetLng = XMLParser.getNodeAttributeDouble(markNode, "TargetLng");
-                Mark mark = new Mark(markName, targetLat, targetLng, sourceID);
+                Mark mark = new Mark(markName, seqID, targetLat, targetLng, sourceID);
                 subMarks.add(mark);
             }
         }
