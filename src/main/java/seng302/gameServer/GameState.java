@@ -36,7 +36,6 @@ import seng302.utilities.XMLParser;
  * Created by wmu16 on 10/07/17.
  */
 public class GameState implements Runnable {
-
     @FunctionalInterface
     interface NewMessageListener {
 
@@ -180,6 +179,14 @@ public class GameState implements Runnable {
         return windDirection;
     }
 
+    public static void setWindDirection(Double newWindDirection) {
+        windDirection = newWindDirection;
+    }
+
+    public static void setWindSpeed(Double newWindSpeed) {
+        windSpeed = newWindSpeed;
+    }
+
     public static Double getWindSpeedMMS() {
         return windSpeed;
     }
@@ -250,7 +257,6 @@ public class GameState implements Runnable {
         }
     }
 
-
     /**
      * Called periodically in this GameState thread to update the GameState values
      */
@@ -271,6 +277,8 @@ public class GameState implements Runnable {
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
+
+
         }
 
         if (raceFinished) {
@@ -329,17 +337,20 @@ public class GameState implements Runnable {
                 notifyMessageListeners(
                     new YachtEventCodeMessage(serverYacht.getSourceId())
                 );
-            } else if (checkBoundaryCollision(serverYacht)) {
-                serverYacht.setLocation(
-                    calculateBounceBack(serverYacht, serverYacht.getLocation(),
-                        BOUNCE_DISTANCE_YACHT)
-                );
-                serverYacht.setCurrentVelocity(
-                    serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
-                );
-                notifyMessageListeners(
-                    new YachtEventCodeMessage(serverYacht.getSourceId())
-                );
+            }
+            else{
+                if (checkBoundaryCollision(serverYacht)) {
+                    serverYacht.setLocation(
+                            calculateBounceBack(serverYacht, serverYacht.getLocation(),
+                                    BOUNCE_DISTANCE_YACHT)
+                    );
+                    serverYacht.setCurrentVelocity(
+                            serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+                    );
+                    notifyMessageListeners(
+                            new YachtEventCodeMessage(serverYacht.getSourceId())
+                    );
+                }
             }
         }
     }

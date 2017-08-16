@@ -73,6 +73,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ComboBox<ClientYacht> yachtSelectionComboBox;
     @FXML
     private Text fpsDisplay;
+    @FXML
+    private Text windSpeedText;
+
     //Race Data
     private Map<Integer, ClientYacht> participants;
     private Map<Integer, CompoundMark> markers;
@@ -102,8 +105,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     public void loadRace (
         Map<Integer, ClientYacht> participants, RaceXMLData raceData, RaceState raceState,
-        ClientYacht player
-    ) {
+        ClientYacht player) {
         this.participants = participants;
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
@@ -315,7 +317,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             @Override
             public void run() {
                 updateRaceTime();
-                updateWindDirection();
+                updateWind();
                 updateOrder();
 //                updateSparkLine();
             }
@@ -355,9 +357,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     /**
      * Updates the wind direction arrow and text as from info from the StreamParser
      */
-    private void updateWindDirection() {
+    private void updateWind() {
         windDirectionText.setText(String.format("%.1f°", raceState.getWindDirection()));
         windArrowText.setRotate(raceState.getWindDirection());
+
+        windSpeedText.setText("Speed: " + String.format("%.1f", raceState.getWindSpeed()) + " Knots");
     }
 
 

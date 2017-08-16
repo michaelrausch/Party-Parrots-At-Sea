@@ -4,10 +4,7 @@ import gherkin.lexer.Fi;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import seng302.gameServer.server.messages.*;
 import seng302.model.GeoPoint;
@@ -25,11 +22,16 @@ import seng302.visualiser.GameClient;
 public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private static final int PORT = 4942;
-    private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
+    private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
     private static final int LOG_LEVEL = 1;
     private static final int WARNING_TIME = 10 * -1000;
     private static final int PREPATORY_TIME = 5 * -1000;
     public static final int TIME_TILL_START = 10 * 1000;
+
+    private static final int MAX_WIND_SPEED = 12000;
+    private static final int MIN_WIND_SPEED = 8000;
+
+    public static int windSpeed = 1000;
 
     private boolean terminated;
 
@@ -51,6 +53,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");
+        startUpdatingWind();
         thread.start();
     }
 
@@ -102,6 +105,45 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.sendMessage(message);
         }
+    }
+
+    private static void updateWind(){
+        Integer direction = GameState.getWindDirection().intValue();
+        Integer windSpeed = GameState.getWindSpeedMMS().intValue();
+
+        Random random = new Random();
+
+        if (Math.floorMod(random.nextInt(), 2) == 0){
+            direction += random.nextInt(4);
+            windSpeed += random.nextInt(100) + 500;
+        }
+        else{
+            direction -= random.nextInt(4);
+            windSpeed -= random.nextInt(100) + 500;
+        }
+
+        direction = Math.floorMod(direction, 360);
+
+        if (windSpeed > MAX_WIND_SPEED){
+            windSpeed -= random.nextInt(1000);
+        }
+
+        if (windSpeed <= MIN_WIND_SPEED){
+            windSpeed += random.nextInt(1000);
+        }
+
+        GameState.setWindSpeed(Double.valueOf(windSpeed));
+        GameState.setWindDirection(direction.doubleValue());
+    }
+
+    private static void startUpdatingWind(){
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateWind();
+            }
+        }, 0, 500);
     }
 
 
