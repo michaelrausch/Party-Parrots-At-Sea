@@ -104,7 +104,7 @@ public class GameView extends Pane {
 
     public void zoomIn() {
         scaleFactor = 0.10;
-        if (this.getScaleX() < 3) {
+        if (this.getScaleX() < 2.5) {
             this.setScaleX(this.getScaleX() + scaleFactor);
             this.setScaleY(this.getScaleY() + scaleFactor);
         }
