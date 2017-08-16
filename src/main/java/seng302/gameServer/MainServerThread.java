@@ -27,9 +27,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
     private static final int LOG_LEVEL = 1;
-    private static final int PRESTART_TIME = 60 * -1000;
-    private static final int WARNING_TIME = 30 * -1000;
-    private static final int PREPATORY_TIME = 10 * -1000;
+    private static final int WARNING_TIME = 10 * -1000;
+    private static final int PREPATORY_TIME = 5 * -1000;
+    public static final int TIME_TILL_START = 10 * 1000;
 
     private boolean terminated;
 

@@ -89,7 +89,7 @@ public class GameState implements Runnable {
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         markListeners = new ArrayList<>();
 
-        startTime = System.currentTimeMillis() + 60000;
+        resetStartTime();
 
         new Thread(this).start();   //Run the auto updates on the game state
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
@@ -147,6 +147,10 @@ public class GameState implements Runnable {
 
     public static long getStartTime(){
         return startTime;
+    }
+
+    public static void resetStartTime(){
+        startTime = System.currentTimeMillis() + MainServerThread.TIME_TILL_START;
     }
 
     public static Double getWindDirection() {

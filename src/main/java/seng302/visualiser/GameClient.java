@@ -12,6 +12,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.model.ClientYacht;
@@ -76,8 +77,16 @@ public class GameClient {
         LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.disableReadyButton();
-        lobbyController.setTitle(regattaData.getRegattaName());
-        lobbyController.setCourseName(regattaData.getCourseName());
+
+        if (regattaData != null){
+            lobbyController.setTitle(regattaData.getRegattaName());
+            lobbyController.setCourseName(regattaData.getCourseName());
+        }
+        else{
+            lobbyController.setTitle(ipAddress);
+            lobbyController.setCourseName("");
+        }
+
         lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
         this.lobbyController = lobbyController;
     }
@@ -98,10 +107,20 @@ public class GameClient {
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
         lobbyController.setPlayerListSource(clientLobbyList);
-        lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
-        lobbyController.setCourseName(regattaData.getCourseName());
+
+        if (regattaData != null){
+            lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
+            lobbyController.setCourseName(regattaData.getCourseName());
+        }
+        else{
+            lobbyController.setTitle("Hosting: " + ipAddress);
+            lobbyController.setCourseName("");
+        }
+
         lobbyController.addCloseListener(exitCause -> {
             if (exitCause == CloseStatus.READY) {
+                GameState.resetStartTime();
+                lobbyController.disableReadyButton();
                 server.startGame();
             } else if (exitCause == CloseStatus.LEAVE) {
                 loadStartScreen();

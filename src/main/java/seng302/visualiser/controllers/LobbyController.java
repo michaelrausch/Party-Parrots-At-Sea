@@ -96,7 +96,7 @@ public class LobbyController {
         );
         initialiseImageView();
 
-        timeUntilStart.setText("");
+        timeUntilStart.setText("Waiting For Host...");
     }
 
     /**
@@ -170,7 +170,7 @@ public class LobbyController {
 
     public void updateRaceState(RaceState raceState){
         this.raceState = raceState;
-        timeUntilStart.setText(raceState.getRaceTimeStr());
+        timeUntilStart.setText("Starting in: " + raceState.getRaceTimeStr());
     }
 
     public void disableReadyButton () {
