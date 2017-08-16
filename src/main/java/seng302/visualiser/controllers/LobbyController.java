@@ -1,8 +1,7 @@
 package seng302.visualiser.controllers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -14,6 +13,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.model.RaceState;
+import seng302.visualiser.GameClient;
 
 /**
  * A class describing the actions of the lobby screen
@@ -67,9 +68,14 @@ public class LobbyController {
     private ImageView seventhImageView;
     @FXML
     private ImageView eighthImageView;
+    @FXML
+    private Text timeUntilStart;
+    @FXML
+    private Text courseNameText;
 
     private List<ImageView> imageViews = new ArrayList<>();
     private List<TextArea> listViews = new ArrayList<>();
+    private RaceState raceState;
 
     private int MAX_NUM_PLAYERS = 8;
 
@@ -89,6 +95,8 @@ public class LobbyController {
             fifthImageView, sixthImageView, seventhImageView, eighthImageView
         );
         initialiseImageView();
+
+        timeUntilStart.setText("Waiting For Host...");
     }
 
     /**
@@ -133,13 +141,19 @@ public class LobbyController {
 
     @FXML
     public void readyButtonPressed() {
-        GameState.setCurrentStage(GameStages.RACING);
+        GameState.setCurrentStage(GameStages.PRE_RACE);
+        // Do countdown logic here
+
         for (LobbyCloseListener readyListener : lobbyListeners)
             readyListener.notify(CloseStatus.READY);
     }
 
     public void setTitle (String title) {
         lobbyIpText.setText(title);
+    }
+
+    public void setCourseName(String courseName){
+        courseNameText.setText(courseName);
     }
 
     public void addCloseListener(LobbyCloseListener listener) {
@@ -152,6 +166,11 @@ public class LobbyController {
             Platform.runLater(this::updatePlayers)
         );
         Platform.runLater(this::updatePlayers);
+    }
+
+    public void updateRaceState(RaceState raceState){
+        this.raceState = raceState;
+        timeUntilStart.setText("Starting in: " + raceState.getRaceTimeStr());
     }
 
     public void disableReadyButton () {
