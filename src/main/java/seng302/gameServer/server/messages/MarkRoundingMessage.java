@@ -1,5 +1,7 @@
 package seng302.gameServer.server.messages;
 
+import seng302.gameServer.GameState;
+
 public class MarkRoundingMessage extends Message{
     private final long MESSAGE_VERSION_NUMBER = 1;
     private final int MESSAGE_SIZE = 21;
@@ -18,14 +20,14 @@ public class MarkRoundingMessage extends Message{
      * The purpose of this is to record the time when yachts cross marks
      * @param ackNumber ackNumber
      * @param raceId raceId
-     * @param sourceId sourceId
+     * @param sourceId boatSourceId
      * @param roundingBoatStatus roundingBoatStatus
      * @param roundingSide roundingSide
      * @param markId markId
      */
     public MarkRoundingMessage(int ackNumber, int raceId, int sourceId, RoundingBoatStatus roundingBoatStatus,
-                               RoundingSide roundingSide, int markId){
-        this.time = System.currentTimeMillis() / 1000L;
+        RoundingSide roundingSide, MarkType markType, int markId) {
+        this.time = System.currentTimeMillis();
         this.ackNumber = ackNumber;
         this.raceId = raceId;
         this.sourceId = sourceId;
@@ -44,6 +46,7 @@ public class MarkRoundingMessage extends Message{
         putInt((int) sourceId, 4);
         putByte((byte) boatStatus.getCode());
         putByte((byte) roundingSide.getCode());
+        putByte((byte) markType.getCode());
         putByte((byte) markId);
 
         writeCRC();

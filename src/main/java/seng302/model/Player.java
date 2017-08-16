@@ -9,11 +9,11 @@ import java.net.Socket;
 public class Player {
 
     private Socket socket;
-    private Yacht yacht;
+    private ServerYacht yacht;
     private Integer lastMarkPassed;
 
 
-    public Player(Socket socket, Yacht yacht) {
+    public Player(Socket socket, ServerYacht yacht) {
         this.socket = socket;
         this.yacht = yacht;
     }
@@ -30,7 +30,7 @@ public class Player {
         this.lastMarkPassed = lastMarkPassed;
     }
 
-    public Yacht getYacht() {
+    public ServerYacht getYacht() {
         return yacht;
     }
 

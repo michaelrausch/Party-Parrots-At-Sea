@@ -8,12 +8,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import seng302.gameServer.GameState;
 import seng302.model.PolarTable;
-import seng302.model.Yacht;
+import seng302.model.ServerYacht;
 
 
 public class YachtTest {
 
-    private static Yacht y1;
+    private static ServerYacht y1;
     //Yacht y2;
     private static Double windDirection = 180d;
     private static Double windSpeed = 20d;
@@ -21,7 +21,7 @@ public class YachtTest {
 
     @BeforeClass
     public static void setUp() {
-        y1 = new Yacht("Yacht", 101, "Y1", "Y1", "Yacht 1", "C1");
+        y1 = new ServerYacht("Yacht", 101, "Y1", "Y1", "Yacht 1", "C1");
         gs = new GameState("localhost");
     }
 
