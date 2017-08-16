@@ -27,6 +27,7 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
+import seng302.visualiser.controllers.FinishScreenViewController;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.LobbyController.CloseStatus;
 import seng302.visualiser.controllers.RaceViewController;
@@ -195,6 +196,9 @@ public class GameClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        FinishScreenViewController controller = fxmlLoader.getController();
+        controller.setFinishers(allBoatsMap.values());
     }
 
     private void parsePackets() {
