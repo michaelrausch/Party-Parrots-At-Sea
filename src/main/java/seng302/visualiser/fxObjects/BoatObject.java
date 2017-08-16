@@ -48,7 +48,6 @@ public class BoatObject extends Group {
     private Point2D lastPoint;
     private Paint colour = Color.BLACK;
     private Boolean isSelected = false, destinationSet;  //All boats are initialised as selected
-    private Boolean isBeingTracked = false;
     private boolean isPlayer = false;
 
     private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
@@ -298,7 +297,6 @@ public class BoatObject extends Group {
     public void setIsSelected(Boolean isSelected) {
         updateListener(isSelected);
         this.isSelected = isSelected;
-        this.isBeingTracked = isSelected;
         setLineGroupVisible(isSelected);
         setWakeVisible(isSelected);
         setLayLinesVisible(isSelected);
@@ -374,10 +372,6 @@ public class BoatObject extends Group {
         xVelocity = Math.cos(Math.toRadians(heading)) * velocity;
         yVelocity = Math.sin(Math.toRadians(heading)) * velocity;
         lastHeading = heading;
-    }
-
-    public Boolean getBeingTracked() {
-        return isBeingTracked;
     }
 
     public Boolean getSelected() {
