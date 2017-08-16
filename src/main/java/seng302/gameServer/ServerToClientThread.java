@@ -203,6 +203,9 @@ public class ServerToClientThread implements Runnable, Observer {
 
                                 completeRegistration(requestedType);
                                 break;
+
+                            case RACE_CUSTOMIZATION_REQUEST:
+                                System.out.println("CUSTOMIZATION RECEIVED");
                         }
                     } else {
                         logger.warn("Packet has been dropped", 1);

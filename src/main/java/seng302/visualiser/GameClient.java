@@ -136,6 +136,7 @@ public class GameClient {
             e.printStackTrace();
         }
         LobbyController lobbyController = fxmlLoader.getController();
+        lobbyController.setSocketThread(socketThread);
         lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.setPlayerID(socketThread.getClientId());
 

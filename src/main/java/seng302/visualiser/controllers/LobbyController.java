@@ -1,5 +1,8 @@
 package seng302.visualiser.controllers;
 
+import com.sun.deploy.util.SessionState.Client;
+import com.sun.media.jfxmedia.logging.Logger;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,13 +10,18 @@ import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.visualiser.ClientToServerThread;
 import seng302.visualiser.GameView;
 
 /**
@@ -72,6 +80,8 @@ public class LobbyController {
     private List<ImageView> imageViews = new ArrayList<>();
     private List<TextArea> listViews = new ArrayList<>();
 
+    private ClientToServerThread socketThread;
+
     private int MAX_NUM_PLAYERS = 8;
     private Integer playerID;
 
@@ -129,7 +139,23 @@ public class LobbyController {
 
     @FXML
     public void customize() {
-        System.out.println(playerID);
+        Parent root;
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(LobbyController.class.getResource("/views/customizeView.fxml"));
+            root = fxmlLoader.load();
+            Stage customizeStage = new Stage();
+            CustomizationController cc = fxmlLoader.getController();
+            cc.setServerThread(this.socketThread);
+            customizeStage.setTitle("Customize Boat");
+            customizeStage.setScene(new Scene(root, 700, 450));
+            customizeStage.show();
+        } catch (IOException e) {
+            Logger.logMsg(4, "Failed to load Customization View from resources.");
+        }
+    }
+
+    public void setSocketThread(ClientToServerThread thread) {
+        this.socketThread = thread;
     }
 
     @FXML

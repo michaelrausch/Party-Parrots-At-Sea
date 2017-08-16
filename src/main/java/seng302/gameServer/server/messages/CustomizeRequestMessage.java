@@ -12,12 +12,12 @@ public class CustomizeRequestMessage extends Message {
 
     public CustomizeRequestMessage(CustomizeRequestType customizeType, double sourceID,
         byte[] payload) {
+        payloadLength = payload.length;
         setHeader(new Header(MessageType.CUSTOMIZATION_REQUEST, 1, (short) getSize()));
-
         allocateBuffer();
         writeHeaderToBuffer();
 
-        payloadLength = payload.length;
+
         putInt((int) sourceID, 4);
         putInt((int) customizeType.getType(), 2);
         putBytes(payload);

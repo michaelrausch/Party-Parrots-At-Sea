@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import seng302.gameServer.server.messages.BoatAction;
 import seng302.gameServer.server.messages.BoatActionMessage;
 import seng302.gameServer.server.messages.ClientType;
+import seng302.gameServer.server.messages.CustomizeRequestMessage;
+import seng302.gameServer.server.messages.CustomizeRequestType;
 import seng302.gameServer.server.messages.Message;
 import seng302.gameServer.server.messages.RegistrationRequestMessage;
 import seng302.gameServer.server.messages.RegistrationResponseStatus;
@@ -173,6 +175,15 @@ public class ClientToServerThread implements Runnable {
         clientLog("Closed connection to Server", 0);
     }
 
+    public void sendCustomizationRequest(CustomizeRequestType reqType, byte[] payload) {
+        CustomizeRequestMessage requestMessage = new CustomizeRequestMessage(reqType, this.clientId, payload);
+        try {
+            os.write(requestMessage.getBuffer());
+        } catch (IOException e) {
+            logger.error("Could not send customization request");
+        }
+
+    }
 
     /**
      * Sends a request to the server asking for a source ID

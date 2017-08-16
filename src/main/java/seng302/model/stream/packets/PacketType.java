@@ -1,8 +1,5 @@
 package seng302.model.stream.packets;
 
-/**
- * Created by Kusal on 4/24/2017.
- */
 public enum PacketType {
     HEARTBEAT,
     RACE_STATUS,
@@ -21,7 +18,9 @@ public enum PacketType {
     BOAT_ACTION,
     OTHER,
     RACE_REGISTRATION_REQUEST,
-    RACE_REGISTRATION_RESPONSE;
+    RACE_REGISTRATION_RESPONSE,
+    RACE_CUSTOMIZATION_REQUEST,
+    RACE_CUSTOMIZATION_RESPONSE;
 
     public static PacketType assignPacketType(int packetType, byte[] payload){
         switch(packetType){
@@ -62,6 +61,10 @@ public enum PacketType {
                 return RACE_REGISTRATION_REQUEST;
             case 102:
                 return RACE_REGISTRATION_RESPONSE;
+            case 103:
+                return RACE_CUSTOMIZATION_REQUEST;
+            case 104:
+                return RACE_CUSTOMIZATION_RESPONSE;
             default:
         }
         return OTHER;
