@@ -149,9 +149,11 @@ public class LobbyController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(LobbyController.class.getResource("/views/customizeView.fxml"));
             root = fxmlLoader.load();
+            root.getStylesheets().add("/css/master.css");
             Stage customizeStage = new Stage();
             CustomizationController cc = fxmlLoader.getController();
             cc.setServerThread(this.socketThread);
+            cc.setPlayerName(this.players.get(playerID - 1));
             customizeStage.setTitle("Customize Boat");
             customizeStage.setScene(new Scene(root, 700, 450));
             cc.setStage(customizeStage); // pass the stage through so it can be closed later.

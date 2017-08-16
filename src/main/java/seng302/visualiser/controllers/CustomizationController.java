@@ -25,6 +25,8 @@ public class CustomizationController {
 
     public void initialize() {
 
+        boatColorPicker.setValue(new Color(0.0, 0.0, 0.0, 1.0));
+
     }
 
     public void setServerThread(ClientToServerThread ctsThread) {
@@ -56,6 +58,9 @@ public class CustomizationController {
         this.windowStage = stage;
     }
 
+    public void setPlayerName(String name) {
+        this.nameField.setText(name);
+    }
 
 
 }

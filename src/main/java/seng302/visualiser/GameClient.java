@@ -241,7 +241,7 @@ public class GameClient {
                     );
                     clientLobbyList.clear();
                     allBoatsMap.forEach((id, boat) ->
-                        clientLobbyList.add(id + " " + boat.getBoatName())
+                        clientLobbyList.add(boat.getBoatName())
                     );
                     break;
 

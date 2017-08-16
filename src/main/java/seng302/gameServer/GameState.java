@@ -60,6 +60,8 @@ public class GameState implements Runnable {
     public static Double windDirection;
     private static Double windSpeed;
 
+    private static Boolean customizationFlag;
+
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
@@ -91,6 +93,7 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
+        customizationFlag = false;
 
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
@@ -667,5 +670,17 @@ public class GameState implements Runnable {
 
     public static void addMarkPassListener(NewMessageListener listener) {
         markListeners.add(listener);
+    }
+
+    public static void setCustomizationFlag() {
+        customizationFlag = true;
+    }
+
+    public static Boolean getCustomizationFlag() {
+        return customizationFlag;
+    }
+
+    public static void resetCustomizationFlag() {
+        customizationFlag = false;
     }
 }

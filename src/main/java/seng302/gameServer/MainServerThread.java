@@ -76,13 +76,13 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             } catch (InterruptedException e) {
                 serverLog("Interrupted exception in Main Server Thread thread sleep", 1);
             }
-
-            if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+            if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState
+                .getCustomizationFlag()) {
                 // TODO: 16/08/17 ajm412: This can probably be done in a nicer way via those fancy functional interfaces.
                 for (ServerToClientThread thread : serverToClientThreads) {
                     thread.sendSetupMessages();
                 }
-
+                GameState.resetCustomizationFlag();
             }
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
