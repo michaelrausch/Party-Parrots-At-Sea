@@ -16,6 +16,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -96,7 +98,7 @@ public class GameView extends Pane {
 
     double scaleFactor = 1;
 
-    public void zoomOut() {
+    private void zoomOut() {
         scaleFactor = 0.1;
         if (this.getScaleX() > 0.5) {
             this.setScaleX(this.getScaleX() - scaleFactor);
@@ -104,7 +106,7 @@ public class GameView extends Pane {
         }
     }
 
-    public void zoomIn() {
+    private void zoomIn() {
         scaleFactor = 0.10;
         if (this.getScaleX() < 2.5) {
             this.setScaleX(this.getScaleX() + scaleFactor);
@@ -447,6 +449,21 @@ public class GameView extends Pane {
         raceBorder.getPoints().setAll(boundaryPoints);
     }
 
+    // TODO: 16/08/17 initialize zooming internal to GameView only
+    /**
+     * Enables zoom. Has to be called after this is added to a scene.
+     */
+    public void enableZoom () {
+        if (this.getScene() != null) {
+            this.getScene().addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
+                if (event.getCode() == KeyCode.Z) {
+                    zoomIn();
+                } else if (event.getCode() == KeyCode.X) {
+                    zoomOut();
+                }
+            });
+        }
+    }
     /**
      * Rescales the race to the size of the window.
      *

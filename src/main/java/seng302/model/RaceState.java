@@ -23,8 +23,8 @@ public class RaceState {
 
 //    private final DateFormat DATE_TIME_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     private final DateFormat DATE_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
-    private double windSpeed;
-    private double windDirection;
+    private ReadOnlyDoubleWrapper windSpeed = new ReadOnlyDoubleWrapper();
+    private ReadOnlyDoubleWrapper windDirection = new ReadOnlyDoubleWrapper();
     private long serverSystemTime;
     private long expectedStartTime;
     private boolean isRaceStarted = false;
@@ -36,8 +36,8 @@ public class RaceState {
     }
 
     public void updateState (RaceStatusData data) {
-        this.windSpeed = data.getWindSpeed();
-        this.windDirection = data.getWindDirection();
+        this.windSpeed.set(data.getWindSpeed());
+        this.windDirection.set(data.getWindDirection());
         this.serverSystemTime = data.getCurrentTime();
         this.expectedStartTime = data.getExpectedStartTime();
         this.isRaceStarted = data.isRaceStarted();
@@ -65,7 +65,11 @@ public class RaceState {
     }
 
     public double getWindSpeed() {
-        return windSpeed;
+        return windSpeed.doubleValue();
+    }
+
+    public ReadOnlyDoubleProperty windSpeedProperty() {
+        return windSpeed.getReadOnlyProperty();
     }
 
     public ReadOnlyDoubleProperty windDirectionProperty() {

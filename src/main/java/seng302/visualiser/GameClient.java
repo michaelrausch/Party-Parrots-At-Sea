@@ -369,13 +369,6 @@ public class GameClient {
                 socketThread.sendBoatAction(BoatAction.DOWNWIND); break;
             case ENTER: // tack/gybe
                 socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
-            //TODO Allow a zoom in and zoom out methods
-            case Z:  // zoom in
-                raceView.getGameView().zoomIn();
-                break;
-            case X:  // zoom out
-                raceView.getGameView().zoomOut();
-                break;
         }
     }
 

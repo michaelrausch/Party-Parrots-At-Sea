@@ -123,6 +123,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             gameView.updateCourse(
                 new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
+        gameView.enableZoom();
         gameView.setBoatAsPlayer(player);
         gameView.startRace();
         raceState.addCollisionListener(gameView::drawCollision);

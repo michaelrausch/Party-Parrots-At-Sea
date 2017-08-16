@@ -1,6 +1,5 @@
 package seng302.gameServer;
 
-import gherkin.lexer.Fi;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
@@ -8,7 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import seng302.gameServer.server.messages.*;
+import seng302.gameServer.messages.BoatSubMessage;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RaceStartNotificationType;
+import seng302.gameServer.messages.RaceStartStatusMessage;
+import seng302.gameServer.messages.RaceStatus;
+import seng302.gameServer.messages.RaceStatusMessage;
+import seng302.gameServer.messages.RaceType;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
