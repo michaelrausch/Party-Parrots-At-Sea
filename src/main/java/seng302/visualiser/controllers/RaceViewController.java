@@ -2,7 +2,6 @@ package seng302.visualiser.controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -36,8 +35,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
-import seng302.model.RaceState;
 import seng302.model.ClientYacht;
+import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
@@ -147,14 +146,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             gameView.setWindDir(newDirection.doubleValue());
             updateWindDirection(newDirection.doubleValue());
         });
+        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) -> {
+            updateWindSpeed(newSpeed.doubleValue());
+        });
         updateWindDirection(raceState.windDirectionProperty().doubleValue());
+        updateWindSpeed(raceState.getWindSpeed());
         gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
-        for (ClientYacht yacht : participants.values()) {
-            yacht.placingProperty().addListener((obs, oldPlacing, newPlacing) -> {
-                updateOrder();
-                updateSparkLine();
-            });
-        }
     }
 
     /**
@@ -379,10 +376,17 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the wind direction arrow and text as from info from the StreamParser
      * @param direction the from north angle of the wind.
      */
-    private void updateWind() {
-        windDirectionText.setText(String.format("%.1f°", raceState.getWindDirection()));
-        windArrowText.setRotate(raceState.getWindDirection());
-        windSpeedText.setText("Speed: " + String.format("%.1f", raceState.getWindSpeed()) + " Knots");
+    private void updateWindDirection(double direction) {
+        windDirectionText.setText(String.format("%.1f°", direction));
+        windArrowText.setRotate(direction);
+    }
+
+    /**
+     * Updates the speed of the wind as displayed by the info pane.
+     * @param windSpeed Windspeed in knots.
+     */
+    private void updateWindSpeed(double windSpeed) {
+        windSpeedText.setText("Speed: " + String.format("%.1f", windSpeed) + " Knots");
     }
 
 

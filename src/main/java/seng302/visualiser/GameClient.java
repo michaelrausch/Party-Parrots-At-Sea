@@ -14,8 +14,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
-import seng302.gameServer.server.messages.BoatAction;
-import seng302.gameServer.server.messages.BoatStatus;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatStatus;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -176,7 +176,9 @@ public class GameClient {
     }
 
     private void loadFinishScreenView() {
-        loadFXMLToHolder("/views/FinishScreenView.fxml");
+        FXMLLoader fxmlLoader = loadFXMLToHolder("/views/FinishScreenView.fxml");
+        FinishScreenViewController controller = fxmlLoader.getController();
+        controller.setFinishers(raceState.getPlayerPositions());
     }
 
     private FXMLLoader loadFXMLToHolder(String fxmlLocation) {
@@ -192,8 +194,6 @@ public class GameClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        FinishScreenViewController controller = fxmlLoader.getController();
-        controller.setFinishers(raceState.getPlayerPositions());
         return fxmlLoader;
     }
 
@@ -297,13 +297,10 @@ public class GameClient {
     private void updateMarkRounding(MarkRoundingData roundingData) {
         if (allXMLReceived()) {
             ClientYacht clientYacht = allBoatsMap.get(roundingData.getBoatId());
-            clientYacht.setMarkRoundingTime(roundingData.getTimeStamp());
-            clientYacht.updateTimeSinceLastMarkProperty(
-                raceState.getRaceTime() - roundingData.getTimeStamp());
-            clientYacht.setLastMarkRounded(
-                courseData.getCompoundMarks().get(
-                    roundingData.getMarkId()
-                )
+            clientYacht.roundMark(
+                courseData.getCompoundMarks().get(roundingData.getMarkId()),
+                roundingData.getTimeStamp(),
+                raceState.getRaceTime() - roundingData.getTimeStamp()
             );
         }
     }

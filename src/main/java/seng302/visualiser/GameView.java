@@ -771,9 +771,6 @@ public class GameView extends Pane {
 
     private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
         //Only show arrows for this and next leg.
-        if (legNumber - 2 >= 0) {
-            CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
-        }
         if (compoundMark != null) {
             for (Mark mark : compoundMark.getMarks()) {
                 markerObjects.get(mark).showNextExitArrow();
