@@ -130,7 +130,6 @@ public class GameClient {
         });
 
         this.lobbyController = lobbyController;
-        server.setGameClient(this);
     }
 
     private void loadStartScreen() {

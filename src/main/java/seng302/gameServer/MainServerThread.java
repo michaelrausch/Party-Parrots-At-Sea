@@ -21,7 +21,6 @@ import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.GameClient;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -47,8 +46,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private ServerSocket serverSocket = null;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
-
-    private GameClient gameClient;
 
     public MainServerThread() {
         new GameState("localhost");
@@ -271,24 +268,16 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     }
 
     /**
-     * Pass GameClient to main server thread so it can access the properties inside.
-     *
-     * @param gameClient gameClient
-     */
-    public void setGameClient(GameClient gameClient) {
-        this.gameClient = gameClient;
-    }
-
-    /**
      * Initialise boats to specific spaced out geopoints behind starting line.
      */
     private void initialiseBoatPositions() {
         // Getting the start line compound marks
-        CompoundMark cm = gameClient.getCourseData().getCompoundMarks().get(1);
-        GeoPoint startMark1 = new GeoPoint(cm.getMarks().get(0).getLat(),
-            cm.getMarks().get(0).getLng());
-        GeoPoint startMark2 = new GeoPoint(cm.getMarks().get(1).getLat(),
-            cm.getMarks().get(1).getLng());
+//        if (gameClient== null) {
+//            return;
+//        }
+        CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
+        GeoPoint startMark1 = cm.getSubMark(1);
+        GeoPoint startMark2 = cm.getSubMark(2);
 
         // Calculating midpoint
         Double perpendicularAngle = GeoUtility.getBearing(startMark1, startMark2);
