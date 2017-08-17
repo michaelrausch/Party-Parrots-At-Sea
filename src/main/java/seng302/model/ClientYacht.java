@@ -289,7 +289,7 @@ public class ClientYacht extends Observable {
         this.markRoundTime = markRoundTime;
         timeSinceLastMarkProperty.set(timeSinceLastMark);
         lastMarkRounded = mark;
-        legNumber += 1;
+        legNumber++;
         for (MarkRoundingListener listener : markRoundingListeners) {
             listener.notifyRounding(this, lastMarkRounded, legNumber);
         }

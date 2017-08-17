@@ -330,7 +330,7 @@ public class ClientToServerThread implements Runnable {
             clientLog("Read byte failed", 1);
         }
         if (currentByte == -1) {
-            throw new ByteReadException("InputStream reach end of stream");
+            clientLog("InputStream reach end of stream", 1);
         }
         return currentByte;
     }
