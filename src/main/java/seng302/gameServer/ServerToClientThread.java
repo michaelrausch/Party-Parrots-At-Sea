@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -19,6 +20,24 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RegistrationResponseMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.model.Player;
+import seng302.model.ServerYacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+import seng302.utilities.XMLGenerator;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatLocationMessage;
 import seng302.gameServer.messages.ClientType;
@@ -205,6 +224,18 @@ public class ServerToClientThread implements Runnable, Observer {
                                         new StreamPacket(type, payloadLength, timeStamp, payload));
 
                                 completeRegistration(requestedType);
+                                break;
+
+                            case RACE_CUSTOMIZATION_REQUEST:
+                                Long sourceID = Message
+                                    .bytesToLong(Arrays.copyOfRange(payload, 0, 3));
+                                CustomizeRequestType requestType = ServerPacketParser
+                                    .extractCustomizationType(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                GameState.customizePlayer(sourceID, requestType,
+                                    Arrays.copyOfRange(payload, 6, payload.length));
+                                GameState.setCustomizationFlag();
+                                // TODO: 17/08/2017 ajm412: Send a response packet here, not really necessary until we do shapes.
                                 break;
                         }
                     } else {

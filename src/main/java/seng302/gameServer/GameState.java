@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.scene.paint.Color;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
@@ -36,6 +38,7 @@ import seng302.utilities.XMLParser;
  * Created by wmu16 on 10/07/17.
  */
 public class GameState implements Runnable {
+
     @FunctionalInterface
     interface NewMessageListener {
 
@@ -56,6 +59,8 @@ public class GameState implements Runnable {
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
+
+    private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
 
     private static String hostIpAddress;
     private static List<Player> players;
@@ -88,6 +93,7 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
+        customizationFlag = false;
 
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
@@ -414,7 +420,7 @@ public class GameState implements Runnable {
     }
 
 
-    /**
+    /**        lobbyController.setPlayerListSource(clientLobbyList);
      * 4 Different cases of progression in the race 1 - Passing the start line 2 - Passing any
      * in-race Gate 3 - Passing any in-race Mark 4 - Passing the finish line
      *
@@ -580,6 +586,28 @@ public class GameState implements Runnable {
         return false;
     }
 
+    /**
+     * Handles player customization.
+     *
+     * @param playerID The ID of the player being modified.
+     * @param requestType the type of player customization the player wants
+     * @param customizeData the data related to the customization (color, name, shape)
+     */
+    public static void customizePlayer(long playerID, CustomizeRequestType requestType,
+        byte[] customizeData) {
+        ServerYacht playerYacht = yachts.get((int) playerID);
+
+        if (requestType.equals(CustomizeRequestType.NAME)) {
+            String name = new String(customizeData);
+            playerYacht.setBoatName(name);
+        } else if (requestType.equals(CustomizeRequestType.COLOR)) {
+            int red = customizeData[0] & 0xFF;
+            int green = customizeData[1] & 0xFF;
+            int blue = customizeData[2] & 0xFF;
+            Color yachtColor = Color.rgb(red, green, blue);
+            playerYacht.setBoatColor(yachtColor);
+        }
+    }
 
     private static Mark checkMarkCollision(ServerYacht yacht) {
         Set<Mark> marksInRace = GameState.getMarks();
@@ -658,5 +686,17 @@ public class GameState implements Runnable {
 
     public static void addMarkPassListener(NewMessageListener listener) {
         markListeners.add(listener);
+    }
+
+    public static void setCustomizationFlag() {
+        customizationFlag = true;
+    }
+
+    public static Boolean getCustomizationFlag() {
+        return customizationFlag;
+    }
+
+    public static void resetCustomizationFlag() {
+        customizationFlag = false;
     }
 }

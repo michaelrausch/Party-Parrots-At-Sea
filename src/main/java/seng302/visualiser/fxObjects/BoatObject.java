@@ -129,7 +129,7 @@ public class BoatObject extends Group {
      * @param y The Y coordinate to move the boat to
      * @param rotation The rotation by which the boat moves
      * @param velocity The velocity the boat is moving
-     * @param sailIn
+     * @param sailIn Boolean to toggle sail state.
      */
     public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn, double windDir) {
         Double dx = Math.abs(boatPoly.getLayoutX() - x);

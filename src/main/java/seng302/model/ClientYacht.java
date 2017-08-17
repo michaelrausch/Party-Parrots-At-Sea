@@ -78,6 +78,7 @@ public class ClientYacht extends Observable {
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;
         this.boatStatus = 1;
+        this.colour = Color.rgb(0, 0, 0, 1.0);
     }
 
     /**

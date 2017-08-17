@@ -1,20 +1,29 @@
 package seng302.visualiser.controllers;
 
-import java.util.*;
-
+import com.sun.media.jfxmedia.logging.Logger;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.model.Colors;
 import seng302.model.RaceState;
-import seng302.visualiser.GameClient;
+import seng302.visualiser.ClientToServerThread;
 
 /**
  * A class describing the actions of the lobby screen
@@ -36,6 +45,8 @@ public class LobbyController {
     private Text lobbyIpText;
     @FXML
     private Button readyButton;
+    @FXML
+    private Button customizeButton;
     @FXML
     private TextArea playerOneTxt;
     @FXML
@@ -77,7 +88,14 @@ public class LobbyController {
     private List<TextArea> listViews = new ArrayList<>();
     private RaceState raceState;
 
+    private ClientToServerThread socketThread;
+
+    private Stage customizeStage;
+
+    private Color playersColor;
+
     private int MAX_NUM_PLAYERS = 8;
+    private Integer playerID;
 
     private List<LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private ObservableList<String> players;
@@ -106,6 +124,9 @@ public class LobbyController {
         //Update players if one added.
         for (int i = 0; i < players.size(); i++) {
             listViews.get(i).setText(players.get(i));
+            if (playerID == (i + 1)) {
+                listViews.get(i).setText(listViews.get(i).getText() + " (YOU)");
+            }
             imageViews.get(i).setVisible(true);
         }
         //Update empty text fields if player left.
@@ -131,6 +152,37 @@ public class LobbyController {
     }
 
     @FXML
+    public void customize() {
+        Parent root;
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(LobbyController.class.getResource("/views/customizeView.fxml"));
+            root = fxmlLoader.load();
+            root.getStylesheets().add("/css/master.css");
+            customizeStage = new Stage();
+            customizeStage.setTitle("Customize Boat");
+            customizeStage.setScene(new Scene(root, 700, 450));
+            CustomizationController cc = fxmlLoader.getController();
+            cc.setServerThread(this.socketThread);
+            cc.setPlayerName(this.players.get(playerID - 1));
+
+            if (this.playersColor == null) {
+                this.playersColor = Colors.getColor(playerID - 1);
+            }
+
+            cc.setPlayerColor(this.playersColor);
+            cc.setStage(customizeStage); // pass the stage through so it can be closed later.
+            cc.setLobbyController(this);
+            customizeStage.show();
+        } catch (IOException e) {
+            Logger.logMsg(4, "Failed to load Customization View from resources.");
+        }
+    }
+
+    public void setSocketThread(ClientToServerThread thread) {
+        this.socketThread = thread;
+    }
+
+    @FXML
     public void leaveLobbyButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function!
         GameState.setCurrentStage(GameStages.CANCELLED);
@@ -146,6 +198,7 @@ public class LobbyController {
 
         for (LobbyCloseListener readyListener : lobbyListeners)
             readyListener.notify(CloseStatus.READY);
+        customizeButton.setDisable(true);
     }
 
     public void setTitle (String title) {
@@ -168,8 +221,18 @@ public class LobbyController {
         Platform.runLater(this::updatePlayers);
     }
 
+    public void setPlayerID(Integer id) {
+        playerID = id;
+    }
+
     public void updateRaceState(RaceState raceState){
         this.raceState = raceState;
+        /*if (this.customizeStage != null) {
+            this.customizeStage.close();
+        }*/ // TODO: 17/08/17 ajm412: close the customization window if the host starts the game while customizing 
+        if (!customizeButton.isDisabled()) {
+            customizeButton.setDisable(true);
+        }
         timeUntilStart.setText("Starting in: " + raceState.getRaceTimeStr());
     }
 
@@ -177,4 +240,9 @@ public class LobbyController {
         readyButton.setDisable(true);
         readyButton.setVisible(false);
     }
+
+    public void setPlayersColor(Color playerColor) {
+        this.playersColor = playerColor;
+    }
+
 }

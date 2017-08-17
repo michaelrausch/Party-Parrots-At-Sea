@@ -12,7 +12,7 @@ public class ColorsTest {
         Color expectedColors[] = {Color.RED, Color.PERU, Color.GOLD, Color.GREEN, Color.BLUE,
             Color.PURPLE, Color.DEEPPINK, Color.GRAY};
         for (int i = 0; i < 8; i++) {
-            Assert.assertEquals(expectedColors[i], Colors.getColor());
+            Assert.assertEquals(expectedColors[i], Colors.getColor(i));
         }
     }
 }

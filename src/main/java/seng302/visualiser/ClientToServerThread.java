@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatActionMessage;
 import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.CustomizeRequestMessage;
+import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RegistrationRequestMessage;
 import seng302.gameServer.messages.RegistrationResponseStatus;
@@ -149,6 +151,17 @@ public class ClientToServerThread implements Runnable {
         logger.warn("Closed connection to server", 1);
         notifyDisconnectListeners("Connection to server was terminated");
         closeSocket();
+    }
+
+    public void sendCustomizationRequest(CustomizeRequestType reqType, byte[] payload) {
+        CustomizeRequestMessage requestMessage = new CustomizeRequestMessage(reqType, this.clientId, payload);
+        try {
+            os.write(requestMessage.getBuffer());
+        } catch (IOException e) {
+            logger.error("Could not send customization request");
+            notifyDisconnectListeners("Could not communicate with server");
+            closeSocket();
+        }
     }
 
     private void notifyDisconnectListeners (String message) {

@@ -18,6 +18,7 @@ import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.BoatAction;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -257,7 +258,7 @@ public class GameClient {
                     );
                     clientLobbyList.clear();
                     allBoatsMap.forEach((id, boat) ->
-                        clientLobbyList.add(id + " " + boat.getBoatName())
+                        clientLobbyList.add(boat.getBoatName())
                     );
                     raceState.setBoats(allBoatsMap.values());
                     break;
