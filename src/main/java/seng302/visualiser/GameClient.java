@@ -74,6 +74,7 @@ public class GameClient {
             startClientToServerThread(ipAddress, portNumber);
             socketThread.addDisconnectionListener((cause) -> {
                 showConnectionError(cause);
+                tearDownConnection();
                 Platform.runLater(this::loadStartScreen);
             });
             socketThread.addStreamObserver(this::parsePackets);
@@ -91,7 +92,10 @@ public class GameClient {
                 lobbyController.setCourseName("");
             }
 
-            lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
+            lobbyController.addCloseListener((exitCause) -> {
+                this.tearDownConnection();
+                this.loadStartScreen();
+            });
             this.lobbyController = lobbyController;
         } catch (IOException ioe) {
             showConnectionError("Unable to find server");
@@ -109,6 +113,7 @@ public class GameClient {
         try {
             startClientToServerThread(ipAddress, portNumber);
             socketThread.addDisconnectionListener((cause) -> {
+                this.tearDownConnection();
                 Platform.runLater(this::loadStartScreen);
             });
             LobbyController lobbyController = loadLobby();
@@ -129,8 +134,7 @@ public class GameClient {
                     lobbyController.disableReadyButton();
                     server.startGame();
                 } else if (exitCause == CloseStatus.LEAVE) {
-                    server.terminate();
-                    server = null;
+                    tearDownConnection();
                     loadStartScreen();
                 }
             });
@@ -141,12 +145,20 @@ public class GameClient {
         }
     }
 
-    private void loadStartScreen() {
+    private void tearDownConnection() {
         socketThread.setSocketToClose();
         if (server != null) {
             server.terminate();
             server = null;
         }
+    }
+
+    private void loadStartScreen() {
+//        socketThread.setSocketToClose();
+//        if (server != null) {
+//            server.terminate();
+//            server = null;
+//        }
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/views/StartScreenView.fxml"));
         try {
