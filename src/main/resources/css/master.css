@@ -99,6 +99,7 @@ Table
     -fx-text-fill: black;
 }
 
+server thread
 .ui-table .column-header {
     -fx-background-color: transparent;
 }

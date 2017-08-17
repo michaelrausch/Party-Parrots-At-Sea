@@ -210,7 +210,7 @@ public class ServerToClientThread implements Runnable, Observer {
                                 GameState.customizePlayer(sourceID, requestType,
                                     Arrays.copyOfRange(payload, 6, payload.length));
                                 GameState.setCustomizationFlag();
-                                //// TODO: 17/08/2017 ajm412: Send a response packet here. 
+                                // TODO: 17/08/2017 ajm412: Send a response packet here, not really necessary until we do shapes.
                                 break;
                         }
                     } else {

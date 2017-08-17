@@ -60,7 +60,7 @@ public class GameState implements Runnable {
     public static Double windDirection;
     private static Double windSpeed;
 
-    private static Boolean customizationFlag;
+    private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
 
     private static String hostIpAddress;
     private static List<Player> players;
@@ -575,16 +575,21 @@ public class GameState implements Runnable {
         return false;
     }
 
+    /**
+     * Handles player customization.
+     *
+     * @param playerID The ID of the player being modified.
+     * @param requestType the type of player customization the player wants
+     * @param customizeData the data related to the customization (color, name, shape)
+     */
     public static void customizePlayer(long playerID, CustomizeRequestType requestType,
         byte[] customizeData) {
-        System.out.println(playerID + " " + requestType.toString());
         ServerYacht playerYacht = yachts.get((int) playerID);
 
         if (requestType.equals(CustomizeRequestType.NAME)) {
             String name = new String(customizeData);
             playerYacht.setBoatName(name);
         } else if (requestType.equals(CustomizeRequestType.COLOR)) {
-            System.out.println(customizeData.length);
             int red = customizeData[0] & 0xFF;
             int green = customizeData[1] & 0xFF;
             int blue = customizeData[2] & 0xFF;
