@@ -429,7 +429,6 @@ public class GameState implements Runnable {
     private void checkForLegProgression(ServerYacht yacht) {
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
-//        System.out.println(yacht.getCurrentMarkSeqID());
 
         Boolean hasProgressed;
         if (currentMarkSeqID == 0) {

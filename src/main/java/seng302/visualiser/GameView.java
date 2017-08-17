@@ -278,7 +278,31 @@ public class GameView extends Pane {
             colour = Color.BLACK;
         }
 
-        //Creating mark arrows.
+        createMarkArrows(sequence);
+
+        //Scale race to markers if there is no border.
+        if (borderPoints == null) {
+            rescaleRace(new ArrayList<>(markerObjects.keySet()));
+        }
+        //Move the Markers to initial position.
+        markerObjects.forEach(((mark, marker) -> {
+            Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
+            marker.setLayoutX(p2d.getX());
+            marker.setLayoutY(p2d.getY());
+        }));
+        Platform.runLater(() -> {
+            markers.getChildren().clear();
+            markers.getChildren().addAll(gates);
+            markers.getChildren().addAll(markerObjects.values());
+        });
+    }
+
+    /**
+     * Calculates all the data needed for to create mark arrows. Requires that a course has been
+     * added to the gameview.
+     * @param sequence The order in which marks are traversed.
+     */
+    private void createMarkArrows (List<Corner> sequence) {
         for (int i=1; i < sequence.size()-1; i++) { //General case.
             double averageLat = 0;
             double averageLng = 0;
@@ -298,7 +322,7 @@ public class GameView extends Pane {
                 averageLng += mark.getLng();
             }
             GeoPoint nextMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
-            // TODO: 16/08/17 This comparison is cancer and deserves to die.
+            // TODO: 16/08/17 This comparison doesn't need to exist but the alternative is to user server enum client side.
             for (Mark mark : course.get(i).getMarks()) {
                 markerObjects.get(mark).addArrows(
                     mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
@@ -307,9 +331,11 @@ public class GameView extends Pane {
                 );
             }
         }
+        createStartLineArrows();
+        createFinishLineArrows();
+    }
 
-        // TODO: 16/08/17 Make this cleaner
-        //First mark case
+    private void createStartLineArrows () {
         double averageLat = 0;
         double averageLng = 0;
         int numMarks = 0;
@@ -326,10 +352,12 @@ public class GameView extends Pane {
                 GeoUtility.getBearing(mark, firstMarkAv)
             );
         }
-        //Last Mark case
-        numMarks = 0;
-        averageLat = 0;
-        averageLng = 0;
+    }
+
+    private void createFinishLineArrows () {
+        double numMarks = 0;
+        double averageLat = 0;
+        double averageLng = 0;
         for (Mark mark : course.get(course.size()-2).getMarks()) {
             numMarks += 1;
             averageLat += mark.getLat();
@@ -343,22 +371,6 @@ public class GameView extends Pane {
                 GeoUtility.getBearing(mark, mark)
             );
         }
-
-        //Scale race to markers if there is no border.
-        if (borderPoints == null) {
-            rescaleRace(new ArrayList<>(markerObjects.keySet()));
-        }
-        //Move the Markers to initial position.
-        markerObjects.forEach(((mark, marker) -> {
-            Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
-            marker.setLayoutX(p2d.getX());
-            marker.setLayoutY(p2d.getY());
-        }));
-        Platform.runLater(() -> {
-            markers.getChildren().clear();
-            markers.getChildren().addAll(gates);
-            markers.getChildren().addAll(markerObjects.values());
-        });
     }
 
     /**

@@ -10,13 +10,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
-import seng302.gameServer.messages.BoatAction;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -70,27 +71,32 @@ public class GameClient {
      */
     public void runAsClient(String ipAddress, Integer portNumber) {
         try {
-            socketThread = new ClientToServerThread(ipAddress, portNumber);
+            startClientToServerThread(ipAddress, portNumber);
+            socketThread.addDisconnectionListener((cause) -> {
+                showConnectionError(cause);
+                Platform.runLater(this::loadStartScreen);
+            });
+            socketThread.addStreamObserver(this::parsePackets);
+            LobbyController lobbyController = loadLobby();
+            lobbyController.setSocketThread(socketThread);
+            lobbyController.setPlayerID(socketThread.getClientId());
+            lobbyController.setPlayerListSource(clientLobbyList);
+            lobbyController.disableReadyButton();
+            if (regattaData != null){
+                lobbyController.setTitle(regattaData.getRegattaName());
+                lobbyController.setCourseName(regattaData.getCourseName());
+            }
+            else{
+                lobbyController.setTitle(ipAddress);
+                lobbyController.setCourseName("");
+            }
+
+            lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
+            this.lobbyController = lobbyController;
         } catch (IOException ioe) {
-            ioe.printStackTrace();
-            System.out.println("Unable to connect to host...");
+            showConnectionError("Unable to find server");
+            Platform.runLater(this::loadStartScreen);
         }
-
-        socketThread.addStreamObserver(this::parsePackets);
-        LobbyController lobbyController = loadLobby();
-        lobbyController.disableReadyButton();
-
-        if (regattaData != null){
-            lobbyController.setTitle(regattaData.getRegattaName());
-            lobbyController.setCourseName(regattaData.getCourseName());
-        }
-        else{
-            lobbyController.setTitle(ipAddress);
-            lobbyController.setCourseName("");
-        }
-
-        lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
-        this.lobbyController = lobbyController;
     }
 
     /**
@@ -101,36 +107,38 @@ public class GameClient {
     public void runAsHost(String ipAddress, Integer portNumber) {
         server = new MainServerThread();
         try {
-            socketThread = new ClientToServerThread(ipAddress, portNumber);
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-            System.out.println("Unable to make local connection to host...");
-        }
-        socketThread.addStreamObserver(this::parsePackets);
-        LobbyController lobbyController = loadLobby();
-        lobbyController.setPlayerListSource(clientLobbyList);
-
-        if (regattaData != null){
-            lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
-            lobbyController.setCourseName(regattaData.getCourseName());
-        }
-        else{
-            lobbyController.setTitle("Hosting: " + ipAddress);
-            lobbyController.setCourseName("");
-        }
-
-        lobbyController.addCloseListener(exitCause -> {
-            if (exitCause == CloseStatus.READY) {
-                GameState.resetStartTime();
-                lobbyController.disableReadyButton();
-                server.startGame();
-            } else if (exitCause == CloseStatus.LEAVE) {
-                loadStartScreen();
+            startClientToServerThread(ipAddress, portNumber);
+            socketThread.addDisconnectionListener((cause) -> {
+                Platform.runLater(this::loadStartScreen);
+            });
+            LobbyController lobbyController = loadLobby();
+            lobbyController.setSocketThread(socketThread);
+            lobbyController.setPlayerID(socketThread.getClientId());
+            lobbyController.setPlayerListSource(clientLobbyList);
+            if (regattaData != null) {
+                lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
+                lobbyController.setCourseName(regattaData.getCourseName());
+            } else {
+                lobbyController.setTitle("Hosting: " + ipAddress);
+                lobbyController.setCourseName("");
             }
-        });
 
-        this.lobbyController = lobbyController;
-        //server.setGameClient(this);
+            lobbyController.addCloseListener(exitCause -> {
+                if (exitCause == CloseStatus.READY) {
+                    GameState.resetStartTime();
+                    lobbyController.disableReadyButton();
+                    server.startGame();
+                } else if (exitCause == CloseStatus.LEAVE) {
+                    server.terminate();
+                    server = null;
+                    loadStartScreen();
+                }
+            });
+            this.lobbyController = lobbyController;
+        } catch (IOException ioe) {
+            showConnectionError("Cannot connect to server as host");
+            Platform.runLater(this::loadStartScreen);
+        }
     }
 
     private void loadStartScreen() {
@@ -145,8 +153,22 @@ public class GameClient {
             holderPane.getChildren().clear();
             holderPane.getChildren().add(fxmlLoader.load());
         } catch (IOException e) {
-            e.printStackTrace();
+            showConnectionError("JavaFX crashed. Please restart the app");
         }
+    }
+
+    private void showConnectionError (String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setHeaderText("Connection Error");
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
+
+    private void startClientToServerThread (String ipAddress, int portNumber) throws IOException {
+        socketThread = new ClientToServerThread(ipAddress, portNumber);
+        socketThread.addStreamObserver(this::parsePackets);
     }
 
     /**
@@ -163,12 +185,7 @@ public class GameClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        LobbyController lobbyController = fxmlLoader.getController();
-        lobbyController.setSocketThread(socketThread);
-        lobbyController.setPlayerListSource(clientLobbyList);
-        lobbyController.setPlayerID(socketThread.getClientId());
-
-        return lobbyController;
+        return fxmlLoader.getController();
     }
 
     private void loadRaceView() {
