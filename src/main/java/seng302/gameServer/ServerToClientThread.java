@@ -280,7 +280,6 @@ public class ServerToClientThread implements Runnable, Observer {
             currentByte = is.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {
-            e.printStackTrace();
             logger.warn("Socket read failed", 1);
         }
         if (currentByte == -1) {

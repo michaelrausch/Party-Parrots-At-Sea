@@ -308,6 +308,7 @@ public class GameClient {
                 raceState.getRaceTime() - roundingData.getTimeStamp()
             );
         }
+        updatePlayerPositions();
     }
 
     private void processRaceStatusUpdate(RaceStatusData data) {
@@ -324,12 +325,11 @@ public class GameClient {
                 ClientYacht clientYacht = allBoatsMap.get((int) boatData[0]);
                 clientYacht.setEstimateTimeTillNextMark(raceState.getRaceTime() - boatData[1]);
                 clientYacht.setEstimateTimeAtFinish(boatData[2]);
-                int legNumber = (int) boatData[3];
+//                int legNumber = (int) boatData[3];
                 clientYacht.setBoatStatus((int) boatData[4]);
-                if (legNumber != clientYacht.getLegNumber()) {
-                    clientYacht.setLegNumber(legNumber);
-                    updatePlayerPositions();
-                }
+//                if (legNumber != clientYacht.getLegNumber()) {
+//                    clientYacht.setLegNumber(legNumber);
+//                }
             }
 
             if (raceFinished) {
