@@ -9,7 +9,7 @@ prints out event details, including time, involved boats and legs.
 
 - Configuration file
 
-We decided to store the team information including team names and boat velocity, as well as race configuration setting in external file.
+We decided to store the team information including team names and boat currentVelocity, as well as race configuration setting in external file.
 
 To read external files, "Json-simple" library has been used to parse information. 
 By using this library, we did not have to write our json parser and benefited from the flexibility of json files.

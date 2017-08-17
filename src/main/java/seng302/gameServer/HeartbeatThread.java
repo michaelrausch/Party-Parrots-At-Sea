@@ -1,18 +1,19 @@
 package seng302.gameServer;
 
-import seng302.models.Player;
-import seng302.server.messages.Heartbeat;
-import seng302.server.messages.Message;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
+import seng302.model.Player;
+import seng302.gameServer.messages.Heartbeat;
+import seng302.gameServer.messages.Message;
 
 /**
  * Send Heartbeat messages to connected player at a specified interval
  * Will call .clientDisconnected on the delegate when a heartbeat message
  * cannot be sent to a player
  */
-public class HeartbeatThread extends Thread{
+public class HeartbeatThread implements Runnable {
     private final int HEARTBEAT_PERIOD = 200;
     private ClientConnectionDelegate delegate;
     private Integer seqNum;
@@ -22,6 +23,9 @@ public class HeartbeatThread extends Thread{
         this.delegate =  delegate;
         seqNum = 0;
         disconnectedPlayers = new Stack<>();
+
+        Thread thread = new Thread(this, "HeartBeat");
+        thread.start();
     }
 
     /**
@@ -41,7 +45,6 @@ public class HeartbeatThread extends Thread{
      */
     private void sendHeartbeatToAllPlayers(){
         Message heartbeat = new Heartbeat(seqNum);
-
         for (Player player : GameState.getPlayers()){
             if (!player.getSocket().isConnected()) {
                 playerLostConnection(player);
@@ -53,7 +56,6 @@ public class HeartbeatThread extends Thread{
                 playerLostConnection(player);
             }
         }
-
         updateDelegate();
         seqNum++;
     }
@@ -70,7 +72,6 @@ public class HeartbeatThread extends Thread{
 
     public void run(){
         Timer t = new Timer();
-
         t.schedule(new TimerTask() {
             @Override
             public void run() {
