@@ -26,6 +26,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import seng302.model.ClientYacht;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
 import seng302.model.Colors;
@@ -473,19 +474,19 @@ public class GameView extends Pane {
     public void setBoats(List<ClientYacht> yachts) {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
-        for (ClientYacht yacht : yachts) {
-            Paint colour = Colors.getColor();
+        for (ClientYacht clientYacht : yachts) {
+            Paint colour = clientYacht.getColour();
             newBoat = new BoatObject();
             newBoat.addSelectedBoatListener(this::setSelectedBoat);
             newBoat.setFill(colour);
-            boatObjects.put(yacht, newBoat);
-            createAndBindAnnotationBox(yacht, colour);
+            boatObjects.put(clientYacht, newBoat);
+            createAndBindAnnotationBox(clientYacht, colour);
 //            wakesGroup.getChildren().add(newBoat.getWake());
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
             // TODO: 1/08/17 Make this less vile to look at.
-            yacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
+            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
@@ -506,11 +507,11 @@ public class GameView extends Pane {
         });
     }
 
-    private void createAndBindAnnotationBox(ClientYacht yacht, Paint colour) {
+    private void createAndBindAnnotationBox(ClientYacht clientYacht, Paint colour) {
         AnnotationBox newAnnotation = new AnnotationBox();
         newAnnotation.setFill(colour);
         newAnnotation.addAnnotation(
-            "name", "Player: " + yacht.getShortName()
+            "name", "Player: " + clientYacht.getShortName()
         );
 //        newAnnotation.addAnnotation(
 //            "velocity",
@@ -533,7 +534,7 @@ public class GameView extends Pane {
 //                return format.format(time);
 //            }
 //        );
-        annotations.put(yacht, newAnnotation);
+        annotations.put(clientYacht, newAnnotation);
     }
 
     private void drawFps(Double fps) {

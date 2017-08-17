@@ -16,6 +16,7 @@ import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.BoatAction;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -77,7 +78,6 @@ public class GameClient {
 
         socketThread.addStreamObserver(this::parsePackets);
         LobbyController lobbyController = loadLobby();
-        lobbyController.setPlayerListSource(clientLobbyList);
         lobbyController.disableReadyButton();
 
         if (regattaData != null){
@@ -130,6 +130,7 @@ public class GameClient {
         });
 
         this.lobbyController = lobbyController;
+        //server.setGameClient(this);
     }
 
     private void loadStartScreen() {
@@ -162,7 +163,12 @@ public class GameClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return fxmlLoader.getController();
+        LobbyController lobbyController = fxmlLoader.getController();
+        lobbyController.setSocketThread(socketThread);
+        lobbyController.setPlayerListSource(clientLobbyList);
+        lobbyController.setPlayerID(socketThread.getClientId());
+
+        return lobbyController;
     }
 
     private void loadRaceView() {
@@ -236,7 +242,7 @@ public class GameClient {
                     );
                     clientLobbyList.clear();
                     allBoatsMap.forEach((id, boat) ->
-                        clientLobbyList.add(id + " " + boat.getBoatName())
+                        clientLobbyList.add(boat.getBoatName())
                     );
                     raceState.setBoats(allBoatsMap.values());
                     break;

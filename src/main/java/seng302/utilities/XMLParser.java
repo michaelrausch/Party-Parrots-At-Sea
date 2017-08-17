@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.scene.paint.Color;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -142,6 +143,7 @@ public class XMLParser {
                     XMLParser.getNodeAttributeString(currentBoat, "ShortName"),
                     XMLParser.getNodeAttributeString(currentBoat, "BoatName"),
                     XMLParser.getNodeAttributeString(currentBoat, "Country"));
+                yacht.setColour(Color.web(getNodeAttributeString(currentBoat, "Color")));
                 if (yacht.getBoatType().equals("Yacht")) {
                     competingBoats.put(yacht.getSourceId(), yacht);
                 }
