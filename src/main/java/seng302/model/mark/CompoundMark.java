@@ -55,7 +55,7 @@ public class CompoundMark {
 		this.name = name;
 	}
 
-    public void setRoundingSide(RoundingSide roundingSide) {
+    public void setRoundingSide(RoundingSide roundingSide) {;
         switch (roundingSide) {
             case SP:
                 getSubMark(1).setRoundingSide(RoundingSide.STARBOARD);

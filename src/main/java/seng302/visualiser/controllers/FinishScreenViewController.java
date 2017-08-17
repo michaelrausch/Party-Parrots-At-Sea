@@ -3,6 +3,7 @@ package seng302.visualiser.controllers;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -61,9 +62,9 @@ public class FinishScreenViewController implements Initializable {
         finishOrderTable.refresh();
     }
 
-    public void setFinishers(List<ClientYacht> participants) {
+    public void setFinishers(Collection<ClientYacht> participants) {
         List<ClientYacht> sorted = new ArrayList<>(participants);
-        sorted.sort(Comparator.comparingInt(ClientYacht::getPositionInteger));
+        sorted.sort(Comparator.comparingInt(ClientYacht::getPlacing));
         finishOrderTable.getItems().setAll(sorted);
     }
 

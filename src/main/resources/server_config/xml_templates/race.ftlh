@@ -24,8 +24,8 @@
             <Mark SeqID="2" Name="Lee Gate 2" TargetLat="57.671629" TargetLng="11.840951" SourceID="125" />
         </CompoundMark>
         <CompoundMark CompoundMarkID="4" Name="Mark3">
-            <Mark SeqID="1" Name="Wind Gate 1" TargetLat="57.665316" TargetLng="11.827184" SourceID="126" />
-            <Mark SeqID="2" Name="Wind Gate 2" TargetLat="57.664190" TargetLng="11.829576" SourceID="127" />
+            <Mark SeqID="1" Name="Wind Gate 1" TargetLat="57.664190" TargetLng="11.829576" SourceID="126" />
+            <Mark SeqID="2" Name="Wind Gate 2" TargetLat="57.665316" TargetLng="11.827184" SourceID="127" />
         </CompoundMark>
         <CompoundMark CompoundMarkID="5" Name="Mark4">
             <Mark SeqID="1" Name="Finish Line 1" TargetLat="57.672350" TargetLng="11.842535" SourceID="128" />
@@ -38,12 +38,7 @@
         <Corner SeqID="3" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
         <Corner SeqID="4" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
         <Corner SeqID="5" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
-        <Corner SeqID="6" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
-        <Corner SeqID="7" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
-        <Corner SeqID="8" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
-        <Corner SeqID="9" CompoundMarkID="3" Rounding="SP" ZoneSize="3" />
-        <Corner SeqID="10" CompoundMarkID="4" Rounding="PS" ZoneSize="3" />
-        <Corner SeqID="11" CompoundMarkID="5" Rounding="PS" ZoneSize="3" />
+        <Corner SeqID="6" CompoundMarkID="5" Rounding="PS" ZoneSize="3" />
     </CompoundMarkSequence>
     <CourseLimit>
         <Limit SeqID="1" Lat="57.6739450" Lon="11.8417100" />

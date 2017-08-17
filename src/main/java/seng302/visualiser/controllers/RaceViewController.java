@@ -2,7 +2,6 @@ package seng302.visualiser.controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -11,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -71,6 +72,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Button selectAnnotationBtn;
     @FXML
     private ComboBox<ClientYacht> yachtSelectionComboBox;
+    @FXML
+    private Text fpsDisplay;
+    @FXML
+    private Text windSpeedText;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -79,6 +84,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private GameView gameView;
     private RaceState raceState;
 
+    private Timeline timerTimeline;
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
@@ -101,8 +107,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     public void loadRace (
         Map<Integer, ClientYacht> participants, RaceXMLData raceData, RaceState raceState,
-        ClientYacht player
-    ) {
+        ClientYacht player) {
+
         this.participants = participants;
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
@@ -114,15 +120,38 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         initialiseBoatSelectionComboBox();
         initialiseSparkLine();
 
+        raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
+            while (c.next()) {
+                if (c.wasPermutated()) {
+                    updateOrder(raceState.getPlayerPositions());
+                }
+            }
+        });
+
+        updateOrder(raceState.getPlayerPositions());
         gameView = new GameView();
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(gameView));
-        gameView.setBoats(new ArrayList<>(participants.values()));
-        gameView.updateBorder(raceData.getCourseLimit());
-        gameView.updateCourse(
-            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+        gameView.setFrameRateFXText(fpsDisplay);
+        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
+            gameView.setBoats(new ArrayList<>(participants.values()));
+            gameView.updateBorder(raceData.getCourseLimit());
+            gameView.updateCourse(
+                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
+        gameView.enableZoom();
         gameView.setBoatAsPlayer(player);
         gameView.startRace();
+
+        raceState.addCollisionListener(gameView::drawCollision);
+        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
+            gameView.setWindDir(newDirection.doubleValue());
+            updateWindDirection(newDirection.doubleValue());
+        });
+        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) -> {
+            updateWindSpeed(newSpeed.doubleValue());
+        });
+        updateWindDirection(raceState.windDirectionProperty().doubleValue());
+        updateWindSpeed(raceState.getWindSpeed());
+        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
     }
 
     /**
@@ -208,10 +237,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
-     * Used to add any new yachts into the race that may have started late or not have had data
-     * received yet
+     * Used to add any new yachts into the race that may have started late or not have had data received yet
      */
-    private void updateSparkLine() {
+    private void updateSparkLine(){
         // TODO: 2/08/17 there is about 0 chance of this working. Once we are keeping track of boat positions it can be fixed.
         // Collect the racing yachts that aren't already in the chart
         sparkLineData.clear();
@@ -219,40 +247,39 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         // Create a new data series for new yachts
         sparkLineCandidates
             .stream()
-            .filter(yacht -> yacht.getPositionInteger() != null)
+            .filter(yacht -> yacht.getPlacing() != null)
             .forEach(yacht -> {
                 Series<String, Double> yachtData = new Series<>();
                 yachtData.setName(yacht.getSourceId().toString());
                 yachtData.getData().add(
                     new XYChart.Data<>(
                         Integer.toString(yacht.getLegNumber()),
-                        1.0 + participants.size() - yacht.getPositionInteger()
+                        1.0 + participants.size() - yacht.getPlacing()
                     )
                 );
-                sparkLineData.add(yachtData);
+            sparkLineData.add(yachtData);
             });
 
         // Lambda function to sort the series in order of leg (later legs shown more to the right)
         sparkLineData.sort((o1, o2) -> {
-            Integer leg1 = Integer.parseInt(o1.getData().get(o1.getData().size() - 1).getXValue());
-            Integer leg2 = Integer.parseInt(o2.getData().get(o2.getData().size() - 1).getXValue());
-            if (leg2 < leg1) {
+            Integer leg1 =  Integer.parseInt(o1.getData().get(o1.getData().size()-1).getXValue());
+            Integer leg2 =  Integer.parseInt(o2.getData().get(o2.getData().size()-1).getXValue());
+            if (leg2 < leg1){
                 return 1;
             } else {
                 return -1;
             }
         });
         // Adds the new data series to the sparkline (and set the colour of the series)
-        Platform.runLater(() ->
+        Platform.runLater(() -> {
             sparkLineData
                 .stream()
                 .filter(spark -> !raceSparkLine.getData().contains(spark))
                 .forEach(spark -> {
                     raceSparkLine.getData().add(spark);
-                    spark.getNode().lookup(".chart-series-line")
-                        .setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
-                })
-        );
+                    spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
+                });
+        });
     }
 
     private void initialiseSparkLine() {
@@ -262,15 +289,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * Updates the yachts sparkline of the desired yacht and using the new leg number
-     * @param clientYacht The yacht to be updated on the sparkline
+     * @param yacht The yacht to be updated on the sparkline
      * @param legNumber the leg number that the position will be assigned to
      */
-    void updateYachtPositionSparkline(ClientYacht clientYacht, Integer legNumber) {
+    void updateYachtPositionSparkline(ClientYacht yacht, Integer legNumber){
         for (XYChart.Series<String, Double> positionData : sparkLineData) {
             positionData.getData().add(
                 new Data<>(
                     Integer.toString(legNumber),
-                    1.0 + participants.size() - clientYacht.getPositionInteger()
+                    1.0 + participants.size() - yacht.getPlacing()
                 )
             );
         }
@@ -278,7 +305,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        positionData.getData().add(
 //            new XYChart.Data<>(
 //                Integer.toString(legNumber),
-//                1.0 + participants.size() - yacht.getPosition()
+//                1.0 + participants.size() - yacht.getPlacing()
 //            )
 //        );
     }
@@ -286,52 +313,47 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * gets the rgb string of the yachts colour to use for the chart via css
-     *
      * @param yachtId id of yacht passed in to get the yachts colour
      * @return the colour as an rgb string
      */
-    private String getBoatColorAsRGB(String yachtId) {
+    private String getBoatColorAsRGB(String yachtId){
         Color color = participants.get(Integer.valueOf(yachtId)).getColour();
-        if (color == null) {
-            return String.format("#%02X%02X%02X", 255, 255, 255);
+        if (color == null){
+            return String.format("#%02X%02X%02X",255,255,255);
         }
-        return String.format("#%02X%02X%02X",
-            (int) (color.getRed() * 255),
-            (int) (color.getGreen() * 255),
-            (int) (color.getBlue() * 255)
+        return String.format( "#%02X%02X%02X",
+            (int)( color.getRed() * 255 ),
+            (int)( color.getGreen() * 255 ),
+            (int)( color.getBlue() * 255 )
         );
     }
 
 
     /**
      * Initialises a timer which updates elements of the RaceView such as wind direction, yacht
-     * orderings etc.. which are dependent on the info from the stream parser constantly. Updates of
-     * each of these attributes are called ONCE EACH SECOND
+     * orderings etc.. which are dependent on the info from the stream parser constantly.
+     * Updates of each of these attributes are called ONCE EACH SECOND
      */
     private void initializeUpdateTimer() {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 updateRaceTime();
-                updateWindDirection();
-                updateOrder();
-//                updateSparkLine();
             }
         }, 0, 1000);
     }
 
     /**
-     * Iterates over all corners until ones SeqID matches with the yachts current leg number. Then
-     * it gets the compoundMarkID of that corner and uses it to fetch the appropriate mark Returns
-     * null if no next mark found.
-     *
+     * Iterates over all corners until ones SeqID matches with the yachts current leg number.
+     * Then it gets the compoundMarkID of that corner and uses it to fetch the appropriate mark
+     * Returns null if no next mark found.
      * @param bg The BoatGroup to find the next mark of
      * @return The next Mark or null if none found
      */
     private Mark getNextMark(BoatObject bg) {
         // TODO: 1/08/17 Move to GameView
 //
-//        Integer legNumber = bg.getYacht().getLegNumber();
+//        Integer legNumber = bg.getClientYacht().getLegNumber();
 //        List<Corner> markSequence = courseData.getMarkSequence();
 //
 //        if (legNumber == 0) {
@@ -352,10 +374,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     /**
      * Updates the wind direction arrow and text as from info from the StreamParser
+     * @param direction the from north angle of the wind.
      */
-    private void updateWindDirection() {
-        windDirectionText.setText(String.format("%.1f°", raceState.getWindDirection()));
-        windArrowText.setRotate(raceState.getWindDirection());
+    private void updateWindDirection(double direction) {
+        windDirectionText.setText(String.format("%.1f°", direction));
+        windArrowText.setRotate(direction);
+    }
+
+    /**
+     * Updates the speed of the wind as displayed by the info pane.
+     * @param windSpeed Windspeed in knots.
+     */
+    private void updateWindSpeed(double windSpeed) {
+        windSpeedText.setText("Speed: " + String.format("%.1f", windSpeed) + " Knots");
     }
 
 
@@ -375,26 +406,20 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the order of the yachts as from the StreamParser and sets them in the yacht order
      * section
      */
-    private void updateOrder() {
-//        positionVbox.getChildren().removeAll();
-//        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-
-        // list of racing yacht id
-        List<ClientYacht> sorted = new ArrayList<>(participants.values());
-        sorted.sort(Comparator.comparingInt(ClientYacht::getPositionInteger));
+    private void updateOrder(ObservableList<ClientYacht> yachts) {
         List<Text> vboxEntries = new ArrayList<>();
 
-        for (ClientYacht clientYacht : sorted) {
+        for (int i = 0; i < yachts.size(); i++) {
 //            System.out.println("yacht == null  " + String.valueOf(yacht == null));
-            if (clientYacht.getBoatStatus() == 3) {  // 3 is finish status
-                Text textToAdd = new Text(clientYacht.getPositionInteger() + ". " +
-                    clientYacht.getShortName() + " (Finished)");
+            if (yachts.get(i).getBoatStatus() == 3) {  // 3 is finish status
+                Text textToAdd = new Text(i + 1 + ". " +
+                    yachts.get(i).getShortName() + " (Finished)");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 vboxEntries.add(textToAdd);
 
             } else {
-                Text textToAdd = new Text(clientYacht.getPositionInteger() + ". " +
-                    clientYacht.getShortName() + " ");
+                Text textToAdd = new Text(i + 1 + ". " +
+                    yachts.get(i).getShortName() + " ");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
                 textToAdd.setStyle("");
                 vboxEntries.add(textToAdd);
@@ -403,13 +428,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         Platform.runLater(() ->
             positionVbox.getChildren().setAll(vboxEntries)
         );
-//            participants.forEach((id, yacht) ->{
-//                Text textToAdd = new Text(yacht.getPosition() + ". " +
-//                    yacht.getShortName() + " ");
-//                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-//                textToAdd.setStyle("");
-//                positionVbox.getChildren().add(textToAdd);
-//            });
     }
 
 
@@ -488,8 +506,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
 
-    public Line makeLeftLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
-
+    public Line  makeLeftLayline(Point2D startPoint, Double layLineAngle, Double baseAngle) {
         Point2D ep = getPointRotation(startPoint, 50.0, baseAngle + layLineAngle);
         Line line = new Line(startPoint.getX(), startPoint.getY(), ep.getX(), ep.getY());
         return line;
@@ -507,8 +524,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 
     /**
-     * Initialised the combo box with any yachts currently in the race and adds the required
-     * listener for the combobox to take action upon selection
+     * Initialised the combo box with any yachts currently in the race and adds the required listener
+     * for the combobox to take action upon selection
      */
     private void initialiseBoatSelectionComboBox() {
         yachtSelectionComboBox.setItems(
@@ -580,9 +597,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     /**
      * Sets all the annotations of the selected yacht to be visible and all others to be hidden
      *
-     * @param clientYacht The yacht for which we want to view all annotations
+     * @param yacht The yacht for which we want to view all annotations
      */
-    private void setSelectedBoat(ClientYacht clientYacht) {
+    private void setSelectedBoat(ClientYacht yacht) {
 //        for (BoatObject bg : gameViewController.getBoatGroups()) {
 //            //We need to iterate over all race groups to get the matching yacht group belonging to this yacht if we
 //            //are to toggle its annotations, there is no other backwards knowledge of a yacht to its yachtgroup.
@@ -596,23 +613,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        }
     }
 
-    public void updateRaceData(RaceXMLData raceData) {
+    public void updateRaceData (RaceXMLData raceData) {
         this.courseData = raceData;
         gameView.updateBorder(raceData.getCourseLimit());
-    }
-
-    /**
-     * Called by game client after receiving yacht event packet. Parameter subject id is the
-     * offending yacht. This function in turn will pass the yacht location to game view to display a
-     * collision alert.
-     *
-     * @param subjectId source id of offending yacht
-     */
-    public void showCollision(Long subjectId) {
-        gameView.drawCollision(participants.get((int) (long) subjectId).getLocation());
-    }
-
-    public GameView getGameView() {
-        return gameView;
     }
 }

@@ -43,6 +43,7 @@ public class ServerYacht extends Observable {
     private Double currentVelocity;
     private Boolean isAuto;
     private Double autoHeading;
+    private Integer legNumber;
 
     //Mark Rounding
     private Integer currentMarkSeqID;
@@ -68,6 +69,7 @@ public class ServerYacht extends Observable {
         this.heading = 120.0;   //In degrees
         this.currentVelocity = 0d;     //in mms-1
         this.currentMarkSeqID = 0;
+        this.legNumber = 0;
         this.boatColor = Colors.getColor(sourceId - 1);
 
         this.hasEnteredRoundingZone = false;
@@ -387,6 +389,14 @@ public class ServerYacht extends Observable {
 
     public Boolean hasPassedLine() {
         return hasPassedLine;
+    }
+
+    public void incrementLegNumber() {
+        legNumber++;
+    }
+
+    public Integer getLegNumber() {
+        return legNumber;
     }
 
     public void setBoatColor(Color color) {

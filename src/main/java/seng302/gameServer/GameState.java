@@ -104,7 +104,6 @@ public class GameState implements Runnable {
 
         resetStartTime();
 
-        new Thread(this).start();   //Run the auto updates on the game state
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
 
         marks = new MarkOrder().getAllMarks();
@@ -186,6 +185,14 @@ public class GameState implements Runnable {
         return windDirection;
     }
 
+    public static void setWindDirection(Double newWindDirection) {
+        windDirection = newWindDirection;
+    }
+
+    public static void setWindSpeed(Double newWindSpeed) {
+        windSpeed = newWindSpeed;
+    }
+
     public static Double getWindSpeedMMS() {
         return windSpeed;
     }
@@ -256,7 +263,6 @@ public class GameState implements Runnable {
         }
     }
 
-
     /**
      * Called periodically in this GameState thread to update the GameState values
      */
@@ -277,6 +283,8 @@ public class GameState implements Runnable {
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
+
+
         }
 
         if (raceFinished) {
@@ -335,17 +343,20 @@ public class GameState implements Runnable {
                 notifyMessageListeners(
                     new YachtEventCodeMessage(serverYacht.getSourceId())
                 );
-            } else if (checkBoundaryCollision(serverYacht)) {
-                serverYacht.setLocation(
-                    calculateBounceBack(serverYacht, serverYacht.getLocation(),
-                        BOUNCE_DISTANCE_YACHT)
-                );
-                serverYacht.setCurrentVelocity(
-                    serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
-                );
-                notifyMessageListeners(
-                    new YachtEventCodeMessage(serverYacht.getSourceId())
-                );
+            }
+            else{
+                if (checkBoundaryCollision(serverYacht)) {
+                    serverYacht.setLocation(
+                            calculateBounceBack(serverYacht, serverYacht.getLocation(),
+                                    BOUNCE_DISTANCE_YACHT)
+                    );
+                    serverYacht.setCurrentVelocity(
+                            serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+                    );
+                    notifyMessageListeners(
+                            new YachtEventCodeMessage(serverYacht.getSourceId())
+                    );
+                }
             }
         }
     }
@@ -409,7 +420,7 @@ public class GameState implements Runnable {
     }
 
 
-    /**
+    /**        lobbyController.setPlayerListSource(clientLobbyList);
      * 4 Different cases of progression in the race 1 - Passing the start line 2 - Passing any
      * in-race Gate 3 - Passing any in-race Mark 4 - Passing the finish line
      *
@@ -432,6 +443,7 @@ public class GameState implements Runnable {
         }
 
         if (hasProgressed) {
+            yacht.incrementLegNumber();
             sendMarkRoundingMessage(yacht);
             logMarkRounding(yacht);
             yacht.setHasPassedLine(false);
@@ -654,7 +666,7 @@ public class GameState implements Runnable {
         // TODO: 13/8/17 figure out the rounding side, rounded mark source ID and boat status.
         Message markRoundingMessage = new MarkRoundingMessage(0, 0,
             sourceID, RoundingBoatStatus.RACING, roundingMark.getRoundingSide(), markType,
-            roundingMark.getSourceID());
+            currentMarkSeqID + 1);
 
         notifyMessageListeners(markRoundingMessage);
     }

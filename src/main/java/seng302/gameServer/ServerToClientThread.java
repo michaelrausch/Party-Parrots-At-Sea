@@ -30,6 +30,7 @@ import seng302.gameServer.messages.RegistrationResponseStatus;
 import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
@@ -37,6 +38,19 @@ import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.BoatSubMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RaceStatus;
+import seng302.gameServer.messages.RaceStatusMessage;
+import seng302.gameServer.messages.RaceType;
+import seng302.gameServer.messages.RegistrationResponseMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.model.ServerYacht;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -186,6 +200,7 @@ public class ServerToClientThread implements Runnable, Observer {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
+                        //System.out.println("RECEIVED A PACKET");
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
                                 BoatAction actionType = ServerPacketParser

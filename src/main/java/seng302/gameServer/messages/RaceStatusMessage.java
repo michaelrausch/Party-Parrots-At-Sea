@@ -39,7 +39,7 @@ public class RaceStatusMessage extends Message{
         this.raceId = raceId;
         this.raceStatus = raceStatus;
         this.expectedStartTime = expectedStartTime;
-        this.raceWindDirection = raceWindDirection * windDirFactor;
+        this.raceWindDirection = raceWindDirection * windDirFactor+100.0;
         this.windSpeed = windSpeed;
         this.numBoatsInRace = numBoatsInRace;
         this.raceType = raceType;

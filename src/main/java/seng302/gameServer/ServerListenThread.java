@@ -8,13 +8,16 @@ import java.net.Socket;
  * A class for a thread to listen to connections
  * Created by wmu16 on 11/07/17.
  */
-public class ServerListenThread extends Thread{
+public class ServerListenThread implements Runnable {
     private ServerSocket serverSocket;
     private ClientConnectionDelegate delegate;
 
     public ServerListenThread(ServerSocket serverSocket, ClientConnectionDelegate delegate){
         this.serverSocket = serverSocket;
         this.delegate = delegate;
+
+        Thread thread = new Thread(this, "ServerListen");
+        thread.start();
     }
 
     /**

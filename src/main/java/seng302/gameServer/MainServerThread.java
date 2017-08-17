@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import seng302.gameServer.messages.BoatSubMessage;
@@ -20,7 +21,6 @@ import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.GameClient;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -29,11 +29,16 @@ import seng302.visualiser.GameClient;
 public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private static final int PORT = 4942;
-    private static final Integer CLIENT_UPDATES_PER_SECOND = 10;
+    private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
     private static final int LOG_LEVEL = 1;
     private static final int WARNING_TIME = 10 * -1000;
     private static final int PREPATORY_TIME = 5 * -1000;
     public static final int TIME_TILL_START = 10 * 1000;
+
+    private static final int MAX_WIND_SPEED = 12000;
+    private static final int MIN_WIND_SPEED = 8000;
+
+    public static int windSpeed = 1000;
 
     private boolean terminated;
 
@@ -41,8 +46,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private ServerSocket serverSocket = null;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
-
-    private GameClient gameClient;
 
     public MainServerThread() {
         new GameState("localhost");
@@ -55,19 +58,15 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");
+        startUpdatingWind();
         thread.start();
     }
 
 
     public void run() {
-        ServerListenThread serverListenThread;
-        HeartbeatThread heartbeatThread;
 
-        serverListenThread = new ServerListenThread(serverSocket, this);
-        heartbeatThread = new HeartbeatThread(this);
-
-        heartbeatThread.start();
-        serverListenThread.start();
+        new HeartbeatThread(this);
+        new ServerListenThread(serverSocket, this);
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!terminated) {
@@ -119,6 +118,45 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.sendMessage(message);
         }
+    }
+
+    private static void updateWind(){
+        Integer direction = GameState.getWindDirection().intValue();
+        Integer windSpeed = GameState.getWindSpeedMMS().intValue();
+
+        Random random = new Random();
+
+        if (Math.floorMod(random.nextInt(), 2) == 0){
+            direction += random.nextInt(4);
+            windSpeed += random.nextInt(100) + 500;
+        }
+        else{
+            direction -= random.nextInt(4);
+            windSpeed -= random.nextInt(100) + 500;
+        }
+
+        direction = Math.floorMod(direction, 360);
+
+        if (windSpeed > MAX_WIND_SPEED){
+            windSpeed -= random.nextInt(1000);
+        }
+
+        if (windSpeed <= MIN_WIND_SPEED){
+            windSpeed += random.nextInt(1000);
+        }
+
+        GameState.setWindSpeed(Double.valueOf(windSpeed));
+        GameState.setWindDirection(direction.doubleValue());
+    }
+
+    private static void startUpdatingWind(){
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateWind();
+            }
+        }, 0, 500);
     }
 
 
@@ -202,7 +240,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         for (Player player : GameState.getPlayers()) {
             ServerYacht y = player.getYacht();
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(), 0,
+            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(),
+                y.getLegNumber(),
                 0, 0, 1234L,
                 1234L);
             boatSubMessages.add(m);
@@ -237,24 +276,16 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     }
 
     /**
-     * Pass GameClient to main server thread so it can access the properties inside.
-     *
-     * @param gameClient gameClient
-     */
-    public void setGameClient(GameClient gameClient) {
-        this.gameClient = gameClient;
-    }
-
-    /**
      * Initialise boats to specific spaced out geopoints behind starting line.
      */
     private void initialiseBoatPositions() {
         // Getting the start line compound marks
-        CompoundMark cm = gameClient.getCourseData().getCompoundMarks().get(1);
-        GeoPoint startMark1 = new GeoPoint(cm.getMarks().get(0).getLat(),
-            cm.getMarks().get(0).getLng());
-        GeoPoint startMark2 = new GeoPoint(cm.getMarks().get(1).getLat(),
-            cm.getMarks().get(1).getLng());
+//        if (gameClient== null) {
+//            return;
+//        }
+        CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
+        GeoPoint startMark1 = cm.getSubMark(1);
+        GeoPoint startMark2 = cm.getSubMark(2);
 
         // Calculating midpoint
         Double perpendicularAngle = GeoUtility.getBearing(startMark1, startMark2);
