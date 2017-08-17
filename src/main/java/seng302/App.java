@@ -68,7 +68,7 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
-        primaryStage.setTitle("RaceVision");
+        primaryStage.setTitle("Party Parrots at Sea");
         Scene scene = new Scene(root, 1530, 960);
         scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
         primaryStage.setScene(scene);

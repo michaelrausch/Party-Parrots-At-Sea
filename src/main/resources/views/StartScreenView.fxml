@@ -20,7 +20,9 @@
    <children>
       <GridPane fx:id="startScreen2" layoutX="365.0" layoutY="285.0" nodeOrientation="LEFT_TO_RIGHT" prefWidth="800.0" style="-fx-background-color: #2C2c36;">
          <children>
-            <Label alignment="CENTER" text="Welcome to Race Vision" textFill="WHITE" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="BOTTOM">
+            <Label alignment="CENTER" text="Party Parrots at Sea" textFill="WHITE"
+              GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="1"
+              GridPane.valignment="BOTTOM">
                <font>
                   <Font size="40.0" />
                </font>
