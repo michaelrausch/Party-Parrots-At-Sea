@@ -49,17 +49,13 @@ public class Marker extends Group {
      */
     public void addArrows(MarkArrowFactory.RoundingSide roundingSide, double entryAngle,
         double exitAngle) {
-
+        //Change Color.GRAY to this.colour to revert all gray arrows.
         enterArrows.add(
-            MarkArrowFactory.constructEntryArrow(roundingSide, entryAngle, exitAngle, colour)
+            MarkArrowFactory.constructEntryArrow(roundingSide, entryAngle, exitAngle, Color.GRAY)
         );
         exitArrows.add(
-            MarkArrowFactory.constructExitArrow(roundingSide, exitAngle, colour)
+            MarkArrowFactory.constructExitArrow(roundingSide, exitAngle, Color.GRAY)
         );
-//        Platform.runLater(() -> {
-//            this.getChildren().add(enterArrows.get(enterArrows.size()-1));
-//            this.getChildren().add(exitArrows.get(exitArrows.size()-1));
-//        });
     }
 
     /**

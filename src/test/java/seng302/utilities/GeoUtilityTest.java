@@ -140,7 +140,6 @@ public class GeoUtilityTest {
 //        for (int i = 0; i < 100000; i++) {
 //            assertTrue(GeoUtility.isPointInTriangle(v1, v2, v3, p1));
 //        }
-//        System.out.println((System.nanoTime() - startTime) / 1000000000.0);
 
         // test for different orders of vertices, which should not affect the result
         assertTrue(GeoUtility.isPointInTriangle(v2, v1, v3, p1));

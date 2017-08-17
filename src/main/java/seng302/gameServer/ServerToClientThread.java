@@ -192,7 +192,6 @@ public class ServerToClientThread implements Runnable, Observer {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
-                        //System.out.println("RECEIVED A PACKET");
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
                                 BoatAction actionType = ServerPacketParser
@@ -229,7 +228,11 @@ public class ServerToClientThread implements Runnable, Observer {
         }
 
         //@TODO calculate lat/lng values
-        xml.setRegatta(new Regatta("Party Parrot Test Server", "Bermuda Test Course",  57.6679590, 11.8503233));
+        xml.setRegatta(
+            new Regatta(
+                "Party Parrot Test Server", "Bermuda Test Course",
+                57.6679590, 11.8503233)
+        );
         xml.setRace(race);
 
         XMLMessage xmlMessage;
@@ -289,8 +292,7 @@ public class ServerToClientThread implements Runnable, Observer {
         try {
             os.write(message.getBuffer());
         } catch (SocketException e) {
-            //serverLog("Player " + sourceId + " side socket disconnected", 1);
-            return;
+            logger.warn("Player " + sourceId + " side socket disconnected", 1);
         } catch (IOException e) {
             logger.warn("Message send failed", 1);
         }
