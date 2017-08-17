@@ -338,6 +338,8 @@ public class ClientToServerThread implements Runnable {
             closeSocket();
         }
         if (currentByte == -1) {
+            notifyDisconnectListeners("Cannot read from server.");
+            closeSocket();
             logger.warn("InputStream reach end of stream", 1);
         }
         return currentByte;
