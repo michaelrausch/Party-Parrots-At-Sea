@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,10 +14,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
@@ -46,16 +41,20 @@ public class ClientToServerThread implements Runnable {
         void newPacket();
     }
 
+    @FunctionalInterface
+    public interface DisconnectedFromHostListener {
+        void notifYDisconnection (String message);
+    }
+
     private class ByteReadException extends Exception {
         private ByteReadException(String message) {
             super(message);
         }
     }
 
-    private static final int LOG_LEVEL = 1;
-
     private Queue<StreamPacket> streamPackets = new ConcurrentLinkedQueue<>();
     private List<ClientSocketListener> listeners = new ArrayList<>();
+    private List<DisconnectedFromHostListener> disconnectionListeners = new ArrayList<>();
     private Thread thread;
 
     private Socket socket;
@@ -72,7 +71,6 @@ public class ClientToServerThread implements Runnable {
 
     private int clientId = -1;
 
-//    private Boolean updateClient = true;
     private ByteArrayOutputStream crcBuffer;
     private boolean socketOpen = true;
 
@@ -100,20 +98,6 @@ public class ClientToServerThread implements Runnable {
     }
 
     /**
-     * Prints out log messages and the time happened.
-     * Only perform task if log level is below LOG_LEVEL variable.
-     *
-     * @param message a string of message to be printed out
-     * @param logLevel an int for log level
-     */
-    static void clientLog(String message, int logLevel) {
-        if (logLevel <= LOG_LEVEL) {
-            System.out.println(
-                "[CLIENT " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
-        }
-    }
-
-    /**
      * Perform the thread loop. It exits the loop if ClientState connected to host
      * variable is false.
      */
@@ -121,7 +105,7 @@ public class ClientToServerThread implements Runnable {
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
-        while(socketOpen) {
+        while(!socket.isClosed() && socket.isConnected() && socketOpen) {
             try {
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
@@ -153,26 +137,25 @@ public class ClientToServerThread implements Runnable {
                             }
                         }
                     } else {
-                        clientLog("Packet has been dropped", 1);
+                        logger.warn("Packet has been dropped", 1);
                     }
                 }
             } catch (ByteReadException e) {
-                e.printStackTrace();
+                logger.warn("Byte read exception on ClientToServerThread", 1);
                 closeSocket();
-                Platform.runLater(() -> {
-                    Alert alert = new Alert(AlertType.ERROR);
-                    alert.setHeaderText("Host has disconnected");
-                    alert.setContentText("Cannot find Server");
-                    alert.showAndWait();
-                });
-                clientLog(e.getMessage(), 1);
-                return;
+                notifyDisconnectListeners("Connection to server was interrupted");
             }
         }
+        logger.warn("Closed connection to server", 1);
         closeSocket();
-        clientLog("Closed connection to Server", 0);
+        notifyDisconnectListeners("Connection to server was terminated");
     }
 
+    private void notifyDisconnectListeners (String message) {
+        for (DisconnectedFromHostListener listener : disconnectionListeners) {
+            listener.notifYDisconnection(message);
+        }
+    }
 
     /**
      * Sends a request to the server asking for a source ID
@@ -184,7 +167,8 @@ public class ClientToServerThread implements Runnable {
             os.write(requestMessage.getBuffer());
         } catch (IOException e) {
             logger.error("Could not send registration request. Exiting");
-            System.exit(1);
+            closeSocket();
+            notifyDisconnectListeners("Failed to register with server");
         }
     }
 
@@ -200,7 +184,6 @@ public class ClientToServerThread implements Runnable {
 
         if (status.equals(RegistrationResponseStatus.SUCCESS_PLAYING)){
             clientId = sourceId;
-
             return;
         }
 
@@ -214,11 +197,8 @@ public class ClientToServerThread implements Runnable {
         else{
             alertErrorText = "Could not connect to server";
         }
-
-        Platform.runLater(() -> {
-            new Alert(AlertType.ERROR, alertErrorText, ButtonType.OK).showAndWait();
-            System.exit(1);
-        });
+        closeSocket();
+        notifyDisconnectListeners(alertErrorText);
     }
 
     /**
@@ -228,7 +208,7 @@ public class ClientToServerThread implements Runnable {
      * - MAINTAIN_HEADING = DOWNWIND and UPWIND packets stop being sent.
      * @param actionType The boat action that will dictate packets sent.
      */
-    public void sendBoatAction(BoatAction actionType) {
+    public void sendBoatActionMessage(BoatAction actionType) {
         switch (actionType) {
             case MAINTAIN_HEADING:
                 if (upwindTimerFlag) {
@@ -249,7 +229,7 @@ public class ClientToServerThread implements Runnable {
                         new TimerTask() {
                             @Override
                             public void run() {
-                                sendBoatAction(new BoatActionMessage(BoatAction.DOWNWIND));
+                                sendBoatActionMessage(new BoatActionMessage(BoatAction.DOWNWIND));
                             }
                         }, 0, PACKET_SENDING_INTERVAL_MS
                     );
@@ -262,14 +242,14 @@ public class ClientToServerThread implements Runnable {
                         new TimerTask() {
                             @Override
                             public void run() {
-                                sendBoatAction(new BoatActionMessage(BoatAction.UPWIND));
+                                sendBoatActionMessage(new BoatActionMessage(BoatAction.UPWIND));
                             }
                         }, 0, PACKET_SENDING_INTERVAL_MS
                     );
                 }
                 break;
             default:
-                sendBoatAction(new BoatActionMessage(actionType));
+                sendBoatActionMessage(new BoatActionMessage(actionType));
                 break;
         }
     }
@@ -287,12 +267,14 @@ public class ClientToServerThread implements Runnable {
      * Sends a boat action of the given message type.
      * @param message The given message type.
      */
-    private void sendBoatAction(BoatActionMessage message) {
+    private void sendBoatActionMessage(BoatActionMessage message) {
         if (clientId != -1) {
             try {
                 os.write(message.getBuffer());
             } catch (IOException e) {
-                clientLog("Could not write to server", 1);
+                logger.warn("IOException on attempting to sendBoatActionMessage from Client");
+                closeSocket();
+                notifyDisconnectListeners("Cannot communicate with server");
             }
         }
     }
@@ -301,7 +283,7 @@ public class ClientToServerThread implements Runnable {
         try {
             socket.close();
         } catch (IOException e) {
-            clientLog("Failed to close the socket", 1);
+            logger.warn("IOException on attempting to close ClientToServerSocket");
         }
     }
 
@@ -321,13 +303,23 @@ public class ClientToServerThread implements Runnable {
         listeners.remove(streamListener);
     }
 
+    public void addDisconnectionListener (DisconnectedFromHostListener listener) {
+        disconnectionListeners.add(listener);
+    }
+
+    public void removeDisconnectionListener (DisconnectedFromHostListener listener) {
+        disconnectionListeners.remove(listener);
+    }
+
     private int readByte() throws ByteReadException {
         int currentByte = -1;
         try {
             currentByte = is.read();
             crcBuffer.write(currentByte);
         } catch (IOException e) {
-            clientLog("Read byte failed", 1);
+            logger.warn("IOException on readByte Client side", 1);
+            closeSocket();
+            notifyDisconnectListeners("Cannot read from server.");
         }
         if (currentByte == -1) {
             throw new ByteReadException("InputStream reach end of stream");
@@ -349,8 +341,7 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
-    public int getClientId () {
+    int getClientId () {
         return clientId;
     }
-
 }

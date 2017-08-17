@@ -30,12 +30,12 @@ public class RegularPacketsTest {
 //        ServerYacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
 //        double startAngle = yacht.getHeading();
 //        long startTime = System.currentTimeMillis();
-//        clientThread.sendBoatAction(BoatAction.UPWIND);
+//        clientThread.sendBoatActionMessage(BoatAction.UPWIND);
 //        Thread.sleep(200);
 //        while (Math.abs(yacht.getHeading() - startAngle) < TEST_DISTANCE) {
 //            Thread.sleep(1);
 //        }
-//        clientThread.sendBoatAction(BoatAction.MAINTAIN_HEADING);
+//        clientThread.sendBoatActionMessage(BoatAction.MAINTAIN_HEADING);
 //        long endTime = System.currentTimeMillis();
 //        SleepThreadMaxDelay();
 //        //Allowed to be two loops of delay due to loop delay and processing delay at client + server ends.
@@ -50,7 +50,7 @@ public class RegularPacketsTest {
 //        SleepThreadMaxDelay();
 //        Yacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
 //        boolean startState = yacht.getSailIn();
-//        clientThread.sendBoatAction(BoatAction.SAILS_IN);
+//        clientThread.sendBoatActionMessage(BoatAction.SAILS_IN);
 //        SleepThreadMaxDelay();
 //        Assert.assertEquals(startState, !yacht.getSailIn());
 //    }
