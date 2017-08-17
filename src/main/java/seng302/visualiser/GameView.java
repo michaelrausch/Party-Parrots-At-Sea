@@ -474,7 +474,7 @@ public class GameView extends Pane {
     public void setBoats(List<ClientYacht> yachts) {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
-        for (ClientYacht clientYacht : clientYachts) {
+        for (ClientYacht clientYacht : yachts) {
             Paint colour = clientYacht.getColour();
             newBoat = new BoatObject();
             newBoat.addSelectedBoatListener(this::setSelectedBoat);

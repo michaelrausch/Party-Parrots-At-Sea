@@ -95,7 +95,7 @@ public class GameClient {
 
     /**
      * Connect to a game as the host at the given address and starts the visualiser.
-     * @param ipAddress IP to connect to.
+     * @param ipAdclientYachtsdress IP to connect to.
      * @param portNumber Port to connect to.
      */
     public void runAsHost(String ipAddress, Integer portNumber) {
@@ -130,7 +130,7 @@ public class GameClient {
         });
 
         this.lobbyController = lobbyController;
-        server.setGameClient(this);
+        //server.setGameClient(this);
     }
 
     private void loadStartScreen() {
