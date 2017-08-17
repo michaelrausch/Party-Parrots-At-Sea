@@ -252,9 +252,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             .stream()
             .filter(yacht -> yacht.getPosition() != null)
             .forEach(yacht -> {
-                System.out.println(
-                    yacht.getBoatName() + " pos: " + yacht.getPosition() + " legno: " + yacht
-                        .getLegNumber());
                 Series<String, Double> yachtData = new Series<>();
                 yachtData.setName(yacht.getSourceId().toString());
                 yachtData.getData().add(
@@ -283,7 +280,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 .stream()
                 .filter(spark -> !raceSparkLine.getData().contains(spark))
                 .forEach(spark -> {
-                    System.out.println(spark.getName());
                     raceSparkLine.getData().add(spark);
                     spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
                 });
