@@ -130,7 +130,6 @@ public class GameClient {
                 }
             });
             this.lobbyController = lobbyController;
-            server.setGameClient(this);
         } catch (IOException ioe) {
             showConnectionError("Cannot connect to server as host");
             Platform.runLater(this::loadStartScreen);
