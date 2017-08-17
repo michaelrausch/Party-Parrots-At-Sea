@@ -61,7 +61,7 @@ public class RegularPacketsTest {
 //        SleepThreadMaxDelay();
 //        ServerYacht yacht = new ArrayList<>(GameState.getYachts().values()).get(0);
 //        boolean startState = yacht.getSailIn();
-//        clientThread.sendBoatActionMessage(BoatAction.SAILS_IN);
+//        clientThread.sendBoatAction(BoatAction.SAILS_IN);
 //        SleepThreadMaxDelay();
 //        Assert.assertEquals(startState, !yacht.getSailIn());
 //    }

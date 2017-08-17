@@ -38,7 +38,7 @@ public class ServerListenThread implements Runnable {
     }
 
     public void run(){
-        while (true){
+        while (serverSocket != null && !serverSocket.isClosed()){
             acceptConnection();
         }
     }

@@ -93,6 +93,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
         try {
+            for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+                serverToClientThread.terminate();
+            }
             serverSocket.close();
             return;
         } catch (IOException e) {
@@ -173,6 +176,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 thread.sendSetupMessages();
             }
         });
+        serverToClientThread.addDisconnectListener(this::clientDisconnected);
     }
 
     /**
@@ -182,11 +186,11 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
      */
     @Override
     public void clientDisconnected(Player player) {
-        try {
-            player.getSocket().close();
-        } catch (Exception e) {
-            serverLog("Cannot disconnect the socket for the disconnected player.", 0);
-        }
+//        try {
+//            player.getSocket().close();
+//        } catch (Exception e) {
+//            serverLog("Cannot disconnect the socket for the disconnected player.", 0);
+//        }
         serverLog("Player " + player.getYacht().getSourceId() + "'s socket disconnected", 0);
         GameState.removeYacht(player.getYacht().getSourceId());
         GameState.removePlayer(player);
@@ -194,11 +198,12 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             if (serverToClientThread.getSocket() == player.getSocket()) {
                 closedConnection = serverToClientThread;
-            } else {
+            } else if (GameState.getCurrentStage() != GameStages.RACING){
                 serverToClientThread.sendSetupMessages();
             }
         }
         serverToClientThreads.remove(closedConnection);
+        closedConnection.terminate();
     }
 
     public void startGame() {

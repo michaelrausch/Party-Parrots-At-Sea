@@ -36,7 +36,7 @@ public class ToggleSailSteps {
     public void the_user_has_pressed(String arg1) throws Throwable {
         startTime = System.currentTimeMillis();
         if (arg1 == "shift") {
-            client.sendBoatActionMessage(BoatAction.SAILS_IN);
+            client.sendBoatAction(BoatAction.SAILS_IN);
         }
     }
 

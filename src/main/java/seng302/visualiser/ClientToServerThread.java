@@ -142,18 +142,20 @@ public class ClientToServerThread implements Runnable {
                 }
             } catch (ByteReadException e) {
                 logger.warn("Byte read exception on ClientToServerThread", 1);
-                closeSocket();
                 notifyDisconnectListeners("Connection to server was interrupted");
+                closeSocket();
             }
         }
         logger.warn("Closed connection to server", 1);
-        closeSocket();
         notifyDisconnectListeners("Connection to server was terminated");
+        closeSocket();
     }
 
     private void notifyDisconnectListeners (String message) {
-        for (DisconnectedFromHostListener listener : disconnectionListeners) {
-            listener.notifYDisconnection(message);
+        if (socketOpen) {
+            for (DisconnectedFromHostListener listener : disconnectionListeners) {
+                listener.notifYDisconnection(message);
+            }
         }
     }
 
@@ -167,8 +169,8 @@ public class ClientToServerThread implements Runnable {
             os.write(requestMessage.getBuffer());
         } catch (IOException e) {
             logger.error("Could not send registration request. Exiting");
-            closeSocket();
             notifyDisconnectListeners("Failed to register with server");
+            closeSocket();
         }
     }
 
@@ -197,8 +199,8 @@ public class ClientToServerThread implements Runnable {
         else{
             alertErrorText = "Could not connect to server";
         }
-        closeSocket();
         notifyDisconnectListeners(alertErrorText);
+        closeSocket();
     }
 
     /**
@@ -208,7 +210,7 @@ public class ClientToServerThread implements Runnable {
      * - MAINTAIN_HEADING = DOWNWIND and UPWIND packets stop being sent.
      * @param actionType The boat action that will dictate packets sent.
      */
-    public void sendBoatActionMessage(BoatAction actionType) {
+    public void sendBoatAction(BoatAction actionType) {
         switch (actionType) {
             case MAINTAIN_HEADING:
                 if (upwindTimerFlag) {
@@ -272,9 +274,9 @@ public class ClientToServerThread implements Runnable {
             try {
                 os.write(message.getBuffer());
             } catch (IOException e) {
-                logger.warn("IOException on attempting to sendBoatActionMessage from Client");
-                closeSocket();
+                logger.warn("IOException on attempting to sendBoatAction from Client");
                 notifyDisconnectListeners("Cannot communicate with server");
+                closeSocket();
             }
         }
     }
@@ -282,6 +284,7 @@ public class ClientToServerThread implements Runnable {
     private void closeSocket() {
         try {
             socket.close();
+            socketOpen = false;
         } catch (IOException e) {
             logger.warn("IOException on attempting to close ClientToServerSocket");
         }
@@ -318,8 +321,8 @@ public class ClientToServerThread implements Runnable {
             crcBuffer.write(currentByte);
         } catch (IOException e) {
             logger.warn("IOException on readByte Client side", 1);
-            closeSocket();
             notifyDisconnectListeners("Cannot read from server.");
+            closeSocket();
         }
         if (currentByte == -1) {
             throw new ByteReadException("InputStream reach end of stream");

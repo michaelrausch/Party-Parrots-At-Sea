@@ -104,6 +104,7 @@ public class GameClient {
      * @param portNumber Port to connect to.
      */
     public void runAsHost(String ipAddress, Integer portNumber) {
+        server = new MainServerThread();
         try {
             startClientToServerThread(ipAddress, portNumber);
             socketThread.addDisconnectionListener((cause) -> {
@@ -126,6 +127,8 @@ public class GameClient {
                     lobbyController.disableReadyButton();
                     server.startGame();
                 } else if (exitCause == CloseStatus.LEAVE) {
+                    server.terminate();
+                    server = null;
                     loadStartScreen();
                 }
             });
@@ -370,13 +373,13 @@ public class GameClient {
     private void keyPressed(KeyEvent e) {
         switch (e.getCode()) {
             case SPACE: // align with vmg
-                socketThread.sendBoatActionMessage(BoatAction.VMG); break;
+                socketThread.sendBoatAction(BoatAction.VMG); break;
             case PAGE_UP: // upwind
-                socketThread.sendBoatActionMessage(BoatAction.UPWIND); break;
+                socketThread.sendBoatAction(BoatAction.UPWIND); break;
             case PAGE_DOWN: // downwind
-                socketThread.sendBoatActionMessage(BoatAction.DOWNWIND); break;
+                socketThread.sendBoatAction(BoatAction.DOWNWIND); break;
             case ENTER: // tack/gybe
-                socketThread.sendBoatActionMessage(BoatAction.TACK_GYBE); break;
+                socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
         }
     }
 
@@ -385,12 +388,12 @@ public class GameClient {
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
-                socketThread.sendBoatActionMessage(BoatAction.SAILS_IN);
+                socketThread.sendBoatAction(BoatAction.SAILS_IN);
                 allBoatsMap.get(socketThread.getClientId()).toggleSail();
                 break;
             case PAGE_UP:
             case PAGE_DOWN:
-                socketThread.sendBoatActionMessage(BoatAction.MAINTAIN_HEADING); break;
+                socketThread.sendBoatAction(BoatAction.MAINTAIN_HEADING); break;
         }
     }
 

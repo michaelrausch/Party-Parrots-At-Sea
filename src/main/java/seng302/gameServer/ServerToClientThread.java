@@ -19,26 +19,22 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RegistrationResponseMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
+import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.Race;
 import seng302.model.stream.xml.generator.Regatta;
 import seng302.utilities.XMLGenerator;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatLocationMessage;
-import seng302.gameServer.messages.BoatSubMessage;
-import seng302.gameServer.messages.ClientType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RaceStatus;
-import seng302.gameServer.messages.RaceStatusMessage;
-import seng302.gameServer.messages.RaceType;
-import seng302.gameServer.messages.RegistrationResponseMessage;
-import seng302.gameServer.messages.RegistrationResponseStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.model.ServerYacht;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -53,6 +49,12 @@ public class ServerToClientThread implements Runnable, Observer {
     @FunctionalInterface
     interface ConnectionListener {
         void notifyConnection ();
+    }
+
+    // TODO: 17/08/17 this is only temporary disconnects should be handled consistently
+    @FunctionalInterface
+    interface DisconnectListener {
+        void notifyDisconnect (Player player);
     }
 
     private Logger logger = LoggerFactory.getLogger(ServerToClientThread.class);
@@ -74,8 +76,10 @@ public class ServerToClientThread implements Runnable, Observer {
     private XMLGenerator xml;
 
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
+    private DisconnectListener disconnectListener;
 
     private ServerYacht yacht;
+    private Player player;
 
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
@@ -122,8 +126,9 @@ public class ServerToClientThread implements Runnable, Observer {
         );
 
         yacht.addObserver(this); // TODO: yacht can notify mark rounding message hyi25 13/8/17
+        player = new Player(socket, yacht);
         GameState.addYacht(sourceId, yacht);
-        GameState.addPlayer(new Player(socket, yacht));
+        GameState.addPlayer(player);
     }
 
     @Override
@@ -169,8 +174,7 @@ public class ServerToClientThread implements Runnable, Observer {
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
 
-        while (socket.isConnected()) {
-
+        while (socket.isConnected() && !socket.isClosed()) {
             try {
                 crcBuffer = new ByteArrayOutputStream();
                 sync1 = readByte();
@@ -213,6 +217,7 @@ public class ServerToClientThread implements Runnable, Observer {
                 return;
             }
         }
+        logger.warn("Closed serverToClientThread" + thread, 1);
     }
 
     public void sendSetupMessages() {
@@ -252,11 +257,12 @@ public class ServerToClientThread implements Runnable, Observer {
     private int readByte() throws Exception {
         int currentByte = -1;
         try {
-            // @TODO @FIX ConnectionReset Exception when a client disconnects before it is garbage collected
             currentByte = is.read();
             crcBuffer.write(currentByte);
+        } catch (SocketException se) {
+            disconnectListener.notifyDisconnect(this.player);
         } catch (IOException e) {
-            e.printStackTrace();
+            disconnectListener.notifyDisconnect(this.player);
             logger.warn("Socket read failed", 1);
         }
         if (currentByte == -1) {
@@ -334,5 +340,17 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public void removeConnectionListener(ConnectionListener listener) {
         connectionListeners.remove(listener);
+    }
+
+    public void terminate () {
+        try {
+            socket.close();
+        } catch (IOException ioe) {
+            logger.warn("IOException attempting to terminate serverToClientThread " + this.thread);
+        }
+    }
+
+    public void addDisconnectListener(DisconnectListener disconnectListener) {
+        this.disconnectListener = disconnectListener;
     }
 }
