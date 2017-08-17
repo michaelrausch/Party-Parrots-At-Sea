@@ -46,6 +46,8 @@ public class LobbyController {
     @FXML
     private Button readyButton;
     @FXML
+    private Button customizeButton;
+    @FXML
     private TextArea playerOneTxt;
     @FXML
     private TextArea playerTwoTxt;
@@ -87,6 +89,8 @@ public class LobbyController {
     private RaceState raceState;
 
     private ClientToServerThread socketThread;
+
+    private Stage customizeStage;
 
     private Color playersColor;
 
@@ -154,7 +158,9 @@ public class LobbyController {
             FXMLLoader fxmlLoader = new FXMLLoader(LobbyController.class.getResource("/views/customizeView.fxml"));
             root = fxmlLoader.load();
             root.getStylesheets().add("/css/master.css");
-            Stage customizeStage = new Stage();
+            customizeStage = new Stage();
+            customizeStage.setTitle("Customize Boat");
+            customizeStage.setScene(new Scene(root, 700, 450));
             CustomizationController cc = fxmlLoader.getController();
             cc.setServerThread(this.socketThread);
             cc.setPlayerName(this.players.get(playerID - 1));
@@ -164,8 +170,6 @@ public class LobbyController {
             }
 
             cc.setPlayerColor(this.playersColor);
-            customizeStage.setTitle("Customize Boat");
-            customizeStage.setScene(new Scene(root, 700, 450));
             cc.setStage(customizeStage); // pass the stage through so it can be closed later.
             cc.setLobbyController(this);
             customizeStage.show();
@@ -194,6 +198,7 @@ public class LobbyController {
 
         for (LobbyCloseListener readyListener : lobbyListeners)
             readyListener.notify(CloseStatus.READY);
+        customizeButton.setDisable(true);
     }
 
     public void setTitle (String title) {
@@ -222,6 +227,12 @@ public class LobbyController {
 
     public void updateRaceState(RaceState raceState){
         this.raceState = raceState;
+        /*if (this.customizeStage != null) {
+            this.customizeStage.close();
+        }*/ // TODO: 17/08/17 ajm412: close the customization window if the host starts the game while customizing 
+        if (!customizeButton.isDisabled()) {
+            customizeButton.setDisable(true);
+        }
         timeUntilStart.setText("Starting in: " + raceState.getRaceTimeStr());
     }
 

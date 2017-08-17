@@ -2,7 +2,7 @@ package seng302.model.mark;
 
 import java.util.ArrayList;
 import java.util.List;
-import seng302.gameServer.server.messages.RoundingSide;
+import seng302.gameServer.messages.RoundingSide;
 import seng302.model.GeoPoint;
 
 /**

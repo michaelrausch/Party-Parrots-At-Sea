@@ -6,7 +6,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import seng302.gameServer.server.messages.CustomizeRequestType;
+import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.visualiser.ClientToServerThread;
 
 public class CustomizationController {
