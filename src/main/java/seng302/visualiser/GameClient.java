@@ -18,7 +18,6 @@ import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
-import seng302.gameServer.messages.BoatAction;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -79,9 +78,10 @@ public class GameClient {
             });
             socketThread.addStreamObserver(this::parsePackets);
             LobbyController lobbyController = loadLobby();
+            lobbyController.setSocketThread(socketThread);
+            lobbyController.setPlayerID(socketThread.getClientId());
             lobbyController.setPlayerListSource(clientLobbyList);
             lobbyController.disableReadyButton();
-
             if (regattaData != null){
                 lobbyController.setTitle(regattaData.getRegattaName());
                 lobbyController.setCourseName(regattaData.getCourseName());
@@ -112,8 +112,9 @@ public class GameClient {
                 Platform.runLater(this::loadStartScreen);
             });
             LobbyController lobbyController = loadLobby();
+            lobbyController.setSocketThread(socketThread);
+            lobbyController.setPlayerID(socketThread.getClientId());
             lobbyController.setPlayerListSource(clientLobbyList);
-
             if (regattaData != null) {
                 lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
                 lobbyController.setCourseName(regattaData.getCourseName());
