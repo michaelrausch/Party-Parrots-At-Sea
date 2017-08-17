@@ -338,7 +338,7 @@ public class ClientToServerThread implements Runnable {
             closeSocket();
         }
         if (currentByte == -1) {
-            throw new ByteReadException("InputStream reach end of stream");
+            clientLog("InputStream reach end of stream", 1);
         }
         return currentByte;
     }

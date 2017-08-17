@@ -35,6 +35,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
+import seng302.gameServer.messages.BoatStatus;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
@@ -94,9 +95,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         importantAnnotations = new ImportantAnnotationsState();
 
         //Formatting the y axis of the sparkline
-        raceSparkLine.getYAxis().setRotate(180);
-        raceSparkLine.getYAxis().setTickLabelRotation(180);
-        raceSparkLine.getYAxis().setTranslateX(-5);
+//        raceSparkLine.getYAxis().setRotate(180);
+//        raceSparkLine.getYAxis().setTickLabelRotation(180);
+//        raceSparkLine.getYAxis().setTranslateX(-5);
+        raceSparkLine.visibleProperty().setValue(false);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
 
@@ -124,6 +126,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             while (c.next()) {
                 if (c.wasPermutated()) {
                     updateOrder(raceState.getPlayerPositions());
+                    updateSparkLine();
                 }
             }
         });
@@ -247,14 +250,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         // Create a new data series for new yachts
         sparkLineCandidates
             .stream()
-            .filter(yacht -> yacht.getPlacing() != null)
+            .filter(yacht -> yacht.getPosition() != null)
             .forEach(yacht -> {
                 Series<String, Double> yachtData = new Series<>();
                 yachtData.setName(yacht.getSourceId().toString());
                 yachtData.getData().add(
-                    new XYChart.Data<>(
+                    new Data<>(
                         Integer.toString(yacht.getLegNumber()),
-                        1.0 + participants.size() - yacht.getPlacing()
+                        1.0 + participants.size() - yacht.getPosition()
                     )
                 );
             sparkLineData.add(yachtData);
@@ -270,6 +273,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 return -1;
             }
         });
+
         // Adds the new data series to the sparkline (and set the colour of the series)
         Platform.runLater(() -> {
             sparkLineData
@@ -410,7 +414,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         List<Text> vboxEntries = new ArrayList<>();
 
         for (int i = 0; i < yachts.size(); i++) {
-            if (yachts.get(i).getBoatStatus() == 3) {  // 3 is finish status
+//            System.out.println("yacht == null  " + String.valueOf(yacht == null));
+            if (yachts.get(i).getBoatStatus() == BoatStatus.FINISHED
+                .getCode()) {  // 3 is finish status
                 Text textToAdd = new Text(i + 1 + ". " +
                     yachts.get(i).getShortName() + " (Finished)");
                 textToAdd.setFill(Paint.valueOf("#d3d3d3"));
