@@ -1,26 +1,17 @@
 package seng302.gameServer;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import seng302.gameServer.messages.BoatSubMessage;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RaceStartNotificationType;
-import seng302.gameServer.messages.RaceStartStatusMessage;
-import seng302.gameServer.messages.RaceStatus;
-import seng302.gameServer.messages.RaceStatusMessage;
-import seng302.gameServer.messages.RaceType;
+import seng302.gameServer.messages.*;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.utilities.GeoUtility;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -128,11 +119,11 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         if (Math.floorMod(random.nextInt(), 2) == 0){
             direction += random.nextInt(4);
-            windSpeed += random.nextInt(100) + 500;
+            windSpeed += random.nextInt(20) + 50;
         }
         else{
             direction -= random.nextInt(4);
-            windSpeed -= random.nextInt(100) + 500;
+            windSpeed -= random.nextInt(20) + 50;
         }
 
         direction = Math.floorMod(direction, 360);
