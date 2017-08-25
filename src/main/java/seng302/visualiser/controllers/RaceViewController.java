@@ -25,6 +25,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -53,6 +55,12 @@ import seng302.visualiser.fxObjects.BoatObject;
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+    @FXML
+    private Button chatSend;
+    @FXML
+    private TextArea chatHistory;
+    @FXML
+    private TextField chatInput;
     @FXML
     private LineChart<String, Double> raceSparkLine;
     @FXML
@@ -621,5 +629,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public void updateRaceData (RaceXMLData raceData) {
         this.courseData = raceData;
         gameView.updateBorder(raceData.getCourseLimit());
+    }
+
+    @FXML
+    public void onSendAction() {
+        chatHistory.setText(chatHistory.getText() + chatInput.getText() + '\n');
     }
 }
