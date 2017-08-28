@@ -28,6 +28,7 @@ import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.utilities.Sounds;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.FinishScreenViewController;
@@ -421,6 +422,7 @@ public class GameClient {
     private void showCollisionAlert(YachtEventData yachtEventData) {
         // 33 is the agreed code to show collision
         if (yachtEventData.getEventId() == 33) {
+            Sounds.playCrashSound();
             raceState.storeCollision(
                 allBoatsMap.get(
                     yachtEventData.getSubjectId().intValue()

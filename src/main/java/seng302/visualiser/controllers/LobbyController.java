@@ -23,6 +23,7 @@ import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.Colors;
 import seng302.model.RaceState;
+import seng302.utilities.Sounds;
 import seng302.visualiser.ClientToServerThread;
 
 /**
@@ -153,6 +154,7 @@ public class LobbyController {
 
     @FXML
     public void customize() {
+        Sounds.playButtonClick();
         Parent root;
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(LobbyController.class.getResource("/views/customizeView.fxml"));
@@ -184,6 +186,7 @@ public class LobbyController {
 
     @FXML
     public void leaveLobbyButtonPressed() {
+        Sounds.playButtonClick();
         // TODO: 10/07/17 wmu16 - Finish function!
         GameState.setCurrentStage(GameStages.CANCELLED);
         // TODO: 20/07/17 wmu16 - Implement some way of terminating the game
@@ -193,6 +196,7 @@ public class LobbyController {
 
     @FXML
     public void readyButtonPressed() {
+        Sounds.playButtonClick();
         GameState.setCurrentStage(GameStages.PRE_RACE);
         // Do countdown logic here
 

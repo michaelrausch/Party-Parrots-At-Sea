@@ -6,12 +6,15 @@ import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import seng302.gameServer.GameState;
+import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 
 /**
@@ -20,6 +23,10 @@ import seng302.visualiser.GameClient;
  */
 public class StartScreenController implements Initializable {
 
+    @FXML
+    private ToggleButton muteMusicButton;
+    @FXML
+    private ToggleButton muteSoundsButton;
     @FXML
     private TextField ipTextField;
     @FXML
@@ -32,6 +39,17 @@ public class StartScreenController implements Initializable {
     GameClient gameClient;
 
     public void initialize(URL url,  ResourceBundle resourceBundle) {
+        if (Sounds.isMusicMuted()) {
+            muteMusicButton.setText("UnMute Music");
+        } else {
+            muteMusicButton.setText("Mute Music");
+        }
+        if (Sounds.isSoundEffectsMuted()) {
+            muteSoundsButton.setText("UnMute Sounds");
+        } else {
+            muteSoundsButton.setText("Mute Sounds");
+        }
+
 //        gameClient = new GameClient(holder);
     }
 //
@@ -66,6 +84,7 @@ public class StartScreenController implements Initializable {
      */
     @FXML
     public void hostButtonPressed() {
+        Sounds.playButtonClick();
 //        new GameState(getLocalHostIp());
         gameClient = new GameClient(holder);
         gameClient.runAsHost(getLocalHostIp(), 4942);
@@ -104,6 +123,7 @@ public class StartScreenController implements Initializable {
     @FXML
     public void connectButtonPressed() {
         // TODO: 10/07/17 wmu16 - Finish function
+        Sounds.playButtonClick();
         gameClient = new GameClient(holder);
         gameClient.runAsClient(ipTextField.getText().trim().toLowerCase(), 4942);
 
@@ -164,5 +184,25 @@ public class StartScreenController implements Initializable {
         }
 //        ClientState.setHostIp(ipAddress);
         return ipAddress;
+    }
+
+    public void toggleMusic(ActionEvent actionEvent) {
+        Sounds.toggleMuteMusic();
+        Sounds.playButtonClick();
+        if (Sounds.isMusicMuted()) {
+            muteMusicButton.setText("UnMute Music");
+        } else {
+            muteMusicButton.setText("Mute Music");
+        }
+    }
+
+    public void toggleSounds(ActionEvent actionEvent) {
+        Sounds.toggleMuteEffects();
+        Sounds.playButtonClick();
+        if (Sounds.isSoundEffectsMuted()) {
+            muteSoundsButton.setText("UnMute Sounds");
+        } else {
+            muteSoundsButton.setText("Mute Sounds");
+        }
     }
 }

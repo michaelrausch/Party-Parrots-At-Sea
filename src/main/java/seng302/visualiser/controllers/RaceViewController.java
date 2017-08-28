@@ -41,6 +41,7 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.utilities.Sounds;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.annotations.Annotation;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
@@ -91,6 +92,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ImportantAnnotationsState importantAnnotations;
 
     public void initialize() {
+        Sounds.stopMusic();
+        Sounds.playRaceMusic();
         // Load a default important annotation state
         importantAnnotations = new ImportantAnnotationsState();
 

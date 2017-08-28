@@ -15,6 +15,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.model.PolarTable;
+import seng302.utilities.Sounds;
 
 public class App extends Application {
 
@@ -67,6 +68,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        Sounds.playMenuMusic();
         Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
         primaryStage.setTitle("Party Parrots at Sea");
         Scene scene = new Scene(root, 1530, 960);
