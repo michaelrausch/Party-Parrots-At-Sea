@@ -13,7 +13,7 @@
 
     <Tokens>
         <#list tokens as token>
-            <Token TokenType="${token.type}" TargetLat="${token.targetLat}" TargetLng="${token.targetLng}"/>
+            <Token TokenType="${token.tokenType}" TargetLat="${token.lat?c}" TargetLng="${token.lng?c}"/>
         </#list>
     </Tokens>
 

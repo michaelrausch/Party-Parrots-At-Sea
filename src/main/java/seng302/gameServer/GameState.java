@@ -30,6 +30,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
 import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLParser;
 
@@ -94,6 +95,17 @@ public class GameState implements Runnable {
         this.hostIpAddress = hostIpAddress;
         yachts = new HashMap<>();
         tokens = new ArrayList<>();
+
+        //TEMP TEST STUFF
+        // TODO: 29/08/17 wmu16 - Take this out!
+        tokens.add(new Token(TokenType.BOOST, 1233d, 11.83154));
+        tokens.add(new Token(TokenType.BOOST, 57.66877, 11.83382));
+        tokens.add(new Token(TokenType.BOOST, 57.66914, 11.83965));
+        tokens.add(new Token(TokenType.BOOST, 57.66684, 11.83214));
+        ;
+
+        //TEMP TEST STUFF
+
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
@@ -138,6 +150,10 @@ public class GameState implements Runnable {
 
     public static List<Player> getPlayers() {
         return players;
+    }
+
+    public static void addToken(Token token) {
+        tokens.add(token);
     }
 
     public static List<Token> getTokens() {
