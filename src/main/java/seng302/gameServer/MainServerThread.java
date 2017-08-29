@@ -6,12 +6,16 @@ import seng302.model.Player;
 import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.*;
+import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -48,6 +52,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         terminated = false;
         thread = new Thread(this, "MainServer");
         startUpdatingWind();
+        startSpawningTokens();
         thread.start();
     }
 
@@ -141,6 +146,25 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.setWindDirection(direction.doubleValue());
     }
 
+    // TODO: 29/08/17 wmu16 - This should not be in one function (init and a scheduling update)
+    public void startGame() {
+        initialiseBoatPositions();
+        Timer t = new Timer();
+
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                broadcastMessage(makeRaceStatusMessage());
+                if (GameState.getCurrentStage() == GameStages.PRE_RACE
+                    || GameState.getCurrentStage() == GameStages.LOBBYING) {
+                    broadcastMessage(makeRaceStartMessage());
+                }
+            }
+        }, 0, 500);
+    }
+
+
+    // TODO: 29/08/17 wmu16 - This sort of update should be in game state
     private static void startUpdatingWind(){
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -150,6 +174,57 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             }
         }, 0, 500);
     }
+
+    /**
+     * Start spawning coins every 60s after the first minute
+     */
+    private void startSpawningTokens() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                spawnNewCoins();
+            }
+        }, 0, 60000);
+    }
+
+    /**
+     * Randomly select a subset of tokens from a pre defined superset
+     * Broadasts a new race status message to show this update
+     */
+    private void spawnNewCoins() {
+
+        List<Token> allTokens = new ArrayList<>();
+        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
+        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
+        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
+        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
+        allTokens.add(token1);
+        allTokens.add(token2);
+        allTokens.add(token3);
+        allTokens.add(token4);
+
+        GameState.clearTokens();
+        Random random = new Random();
+        Collections.shuffle(allTokens);
+        for (int i = 0; i < random.nextInt(allTokens.size() - 1); i++) {
+            GameState.addToken(allTokens.get(i));
+        }
+
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
+        List<Token> tokens = GameState.getTokens();
+        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
+        xmlGenerator.setRaceTemplate(raceXMLTemplate);
+
+        XMLMessage raceXMLMessage = new XMLMessage(
+            xmlGenerator.getRaceAsXml(),
+            XMLMessageSubType.RACE,
+            xmlGenerator.getRaceAsXml().length());
+
+        broadcastMessage(raceXMLMessage);
+    }
+
 
 
     static void serverLog(String message, int logLevel) {
@@ -201,21 +276,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }
         serverToClientThreads.remove(closedConnection);
         closedConnection.terminate();
-    }
-
-    public void startGame() {
-        initialiseBoatPositions();
-        Timer t = new Timer();
-
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                broadcastMessage(makeRaceStatusMessage());
-                if (GameState.getCurrentStage() == GameStages.PRE_RACE || GameState.getCurrentStage() == GameStages.LOBBYING) {
-                    broadcastMessage(makeRaceStartMessage());
-                }
-            }
-        }, 0, 500);
     }
 
 

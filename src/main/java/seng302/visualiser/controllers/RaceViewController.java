@@ -138,10 +138,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
             gameView.setBoats(new ArrayList<>(participants.values()));
             gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateTokens(raceData.getTokens());
             gameView.updateCourse(
                 new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
             );
-        gameView.updateTokens(raceData.getTokens());
         gameView.enableZoom();
         gameView.setBoatAsPlayer(player);
         gameView.startRace();

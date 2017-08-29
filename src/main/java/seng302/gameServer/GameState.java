@@ -98,16 +98,6 @@ public class GameState implements Runnable {
         yachts = new HashMap<>();
         tokens = new ArrayList<>();
 
-        //TEMP TEST STUFF
-        // TODO: 29/08/17 wmu16 - Take this out!
-        tokens.add(new Token(TokenType.BOOST, 57.66946, 11.83154));
-        tokens.add(new Token(TokenType.BOOST, 57.66877, 11.83382));
-        tokens.add(new Token(TokenType.BOOST, 57.66914, 11.83965));
-        tokens.add(new Token(TokenType.BOOST, 57.66684, 11.83214));
-        ;
-
-        //TEMP TEST STUFF
-
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
@@ -160,6 +150,10 @@ public class GameState implements Runnable {
 
     public static List<Token> getTokens() {
         return tokens;
+    }
+
+    public static void clearTokens() {
+        tokens.clear();
     }
 
     public static void addPlayer(Player player) {
