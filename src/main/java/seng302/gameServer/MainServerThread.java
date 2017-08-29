@@ -50,7 +50,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         terminated = false;
         thread = new Thread(this, "MainServer");
         startUpdatingWind();
-//        startSpawningTokens();
+        startSpawningTokens();
         thread.start();
     }
 

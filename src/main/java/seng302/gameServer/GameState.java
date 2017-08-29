@@ -54,18 +54,18 @@ public class GameState implements Runnable {
     private Logger logger = LoggerFactory.getLogger(GameState.class);
 
 
-    public static final int WARNING_TIME = 10 * -1000;
-    public static final int PREPATORY_TIME = 5 * -1000;
-    public static final int TIME_TILL_START = 10 * 1000;
-    public static Integer MAX_PLAYERS = 8;
+    static final int WARNING_TIME = 10 * -1000;
+    static final int PREPATORY_TIME = 5 * -1000;
+    private static final int TIME_TILL_START = 10 * 1000;
+    static Integer MAX_PLAYERS = 8;
 
     private static final Integer STATE_UPDATES_PER_SECOND = 60;
-    public static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
-    public static final Double MARK_COLLISION_DISTANCE = 15d;
+    private static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
+    private static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
-    public static final Double BOUNCE_DISTANCE_MARK = 20.0;
+    private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
-    public static final Double COLLISION_VELOCITY_PENALTY = 0.3;
+    private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -350,6 +350,8 @@ public class GameState implements Runnable {
             if (distance < YACHT_COLLISION_DISTANCE) {
                 tokens.remove(token);
                 serverYacht.setPowerUp(token.getTokenType());
+                logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + token
+                    .getTokenType());
                 notifyMessageListeners(MessageFactory.getRaceXML());
                 break;
             }

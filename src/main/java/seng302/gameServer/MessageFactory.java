@@ -22,9 +22,15 @@ import seng302.utilities.XMLGenerator;
  * A Class for interfacing between the data we have in the GameState to the messages we need to send
  * through the MainServerThread.
  *
- * WARNING DO NOT USE THIS CLASS IF GAMESTATE HAS NOT BEEN INSTANTIATED.
+ * WARNING DO NOT USE THIS CLASS IF GAMESTATE HAS NOT BEEN INSTANTIATED. (Main Server has not started)
  * // TODO: 29/08/17 wmu16 - Make GameState non static to fix this ¯\_(ツ)_/¯
  * Created by wmu16 on 29/08/17.
+ */
+
+/*
+Ideally this class would be created with an instance of the GameState (I tried implementing this for
+ a bit) but it was too difficult to properly make GameState non static without doing some proper
+ re working. To do later.
  */
 public class MessageFactory {
 
