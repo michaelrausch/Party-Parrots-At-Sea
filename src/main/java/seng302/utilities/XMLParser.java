@@ -16,6 +16,8 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 
 /**
  * Utilities for parsing XML documents
@@ -182,10 +184,30 @@ public class XMLParser {
         Element docEle = doc.getDocumentElement();
         return new RaceXMLData(
             extractParticpantIDs(docEle),
+            extractTokens(docEle),
             extractCompoundMarks(docEle),
             extractMarkOrder(docEle),
             extractCourseLimit(docEle)
         );
+    }
+
+    /**
+     * Extracts token data
+     */
+    private static List<Token> extractTokens(Element docEle) {
+        List<Token> tokens = new ArrayList<>();
+        NodeList tokenList = docEle.getElementsByTagName("Tokens").item(0).getChildNodes();
+        for (int i = 0; i < tokenList.getLength(); i++) {
+            Node tokenNode = tokenList.item(i);
+            if (tokenNode.getNodeName().equals("Token")) {
+                String tokenType = getNodeAttributeString(tokenNode, "TokenType");
+                Double lat = getNodeAttributeDouble(tokenNode, "TargetLat");
+                Double lng = getNodeAttributeDouble(tokenNode, "TargetLng");
+                tokens.add(new Token(TokenType.valueOf(tokenType), lat, lng));
+            }
+        }
+
+        return tokens;
     }
 
     /**

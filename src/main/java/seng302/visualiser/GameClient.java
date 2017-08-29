@@ -28,6 +28,7 @@ import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.model.token.Token;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.FinishScreenViewController;
@@ -260,6 +261,7 @@ public class GameClient {
                     courseData = XMLParser.parseRace(
                         StreamParser.extractXmlMessage(packet)
                     );
+
                     if (raceView != null) {
                         raceView.updateRaceData(courseData);
                     }

@@ -6,6 +6,7 @@ import java.util.Map;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
+import seng302.model.token.Token;
 
 /**
  * Process a Document object containing race data in XML format and stores the data.
@@ -13,13 +14,16 @@ import seng302.model.mark.Corner;
 public class RaceXMLData {
 
     private List<Integer> participants;
+    private List<Token> tokens;
     private Map<Integer, CompoundMark> compoundMarks;
     private List<Corner> markSequence;
     private List<Limit> courseLimit;
 
-    public RaceXMLData(List<Integer> participants, List<CompoundMark> compoundMarks,
+    public RaceXMLData(List<Integer> participants, List<Token> tokens,
+        List<CompoundMark> compoundMarks,
         List<Corner> markSequence, List<Limit> courseLimit) {
         this.participants = participants;
+        this.tokens = tokens;
         this.markSequence = markSequence;
         this.courseLimit = courseLimit;
         this.compoundMarks = new HashMap<>();
@@ -30,6 +34,10 @@ public class RaceXMLData {
 
     public List<Integer> getParticipants() {
         return participants;
+    }
+
+    public List<Token> getTokens() {
+        return tokens;
     }
 
     public Map<Integer, CompoundMark> getCompoundMarks() {

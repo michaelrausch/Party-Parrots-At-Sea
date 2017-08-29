@@ -29,9 +29,11 @@ import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 
 /**
