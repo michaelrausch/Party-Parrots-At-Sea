@@ -20,6 +20,8 @@ import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoundingBoatStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -51,8 +53,13 @@ public class GameState implements Runnable {
 
     private Logger logger = LoggerFactory.getLogger(GameState.class);
 
-    private static final Integer STATE_UPDATES_PER_SECOND = 60;
+
+    public static final int WARNING_TIME = 10 * -1000;
+    public static final int PREPATORY_TIME = 5 * -1000;
+    public static final int TIME_TILL_START = 10 * 1000;
     public static Integer MAX_PLAYERS = 8;
+
+    private static final Integer STATE_UPDATES_PER_SECOND = 60;
     public static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
     public static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
@@ -197,7 +204,7 @@ public class GameState implements Runnable {
     }
 
     public static void resetStartTime(){
-        startTime = System.currentTimeMillis() + MainServerThread.TIME_TILL_START;
+        startTime = System.currentTimeMillis() + TIME_TILL_START;
     }
 
     public static Double getWindDirection() {
@@ -299,6 +306,7 @@ public class GameState implements Runnable {
             yacht.updateLocation(timeInterval);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkCollision(yacht);
+                checkTokenPickUp(yacht);
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
@@ -330,6 +338,24 @@ public class GameState implements Runnable {
         }
         return false;
     }
+
+    /**
+     * Checks all tokens to see if a yacht has picked one up
+     *
+     * @param serverYacht The yacht to check for
+     */
+    private void checkTokenPickUp(ServerYacht serverYacht) {
+        for (Token token : tokens) {
+            Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
+            if (distance < YACHT_COLLISION_DISTANCE) {
+                tokens.remove(token);
+                serverYacht.setPowerUp(token.getTokenType());
+                notifyMessageListeners(MessageFactory.getRaceXML());
+                break;
+            }
+        }
+    }
+
 
     public static void checkCollision(ServerYacht serverYacht) {
         ServerYacht collidedYacht = checkYachtCollision(serverYacht);
@@ -703,7 +729,7 @@ public class GameState implements Runnable {
     }
 
 
-    public static void addMarkPassListener(NewMessageListener listener) {
+    public static void addMessageEventListener(NewMessageListener listener) {
         markListeners.add(listener);
     }
 
@@ -718,4 +744,5 @@ public class GameState implements Runnable {
     public static void resetCustomizationFlag() {
         customizationFlag = false;
     }
+
 }

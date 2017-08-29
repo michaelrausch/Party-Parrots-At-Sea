@@ -33,8 +33,6 @@ import seng302.model.stream.packets.StreamPacket;
  */
 public class ClientToServerThread implements Runnable {
 
-
-
     /**
      * Functional interface for receiving packets from client socket.
      */
@@ -95,7 +93,7 @@ public class ClientToServerThread implements Runnable {
 
         sendRegistrationRequest();
 
-        thread = new Thread(this);
+        thread = new Thread(this, "ClientToServer");
         thread.start();
     }
 

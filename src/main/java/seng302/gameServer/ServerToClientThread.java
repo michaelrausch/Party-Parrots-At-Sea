@@ -44,7 +44,7 @@ import seng302.utilities.XMLGenerator;
  * its own thread. All server threads created and owned by the server thread handler which can
  * trigger client updates on its threads Created by wmu16 on 13/07/17.
  */
-public class ServerToClientThread implements Runnable, Observer {
+public class ServerToClientThread implements Runnable {
 
     /**
      * Called to notify listeners when this thread receives a connection correctly.
@@ -128,19 +128,9 @@ public class ServerToClientThread implements Runnable, Observer {
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
 
-        yacht.addObserver(this); // TODO: yacht can notify mark rounding message hyi25 13/8/17
         player = new Player(socket, yacht);
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(player);
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        if (arg != null) {
-            sendMessage((Message) arg);
-        } else {
-            sendSetupMessages();
-        }
     }
 
     private void completeRegistration(ClientType clientType) throws IOException {
@@ -234,45 +224,6 @@ public class ServerToClientThread implements Runnable, Observer {
         logger.warn("Closed serverToClientThread" + thread, 1);
     }
 
-
-    /**
-     * Generates XML messages of each type and sends them to the client
-     */
-    // TODO: 29/08/17 wmu16 - This functionality should not even be here
-    public void sendSetupMessages() {
-        xmlGenerator = new XMLGenerator();
-        List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        List<Token> tokens = GameState.getTokens();
-        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
-        xmlGenerator.setRaceTemplate(raceXMLTemplate);
-
-        //@TODO calculate lat/lng values
-        xmlGenerator.setRegattaTemplate(
-            new RegattaXMLTemplate(
-                "Party Parrot Test Server", "Bermuda Test Course",
-                57.6679590, 11.8503233)
-        );
-
-        XMLMessage regattaXMLMessage = new XMLMessage(
-            xmlGenerator.getRegattaAsXml(),
-            XMLMessageSubType.REGATTA,
-            xmlGenerator.getRegattaAsXml().length());
-
-        XMLMessage boatXMLMessage = new XMLMessage(
-            xmlGenerator.getBoatsAsXml(),
-            XMLMessageSubType.BOAT,
-            xmlGenerator.getBoatsAsXml().length());
-
-        XMLMessage raceXMLMessage = new XMLMessage(
-            xmlGenerator.getRaceAsXml(),
-            XMLMessageSubType.RACE,
-            xmlGenerator.getRaceAsXml().length());
-
-        sendMessage(regattaXMLMessage);
-        sendMessage(boatXMLMessage);
-        sendMessage(raceXMLMessage);
-    }
-
     private void closeSocket() {
         try {
             socket.close();
@@ -325,23 +276,6 @@ public class ServerToClientThread implements Runnable, Observer {
     private int getSeqNo() {
         seqNo++;
         return seqNo;
-    }
-
-
-    public void sendBoatLocationPackets() {
-        ArrayList<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        for (ServerYacht yacht : yachts) {
-            BoatLocationMessage boatLocationMessage =
-                new BoatLocationMessage(
-                    yacht.getSourceId(),
-                    getSeqNo(),
-                    yacht.getLocation().getLat(),
-                    yacht.getLocation().getLng(),
-                    yacht.getHeading(),
-                    yacht.getCurrentVelocity().longValue());
-
-            sendMessage(boatLocationMessage);
-        }
     }
 
     public Thread getThread() {
