@@ -210,7 +210,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.clearTokens();
         Random random = new Random();
         Collections.shuffle(allTokens);
-        for (int i = 0; i < random.nextInt(allTokens.size() - 1); i++) {
+        for (int i = 0; i < random.nextInt(allTokens.size()); i++) {
             GameState.addToken(allTokens.get(i));
         }
     }

@@ -53,6 +53,7 @@ public class ServerYacht {
 
     //PowerUp
     private TokenType powerUp;
+    private Long powerUpStartTime;
 
 
     public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
@@ -104,8 +105,17 @@ public class ServerYacht {
         location = geoPoint;
     }
 
-    public void setPowerUp(TokenType powerUp) {
+    public void powerUp(TokenType powerUp) {
         this.powerUp = powerUp;
+        powerUpStartTime = System.currentTimeMillis();
+    }
+
+    public void powerDown() {
+        this.powerUp = null;
+    }
+
+    public Long getPowerUpStartTime() {
+        return powerUpStartTime;
     }
 
     public TokenType getPowerUp() {

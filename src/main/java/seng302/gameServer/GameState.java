@@ -59,6 +59,8 @@ public class GameState implements Runnable {
     private static final int TIME_TILL_START = 10 * 1000;
     static Integer MAX_PLAYERS = 8;
 
+    private static final Long POWERUP_TIMEOUT_MS = 10_000L;
+
     private static final Integer STATE_UPDATES_PER_SECOND = 60;
     private static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
     private static final Double MARK_COLLISION_DISTANCE = 15d;
@@ -302,6 +304,7 @@ public class GameState implements Runnable {
         }
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
+            checkPowerUpTimeout(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
@@ -318,6 +321,17 @@ public class GameState implements Runnable {
             currentStage = GameStages.FINISHED;
         }
     }
+
+
+    private void checkPowerUpTimeout(ServerYacht yacht) {
+        if (yacht.getPowerUp() != null) {
+            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > POWERUP_TIMEOUT_MS) {
+                yacht.powerDown();
+                logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+            }
+        }
+    }
+
 
     /**
      * Check if the yacht has crossed the course limit
@@ -349,7 +363,7 @@ public class GameState implements Runnable {
             Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
             if (distance < YACHT_COLLISION_DISTANCE) {
                 tokens.remove(token);
-                serverYacht.setPowerUp(token.getTokenType());
+                serverYacht.powerUp(token.getTokenType());
                 logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + token
                     .getTokenType());
                 notifyMessageListeners(MessageFactory.getRaceXML());
@@ -410,25 +424,31 @@ public class GameState implements Runnable {
 
 
     private void updateVelocity(ServerYacht yacht) {
-        Double velocity = yacht.getCurrentVelocity();
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
         Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        if (yacht.getPowerUp() != null) {
+            if (yacht.getPowerUp().equals(TokenType.BOOST)) {
+                maxBoatSpeed *= 2;
+            }
+        }
+
+        Double currentVelocity = yacht.getCurrentVelocity();
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
-            if (velocity < maxBoatSpeed - 500) {
+            if (currentVelocity < maxBoatSpeed - 500) {
                 yacht.changeVelocity(maxBoatSpeed / 100);
-            } else if (velocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-velocity / 200);
+            } else if (currentVelocity > maxBoatSpeed + 500) {
+                yacht.changeVelocity(-currentVelocity / 200);
             } else {
                 yacht.setCurrentVelocity(maxBoatSpeed);
             }
         } else {
-            if (velocity > 3000) {
-                yacht.changeVelocity(-velocity / 200);
-            } else if (velocity > 100) {
-                yacht.changeVelocity(-velocity / 50);
-            } else if (velocity <= 100) {
+            if (currentVelocity > 3000) {
+                yacht.changeVelocity(-currentVelocity / 200);
+            } else if (currentVelocity > 100) {
+                yacht.changeVelocity(-currentVelocity / 50);
+            } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }
         }
