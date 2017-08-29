@@ -30,29 +30,13 @@ import seng302.gameServer.messages.RegistrationResponseStatus;
 import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatLocationMessage;
-import seng302.gameServer.messages.ClientType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RegistrationResponseMessage;
-import seng302.gameServer.messages.RegistrationResponseStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.model.Player;
-import seng302.model.ServerYacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+import seng302.model.token.Token;
 import seng302.utilities.XMLGenerator;
 
 /**
@@ -92,7 +76,7 @@ public class ServerToClientThread implements Runnable, Observer {
     private ClientType clientType;
     private Boolean isRegistered = false;
 
-    private XMLGenerator xml;
+    private XMLGenerator xmlGenerator;
 
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
     private DisconnectListener disconnectListener;
@@ -250,34 +234,43 @@ public class ServerToClientThread implements Runnable, Observer {
         logger.warn("Closed serverToClientThread" + thread, 1);
     }
 
-    public void sendSetupMessages() {
-        xml = new XMLGenerator();
-        Race race = new Race();
 
-        for (ServerYacht yacht : GameState.getYachts().values()) {
-            race.addBoat(yacht);
-        }
+    /**
+     * Generates XML messages of each type and sends them to the client
+     */
+    // TODO: 29/08/17 wmu16 - This functionality should not even be here
+    public void sendSetupMessages() {
+        xmlGenerator = new XMLGenerator();
+        List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
+        List<Token> tokens = GameState.getTokens();
+        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
+        xmlGenerator.setRaceTemplate(raceXMLTemplate);
 
         //@TODO calculate lat/lng values
-        xml.setRegatta(
-            new Regatta(
+        xmlGenerator.setRegattaTemplate(
+            new RegattaXMLTemplate(
                 "Party Parrot Test Server", "Bermuda Test Course",
                 57.6679590, 11.8503233)
         );
-        xml.setRace(race);
 
-        XMLMessage xmlMessage;
-        xmlMessage = new XMLMessage(xml.getRegattaAsXml(), XMLMessageSubType.REGATTA,
-                xml.getRegattaAsXml().length());
-        sendMessage(xmlMessage);
+        XMLMessage regattaXMLMessage = new XMLMessage(
+            xmlGenerator.getRegattaAsXml(),
+            XMLMessageSubType.REGATTA,
+            xmlGenerator.getRegattaAsXml().length());
 
-        xmlMessage = new XMLMessage(xml.getBoatsAsXml(), XMLMessageSubType.BOAT,
-                xml.getBoatsAsXml().length());
-        sendMessage(xmlMessage);
+        XMLMessage boatXMLMessage = new XMLMessage(
+            xmlGenerator.getBoatsAsXml(),
+            XMLMessageSubType.BOAT,
+            xmlGenerator.getBoatsAsXml().length());
 
-        xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE,
-                xml.getRaceAsXml().length());
-        sendMessage(xmlMessage);
+        XMLMessage raceXMLMessage = new XMLMessage(
+            xmlGenerator.getRaceAsXml(),
+            XMLMessageSubType.RACE,
+            xmlGenerator.getRaceAsXml().length());
+
+        sendMessage(regattaXMLMessage);
+        sendMessage(boatXMLMessage);
+        sendMessage(raceXMLMessage);
     }
 
     private void closeSocket() {

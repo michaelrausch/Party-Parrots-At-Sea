@@ -3,7 +3,7 @@ package seng302.model.stream.xml.generator;
 /**
  * A Race regatta that can be parsed into XML
  */
-public class Regatta {
+public class RegattaXMLTemplate {
   private final Double DEFAULT_ALTITUDE = 0d;
   private final Integer DEFAULT_REGATTA_ID = 0;
 
@@ -18,7 +18,7 @@ public class Regatta {
   private Integer utcOffset;
   private Double magneticVariation;
 
-  public Regatta(String name, String courseName, Double latitude, Double longitude) {
+    public RegattaXMLTemplate(String name, String courseName, Double latitude, Double longitude) {
       this.name = name;
       this.id = DEFAULT_REGATTA_ID;
       this.courseName = courseName;

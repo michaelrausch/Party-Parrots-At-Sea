@@ -29,8 +29,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private static final int MAX_WIND_SPEED = 12000;
     private static final int MIN_WIND_SPEED = 8000;
 
-    public static int windSpeed = 1000;
-
     private boolean terminated;
 
     private Thread thread;

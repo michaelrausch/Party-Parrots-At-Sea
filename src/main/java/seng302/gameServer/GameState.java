@@ -29,6 +29,7 @@ import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
+import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLParser;
 
@@ -65,6 +66,7 @@ public class GameState implements Runnable {
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
+    private static List<Token> tokens;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
@@ -91,6 +93,7 @@ public class GameState implements Runnable {
         windSpeed = 10000d;
         this.hostIpAddress = hostIpAddress;
         yachts = new HashMap<>();
+        tokens = new ArrayList<>();
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
@@ -135,6 +138,10 @@ public class GameState implements Runnable {
 
     public static List<Player> getPlayers() {
         return players;
+    }
+
+    public static List<Token> getTokens() {
+        return tokens;
     }
 
     public static void addPlayer(Player player) {

@@ -11,8 +11,10 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.gameServer.messages.RoundingSide;
-import seng302.model.stream.xml.generator.Race;
+import seng302.model.ServerYacht;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.token.Token;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 import java.util.*;
@@ -125,7 +127,10 @@ public class MarkOrder {
     private void loadRaceProperties(){
         XMLGenerator generator = new XMLGenerator();
 
-        generator.setRace(new Race());
+        // TODO: 29/08/17 wmu16 - This is terrible, having to make a template just to receive constant data
+        generator.setRaceTemplate(new RaceXMLTemplate(
+            new ArrayList<>(),
+            new ArrayList<>()));
 
         String raceXML = generator.getRaceAsXml();
 

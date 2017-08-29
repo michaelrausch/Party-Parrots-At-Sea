@@ -7,8 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.gameServer.messages.XMLMessageSubType;
 
 /**
@@ -20,8 +20,8 @@ public class XMLGenerator {
     private static final String BOATS_TEMPLATE_NAME = "boats.ftlh";
     private static final String RACE_TEMPLATE_NAME = "race.ftlh";
     private Configuration configuration;
-    private Regatta regatta;
-    private Race race;
+    private RegattaXMLTemplate regatta;
+    private RaceXMLTemplate race;
 
     /**
      * Set up a configuration instance for Apache Freemake
@@ -48,7 +48,7 @@ public class XMLGenerator {
      * Note: This must be set before a regatta message can be generated
      * @param regatta The race regatta
      */
-    public void setRegatta(Regatta regatta){
+    public void setRegattaTemplate(RegattaXMLTemplate regatta) {
         this.regatta = regatta;
     }
 
@@ -57,7 +57,7 @@ public class XMLGenerator {
      * Note: This must be set before a boat or race message can be generated
      * @param race The race
      */
-    public void setRace(Race race){
+    public void setRaceTemplate(RaceXMLTemplate race) {
         this.race = race;
     }
 

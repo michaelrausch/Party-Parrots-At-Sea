@@ -5,26 +5,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import seng302.model.ServerYacht;
+import seng302.model.token.Token;
 
 /**
  * A Race object that can be parsed into XML
  */
-public class Race {
+public class RaceXMLTemplate {
 
     private List<ServerYacht> yachts;
     private LocalDateTime startTime;
+    private List<Token> tokens;
 
-    public Race(){
-        yachts = new ArrayList<>();
+    public RaceXMLTemplate(List<ServerYacht> yachts, List<Token> tokens) {
+        this.yachts = yachts;
+        this.tokens = tokens;
         startTime = LocalDateTime.now();
-    }
-
-    /**
-     * Add a boat to the race
-     * @param yacht The boat to add
-     */
-    public void addBoat(ServerYacht yacht) {
-        yachts.add(yacht);
     }
 
     /**
@@ -33,6 +28,15 @@ public class Race {
      */
     public List<ServerYacht> getBoats() {
         return Collections.unmodifiableList(yachts);
+    }
+
+    /**
+     * Get a list of tokens in the race
+     *
+     * @return A list of tokens
+     */
+    public List<Token> getTokens() {
+        return Collections.unmodifiableList(tokens);
     }
 
     /**
