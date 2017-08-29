@@ -35,6 +35,7 @@ import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
+import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.AnnotationBox;
 import seng302.visualiser.fxObjects.BoatObject;
@@ -82,6 +83,7 @@ public class GameView extends Pane {
     private Group boatObjectGroup = new Group();
     private Group trails = new Group();
     private Group markers = new Group();
+    private Group tokens = new Group();
     private List<CompoundMark> course = new ArrayList<>();
 
     private ImageView mapImage = new ImageView();
@@ -141,6 +143,7 @@ public class GameView extends Pane {
         gameObjects.add(mapImage);
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
+        gameObjects.add(tokens);
         initializeTimer();
     }
 
@@ -433,6 +436,28 @@ public class GameView extends Pane {
             boundaryPoints.add(location.getY());
         }
         raceBorder.getPoints().setAll(boundaryPoints);
+    }
+
+    /**
+     * Replaces all tokens in the course with those passed in
+     *
+     * @param newTokens the tokens to be put on the course.
+     */
+    public void updateTokens(List<Token> newTokens) {
+
+        List<Marker> mapTokens = new ArrayList<>();
+
+        for (Token token : newTokens) {
+            Point2D location = findScaledXY(token.getLat(), token.getLng());
+            Marker thisMarker = new Marker(Color.YELLOW);
+            thisMarker.setLayoutX(location.getX());
+            thisMarker.setLayoutY(location.getY());
+            mapTokens.add(thisMarker);
+        }
+        Platform.runLater(() -> {
+            tokens.getChildren().clear();
+            tokens.getChildren().addAll(mapTokens);
+        });
     }
 
     // TODO: 16/08/17 initialize zooming internal to GameView only
