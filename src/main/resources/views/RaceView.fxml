@@ -58,6 +58,8 @@
                                </AnchorPane>
                            </children>
                        </AnchorPane>
+                       <Text fx:id="fpsDisplay" strokeType="OUTSIDE" strokeWidth="0.0" text="60 FPS"
+                         GridPane.halignment="CENTER" GridPane.valignment="CENTER"/>
                    </children>
                </GridPane>
            </children>
