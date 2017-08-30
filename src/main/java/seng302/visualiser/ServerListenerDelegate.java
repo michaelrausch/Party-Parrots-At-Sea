@@ -1,6 +1,10 @@
 package seng302.visualiser;
 
+import seng302.gameServer.ServerDescription;
+
+import java.util.List;
+
 public interface ServerListenerDelegate {
-    void serverDetected(String serverName, String mapName, Integer placesLeft, String serverAddress);
-    void serverRemoved(String serverName);
+    void serverRemoved(List<ServerDescription> currentServers);
+    void serverDetected(ServerDescription serverDescription, List<ServerDescription> servers);
 }

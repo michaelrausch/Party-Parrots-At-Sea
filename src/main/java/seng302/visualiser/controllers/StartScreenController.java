@@ -1,24 +1,33 @@
 package seng302.visualiser.controllers;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.ResourceBundle;
+import java.util.*;
+
+import com.sun.security.ntlm.Server;
+import cucumber.api.java.en.But;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import seng302.gameServer.GameState;
+import seng302.gameServer.ServerDescription;
 import seng302.visualiser.GameClient;
+import seng302.visualiser.ServerListener;
+import seng302.visualiser.ServerListenerDelegate;
 
 /**
  * A Class describing the actions of the start screen controller
  * Created by wmu16 on 10/07/17.
  */
-public class StartScreenController implements Initializable {
+public class StartScreenController implements Initializable, ServerListenerDelegate{
 
     @FXML
     private TextField ipTextField;
@@ -29,10 +38,27 @@ public class StartScreenController implements Initializable {
     @FXML
     private AnchorPane holder;
 
+    @FXML
+    private Button joinLobbyButton;
+
+    @FXML
+    private ListView serverList;
+
+    private List<ServerDescription> servers = null;
+    private boolean serverListDirty = false;
+
     GameClient gameClient;
 
     public void initialize(URL url,  ResourceBundle resourceBundle) {
 //        gameClient = new GameClient(holder);
+
+        try {
+            ServerListener.getInstance().setDelegate(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        joinLobbyButton.setOnAction(event -> joinLobbyClicked());
     }
 //
 //    /**
@@ -164,5 +190,42 @@ public class StartScreenController implements Initializable {
         }
 //        ClientState.setHostIp(ipAddress);
         return ipAddress;
+    }
+
+    private void refreshServerList(List<ServerDescription> servers){
+        this.serverList.getItems().clear();
+
+        for (ServerDescription server : servers){
+            serverList.getItems().add(server.getName() + " - " + server.getMapName() + " - " + server.spacesLeft() + " spaces left");
+        }
+    }
+
+    @Override
+    public void serverRemoved(List<ServerDescription> currentServers) {
+        this.servers = currentServers;
+
+        refreshServerList(currentServers);
+    }
+
+    @Override
+    public void serverDetected(ServerDescription serverDescription, List<ServerDescription> servers) {
+        this.servers = servers;
+
+        refreshServerList(servers);
+    }
+
+    private void joinLobbyClicked() {
+        Integer selectedServer = serverList.getSelectionModel().getSelectedIndex();
+
+        if (this.servers == null || selectedServer >= this.servers.size()){
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid server selected");
+            alert.showAndWait();
+            return;
+        }
+
+        ServerDescription server = servers.get(selectedServer);
+
+        gameClient = new GameClient(holder);
+        gameClient.runAsClient(server.getAddress().trim().toLowerCase(), server.portNumber());
     }
 }

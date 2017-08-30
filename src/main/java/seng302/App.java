@@ -14,13 +14,17 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.ServerAdvertiser;
 import seng302.model.PolarTable;
+import seng302.visualiser.ServerListener;
+
+import java.io.IOException;
 
 public class App extends Application {
 
     private static Logger logger = LoggerFactory.getLogger(App.class);
 
-    public static void parseArgs(String[] args) throws ParseException {
+    public static void parseArgs(String[] args) throws ParseException, IOException {
         Options options = new Options();
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
@@ -82,6 +86,7 @@ public class App extends Application {
         primaryStage.setOnCloseRequest(e -> {
 //            ClientPacketParser.appClose();
 //            ClientPacketParser.appClose();
+
             System.exit(0);
         });
 
@@ -93,6 +98,8 @@ public class App extends Application {
             parseArgs(args);
         } catch (ParseException e) {
             logger.error("Could not parse command line arguments");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         launch(args);

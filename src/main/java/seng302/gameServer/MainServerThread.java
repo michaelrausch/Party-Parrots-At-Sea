@@ -1,5 +1,8 @@
 package seng302.gameServer;
 
+import javafx.application.Platform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.*;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
@@ -37,6 +40,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private ServerSocket serverSocket = null;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
+    private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
 
     public MainServerThread() {
         new GameState("localhost");
@@ -45,6 +49,15 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         } catch (IOException e) {
             serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
+
+        // Start advertising server
+        try{
+            ServerAdvertiser.getInstance().registerGame(PORT, "PP Test Server", 10, "Random Map");
+        } catch (IOException e) {
+            logger.warn("Could not register server");
+        }
+
+
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
         GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
@@ -206,6 +219,12 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     }
 
     public void startGame() {
+        try {
+            ServerAdvertiser.getInstance().unregister();
+        } catch (IOException e) {
+            logger.warn("Error unregistering server");
+        }
+
         initialiseBoatPositions();
         Timer t = new Timer();
 

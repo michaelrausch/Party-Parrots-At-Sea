@@ -142,6 +142,7 @@ public class GameClient {
     }
 
     private void loadStartScreen() {
+
         socketThread.setSocketToClose();
         if (server != null) {
             server.terminate();

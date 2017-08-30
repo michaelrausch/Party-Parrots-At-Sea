@@ -4,11 +4,12 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Hashtable;
 
 public class ServerAdvertiser {
-    private static String SERVICE = "_partyatsea_";
+    private static String SERVICE = "_partyatsea";
     private static String PROTOCOL = "_tcp";
-    public static String SERVICE_TYPE = SERVICE + "." + PROTOCOL + ".local";
+    public static String SERVICE_TYPE = SERVICE + "." + PROTOCOL + ".local.";
     private static Integer PROTO_VERSION = 1;
 
 
@@ -16,7 +17,7 @@ public class ServerAdvertiser {
     private static JmDNS jmdnsInstance = null;
 
     private ServerAdvertiser() throws IOException{
-        jmdnsInstance = JmDNS.create(InetAddress.getLocalHost(), InetAddress.getByName(InetAddress.getLocalHost().getHostName()).toString());
+        jmdnsInstance = JmDNS.create(InetAddress.getLocalHost());
     }
 
     public static ServerAdvertiser getInstance() throws IOException {
@@ -27,14 +28,30 @@ public class ServerAdvertiser {
         return instance;
     }
 
-    public void registerGame(Integer portNo, String serverName, Integer spacesLeft, String mapName) throws IOException {
-        String serviceData = packageServerData(spacesLeft, mapName, PROTO_VERSION);
-        ServiceInfo serviceInfo = ServiceInfo.create(SERVICE_TYPE, serverName, portNo, serviceData);
+    public void registerGame(Integer portNo, String serverName, Integer spacesLeft, String mapName) {
+        Hashtable<String ,String> props = new Hashtable<>();
 
-        jmdnsInstance.registerService(serviceInfo);
+        props.put("map", mapName);
+        props.put("spacesLeft", spacesLeft.toString());
+
+        ServiceInfo serviceInfo = ServiceInfo.create(SERVICE_TYPE, serverName, portNo, 0, 0, props);
+
+        new java.util.Timer().schedule(
+            new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        jmdnsInstance.registerService(serviceInfo);
+                    } catch (IOException e) {
+                        System.out.println("Failed");
+                    }
+                }
+            }, 0
+        );
     }
 
-    private String packageServerData(Integer spacesLeft, String mapName, Integer version){
-        return spacesLeft.toString() + "|" + mapName + "|" + version.toString();
+    public void unregister(){
+        jmdnsInstance.unregisterAllServices();
+        jmdnsInstance = null;
     }
 }
