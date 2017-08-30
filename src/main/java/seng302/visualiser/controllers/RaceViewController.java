@@ -9,6 +9,8 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -55,6 +57,8 @@ import seng302.visualiser.fxObjects.BoatObject;
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+    @FXML
+    private Pane basePane;
     @FXML
     private Button chatSend;
     @FXML
@@ -631,8 +635,24 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         gameView.updateBorder(raceData.getCourseLimit());
     }
 
-    @FXML
-    public void onSendAction() {
-        chatHistory.setText(chatHistory.getText() + chatInput.getText() + '\n');
+    public ReadOnlyBooleanProperty getSendPressedProperty() {
+        return chatSend.pressedProperty();
     }
+
+    public boolean isChatInputFocused() {
+        return chatInput.focusedProperty().getValue();
+    }
+
+    public String readChatInput() {
+        String chat = chatInput.getText();
+        chatInput.clear();
+        basePane.requestFocus();
+        return chat;
+    }
+
+//    @FXML
+//    public void onSendAction() {
+//
+//        chatHistory.setText(chatHistory.getText() + chatInput.getText() + '\n');
+//    }
 }

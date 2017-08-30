@@ -12,6 +12,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
@@ -195,7 +196,13 @@ public class GameClient {
         raceView = fxmlLoader.getController();
         ClientYacht player = allBoatsMap.get(socketThread.getClientId());
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
+        raceView.getSendPressedProperty().addListener((obs, old, isPressed) -> {
+            if (isPressed) {
+                socketThread.sendChatterMessage(raceView.readChatInput());
+            }
+        });
     }
+
 
     private void loadFinishScreenView() {
         FXMLLoader fxmlLoader = loadFXMLToHolder("/views/FinishScreenView.fxml");
@@ -373,6 +380,12 @@ public class GameClient {
      * @param e The key event triggering this call
      */
     private void keyPressed(KeyEvent e) {
+        if (raceView.isChatInputFocused()) {
+            if (e.getCode() == KeyCode.ENTER) {
+                socketThread.sendChatterMessage(raceView.readChatInput());
+            }
+            return;
+        }
         switch (e.getCode()) {
             case SPACE: // align with vmg
                 socketThread.sendBoatAction(BoatAction.VMG); break;
@@ -381,12 +394,16 @@ public class GameClient {
             case PAGE_DOWN: // downwind
                 socketThread.sendBoatAction(BoatAction.DOWNWIND); break;
             case ENTER: // tack/gybe
+                // if chat box is active take whatever is in there and send it to server
                 socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
         }
     }
 
 
     private void keyReleased(KeyEvent e) {
+        if (raceView.isChatInputFocused()) {
+            return;
+        }
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out

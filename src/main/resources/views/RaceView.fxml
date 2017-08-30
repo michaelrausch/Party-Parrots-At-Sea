@@ -26,8 +26,8 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="998.0" prefWidth="1530.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.RaceViewController">
    <children>
-       <AnchorPane layoutX="322.0" layoutY="130.0" prefHeight="998.0" prefWidth="1281.0"
-         style="-fx-background-color: skyblue;" AnchorPane.bottomAnchor="0.0"
+       <AnchorPane fx:id="basePane" layoutX="322.0" layoutY="130.0" prefHeight="998.0"
+         prefWidth="1281.0" style="-fx-background-color: skyblue;" AnchorPane.bottomAnchor="0.0"
          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
            <children>
                <GridPane prefHeight="998.0" prefWidth="1281.0" AnchorPane.bottomAnchor="0.0"
@@ -56,14 +56,16 @@
                                          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                            <children>
-                                               <TextArea fx:id="chatHistory" VBox.vgrow="ALWAYS"/>
+                                               <TextArea fx:id="chatHistory" editable="false"
+                                                 focusTraversable="false" VBox.vgrow="ALWAYS"/>
                                                <HBox VBox.vgrow="NEVER">
                                                    <children>
                                                        <TextField fx:id="chatInput"
-                                                         prefHeight="25.0" HBox.hgrow="ALWAYS"/>
+                                                         focusTraversable="false" prefHeight="25.0"
+                                                         HBox.hgrow="ALWAYS"/>
                                                        <Button fx:id="chatSend"
-                                                         mnemonicParsing="false"
-                                                         onAction="#onSendAction" text="Send"/>
+                                                         focusTraversable="false"
+                                                         mnemonicParsing="false" text="Send"/>
                                                    </children>
                                                </HBox>
                                            </children>
