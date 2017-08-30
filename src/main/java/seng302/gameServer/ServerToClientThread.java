@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.Message;
@@ -225,7 +226,11 @@ public class ServerToClientThread implements Runnable, Observer {
 
                                 completeRegistration(requestedType);
                                 break;
-
+                            case CHATTER_TEXT:
+                                GameState.broadcastChatter(
+                                    ServerPacketParser.extractChatterText(payload)
+                                );
+                                break;
                             case RACE_CUSTOMIZATION_REQUEST:
                                 Long sourceID = Message
                                     .bytesToLong(Arrays.copyOfRange(payload, 0, 3));

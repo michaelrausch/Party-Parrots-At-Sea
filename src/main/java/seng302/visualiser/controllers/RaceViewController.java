@@ -57,6 +57,8 @@ import seng302.visualiser.fxObjects.BoatObject;
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+    private final int CHAT_LIMIT = 128;
+
     @FXML
     private Pane basePane;
     @FXML
@@ -113,10 +115,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceSparkLine.visibleProperty().setValue(false);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
-
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
+            if (newLen.intValue() > CHAT_LIMIT) {
+                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
+            }
+        });
     }
 
     public void loadRace (
@@ -650,9 +656,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return chat;
     }
 
-//    @FXML
-//    public void onSendAction() {
-//
-//        chatHistory.setText(chatHistory.getText() + chatInput.getText() + '\n');
-//    }
+    public void updateChatHistory(Paint playerColour, String newMessage) {
+        chatHistory.setText(chatHistory.getText() + newMessage + '\n');
+    }
+
 }

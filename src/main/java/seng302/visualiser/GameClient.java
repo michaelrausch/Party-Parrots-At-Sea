@@ -1,8 +1,12 @@
 package seng302.visualiser;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
@@ -15,6 +19,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.util.Pair;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
@@ -198,10 +203,11 @@ public class GameClient {
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
         raceView.getSendPressedProperty().addListener((obs, old, isPressed) -> {
             if (isPressed) {
-                socketThread.sendChatterMessage(raceView.readChatInput());
+                formatAndSendChatMessage(raceView.readChatInput());
             }
         });
     }
+
 
 
     private void loadFinishScreenView() {
@@ -287,6 +293,14 @@ public class GameClient {
                 case YACHT_EVENT_CODE:
                     showCollisionAlert(StreamParser.extractYachtEventCode(packet));
                     break;
+
+                case CHATTER_TEXT:
+                    Pair<Integer, String> playerIdMessagePair = StreamParser
+                        .extractChatterText(packet);
+                    raceView.updateChatHistory(
+                        allBoatsMap.get(playerIdMessagePair.getKey()).getColour(),
+                        playerIdMessagePair.getValue()
+                    );
             }
         }
     }
@@ -382,7 +396,7 @@ public class GameClient {
     private void keyPressed(KeyEvent e) {
         if (raceView.isChatInputFocused()) {
             if (e.getCode() == KeyCode.ENTER) {
-                socketThread.sendChatterMessage(raceView.readChatInput());
+                formatAndSendChatMessage(raceView.readChatInput());
             }
             return;
         }
@@ -433,4 +447,14 @@ public class GameClient {
             );
         }
     }
+
+    private void formatAndSendChatMessage(String rawChat) {
+        if (rawChat.length() > 0) {
+            socketThread.sendChatterMessage(
+                new SimpleDateFormat("[HH:mm:ss] ").format(new Date()) +
+                    allBoatsMap.get(socketThread.getClientId()).getShortName() + ": " + rawChat
+            );
+        }
+    }
+
 }

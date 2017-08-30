@@ -288,7 +288,7 @@ public class ClientToServerThread implements Runnable {
     }
 
     public void sendChatterMessage(String message) {
-        sendByteBuffer(new ChatterMessage(5, message).getBuffer());
+        sendByteBuffer(new ChatterMessage(clientId, message).getBuffer());
     }
 
     private void sendByteBuffer(byte[] bytes) {
