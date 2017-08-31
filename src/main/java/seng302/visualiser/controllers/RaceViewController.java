@@ -160,7 +160,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             gameView.updateCourse(
                 new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
-        gameView.enableZoom();
         gameView.setBoatAsPlayer(player);
         gameView.startRace();
 
@@ -175,6 +174,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         updateWindDirection(raceState.windDirectionProperty().doubleValue());
         updateWindSpeed(raceState.getWindSpeed());
         gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
+        chatInput.focusedProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue) {
+                gameView.disableZoom();
+            } else {
+                gameView.enableZoom();
+            }
+        });
     }
 
     /**
