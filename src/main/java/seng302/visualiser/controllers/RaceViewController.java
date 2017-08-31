@@ -11,6 +11,8 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -122,6 +124,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             if (newLen.intValue() > CHAT_LIMIT) {
                 chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
             }
+        });
+        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
+            chatHistory.setScrollTop(Double.MAX_VALUE);
         });
     }
 
@@ -657,7 +662,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateChatHistory(Paint playerColour, String newMessage) {
-        chatHistory.setText(chatHistory.getText() + newMessage + '\n');
+        chatHistory.appendText(newMessage + '\n');
     }
 
 }
