@@ -659,7 +659,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateChatHistory(Paint playerColour, String newMessage) {
-        Platform.runLater(() -> chatHistory.appendText(newMessage + '\n'));
+        Platform.runLater(() -> chatHistory.appendText(newMessage + "\n\n"));
     }
 
 }
