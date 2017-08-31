@@ -9,10 +9,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -662,7 +659,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateChatHistory(Paint playerColour, String newMessage) {
-        chatHistory.appendText(newMessage + '\n');
+        Platform.runLater(() -> chatHistory.appendText(newMessage + '\n'));
     }
 
 }
