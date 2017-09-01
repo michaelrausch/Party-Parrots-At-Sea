@@ -1,8 +1,5 @@
 package seng302.model;
 
-import java.util.HashMap;
-import java.util.Observable;
-import java.util.Observer;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +7,10 @@ import seng302.gameServer.GameState;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
+
+import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -123,6 +124,7 @@ public class ServerYacht extends Observable {
 
     /**
      * Swaps the boats direction from one side of the wind to the other.
+     * @param windDirection .
      */
     public void tackGybe(Double windDirection) {
         if (isAuto) {

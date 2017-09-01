@@ -54,7 +54,7 @@ public class ServerAdvertiser {
     }
 
     /**
-     * Set the map name & broadcast an update on the network
+     * Set the map name and broadcast an update on the network
      * @param mapName The new map name
      * @return The current ServerAdvertiser instance
      */
@@ -69,7 +69,7 @@ public class ServerAdvertiser {
     }
 
     /**
-     * Set the spaces left on the server & broadcast an update on the network
+     * Set the spaces left on the server and broadcast an update on the network
      * @param spacesLeft The number of spaces left on the server
      * @return The current ServerAdvertiser instance
      */
