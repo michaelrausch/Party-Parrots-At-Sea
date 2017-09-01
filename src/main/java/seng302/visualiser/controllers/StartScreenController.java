@@ -9,6 +9,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import seng302.gameServer.ServerAdvertiser;
 import seng302.gameServer.ServerDescription;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.ServerListener;
@@ -94,7 +95,7 @@ public class StartScreenController implements Initializable, ServerListenerDeleg
     public void hostButtonPressed() {
 //        new GameState(getLocalHostIp());
         gameClient = new GameClient(holder);
-        gameClient.runAsHost(getLocalHostIp(), 4942);
+        gameClient.runAsHost(ServerAdvertiser.getLocalHostIp(), 4942);
 //        try {
 ////            String ipAddress = InetAddress.getLocalHost().getHostAddress();
 ////            new GameState(ipAddress);
@@ -155,42 +156,7 @@ public class StartScreenController implements Initializable, ServerListenerDeleg
 //        this.controller = controller;
 //    }
 
-    /**
-     * Gets the local host ip address and sets this ip to ClientState.
-     * Only runs by the host.
-     *
-     * @return the localhost ip address
-     */
-    private String getLocalHostIp() {
-        String ipAddress = null;
-        try {
-            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-            while (e.hasMoreElements()) {
-                NetworkInterface ni = e.nextElement();
-                if (ni.isLoopback())
-                    continue;
-                if(ni.isPointToPoint())
-                    continue;
-                if(ni.isVirtual())
-                    continue;
 
-                Enumeration<InetAddress> addresses = ni.getInetAddresses();
-                while(addresses.hasMoreElements()) {
-                    InetAddress address = addresses.nextElement();
-                    if(address instanceof Inet4Address) {    // skip all ipv6
-                        ipAddress = address.getHostAddress();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (ipAddress == null) {
-            System.out.println("[HOST] Cannot obtain local host ip address.");
-        }
-//        ClientState.setHostIp(ipAddress);
-        return ipAddress;
-    }
 
     /**
      * Update the server list with new information

@@ -3,7 +3,10 @@ package seng302.gameServer;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -33,7 +36,7 @@ public class ServerAdvertiser {
     private Hashtable<String ,String> props;
 
     private ServerAdvertiser() throws IOException{
-        jmdnsInstance = JmDNS.create(InetAddress.getLocalHost());
+        jmdnsInstance = JmDNS.create(InetAddress.getByName(getLocalHostIp()));
 
         props = new Hashtable<>();
         props.put("map", "");
@@ -114,5 +117,40 @@ public class ServerAdvertiser {
     public void unregister(){
         if (serviceInfo != null)
             jmdnsInstance.unregisterService(serviceInfo);
+    }
+
+    /**
+     * Gets the local host ip address.
+     *
+     * @return the localhost ip address
+     */
+    public static String getLocalHostIp() {
+        String ipAddress = null;
+        try {
+            Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+            while (e.hasMoreElements()) {
+                NetworkInterface ni = e.nextElement();
+                if (ni.isLoopback())
+                    continue;
+                if(ni.isPointToPoint())
+                    continue;
+                if(ni.isVirtual())
+                    continue;
+
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if(address instanceof Inet4Address) {    // skip all ipv6
+                        ipAddress = address.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (ipAddress == null) {
+            System.out.println("[HOST] Cannot obtain local host ip address.");
+        }
+        return ipAddress;
     }
 }

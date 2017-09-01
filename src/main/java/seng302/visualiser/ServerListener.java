@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import static seng302.gameServer.ServerAdvertiser.getLocalHostIp;
+
 /**
  * Listens for servers on the local network
  */
@@ -86,7 +88,7 @@ public class ServerListener{
     }
 
     private ServerListener() throws IOException {
-        jmdns = JmDNS.create(InetAddress.getLocalHost());
+        jmdns = JmDNS.create(InetAddress.getByName(getLocalHostIp()));
         listener = new GameServeMonitor();
         jmdns.addServiceListener(ServerAdvertiser.SERVICE_TYPE, listener);
     }
