@@ -11,6 +11,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -99,6 +101,9 @@ public class GameView extends Pane {
 
     double scaleFactor = 1;
 
+    private List<CompoundMark> newCourse;
+    private List<Corner> sequence;
+
     private void zoomOut() {
         scaleFactor = 0.1;
         if (this.getScaleX() > 0.5) {
@@ -142,6 +147,32 @@ public class GameView extends Pane {
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
         initializeTimer();
+
+        this.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+                Number newValue) {
+                if (oldValue.doubleValue() != 0.0) {
+                    System.out.println("Width: " + newValue);
+                    canvasWidth = newValue.doubleValue() - 40.0;
+                    updateBorder(borderPoints);
+                    updateCourse(newCourse, sequence);
+                }
+            }
+        });
+
+        this.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+                Number newValue) {
+                if (oldValue.doubleValue() != 0.0) {
+                    System.out.println("Height: " + newValue);
+                    canvasHeight = newValue.doubleValue();
+                    updateBorder(borderPoints);
+                    updateCourse(newCourse, sequence);
+                }
+            }
+        });
     }
 
     private void initializeTimer() {
@@ -185,42 +216,42 @@ public class GameView extends Pane {
         };
     }
 
-    /**
-     * First find the top right and bottom left points' geo locations, then retrieve map from google
-     * to display on image view.  - Haoming 22/5/2017
-     */
-    private void drawGoogleMap() {
-        findMetersPerPixel();
-        Point2D topLeftPoint = findScaledXY(maxLatPoint.getLat(), minLonPoint.getLng());
-        // distance from top left extreme to panel origin (top left corner)
-        double distanceFromTopLeftToOrigin = Math.sqrt(
-            Math.pow(topLeftPoint.getX() * metersPerPixelX, 2) + Math
-                .pow(topLeftPoint.getY() * metersPerPixelY, 2));
-        // angle from top left extreme to panel origin
-        double bearingFromTopLeftToOrigin = Math
-            .toDegrees(Math.atan2(-topLeftPoint.getX(), topLeftPoint.getY()));
-        // the top left extreme
-        GeoPoint topLeftPos = new GeoPoint(maxLatPoint.getLat(), minLonPoint.getLng());
-        GeoPoint originPos = GeoUtility
-            .getGeoCoordinate(topLeftPos, bearingFromTopLeftToOrigin, distanceFromTopLeftToOrigin);
-
-        // distance from origin corner to bottom right corner of the panel
-        double distanceFromOriginToBottomRight = Math.sqrt(
-            Math.pow(panelHeight * metersPerPixelY, 2) + Math
-                .pow(panelWidth * metersPerPixelX, 2));
-        double bearingFromOriginToBottomRight = Math
-            .toDegrees(Math.atan2(panelWidth, -panelHeight));
-        GeoPoint bottomRightPos = GeoUtility
-            .getGeoCoordinate(originPos, bearingFromOriginToBottomRight,
-                distanceFromOriginToBottomRight);
-
-        Boundary boundary = new Boundary(originPos.getLat(), bottomRightPos.getLng(),
-            bottomRightPos.getLat(), originPos.getLng());
-        CanvasMap canvasMap = new CanvasMap(boundary);
-        mapImage.setImage(canvasMap.getMapImage());
-        mapImage.fitWidthProperty().bind(((AnchorPane) this.getParent()).heightProperty());
-        mapImage.fitHeightProperty().bind(((AnchorPane) this.getParent()).heightProperty());
-    }
+//    /**
+//     * First find the top right and bottom left points' geo locations, then retrieve map from google
+//     * to display on image view.  - Haoming 22/5/2017
+//     */
+//    private void drawGoogleMap() {
+//        findMetersPerPixel();
+//        Point2D topLeftPoint = findScaledXY(maxLatPoint.getLat(), minLonPoint.getLng());
+//        // distance from top left extreme to panel origin (top left corner)
+//        double distanceFromTopLeftToOrigin = Math.sqrt(
+//            Math.pow(topLeftPoint.getX() * metersPerPixelX, 2) + Math
+//                .pow(topLeftPoint.getY() * metersPerPixelY, 2));
+//        // angle from top left extreme to panel origin
+//        double bearingFromTopLeftToOrigin = Math
+//            .toDegrees(Math.atan2(-topLeftPoint.getX(), topLeftPoint.getY()));
+//        // the top left extreme
+//        GeoPoint topLeftPos = new GeoPoint(maxLatPoint.getLat(), minLonPoint.getLng());
+//        GeoPoint originPos = GeoUtility
+//            .getGeoCoordinate(topLeftPos, bearingFromTopLeftToOrigin, distanceFromTopLeftToOrigin);
+//
+//        // distance from origin corner to bottom right corner of the panel
+//        double distanceFromOriginToBottomRight = Math.sqrt(
+//            Math.pow(panelHeight * metersPerPixelY, 2) + Math
+//                .pow(panelWidth * metersPerPixelX, 2));
+//        double bearingFromOriginToBottomRight = Math
+//            .toDegrees(Math.atan2(panelWidth, -panelHeight));
+//        GeoPoint bottomRightPos = GeoUtility
+//            .getGeoCoordinate(originPos, bearingFromOriginToBottomRight,
+//                distanceFromOriginToBottomRight);
+//
+//        Boundary boundary = new Boundary(originPos.getLat(), bottomRightPos.getLng(),
+//            bottomRightPos.getLat(), originPos.getLng());
+//        CanvasMap canvasMap = new CanvasMap(boundary);
+//        mapImage.setImage(canvasMap.getMapImage());
+//        mapImage.fitWidthProperty().bind(((AnchorPane) this.getParent()).heightProperty());
+//        mapImage.fitHeightProperty().bind(((AnchorPane) this.getParent()).heightProperty());
+//    }
 
     // TODO: 16/08/17 Break up this function
     /**
@@ -231,6 +262,11 @@ public class GameView extends Pane {
      * @param sequence The sequence the marks travel through
      */
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
+        System.out.println("ran update course");
+        this.newCourse = newCourse;
+        this.sequence = sequence;
+        course = new ArrayList<>();
+
         markerObjects = new HashMap<>();
 
         for (Corner corner : sequence) { //Makes course out of all compound marks.
@@ -281,9 +317,9 @@ public class GameView extends Pane {
         createMarkArrows(sequence);
 
         //Scale race to markers if there is no border.
-        if (borderPoints == null) {
+//        if (borderPoints == null) {
             rescaleRace(new ArrayList<>(markerObjects.keySet()));
-        }
+//        }
         //Move the Markers to initial position.
         markerObjects.forEach(((mark, marker) -> {
             Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
@@ -422,16 +458,18 @@ public class GameView extends Pane {
      * @param border the race border to be drawn.
      */
     public void updateBorder(List<Limit> border) {
-        if (borderPoints == null) {
+        System.out.println("ran update border");
+//        if (borderPoints == null) {
             borderPoints = border;
             rescaleRace(new ArrayList<>(borderPoints));
-        }
+//        }
         List<Double> boundaryPoints = new ArrayList<>();
         for (Limit limit : border) {
             Point2D location = findScaledXY(limit.getLat(), limit.getLng());
             boundaryPoints.add(location.getX());
             boundaryPoints.add(location.getY());
         }
+        raceBorder.getPoints().remove(0, raceBorder.getPoints().size());
         raceBorder.getPoints().setAll(boundaryPoints);
     }
 
@@ -457,6 +495,7 @@ public class GameView extends Pane {
      */
     private void rescaleRace(List<GeoPoint> limitingCoordinates) {
         //Check is called once to avoid unnecessarily change the course limits once the race is running
+        System.out.println("ran rescale race");
         findMinMaxPoint(limitingCoordinates);
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
@@ -559,6 +598,7 @@ public class GameView extends Pane {
      * respectively.
      */
     private void findMinMaxPoint(List<GeoPoint> points) {
+        System.out.println("ran find min max point");
         List<GeoPoint> sortedPoints = new ArrayList<>(points);
         sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLat));
         minLatPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
@@ -582,6 +622,7 @@ public class GameView extends Pane {
      * maximum longitude.
      */
     private void calculateReferencePointLocation(double minLonToMaxLon) {
+        System.out.println("ran calculate reference point location");
         GeoPoint referencePoint = minLatPoint;
         double referenceAngle;
 
@@ -625,6 +666,7 @@ public class GameView extends Pane {
      * it to distanceScaleFactor Returns the max horizontal distance of the map.
      */
     private double scaleRaceExtremities() {
+        System.out.println("ran scale race extremities");
 
         double vertAngle = Math.abs(
             GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
@@ -659,6 +701,7 @@ public class GameView extends Pane {
     }
 
     private Point2D findScaledXY(double unscaledLat, double unscaledLon) {
+//        System.out.println("ran find scaled XY");
         double distanceFromReference;
         double angleFromReference;
         double xAxisLocation = referencePointX;

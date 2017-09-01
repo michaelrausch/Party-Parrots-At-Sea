@@ -26,6 +26,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -64,7 +65,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Text timerLabel;
     @FXML
-    private AnchorPane contentAnchorPane;
+    private GridPane contentAnchorPane;
     @FXML
     private Text windArrowText, windDirectionText;
     @FXML
@@ -91,6 +92,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ImportantAnnotationsState importantAnnotations;
 
     public void initialize() {
+
         // Load a default important annotation state
         importantAnnotations = new ImportantAnnotationsState();
 
@@ -134,7 +136,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView();
         gameView.setFrameRateFXText(fpsDisplay);
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
+        Platform.runLater(() -> contentAnchorPane.getChildren().addAll(gameView));
+//            gameView.prefWidthProperty().bind(contentAnchorPane.widthProperty());
+//            gameView.prefHeightProperty().bind(contentAnchorPane.heightProperty());
             gameView.setBoats(new ArrayList<>(participants.values()));
             gameView.updateBorder(raceData.getCourseLimit());
             gameView.updateCourse(
