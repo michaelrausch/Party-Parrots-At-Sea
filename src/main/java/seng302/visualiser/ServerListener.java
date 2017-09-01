@@ -8,12 +8,13 @@ import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Listens for servers on the local network
+ */
 public class ServerListener{
     private static ServerListener instance;
     private ServerListenerDelegate delegate;
@@ -21,35 +22,51 @@ public class ServerListener{
     GameServeMonitor listener;
 
     private class GameServeMonitor implements ServiceListener {
-        private List<ServerDescription> servers;
+        private Set<ServerDescription> servers;
 
         GameServeMonitor(){
-            servers = new ArrayList<>();
+            servers = new HashSet<>();
         }
 
+        /**
+         * A Service has been detected but not resolved
+         * @param event The ServiceEvent
+         */
         @Override
         public void serviceAdded(ServiceEvent event) {
         }
 
+        /**
+         * A Service has been removed / unregistered
+         * @param event The ServiceEvent
+         */
         @Override
         public void serviceRemoved(ServiceEvent event) {
-            Integer serverId = -1;
+            String serverName = event.getInfo().getName();
 
-            for (int i = 0; i < servers.size(); i++){
-                ServerDescription server = servers.get(i);
-                if (server.getName().equals(event.getInfo().getName())){
-                    serverId = i;
-                    break;
+            ServerDescription toRemove = null;
+
+            for (ServerDescription server : servers){
+                if (server.getName().equals(serverName)){
+                    toRemove = server;
                 }
             }
 
-            if (serverId > 0){
-                servers.remove(serverId);
+            if (toRemove != null){
+                servers.remove(toRemove);
             }
 
-            delegate.serverRemoved(servers);
+            delegate.serverRemoved(new ArrayList<ServerDescription>(servers));
+
+            // Get all other servers with the same name to respond if they are up
+            jmdns.requestServiceInfo(ServerAdvertiser.SERVICE_TYPE, serverName);
+
         }
 
+        /**
+         * A Service has been added and resolved
+         * @param event The ServiceEvent
+         */
         @Override
         public void serviceResolved(ServiceEvent event) {
             String address = event.getInfo().getServer();
@@ -60,9 +77,11 @@ public class ServerListener{
             Integer spacesLeft = Integer.parseInt(event.getInfo().getPropertyString("spacesLeft"));
 
             ServerDescription serverDescription = new ServerDescription(serverName, mapName, spacesLeft, address, portNum);
+
+            servers.remove(serverDescription);
             servers.add(serverDescription);
 
-            delegate.serverDetected(serverDescription, Collections.unmodifiableList(servers));
+            delegate.serverDetected(serverDescription, new ArrayList<ServerDescription>(servers));
         }
     }
 
@@ -80,6 +99,10 @@ public class ServerListener{
         return instance;
     }
 
+    /**
+     * Set the delegate to handle events
+     * @param delegate .
+     */
     public void setDelegate(ServerListenerDelegate delegate){
         this.delegate = delegate;
     }

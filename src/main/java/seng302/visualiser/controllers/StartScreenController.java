@@ -1,14 +1,6 @@
 package seng302.visualiser.controllers;
 
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.URL;
-import java.util.*;
-
-import com.sun.security.ntlm.Server;
-import cucumber.api.java.en.But;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -17,11 +9,19 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import seng302.gameServer.GameState;
 import seng302.gameServer.ServerDescription;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
+
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * A Class describing the actions of the start screen controller
@@ -192,6 +192,10 @@ public class StartScreenController implements Initializable, ServerListenerDeleg
         return ipAddress;
     }
 
+    /**
+     * Update the server list with new information
+     * @param servers The current list of servers
+     */
     private void refreshServerList(List<ServerDescription> servers){
         this.serverList.getItems().clear();
 
@@ -204,20 +208,20 @@ public class StartScreenController implements Initializable, ServerListenerDeleg
     public void serverRemoved(List<ServerDescription> currentServers) {
         this.servers = currentServers;
 
-        refreshServerList(currentServers);
+        Platform.runLater(() -> refreshServerList(currentServers));
     }
 
     @Override
     public void serverDetected(ServerDescription serverDescription, List<ServerDescription> servers) {
         this.servers = servers;
 
-        refreshServerList(servers);
+        Platform.runLater(() -> refreshServerList(servers));
     }
 
     private void joinLobbyClicked() {
         Integer selectedServer = serverList.getSelectionModel().getSelectedIndex();
 
-        if (this.servers == null || selectedServer >= this.servers.size()){
+        if (this.servers == null || selectedServer >= this.servers.size() || selectedServer < 0){
             Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid server selected");
             alert.showAndWait();
             return;

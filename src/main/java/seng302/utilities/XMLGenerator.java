@@ -3,13 +3,15 @@ package seng302.utilities;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.Regatta;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.gameServer.messages.XMLMessageSubType;
+import java.util.Random;
 
 /**
  * An XML generator to generate the Race, Boat, and Regatta XML dynamically
@@ -20,8 +22,13 @@ public class XMLGenerator {
     private static final String BOATS_TEMPLATE_NAME = "boats.ftlh";
     private static final String RACE_TEMPLATE_NAME = "race.ftlh";
     private Configuration configuration;
-    private Regatta regatta;
+    private Regatta regatta = null;
     private Race race;
+
+    public static Regatta DEFAULT_REGATTA = new Regatta("Party Parrot Test Server " + new Random().nextInt(100),
+            "Bermuda Test Course",
+            57.6679590,
+            11.8503233);
 
     /**
      * Set up a configuration instance for Apache Freemake
@@ -106,7 +113,7 @@ public class XMLGenerator {
     public String getRegattaAsXml(){
         String result = null;
 
-        if (regatta == null) return null;
+        if (regatta == null) regatta = DEFAULT_REGATTA;
 
         try {
             result = parseToXmlString(REGATTA_TEMPLATE_NAME, XMLMessageSubType.REGATTA);
