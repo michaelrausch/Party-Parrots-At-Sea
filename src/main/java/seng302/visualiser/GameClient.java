@@ -28,7 +28,6 @@ import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.model.token.Token;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.FinishScreenViewController;
@@ -155,11 +154,6 @@ public class GameClient {
     }
 
     private void loadStartScreen() {
-//        socketThread.setSocketToClose();
-//        if (server != null) {
-//            server.terminate();
-//            server = null;
-//        }
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/views/StartScreenView.fxml"));
         try {
@@ -258,12 +252,14 @@ public class GameClient {
                     break;
 
                 case RACE_XML:
-                    courseData = XMLParser.parseRace(
+                    RaceXMLData raceXMLData = XMLParser.parseRace(
                         StreamParser.extractXmlMessage(packet)
                     );
-
+                    if (courseData == null) { //workaround for object comparisons. Avoid recreating
+                        courseData = raceXMLData;
+                    }
                     if (raceView != null) {
-                        raceView.updateRaceData(courseData);
+                        raceView.updateRaceData(raceXMLData);
                     }
                     break;
 

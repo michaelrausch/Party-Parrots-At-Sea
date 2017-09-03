@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.commons.cli.CommandLine;
@@ -14,7 +15,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.model.PolarTable;
 
 public class App extends Application {
 
@@ -69,7 +69,7 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
         primaryStage.setTitle("Party Parrots at Sea");
-        Scene scene = new Scene(root, 1530, 960);
+        Scene scene = new Scene(root, 1530, 960, false, SceneAntialiasing.BALANCED);
         scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
         primaryStage.setScene(scene);
 //        primaryStage.setMaxWidth(1530);

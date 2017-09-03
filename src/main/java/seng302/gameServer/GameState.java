@@ -20,8 +20,6 @@ import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoundingBoatStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -31,11 +29,9 @@ import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 
 /**
@@ -426,7 +422,7 @@ public class GameState implements Runnable {
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * 4;
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
                 maxBoatSpeed *= 2;
@@ -732,7 +728,8 @@ public class GameState implements Runnable {
         // TODO: 13/8/17 figure out the rounding side, rounded mark source ID and boat status.
         Message markRoundingMessage = new MarkRoundingMessage(0, 0,
             sourceID, RoundingBoatStatus.RACING, roundingMark.getRoundingSide(), markType,
-            currentMarkSeqID + 1);
+            currentMark.getId());
+//            currentMarkSeqID + 1);
 
         notifyMessageListeners(markRoundingMessage);
     }

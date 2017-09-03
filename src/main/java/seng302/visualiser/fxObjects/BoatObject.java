@@ -1,17 +1,21 @@
 package seng302.visualiser.fxObjects;
 
+import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
-import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Rotate;
 
 /**
@@ -24,6 +28,17 @@ import javafx.scene.transform.Rotate;
  */
 public class BoatObject extends Group {
 
+
+    private static final double MODEL_SCALE_FACTOR = 400;
+    private static final double MODEL_X_OFFSET = 0; // standard
+    private static final double MODEL_Y_OFFSET = 0; // standard
+
+    private static final int VIEWPORT_SIZE = 800;
+
+    private static final Color lightColor = Color.rgb(244, 255, 250);
+    private static final Color jewelColor = Color.rgb(0, 190, 222);
+
+
     @FunctionalInterface
     public interface SelectedBoatListener {
 
@@ -31,8 +46,8 @@ public class BoatObject extends Group {
     }
 
     //Constants for drawing
-    private static final double BOAT_HEIGHT = 15d;
-    private static final double BOAT_WIDTH = 10d;
+    private static final float BOAT_HEIGHT = 15f;
+    private static final float BOAT_WIDTH = 10f;
 
     private double xVelocity;
     private double yVelocity;
@@ -40,14 +55,15 @@ public class BoatObject extends Group {
     private double sailState;
     //Graphical objects
     private Polyline trail = new Polyline();
-    private Polygon boatPoly;
+//    private Polygon boatPoly;
+    private Shape3D boatPoly;
     private Polygon sail;
     private Wake wake;
     private Line leftLayLine;
     private Line rightLayline;
     private double distanceTravelled, lastRotation;
     private Point2D lastPoint;
-    private Paint colour = Color.BLACK;
+    private Color colour = Color.BLACK;
     private Boolean isSelected = false, destinationSet;  //All boats are initialised as selected
     private boolean isPlayer = false;
 
@@ -80,17 +96,20 @@ public class BoatObject extends Group {
      * polygon.
      */
     private void initChildren(double... points) {
-        boatPoly = new Polygon(points);
-        boatPoly.setFill(colour);
-        boatPoly.setFill(this.colour);
+        boatPoly = makeBoatPolygon();
+//        boatPoly.setFill(colour);
+//        boatPoly.setFill(this.colour);
+//        boatPoly.setMaterial(new PhongMaterial(this.colour));
         boatPoly.setOnMouseEntered(event -> {
-            boatPoly.setFill(Color.FLORALWHITE);
-            boatPoly.setStroke(Color.RED);
+//            boatPoly.setFill(Color.FLORALWHITE);
+//            boatPoly.setStroke(Color.RED);
+//            boatPoly.setMaterial(new PhongMaterial(Color.FLORALWHITE));
         });
         boatPoly.setOnMouseExited(event -> {
-            boatPoly.setFill(colour);
-            boatPoly.setFill(this.colour);
-            boatPoly.setStroke(Color.BLACK);
+//            boatPoly.setMaterial(new PhongMaterial(this.colour));
+//            boatPoly.setFill(colour);
+//            boatPoly.setFill(this.colour);
+//            boatPoly.setStroke(Color.BLACK);
         });
         boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
         boatPoly.setCache(true);
@@ -117,10 +136,89 @@ public class BoatObject extends Group {
         super.getChildren().addAll(boatPoly, sail);
     }
 
-    public void setFill (Paint value) {
+    public void setFill (Color value) {
+
+
+        PointLight pointLight = new PointLight();
+//        pointLight.setTranslateX(VIEWPORT_SIZE*3/4);
+//        pointLight.setTranslateY(VIEWPORT_SIZE/2);
+//        pointLight.setTranslateZ(VIEWPORT_SIZE/2);
+
+//        PointLight pointLight2 = new PointLight(lightColor);
+//        pointLight2.setTranslateX(VIEWPORT_SIZE*1/4);
+//        pointLight2.setTranslateY(VIEWPORT_SIZE*3/4);
+//        pointLight2.setTranslateZ(VIEWPORT_SIZE*3/4);
+//        PointLight pointLight3 = new PointLight(lightColor);
+//        pointLight3.setTranslateX(VIEWPORT_SIZE*5/8);
+//        pointLight3.setTranslateY(VIEWPORT_SIZE/2);
+//        pointLight3.setTranslateZ(0);
+//
+//        Color ambientColor = Color.rgb(80, 80, 80, 0);
+//        AmbientLight ambient = new AmbientLight(ambientColor);
+
+        this.getChildren().add(pointLight);
+//        this.getChildren().add(pointLight2);
+//        this.getChildren().add(pointLight3);
+//        this.getChildren().add(ambient);
+
         this.colour = value;
-        boatPoly.setFill(colour);
+        PhongMaterial pm = new PhongMaterial(this.colour);
+//        pm.setSpecularPower(16);
+//        pm.setSpecularColor(lightColor);
+        boatPoly.setMaterial(pm);
         trail.setStroke(colour);
+    }
+
+    public Shape3D makeBoatPolygon () {
+        StlMeshImporter importer = new StlMeshImporter();
+//        System.out.println(BoatObject.class.getResource("simpleboat.stl").toString());
+        System.out.println(BoatObject.class.getResource("/views/StartScreenView.fxml").toString());
+        importer.read(getClass().getResource("/simpleboat.stl").toString());
+        return new MeshView(importer.getImport());
+//        MeshView boat = new MeshView();
+//        TriangleMesh boatMesh = new TriangleMesh();
+////        -BOAT_WIDTH / 2, BOAT_HEIGHT / 2,
+////            0.0, -BOAT_HEIGHT / 2,
+////            BOAT_WIDTH / 2, BOAT_HEIGHT / 2
+//        boatMesh.getPoints().addAll(
+//            -BOAT_WIDTH / 2, BOAT_HEIGHT / 2, 0,
+//            0, -BOAT_HEIGHT / 2,0,
+//            BOAT_WIDTH / 2, BOAT_HEIGHT / 2, 0
+//        );
+//        boatMesh.getTexCoords().addAll(0.5f,0,0,1,1,1);
+//        boatMesh.getFaces().addAll(
+//            0,0,1,1,2,2//,
+////            1,1,2,2,3,3,
+////            0,0,2,2,3,3,
+////            1,1,0,0,3,3
+//        );
+//        boat.setMesh(boatMesh);
+////        boat.setDrawMode(DrawMode.LINE);
+//        return boat;
+////        Box b = new Box();
+////        TriangleMesh planeMesh = new TriangleMesh();
+////        float[] points = {
+////            -10, 10, 5,
+////            -10, -10, 10,
+////            10, 10, 15,
+////            10, 10, 20
+////        };
+////        float[] texCoords = {
+////            0, 0,
+////            0, 1,
+////            1, 0,
+////            1, 1
+////        };
+////        int[] faces = {
+////            0, 0, 1, 1, 2, 2,
+////            2, 2, 3, 3, 1, 1
+////        };
+////        planeMesh.getPoints().addAll(points);
+////        planeMesh.getTexCoords().addAll(texCoords);
+////        planeMesh.getFaces().addAll(faces);
+////        MeshView meshView =   new MeshView(planeMesh);
+//        meshView.setMaterial(new PhongMaterial(Color.BLACK));
+//        return meshView;
     }
 
     /**
@@ -181,7 +279,7 @@ public class BoatObject extends Group {
 
 
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
-        boatPoly.getTransforms().setAll(new Rotate(heading));
+//        boatPoly.getTransforms().add(new Rotate(heading, new Point3D(0,0,1)));
         if (sailsIn) {
             Double sailWindOffset = 30.0;
             Double upwindAngleLimit = 15.0;
@@ -220,8 +318,8 @@ public class BoatObject extends Group {
         double period = 10;
         for (int i = 0; i < 50; i++) {
             points[i * 2] = amplitude * Math.sin(((Math.PI * i) / period + sailState));
-            points[i * 2 + 1] = (BOAT_HEIGHT * i) / BOAT_HEIGHT / 2;
-            points[199 - (i * 2)] = (BOAT_HEIGHT * i) / BOAT_HEIGHT / 2;
+            points[i * 2 + 1] = (double) (BOAT_HEIGHT * i) / BOAT_HEIGHT / 2;
+            points[199 - (i * 2)] = (double) (BOAT_HEIGHT * i) / BOAT_HEIGHT / 2;
             points[199 - (i * 2 + 1)] = amplitude * Math.sin(((Math.PI * i) / period + sailState));
         }
         if (sailState == - 2 * Math.PI) {
@@ -235,6 +333,7 @@ public class BoatObject extends Group {
     }
 
     public void updateLocation() {
+        boatPoly.getTransforms().add(new Rotate(2, new Point3D(1,1,1)));
 //        double dx = xVelocity / 60;
 //        double dy = yVelocity / 60;
 //
@@ -356,14 +455,14 @@ public class BoatObject extends Group {
      * Sets this boat to appear highlighted
      */
     public void setAsPlayer() {
-        boatPoly.getPoints().setAll(
-            -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,
-            0.0, -BOAT_HEIGHT / 1.75,
-            BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75
-        );
-        boatPoly.setStroke(Color.BLACK);
-        boatPoly.setStrokeWidth(2);
-        boatPoly.setStrokeLineCap(StrokeLineCap.ROUND);
+//        boatPoly.getPoints().setAll(
+//            -BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75,
+//            0.0, -BOAT_HEIGHT / 1.75,
+//            BOAT_WIDTH / 1.75, BOAT_HEIGHT / 1.75
+//        );
+//        boatPoly.setStroke(Color.BLACK);
+//        boatPoly.setStrokeWidth(2);
+//        boatPoly.setStrokeLineCap(StrokeLineCap.ROUND);
         isPlayer = true;
         animateSail();
     }

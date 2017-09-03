@@ -13,6 +13,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
@@ -22,27 +23,22 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
-import seng302.gameServer.GameState;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.model.ClientYacht;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
-import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
-import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.XMLGenerator;
 import seng302.visualiser.fxObjects.AnnotationBox;
 import seng302.visualiser.fxObjects.BoatObject;
 import seng302.visualiser.fxObjects.CourseBoundary;
@@ -91,6 +87,7 @@ public class GameView extends Pane {
     private Group markers = new Group();
     private Group tokens = new Group();
     private List<CompoundMark> course = new ArrayList<>();
+    private List<Cylinder> mapTokens;
 
     private ImageView mapImage = new ImageView();
 
@@ -190,6 +187,9 @@ public class GameView extends Pane {
                     }
                 }
                 boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
+                for (Cylinder c : mapTokens) {
+                    c.getTransforms().add(new Rotate(1, new Point3D(45, 45, 45)));
+                }
             }
         };
     }
@@ -315,18 +315,16 @@ public class GameView extends Pane {
         for (int i=1; i < sequence.size()-1; i++) { //General case.
             double averageLat = 0;
             double averageLng = 0;
-            int numMarks = 0;
+            int numMarks = course.get(i-1).getMarks().size();
             for (Mark mark : course.get(i-1).getMarks()) {
-                numMarks += 1;
                 averageLat += mark.getLat();
                 averageLng += mark.getLng();
             }
             GeoPoint lastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
-            numMarks = 0;
+            numMarks = course.get(i+1).getMarks().size();
             averageLat = 0;
             averageLng = 0;
             for (Mark mark : course.get(i+1).getMarks()) {
-                numMarks += 1;
                 averageLat += mark.getLat();
                 averageLng += mark.getLng();
             }
@@ -451,15 +449,26 @@ public class GameView extends Pane {
      */
     public void updateTokens(List<Token> newTokens) {
 
-        List<Marker> mapTokens = new ArrayList<>();
-
+//        List<Marker> mapTokens = new ArrayList<>();
+//
+//        for (Token token : newTokens) {
+//            Point2D location = findScaledXY(token.getLat(), token.getLng());
+//            Marker thisMarker = new Marker(Color.YELLOW);
+//            thisMarker.setLayoutX(location.getX());
+//            thisMarker.setLayoutY(location.getY());
+//            mapTokens.add(thisMarker);
+//        }
+        mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
             Point2D location = findScaledXY(token.getLat(), token.getLng());
-            Marker thisMarker = new Marker(Color.YELLOW);
-            thisMarker.setLayoutX(location.getX());
-            thisMarker.setLayoutY(location.getY());
-            mapTokens.add(thisMarker);
+            Cylinder tokenObject = new Cylinder(10, 10);
+            tokenObject.getTransforms().add(new Rotate(45, new Point3D(45, 45, 45)));
+            tokenObject.setLayoutX(location.getX());
+            tokenObject.setLayoutY(location.getY());
+            tokenObject.setMaterial(new PhongMaterial(Color.YELLOW));
+            mapTokens.add(tokenObject);
         }
+
         Platform.runLater(() -> {
             tokens.getChildren().clear();
             tokens.getChildren().addAll(mapTokens);
@@ -518,7 +527,7 @@ public class GameView extends Pane {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
         for (ClientYacht clientYacht : yachts) {
-            Paint colour = clientYacht.getColour();
+            Color colour = clientYacht.getColour();
             newBoat = new BoatObject();
             newBoat.addSelectedBoatListener(this::setSelectedBoat);
             newBoat.setFill(colour);
@@ -528,7 +537,7 @@ public class GameView extends Pane {
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
-            // TODO: 1/08/17 Make this less vile to look at.
+
             clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
@@ -815,8 +824,10 @@ public class GameView extends Pane {
 
     private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
         //Only show arrows for this and next leg.
+//        System.out.println(markerObjects);
         if (compoundMark != null) {
             for (Mark mark : compoundMark.getMarks()) {
+//                System.out.println("markerObjects.get(mark) = " + markerObjects.get(mark));
                 markerObjects.get(mark).showNextExitArrow();
             }
         }

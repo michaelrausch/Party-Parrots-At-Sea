@@ -41,7 +41,6 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.model.token.Token;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.annotations.Annotation;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
@@ -621,7 +620,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateRaceData (RaceXMLData raceData) {
-        this.courseData = raceData;
         gameView.updateBorder(raceData.getCourseLimit());
         gameView.updateTokens(raceData.getTokens());
     }
