@@ -1,11 +1,9 @@
 package seng302.visualiser;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
@@ -148,7 +146,9 @@ public class GameClient {
     }
 
     private void loadStartScreen() {
-        socketThread.setSocketToClose();
+        if (socketThread != null) {
+            socketThread.setSocketToClose();
+        }
         if (server != null) {
             server.terminate();
             server = null;

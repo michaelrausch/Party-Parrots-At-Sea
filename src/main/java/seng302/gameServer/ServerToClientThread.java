@@ -386,32 +386,34 @@ public class ServerToClientThread implements Runnable, Observer {
             Arrays.copyOfRange(chatterPayload, 3, 3 + chatterPayload.length)
         );
         String[] words = chatterText.split("\\s+");
-        if (words.length < 3) {
-            return;
+        for (String s : words) {
+            System.out.println(s);
         }
-        switch (words[2].trim()) {
-            case ">speed":
-                try {
-                    GameState.setSpeedMultiplier(Double.valueOf(words[3]));
+        if (words.length > 2 && isHost) {
+            switch (words[2].trim()) {
+                case ">speed":
+                    try {
+                        GameState.setSpeedMultiplier(Double.valueOf(words[3]));
+                        GameState.broadcastChatter(new ChatterMessage(
+                            Byte.toUnsignedInt(chatterPayload[1]),
+                            words[0] + "Host has set speed modifier to x" + words[3]
+                        ));
+                    } catch (Exception e) {
+                        logger.error("cannot parse >speed value");
+                    }
+                    return;
+                case ">finish":
+                    System.out.println(words[2].trim());
+                    GameState.endRace();
                     GameState.broadcastChatter(new ChatterMessage(
-                        Byte.toUnsignedInt(chatterPayload[1]),
-                        words[0] + "Host has set speed modifier to x" + words[3]
+                        chatterPayload[1],
+                        words[0] + "Host has ended the game"
                     ));
-                } catch (Exception e) {
-                    logger.error("cannot parse >speed value");
-                }
-                break;
-            case ">finish":
-                GameState.endRace();
-                GameState.broadcastChatter(new ChatterMessage(
-                    chatterPayload[1],
-                    words[0] + "Host has ended the game"
-                ));
-                break;
-            default:
-                GameState.broadcastChatter(
-                    ServerPacketParser.extractChatterText(chatterPayload)
-                );
+                    return;
+            }
         }
+        GameState.broadcastChatter(
+            ServerPacketParser.extractChatterText(chatterPayload)
+        );
     }
 }
