@@ -86,7 +86,13 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-                terminate();
+                broadcastMessage(makeRaceStatusMessage());
+                try {
+                    Thread.sleep(1000); //Hackish fix to make sure all threads have broadcasted
+                    terminate();
+                } catch (InterruptedException ie) {
+                    serverLog("Thread interrupted while waiting to terminate clients", 1);
+                }
             }
         }
 
@@ -169,6 +175,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     @Override
     public void clientConnected(ServerToClientThread serverToClientThread) {
         serverLog("Player Connected From " + serverToClientThread.getThread().getName(), 0);
+        if (serverToClientThreads.size() == 0) { //Sets first client as host.
+            serverToClientThread.setAsHost();
+        }
         serverToClientThreads.add(serverToClientThread);
         serverToClientThread.addConnectionListener(() -> {
             for (ServerToClientThread thread : serverToClientThreads) {
@@ -257,6 +266,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             if (timeTillStart > PREPATORY_TIME) {
                 raceStatus = RaceStatus.PREPARATORY;
             }
+        } else if (GameState.getCurrentStage() == GameStages.FINISHED) {
+            raceStatus = RaceStatus.TERMINATED;
         } else {
             raceStatus = RaceStatus.STARTED;
         }

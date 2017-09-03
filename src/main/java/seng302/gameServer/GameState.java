@@ -59,6 +59,7 @@ public class GameState implements Runnable {
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
+    private static Double speedMultiplier = 1d;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
 
@@ -356,7 +357,7 @@ public class GameState implements Runnable {
         Double velocity = yacht.getCurrentVelocity();
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (velocity < maxBoatSpeed - 500) {
@@ -692,5 +693,14 @@ public class GameState implements Runnable {
 
     public static void broadcastChatter(ChatterMessage chatterMessage) {
         notifyMessageListeners(chatterMessage);
+    }
+
+    public static void endRace () {
+        yachts.forEach((id, yacht) -> yacht.setBoatStatus(BoatStatus.FINISHED));
+//        currentStage = GameStages.FINISHED;
+    }
+
+    public static void setSpeedMultiplier (double multiplier) {
+        speedMultiplier = multiplier;
     }
 }

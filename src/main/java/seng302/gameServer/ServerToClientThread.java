@@ -31,23 +31,6 @@ import seng302.gameServer.messages.RegistrationResponseStatus;
 import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.model.Player;
-import seng302.model.ServerYacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
-import seng302.utilities.XMLGenerator;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatLocationMessage;
-import seng302.gameServer.messages.ClientType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RegistrationResponseMessage;
-import seng302.gameServer.messages.RegistrationResponseStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
@@ -92,6 +75,7 @@ public class ServerToClientThread implements Runnable, Observer {
 
     private ClientType clientType;
     private Boolean isRegistered = false;
+    private Boolean isHost = false;
 
     private XMLGenerator xml;
 
@@ -227,9 +211,10 @@ public class ServerToClientThread implements Runnable, Observer {
                                 completeRegistration(requestedType);
                                 break;
                             case CHATTER_TEXT:
-                                GameState.broadcastChatter(
-                                    ServerPacketParser.extractChatterText(payload)
-                                );
+//                                GameState.broadcastChatter(
+//                                    ServerPacketParser.extractChatterText(payload)
+//                                );
+                                parseChatter(payload);
                                 break;
                             case RACE_CUSTOMIZATION_REQUEST:
                                 Long sourceID = Message
@@ -390,5 +375,43 @@ public class ServerToClientThread implements Runnable, Observer {
 
     public void addDisconnectListener(DisconnectListener disconnectListener) {
         this.disconnectListener = disconnectListener;
+    }
+
+    public void setAsHost() {
+        isHost = true;
+    }
+
+    private void parseChatter(byte[] chatterPayload) {
+        String chatterText = new String(
+            Arrays.copyOfRange(chatterPayload, 3, 3 + chatterPayload.length)
+        );
+        String[] words = chatterText.split("\\s+");
+        if (words.length < 3) {
+            return;
+        }
+        switch (words[2].trim()) {
+            case ">speed":
+                try {
+                    GameState.setSpeedMultiplier(Double.valueOf(words[3]));
+                    GameState.broadcastChatter(new ChatterMessage(
+                        Byte.toUnsignedInt(chatterPayload[1]),
+                        words[0] + "Host has set speed modifier to x" + words[3]
+                    ));
+                } catch (Exception e) {
+                    logger.error("cannot parse >speed value");
+                }
+                break;
+            case ">finish":
+                GameState.endRace();
+                GameState.broadcastChatter(new ChatterMessage(
+                    chatterPayload[1],
+                    words[0] + "Host has ended the game"
+                ));
+                break;
+            default:
+                GameState.broadcastChatter(
+                    ServerPacketParser.extractChatterText(chatterPayload)
+                );
+        }
     }
 }
