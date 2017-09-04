@@ -24,9 +24,18 @@ public class ChatHistory extends ScrollPane {
         this.setMaxWidth(Double.MAX_VALUE);
         this.setVbarPolicy(ScrollBarPolicy.ALWAYS);
         this.setHbarPolicy(ScrollBarPolicy.NEVER);
-        textFlow.getChildren().addListener((ListChangeListener<Node>) c -> {
-            this.setVvalue(1.0);
-        });
+        //This makes the window auto scroll.
+        textFlow.getChildren().addListener((ListChangeListener<Node>) c ->
+            this.setVvalue(1.0)
+        );
+        //This just makes it so that the ChatHistory is on focus it passes it off to the parent.
+        this.parentProperty().addListener((obs, old, parent) ->
+            this.focusedProperty().addListener((obsVal, oldVal, onFocus) -> {
+                if (onFocus) {
+                    parent.requestFocus();
+                }
+            })
+        );
     }
 
     /**

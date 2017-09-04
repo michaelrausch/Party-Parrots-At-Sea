@@ -44,20 +44,23 @@ public class HeartbeatThread implements Runnable {
      * The delegate is notified if a player has disconnected
      */
     private void sendHeartbeatToAllPlayers(){
-        Message heartbeat = new Heartbeat(seqNum);
-        for (Player player : GameState.getPlayers()){
-            if (!player.getSocket().isConnected()) {
-                playerLostConnection(player);
+        try {
+            Message heartbeat = new Heartbeat(seqNum);
+            for (Player player : GameState.getPlayers()) {
+                if (!player.getSocket().isConnected()) {
+                    playerLostConnection(player);
+                }
+                try {
+                    player.getSocket().getOutputStream().write(heartbeat.getBuffer());
+                } catch (IOException e) {
+                    playerLostConnection(player);
+                }
             }
-
-            try {
-                player.getSocket().getOutputStream().write(heartbeat.getBuffer());
-            } catch (IOException e) {
-                playerLostConnection(player);
-            }
+            updateDelegate();
+            seqNum++;
+        } catch (NullPointerException ne) {
+            // TODO: 4/09/17 Just ignoring this at the moment. Caused by players getting removed elsewhere.
         }
-        updateDelegate();
-        seqNum++;
     }
 
     /**

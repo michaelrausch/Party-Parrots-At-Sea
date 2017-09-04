@@ -574,7 +574,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         yachtSelectionComboBox.setItems(
             FXCollections.observableArrayList(participants.values())
         );
-        //Null check is if the listener is fired but nothing selected
         yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
             if (selectedBoat != null) {
                 gameView.selectBoat(selectedBoat);
@@ -677,7 +676,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateChatHistory(Paint playerColour, String newMessage) {
-//        Platform.runLater(() -> chatHistory.appendText(newMessage + "\n\n"));
         Platform.runLater(() -> chatHistory.addMessage(playerColour, newMessage));
     }
 

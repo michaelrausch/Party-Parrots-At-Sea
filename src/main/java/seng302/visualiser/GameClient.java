@@ -234,7 +234,6 @@ public class GameClient {
 
     private void parsePackets() {
         while (socketThread.getPacketQueue().peek() != null) {
-            System.out.println("PARSING PACKET");
             StreamPacket packet = socketThread.getPacketQueue().poll();
             switch (packet.getType()) {
                 case RACE_STATUS:
@@ -298,8 +297,6 @@ public class GameClient {
                 case CHATTER_TEXT:
                     Pair<Integer, String> playerIdMessagePair = StreamParser
                         .extractChatterText(packet);
-
-                    System.out.println("playerIdMessagePair = " + playerIdMessagePair);
                     raceView.updateChatHistory(
                         allBoatsMap.get(playerIdMessagePair.getKey()).getColour(),
                         playerIdMessagePair.getValue()

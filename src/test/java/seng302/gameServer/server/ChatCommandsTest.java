@@ -27,6 +27,11 @@ public class ChatCommandsTest {
     @Test
     public void sendFinishAsHost () {
         try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
+        try {
             dcSent = false;
             new GameState("localhost");
             mst = new MainServerThread();
@@ -39,6 +44,7 @@ public class ChatCommandsTest {
                             RaceStatusData rsd = StreamParser.extractRaceStatus(packet);
                             if (rsd.getBoatData().get(0)[4] == BoatStatus.FINISHED.getCode()) {
                                 mst.terminate();
+                                System.out.println("AY WE DID IT");
 //                                host.setSocketToClose();
                                 Assert.assertTrue(dcSent);
                             }
@@ -76,6 +82,11 @@ public class ChatCommandsTest {
 
     @Test
     public void sendSpeedAsHostValid () {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         new GameState("localhost");
         mst = new MainServerThread();
         host = null;
@@ -97,6 +108,7 @@ public class ChatCommandsTest {
             ie.printStackTrace();
         }
         Assert.assertEquals(5.0, GameState.getSpeedMultiplier(), 0.00001);
+        System.out.println("the thing " + GameState.getSpeedMultiplier());
         mst.terminate();
 //        host.setSocketToClose();
         try {
@@ -111,6 +123,11 @@ public class ChatCommandsTest {
 
     @Test
     public void sendSpeedAsHostInvalid () {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         new GameState("localhost");
         mst = new MainServerThread();
         host = null;
@@ -134,6 +151,7 @@ public class ChatCommandsTest {
         mst.terminate();
 //        host.setSocketToClose();
         Assert.assertEquals(1.0, GameState.getSpeedMultiplier(), 0.00001);
+        System.out.println("value " + GameState.getSpeedMultiplier());
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ie) {
@@ -143,10 +161,12 @@ public class ChatCommandsTest {
 
     @Test
     public void sendCommandAsClient () {
-        new GameState("localhost");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         mst = new MainServerThread();
-        host = null;
-        client = null;
         try {
             host = new ClientToServerThread("localhost", 4942);
             try {
@@ -189,13 +209,28 @@ public class ChatCommandsTest {
 
     @Test
     public void receiveFinishedAsClient () {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         new GameState("localhost");
         dcSent = false;
         mst = new MainServerThread();
         host = null;
         try {
             host = new ClientToServerThread("localhost", 4942);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
             client = new ClientToServerThread("localhost", 4942);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
             client.addStreamObserver(() -> {
                 while (client.getPacketQueue().peek() != null) {
                     StreamPacket packet = client.getPacketQueue().poll();
@@ -204,6 +239,7 @@ public class ChatCommandsTest {
                             RaceStatusData rsd = StreamParser.extractRaceStatus(packet);
                             if (rsd.getBoatData().get(0)[4] == BoatStatus.FINISHED.getCode()) {
                                 mst.terminate();
+                                System.out.println("TEST COMPLETE");
 //                                client.setSocketToClose();
 //                                host.setSocketToClose();
                                 Assert.assertTrue(dcSent);
@@ -217,25 +253,26 @@ public class ChatCommandsTest {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
-        mst.startGame();
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(100);
+//        } catch (InterruptedException ie) {
+//            ie.printStackTrace();
+//        }
+//        mst.startGame();
+//        try {
+//            Thread.sleep(100);
+//        } catch (InterruptedException ie) {
+//            ie.printStackTrace();
+//        }
         host.sendChatterMessage("[time_prefix] <name_prefix> >finish");
         dcSent = true;
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
-//        host.setSocketToClose();
+//        try {
+//            Thread.sleep(200);
+//        } catch (InterruptedException ie) {
+//            ie.printStackTrace();
+//        }
+////        host.setSocketToClose();
+//        mst.terminate();
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ie) {

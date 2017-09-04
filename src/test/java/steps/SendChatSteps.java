@@ -1,22 +1,10 @@
 package steps;
 
-import cucumber.api.PendingException;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import java.util.ArrayList;
-
-import javafx.scene.layout.Pane;
-import org.junit.Assert;
-import org.mockito.Mock;
-import seng302.gameServer.GameStages;
-import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
-import seng302.gameServer.messages.BoatAction;
-import seng302.model.ServerYacht;
-import seng302.visualiser.ClientToServerThread;
 import seng302.visualiser.GameClient;
-import seng302.visualiser.controllers.StartScreenController;
 
 /**
  * Created by kre39 on 7/08/17.
@@ -44,7 +32,7 @@ public class SendChatSteps {
 //        client1.getSocketThread().sendChatterMessage(arg1);
     }
 
-    @Then("^the other client should recieve the message \"([^\"]*)\"$")
+    @Then("^the other client should receive the message \"([^\"]*)\"$")
     public void the_other_client_should_recieve_the_message(String arg1) throws Throwable {
 //        System.out.println(client2.getPacketQueue());
 //        client2.setSocketToClose();
