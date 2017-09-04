@@ -698,7 +698,6 @@ public class GameState implements Runnable {
     public static void endRace () {
         yachts.forEach((id, yacht) -> yacht.setBoatStatus(BoatStatus.FINISHED));
         currentStage = GameStages.FINISHED;
-        System.out.println("FOR FUCKS SAKE YOU FUCKING DEGENERATE");
     }
 
     public static void setSpeedMultiplier (double multiplier) {

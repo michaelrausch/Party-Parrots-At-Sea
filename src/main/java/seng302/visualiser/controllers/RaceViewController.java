@@ -26,7 +26,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -50,6 +49,7 @@ import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.ChatHistory;
 
 /**
  * Controller class that manages the display of a race
@@ -63,7 +63,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Button chatSend;
     @FXML
-    private TextArea chatHistory;
+    private Pane chatHistoryHolder;
     @FXML
     private TextField chatInput;
     @FXML
@@ -98,6 +98,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private GameView gameView;
     private RaceState raceState;
 
+    private ChatHistory chatHistory;
+
     private Timeline timerTimeline;
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
@@ -122,9 +124,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
             }
         });
-        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
-            chatHistory.setScrollTop(Double.MAX_VALUE);
-        });
+        chatHistory = new ChatHistory();
+        chatHistoryHolder.getChildren().addAll(chatHistory);
+        chatHistory.prefWidthProperty().bind(
+            chatHistoryHolder.widthProperty()
+        );
+        chatHistory.prefHeightProperty().bind(
+            chatHistoryHolder.heightProperty()
+        );
+//        chatHistory.setFitToWidth(true);
+//        chatHistory.setFitToHeight(true);
+//        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
+//            chatHistory.setScrollTop(Double.MAX_VALUE);
+//        });
     }
 
     public void loadRace (
@@ -135,12 +147,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
         this.raceState = raceState;
-
-        initializeUpdateTimer();
-        initialiseFPSCheckBox();
-        initialiseAnnotationSlider();
-        initialiseBoatSelectionComboBox();
-        initialiseSparkLine();
 
         raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
             while (c.next()) {
@@ -181,6 +187,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 gameView.enableZoom();
             }
         });
+
+        initializeUpdateTimer();
+        initialiseFPSCheckBox();
+        initialiseAnnotationSlider();
+        initialiseBoatSelectionComboBox();
+        initialiseSparkLine();
     }
 
     /**
@@ -665,7 +677,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateChatHistory(Paint playerColour, String newMessage) {
-        Platform.runLater(() -> chatHistory.appendText(newMessage + "\n\n"));
+//        Platform.runLater(() -> chatHistory.appendText(newMessage + "\n\n"));
+        Platform.runLater(() -> chatHistory.addMessage(playerColour, newMessage));
     }
 
 }

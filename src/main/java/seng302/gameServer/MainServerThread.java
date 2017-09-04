@@ -61,7 +61,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!terminated) {
-            System.out.println("CUNT GF" + GameState.getCurrentStage());
             try {
                 Thread.sleep(1000 / CLIENT_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
@@ -88,9 +87,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
                 broadcastMessage(makeRaceStatusMessage());
-                System.out.println("BUT I WAS HERE CUNTFACE");
                 try {
-                    Thread.sleep(100); //Hackish fix to make sure all threads have broadcasted
+                    Thread.sleep(1000); //Hackish fix to make sure all threads have sent closing RaceStatus
                     terminate();
                 } catch (InterruptedException ie) {
                     serverLog("Thread interrupted while waiting to terminate clients", 1);
@@ -102,7 +100,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 serverToClientThread.terminate();
             }
             serverSocket.close();
-            System.out.println("closed");
         } catch (IOException e) {
             System.out.println("IO error in server thread handler upon closing socket");
         }
@@ -245,7 +242,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         for (Player player : GameState.getPlayers()) {
             ServerYacht y = player.getYacht();
-            System.out.println(y.getBoatStatus());
             BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(),
                 y.getLegNumber(),
                 0, 0, 1234L,
@@ -268,7 +264,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 raceStatus = RaceStatus.PREPARATORY;
             }
         } else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-            System.out.println("WHAT THE FUCKING FUCK");
             raceStatus = RaceStatus.TERMINATED;
         } else {
             raceStatus = RaceStatus.STARTED;
@@ -281,7 +276,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     }
 
     public void terminate() {
-        System.out.println("done");
         terminated = true;
     }
 

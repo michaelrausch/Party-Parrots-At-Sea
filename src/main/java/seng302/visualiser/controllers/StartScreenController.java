@@ -10,8 +10,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import seng302.gameServer.GameState;
 import seng302.visualiser.GameClient;
 
 /**
@@ -23,111 +21,32 @@ public class StartScreenController implements Initializable {
     @FXML
     private TextField ipTextField;
     @FXML
-    private TextField portTextField;
-    @FXML
-    private GridPane startScreen2;
-    @FXML
     private AnchorPane holder;
 
-    GameClient gameClient;
+    private GameClient gameClient;
 
     public void initialize(URL url,  ResourceBundle resourceBundle) {
-//        gameClient = new GameClient(holder);
-    }
-//
-//    /**
-//     * Loads the fxml content into the parent pane
-//     * @param jfxUrl
-//     * @return the controller of the fxml
-//     */
-//    private Object setContentPane(String jfxUrl) {
-//        try {
-//            AnchorPane contentPane = (AnchorPane) startScreen2.getParent();
-//            contentPane.getChildren().removeAll();
-//            contentPane.getChildren().clear();
-//            contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(jfxUrl));
-//            contentPane.getChildren().addAll((Pane) fxmlLoader.load());
-//
-//            return fxmlLoader.getController();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 
+    }
 
     /**
-     * ATTEMPTS TO:
-     * Sets up a new game state with your IP address as designated as the host.
-     * Starts a thread to listen for incoming connections.
-     * Starts a client to server thread and connects to own ip.
-     * Switches to the lobby screen
+     * Creates an instance of GameClient and runs it as a host.
      */
     @FXML
     public void hostButtonPressed() {
-//        new GameState(getLocalHostIp());
         gameClient = new GameClient(holder);
         gameClient.runAsHost(getLocalHostIp(), 4942);
-//        try {
-////            String ipAddress = InetAddress.getLocalHost().getHostAddress();
-////            new GameState(ipAddress);
-////            new MainServerThread();
-////            ClientToServerThread clientToServerThread = new ClientToServerThread("localhost", 4950);
-////            controller.setClientToServerThread(clientToServerThread);
-//            // get the lobby controller so that we can pass the game server thread to it
-//            new GameState(getLocalHostIp());
-//            MainServerThread mainServerThread = new MainServerThread();
-////            ClientState.setHost(true);
-//            // host will connect and handshake to itself after setting up the server
-//            // TODO: 24/07/17 wmu16 - Make port number some static global type constant?
-////            ClientToServerThread clientToServerThread = new ClientToServerThread(ClientState.getHostIp(), 4942);
-////            ClientState.setConnectedToHost(true);
-////            controller.setClientToServerThread(clientToServerThread);
-//            LobbyController lobbyController = (LobbyController) setContentPane("/views/LobbyView.fxml");
-//            lobbyController.setMainServerThread(mainServerThread);
-//        } catch (Exception e) {
-//            Alert alert = new Alert(AlertType.ERROR);
-//            alert.setHeaderText("Cannot host");
-//            alert.setContentText("Oops, failed to host, try to restart.");
-//            alert.showAndWait();
-//            e.printStackTrace();
-//        }
     }
 
     /**
-     * ATTEMPTS TO:
-     * Connect to an ip address and port using the ip and port specified on start screen.
-     * Starts a Client To Server Thread to maintain connection to host.
-     * Switch view to lobby view.
+     * Creates an instance of GameClient and runs it has a client.
      */
     @FXML
     public void connectButtonPressed() {
-        // TODO: 10/07/17 wmu16 - Finish function
         gameClient = new GameClient(holder);
         gameClient.runAsClient(ipTextField.getText().trim().toLowerCase(), 4942);
-
-//        try {
-//            String ipAddress = ipTextField.getText().trim().toLowerCase();
-//            Integer port = Integer.valueOf(portTextField.getText().trim());
-//
-////            ClientToServerThread clientToServerThread = new ClientToServerThread(ipAddress, port);
-////            ClientState.setHost(false);
-////            ClientState.setConnectedToHost(true);
-//
-////            controller.setClientToServerThread(clientToServerThread);
-////            setContentPane("/views/LobbyView.fxml");
-//        } catch (Exception e) {
-//            Alert alert = new Alert(AlertType.ERROR);
-//            alert.setHeaderText("Cannot reach the host");
-//            alert.setContentText("Please check your host IP address.");
-//            alert.showAndWait();
-//        }
     }
 
-//    public void setController(Controller controller) {
-//        this.controller = controller;
-//    }
 
     /**
      * Gets the local host ip address and sets this ip to ClientState.
@@ -162,7 +81,6 @@ public class StartScreenController implements Initializable {
         if (ipAddress == null) {
             System.out.println("[HOST] Cannot obtain local host ip address.");
         }
-//        ClientState.setHostIp(ipAddress);
         return ipAddress;
     }
 }
