@@ -303,7 +303,7 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
-    private void closeSocket() {
+    public void closeSocket() {
         try {
             socket.close();
             socketOpen = false;
