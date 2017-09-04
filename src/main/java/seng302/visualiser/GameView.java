@@ -13,7 +13,6 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
@@ -23,12 +22,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
@@ -45,6 +41,7 @@ import seng302.visualiser.fxObjects.CourseBoundary;
 import seng302.visualiser.fxObjects.Gate;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
 import seng302.visualiser.fxObjects.Marker;
+import seng302.visualiser.fxObjects.VelocityPickup;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
 
@@ -87,7 +84,7 @@ public class GameView extends Pane {
     private Group markers = new Group();
     private Group tokens = new Group();
     private List<CompoundMark> course = new ArrayList<>();
-    private List<Cylinder> mapTokens;
+    private List<Node> mapTokens;
 
     private ImageView mapImage = new ImageView();
 
@@ -187,9 +184,9 @@ public class GameView extends Pane {
                     }
                 }
                 boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
-                for (Cylinder c : mapTokens) {
-                    c.getTransforms().add(new Rotate(1, new Point3D(45, 45, 45)));
-                }
+//                for (Cylinder c : mapTokens) {
+//                    c.getTransforms().add(new Rotate(1, new Point3D(45, 45, 45)));
+//                }
             }
         };
     }
@@ -461,11 +458,11 @@ public class GameView extends Pane {
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
             Point2D location = findScaledXY(token.getLat(), token.getLng());
-            Cylinder tokenObject = new Cylinder(10, 10);
-            tokenObject.getTransforms().add(new Rotate(45, new Point3D(45, 45, 45)));
+            Node tokenObject = new VelocityPickup();
+//            tokenObject.getTransforms().add(new Rotate(45, new Point3D(45, 45, 45)));
             tokenObject.setLayoutX(location.getX());
             tokenObject.setLayoutY(location.getY());
-            tokenObject.setMaterial(new PhongMaterial(Color.YELLOW));
+//            tokenObject.setMaterial(new PhongMaterial(Color.YELLOW));
             mapTokens.add(tokenObject);
         }
 
