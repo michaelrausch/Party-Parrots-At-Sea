@@ -388,7 +388,7 @@ public class ServerToClientThread implements Runnable, Observer {
         String[] words = chatterText.split("\\s+");
         if (words.length > 2 && isHost) {
             switch (words[2].trim()) {
-                case ">speed":
+                case "/speed":
                     try {
                         GameState.setSpeedMultiplier(Double.valueOf(words[3]));
                         GameState.broadcastChatter(new ChatterMessage(
@@ -399,7 +399,7 @@ public class ServerToClientThread implements Runnable, Observer {
                         logger.error("cannot parse >speed value");
                     }
                     return;
-                case ">finish":
+                case "/finish":
                     GameState.broadcastChatter(new ChatterMessage(
                         chatterPayload[1],
                         "SERVER: Game will now finish"
