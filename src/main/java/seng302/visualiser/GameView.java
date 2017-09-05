@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.PointLight;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -25,6 +26,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
@@ -139,6 +141,17 @@ public class GameView extends Pane {
 
     public GameView () {
         gameObjects = this.getChildren();
+        PointLight pointLight = new PointLight(Color.WHITE);
+        pointLight.setLightOn(true);
+        pointLight.getTransforms().add(new Translate(100, 100, -100));
+        gameObjects.add(pointLight);
+        pointLight = new PointLight(Color.WHITE);
+        pointLight.setLightOn(true);
+        pointLight.getTransforms().add(new Translate(900, 900, -100));
+        gameObjects.add(pointLight);
+//        AmbientLight ambientLight = new AmbientLight(new Color(1,1,1,0.4));
+////        ambientLight.setOpacity(0.5);
+//        gameObjects.add(ambientLight);
         // create image view for map, bind panel size to image
         gameObjects.add(mapImage);
         gameObjects.add(raceBorder);
@@ -183,10 +196,7 @@ public class GameView extends Pane {
                         lastTime = now;
                     }
                 }
-                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
-//                for (Cylinder c : mapTokens) {
-//                    c.getTransforms().add(new Rotate(1, new Point3D(45, 45, 45)));
-//                }
+//                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
             }
         };
     }
@@ -445,24 +455,12 @@ public class GameView extends Pane {
      * @param newTokens the tokens to be put on the course.
      */
     public void updateTokens(List<Token> newTokens) {
-
-//        List<Marker> mapTokens = new ArrayList<>();
-//
-//        for (Token token : newTokens) {
-//            Point2D location = findScaledXY(token.getLat(), token.getLng());
-//            Marker thisMarker = new Marker(Color.YELLOW);
-//            thisMarker.setLayoutX(location.getX());
-//            thisMarker.setLayoutY(location.getY());
-//            mapTokens.add(thisMarker);
-//        }
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
             Point2D location = findScaledXY(token.getLat(), token.getLng());
             Node tokenObject = new VelocityPickup();
-//            tokenObject.getTransforms().add(new Rotate(45, new Point3D(45, 45, 45)));
             tokenObject.setLayoutX(location.getX());
             tokenObject.setLayoutY(location.getY());
-//            tokenObject.setMaterial(new PhongMaterial(Color.YELLOW));
             mapTokens.add(tokenObject);
         }
 

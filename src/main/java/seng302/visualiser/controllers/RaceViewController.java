@@ -31,6 +31,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -47,6 +48,7 @@ import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.WindArrow;
 
 /**
  * Controller class that manages the display of a race
@@ -66,7 +68,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private AnchorPane contentAnchorPane;
     @FXML
-    private Text windArrowText, windDirectionText;
+    private Text windDirectionText;
+    @FXML
+    private AnchorPane windArrowHolder;
     @FXML
     private Slider annotationSlider;
     @FXML
@@ -89,6 +93,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
+    private Polyline windArrow = new WindArrow(Color.LIGHTGRAY);
 
     public void initialize() {
         // Load a default important annotation state
@@ -105,6 +110,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        windArrowHolder.getChildren().addAll(windArrow);
+        windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
+        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
     }
 
     public void loadRace (
@@ -148,13 +156,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceState.addCollisionListener(gameView::drawCollision);
         raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
             gameView.setWindDir(newDirection.doubleValue());
-            updateWindDirection(newDirection.doubleValue());
+            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
         });
-        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) -> {
-            updateWindSpeed(newSpeed.doubleValue());
+        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
+            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
+        );
+        Platform.runLater(() -> {
+            updateWindDirection(raceState.windDirectionProperty().doubleValue());
+            updateWindSpeed(raceState.getWindSpeed());
         });
-        updateWindDirection(raceState.windDirectionProperty().doubleValue());
-        updateWindSpeed(raceState.getWindSpeed());
         gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
     }
 
@@ -383,7 +393,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     private void updateWindDirection(double direction) {
         windDirectionText.setText(String.format("%.1f°", direction));
-        windArrowText.setRotate(direction);
+        windArrow.setRotate(direction);
     }
 
     /**
