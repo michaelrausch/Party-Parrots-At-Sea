@@ -3,6 +3,7 @@ package seng302.visualiser;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
@@ -53,6 +54,8 @@ public class GameClient {
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
     private LobbyController lobbyController;
+
+    private ArrayList<ClientYacht> finishedBoats = new ArrayList<>();
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
@@ -160,6 +163,10 @@ public class GameClient {
 //            server.terminate();
 //            server = null;
 //        }
+
+        Sounds.stopSoundEffects();
+        Sounds.stopMusic();
+        Sounds.playMenuMusic();
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/views/StartScreenView.fxml"));
         try {
@@ -348,6 +355,9 @@ public class GameClient {
             for (ClientYacht yacht : allBoatsMap.values()) {
                 if (yacht.getBoatStatus() != BoatStatus.FINISHED.getCode()) {
                     raceFinished = false;
+                } else if (!finishedBoats.contains(yacht)) {
+                    finishedBoats.add(yacht);
+                    Sounds.playFinishSound();
                 }
             }
 
@@ -363,6 +373,7 @@ public class GameClient {
             }
 
             if (raceFinished) {
+                Sounds.playFinishSound();
                 close();
                 loadFinishScreenView();
             }

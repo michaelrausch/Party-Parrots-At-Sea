@@ -22,6 +22,10 @@ public class Sounds {
         musicPlayer.stop();
     }
 
+    public static void stopSoundEffects() {
+        soundEffect.stop();
+    }
+
     public static void toggleMuteMusic() {
         musicMuted = !musicMuted;
         musicPlayer.setMute(musicMuted);
@@ -71,6 +75,13 @@ public class Sounds {
     public static void playButtonClick() {
         Media buttonClick = new Media(Sounds.class.getClassLoader().getResource("sounds/Button-click-sound.mp3").toString());
         soundPlayer = new MediaPlayer(buttonClick);
+        soundPlayer.play();
+        soundPlayer.setMute(soundEffectsMuted);
+    }
+
+    public static void playFinishSound() {
+        Media finishSound = new Media(Sounds.class.getClassLoader().getResource("sounds/Sms-notification.mp3").toString());
+        soundPlayer = new MediaPlayer(finishSound);
         soundPlayer.play();
         soundPlayer.setMute(soundEffectsMuted);
     }
