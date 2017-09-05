@@ -3,19 +3,19 @@ package steps;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import javafx.scene.layout.Pane;
-import seng302.gameServer.GameStages;
-import seng302.gameServer.GameState;
+import javafx.util.Pair;
+import org.junit.Assert;
 import seng302.gameServer.MainServerThread;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.utilities.StreamParser;
 import seng302.visualiser.ClientToServerThread;
-import seng302.visualiser.GameClient;
 
 /**
+ * Cucumber test for sending chat messages
  * Created by kre39 on 7/08/17.
  */
 public class SendChatSteps {
 
-    private boolean dcSent = false;
     private ClientToServerThread client;
     private ClientToServerThread host;
     private MainServerThread mst;
@@ -49,7 +49,9 @@ public class SendChatSteps {
 
     @Then("^the other client should receive the message \"([^\"]*)\"$")
     public void the_other_client_should_receive_the_message(String arg1) throws Throwable {
-        System.out.println("HERE IT IS" + host.getPacketQueue().peek());
+        Object[] packets = host.getPacketQueue().toArray();
+        Pair<Integer, String> message = StreamParser.extractChatterText((StreamPacket) packets[packets.length - 1]);
+        Assert.assertEquals("[time_prefix] <name_prefix> "  + arg1, message.getValue());
         mst.terminate();
         host.setSocketToClose();
         client.setSocketToClose();
