@@ -164,7 +164,6 @@ public class GameClient {
 //            server = null;
 //        }
 
-        Sounds.stopSoundEffects();
         Sounds.stopMusic();
         Sounds.playMenuMusic();
         FXMLLoader fxmlLoader = new FXMLLoader(

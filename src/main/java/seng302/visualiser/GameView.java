@@ -36,6 +36,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.Sounds;
 import seng302.visualiser.fxObjects.AnnotationBox;
 import seng302.visualiser.fxObjects.BoatObject;
 import seng302.visualiser.fxObjects.CourseBoundary;
@@ -785,12 +786,14 @@ public class GameView extends Pane {
     private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
         //Only show arrows for this and next leg.
         if (compoundMark != null) {
+            Sounds.playMarkRoundingSound();
             for (Mark mark : compoundMark.getMarks()) {
                 markerObjects.get(mark).showNextExitArrow();
             }
         }
         CompoundMark nextMark = null;
         if (legNumber < course.size() - 1) {
+            Sounds.playMarkRoundingSound();
             nextMark = course.get(legNumber);
             for (Mark mark : nextMark.getMarks()) {
                 markerObjects.get(mark).showNextEnterArrow();

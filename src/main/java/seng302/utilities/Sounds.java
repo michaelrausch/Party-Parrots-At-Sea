@@ -19,16 +19,22 @@ public class Sounds {
 
 
     public static void stopMusic() {
-        musicPlayer.stop();
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+        }
     }
 
     public static void stopSoundEffects() {
-        soundEffect.stop();
+        if (soundEffect != null) {
+            soundEffect.stop();
+        }
     }
 
     public static void toggleMuteMusic() {
         musicMuted = !musicMuted;
-        musicPlayer.setMute(musicMuted);
+        if (musicPlayer != null) {
+            musicPlayer.setMute(musicMuted);
+        }
     }
 
     public static void toggleMuteEffects() {
@@ -83,21 +89,32 @@ public class Sounds {
         Media finishSound = new Media(Sounds.class.getClassLoader().getResource("sounds/Sms-notification.mp3").toString());
         soundPlayer = new MediaPlayer(finishSound);
         soundPlayer.play();
-        soundPlayer.setMute(soundEffectsMuted);
+    }
+
+
+    public static void playMarkRoundingSound() {
+        Media markRoundingSound = new Media(Sounds.class.getClassLoader().getResource("sounds/sms-tone.mp3").toString());
+        soundPlayer = new MediaPlayer(markRoundingSound);
+        soundPlayer.play();
     }
 
     public static void playCapGunSound() {
         Media gunSound = new Media(Sounds.class.getClassLoader().getResource("sounds/Gunshot-sound.mp3").toString());
         soundPlayer = new MediaPlayer(gunSound);
         soundPlayer.play();
-        soundPlayer.setMute(soundEffectsMuted);
     }
 
     public static void playCrashSound() {
         Media crashSound = new Media(Sounds.class.getClassLoader().getResource("sounds/Large-metal-door-slam.mp3").toString());
         soundPlayer = new MediaPlayer(crashSound);
         soundPlayer.play();
-        soundPlayer.setMute(soundEffectsMuted);
     }
+
+    public static void playHoverSound() {
+        Media hoverSound = new Media(Sounds.class.getClassLoader().getResource("sounds/sound-over.wav").toString());
+        soundPlayer = new MediaPlayer(hoverSound);
+        soundPlayer.play();
+    }
+
 
 }

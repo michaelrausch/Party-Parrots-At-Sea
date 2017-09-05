@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import seng302.gameServer.GameState;
@@ -204,5 +205,9 @@ public class StartScreenController implements Initializable {
         } else {
             muteSoundsButton.setText("Mute Sounds");
         }
+    }
+
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
     }
 }

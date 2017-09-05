@@ -25,8 +25,8 @@
                   <Font size="40.0" />
                </font>
             </Label>
-            <Button mnemonicParsing="false" onAction="#hostButtonPressed" prefHeight="25.0" prefWidth="175.0" text="Host" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" onAction="#connectButtonPressed" prefHeight="25.0" prefWidth="147.0" text="Connect" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <Button mnemonicParsing="false" onAction="#hostButtonPressed" onMouseEntered="#playButtonHoverSound" prefHeight="25.0" prefWidth="175.0" text="Host" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Button mnemonicParsing="false" onAction="#connectButtonPressed" onMouseEntered="#playButtonHoverSound" prefHeight="25.0" prefWidth="147.0" text="Connect" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <GridPane.margin>
                   <Insets left="5.0" right="5.0" />
                </GridPane.margin>
@@ -58,12 +58,12 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <ToggleButton fx:id="muteMusicButton" mnemonicParsing="false" onAction="#toggleMusic" prefWidth="130.0" text="Mute Music" GridPane.halignment="RIGHT">
+                  <ToggleButton fx:id="muteMusicButton" mnemonicParsing="false" onAction="#toggleMusic" onMouseEntered="#playButtonHoverSound" prefWidth="130.0" text="Mute Music" GridPane.halignment="RIGHT">
                      <GridPane.margin>
                         <Insets left="5.0" right="5.0" />
                      </GridPane.margin>
                   </ToggleButton>
-                  <ToggleButton fx:id="muteSoundsButton" mnemonicParsing="false" onAction="#toggleSounds" prefWidth="130.0" text="Mute Sounds" GridPane.columnIndex="1">
+                  <ToggleButton fx:id="muteSoundsButton" mnemonicParsing="false" onAction="#toggleSounds" onMouseEntered="#playButtonHoverSound" prefWidth="130.0" text="Mute Sounds" GridPane.columnIndex="1">
                      <GridPane.margin>
                         <Insets left="5.0" right="5.0" />
                      </GridPane.margin>
