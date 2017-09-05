@@ -36,7 +36,9 @@ public class StartScreenController implements Initializable {
     private GameClient gameClient;
 
     public void initialize(URL url,  ResourceBundle resourceBundle) {
-
+        Sounds.stopMusic();
+        Sounds.stopSoundEffects();
+        Sounds.playMenuMusic();
         if (Sounds.isMusicMuted()) {
             muteMusicButton.setText("UnMute Music");
         } else {
@@ -47,7 +49,7 @@ public class StartScreenController implements Initializable {
         } else {
             muteSoundsButton.setText("Mute Sounds");
         }
-
+        Sounds.setMutes();
 //        gameClient = new GameClient(holder);
     }
 

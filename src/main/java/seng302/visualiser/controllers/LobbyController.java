@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -31,6 +32,10 @@ import seng302.visualiser.ClientToServerThread;
  * Created by wmu16 on 10/07/17.
  */
 public class LobbyController {
+
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
+    }
 
     public enum CloseStatus {
         LEAVE,

@@ -15,10 +15,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import seng302.model.ClientYacht;
+import seng302.utilities.Sounds;
 
 public class FinishScreenViewController implements Initializable {
 
@@ -86,5 +88,9 @@ public class FinishScreenViewController implements Initializable {
 
     public void switchToStartScreenView() {
         setContentPane("/views/StartScreenView.fxml");
+    }
+
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
     }
 }

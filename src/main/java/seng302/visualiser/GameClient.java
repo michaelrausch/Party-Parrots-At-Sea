@@ -153,8 +153,7 @@ public class GameClient {
         if (socketThread != null) {
             socketThread.setSocketToClose();
         }
-        Sounds.stopMusic();
-        Sounds.playMenuMusic();
+
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/views/StartScreenView.fxml"));
         try {
@@ -213,6 +212,9 @@ public class GameClient {
 
 
     private void loadFinishScreenView() {
+        Sounds.stopMusic();
+        Sounds.stopSoundEffects();
+        Sounds.playFinishMusic();
         FXMLLoader fxmlLoader = loadFXMLToHolder("/views/FinishScreenView.fxml");
         FinishScreenViewController controller = fxmlLoader.getController();
         controller.setFinishers(raceState.getPlayerPositions());

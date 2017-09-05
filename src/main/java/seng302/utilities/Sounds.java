@@ -24,6 +24,18 @@ public class Sounds {
         }
     }
 
+    public static void setMutes() {
+        if (soundPlayer != null) {
+            soundPlayer.setMute(soundEffectsMuted);
+        }
+        if (soundEffect != null) {
+            soundEffect.setMute(soundEffectsMuted);
+        }
+        if (musicPlayer != null) {
+            musicPlayer.setMute(musicMuted);
+        }
+    }
+
     public static void stopSoundEffects() {
         if (soundEffect != null) {
             soundEffect.stop();
@@ -71,8 +83,17 @@ public class Sounds {
     }
 
     public static void playMenuMusic() {
-        Media menuMusic = new Media(Sounds.class.getClassLoader().getResource("sounds/Elevator-music.mp3").toString());
+        Media menuMusic = new Media(
+            Sounds.class.getClassLoader().getResource("sounds/Elevator-music.mp3").toString());
         musicPlayer = new MediaPlayer(menuMusic);
+        musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        musicPlayer.play();
+    }
+
+
+    public static void playFinishMusic() {
+        Media finishMusic = new Media(Sounds.class.getClassLoader().getResource("sounds/Happy-birthday-song.mp3").toString());
+        musicPlayer = new MediaPlayer(finishMusic);
         musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         musicPlayer.play();
         musicPlayer.setMute(musicMuted);
