@@ -65,6 +65,7 @@ public class GameView extends Pane {
     private double metersPerPixelX, metersPerPixelY;
 
     final double SCALE_DELTA = 1.1;
+    private boolean isZoom = false;
 
     private Text fpsDisplay = new Text();
     private Polygon raceBorder = new CourseBoundary();
@@ -102,7 +103,7 @@ public class GameView extends Pane {
 
     private void zoomOut() {
         scaleFactor = 0.1;
-        if (this.getScaleX() > 0.5) {
+        if (this.isZoom && this.getScaleX() > 0.5) {
             this.setScaleX(this.getScaleX() - scaleFactor);
             this.setScaleY(this.getScaleY() - scaleFactor);
         }
@@ -110,7 +111,7 @@ public class GameView extends Pane {
 
     private void zoomIn() {
         scaleFactor = 0.10;
-        if (this.getScaleX() < 2.5) {
+        if (this.isZoom && this.getScaleX() < 2.5) {
             this.setScaleX(this.getScaleX() + scaleFactor);
             this.setScaleY(this.getScaleY() + scaleFactor);
         }
@@ -143,6 +144,13 @@ public class GameView extends Pane {
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
         initializeTimer();
+        this.sceneProperty().addListener(((observable, oldValue, scene) -> {
+            if (scene != null) {
+                setupZoom();
+            } else {
+                disableZoom();
+            }
+        }));
     }
 
     private void initializeTimer() {
@@ -440,17 +448,25 @@ public class GameView extends Pane {
     /**
      * Enables zoom. Has to be called after this is added to a scene.
      */
-    public void enableZoom () {
-        if (this.getScene() != null) {
-            this.getScene().addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
-                if (event.getCode() == KeyCode.Z) {
-                    zoomIn();
-                } else if (event.getCode() == KeyCode.X) {
-                    zoomOut();
-                }
-            });
-        }
+    private void setupZoom() {
+        this.getScene().addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
+            if (event.getCode() == KeyCode.Z) {
+                zoomIn();
+            } else if (event.getCode() == KeyCode.X) {
+                zoomOut();
+            }
+        });
+        enableZoom();
     }
+
+    public void enableZoom() {
+        isZoom = true;
+    }
+
+    public void disableZoom() {
+        isZoom = false;
+    }
+
     /**
      * Rescales the race to the size of the window.
      *

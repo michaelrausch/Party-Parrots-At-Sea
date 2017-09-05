@@ -11,9 +11,11 @@ public class ChatterMessage extends Message {
     private int message_size = 21;
     private String message;
 
-    public ChatterMessage(int message_type, int message_size, String message) {
+    public ChatterMessage(int message_type, String message) {
+        byte[] byteMessage = message.getBytes();
+
         this.message_type = message_type;
-        this.message_size = message_size;
+        this.message_size = byteMessage.length;
         this.message = message;
 
         setHeader(new Header(MessageType.CHATTER_TEXT, 1, (short) getSize()));
@@ -23,7 +25,7 @@ public class ChatterMessage extends Message {
         putByte((byte) MESSAGE_VERSION_NUMBER);
         putInt(message_type, 1);
         putInt(message_size, 1);
-        putBytes(message.getBytes());
+        putBytes(byteMessage);
 
         writeCRC();
         rewind();

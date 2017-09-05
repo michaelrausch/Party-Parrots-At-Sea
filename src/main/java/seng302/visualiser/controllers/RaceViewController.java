@@ -9,6 +9,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -25,6 +26,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -48,12 +50,23 @@ import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.ChatHistory;
 
 /**
  * Controller class that manages the display of a race
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+    private final int CHAT_LIMIT = 128;
+
+    @FXML
+    private Pane basePane;
+    @FXML
+    private Button chatSend;
+    @FXML
+    private Pane chatHistoryHolder;
+    @FXML
+    private TextField chatInput;
     @FXML
     private LineChart<String, Double> raceSparkLine;
     @FXML
@@ -86,6 +99,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private GameView gameView;
     private RaceState raceState;
 
+    private ChatHistory chatHistory;
+
     private Timeline timerTimeline;
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
@@ -104,10 +119,27 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         raceSparkLine.visibleProperty().setValue(false);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
-
         positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
+            if (newLen.intValue() > CHAT_LIMIT) {
+                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
+            }
+        });
+        chatHistory = new ChatHistory();
+        chatHistoryHolder.getChildren().addAll(chatHistory);
+        chatHistory.prefWidthProperty().bind(
+            chatHistoryHolder.widthProperty()
+        );
+        chatHistory.prefHeightProperty().bind(
+            chatHistoryHolder.heightProperty()
+        );
+//        chatHistory.setFitToWidth(true);
+//        chatHistory.setFitToHeight(true);
+//        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
+//            chatHistory.setScrollTop(Double.MAX_VALUE);
+//        });
     }
 
     public void loadRace (
@@ -118,12 +150,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
         this.raceState = raceState;
-
-        initializeUpdateTimer();
-        initialiseFPSCheckBox();
-        initialiseAnnotationSlider();
-        initialiseBoatSelectionComboBox();
-        initialiseSparkLine();
 
         raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
             while (c.next()) {
@@ -143,7 +169,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             gameView.updateCourse(
                 new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
-        gameView.enableZoom();
         gameView.setBoatAsPlayer(player);
         gameView.startRace();
 
@@ -158,6 +183,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         updateWindDirection(raceState.windDirectionProperty().doubleValue());
         updateWindSpeed(raceState.getWindSpeed());
         gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
+        chatInput.focusedProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue) {
+                gameView.disableZoom();
+            } else {
+                gameView.enableZoom();
+            }
+        });
+
+        initializeUpdateTimer();
+        initialiseFPSCheckBox();
+        initialiseAnnotationSlider();
+        initialiseBoatSelectionComboBox();
+        initialiseSparkLine();
     }
 
     /**
@@ -539,7 +577,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         yachtSelectionComboBox.setItems(
             FXCollections.observableArrayList(participants.values())
         );
-        //Null check is if the listener is fired but nothing selected
         yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
             if (selectedBoat != null) {
                 gameView.selectBoat(selectedBoat);
@@ -625,4 +662,24 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         gameView.updateBorder(raceData.getCourseLimit());
     }
+
+    public ReadOnlyBooleanProperty getSendPressedProperty() {
+        return chatSend.pressedProperty();
+    }
+
+    public boolean isChatInputFocused() {
+        return chatInput.focusedProperty().getValue();
+    }
+
+    public String readChatInput() {
+        String chat = chatInput.getText();
+        chatInput.clear();
+        basePane.requestFocus();
+        return chat;
+    }
+
+    public void updateChatHistory(Paint playerColour, String newMessage) {
+        Platform.runLater(() -> chatHistory.addMessage(playerColour, newMessage));
+    }
+
 }
