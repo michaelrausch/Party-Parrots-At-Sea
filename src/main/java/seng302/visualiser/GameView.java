@@ -11,6 +11,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -26,10 +28,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import seng302.model.ClientYacht;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
-import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
@@ -142,6 +142,55 @@ public class GameView extends Pane {
         gameObjects.add(raceBorder);
         gameObjects.add(markers);
         initializeTimer();
+
+        // DEBUG USE
+        gameObjects.add(new Circle(0, 0, 10, Color.RED));
+        gameObjects.add(new Circle(0, 960, 10, Color.RED));
+        gameObjects.add(new Circle(1280, 960, 10, Color.RED));
+        gameObjects.add(new Circle(1280, 0, 10, Color.RED));
+        // --------
+
+        this.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+                Number newValue) {
+                scaleFactor = (newValue.doubleValue() - 180) / canvasWidth;
+                double maxVertical = 960 * scaleFactor;
+
+                if (oldValue.doubleValue() != 0.0 && maxVertical < getScene().getHeight()) {
+                    setScaleX(scaleFactor);
+                    setScaleY(scaleFactor);
+                    setTranslateX(0 - ((1 - scaleFactor) * oldValue.doubleValue() / 2));
+                    setTranslateY(0 - ((1 - scaleFactor) * getScene().getHeight() / 2));
+                    System.out.println("Width: " + newValue);
+                    System.out.println("Scale X: " + getScaleX());
+                    System.out.println("Transition X: " + getTranslateX());
+                    System.out.println("Get Height: " + getScene().getHeight());
+                    System.out.println("Get Width: " + getScene().getWidth());
+                }
+            }
+        });
+
+        this.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+                Number newValue) {
+                scaleFactor = (newValue.doubleValue() - 40) / canvasHeight;
+                double maxHorizontal = 1530 * scaleFactor;
+
+                if (oldValue.doubleValue() != 0.0 && maxHorizontal < getScene().getWidth()) {
+                    setScaleX(scaleFactor);
+                    setScaleY(scaleFactor);
+                    setTranslateX(0 - ((1 - scaleFactor) * getScene().getWidth() / 2));
+                    setTranslateY(0 - ((1 - scaleFactor) * oldValue.doubleValue() / 2));
+                    System.out.println("Height: " + newValue);
+                    System.out.println("Scale Y: " + getScaleY());
+                    System.out.println("Transition Y: " + getTranslateY());
+                    System.out.println("Get Height: " + getScene().getHeight());
+                    System.out.println("Get Width: " + getScene().getWidth());
+                }
+            }
+        });
     }
 
     private void initializeTimer() {
@@ -440,7 +489,9 @@ public class GameView extends Pane {
      * Enables zoom. Has to be called after this is added to a scene.
      */
     public void enableZoom () {
+        System.out.println("enable zoom");
         if (this.getScene() != null) {
+            System.out.println("can zoom");
             this.getScene().addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
                 if (event.getCode() == KeyCode.Z) {
                     zoomIn();

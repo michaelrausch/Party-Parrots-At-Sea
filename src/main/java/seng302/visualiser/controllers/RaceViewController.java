@@ -25,7 +25,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -64,7 +64,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Text timerLabel;
     @FXML
-    private AnchorPane contentAnchorPane;
+    private GridPane contentAnchorPane;
     @FXML
     private Text windArrowText, windDirectionText;
     @FXML
