@@ -105,6 +105,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
+    private boolean done = false;
 
     public void initialize() {
         Sounds.stopMusic();
@@ -140,6 +141,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
 //            chatHistory.setScrollTop(Double.MAX_VALUE);
 //        });
+        done = true;
+
     }
 
     public void loadRace (
@@ -574,9 +577,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * for the combobox to take action upon selection
      */
     private void initialiseBoatSelectionComboBox() {
-        yachtSelectionComboBox.setItems(
-            FXCollections.observableArrayList(participants.values())
-        );
+        ObservableList<ClientYacht> selectables = FXCollections.observableArrayList(participants.values());
+        yachtSelectionComboBox.setItems(selectables);
         yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
             if (selectedBoat != null) {
                 gameView.selectBoat(selectedBoat);

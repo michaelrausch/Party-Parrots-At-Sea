@@ -4,6 +4,8 @@ import java.util.Arrays;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Background;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -22,8 +24,13 @@ public class ChatHistory extends ScrollPane {
         this.setFitToHeight(true);
         this.setMaxHeight(Double.MAX_VALUE);
         this.setMaxWidth(Double.MAX_VALUE);
-        this.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+        this.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
         this.setHbarPolicy(ScrollBarPolicy.NEVER);
+        this.lookup(".scroll-pane").setStyle("-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1);");
+
+        this.textFlow.setStyle(
+            "-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1);"
+        );
         //This makes the window auto scroll.
         textFlow.getChildren().addListener((ListChangeListener<Node>) c ->
             this.setVvalue(1.0)
