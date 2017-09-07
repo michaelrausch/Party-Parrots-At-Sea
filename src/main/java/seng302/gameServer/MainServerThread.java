@@ -1,14 +1,26 @@
 package seng302.gameServer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import seng302.gameServer.messages.*;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
+import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.XMLGenerator;
+import seng302.utilities.XMLParser;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -37,6 +49,42 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private ServerSocket serverSocket = null;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
+    private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
+
+    private void startAdvertisingServer(){
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db;
+        Document doc;
+        XMLGenerator generator = new XMLGenerator();
+
+        try {
+            db = dbf.newDocumentBuilder();
+            String regatta = generator.getRegattaAsXml();
+            StringReader stringReader = new StringReader(regatta);
+            InputSource is = new InputSource(stringReader);
+            doc = db.parse(is);
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            logger.warn("Couldn't load race regatta");
+            return;
+        }
+
+        RegattaXMLData regattaXMLData = XMLParser.parseRegatta(doc);
+
+        Integer spacesLeft = GameState.getSpacesLeft();
+
+        // No spaces left on server
+        if (spacesLeft < 1){
+            return;
+        }
+
+        // Start advertising server
+        try{
+            ServerAdvertiser.getInstance().setMapName(regattaXMLData.getCourseName()).setSpacesLeft(spacesLeft);
+            ServerAdvertiser.getInstance().registerGame(PORT, regattaXMLData.getRegattaName());
+        } catch (IOException e) {
+            logger.warn("Could not register server");
+        }
+    }
 
     public MainServerThread() {
         new GameState("localhost");
@@ -45,6 +93,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         } catch (IOException e) {
             serverLog("IO error in server thread handler upon trying to make new server socket", 0);
         }
+
+        startAdvertisingServer();
+
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
         GameState.addMarkPassListener(this::broadcastMessage);
         terminated = false;
@@ -176,6 +227,12 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             }
         });
         serverToClientThread.addDisconnectListener(this::clientDisconnected);
+
+        try {
+            ServerAdvertiser.getInstance().setSpacesLeft(GameState.getSpacesLeft());
+        } catch (IOException e) {
+            logger.warn("Couldn't update advertisement");
+        }
     }
 
     /**
@@ -202,10 +259,23 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             }
         }
         serverToClientThreads.remove(closedConnection);
+
+        try {
+            ServerAdvertiser.getInstance().setSpacesLeft(GameState.getSpacesLeft());
+        } catch (IOException e) {
+            logger.warn("Couldn't update advertisement");
+        }
+
         closedConnection.terminate();
     }
 
     public void startGame() {
+        try {
+            ServerAdvertiser.getInstance().unregister();
+        } catch (IOException e) {
+            logger.warn("Error unregistered server");
+        }
+
         initialiseBoatPositions();
         Timer t = new Timer();
 

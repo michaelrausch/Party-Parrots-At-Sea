@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXButton;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -14,6 +15,26 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import seng302.gameServer.ServerAdvertiser;
+import seng302.gameServer.ServerDescription;
+import seng302.visualiser.GameClient;
+import seng302.visualiser.ServerListener;
+import seng302.visualiser.ServerListenerDelegate;
+
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class StartScreenController implements Initializable {
 
@@ -26,6 +47,38 @@ public class StartScreenController implements Initializable {
     private Node serverList;
 
     private Logger logger = LoggerFactory.getLogger(StartScreenController.class);
+    public void initialize(URL url,  ResourceBundle resourceBundle) {
+//        gameClient = new GameClient(holder);
+
+        try {
+            ServerListener.getInstance().setDelegate(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        joinLobbyButton.setOnAction(event -> joinLobbyClicked());
+    }
+//
+//    /**
+//     * Loads the fxml content into the parent pane
+//     * @param jfxUrl
+//     * @return the controller of the fxml
+//     */
+//    private Object setContentPane(String jfxUrl) {
+//        try {
+//            AnchorPane contentPane = (AnchorPane) startScreen2.getParent();
+//            contentPane.getChildren().removeAll();
+//            contentPane.getChildren().clear();
+//            contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(jfxUrl));
+//            contentPane.getChildren().addAll((Pane) fxmlLoader.load());
+//
+//            return fxmlLoader.getController();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
     private void setInitialDropShadow(){
         DropShadow dropShadow = new DropShadow();

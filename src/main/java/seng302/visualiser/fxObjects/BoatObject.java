@@ -1,7 +1,5 @@
 package seng302.visualiser.fxObjects;
 
-import java.util.ArrayList;
-import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -13,6 +11,9 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.transform.Rotate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -130,6 +131,7 @@ public class BoatObject extends Group {
      * @param rotation The rotation by which the boat moves
      * @param velocity The velocity the boat is moving
      * @param sailIn Boolean to toggle sail state.
+     * @param windDir .
      */
     public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn, double windDir) {
         Double dx = Math.abs(boatPoly.getLayoutX() - x);

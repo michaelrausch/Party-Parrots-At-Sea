@@ -22,6 +22,7 @@ public class MarkRoundingMessage extends Message{
      * @param roundingBoatStatus roundingBoatStatus
      * @param roundingSide roundingSide
      * @param markId markId
+     * @param markType .
      */
     public MarkRoundingMessage(int ackNumber, int raceId, int sourceId, RoundingBoatStatus roundingBoatStatus,
         RoundingSide roundingSide, MarkType markType, int markId) {

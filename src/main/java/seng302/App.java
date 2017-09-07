@@ -8,14 +8,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.visualiser.controllers.ViewManager;
+import seng302.gameServer.ServerAdvertiser;
+
+import java.io.IOException;
 
 public class App extends Application {
 
@@ -86,6 +85,21 @@ public class App extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+        primaryStage.setOnCloseRequest(e -> {
+//            ClientPacketParser.appClose();
+//            ClientPacketParser.appClose();
+
+
+            try {
+                ServerAdvertiser.getInstance().unregister();
+            } catch (IOException e1) {
+                logger.warn("Could not un-register game");
+            }
+
+            System.exit(0);
+        });
+
+//        ClientState.primaryStage = primaryStage;
         primaryStage.setOnCloseRequest(e -> System.exit(0));
     }
 
@@ -94,6 +108,8 @@ public class App extends Application {
             parseArgs(args);
         } catch (ParseException e) {
             logger.error("Could not parse command line arguments");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         launch(args);
