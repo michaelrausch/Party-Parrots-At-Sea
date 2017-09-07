@@ -87,6 +87,7 @@ public class FinishScreenViewController implements Initializable {
     }
 
     public void switchToStartScreenView() {
+        Sounds.playButtonClick();
         setContentPane("/views/StartScreenView.fxml");
     }
 
