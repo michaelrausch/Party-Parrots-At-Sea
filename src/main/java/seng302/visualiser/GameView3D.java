@@ -52,7 +52,7 @@ public class GameView3D {
         Sphere bottom = new Sphere(1);
         bottom.setMaterial(new PhongMaterial(Color.BLANCHEDALMOND));
         bottom.getTransforms().add(new Translate(0, Math.tan(Math.toRadians(FOV / 2)) * DEFAULT_CAMERA_DEPTH, 0));
-        
+
         Node boat = ModelFactory.boatGameView(BoatMeshType.DINGHY, Color.BLUE).getAssets();
         Node boat2 = ModelFactory.boatGameView(BoatMeshType.DINGHY, Color.BROWN).getAssets();
         boat2.getTransforms().add(new Translate(0,20, 0));
