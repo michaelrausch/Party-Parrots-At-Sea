@@ -40,17 +40,17 @@ public class test3d extends Application {
         primaryStage.show();
 
         StlMeshImporter importer = new StlMeshImporter();
-        importer.read(test3d.class.getResource("/meshes/high_poly_boat.stl").toString());
+        importer.read(test3d.class.getResource("/meshes/dinghy_hull.stl").toString());
         MeshView boat = new MeshView(importer.getImport());
         boat.setMaterial(new PhongMaterial(Color.GREENYELLOW));
 
         importer = new StlMeshImporter();
-        importer.read(getClass().getResource("/meshes/boat-mast.stl").toString());
+        importer.read(getClass().getResource("/meshes/dinghy_mast.stl").toString());
         MeshView mast = new MeshView(importer.getImport());
         mast.setMaterial(new PhongMaterial(Color.GREENYELLOW));
 
         importer = new StlMeshImporter();
-        importer.read(getClass().getResource("/meshes/sail_centered.stl").toString());
+        importer.read(getClass().getResource("/meshes/dinghy_sail.stl").toString());
         MeshView sail = new MeshView(importer.getImport());
         sail.setMaterial(new PhongMaterial(Color.LIGHTGREY));
 
@@ -97,6 +97,6 @@ public class test3d extends Application {
             }
         };
 
-        animationTimer.start();
+//        animationTimer.start();
     }
 }
