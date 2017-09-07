@@ -1,4 +1,4 @@
-package seng302.visualiser.map;
+package seng302.visualiser;
 
 import javafx.scene.Camera;
 import javafx.scene.Group;
