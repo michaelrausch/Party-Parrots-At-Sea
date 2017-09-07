@@ -20,8 +20,6 @@ import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoundingBoatStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -31,11 +29,9 @@ import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 
 /**
@@ -89,16 +85,6 @@ public class GameState implements Runnable {
     private static List<NewMessageListener> markListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
-    /*
-        Ideally I would like to make this class an object instantiated by the server and given to
-        it's created threads if necessary. Outside of that I think the dependencies on it
-        (atm only Yacht & GameClient) can be removed from most other classes. The observable list of
-        players could be pulled directly from the server by the GameClient since it instantiates it
-        and it is reasonable for it to pull data. The current setup of publicly available statics is
-        pretty meh IMO because anything can change it making it unreliable and like people did with
-        the old ServerParser class everything that needs shared just gets thrown in the static
-        collections and things become a real mess.
-     */
 
     public GameState(String hostIpAddress) {
         windDirection = 180d;

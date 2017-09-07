@@ -26,23 +26,15 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import seng302.gameServer.GameState;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.model.ClientYacht;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
-import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
-import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.XMLGenerator;
 import seng302.visualiser.fxObjects.AnnotationBox;
 import seng302.visualiser.fxObjects.BoatObject;
 import seng302.visualiser.fxObjects.CourseBoundary;
@@ -813,13 +805,8 @@ public class GameView extends Pane {
         playerYacht.addMarkRoundingListener(this::updateMarkArrows);
     }
 
-    private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
+    private void updateMarkArrows (ClientYacht yacht, int legNumber) {
         //Only show arrows for this and next leg.
-        if (compoundMark != null) {
-            for (Mark mark : compoundMark.getMarks()) {
-                markerObjects.get(mark).showNextExitArrow();
-            }
-        }
         CompoundMark nextMark = null;
         if (legNumber < course.size() - 1) {
             nextMark = course.get(legNumber);
@@ -832,6 +819,14 @@ public class GameView extends Pane {
             if (lastMark != nextMark) {
                 for (Mark mark : lastMark.getMarks()) {
                     markerObjects.get(mark).hideAllArrows();
+                }
+            }
+        }
+        if (legNumber - 1 >= 0) {
+            CompoundMark thisMark = course.get(Math.max(0, legNumber - 1));
+            if (thisMark != nextMark) {
+                for (Mark mark : thisMark.getMarks()) {
+                    markerObjects.get(mark).showNextExitArrow();
                 }
             }
         }

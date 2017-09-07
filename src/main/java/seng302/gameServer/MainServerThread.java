@@ -259,10 +259,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
      * Initialise boats to specific spaced out geopoints behind starting line.
      */
     private void initialiseBoatPositions() {
-        // Getting the start line compound marks
-//        if (gameClient== null) {
-//            return;
-//        }
         CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
         GeoPoint startMark1 = cm.getSubMark(1);
         GeoPoint startMark2 = cm.getSubMark(2);

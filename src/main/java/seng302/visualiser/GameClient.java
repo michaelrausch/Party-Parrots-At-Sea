@@ -28,7 +28,6 @@ import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.model.token.Token;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.FinishScreenViewController;
@@ -334,7 +333,6 @@ public class GameClient {
         if (allXMLReceived()) {
             ClientYacht clientYacht = allBoatsMap.get(roundingData.getBoatId());
             clientYacht.roundMark(
-                courseData.getCompoundMarks().get(roundingData.getMarkId()),
                 roundingData.getTimeStamp(),
                 raceState.getRaceTime() - roundingData.getTimeStamp()
             );
