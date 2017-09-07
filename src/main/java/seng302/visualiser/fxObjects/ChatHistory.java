@@ -40,8 +40,8 @@ public class ChatHistory extends ScrollPane {
 
     /**
      * Adds a message to chat history. Messages should be either of the form:
-     * "[HH:MM:ss] \<player_name\>: \<message_text\>" or
-     * "SERVER: \<message_text\>"
+     * "[HH:MM:ss] player_name: message_text" or
+     * "SERVER: message_text"
      * @param colour The colour of the user sending the message
      * @param Text The chatter text message to be displayed
      */
