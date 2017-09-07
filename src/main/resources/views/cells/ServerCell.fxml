@@ -51,7 +51,7 @@
                      <Label fx:id="mapName" text="Party parrots in space" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                  </children>
              </GridPane>
-             <JFXButton fx:id="serverConnButton" buttonType="RAISED" onAction="#createServer" prefHeight="39.0" prefWidth="123.0" text="JOIN GAME" GridPane.columnIndex="3" />
+             <JFXButton fx:id="serverConnButton" buttonType="RAISED" prefHeight="39.0" prefWidth="123.0" text="JOIN GAME" GridPane.columnIndex="3" />
              <Label fx:id="serverPlayerCount" text="2/8 Players" GridPane.columnIndex="2" />
          </children>
       </GridPane>

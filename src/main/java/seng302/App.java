@@ -86,9 +86,6 @@ public class App extends Application {
         primaryStage.show();
 
         primaryStage.setOnCloseRequest(e -> {
-//            ClientPacketParser.appClose();
-//            ClientPacketParser.appClose();
-
 
             try {
                 ServerAdvertiser.getInstance().unregister();
@@ -108,8 +105,6 @@ public class App extends Application {
             parseArgs(args);
         } catch (ParseException e) {
             logger.error("Could not parse command line arguments");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         launch(args);

@@ -1,5 +1,10 @@
 #serverListCell {
     -fx-background-color: -fx-pp-front-color;
+    -fx-effect: -fx-pp-dropshadow-light;
+}
+
+#serverListCell:hover {
+    -fx-effect: -fx-pp-dropshadow-dark;
 }
 
 #serverCellVBox {

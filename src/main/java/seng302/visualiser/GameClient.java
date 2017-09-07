@@ -16,6 +16,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
+import seng302.gameServer.ServerDescription;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.model.ClientYacht;
@@ -34,6 +35,7 @@ import seng302.visualiser.controllers.FinishScreenViewController;
 import seng302.visualiser.controllers.LobbyController_old;
 import seng302.visualiser.controllers.LobbyController_old.CloseStatus;
 import seng302.visualiser.controllers.RaceViewController;
+import seng302.visualiser.controllers.ViewManager;
 
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
@@ -72,30 +74,43 @@ public class GameClient {
     public void runAsClient(String ipAddress, Integer portNumber) {
         try {
             startClientToServerThread(ipAddress, portNumber);
-            socketThread.addDisconnectionListener((cause) -> {
-                showConnectionError(cause);
-                Platform.runLater(this::loadStartScreen);
-            });
+
+//            socketThread.addDisconnectionListener((cause) -> {
+//                showConnectionError(cause);
+//                Platform.runLater(this::loadStartScreen);
+//            });
+
+
             socketThread.addStreamObserver(this::parsePackets);
-            LobbyController_old lobbyController = loadLobby();
-            lobbyController.setSocketThread(socketThread);
-            lobbyController.setPlayerID(socketThread.getClientId());
-            lobbyController.setPlayerListSource(clientLobbyList);
-            lobbyController.disableReadyButton();
+
+            ViewManager.getInstance().setPlayerList(clientLobbyList);
+
             if (regattaData != null){
-                lobbyController.setTitle(regattaData.getRegattaName());
-                lobbyController.setCourseName(regattaData.getCourseName());
+                ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
+                ViewManager.getInstance().setProperty("mapName", regattaData.getCourseName());
             }
             else{
-                lobbyController.setTitle(ipAddress);
-                lobbyController.setCourseName("");
+                ViewManager.getInstance().setProperty("serverName", ipAddress);
+                ViewManager.getInstance().setProperty("mapName", "");
             }
 
-            lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
-            this.lobbyController = lobbyController;
+
+            // TODO disable ready button;
+
+
+            //LobbyController_old lobbyController = loadLobby();
+            //lobbyController.setSocketThread(socketThread);
+            //lobbyController.setPlayerID(socketThread.getClientId());
+            //lobbyController.setPlayerListSource(clientLobbyList);
+            //lobbyController.disableReadyButton();
+
+
+
+//            lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
+//            this.lobbyController = lobbyController;
         } catch (IOException ioe) {
             showConnectionError("Unable to find server");
-            Platform.runLater(this::loadStartScreen);
+            //Platform.runLater(this::loadStartScreen);
         }
     }
 
@@ -104,41 +119,32 @@ public class GameClient {
      * @param ipAddress IP to connect to.
      * @param portNumber Port to connect to.
      */
-    public void runAsHost(String ipAddress, Integer portNumber) {
+    public ServerDescription runAsHost(String ipAddress, Integer portNumber) {
         server = new MainServerThread();
-        try {
-            startClientToServerThread(ipAddress, portNumber);
-            socketThread.addDisconnectionListener((cause) -> {
-                Platform.runLater(this::loadStartScreen);
-            });
-            LobbyController_old lobbyController = loadLobby();
-            lobbyController.setSocketThread(socketThread);
-            lobbyController.setPlayerID(socketThread.getClientId());
-            lobbyController.setPlayerListSource(clientLobbyList);
-            if (regattaData != null) {
-                lobbyController.setTitle("Hosting: " + regattaData.getRegattaName());
-                lobbyController.setCourseName(regattaData.getCourseName());
-            } else {
-                lobbyController.setTitle("Hosting: " + ipAddress);
-                lobbyController.setCourseName("");
-            }
 
-            lobbyController.addCloseListener(exitCause -> {
-                if (exitCause == CloseStatus.READY) {
-                    GameState.resetStartTime();
-                    lobbyController.disableReadyButton();
-                    server.startGame();
-                } else if (exitCause == CloseStatus.LEAVE) {
-                    server.terminate();
-                    server = null;
-                    loadStartScreen();
-                }
-            });
-            this.lobbyController = lobbyController;
-        } catch (IOException ioe) {
+        try {
+            startClientToServerThread(ipAddress, 4942);
+        } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
-            Platform.runLater(this::loadStartScreen);
         }
+
+        String serverName = "";
+        String courseName = "";
+
+        while (regattaData == null){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        ViewManager.getInstance().setPlayerList(clientLobbyList);
+
+        serverName = regattaData.getRegattaName();
+        courseName = regattaData.getCourseName();
+
+        return new ServerDescription(serverName, courseName, 0, ipAddress, 4942);
     }
 
     private void loadStartScreen() {

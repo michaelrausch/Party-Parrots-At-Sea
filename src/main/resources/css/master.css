@@ -10,6 +10,9 @@
     -fx-pp-background-color: transparent;
     -fx-pp-front-color: #fff;
     -fx-font-family: "Baloo Tammudu";
+
+    -fx-pp-dropshadow-light: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10.0, 0.2, 3, 4);
+    -fx-pp-dropshadow-dark: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10.0, 0.2, 5, 6);
 }
 
 .jfx-text-field {

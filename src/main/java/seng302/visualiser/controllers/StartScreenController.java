@@ -36,7 +36,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class StartScreenController implements Initializable {
+public class StartScreenController implements Initializable{
 
     @FXML
     private Label headText;
@@ -47,38 +47,8 @@ public class StartScreenController implements Initializable {
     private Node serverList;
 
     private Logger logger = LoggerFactory.getLogger(StartScreenController.class);
-    public void initialize(URL url,  ResourceBundle resourceBundle) {
-//        gameClient = new GameClient(holder);
 
-        try {
-            ServerListener.getInstance().setDelegate(this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        joinLobbyButton.setOnAction(event -> joinLobbyClicked());
-    }
-//
-//    /**
-//     * Loads the fxml content into the parent pane
-//     * @param jfxUrl
-//     * @return the controller of the fxml
-//     */
-//    private Object setContentPane(String jfxUrl) {
-//        try {
-//            AnchorPane contentPane = (AnchorPane) startScreen2.getParent();
-//            contentPane.getChildren().removeAll();
-//            contentPane.getChildren().clear();
-//            contentPane.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(jfxUrl));
-//            contentPane.getChildren().addAll((Pane) fxmlLoader.load());
-//
-//            return fxmlLoader.getController();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    private List<ServerDescription> servers;
 
     private void setInitialDropShadow(){
         DropShadow dropShadow = new DropShadow();
@@ -114,5 +84,8 @@ public class StartScreenController implements Initializable {
 
         setInitialDropShadow();
         preloadServerListView();
+
+
     }
+
 }

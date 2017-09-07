@@ -33,7 +33,7 @@
                 </GridPane>
                 <GridPane>
                     <children>
-                        <Label text="Party Parrots In Space" GridPane.valignment="CENTER">
+                        <Label text="Party Parrots In Space" GridPane.valignment="CENTER" fx:id="serverName">
                             <font>
                                 <Font size="31.0" />
                             </font>
@@ -41,7 +41,7 @@
                                 <Insets left="35.0" top="10.0" />
                             </padding>
                         </Label>
-                        <Label text="This is a map, it's called Haoming" GridPane.rowIndex="1">
+                        <Label text="This is a map, it's called Haoming" GridPane.rowIndex="1" fx:id="mapName">
                             <padding>
                                 <Insets left="35.0" top="-15.0" />
                             </padding>
