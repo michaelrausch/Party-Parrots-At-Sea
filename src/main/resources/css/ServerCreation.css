@@ -1,0 +1,26 @@
+#submitBtn {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-font-size: 20px;
+}
+
+#hostDialogHeader {
+    -fx-font-size: 30px;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+
+#serverName {
+    -jfx-focus-color: -fx-pp-dark-text-color;
+    -jfx-unfocus-color: -fx-pp-dark-text-color;
+    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-prompt-text-fill: -fx-pp-dark-text-color;
+}
+
+#maxPlayerLabel {
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#maxPlayers .thumb, #maxPlayers .track {
+    -fx-background-color: -fx-pp-theme-color;
+}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.net.*?>
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.BoatCustomizeController">
+    <children>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="90.0" minHeight="90.0" prefHeight="90.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="100.0" minHeight="100.0" prefHeight="100.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="125.0" minHeight="61.0" prefHeight="61.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="164.0" minHeight="100.0" prefHeight="164.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <Label fx:id="hostDialogHeader" text="Customize Boat..." GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                <JFXButton fx:id="submitBtn" prefHeight="45.0" prefWidth="220.0" text="Customize Boat" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
+            <JFXTextField fx:id="boatName" promptText="Boat Name" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets left="30.0" right="30.0" />
+               </GridPane.margin></JFXTextField>
+            <GridPane GridPane.rowIndex="2">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="139.0" minWidth="10.0" prefWidth="89.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="203.0" minWidth="10.0" prefWidth="203.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints maxHeight="69.0" minHeight="10.0" percentHeight="60.0" prefHeight="19.6" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label fx:id="hostDialogHeader1" prefHeight="25.0" prefWidth="96.0" text="Boat Color">
+                     <GridPane.margin>
+                        <Insets top="-10.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <JFXColorPicker fx:id="colorPicker" onAction="#colorChanged" GridPane.columnIndex="1">
+                     <GridPane.margin>
+                        <Insets top="-10.0" />
+                     </GridPane.margin>
+                  </JFXColorPicker>
+               </children>
+               <GridPane.margin>
+                  <Insets left="30.0" right="30.0" />
+               </GridPane.margin>
+            </GridPane>
+            </children>
+        </GridPane>
+    </children>
+   <stylesheets>
+      <String fx:value="/css/ServerCreation.css" />
+      <String fx:value="/css/master.css" />
+   </stylesheets>
+</JFXDialogLayout>

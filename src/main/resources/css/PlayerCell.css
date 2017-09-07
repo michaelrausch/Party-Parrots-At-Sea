@@ -1,0 +1,12 @@
+#playerName {
+    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-font-size: 18px;
+}
+
+#playerListCell {
+    -fx-background-color: -fx-pp-front-color;
+}
+
+#playerCellVBox {
+    -fx-background-color: -fx-pp-background-color;
+}

@@ -1,201 +1,78 @@
-/**
-Background colours
- */
-.background-blue{
-    -fx-background-color: #119796;
+@font-face {
+    src: url("BalooTammudu-Regular.ttf");
 }
 
-.background-dark{
-    -fx-background-color: #2C2c36;
+* {
+    -fx-pp-light-text-color: #fff;
+    -fx-pp-dark-text-color: #6c6c6c;
+    -fx-pp-theme-color: #3493e3;
+    -fx-pp-light-theme-color: #38a2fa;
+    -fx-pp-background-color: transparent;
+    -fx-pp-front-color: #fff;
+    -fx-font-family: "Baloo Tammudu";
 }
 
-/**
-Exit button with no background
- */
-.clear-exit-btn{
-    -fx-background-insets: 0;
-    -fx-background-color:  #119796;
-    -fx-border-style: none;
+.jfx-text-field {
+    -jfx-label-float: true;
 }
 
-/**
-Buttons
- */
-.blue-ui-btn{
-    -fx-background-color: #119796;
-    -fx-text-fill: #fff;
+.jfx-decorator {
+    -fx-decorator-color: -fx-pp-theme-color;
 }
 
-.text-white {
-    -fx-text-fill: white !important;
-    -fx-fill:white !important;
+.jfx-decorator .jfx-decorator-buttons-container {
+    -fx-background-color: -fx-decorator-color;
 }
 
-/**
-Sliders
- */
-.ui-slider .thumb {
-    -fx-background-color: rgb(60, 60, 60);
-    -fx-border-radius: 10;
-    -fx-border-color: darkgray;
+.jfx-decorator .resize-border {
+    -fx-border-color: -fx-decorator-color;
+    -fx-border-width: 0 4 4 4;
 }
+/********* customised scroll bar for scroll pane ***********/
 
-.ui-slider .track{
-    -fx-background-color: #119796;
-}
-
-.ui-slider .axis{
-    -fx-tick-label-fill: white;
-}
-
-.ui-slider .axis .axis-label{
-    -fx-text-fill: white;
-}
-
-/**
-Checkbox
- */
-.ui-checkbox .box{
+/* The main scrollbar **track** CSS class  */
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track {
     -fx-background-color: white;
-    -fx-graphic:none;
-    -fx-shape: none;
+    -fx-border-color: derive(-fx-pp-background-color, 50%);
+    -fx-border-style: solid;
+    -fx-border-width: 3px;
+    -fx-background-radius: 0em;
+    -fx-border-radius: 0em;
 }
 
-.ui-checkbox .box .mark{
-    -fx-background-image: none;
-    -fx-image: none;
-    -fx-graphic: none;
-    -fx-shape: none;
-}
-
-.ui-checkbox:selected .box{
-    -fx-background-color: #119796;
-    -fx-shape: none;
-}
-
-.ui-checkbox:selected .box .mark{
-    -fx-background-color: #119796;
-    -fx-shape: none;
-    -fx-graphic: none;
-}
-
-/**
-Table
- */
-.ui-table{
+/* The increment and decrement button CSS class of scrollbar */
+.scroll-bar:horizontal .increment-button,
+.scroll-bar:horizontal .decrement-button {
     -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 0 10 0;
 }
 
-.ui-table:focused{
+/* The increment and decrement button CSS class of scrollbar */
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
     -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 10 0 10; /* set scroll bar width */
+
 }
 
-.ui-table .column-header-background{
-    -fx-background-color: white
-}
-
-.ui-table .column-header-background .label{
-    -fx-background-color: transparent;
-    -fx-text-fill: black;
-}
-
-/*server thread */
-.ui-table .column-header {
-    -fx-background-color: transparent;
-}
-
-.ui-table .table-cell{
-    -fx-text-fill: white;
-    -fx-border-style: none;
-}
-
-.table-row-cell{
-    -fx-background-color: #119796;
-    -fx-background-insets: 0, 0 0 1 0;
-    -fx-padding: 0.0em; /* 0 */
-    -fx-border-style: none;
-}
-
-.table-row-cell:odd{
-    -fx-background-color: #0e6d6c;
-    -fx-background-insets: 0, 0 0 1 0;
-    -fx-padding: 0.0em; /* 0 */
-    -fx-border-style: none;
-}
-
-.table-row-cell:selected {
-    -fx-background-color: #005797;
-    -fx-background-insets: 0;
-    -fx-border-style: none;
-}
-
-
-/**
-Combo Box
- */
-
-.combo-box-base {
-    -fx-background-color: #119796;
-    -fx-text-fill: white;
-}
-
-.combo-box-popup .list-view .list-cell:hover {
-    -fx-text-fill: white;
-}
-
-.combo-box .cell:selected {
-    -fx-text-fill: white;
-}
-
-/**
-Remove scroll bars
- */
-.ui-table *.scroll-bar:horizontal *.increment-button,
-.ui-table *.scroll-bar:horizontal *.decrement-button {
-    -fx-background-color: null;
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: " ";
     -fx-padding: 0;
 }
 
-.ui-table *.scroll-bar:horizontal *.increment-arrow,
-.ui-table *.scroll-bar:horizontal *.decrement-arrow {
-    -fx-background-color: null;
-    -fx-background-radius: 0;
+/* The main scrollbar **thumb** CSS class which we drag every time (movable) */
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color: derive(#c9c9cb, 0%);
+    -fx-background-insets: 2, 0, 0;
+    -fx-background-radius: 0em;
+}
+
+.scroll-bar {
     -fx-background-insets: 0;
-    -fx-padding: 0;
-    -fx-shape: null;
-}
-
-.ui-table *.scroll-bar:vertical *.increment-arrow,
-.ui-table *.scroll-bar:vertical *.decrement-arrow {
-    -fx-background-color: #0e6d6c;
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
-    -fx-padding: 0;
-    -fx-shape: null;
-}
-
-.ui-table *.scroll-bar:vertical *.increment-button,
-.ui-table *.scroll-bar:vertical *.decrement-button {
-    -fx-background-color: #0e6d6c;
-    -fx-background-radius: 0;
-    -fx-background-insets: 0;
-    -fx-padding: 0;
-}
-
-.chart{
-}
-
-.chart-title {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 1.6em;
-}
-
-.axis-label {
-    -fx-text-fill: #ffffff;
-}
-
-.axis {
-    -fx-tick-label-fill: #ffffff;
 }

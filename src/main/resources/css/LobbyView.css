@@ -1,0 +1,65 @@
+#serverListMainGridPane {
+    -fx-background-color: -fx-pp-background-color;
+}
+
+.scroll-pane {
+    -fx-background: -fx-pp-background-color;
+    -fx-border-style: hidden;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.scroll-pane:focused {
+    -fx-background-insets: 0;
+}
+
+.scroll-pane .corner {
+    -fx-background-insets: 0;
+}
+
+#playerListVBox, #playerListScrollPane {
+    -fx-background: transparent;
+}
+
+
+#customizeButton, #leaveLobbyButton, #beginRaceButton {
+    -fx-background-color: -fx-pp-light-text-color; /* inverted */
+    -fx-text-fill: -fx-pp-theme-color; /* inverted */
+    -fx-font-size: 16px;
+}
+
+#connectLabel, #serverPortNumber, #serverHostName {
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-font-size: 16px;
+}
+
+#serverHostName, #serverPortNumber {
+    -jfx-focus-color: -fx-pp-light-text-color;
+    -jfx-unfocus-color: -fx-pp-light-text-color;
+}
+
+#connectGridPane {
+    -fx-background-color: -fx-pp-theme-color;
+}
+
+#serverListMainGridPane {
+    -fx-background-image: url("/images/waves.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+}
+
+#playerList, #playerListScrollPane {
+    -fx-background-color: transparent;
+}
+
+.invertedButton {
+    -fx-background-color: -fx-pp-light-text-color; /* inverted */
+    -fx-text-fill: -fx-pp-theme-color; /* inverted */
+    -fx-font-size: 16px;
+}
+
+#serverMap {
+    -fx-background-image: url("/images/bg.jpg");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+}

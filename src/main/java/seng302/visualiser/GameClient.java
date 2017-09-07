@@ -31,8 +31,8 @@ import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.FinishScreenViewController;
-import seng302.visualiser.controllers.LobbyController;
-import seng302.visualiser.controllers.LobbyController.CloseStatus;
+import seng302.visualiser.controllers.LobbyController_old;
+import seng302.visualiser.controllers.LobbyController_old.CloseStatus;
 import seng302.visualiser.controllers.RaceViewController;
 
 /**
@@ -51,7 +51,7 @@ public class GameClient {
     private RegattaXMLData regattaData;
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
-    private LobbyController lobbyController;
+    private LobbyController_old lobbyController;
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
@@ -77,7 +77,7 @@ public class GameClient {
                 Platform.runLater(this::loadStartScreen);
             });
             socketThread.addStreamObserver(this::parsePackets);
-            LobbyController lobbyController = loadLobby();
+            LobbyController_old lobbyController = loadLobby();
             lobbyController.setSocketThread(socketThread);
             lobbyController.setPlayerID(socketThread.getClientId());
             lobbyController.setPlayerListSource(clientLobbyList);
@@ -111,7 +111,7 @@ public class GameClient {
             socketThread.addDisconnectionListener((cause) -> {
                 Platform.runLater(this::loadStartScreen);
             });
-            LobbyController lobbyController = loadLobby();
+            LobbyController_old lobbyController = loadLobby();
             lobbyController.setSocketThread(socketThread);
             lobbyController.setPlayerID(socketThread.getClientId());
             lobbyController.setPlayerListSource(clientLobbyList);
@@ -176,7 +176,7 @@ public class GameClient {
      *
      * @return the lobby controller.
      */
-    private LobbyController loadLobby() {
+    private LobbyController_old loadLobby() {
         FXMLLoader fxmlLoader = new FXMLLoader(
             GameClient.class.getResource("/views/LobbyView.fxml"));
         try {

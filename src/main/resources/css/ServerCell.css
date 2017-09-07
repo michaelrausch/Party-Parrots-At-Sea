@@ -1,0 +1,25 @@
+#serverListCell {
+    -fx-background-color: -fx-pp-front-color;
+}
+
+#serverCellVBox {
+    -fx-background-color: -fx-pp-background-color;
+}
+
+#serverConnButton {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-pp-light-text-color;
+}
+
+#serverName, #serverPlayerCount, #mapName {
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#serverName {
+    -fx-font-size: 20px;
+}
+
+#serverPlayerCount, #mapName {
+    -fx-font-size:14px;
+}

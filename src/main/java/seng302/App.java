@@ -1,6 +1,7 @@
 package seng302;
 
 import ch.qos.logback.classic.Level;
+import com.jfoenix.controls.JFXDecorator;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,7 +15,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.model.PolarTable;
+import seng302.visualiser.controllers.ViewManager;
 
 public class App extends Application {
 
@@ -68,24 +69,24 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
-        primaryStage.setTitle("RaceVision");
-        Scene scene = new Scene(root, 1530, 960);
-        scene.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-        primaryStage.setScene(scene);
-//        primaryStage.setMaxWidth(1530);
-//        primaryStage.setMaxHeight(960);
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
-//        primaryStage.setMaximized(true);
+        primaryStage.setTitle("Party Parrots At Sea");
 
+        JFXDecorator decorator = new JFXDecorator(primaryStage, root,false, true, true);
+        decorator.setCustomMaximize(true);
+        decorator.applyCss();
+        decorator.getStylesheets()
+                .add(getClass().getResource("/css/master.css").toExternalForm());
+
+        ViewManager.getInstance().setDecorator(decorator);
+
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
+        Scene scene = new Scene(decorator, 1200, 800);
+        primaryStage.setMinHeight(800);
+        primaryStage.setMinWidth(1200);
+        primaryStage.setScene(scene);
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(e -> {
-//            ClientPacketParser.appClose();
-//            ClientPacketParser.appClose();
-            System.exit(0);
-        });
-
-//        ClientState.primaryStage = primaryStage;
+        primaryStage.setOnCloseRequest(e -> System.exit(0));
     }
 
     public static void main(String[] args) {

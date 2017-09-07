@@ -85,6 +85,6 @@ public class FinishScreenViewController implements Initializable {
     }
 
     public void switchToStartScreenView() {
-        setContentPane("/views/StartScreenView.fxml");
+        setContentPane("/views/StartScreenView_old.fxml");
     }
 }
