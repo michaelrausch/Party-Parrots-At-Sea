@@ -6,11 +6,12 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Polygon;
@@ -18,6 +19,7 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -105,7 +107,7 @@ public class BoatObject extends Group {
             new Rotate(180, new Point3D(0, 0, 1))
         );
         boatPoly.getTransforms().add(new Scale(10, 10, 10));
-        boatPoly.setDrawMode(DrawMode.FILL);
+//        boatPoly.setDrawMode(DrawMode.FILL);
 //        boatPoly.setFill(colour);
 //        boatPoly.setFill(this.colour);
 //        boatPoly.setMaterial(new PhongMaterial(this.colour));
@@ -142,6 +144,24 @@ public class BoatObject extends Group {
         sail.setFill(Color.TRANSPARENT);
         sail.setCache(true);
         super.getChildren().clear();
+        PointLight pointLight = new PointLight(Color.WHITE);
+//        pointLight.setLightOn(true);
+        pointLight.getTransforms().add(new Translate(0, 0, -30));
+        super.getChildren().add(pointLight);
+//        pointLight = new PointLight(Color.WHITE);
+////        pointLight.setLightOn(true);
+//        pointLight.getTransforms().add(new Translate(50, 50, -20));
+//        super.getChildren().add(pointLight);
+//        pointLight = new PointLight(Color.WHITE);
+////        pointLight.setLightOn(true);
+//        pointLight.getTransforms().add(new Translate(50, -50, -20));
+//        super.getChildren().add(pointLight);
+//        pointLight = new PointLight(Color.WHITE);
+////        pointLight.setLightOn(true);
+//        pointLight.getTransforms().add(new Translate(-50, -50, -20));
+//        super.getChildren().add(pointLight);
+        AmbientLight light = new AmbientLight(new Color(0.5,0.5,0.5,1));
+        super.getChildren().add(light);
         super.getChildren().addAll(boatPoly);//, sail);
     }
 
@@ -155,14 +175,30 @@ public class BoatObject extends Group {
 
     public Shape3D makeBoatPolygon () {
         StlMeshImporter importer = new StlMeshImporter();
-        importer.read(getClass().getResource("/meshes/simple_yacht.stl").toString());
+        importer.read(getClass().getResource("/meshes/hollow_simple_boat.stl").toString());
 //        importer.read(getClass().getResource("/cube.stl").toString());
 //        importer.read(getClass().getResource("/meshes/simple_yacht.stl").toString());
 //        ObjModelImporter importer = new ObjModelImporter();
 //        ColModelImporter importer = new ColModelImporter();
-//        importer.read(getClass().getResource("/meshes/simple_yacht.dae"));
+//        ColModelImporter importer = new ColModelImporter();
+//        importer.read(getClass().getResource("/meshes/hollow_simple_boat.dae"));
 //        MeshView mesh = importer.getImport()[0];
-        return new MeshView(importer.getImport());
+//        FileInputStream inputStream = null;
+//        try{
+//            inputStream = new FileInputStream(getClass().getResource("/meshes/simple_yacht.stl").toString());
+//            Obj obj = ObjUtils.convertToRenderable(
+//                ObjReader.read(inputStream));
+//
+//            IntBuffer indices = ObjData.getFaceVertexIndices(obj);
+//            FloatBuffer vertices = ObjData.getVertices(obj);
+//            FloatBuffer texCoords = ObjData.getTexCoords(obj);
+//            MeshView
+//            FloatBuffer normals = ObjData.getNormals(obj);
+            return new MeshView(importer.getImport());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
     }
 
     /**

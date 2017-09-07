@@ -15,7 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.PointLight;
+import javafx.scene.PerspectiveCamera;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -26,7 +26,6 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
@@ -89,6 +88,7 @@ public class GameView extends Pane {
     private List<Node> mapTokens;
 
     private ImageView mapImage = new ImageView();
+    private PerspectiveCamera camera;
 
     //FRAME RATE
 
@@ -141,23 +141,25 @@ public class GameView extends Pane {
 
     public GameView () {
         gameObjects = this.getChildren();
-        PointLight pointLight = new PointLight(Color.WHITE);
-        pointLight.setLightOn(true);
-        pointLight.getTransforms().add(new Translate(100, 100, -100));
-        gameObjects.add(pointLight);
-        pointLight = new PointLight(Color.WHITE);
-        pointLight.setLightOn(true);
-        pointLight.getTransforms().add(new Translate(900, 900, -100));
-        gameObjects.add(pointLight);
 //        AmbientLight ambientLight = new AmbientLight(new Color(1,1,1,0.4));
 ////        ambientLight.setOpacity(0.5);
 //        gameObjects.add(ambientLight);
         // create image view for map, bind panel size to image
-        gameObjects.add(mapImage);
-        gameObjects.add(raceBorder);
-        gameObjects.add(markers);
-        gameObjects.add(tokens);
+//        camera = new PerspectiveCamera(true);
+//        camera.setTranslateZ(-500);
+//        camera.setTranslateY(500);
+//        camera.setTranslateX(800);
+//        camera.setFieldOfView(100);
+//        camera.setFarClip(50);
+//        camera.setNearClip(-600);
+////        gameObjects.add(camera);
+//        this.sceneProperty().addListener((obs, oldValue, scene) -> {
+//            if (scene != null) {
+//                scene.setCamera(camera);
+//            }
+//        });
         initializeTimer();
+        gameObjects.addAll(mapImage, raceBorder, markers, tokens);
     }
 
     private void initializeTimer() {
