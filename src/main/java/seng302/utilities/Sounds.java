@@ -100,41 +100,63 @@ public class Sounds {
     }
 
     public static void playButtonClick() {
-        Media buttonClick = new Media(Sounds.class.getClassLoader().getResource("sounds/Button-click-sound.mp3").toString());
-        soundPlayer = new MediaPlayer(buttonClick);
-        soundPlayer.play();
-        soundPlayer.setMute(soundEffectsMuted);
+        if (!soundEffectsMuted) {
+            Media buttonClick = new Media(
+                Sounds.class.getClassLoader().getResource("sounds/Button-click-sound.mp3")
+                    .toString());
+            soundPlayer = new MediaPlayer(buttonClick);
+            soundPlayer.play();
+            soundPlayer.setMute(soundEffectsMuted);
+        }
     }
 
     public static void playFinishSound() {
-        Media finishSound = new Media(Sounds.class.getClassLoader().getResource("sounds/Sms-notification.mp3").toString());
-        soundPlayer = new MediaPlayer(finishSound);
-        soundPlayer.play();
+        if (!soundEffectsMuted) {
+            Media finishSound = new Media(
+                Sounds.class.getClassLoader().getResource("sounds/Sms-notification.mp3")
+                    .toString());
+            soundPlayer = new MediaPlayer(finishSound);
+            soundPlayer.play();
+        }
     }
 
 
     public static void playMarkRoundingSound() {
-        Media markRoundingSound = new Media(Sounds.class.getClassLoader().getResource("sounds/sms-tone.mp3").toString());
-        soundPlayer = new MediaPlayer(markRoundingSound);
-        soundPlayer.play();
+        if (!soundEffectsMuted) {
+
+            Media markRoundingSound = new Media(
+                Sounds.class.getClassLoader().getResource("sounds/sms-tone.mp3").toString());
+            soundPlayer = new MediaPlayer(markRoundingSound);
+            soundPlayer.play();
+        }
     }
 
     public static void playCapGunSound() {
-        Media gunSound = new Media(Sounds.class.getClassLoader().getResource("sounds/Gunshot-sound.mp3").toString());
-        soundPlayer = new MediaPlayer(gunSound);
-        soundPlayer.play();
+        if (!soundEffectsMuted) {
+
+            Media gunSound = new Media(
+                Sounds.class.getClassLoader().getResource("sounds/Gunshot-sound.mp3").toString());
+            soundPlayer = new MediaPlayer(gunSound);
+            soundPlayer.play();
+        }
     }
 
     public static void playCrashSound() {
-        Media crashSound = new Media(Sounds.class.getClassLoader().getResource("sounds/Large-metal-door-slam.mp3").toString());
-        soundPlayer = new MediaPlayer(crashSound);
-        soundPlayer.play();
+        if (!soundEffectsMuted) {
+            Media crashSound = new Media(
+                Sounds.class.getClassLoader().getResource("sounds/Large-metal-door-slam.mp3")
+                    .toString());
+            soundPlayer = new MediaPlayer(crashSound);
+            soundPlayer.play();
+        }
     }
 
     public static void playHoverSound() {
-        Media hoverSound = new Media(Sounds.class.getClassLoader().getResource("sounds/sound-over.wav").toString());
+        if (!soundEffectsMuted) {
+            Media hoverSound = new Media(Sounds.class.getClassLoader().getResource("sounds/sound-over.wav").toString());
         soundPlayer = new MediaPlayer(hoverSound);
         soundPlayer.play();
+        }
     }
 
 
