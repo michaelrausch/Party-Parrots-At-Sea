@@ -1,4 +1,4 @@
-package seng302.visualiser.fxObjects;
+package seng302.visualiser.fxObjects.assets_2D;
 
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
 import java.util.ArrayList;

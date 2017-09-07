@@ -1,4 +1,4 @@
-package seng302.visualiser.fxObjects;
+package seng302.visualiser.fxObjects.assets_2D;
 
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polyline;

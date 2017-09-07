@@ -1,4 +1,4 @@
-package seng302.visualiser.fxObjects;
+package seng302.visualiser.fxObjects.assets_2D;
 
 import java.util.HashMap;
 import java.util.Map;

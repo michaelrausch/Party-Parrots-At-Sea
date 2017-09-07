@@ -22,81 +22,87 @@ import javafx.stage.Stage;
  */
 public class test3d extends Application {
 
-    Group root3D;
+    Group root = new Group();
     Scene scene;
-    Camera camera;
-    Group gameObjects;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        camera = new PerspectiveCamera();
-        gameObjects = new Group();
-        root3D = new Group(camera, gameObjects);
+//        camera = new PerspectiveCamera();
+//        gameObjects = new Group();
+//        root3D = new Group(camera, gameObjects);
         scene = new Scene(
-            root3D, 750, 750, true, SceneAntialiasing.BALANCED
+            root, 1000, 1000, true, SceneAntialiasing.BALANCED
         );
-        scene.setCamera(camera);
+        gameView3DTest();
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        StlMeshImporter importer = new StlMeshImporter();
-        importer.read(test3d.class.getResource("/meshes/dinghy_hull.stl").toString());
-        MeshView boat = new MeshView(importer.getImport());
-        boat.setMaterial(new PhongMaterial(Color.GREENYELLOW));
-
-        importer = new StlMeshImporter();
-        importer.read(getClass().getResource("/meshes/dinghy_mast.stl").toString());
-        MeshView mast = new MeshView(importer.getImport());
-        mast.setMaterial(new PhongMaterial(Color.GREENYELLOW));
-
-        importer = new StlMeshImporter();
-        importer.read(getClass().getResource("/meshes/dinghy_sail.stl").toString());
-        MeshView sail = new MeshView(importer.getImport());
-        sail.setMaterial(new PhongMaterial(Color.LIGHTGREY));
-
-        gameObjects.getChildren().addAll(boat, mast, sail);
-
-        gameObjects.getTransforms().add(new Scale(25, 25,25));
-        gameObjects.getTransforms().add(new Translate(15, 20,0));
-        gameObjects.getTransforms().addAll(
-            new Rotate(90, new Point3D(0,0,1)),
-            new Rotate(90, new Point3D(0, 1, 0))
-        );
-
-//        PointLight light = new PointLight();
-//        light.setLightOn(true);
-//        light.getTransforms().add(new Translate(15, 20, 0));
+//        scene.setCamera(camera);
+//        primaryStage.setScene(scene);
+//        primaryStage.show();
 //
-//        PointLight light2 = new PointLight();
-//        light2.setLightOn(true);
-//        light2.getTransforms().add(new Translate(30, 40, 0));
+//        StlMeshImporter importer = new StlMeshImporter();
+//        importer.read(test3d.class.getResource("/meshes/dinghy_hull.stl").toString());
+//        MeshView boat = new MeshView(importer.getImport());
+//        boat.setMaterial(new PhongMaterial(Color.GREENYELLOW));
+//
+//        importer = new StlMeshImporter();
+//        importer.read(getClass().getResource("/meshes/dinghy_mast.stl").toString());
+//        MeshView mast = new MeshView(importer.getImport());
+//        mast.setMaterial(new PhongMaterial(Color.GREENYELLOW));
+//
+//        importer = new StlMeshImporter();
+//        importer.read(getClass().getResource("/meshes/dinghy_sail.stl").toString());
+//        MeshView sail = new MeshView(importer.getImport());
+//        sail.setMaterial(new PhongMaterial(Color.LIGHTGREY));
+//
+//        gameObjects.getChildren().addAll(boat, mast, sail);
+//
+//        gameObjects.getTransforms().add(new Scale(25, 25,25));
+//        gameObjects.getTransforms().add(new Translate(15, 20,0));
+//        gameObjects.getTransforms().addAll(
+//            new Rotate(90, new Point3D(0,0,1)),
+//            new Rotate(90, new Point3D(0, 1, 0))
+//        );
+//
+////        PointLight light = new PointLight();
+////        light.setLightOn(true);
+////        light.getTransforms().add(new Translate(15, 20, 0));
+////
+////        PointLight light2 = new PointLight();
+////        light2.setLightOn(true);
+////        light2.getTransforms().add(new Translate(30, 40, 0));
+//
+////        root3D.getChildren().addAll(light);
+//
+//        scene.setOnKeyPressed(event -> {
+//            switch (event.getCode()) {
+//                case UP:
+//                    gameObjects.getTransforms().add(new Rotate(5, new Point3D(0,0,1)));
+//                    break;
+//                case DOWN:
+//                    gameObjects.getTransforms().add(new Rotate(-5, new Point3D(0,0,1)));
+//                    break;
+//                case LEFT:
+//                    gameObjects.getTransforms().add(new Rotate(-5, new Point3D(0,1,0)));
+//                    break;
+//                case RIGHT:
+//                    gameObjects.getTransforms().add(new Rotate(5, new Point3D(0,1,0)));
+//                    break;
+//            }
+//        });
+//
+//        AnimationTimer animationTimer = new AnimationTimer() {
+//            @Override
+//            public void handle(long now) {
+//                sail.getTransforms().add(new Rotate(0.5, 0, -1.36653, 0, new Point3D(0, 0, 1)));
+//            }
+//        };
+//
+////        animationTimer.start();
+    }
 
-//        root3D.getChildren().addAll(light);
-
-        scene.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case UP:
-                    gameObjects.getTransforms().add(new Rotate(5, new Point3D(0,0,1)));
-                    break;
-                case DOWN:
-                    gameObjects.getTransforms().add(new Rotate(-5, new Point3D(0,0,1)));
-                    break;
-                case LEFT:
-                    gameObjects.getTransforms().add(new Rotate(-5, new Point3D(0,1,0)));
-                    break;
-                case RIGHT:
-                    gameObjects.getTransforms().add(new Rotate(5, new Point3D(0,1,0)));
-                    break;
-            }
-        });
-
-        AnimationTimer animationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                sail.getTransforms().add(new Rotate(0.5, 0, -1.36653, 0, new Point3D(0, 0, 1)));
-            }
-        };
-
-//        animationTimer.start();
+    private void gameView3DTest() {
+        GameView3D gameView3D = new GameView3D();
+        root.getChildren().add(gameView3D.getAssets());
     }
 }

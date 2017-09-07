@@ -1,4 +1,4 @@
-package seng302.visualiser.fxObjects;
+package seng302.visualiser.fxObjects.assets_2D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class Marker extends Group {
      * @param exitAngle The angle the arrow wil point from the marker.
      */
     public void addArrows(MarkArrowFactory.RoundingSide roundingSide, double entryAngle,
-        double exitAngle) {
+                          double exitAngle) {
         //Change Color.GRAY to this.colour to revert all gray arrows.
         enterArrows.add(
             MarkArrowFactory.constructEntryArrow(roundingSide, entryAngle, exitAngle, Color.GRAY)

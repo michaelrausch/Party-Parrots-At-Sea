@@ -36,13 +36,14 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.AnnotationBox;
-import seng302.visualiser.fxObjects.BoatObject;
-import seng302.visualiser.fxObjects.CourseBoundary;
-import seng302.visualiser.fxObjects.Gate;
-import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.Marker;
-import seng302.visualiser.fxObjects.VelocityPickup;
+import seng302.visualiser.fxObjects.assets_2D.AnnotationBox;
+import seng302.visualiser.fxObjects.assets_2D.BoatObject;
+import seng302.visualiser.fxObjects.assets_2D.CourseBoundary;
+import seng302.visualiser.fxObjects.assets_2D.Gate;
+import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory;
+import seng302.visualiser.fxObjects.assets_2D.Marker;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
+import seng302.visualiser.fxObjects.assets_3D.ModelType;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
 
@@ -460,7 +461,7 @@ public class GameView extends Pane {
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
             Point2D location = findScaledXY(token.getLat(), token.getLng());
-            Node tokenObject = new VelocityPickup();
+            Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_COIN).getAssets();
             tokenObject.setLayoutX(location.getX());
             tokenObject.setLayoutY(location.getY());
             mapTokens.add(tokenObject);

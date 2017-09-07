@@ -47,8 +47,8 @@ import seng302.visualiser.controllers.annotations.Annotation;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
-import seng302.visualiser.fxObjects.BoatObject;
-import seng302.visualiser.fxObjects.WindArrow;
+import seng302.visualiser.fxObjects.assets_2D.BoatObject;
+import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 
 /**
  * Controller class that manages the display of a race
