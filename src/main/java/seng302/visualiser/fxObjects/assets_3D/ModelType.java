@@ -9,7 +9,8 @@ public enum ModelType {
     VELOCITY_COIN ("velocity_pickup.dae"),
     FINISH_MARKER ("finish_marker.dae"),
     START_MARKER ("start_marker.dae"),
-    PLAIN_MARKER ("plain_marker.dae");
+    PLAIN_MARKER ("plain_marker.dae"),
+    MARK_AREA ("mark_area.dae");
 
     final String filename;
 

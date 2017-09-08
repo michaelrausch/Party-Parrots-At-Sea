@@ -30,7 +30,8 @@ public class GameView3D {
         camera.getTransforms().addAll(
             new Translate(0,0, -DEFAULT_CAMERA_DEPTH)
         );
-        camera.setFarClip(0);
+        camera.setFarClip(Double.MAX_VALUE);
+        camera.setNearClip(0.1);
         camera.setFieldOfView(FOV);
         gameObjects = new Group();
         root3D = new Group(camera, gameObjects);
@@ -74,11 +75,11 @@ public class GameView3D {
         gameObjects.getChildren().addAll(s, left, right, top, bottom, boat, boat2, boat3, sMarker, fMarker, marker, coin);
         view.sceneProperty().addListener((obs, old, scene) -> {
             if (scene!=null)
-                makeMovement(scene);
+                enableCameraMovement(scene);
         });
     }
 
-    public void makeMovement(Scene s) {
+    public void enableCameraMovement(Scene s) {
         s.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case UP:

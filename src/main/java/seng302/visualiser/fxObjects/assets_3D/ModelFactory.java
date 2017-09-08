@@ -12,6 +12,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
+import seng302.model.token.TokenType;
 
 /**
  * Factory class for creating 3D models of boats.
@@ -80,35 +81,44 @@ public class ModelFactory {
     public static Model importModel(ModelType tokenType) {
         ColModelImporter importer = new ColModelImporter();
         importer.read(ModelFactory.class.getResource("/meshes/" + tokenType.filename));
-        Group model = new Group(importer.getImport());
-        AnimationTimer animationTimer;
+        Group assets = new Group(importer.getImport());
         switch (tokenType) {
             case VELOCITY_COIN:
-                model.setRotationAxis(new Point3D(1,0,0));
-                model.setRotate(90);
-                model.setTranslateX(0.2);
-                model.setTranslateY(1);
-                model.getTransforms().add(new Rotate(0 ,new Point3D(0,1,0)));
-                animationTimer = new AnimationTimer() {
-
-                    private double rotation = 0;
-                    private Group group = model;
-
-                    @Override
-                    public void handle(long now) {
-                        rotation += 0.5;
-                        ((Rotate) group.getTransforms().get(0)).setAngle(rotation);
-                    }
-                };
-                break;
+                return makeCoinPickup(assets);
             case FINISH_MARKER:
             case PLAIN_MARKER:
             case START_MARKER:
-                model.getTransforms().add(new Rotate(90, new Point3D(1, 0, 0)));
+                return makeMarker(assets);
             default:
-                animationTimer = null;
-                break;
+                return new Model(assets, null);
         }
-        return new Model(model, animationTimer);
+    }
+
+    private static Model makeCoinPickup(Group assets){
+        assets.setRotationAxis(new Point3D(1,0,0));
+        assets.setRotate(90);
+        assets.setTranslateX(0.2);
+        assets.setTranslateY(1);
+        assets.getTransforms().add(new Rotate(0 ,new Point3D(0,1,0)));
+        return new Model(assets, new AnimationTimer() {
+
+            private double rotation = 0;
+            private Group group = assets;
+
+            @Override
+            public void handle(long now) {
+                rotation += 0.5;
+                ((Rotate) group.getTransforms().get(0)).setAngle(rotation);
+            }
+        });
+    }
+
+    private static Model makeMarker(Group marker) {
+        ColModelImporter importer = new ColModelImporter();
+        importer.read(ModelFactory.class.getResource("/meshes/" + ModelType.MARK_AREA.filename));
+        Group area = new Group(importer.getImport());
+        area.getChildren().add(marker);
+        area.getTransforms().add(new Rotate(90, new Point3D(1, 0, 0)));
+        return new Model(area, null);
     }
 }
