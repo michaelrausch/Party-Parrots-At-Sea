@@ -1,6 +1,5 @@
 package seng302.visualiser.fxObjects.assets_2D;
 
-import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
@@ -13,13 +12,15 @@ import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.visualiser.fxObjects.assets_3D.BoatModel;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -59,7 +60,7 @@ public class BoatObject extends Group {
     //Graphical objects
     private Polyline trail = new Polyline();
 //    private Polygon boatPoly;
-    private Shape3D boatPoly;
+    private BoatModel boatPoly;
     private Polygon sail;
     private Wake wake;
     private Line leftLayLine;
@@ -101,29 +102,29 @@ public class BoatObject extends Group {
      */
     private void initChildren(double... points) {
         boatPoly = makeBoatPolygon();
-        boatPoly.getTransforms().addAll(
+        boatPoly.getAssets().getTransforms().addAll(
             new Rotate(-40, new Point3D(1,0,0)),
             rotation,
-            new Rotate(180, new Point3D(0, 0, 1))
+            new Rotate(-90, new Point3D(0,0,1))
         );
-        boatPoly.getTransforms().add(new Scale(10, 10, 10));
+        boatPoly.getAssets().getTransforms().add(new Scale(5, 5, 5));
 //        boatPoly.setDrawMode(DrawMode.FILL);
 //        boatPoly.setFill(colour);
 //        boatPoly.setFill(this.colour);
 //        boatPoly.setMaterial(new PhongMaterial(this.colour));
-        boatPoly.setOnMouseEntered(event -> {
+        boatPoly.getAssets().setOnMouseEntered(event -> {
 //            boatPoly.setFill(Color.FLORALWHITE);
 //            boatPoly.setStroke(Color.RED);
 //            boatPoly.setMaterial(new PhongMaterial(Color.FLORALWHITE));
         });
-        boatPoly.setOnMouseExited(event -> {
+        boatPoly.getAssets().setOnMouseExited(event -> {
 //            boatPoly.setMaterial(new PhongMaterial(this.colour));
 //            boatPoly.setFill(colour);
 //            boatPoly.setFill(this.colour);
 //            boatPoly.setStroke(Color.BLACK);
         });
-        boatPoly.setOnMouseClicked(event -> setIsSelected(!isSelected));
-        boatPoly.setCache(true);
+        boatPoly.getAssets().setOnMouseClicked(event -> setIsSelected(!isSelected));
+        boatPoly.getAssets().setCache(true);
 //        boatPoly.setCacheHint(CacheHint.SPEED);
 
 //        annotationBox = new AnnotationBox();
@@ -162,20 +163,22 @@ public class BoatObject extends Group {
 //        super.getChildren().add(pointLight);
         AmbientLight light = new AmbientLight(new Color(0.5,0.5,0.5,1));
         super.getChildren().add(light);
-        super.getChildren().addAll(boatPoly);//, sail);
+        super.getChildren().addAll(boatPoly.getAssets());//, sail);
     }
 
     public void setFill (Color value) {
         this.colour = value;
         PhongMaterial pm = new PhongMaterial(this.colour);
-        pm.setSpecularPower(0.5);
-        boatPoly.setMaterial(pm);
+        for (int i=0;i<2;i++) {
+            Shape3D s = (Shape3D) boatPoly.getAssets().getChildren().get(i);
+            s.setMaterial(pm);
+        }
         trail.setStroke(colour);
     }
 
-    public Shape3D makeBoatPolygon () {
-        StlMeshImporter importer = new StlMeshImporter();
-        importer.read(getClass().getResource("/meshes/hollow_simple_boat.stl").toString());
+    public BoatModel makeBoatPolygon () {
+//        StlMeshImporter importer = new StlMeshImporter();
+//        importer.read(getClass().getResource("/meshes/hollow_simple_boat.stl").toString());
 //        importer.read(getClass().getResource("/cube.stl").toString());
 //        importer.read(getClass().getResource("/meshes/simple_yacht.stl").toString());
 //        ObjModelImporter importer = new ObjModelImporter();
@@ -194,7 +197,7 @@ public class BoatObject extends Group {
 //            FloatBuffer texCoords = ObjData.getTexCoords(obj);
 //            MeshView
 //            FloatBuffer normals = ObjData.getNormals(obj);
-            return new MeshView(importer.getImport());
+            return ModelFactory.boatGameView(BoatMeshType.DINGHY, colour);
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //            return null;
@@ -210,12 +213,12 @@ public class BoatObject extends Group {
      * @param sailIn Boolean to toggle sail state.
      */
     public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn, double windDir) {
-        Double dx = Math.abs(boatPoly.getLayoutX() - x);
-        Double dy = Math.abs(boatPoly.getLayoutY() - y);
+        Double dx = Math.abs(boatPoly.getAssets().getLayoutX() - x);
+        Double dy = Math.abs(boatPoly.getAssets().getLayoutY() - y);
         Platform.runLater(() -> {
             rotateTo(rotation, sailIn, windDir);
-            boatPoly.setLayoutX(x);
-            boatPoly.setLayoutY(y);
+            boatPoly.getAssets().setLayoutX(x);
+            boatPoly.getAssets().setLayoutY(y);
             if (sailIn) {
 //                sail.getPoints().clear();
 //                sail.getPoints().addAll(0.0, 0.0, 4.0, 1.5, 8.0, 3.0, 12.0, 3.5, 16.0, 3.0, 20.0, 1.5, 24.0, 0.0);
@@ -261,33 +264,30 @@ public class BoatObject extends Group {
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
         rotation.setAngle(heading);
         if (sailsIn) {
+            boatPoly.showSail();
             Double sailWindOffset = 30.0;
             Double upwindAngleLimit = 15.0;
             Double downwindAngleLimit = 10.0; //Upwind from normalised horizontal
             Double normalizedHeading = normalizeHeading(heading, windDir);
             if (normalizedHeading < 180) {
-                sail.getTransforms().setAll(new Rotate(windDir + 90 + sailWindOffset));
-                sail.getPoints().clear();
-                sail.getPoints().addAll(0.0, 0.0, 4.0, -1.5, 8.0, -3.0, 12.0, -3.5, 16.0, -3.0, 20.0, -1.5, 24.0, 0.0);
-                if (normalizedHeading > 90 + sailWindOffset){
-                    sail.getTransforms().setAll(new Rotate(heading + downwindAngleLimit));
-                }
                 if (normalizedHeading < sailWindOffset + upwindAngleLimit){
-                    sail.getTransforms().setAll(new Rotate(heading + 90 - upwindAngleLimit));
+                    boatPoly.rotateSail(heading + 90 - upwindAngleLimit);
+                } else if (normalizedHeading > 90 + sailWindOffset){
+                    boatPoly.rotateSail(heading + downwindAngleLimit);
+                } else {
+                    boatPoly.rotateSail(windDir + 90 + sailWindOffset);
                 }
             } else {
-                sail.getTransforms().setAll(new Rotate(windDir + 90 - sailWindOffset));
-                sail.getPoints().clear();
-                sail.getPoints().addAll(0.0, 0.0, 4.0, 1.5, 8.0, 3.0, 12.0, 3.5, 16.0, 3.0, 20.0, 1.5, 24.0, 0.0);
-                if (normalizedHeading < 270 - sailWindOffset){
-                    sail.getTransforms().setAll(new Rotate(heading + 180 - downwindAngleLimit));
-                }
                 if (normalizedHeading > 360 - (sailWindOffset + upwindAngleLimit)){
-                    sail.getTransforms().setAll(new Rotate(heading + 90 + upwindAngleLimit));
+                    boatPoly.rotateSail(heading + 90 + upwindAngleLimit);
+                } else if (normalizedHeading < 270 - sailWindOffset){
+                    boatPoly.rotateSail(heading + 180 - downwindAngleLimit);
+                } else {
+                    boatPoly.rotateSail(windDir + 90 - sailWindOffset);
                 }
             }
         } else {
-            sail.getTransforms().setAll(new Rotate(windDir));
+            boatPoly.hideSail();
         }
     }
 
@@ -423,12 +423,12 @@ public class BoatObject extends Group {
     }
 
     public Double getBoatLayoutX() {
-        return boatPoly.getLayoutX();
+        return boatPoly.getAssets().getLayoutX();
     }
 
 
     public Double getBoatLayoutY() {
-        return boatPoly.getLayoutY();
+        return boatPoly.getAssets().getLayoutY();
     }
 
     /**

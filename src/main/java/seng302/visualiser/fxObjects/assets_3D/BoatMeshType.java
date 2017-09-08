@@ -7,7 +7,7 @@ package seng302.visualiser.fxObjects.assets_3D;
  */
 public enum BoatMeshType {
 
-    DINGHY ("dinghy_hull.stl", "dinghy_mast.stl", 0, "dinghy_sail.stl", -1.36653);
+    DINGHY ("dinghy_hull.stl", "dinghy_mast.stl", -1.36653, "dinghy_sail.stl", -1.36653);
 
     final String hullFile, mastFile, sailFile;
     final double mastOffset, sailOffset;

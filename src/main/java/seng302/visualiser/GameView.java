@@ -13,9 +13,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.PerspectiveCamera;
+import javafx.scene.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -89,7 +87,7 @@ public class GameView extends Pane {
     private List<Node> mapTokens;
 
     private ImageView mapImage = new ImageView();
-    private PerspectiveCamera camera;
+    private Camera camera;
 
     //FRAME RATE
 
@@ -143,24 +141,25 @@ public class GameView extends Pane {
     public GameView () {
         gameObjects = this.getChildren();
 //        AmbientLight ambientLight = new AmbientLight(new Color(1,1,1,0.4));
-////        ambientLight.setOpacity(0.5);
+//        ambientLight.setOpacity(0.5);
 //        gameObjects.add(ambientLight);
         // create image view for map, bind panel size to image
-//        camera = new PerspectiveCamera(true);
-//        camera.setTranslateZ(-500);
-//        camera.setTranslateY(500);
-//        camera.setTranslateX(800);
-//        camera.setFieldOfView(100);
-//        camera.setFarClip(50);
-//        camera.setNearClip(-600);
-////        gameObjects.add(camera);
-//        this.sceneProperty().addListener((obs, oldValue, scene) -> {
-//            if (scene != null) {
-//                scene.setCamera(camera);
-//            }
-//        });
+        camera = new ParallelCamera();
+        camera.setTranslateZ(-500);
+        camera.setFarClip(Double.MAX_VALUE);
+        camera.setNearClip(0.1);
+        PointLight pl = new PointLight();
+        pl.setLightOn(true);
+        pl.layoutYProperty().bind(camera.layoutYProperty());
+        pl.layoutXProperty().bind(camera.layoutXProperty());
+//        gameObjects.add(camera);
+        this.sceneProperty().addListener((obs, oldValue, scene) -> {
+            if (scene != null) {
+                scene.setCamera(camera);
+            }
+        });
         initializeTimer();
-        gameObjects.addAll(mapImage, raceBorder, markers, tokens);
+        gameObjects.addAll(mapImage, raceBorder, markers, tokens, pl);
     }
 
     private void initializeTimer() {
