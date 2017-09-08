@@ -41,18 +41,11 @@ public class ServerCreationController implements Initializable {
     }
 
     public void createServer() {
-        try {
-            ServerDescription serverDescription = ViewManager.getInstance().getGameClient().runAsHost("localhost", 4941);
 
-            ViewManager.getInstance().setProperty("serverName", serverDescription.getName());
-            ViewManager.getInstance().setProperty("mapName", serverDescription.getMapName());
+        ServerDescription serverDescription = ViewManager.getInstance().getGameClient().runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayers.getValue());
 
-            Parent root = FXMLLoader.load(StartScreenController.class.getResource("/views/LobbyView.fxml"));
-
-            ViewManager.getInstance().setScene(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ViewManager.getInstance().setProperty("serverName", serverDescription.getName());
+        ViewManager.getInstance().setProperty("mapName", serverDescription.getMapName());
     }
 
     private void updateMaxPlayerLabel() {

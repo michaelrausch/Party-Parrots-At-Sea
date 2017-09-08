@@ -85,19 +85,19 @@ public class App extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(e -> {
+        primaryStage.setOnCloseRequest(e -> closeAll());
 
-            try {
-                ServerAdvertiser.getInstance().unregister();
-            } catch (IOException e1) {
-                logger.warn("Could not un-register game");
-            }
+        decorator.setOnCloseButtonAction(this::closeAll);
+    }
 
-            System.exit(0);
-        });
+    private void closeAll(){
+        try {
+            ServerAdvertiser.getInstance().unregister();
+        } catch (IOException e1) {
+            logger.warn("Could not un-register game");
+        }
 
-//        ClientState.primaryStage = primaryStage;
-        primaryStage.setOnCloseRequest(e -> System.exit(0));
+        System.exit(0);
     }
 
     public static void main(String[] args) {

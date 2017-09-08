@@ -132,7 +132,7 @@ public class ServerToClientThread implements Runnable, Observer {
             return;
         }
 
-        if (GameState.getPlayers().size() >= GameState.MAX_PLAYERS){
+        if (GameState.getPlayers().size() >= GameState.getCapacity()){
             RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(0, RegistrationResponseStatus.FAILURE_FULL);
             os.write(responseMessage.getBuffer());
             return;

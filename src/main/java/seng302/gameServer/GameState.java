@@ -23,7 +23,6 @@ import java.util.*;
  * Created by wmu16 on 10/07/17.
  */
 public class GameState implements Runnable {
-
     @FunctionalInterface
     interface NewMessageListener {
 
@@ -33,7 +32,6 @@ public class GameState implements Runnable {
     private Logger logger = LoggerFactory.getLogger(GameState.class);
 
     private static final Integer STATE_UPDATES_PER_SECOND = 60;
-    public static Integer MAX_PLAYERS = 8;
     public static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
     public static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
@@ -56,6 +54,8 @@ public class GameState implements Runnable {
     private static long startTime;
     private static Set<Mark> marks;
     private static List<Limit> courseLimit;
+    private static Integer maxPlayers = 8;
+
 
     private static List<NewMessageListener> markListeners;
 
@@ -268,8 +268,6 @@ public class GameState implements Runnable {
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
-
-
         }
 
         if (raceFinished) {
@@ -685,10 +683,23 @@ public class GameState implements Runnable {
         customizationFlag = false;
     }
 
-    public static Integer getSpacesLeft(){
-        Integer numberOfPlayers = GameState.getPlayers().size();
-        Integer maxPlayers = GameState.MAX_PLAYERS;
+    public static Integer getNumberOfPlayers(){
+        Integer numPlayers = 0;
 
-        return maxPlayers - numberOfPlayers - 1;
+        for(Player p : getPlayers()){
+            if(p.getSocket().isConnected()){
+                numPlayers++;
+            }
+        }
+
+        return numPlayers;
+    }
+
+    public static Integer getCapacity(){
+        return maxPlayers;
+    }
+
+    public static void setMaxPlayers(Integer newMax){
+        maxPlayers = newMax;
     }
 }

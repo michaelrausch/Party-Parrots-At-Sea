@@ -99,6 +99,11 @@ public class GameView extends Pane {
 
     double scaleFactor = 1;
 
+    public void setRes(Integer x, Integer y){
+        this.panelHeight = y;
+        this.panelWidth = x;
+    }
+
     private void zoomOut() {
         scaleFactor = 0.1;
         if (this.getScaleX() > 0.5) {
@@ -550,7 +555,7 @@ public class GameView extends Pane {
     }
 
     private void drawFps(Double fps) {
-        Platform.runLater(() -> fpsDisplay.setText(String.format("%d FPS", Math.round(fps))));
+        //Platform.runLater(() -> fpsDisplay.setText(String.format("%d FPS", Math.round(fps))));
     }
 
     /**

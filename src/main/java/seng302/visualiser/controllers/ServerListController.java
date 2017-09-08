@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerDescription;
+import seng302.visualiser.GameClient;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 
@@ -55,6 +56,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
 
         try {
             ServerListener.getInstance().setDelegate(this);
+            System.out.println("Setting DH");
         } catch (IOException e) {
             logger.warn("Could not start Server Listener Delegate");
         }
@@ -74,9 +76,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
     }
 
     private void goToDirectConnectLobby() {
-        // TODO: 7/09/17 ajm412: Implement ability to connect to a lobby.
-        serverHostName.setText("Invalid Host Name or Port Number");
-        serverPortNumber.setText("");
+        // TODO: 7/09/17 Error handling
+        ViewManager.getInstance().getGameClient().runAsClient(serverHostName.getText(), Integer.parseInt(serverPortNumber.getText()));
     }
 
     @Override

@@ -1,18 +1,20 @@
 package seng302.gameServer;
 
 public class ServerDescription {
+    private Integer capacity;
     private String address;
     private Integer portNum;
     private String serverName;
     private String mapName;
-    private Integer spacesLeft;
+    private Integer numPlayers;
 
-    public ServerDescription(String serverName, String mapName, Integer spacesLeft, String address, Integer portNum){
+    public ServerDescription(String serverName, String mapName, Integer numPlayers, Integer capacity, String address, Integer portNum){
         this.serverName = serverName;
         this.mapName = mapName;
-        this.spacesLeft = spacesLeft;
+        this.numPlayers = numPlayers;
         this.address = address;
         this.portNum = portNum;
+        this.capacity = capacity;
     }
 
 
@@ -32,8 +34,12 @@ public class ServerDescription {
         return address;
     }
 
-    public Integer spacesLeft() {
-        return spacesLeft;
+    public Integer getNumPlayers() {
+        return numPlayers;
+    }
+
+    public Integer getCapacity(){
+        return capacity;
     }
 
     @Override
@@ -59,6 +65,10 @@ public class ServerDescription {
         }
 
         if (!this.getName().equals(other.getName())){
+            return false;
+        }
+
+        if (!this.getCapacity().equals(other.getCapacity())){
             return false;
         }
 

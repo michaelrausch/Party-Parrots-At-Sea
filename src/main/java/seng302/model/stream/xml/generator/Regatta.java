@@ -74,4 +74,12 @@ public class Regatta {
   public Double getMagneticVariation(){
       return magneticVariation;
   }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+    public void setRegattaName(String regattaName) {
+        this.name = regattaName;
+    }
 }

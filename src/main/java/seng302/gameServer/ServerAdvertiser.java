@@ -41,6 +41,8 @@ public class ServerAdvertiser {
         props = new Hashtable<>();
         props.put("map", "");
         props.put("spacesLeft", "0");
+        props.put("capacity", "0");
+        props.put("players", "0");
     }
 
     /**
@@ -72,12 +74,27 @@ public class ServerAdvertiser {
     }
 
     /**
-     * Set the spaces left on the server and broadcast an update on the network
-     * @param spacesLeft The number of spaces left on the server
+     * Set the number of players on the server and broadcast an update on the network
+     * @param numPlayers The number of players on the server
      * @return The current ServerAdvertiser instance
      */
-    public ServerAdvertiser setSpacesLeft(Integer spacesLeft){
-        props.replace("spacesLeft", spacesLeft.toString());
+    public ServerAdvertiser setNumberOfPlayers(Integer numPlayers){
+        props.replace("players", numPlayers.toString());
+
+        if (serviceInfo != null){
+            serviceInfo.setText(props);
+        }
+
+        return instance;
+    }
+
+    /**
+     * Set the max capacity of the server and broadcast an update on the network
+     * @param capacity The maximum capacity of the server
+     * @return The current ServerAdvertiser instance
+     */
+    public ServerAdvertiser setCapacity(Integer capacity){
+        props.replace("capacity", capacity.toString());
 
         if (serviceInfo != null){
             serviceInfo.setText(props);

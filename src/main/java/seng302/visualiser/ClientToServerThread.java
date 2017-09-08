@@ -359,7 +359,7 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
-    int getClientId () {
+    public int getClientId () {
         return clientId;
     }
 }

@@ -16,6 +16,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import seng302.gameServer.ServerDescription;
+import seng302.visualiser.GameClient;
 
 public class ServerCell implements Initializable {
 
@@ -39,7 +40,7 @@ public class ServerCell implements Initializable {
     private String name;
     private String mapNameString;
 
-    private Integer currPlayerCount;
+    private String currPlayerCount;
 
     private String hostName;
     private Integer portNumber;
@@ -47,7 +48,8 @@ public class ServerCell implements Initializable {
 
     public ServerCell(ServerDescription server) {
         this.name = server.getName();
-        this.currPlayerCount = server.spacesLeft();
+
+        this.currPlayerCount = server.getNumPlayers().toString() + "/" + server.getCapacity().toString();
         this.mapNameString = server.getMapName();
 
         this.hostName = server.getAddress();
@@ -57,7 +59,8 @@ public class ServerCell implements Initializable {
 
     public void initialize(URL location, ResourceBundle resources) {
         serverName.setText(name);
-        serverPlayerCount.setText(Integer.toString(currPlayerCount));
+        serverPlayerCount.setText(currPlayerCount);
+        mapName.setText(mapNameString);
 
         serverConnButton.setOnMouseReleased(event -> joinServer());
     }
@@ -65,12 +68,8 @@ public class ServerCell implements Initializable {
     public void joinServer() {
         // TODO: 7/09/17 ajm412: Connect to a server here with the values stored in the hostName/portNumber variables.
         System.out.println("Connecting to " + serverName.getText());
-        try {
-            Parent root = FXMLLoader.load(StartScreenController.class.getResource("/views/LobbyView.fxml"));
-            ViewManager.getInstance().setScene(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        ViewManager.getInstance().getGameClient().runAsClient(hostName, portNumber);
     }
 
 }

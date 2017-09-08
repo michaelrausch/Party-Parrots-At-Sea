@@ -3,6 +3,8 @@ package seng302.visualiser;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
@@ -30,12 +32,10 @@ import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.StreamParser;
+import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
-import seng302.visualiser.controllers.FinishScreenViewController;
-import seng302.visualiser.controllers.LobbyController_old;
+import seng302.visualiser.controllers.*;
 import seng302.visualiser.controllers.LobbyController_old.CloseStatus;
-import seng302.visualiser.controllers.RaceViewController;
-import seng302.visualiser.controllers.ViewManager;
 
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
@@ -53,7 +53,7 @@ public class GameClient {
     private RegattaXMLData regattaData;
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
-    private LobbyController_old lobbyController;
+    private LobbyController lobbyController;
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
@@ -80,23 +80,22 @@ public class GameClient {
 //                Platform.runLater(this::loadStartScreen);
 //            });
 
-
             socketThread.addStreamObserver(this::parsePackets);
 
             ViewManager.getInstance().setPlayerList(clientLobbyList);
 
-            if (regattaData != null){
-                ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
-                ViewManager.getInstance().setProperty("mapName", regattaData.getCourseName());
-            }
-            else{
-                ViewManager.getInstance().setProperty("serverName", ipAddress);
-                ViewManager.getInstance().setProperty("mapName", "");
+            while (regattaData == null){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
+            ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
+            ViewManager.getInstance().setProperty("mapName", regattaData.getCourseName());
 
             // TODO disable ready button;
-
 
             //LobbyController_old lobbyController = loadLobby();
             //lobbyController.setSocketThread(socketThread);
@@ -107,7 +106,8 @@ public class GameClient {
 
 
 //            lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
-//            this.lobbyController = lobbyController;
+            this.lobbyController = ViewManager.getInstance().goToLobby(true);
+
         } catch (IOException ioe) {
             showConnectionError("Unable to find server");
             //Platform.runLater(this::loadStartScreen);
@@ -119,7 +119,10 @@ public class GameClient {
      * @param ipAddress IP to connect to.
      * @param portNumber Port to connect to.
      */
-    public ServerDescription runAsHost(String ipAddress, Integer portNumber) {
+    public ServerDescription runAsHost(String ipAddress, Integer portNumber, String serverName, Integer maxPlayers) {
+        XMLGenerator.setDefaultRaceName(serverName);
+        GameState.setMaxPlayers(maxPlayers);
+
         server = new MainServerThread();
 
         try {
@@ -127,9 +130,6 @@ public class GameClient {
         } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
         }
-
-        String serverName = "";
-        String courseName = "";
 
         while (regattaData == null){
             try {
@@ -139,12 +139,10 @@ public class GameClient {
             }
         }
 
+        this.lobbyController = ViewManager.getInstance().goToLobby(false);
+
         ViewManager.getInstance().setPlayerList(clientLobbyList);
-
-        serverName = regattaData.getRegattaName();
-        courseName = regattaData.getCourseName();
-
-        return new ServerDescription(serverName, courseName, 0, ipAddress, 4942);
+        return new ServerDescription(serverName, regattaData.getCourseName(), GameState.getNumberOfPlayers(), GameState.getCapacity(), ipAddress, 4942);
     }
 
     private void loadStartScreen() {
@@ -232,7 +230,6 @@ public class GameClient {
             switch (packet.getType()) {
                 case RACE_STATUS:
                     processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
-
                     if (raceState.getTimeTillStart() <= 5000) {
                         startRaceIfAllDataReceived();
                     }
@@ -273,7 +270,7 @@ public class GameClient {
 
                 case RACE_START_STATUS:
                     raceState.updateState(StreamParser.extractRaceStartStatus(packet));
-                    if (lobbyController != null) lobbyController.updateRaceState(raceState);
+                    if (lobbyController != null) Platform.runLater(() -> lobbyController.updateRaceState(raceState));
                     break;
 
                 case BOAT_LOCATION:
@@ -293,7 +290,10 @@ public class GameClient {
 
     private void startRaceIfAllDataReceived() {
         if (allXMLReceived() && raceView == null) {
-            loadRaceView();
+            raceView = ViewManager.getInstance().loadRaceView();
+
+            ClientYacht player = allBoatsMap.get(socketThread.getClientId());
+            raceView.loadRace(allBoatsMap, courseData, raceState, player);
         }
     }
 
@@ -379,7 +379,7 @@ public class GameClient {
      * Handle the key-pressed event from the text field.
      * @param e The key event triggering this call
      */
-    private void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent e) {
         switch (e.getCode()) {
             case SPACE: // align with vmg
                 socketThread.sendBoatAction(BoatAction.VMG); break;
@@ -393,7 +393,7 @@ public class GameClient {
     }
 
 
-    private void keyReleased(KeyEvent e) {
+    public void keyReleased(KeyEvent e) {
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
@@ -422,5 +422,22 @@ public class GameClient {
                 )
             );
         }
+    }
+
+    public void startGame(){
+        server.startGame();
+    }
+
+    public ClientToServerThread getServerThread() {
+        return socketThread;
+    }
+
+    public List<String> getPlayerNames(){
+        return Collections.unmodifiableList(clientLobbyList.sorted());
+    }
+
+    public void stopGame() {
+        if (server != null) server.terminate();
+        if (socketThread != null) socketThread.setSocketToClose();
     }
 }

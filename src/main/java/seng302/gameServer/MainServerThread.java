@@ -50,8 +50,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private ServerSocket serverSocket = null;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
     private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
+    private static Integer capacity;
 
-    private void startAdvertisingServer(){
+    private void startAdvertisingServer() {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Document doc;
@@ -70,16 +71,19 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         RegattaXMLData regattaXMLData = XMLParser.parseRegatta(doc);
 
-        Integer spacesLeft = GameState.getSpacesLeft();
+
+        Integer capacity = GameState.getCapacity();
+        Integer numPlayers = GameState.getNumberOfPlayers();
+        Integer spacesLeft = capacity - numPlayers;
 
         // No spaces left on server
-        if (spacesLeft < 1){
+        if (spacesLeft < 1) {
             return;
         }
 
         // Start advertising server
-        try{
-            ServerAdvertiser.getInstance().setMapName(regattaXMLData.getCourseName()).setSpacesLeft(spacesLeft);
+        try {
+            ServerAdvertiser.getInstance().setMapName(regattaXMLData.getCourseName()).setCapacity(capacity).setNumberOfPlayers(numPlayers);
             ServerAdvertiser.getInstance().registerGame(PORT, regattaXMLData.getRegattaName());
         } catch (IOException e) {
             logger.warn("Could not register server");
@@ -229,7 +233,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         serverToClientThread.addDisconnectListener(this::clientDisconnected);
 
         try {
-            ServerAdvertiser.getInstance().setSpacesLeft(GameState.getSpacesLeft());
+            ServerAdvertiser.getInstance().setNumberOfPlayers(GameState.getNumberOfPlayers());
         } catch (IOException e) {
             logger.warn("Couldn't update advertisement");
         }
@@ -261,7 +265,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         serverToClientThreads.remove(closedConnection);
 
         try {
-            ServerAdvertiser.getInstance().setSpacesLeft(GameState.getSpacesLeft());
+            ServerAdvertiser.getInstance().setNumberOfPlayers(GameState.getNumberOfPlayers());
         } catch (IOException e) {
             logger.warn("Couldn't update advertisement");
         }
@@ -273,7 +277,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         try {
             ServerAdvertiser.getInstance().unregister();
         } catch (IOException e) {
-            logger.warn("Error unregistered server");
+            logger.warn("Error unregistering server");
         }
 
         initialiseBoatPositions();

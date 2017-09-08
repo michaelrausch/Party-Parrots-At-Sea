@@ -229,7 +229,7 @@ public class LobbyController_old {
         this.raceState = raceState;
         /*if (this.customizeStage != null) {
             this.customizeStage.close();
-        }*/ // TODO: 17/08/17 ajm412: close the customization window if the host starts the game while customizing 
+        }*/ // TODO: 17/08/17 ajm412: close the customization window if the host starts the game while customizing
         if (!customizeButton.isDisabled()) {
             customizeButton.setDisable(true);
         }
@@ -241,6 +241,7 @@ public class LobbyController_old {
         readyButton.setVisible(false);
     }
 
+    //TODO here newui
     public void setPlayersColor(Color playerColor) {
         this.playersColor = playerColor;
     }

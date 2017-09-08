@@ -27,6 +27,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -64,7 +65,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Text timerLabel;
     @FXML
-    private AnchorPane contentAnchorPane;
+    private StackPane contentAnchorPane;
+    @FXML
+    private AnchorPane rvAnchorPane;
     @FXML
     private Text windArrowText, windDirectionText;
     @FXML
@@ -92,19 +95,21 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     public void initialize() {
         // Load a default important annotation state
-        importantAnnotations = new ImportantAnnotationsState();
+        //importantAnnotations = new ImportantAnnotationsState();
 
         //Formatting the y axis of the sparkline
 //        raceSparkLine.getYAxis().setRotate(180);
 //        raceSparkLine.getYAxis().setTickLabelRotation(180);
 //        raceSparkLine.getYAxis().setTranslateX(-5);
-        raceSparkLine.visibleProperty().setValue(false);
-        raceSparkLine.getYAxis().setAutoRanging(false);
-        sparklineYAxis.setTickMarkVisible(false);
+        //raceSparkLine.visibleProperty().setValue(false);
+        //raceSparkLine.getYAxis().setAutoRanging(false);
+        //sparklineYAxis.setTickMarkVisible(false);
 
-        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+        //positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
-        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        //selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        rvAnchorPane.prefWidthProperty().bind(ViewManager.getInstance().getDecorator().widthProperty());
+        rvAnchorPane.prefHeightProperty().bind(ViewManager.getInstance().getDecorator().heightProperty());
     }
 
     public void loadRace (
@@ -133,8 +138,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView();
-        gameView.setFrameRateFXText(fpsDisplay);
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
+        //gameView.setFrameRateFXText(fpsDisplay);
+        Platform.runLater(() -> contentAnchorPane.getChildren().add(gameView));
             gameView.setBoats(new ArrayList<>(participants.values()));
             gameView.updateBorder(raceData.getCourseLimit());
             gameView.updateCourse(
@@ -196,46 +201,46 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     private void initialiseFPSCheckBox() {
-        toggleFps.selectedProperty().addListener((obs, oldVal, newVal) ->
-            gameView.setFPSVisibility(toggleFps.isSelected())
-        );
+//        toggleFps.selectedProperty().addListener((obs, oldVal, newVal) ->
+//            gameView.setFPSVisibility(toggleFps.isSelected())
+//        );
     }
 
     private void initialiseAnnotationSlider() {
-        annotationSlider.setLabelFormatter(new StringConverter<Double>() {
-            @Override
-            public String toString(Double n) {
-                if (n == 0) {
-                    return "None";
-                }
-                if (n == 1) {
-                    return "Important";
-                }
-                if (n == 2) {
-                    return "All";
-                }
-                return "All";
-            }
-
-            @Override
-            public Double fromString(String s) {
-                switch (s) {
-                    case "None":
-                        return 0d;
-                    case "Important":
-                        return 1d;
-                    case "All":
-                        return 2d;
-
-                    default:
-                        return 2d;
-                }
-            }
-        });
-        annotationSlider.setValue(2);
-        annotationSlider.valueProperty().addListener((obs, oldVal, newVal) ->
-            setAnnotations((int) annotationSlider.getValue())
-        );
+//        annotationSlider.setLabelFormatter(new StringConverter<Double>() {
+//            @Override
+//            public String toString(Double n) {
+//                if (n == 0) {
+//                    return "None";
+//                }
+//                if (n == 1) {
+//                    return "Important";
+//                }
+//                if (n == 2) {
+//                    return "All";
+//                }
+//                return "All";
+//            }
+//
+//            @Override
+//            public Double fromString(String s) {
+//                switch (s) {
+//                    case "None":
+//                        return 0d;
+//                    case "Important":
+//                        return 1d;
+//                    case "All":
+//                        return 2d;
+//
+//                    default:
+//                        return 2d;
+//                }
+//            }
+//        });
+//        annotationSlider.setValue(2);
+//        annotationSlider.valueProperty().addListener((obs, oldVal, newVal) ->
+//            setAnnotations((int) annotationSlider.getValue())
+//        );
     }
 
 
@@ -243,52 +248,52 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Used to add any new yachts into the race that may have started late or not have had data received yet
      */
     private void updateSparkLine(){
-        // TODO: 2/08/17 there is about 0 chance of this working. Once we are keeping track of boat positions it can be fixed.
-        // Collect the racing yachts that aren't already in the chart
-        sparkLineData.clear();
-        List<ClientYacht> sparkLineCandidates = new ArrayList<>(participants.values());
-        // Create a new data series for new yachts
-        sparkLineCandidates
-            .stream()
-            .filter(yacht -> yacht.getPosition() != null)
-            .forEach(yacht -> {
-                Series<String, Double> yachtData = new Series<>();
-                yachtData.setName(yacht.getSourceId().toString());
-                yachtData.getData().add(
-                    new Data<>(
-                        Integer.toString(yacht.getLegNumber()),
-                        1.0 + participants.size() - yacht.getPosition()
-                    )
-                );
-            sparkLineData.add(yachtData);
-            });
-
-        // Lambda function to sort the series in order of leg (later legs shown more to the right)
-        sparkLineData.sort((o1, o2) -> {
-            Integer leg1 =  Integer.parseInt(o1.getData().get(o1.getData().size()-1).getXValue());
-            Integer leg2 =  Integer.parseInt(o2.getData().get(o2.getData().size()-1).getXValue());
-            if (leg2 < leg1){
-                return 1;
-            } else {
-                return -1;
-            }
-        });
-
-        // Adds the new data series to the sparkline (and set the colour of the series)
-        Platform.runLater(() -> {
-            sparkLineData
-                .stream()
-                .filter(spark -> !raceSparkLine.getData().contains(spark))
-                .forEach(spark -> {
-                    raceSparkLine.getData().add(spark);
-                    spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
-                });
-        });
+//        // TODO: 2/08/17 there is about 0 chance of this working. Once we are keeping track of boat positions it can be fixed.
+//        // Collect the racing yachts that aren't already in the chart
+//        sparkLineData.clear();
+//        List<ClientYacht> sparkLineCandidates = new ArrayList<>(participants.values());
+//        // Create a new data series for new yachts
+//        sparkLineCandidates
+//            .stream()
+//            .filter(yacht -> yacht.getPosition() != null)
+//            .forEach(yacht -> {
+//                Series<String, Double> yachtData = new Series<>();
+//                yachtData.setName(yacht.getSourceId().toString());
+//                yachtData.getData().add(
+//                    new Data<>(
+//                        Integer.toString(yacht.getLegNumber()),
+//                        1.0 + participants.size() - yacht.getPosition()
+//                    )
+//                );
+//            sparkLineData.add(yachtData);
+//            });
+//
+//        // Lambda function to sort the series in order of leg (later legs shown more to the right)
+//        sparkLineData.sort((o1, o2) -> {
+//            Integer leg1 =  Integer.parseInt(o1.getData().get(o1.getData().size()-1).getXValue());
+//            Integer leg2 =  Integer.parseInt(o2.getData().get(o2.getData().size()-1).getXValue());
+//            if (leg2 < leg1){
+//                return 1;
+//            } else {
+//                return -1;
+//            }
+//        });
+//
+//        // Adds the new data series to the sparkline (and set the colour of the series)
+//        Platform.runLater(() -> {
+//            sparkLineData
+//                .stream()
+//                .filter(spark -> !raceSparkLine.getData().contains(spark))
+//                .forEach(spark -> {
+//                    raceSparkLine.getData().add(spark);
+//                    spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
+//                });
+//        });
     }
 
     private void initialiseSparkLine() {
-        sparklineYAxis.setUpperBound(participants.size() + 1);
-        raceSparkLine.setCreateSymbols(false);
+//        sparklineYAxis.setUpperBound(participants.size() + 1);
+//        raceSparkLine.setCreateSymbols(false);
     }
 
     /**
@@ -381,8 +386,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param direction the from north angle of the wind.
      */
     private void updateWindDirection(double direction) {
-        windDirectionText.setText(String.format("%.1f°", direction));
-        windArrowText.setRotate(direction);
+//        windDirectionText.setText(String.format("%.1f°", direction));
+//        windArrowText.setRotate(direction);
     }
 
     /**
@@ -390,7 +395,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param windSpeed Windspeed in knots.
      */
     private void updateWindSpeed(double windSpeed) {
-        windSpeedText.setText("Speed: " + String.format("%.1f", windSpeed) + " Knots");
+//        windSpeedText.setText("Speed: " + String.format("%.1f", windSpeed) + " Knots");
     }
 
 
@@ -402,7 +407,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //            timerLabel.setFill(Color.RED);
 //            timerLabel.setText("Race Finished!");
 //        } else {
-        timerLabel.setText(raceState.getRaceTimeStr());
+//        timerLabel.setText(raceState.getRaceTimeStr());
 //        }
     }
 
@@ -411,28 +416,28 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * section
      */
     private void updateOrder(ObservableList<ClientYacht> yachts) {
-        List<Text> vboxEntries = new ArrayList<>();
-
-        for (int i = 0; i < yachts.size(); i++) {
-//            System.out.println("yacht == null  " + String.valueOf(yacht == null));
-            if (yachts.get(i).getBoatStatus() == BoatStatus.FINISHED
-                .getCode()) {  // 3 is finish status
-                Text textToAdd = new Text(i + 1 + ". " +
-                    yachts.get(i).getShortName() + " (Finished)");
-                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                vboxEntries.add(textToAdd);
-
-            } else {
-                Text textToAdd = new Text(i + 1 + ". " +
-                    yachts.get(i).getShortName() + " ");
-                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
-                textToAdd.setStyle("");
-                vboxEntries.add(textToAdd);
-            }
-        }
-        Platform.runLater(() ->
-            positionVbox.getChildren().setAll(vboxEntries)
-        );
+//        List<Text> vboxEntries = new ArrayList<>();
+//
+//        for (int i = 0; i < yachts.size(); i++) {
+////            System.out.println("yacht == null  " + String.valueOf(yacht == null));
+//            if (yachts.get(i).getBoatStatus() == BoatStatus.FINISHED
+//                .getCode()) {  // 3 is finish status
+//                Text textToAdd = new Text(i + 1 + ". " +
+//                    yachts.get(i).getShortName() + " (Finished)");
+//                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+//                vboxEntries.add(textToAdd);
+//
+//            } else {
+//                Text textToAdd = new Text(i + 1 + ". " +
+//                    yachts.get(i).getShortName() + " ");
+//                textToAdd.setFill(Paint.valueOf("#d3d3d3"));
+//                textToAdd.setStyle("");
+//                vboxEntries.add(textToAdd);
+//            }
+//        }
+//        Platform.runLater(() ->
+//            positionVbox.getChildren().setAll(vboxEntries)
+//        );
     }
 
 
@@ -533,15 +538,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * for the combobox to take action upon selection
      */
     private void initialiseBoatSelectionComboBox() {
-        yachtSelectionComboBox.setItems(
-            FXCollections.observableArrayList(participants.values())
-        );
-        //Null check is if the listener is fired but nothing selected
-        yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
-            if (selectedBoat != null) {
-                gameView.selectBoat(selectedBoat);
-            }
-        });
+//        yachtSelectionComboBox.setItems(
+//            FXCollections.observableArrayList(participants.values())
+//        );
+//        //Null check is if the listener is fired but nothing selected
+//        yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
+//            if (selectedBoat != null) {
+//                gameView.selectBoat(selectedBoat);
+//            }
+//        });
     }
 
     /**

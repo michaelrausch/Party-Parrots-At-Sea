@@ -76,14 +76,16 @@ public class ServerListener{
 
             String serverName = event.getInfo().getName();
             String mapName = event.getInfo().getPropertyString("map");
-            Integer spacesLeft = Integer.parseInt(event.getInfo().getPropertyString("spacesLeft"));
 
-            ServerDescription serverDescription = new ServerDescription(serverName, mapName, spacesLeft, address, portNum);
+            Integer capacity = Integer.parseInt(event.getInfo().getPropertyString("capacity"));
+            Integer numPlayers = Integer.parseInt(event.getInfo().getPropertyString("players"));
+
+            ServerDescription serverDescription = new ServerDescription(serverName, mapName, numPlayers, capacity, address, portNum);
 
             servers.remove(serverDescription);
             servers.add(serverDescription);
 
-            delegate.serverDetected(serverDescription, new ArrayList<ServerDescription>(servers));
+            delegate.serverDetected(serverDescription, new ArrayList<>(servers));
         }
     }
 
@@ -108,6 +110,4 @@ public class ServerListener{
     public void setDelegate(ServerListenerDelegate delegate){
         this.delegate = delegate;
     }
-
-
 }

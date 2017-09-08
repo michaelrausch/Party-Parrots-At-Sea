@@ -19,8 +19,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.model.Colors;
+import seng302.model.RaceState;
+import seng302.visualiser.ServerListener;
 
 public class LobbyController implements Initializable {
 
@@ -31,7 +35,7 @@ public class LobbyController implements Initializable {
     private ScrollPane playerListScrollpane;
 
     @FXML
-    private JFXButton customizeButton, leaveLobbyButton;
+    private JFXButton customizeButton, leaveLobbyButton, beginRaceButton;
 
     @FXML
     private StackPane serverListMainStackPane;
@@ -43,37 +47,42 @@ public class LobbyController implements Initializable {
     private Label mapName;
 
     private List<LobbyController_old.LobbyCloseListener> lobbyListeners = new ArrayList<>();
+    private RaceState raceState;
+    private JFXDialog customizationDialog;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         leaveLobbyButton.setOnMouseReleased(event -> leaveLobby());
+        beginRaceButton.setOnMouseReleased(event -> beginRace());
 
         Platform.runLater(() -> {
-
             serverName.setText(ViewManager.getInstance().getProperty("serverName"));
             mapName.setText(ViewManager.getInstance().getProperty("mapName"));
 
-            ViewManager.getInstance().getPlayerList().addListener((ListChangeListener<String>) c -> {
-                Platform.runLater(this::refreshPlayerList);
-            });
+            ViewManager.getInstance().getPlayerList().addListener((ListChangeListener<String>) c -> Platform.runLater(this::refreshPlayerList));
 
             ViewManager.getInstance().getPlayerList().setAll(ViewManager.getInstance().getPlayerList().sorted());
         });
 
         Platform.runLater(() -> {
-            FXMLLoader dialogContent = new FXMLLoader(getClass().getResource(
-                    "/views/dialogs/BoatCustomizeDialog.fxml"));
+            Integer playerId = ViewManager.getInstance().getGameClient().getServerThread().getClientId();
+            String name = ViewManager.getInstance().getGameClient().getPlayerNames().get(playerId - 1);
 
-            try {
-                JFXDialog dialog = new JFXDialog(serverListMainStackPane, dialogContent.load(),
-                        DialogTransition.CENTER);
-                customizeButton.setOnAction(action -> dialog.show());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Color playerColor = Colors.getColor( playerId - 1);
+            customizationDialog = ViewManager.getInstance().loadCustomizationDialog(serverListMainStackPane, this, playerColor, name);
+
+            customizeButton.setOnMouseReleased(event -> customizationDialog.show());
         });
 
+    }
+
+    private void beginRace() {
+        beginRaceButton.setDisable(true);
+        customizeButton.setDisable(true);
+        GameState.setCurrentStage(GameStages.PRE_RACE);
+        GameState.resetStartTime();
+        Platform.runLater(()-> ViewManager.getInstance().getGameClient().startGame());
     }
 
     private void refreshPlayerList() {
@@ -90,6 +99,7 @@ public class LobbyController implements Initializable {
             try {
                 pane = loader.load();
             } catch (IOException e) {
+                // TODO replace with logger
                 e.printStackTrace();
             }
 
@@ -102,8 +112,21 @@ public class LobbyController implements Initializable {
         GameState.setCurrentStage(GameStages.CANCELLED);
 //        for (LobbyController_old.LobbyCloseListener readyListener : lobbyListeners)
 //            readyListener.notify(LobbyController_old.CloseStatus.LEAVE);
-
-        //TODO close threads and figure out what the above lines do;
+        ViewManager.getInstance().getGameClient().stopGame();
         ViewManager.getInstance().goToStartView();
+    }
+
+    public void disableReadyButton() {
+        this.beginRaceButton.setDisable(true);
+        this.beginRaceButton.setText("Waiting for host...");
+    }
+    
+    public void updateRaceState(RaceState raceState){
+        this.raceState = raceState;
+        this.beginRaceButton.setText("Starting in: " + raceState.getRaceTimeStr());
+    }
+
+    public void closeCustomizationDialog() {
+        customizationDialog.close();
     }
 }

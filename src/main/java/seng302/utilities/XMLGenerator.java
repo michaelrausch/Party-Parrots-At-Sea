@@ -22,11 +22,11 @@ public class XMLGenerator {
     private static final String BOATS_TEMPLATE_NAME = "boats.ftlh";
     private static final String RACE_TEMPLATE_NAME = "race.ftlh";
     private Configuration configuration;
-    private Regatta regatta = null;
+    private static Regatta regatta = null;
     private Race race;
 
     public static Regatta DEFAULT_REGATTA = new Regatta("Party Parrot Test Server " + new Random().nextInt(100),
-            "Bermuda Test Course",
+            "Bermuda",
             57.6679590,
             11.8503233);
 
@@ -166,5 +166,13 @@ public class XMLGenerator {
         }
 
         return result;
+    }
+
+    public static void setDefaultRaceName(String raceName){
+        DEFAULT_REGATTA.setRegattaName(raceName);
+    }
+
+    public static void setDefaultMapName(String mapName){
+        DEFAULT_REGATTA.setCourseName(mapName);
     }
 }
