@@ -21,7 +21,6 @@ public class SendChatSteps {
     private MainServerThread mst;
 
 
-    //TODO Need to mock the controller pane in order to run the full game client
     @Given("^There are two games running$")
     public void the_are_two_games_running() throws Throwable {
         mst = new MainServerThread();

@@ -1,6 +1,7 @@
 package seng302.gameServer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ import seng302.utilities.XMLParser;
  * Created by wmu16 on 10/07/17.
  */
 public class GameState implements Runnable {
+
 
     @FunctionalInterface
     interface NewMessageListener {
@@ -672,6 +674,36 @@ public class GameState implements Runnable {
         logger.debug(
             String.format("Yacht srcID(%d) passed Mark srcID(%d)", yacht.getSourceId(),
                 roundingMark.getSourceID()));
+    }
+
+
+    public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
+        String chatterText = chatterMessage.getMessage();
+        String[] words = chatterText.split("\\s+");
+        if (words.length > 2 && isHost) {
+            switch (words[2].trim()) {
+                case ">speed":
+                    try {
+                        setSpeedMultiplier(Double.valueOf(words[3]));
+                        broadcastChatter(new ChatterMessage(
+                            chatterMessage.getMessage_type(),
+                            "SERVER: Speed modifier set to x" + words[3]
+                        ));
+                    } catch (Exception e) {
+                        Logger logger = LoggerFactory.getLogger(GameState.class);
+                        logger.error("cannot parse >speed value");
+                    }
+                    return;
+                case ">finish":
+                    broadcastChatter(new ChatterMessage(
+                        chatterMessage.getMessage_type(),
+                        "SERVER: Game will now finish"
+                    ));
+                    endRace();
+                    return;
+            }
+        }
+        broadcastChatter(chatterMessage);
     }
 
 

@@ -35,5 +35,12 @@ public class ServerPacketParser {
             payload[1], new String(Arrays.copyOfRange(payload, 3, payload.length))
         );
     }
+
+    public static ChatterMessage extractChatterText(StreamPacket packet) {
+        byte[] payload = packet.getPayload();
+        return new ChatterMessage(
+            payload[1], new String(Arrays.copyOfRange(payload, 3, payload.length))
+        );
+    }
 }
 

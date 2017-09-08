@@ -36,5 +36,11 @@ public class ChatterMessage extends Message {
         return MESSAGE_SIZE + message_size;
     }
 
+    public String getMessage() {
+        return message;
+    }
 
+    public int getMessage_type() {
+        return message_type;
+    }
 }

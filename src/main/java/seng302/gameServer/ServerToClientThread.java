@@ -211,10 +211,10 @@ public class ServerToClientThread implements Runnable, Observer {
                                 completeRegistration(requestedType);
                                 break;
                             case CHATTER_TEXT:
-//                                GameState.broadcastChatter(
-//                                    ServerPacketParser.extractChatterText(payload)
-//                                );
-                                parseChatter(payload);
+                                ChatterMessage chatterMessage = ServerPacketParser
+                                    .extractChatterText(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                GameState.processChatter(chatterMessage, isHost);
                                 break;
                             case RACE_CUSTOMIZATION_REQUEST:
                                 Long sourceID = Message
@@ -381,35 +381,36 @@ public class ServerToClientThread implements Runnable, Observer {
         isHost = true;
     }
 
-    private void parseChatter(byte[] chatterPayload) {
-        String chatterText = new String(
-            Arrays.copyOfRange(chatterPayload, 3, 3 + chatterPayload.length)
-        );
-        String[] words = chatterText.split("\\s+");
-        if (words.length > 2 && isHost) {
-            switch (words[2].trim()) {
-                case ">speed":
-                    try {
-                        GameState.setSpeedMultiplier(Double.valueOf(words[3]));
-                        GameState.broadcastChatter(new ChatterMessage(
-                            Byte.toUnsignedInt(chatterPayload[1]),
-                            "SERVER: Speed modifier set to x" + words[3]
-                        ));
-                    } catch (Exception e) {
-                        logger.error("cannot parse >speed value");
-                    }
-                    return;
-                case ">finish":
-                    GameState.broadcastChatter(new ChatterMessage(
-                        chatterPayload[1],
-                        "SERVER: Game will now finish"
-                    ));
-                    GameState.endRace();
-                    return;
-            }
-        }
-        GameState.broadcastChatter(
-            ServerPacketParser.extractChatterText(chatterPayload)
-        );
+    private void checkChatterForCommands(ChatterMessage chatterMessage) {
+
+//        String chatterText = new String(
+//            Arrays.copyOfRange(chatterPayload, 3, 3 + chatterPayload.length)
+//        );
+//        String[] words = chatterText.split("\\s+");
+//        if (words.length > 2 && isHost) {
+//            switch (words[2].trim()) {
+//                case ">speed":
+//                    try {
+//                        GameState.setSpeedMultiplier(Double.valueOf(words[3]));
+//                        GameState.broadcastChatter(new ChatterMessage(
+//                            Byte.toUnsignedInt(chatterPayload[1]),
+//                            "SERVER: Speed modifier set to x" + words[3]
+//                        ));
+//                    } catch (Exception e) {
+//                        logger.error("cannot parse >speed value");
+//                    }
+//                    return;
+//                case ">finish":
+//                    GameState.broadcastChatter(new ChatterMessage(
+//                        chatterPayload[1],
+//                        "SERVER: Game will now finish"
+//                    ));
+//                    GameState.endRace();
+//                    return;
+//            }
+//        }
+//        GameState.broadcastChatter(
+//            ServerPacketParser.extractChatterText(chatterPayload)
+//        );
     }
 }
