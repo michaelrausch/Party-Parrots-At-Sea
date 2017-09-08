@@ -135,10 +135,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         gameView = new GameView();
         gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
-            gameView.setBoats(new ArrayList<>(participants.values()));
-            gameView.updateBorder(raceData.getCourseLimit());
-            gameView.updateCourse(
-                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+        gameView.setBoats(new ArrayList<>(participants.values()));
+        gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateCourse(
+            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
         gameView.enableZoom();
         gameView.setBoatAsPlayer(player);

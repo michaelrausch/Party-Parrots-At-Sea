@@ -27,6 +27,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
@@ -150,24 +151,28 @@ public class GameView extends Pane {
         gameObjects.add(new Circle(1280, 0, 10, Color.RED));
         // --------
 
+        double RATIO = getWidth() / getHeight();
+
         this.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                scaleFactor = (newValue.doubleValue() - 180) / canvasWidth;
-                double maxVertical = 960 * scaleFactor;
+                scaleFactor = getWidth() / getHeight() > RATIO
+                    ? getHeight() / canvasHeight
+                    : getWidth() / canvasWidth;
 
-                if (oldValue.doubleValue() != 0.0 && maxVertical < getScene().getHeight()) {
-                    setScaleX(scaleFactor);
-                    setScaleY(scaleFactor);
-                    setTranslateX(0 - ((1 - scaleFactor) * oldValue.doubleValue() / 2));
-                    setTranslateY(0 - ((1 - scaleFactor) * getScene().getHeight() / 2));
-                    System.out.println("Width: " + newValue);
-                    System.out.println("Scale X: " + getScaleX());
-                    System.out.println("Transition X: " + getTranslateX());
-                    System.out.println("Get Height: " + getScene().getHeight());
-                    System.out.println("Get Width: " + getScene().getWidth());
-                }
+                Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+                getTransforms().remove(0, getTransforms().size());
+                getTransforms().add(scale);
+
+                setPrefWidth(getWidth() / scaleFactor);
+                setPrefHeight(getHeight() / scaleFactor);
+
+                System.out.println("Width: " + newValue);
+                System.out.println("Scale X: " + getScaleX());
+                System.out.println("Transition X: " + getTranslateX());
+                System.out.println("Get Height: " + getScene().getHeight());
+                System.out.println("Get Width: " + getScene().getWidth());
             }
         });
 
@@ -175,20 +180,22 @@ public class GameView extends Pane {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                scaleFactor = (newValue.doubleValue() - 40) / canvasHeight;
-                double maxHorizontal = 1530 * scaleFactor;
+                scaleFactor = getWidth() / getHeight() > RATIO
+                    ? getWidth() / canvasWidth
+                    : getHeight() / canvasHeight;
 
-                if (oldValue.doubleValue() != 0.0 && maxHorizontal < getScene().getWidth()) {
-                    setScaleX(scaleFactor);
-                    setScaleY(scaleFactor);
-                    setTranslateX(0 - ((1 - scaleFactor) * getScene().getWidth() / 2));
-                    setTranslateY(0 - ((1 - scaleFactor) * oldValue.doubleValue() / 2));
-                    System.out.println("Height: " + newValue);
-                    System.out.println("Scale Y: " + getScaleY());
-                    System.out.println("Transition Y: " + getTranslateY());
-                    System.out.println("Get Height: " + getScene().getHeight());
-                    System.out.println("Get Width: " + getScene().getWidth());
-                }
+                Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+                getTransforms().remove(0, getTransforms().size());
+                getTransforms().add(scale);
+
+                setPrefWidth(getWidth() / scaleFactor);
+                setPrefHeight(getHeight() / scaleFactor);
+
+                System.out.println("Height: " + newValue);
+                System.out.println("Scale Y: " + getScaleY());
+                System.out.println("Transition Y: " + getTranslateY());
+                System.out.println("Get Height: " + getScene().getHeight());
+                System.out.println("Get Width: " + getScene().getWidth());
             }
         });
     }
