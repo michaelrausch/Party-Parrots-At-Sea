@@ -1,8 +1,11 @@
 package seng302.visualiser;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
@@ -12,8 +15,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.util.Pair;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
@@ -28,6 +33,7 @@ import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.utilities.Sounds;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.FinishScreenViewController;
@@ -52,6 +58,8 @@ public class GameClient {
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
     private LobbyController lobbyController;
+
+    private ArrayList<ClientYacht> finishedBoats = new ArrayList<>();
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
@@ -142,11 +150,10 @@ public class GameClient {
     }
 
     private void loadStartScreen() {
-        socketThread.setSocketToClose();
-        if (server != null) {
-            server.terminate();
-            server = null;
+        if (socketThread != null) {
+            socketThread.setSocketToClose();
         }
+
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/views/StartScreenView.fxml"));
         try {
@@ -195,9 +202,19 @@ public class GameClient {
         raceView = fxmlLoader.getController();
         ClientYacht player = allBoatsMap.get(socketThread.getClientId());
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
+        raceView.getSendPressedProperty().addListener((obs, old, isPressed) -> {
+            if (isPressed) {
+                formatAndSendChatMessage(raceView.readChatInput());
+            }
+        });
     }
 
+
+
     private void loadFinishScreenView() {
+        Sounds.stopMusic();
+        Sounds.stopSoundEffects();
+        Sounds.playFinishMusic();
         FXMLLoader fxmlLoader = loadFXMLToHolder("/views/FinishScreenView.fxml");
         FinishScreenViewController controller = fxmlLoader.getController();
         controller.setFinishers(raceState.getPlayerPositions());
@@ -280,6 +297,14 @@ public class GameClient {
                 case YACHT_EVENT_CODE:
                     showCollisionAlert(StreamParser.extractYachtEventCode(packet));
                     break;
+
+                case CHATTER_TEXT:
+                    Pair<Integer, String> playerIdMessagePair = StreamParser
+                        .extractChatterText(packet);
+                    raceView.updateChatHistory(
+                        allBoatsMap.get(playerIdMessagePair.getKey()).getColour(),
+                        playerIdMessagePair.getValue()
+                    );
             }
         }
     }
@@ -335,6 +360,9 @@ public class GameClient {
             for (ClientYacht yacht : allBoatsMap.values()) {
                 if (yacht.getBoatStatus() != BoatStatus.FINISHED.getCode()) {
                     raceFinished = false;
+                } else if (!finishedBoats.contains(yacht)) {
+                    finishedBoats.add(yacht);
+                    Sounds.playFinishSound();
                 }
             }
 
@@ -350,6 +378,7 @@ public class GameClient {
             }
 
             if (raceFinished) {
+                Sounds.playFinishSound();
                 close();
                 loadFinishScreenView();
             }
@@ -373,6 +402,12 @@ public class GameClient {
      * @param e The key event triggering this call
      */
     private void keyPressed(KeyEvent e) {
+        if (raceView.isChatInputFocused()) {
+            if (e.getCode() == KeyCode.ENTER) {
+                formatAndSendChatMessage(raceView.readChatInput());
+            }
+            return;
+        }
         switch (e.getCode()) {
             case SPACE: // align with vmg
                 socketThread.sendBoatAction(BoatAction.VMG); break;
@@ -381,12 +416,16 @@ public class GameClient {
             case PAGE_DOWN: // downwind
                 socketThread.sendBoatAction(BoatAction.DOWNWIND); break;
             case ENTER: // tack/gybe
+                // if chat box is active take whatever is in there and send it to server
                 socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
         }
     }
 
 
     private void keyReleased(KeyEvent e) {
+        if (raceView.isChatInputFocused()) {
+            return;
+        }
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
@@ -409,6 +448,7 @@ public class GameClient {
     private void showCollisionAlert(YachtEventData yachtEventData) {
         // 33 is the agreed code to show collision
         if (yachtEventData.getEventId() == 33) {
+            Sounds.playCrashSound();
             raceState.storeCollision(
                 allBoatsMap.get(
                     yachtEventData.getSubjectId().intValue()
@@ -416,4 +456,19 @@ public class GameClient {
             );
         }
     }
+
+    private void formatAndSendChatMessage(String rawChat) {
+        if (rawChat.length() > 0) {
+            socketThread.sendChatterMessage(
+                new SimpleDateFormat("[HH:mm:ss] ").format(new Date()) +
+                    allBoatsMap.get(socketThread.getClientId()).getShortName() + ": " + rawChat
+            );
+        }
+    }
+
+
+    public ClientToServerThread getSocketThread() {
+        return socketThread;
+    }
+
 }

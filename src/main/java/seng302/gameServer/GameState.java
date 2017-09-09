@@ -1,6 +1,7 @@
 package seng302.gameServer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
@@ -39,9 +41,9 @@ import seng302.utilities.XMLParser;
  */
 public class GameState implements Runnable {
 
+
     @FunctionalInterface
     interface NewMessageListener {
-
         void notify(Message message);
     }
 
@@ -59,6 +61,7 @@ public class GameState implements Runnable {
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
+    private static Double speedMultiplier = 1d;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
 
@@ -72,19 +75,9 @@ public class GameState implements Runnable {
     private static Set<Mark> marks;
     private static List<Limit> courseLimit;
 
-    private static List<NewMessageListener> markListeners;
+    private static List<NewMessageListener> messageListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
-    /*
-        Ideally I would like to make this class an object instantiated by the server and given to
-        it's created threads if necessary. Outside of that I think the dependencies on it
-        (atm only Yacht & GameClient) can be removed from most other classes. The observable list of
-        players could be pulled directly from the server by the GameClient since it instantiates it
-        and it is reasonable for it to pull data. The current setup of publicly available statics is
-        pretty meh IMO because anything can change it making it unreliable and like people did with
-        the old ServerParser class everything that needs shared just gets thrown in the static
-        collections and things become a real mess.
-     */
 
     public GameState(String hostIpAddress) {
         windDirection = 180d;
@@ -94,13 +87,13 @@ public class GameState implements Runnable {
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
-
+        speedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
-        markListeners = new ArrayList<>();
+        messageListeners = new ArrayList<>();
 
         resetStartTime();
 
@@ -366,7 +359,7 @@ public class GameState implements Runnable {
         Double velocity = yacht.getCurrentVelocity();
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (velocity < maxBoatSpeed - 500) {
@@ -671,8 +664,8 @@ public class GameState implements Runnable {
     }
 
     private static void notifyMessageListeners(Message message) {
-        for (NewMessageListener mpl : markListeners) {
-            mpl.notify(message);
+        for (NewMessageListener ml : messageListeners) {
+            ml.notify(message);
         }
     }
 
@@ -684,8 +677,38 @@ public class GameState implements Runnable {
     }
 
 
+    public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
+        String chatterText = chatterMessage.getMessage();
+        String[] words = chatterText.split("\\s+");
+        if (words.length > 2 && isHost) {
+            switch (words[2].trim()) {
+                case ">speed":
+                    try {
+                        setSpeedMultiplier(Double.valueOf(words[3]));
+                        notifyMessageListeners(new ChatterMessage(
+                            chatterMessage.getMessage_type(),
+                            "SERVER: Speed modifier set to x" + words[3]
+                        ));
+                    } catch (Exception e) {
+                        Logger logger = LoggerFactory.getLogger(GameState.class);
+                        logger.error("cannot parse >speed value");
+                    }
+                    return;
+                case ">finish":
+                    notifyMessageListeners(new ChatterMessage(
+                        chatterMessage.getMessage_type(),
+                        "SERVER: Game will now finish"
+                    ));
+                    endRace();
+                    return;
+            }
+        }
+        notifyMessageListeners(chatterMessage);
+    }
+
+
     public static void addMarkPassListener(NewMessageListener listener) {
-        markListeners.add(listener);
+        messageListeners.add(listener);
     }
 
     public static void setCustomizationFlag() {
@@ -698,5 +721,18 @@ public class GameState implements Runnable {
 
     public static void resetCustomizationFlag() {
         customizationFlag = false;
+    }
+
+    public static void endRace () {
+        yachts.forEach((id, yacht) -> yacht.setBoatStatus(BoatStatus.FINISHED));
+        currentStage = GameStages.FINISHED;
+    }
+
+    public static void setSpeedMultiplier (double multiplier) {
+        speedMultiplier = multiplier;
+    }
+
+    public static double getSpeedMultiplier () {
+        return speedMultiplier;
     }
 }
