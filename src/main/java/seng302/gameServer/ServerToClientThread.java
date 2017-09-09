@@ -297,10 +297,6 @@ public class ServerToClientThread implements Runnable {
         return yacht;
     }
 
-    public void sendCollisionMessage(Integer yachtId) {
-        sendMessage(new YachtEventCodeMessage(yachtId));
-    }
-
     public void addConnectionListener(ConnectionListener listener) {
         connectionListeners.add(listener);
     }

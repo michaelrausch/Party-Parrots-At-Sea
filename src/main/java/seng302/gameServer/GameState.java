@@ -87,7 +87,7 @@ public class GameState implements Runnable {
     private static List<Token> allTokens;
     private static List<Token> tokensInPlay;
 
-    private static List<NewMessageListener> markListeners;
+    private static List<NewMessageListener> newMessageListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
 
@@ -106,7 +106,7 @@ public class GameState implements Runnable {
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
-        markListeners = new ArrayList<>();
+        newMessageListeners = new ArrayList<>();
         allTokens = makeTokens();
 
         resetStartTime();
@@ -744,8 +744,8 @@ public class GameState implements Runnable {
     }
 
     private static void notifyMessageListeners(Message message) {
-        for (NewMessageListener mpl : markListeners) {
-            mpl.notify(message);
+        for (NewMessageListener ml : newMessageListeners) {
+            ml.notify(message);
         }
     }
 
@@ -787,7 +787,7 @@ public class GameState implements Runnable {
     }
 
     public static void addMessageEventListener(NewMessageListener listener) {
-        markListeners.add(listener);
+        newMessageListeners.add(listener);
     }
 
     public static void setCustomizationFlag() {
