@@ -1,10 +1,12 @@
 package seng302.gameServer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import javafx.scene.paint.Color;
 import javax.xml.parsers.DocumentBuilder;
@@ -74,13 +76,15 @@ public class GameState implements Runnable {
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
-    private static List<Token> tokens;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
     private static Set<Mark> marks;
     private static List<Limit> courseLimit;
+
+    private static List<Token> allTokens;
+    private static List<Token> tokensInPlay;
 
     private static List<NewMessageListener> markListeners;
 
@@ -89,9 +93,8 @@ public class GameState implements Runnable {
     public GameState(String hostIpAddress) {
         windDirection = 180d;
         windSpeed = 10000d;
-        this.hostIpAddress = hostIpAddress;
         yachts = new HashMap<>();
-        tokens = new ArrayList<>();
+        tokensInPlay = new ArrayList<>();
 
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
@@ -103,6 +106,7 @@ public class GameState implements Runnable {
         previousUpdateTime = System.currentTimeMillis();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         markListeners = new ArrayList<>();
+        allTokens = makeTokens();
 
         resetStartTime();
 
@@ -127,6 +131,21 @@ public class GameState implements Runnable {
         courseLimit = XMLParser.parseRace(document).getCourseLimit();
     }
 
+
+    /**
+     * Make a pre defined set of tokensInPlay. //TODO wmu16 - Should read from some file for each
+     * race ideally
+     *
+     * @return A list of possible tokensInPlay for this race
+     */
+    private ArrayList<Token> makeTokens() {
+        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
+        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
+        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
+        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
+        return new ArrayList<>(Arrays.asList(token1, token2, token3, token4));
+    }
+
     public static String getHostIpAddress() {
         return hostIpAddress;
     }
@@ -139,16 +158,8 @@ public class GameState implements Runnable {
         return players;
     }
 
-    public static void addToken(Token token) {
-        tokens.add(token);
-    }
-
-    public static List<Token> getTokens() {
-        return tokens;
-    }
-
-    public static void clearTokens() {
-        tokens.clear();
+    public static List<Token> getTokensInPlay() {
+        return tokensInPlay;
     }
 
     public static void addPlayer(Player player) {
@@ -278,6 +289,16 @@ public class GameState implements Runnable {
     }
 
     /**
+     * Randomly select a subset of tokensInPlay from a pre defined superset
+     * Broadasts a new race status message to show this update
+     */
+    public static void spawnNewToken() {
+        Random random = new Random();
+        tokensInPlay.clear();
+        tokensInPlay.add(allTokens.get(random.nextInt(allTokens.size())));
+    }
+
+    /**
      * Called periodically in this GameState thread to update the GameState values
      */
     public void update() {
@@ -299,8 +320,6 @@ public class GameState implements Runnable {
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
-
-
         }
 
         if (raceFinished) {
@@ -340,15 +359,15 @@ public class GameState implements Runnable {
     }
 
     /**
-     * Checks all tokens to see if a yacht has picked one up
+     * Checks all tokensInPlay to see if a yacht has picked one up
      *
      * @param serverYacht The yacht to check for
      */
     private void checkTokenPickUp(ServerYacht serverYacht) {
-        for (Token token : tokens) {
+        for (Token token : tokensInPlay) {
             Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
             if (distance < YACHT_COLLISION_DISTANCE) {
-                tokens.remove(token);
+                tokensInPlay.remove(token);
                 serverYacht.powerUp(token.getTokenType());
                 logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + token
                     .getTokenType());

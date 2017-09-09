@@ -185,34 +185,10 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                spawnNewCoins();
+                GameState.spawnNewToken();
                 broadcastMessage(MessageFactory.getRaceXML());
             }
         }, 0, 60000);
-    }
-
-    /**
-     * Randomly select a subset of tokens from a pre defined superset
-     * Broadasts a new race status message to show this update
-     */
-    private void spawnNewCoins() {
-
-        List<Token> allTokens = new ArrayList<>();
-        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
-        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
-        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
-        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
-        allTokens.add(token1);
-        allTokens.add(token2);
-        allTokens.add(token3);
-        allTokens.add(token4);
-
-        GameState.clearTokens();
-        Random random = new Random();
-        Collections.shuffle(allTokens);
-        for (int i = 0; i < random.nextInt(allTokens.size()); i++) {
-            GameState.addToken(allTokens.get(i));
-        }
     }
 
     /**
