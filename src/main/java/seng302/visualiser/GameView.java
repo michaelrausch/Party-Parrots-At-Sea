@@ -20,6 +20,7 @@ import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -42,6 +43,8 @@ import seng302.visualiser.fxObjects.CourseBoundary;
 import seng302.visualiser.fxObjects.Gate;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
 import seng302.visualiser.fxObjects.Marker;
+import seng302.visualiser.map.Boundary;
+import seng302.visualiser.map.CanvasMap;
 
 /**
  * Created by cir27 on 20/07/17.
@@ -49,6 +52,8 @@ import seng302.visualiser.fxObjects.Marker;
 public class GameView extends Pane {
 
     private double bufferSize = 50;
+    private double panelWidth = 1280;
+    private double panelHeight = 960;
     private double canvasWidth = 1100;
     private double canvasHeight = 920;
     private boolean horizontalInversion = false;
@@ -102,7 +107,7 @@ public class GameView extends Pane {
     }
 
     private void zoomIn() {
-        scaleFactor = 0.10;
+        scaleFactor = 0.1;
         if (this.getScaleX() < 2.5) {
             this.setScaleX(this.getScaleX() + scaleFactor);
             this.setScaleY(this.getScaleY() + scaleFactor);
@@ -137,35 +142,20 @@ public class GameView extends Pane {
         gameObjects.add(markers);
         initializeTimer();
 
-        // DEBUG USE
-        gameObjects.add(new Circle(0, 0, 10, Color.RED));
-        gameObjects.add(new Circle(0, 960, 10, Color.RED));
-        gameObjects.add(new Circle(1280, 960, 10, Color.RED));
-        gameObjects.add(new Circle(1280, 0, 10, Color.RED));
-        // --------
-
-        double RATIO = getWidth() / getHeight();
-
         this.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                scaleFactor = getWidth() / getHeight() > RATIO
-                    ? getHeight() / canvasHeight
-                    : getWidth() / canvasWidth;
+                scaleFactor = getWidth() / panelWidth;
 
-                Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
-                getTransforms().remove(0, getTransforms().size());
-                getTransforms().add(scale);
+                if (panelHeight * scaleFactor < getHeight()) {
+                    Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+                    getTransforms().remove(0, getTransforms().size());
+                    getTransforms().add(scale);
 
-                setPrefWidth(getWidth() / scaleFactor);
-                setPrefHeight(getHeight() / scaleFactor);
-
-                System.out.println("Width: " + newValue);
-                System.out.println("Scale X: " + getScaleX());
-                System.out.println("Transition X: " + getTranslateX());
-                System.out.println("Get Height: " + getScene().getHeight());
-                System.out.println("Get Width: " + getScene().getWidth());
+                    setPrefWidth(getWidth() / scaleFactor);
+                    setPrefHeight(getHeight() / scaleFactor);
+                }
             }
         });
 
@@ -173,22 +163,16 @@ public class GameView extends Pane {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                scaleFactor = getWidth() / getHeight() > RATIO
-                    ? getWidth() / canvasWidth
-                    : getHeight() / canvasHeight;
+                scaleFactor = getHeight() / panelHeight;
 
-                Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
-                getTransforms().remove(0, getTransforms().size());
-                getTransforms().add(scale);
+                if (panelWidth * scaleFactor < getWidth()) {
+                    Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+                    getTransforms().remove(0, getTransforms().size());
+                    getTransforms().add(scale);
 
-                setPrefWidth(getWidth() / scaleFactor);
-                setPrefHeight(getHeight() / scaleFactor);
-
-                System.out.println("Height: " + newValue);
-                System.out.println("Scale Y: " + getScaleY());
-                System.out.println("Transition Y: " + getTranslateY());
-                System.out.println("Get Height: " + getScene().getHeight());
-                System.out.println("Get Width: " + getScene().getWidth());
+                    setPrefWidth(getWidth() / scaleFactor);
+                    setPrefHeight(getHeight() / scaleFactor);
+                }
             }
         });
     }
@@ -232,6 +216,43 @@ public class GameView extends Pane {
                 boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
             }
         };
+    }
+
+    /**
+     * First find the top right and bottom left points' geo locations, then retrieve map from google
+     * to display on image view.  - Haoming 22/5/2017
+     */
+    private void drawGoogleMap() {
+        findMetersPerPixel();
+        Point2D topLeftPoint = findScaledXY(maxLatPoint.getLat(), minLonPoint.getLng());
+        // distance from top left extreme to panel origin (top left corner)
+        double distanceFromTopLeftToOrigin = Math.sqrt(
+            Math.pow(topLeftPoint.getX() * metersPerPixelX, 2) + Math
+                .pow(topLeftPoint.getY() * metersPerPixelY, 2));
+        // angle from top left extreme to panel origin
+        double bearingFromTopLeftToOrigin = Math
+            .toDegrees(Math.atan2(-topLeftPoint.getX(), topLeftPoint.getY()));
+        // the top left extreme
+        GeoPoint topLeftPos = new GeoPoint(maxLatPoint.getLat(), minLonPoint.getLng());
+        GeoPoint originPos = GeoUtility
+            .getGeoCoordinate(topLeftPos, bearingFromTopLeftToOrigin, distanceFromTopLeftToOrigin);
+
+        // distance from origin corner to bottom right corner of the panel
+        double distanceFromOriginToBottomRight = Math.sqrt(
+            Math.pow(panelHeight * metersPerPixelY, 2) + Math
+                .pow(panelWidth * metersPerPixelX, 2));
+        double bearingFromOriginToBottomRight = Math
+            .toDegrees(Math.atan2(panelWidth, -panelHeight));
+        GeoPoint bottomRightPos = GeoUtility
+            .getGeoCoordinate(originPos, bearingFromOriginToBottomRight,
+                distanceFromOriginToBottomRight);
+
+        Boundary boundary = new Boundary(originPos.getLat(), bottomRightPos.getLng(),
+            bottomRightPos.getLat(), originPos.getLng());
+        CanvasMap canvasMap = new CanvasMap(boundary);
+        mapImage.setImage(canvasMap.getMapImage());
+        mapImage.fitWidthProperty().bind(((AnchorPane) this.getParent()).heightProperty());
+        mapImage.fitHeightProperty().bind(((AnchorPane) this.getParent()).heightProperty());
     }
 
     // TODO: 16/08/17 Break up this function
@@ -474,6 +495,7 @@ public class GameView extends Pane {
         findMinMaxPoint(limitingCoordinates);
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
+//        drawGoogleMap();
     }
 
     private void setSelectedBoat(BoatObject bo, Boolean isSelected) {
