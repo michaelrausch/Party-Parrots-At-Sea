@@ -39,6 +39,7 @@ public class GameView3D {
             root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
         );
         view.setCamera(camera);
+        view.setFill(Color.SKYBLUE);
         Sphere s = new Sphere(1);
         s.setMaterial(new PhongMaterial(Color.RED));
         Sphere left = new Sphere(1);
@@ -72,7 +73,13 @@ public class GameView3D {
         Node coin = ModelFactory.importModel(ModelType.VELOCITY_COIN).getAssets();
         coin.setTranslateX(coin.getTranslateX() - 30);
 
-        gameObjects.getChildren().addAll(s, left, right, top, bottom, boat, boat2, boat3, sMarker, fMarker, marker, coin);
+        gameObjects.getChildren().addAll(
+            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
+            s, left, right, top, bottom,
+            boat, boat2, boat3,
+            sMarker, fMarker, marker,
+            coin
+        );
         view.sceneProperty().addListener((obs, old, scene) -> {
             if (scene!=null)
                 enableCameraMovement(scene);

@@ -6,13 +6,11 @@ import javafx.animation.AnimationTimer;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
-import seng302.model.token.TokenType;
 
 /**
  * Factory class for creating 3D models of boats.
@@ -89,6 +87,8 @@ public class ModelFactory {
             case PLAIN_MARKER:
             case START_MARKER:
                 return makeMarker(assets);
+            case OCEAN:
+                return makeOcean(assets);
             default:
                 return new Model(assets, null);
         }
@@ -120,5 +120,11 @@ public class ModelFactory {
         area.getChildren().add(marker);
         area.getTransforms().add(new Rotate(90, new Point3D(1, 0, 0)));
         return new Model(area, null);
+    }
+
+    private static Model makeOcean(Group plane) {
+        plane.setScaleY(100);
+        plane.setScaleX(100);
+        return new Model(plane, null);
     }
 }
