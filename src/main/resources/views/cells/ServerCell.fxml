@@ -19,7 +19,7 @@
 <VBox fx:id="serverCellVBox" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="95.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <stylesheets>
        <String fx:value="/css/master.css" />
-       <String fx:value="/css/ServerCell.css" />
+       <String fx:value="/css/cells/ServerCell.css"/>
    </stylesheets>
    <children>
       <GridPane fx:id="serverListCell" prefHeight="80.0">

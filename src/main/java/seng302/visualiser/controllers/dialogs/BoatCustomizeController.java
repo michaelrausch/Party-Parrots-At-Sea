@@ -1,4 +1,4 @@
-package seng302.visualiser.controllers;
+package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXColorPicker;
@@ -13,6 +13,7 @@ import seng302.visualiser.ClientToServerThread;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import seng302.visualiser.controllers.LobbyController;
 
 public class BoatCustomizeController implements Initializable{
 

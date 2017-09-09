@@ -18,9 +18,9 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerDescription;
-import seng302.visualiser.GameClient;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
+import seng302.visualiser.controllers.cells.ServerCell;
 
 public class ServerListController implements Initializable, ServerListenerDelegate {
 

@@ -9,7 +9,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.BoatCustomizeController">
+<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+  minWidth="-Infinity" prefWidth="400.0" xmlns="http://javafx.com/javafx/8"
+  xmlns:fx="http://javafx.com/fxml/1"
+  fx:controller="seng302.visualiser.controllers.dialogs.BoatCustomizeController">
     <children>
         <GridPane>
             <columnConstraints>
@@ -56,7 +59,7 @@
         </GridPane>
     </children>
    <stylesheets>
-      <String fx:value="/css/ServerCreation.css" />
+       <String fx:value="/css/dialogs/ServerCreation.css"/>
       <String fx:value="/css/master.css" />
    </stylesheets>
 </JFXDialogLayout>

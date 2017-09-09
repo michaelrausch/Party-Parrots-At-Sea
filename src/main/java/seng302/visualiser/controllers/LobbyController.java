@@ -2,7 +2,6 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialog.DialogTransition;
 
 import java.io.IOException;
 import java.net.URL;
@@ -24,7 +23,7 @@ import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.Colors;
 import seng302.model.RaceState;
-import seng302.visualiser.ServerListener;
+import seng302.visualiser.controllers.cells.PlayerCell;
 
 public class LobbyController implements Initializable {
 

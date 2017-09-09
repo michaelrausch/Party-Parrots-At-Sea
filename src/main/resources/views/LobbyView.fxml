@@ -33,7 +33,8 @@
                 </GridPane>
                 <GridPane>
                     <children>
-                        <Label text="Party Parrots In Space" GridPane.valignment="CENTER" fx:id="serverName">
+                        <Label fx:id="serverName" text="Party Parrots In Space"
+                          GridPane.valignment="CENTER">
                             <font>
                                 <Font size="31.0" />
                             </font>
@@ -41,7 +42,8 @@
                                 <Insets left="35.0" top="10.0" />
                             </padding>
                         </Label>
-                        <Label text="This is a map, it's called Haoming" GridPane.rowIndex="1" fx:id="mapName">
+                        <Label fx:id="mapName" text="This is a map, it's called Haoming"
+                          GridPane.rowIndex="1">
                             <padding>
                                 <Insets left="35.0" top="-15.0" />
                             </padding>
@@ -67,7 +69,7 @@
                     <children>
                         <ScrollPane fx:id="playerListScrollPane" hbarPolicy="NEVER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                             <content>
-                                <VBox fx:id="playerListVBox" fillWidth="false" prefHeight="200.0" prefWidth="100.0" />
+                                <VBox fx:id="playerListVBox" prefHeight="200.0" prefWidth="100.0"/>
                             </content>
                             <GridPane.margin>
                                 <Insets bottom="15.0" left="7.0" right="15.0" top="15.0" />

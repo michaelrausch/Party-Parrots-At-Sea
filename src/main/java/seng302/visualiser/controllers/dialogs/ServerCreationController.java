@@ -1,20 +1,16 @@
-package seng302.visualiser.controllers;
+package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.controls.JFXSlider;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import com.jfoenix.controls.JFXTextField;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import seng302.gameServer.ServerDescription;
+import seng302.visualiser.controllers.ViewManager;
 
 public class ServerCreationController implements Initializable {
 
@@ -23,7 +19,7 @@ public class ServerCreationController implements Initializable {
     private JFXTextField serverName;
 
     @FXML
-    private JFXSlider maxPlayers;
+    private JFXSlider maxPlayersSlider;
     @FXML
     private Label maxPlayersLabel;
 
@@ -33,23 +29,26 @@ public class ServerCreationController implements Initializable {
 
     public void initialize(URL location, ResourceBundle resources) {
         updateMaxPlayerLabel();
-        maxPlayers.valueProperty().addListener((observable, oldValue, newValue) -> {
+        maxPlayersSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             updateMaxPlayerLabel();
         });
 
+        submitBtn.setOnMouseClicked(event -> submitBtn.setText("CREATING..."));
         submitBtn.setOnMouseReleased(event -> createServer());
     }
 
     public void createServer() {
 
-        ServerDescription serverDescription = ViewManager.getInstance().getGameClient().runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayers.getValue());
+        ServerDescription serverDescription = ViewManager.getInstance().getGameClient()
+            .runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayersSlider
+                .getValue());
 
         ViewManager.getInstance().setProperty("serverName", serverDescription.getName());
         ViewManager.getInstance().setProperty("mapName", serverDescription.getMapName());
     }
 
     private void updateMaxPlayerLabel() {
-        maxPlayers.setValue(Math.floor(maxPlayers.getValue()));
-        maxPlayersLabel.setText(Double.toString(maxPlayers.getValue()));
+        maxPlayersSlider.setValue(Math.floor(maxPlayersSlider.getValue()));
+        maxPlayersLabel.setText(String.format("YOU SELECTED: %.0f", maxPlayersSlider.getValue()));
     }
 }

@@ -1,4 +1,4 @@
-package seng302.visualiser.controllers;
+package seng302.visualiser.controllers.cells;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
@@ -17,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import seng302.gameServer.ServerDescription;
 import seng302.visualiser.GameClient;
+import seng302.visualiser.controllers.ViewManager;
 
 public class ServerCell implements Initializable {
 

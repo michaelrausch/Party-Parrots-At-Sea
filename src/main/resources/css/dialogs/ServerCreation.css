@@ -1,0 +1,55 @@
+#maxPlayersGridPane VBox * {
+    -fx-font-family: monospace !important;
+}
+
+#submitBtn {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-font-size: 20px;
+    -fx-effect: -fx-pp-dropshadow-dark;
+}
+
+.jfx-rippler {
+    -jfx-rippler-fill: -fx-pp-light-theme-color; /* set rippler color for button */
+}
+
+#submitBtn:hover {
+    -fx-font-size: 23px;
+    -fx-background-color: -fx-pp-light-theme-color;
+}
+
+#hostDialogHeader {
+    -fx-font-size: 30px;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+
+#serverName {
+    -jfx-focus-color: -fx-pp-dark-text-color;
+    -jfx-unfocus-color: -fx-pp-dark-text-color;
+    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-prompt-text-fill: -fx-pp-dark-text-color;
+    -fx-font-size: 16px;
+}
+
+#maxPlayersLabel {
+    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-font-size: 16px;
+}
+
+#maxPlayerPromptLabel {
+    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-font-size: 16px;
+}
+
+.maxPlayers {
+    -fx-font-size: 13px;
+}
+
+#maxPlayersSlider .thumb {
+    -fx-background-color: -fx-pp-theme-color;
+}
+
+#maxPlayersSlider .track {
+    -fx-background-color: -fx-pp-dark-text-color;
+}
