@@ -105,7 +105,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
-    private boolean done = false;
+    private ObservableList<ClientYacht> selectionComboBoxList = FXCollections.observableArrayList();
 
     public void initialize() {
         Sounds.stopMusic();
@@ -114,9 +114,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         importantAnnotations = new ImportantAnnotationsState();
 
         //Formatting the y axis of the sparkline
-//        raceSparkLine.getYAxis().setRotate(180);
-//        raceSparkLine.getYAxis().setTickLabelRotation(180);
-//        raceSparkLine.getYAxis().setTranslateX(-5);
+        raceSparkLine.getYAxis().setRotate(180);
+        raceSparkLine.getYAxis().setTickLabelRotation(180);
+        raceSparkLine.getYAxis().setTranslateX(-5);
         raceSparkLine.visibleProperty().setValue(false);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
@@ -141,8 +141,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
 //            chatHistory.setScrollTop(Double.MAX_VALUE);
 //        });
-        done = true;
-
+        contentAnchorPane.setOnMouseClicked((event) ->
+                contentAnchorPane.requestFocus()
+        );
     }
 
     public void loadRace (
@@ -193,12 +194,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 gameView.enableZoom();
             }
         });
-
-        initializeUpdateTimer();
-        initialiseFPSCheckBox();
-        initialiseAnnotationSlider();
-        initialiseBoatSelectionComboBox();
-        initialiseSparkLine();
+        Platform.runLater(() -> {
+            initializeUpdateTimer();
+            initialiseFPSCheckBox();
+            initialiseAnnotationSlider();
+            initialiseBoatSelectionComboBox();
+            initialiseSparkLine();
+        });
     }
 
     /**
@@ -349,13 +351,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 )
             );
         }
-//        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceID());
-//        positionData.getData().add(
-//            new XYChart.Data<>(
-//                Integer.toString(legNumber),
-//                1.0 + participants.size() - yacht.getPlacing()
-//            )
-//        );
     }
 
 
@@ -577,8 +572,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * for the combobox to take action upon selection
      */
     private void initialiseBoatSelectionComboBox() {
-        ObservableList<ClientYacht> selectables = FXCollections.observableArrayList(participants.values());
-        yachtSelectionComboBox.setItems(selectables);
+        selectionComboBoxList.setAll(participants.values());
+        yachtSelectionComboBox.setItems(selectionComboBoxList);
         yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
             if (selectedBoat != null) {
                 gameView.selectBoat(selectedBoat);
