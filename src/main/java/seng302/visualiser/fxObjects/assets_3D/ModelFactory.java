@@ -8,6 +8,7 @@ import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -53,7 +54,8 @@ public class ModelFactory {
     public static BoatModel boatGameView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().setAll(
-            new Scale(0.5, 0.5, 0.5)
+            new Rotate(-90, new Point3D(0,0,1)),
+            new Scale(0.2, 0.2, 0.2)
         );
         return new BoatModel(boatAssets, null, boatType);
     }
@@ -77,9 +79,14 @@ public class ModelFactory {
     }
 
     public static Model importModel(ModelType tokenType) {
-        ColModelImporter importer = new ColModelImporter();
-        importer.read(ModelFactory.class.getResource("/meshes/" + tokenType.filename));
-        Group assets = new Group(importer.getImport());
+        Group assets;
+        if (tokenType.filename == null) {
+            assets = new Group();
+        } else {
+            ColModelImporter importer = new ColModelImporter();
+            importer.read(ModelFactory.class.getResource("/meshes/" + tokenType.filename));
+            assets = new Group(importer.getImport());
+        }
         switch (tokenType) {
             case VELOCITY_COIN:
                 return makeCoinPickup(assets);
@@ -122,9 +129,13 @@ public class ModelFactory {
         return new Model(area, null);
     }
 
-    private static Model makeOcean(Group plane) {
-        plane.setScaleY(100);
-        plane.setScaleX(100);
-        return new Model(plane, null);
+    private static Model makeOcean(Group group) {
+//        group.setScaleY(Double.MAX_VALUE);
+//        group.setScaleX(Double.MAX_VALUE);
+//        group.getTransforms().add(new Rotate(90, new Point3D(1, 0, 0)));
+        Circle ocean = new Circle(0,0,1000, Color.DEEPSKYBLUE);
+        ocean.setStroke(Color.TRANSPARENT);
+        group.getChildren().add(ocean);
+        return new Model(group, null);
     }
 }

@@ -452,6 +452,19 @@ public class GameView extends Pane {
     }
 
     /**
+     * Rescales the race to the size of the window.
+     *
+     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
+     */
+    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
+        //Check is called once to avoid unnecessarily change the course limits once the race is running
+        findMinMaxPoint(limitingCoordinates);
+        double minLonToMaxLon = scaleRaceExtremities();
+        calculateReferencePointLocation(minLonToMaxLon);
+//        drawGoogleMap();
+    }
+
+    /**
      * Replaces all tokens in the course with those passed in
      *
      * @param newTokens the tokens to be put on the course.
@@ -486,18 +499,6 @@ public class GameView extends Pane {
                 }
             });
         }
-    }
-    /**
-     * Rescales the race to the size of the window.
-     *
-     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
-     */
-    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
-        //Check is called once to avoid unnecessarily change the course limits once the race is running
-        findMinMaxPoint(limitingCoordinates);
-        double minLonToMaxLon = scaleRaceExtremities();
-        calculateReferencePointLocation(minLonToMaxLon);
-//        drawGoogleMap();
     }
 
     private void setSelectedBoat(BoatObject bo, Boolean isSelected) {
