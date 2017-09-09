@@ -685,7 +685,7 @@ public class GameState implements Runnable {
                 case ">speed":
                     try {
                         setSpeedMultiplier(Double.valueOf(words[3]));
-                        broadcastChatter(new ChatterMessage(
+                        notifyMessageListeners(new ChatterMessage(
                             chatterMessage.getMessage_type(),
                             "SERVER: Speed modifier set to x" + words[3]
                         ));
@@ -695,7 +695,7 @@ public class GameState implements Runnable {
                     }
                     return;
                 case ">finish":
-                    broadcastChatter(new ChatterMessage(
+                    notifyMessageListeners(new ChatterMessage(
                         chatterMessage.getMessage_type(),
                         "SERVER: Game will now finish"
                     ));
@@ -703,7 +703,7 @@ public class GameState implements Runnable {
                     return;
             }
         }
-        broadcastChatter(chatterMessage);
+        notifyMessageListeners(chatterMessage);
     }
 
 
@@ -721,10 +721,6 @@ public class GameState implements Runnable {
 
     public static void resetCustomizationFlag() {
         customizationFlag = false;
-    }
-
-    public static void broadcastChatter(ChatterMessage chatterMessage) {
-        notifyMessageListeners(chatterMessage);
     }
 
     public static void endRace () {
