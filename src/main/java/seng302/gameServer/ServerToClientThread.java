@@ -324,37 +324,4 @@ public class ServerToClientThread implements Runnable {
     public void setAsHost() {
         isHost = true;
     }
-
-    private void checkChatterForCommands(ChatterMessage chatterMessage) {
-
-//        String chatterText = new String(
-//            Arrays.copyOfRange(chatterPayload, 3, 3 + chatterPayload.length)
-//        );
-//        String[] words = chatterText.split("\\s+");
-//        if (words.length > 2 && isHost) {
-//            switch (words[2].trim()) {
-//                case ">speed":
-//                    try {
-//                        GameState.setSpeedMultiplier(Double.valueOf(words[3]));
-//                        GameState.broadcastChatter(new ChatterMessage(
-//                            Byte.toUnsignedInt(chatterPayload[1]),
-//                            "SERVER: Speed modifier set to x" + words[3]
-//                        ));
-//                    } catch (Exception e) {
-//                        logger.error("cannot parse >speed value");
-//                    }
-//                    return;
-//                case ">finish":
-//                    GameState.broadcastChatter(new ChatterMessage(
-//                        chatterPayload[1],
-//                        "SERVER: Game will now finish"
-//                    ));
-//                    GameState.endRace();
-//                    return;
-//            }
-//        }
-//        GameState.broadcastChatter(
-//            ServerPacketParser.extractChatterText(chatterPayload)
-//        );
-    }
 }

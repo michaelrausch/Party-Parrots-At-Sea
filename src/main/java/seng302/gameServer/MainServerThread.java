@@ -85,12 +85,12 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-                broadcastMessage(makeRaceStatusMessage());
+                broadcastMessage(MessageFactory.getRaceStatusMessage());
                 try {
                     Thread.sleep(1000); //Hackish fix to make sure all threads have sent closing RaceStatus
                     terminate();
                 } catch (InterruptedException ie) {
-                    serverLog("Thread interrupted while waiting to terminate clients", 1);
+                    logger.trace("Thread interrupted while waiting to terminate clients", 1);
                 }
             }
         }
@@ -104,13 +104,13 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }
     }
 
-    public void sendBoatLocations() {
+    private void sendBoatLocations() {
         for (ServerYacht serverYacht : GameState.getYachts().values()) {
             broadcastMessage(MessageFactory.getBoatLocationMessage(serverYacht));
         }
     }
 
-    public void sendSetupMessages() {
+    private void sendSetupMessages() {
         broadcastMessage(MessageFactory.getRaceXML());
         broadcastMessage(MessageFactory.getRegattaXML());
         broadcastMessage(MessageFactory.getBoatXML());
