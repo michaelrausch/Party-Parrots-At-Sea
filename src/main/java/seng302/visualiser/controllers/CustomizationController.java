@@ -7,6 +7,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.utilities.Sounds;
 import seng302.visualiser.ClientToServerThread;
 
 public class CustomizationController {
@@ -34,7 +35,8 @@ public class CustomizationController {
 
     @FXML
     public void submitCustomization() {
-        System.out.println("Attempting to send");
+        Sounds.playButtonClick();
+//        System.out.println("Attempting to send");
         socketThread.sendCustomizationRequest(CustomizeRequestType.NAME, nameField.getText().getBytes());
         // TODO: 16/08/17 ajm412: Turn colors into byte array.
         Color color = boatColorPicker.getValue();

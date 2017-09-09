@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.Message;
@@ -75,6 +76,7 @@ public class ServerToClientThread implements Runnable {
 
     private ClientType clientType;
     private Boolean isRegistered = false;
+    private Boolean isHost = false;
 
     private XMLGenerator xmlGenerator;
 
@@ -199,7 +201,12 @@ public class ServerToClientThread implements Runnable {
 
                                 completeRegistration(requestedType);
                                 break;
-
+                            case CHATTER_TEXT:
+                                ChatterMessage chatterMessage = ServerPacketParser
+                                    .extractChatterText(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                GameState.processChatter(chatterMessage, isHost);
+                                break;
                             case RACE_CUSTOMIZATION_REQUEST:
                                 Long sourceID = Message
                                     .bytesToLong(Arrays.copyOfRange(payload, 0, 3));
@@ -312,5 +319,42 @@ public class ServerToClientThread implements Runnable {
 
     public void addDisconnectListener(DisconnectListener disconnectListener) {
         this.disconnectListener = disconnectListener;
+    }
+
+    public void setAsHost() {
+        isHost = true;
+    }
+
+    private void checkChatterForCommands(ChatterMessage chatterMessage) {
+
+//        String chatterText = new String(
+//            Arrays.copyOfRange(chatterPayload, 3, 3 + chatterPayload.length)
+//        );
+//        String[] words = chatterText.split("\\s+");
+//        if (words.length > 2 && isHost) {
+//            switch (words[2].trim()) {
+//                case ">speed":
+//                    try {
+//                        GameState.setSpeedMultiplier(Double.valueOf(words[3]));
+//                        GameState.broadcastChatter(new ChatterMessage(
+//                            Byte.toUnsignedInt(chatterPayload[1]),
+//                            "SERVER: Speed modifier set to x" + words[3]
+//                        ));
+//                    } catch (Exception e) {
+//                        logger.error("cannot parse >speed value");
+//                    }
+//                    return;
+//                case ">finish":
+//                    GameState.broadcastChatter(new ChatterMessage(
+//                        chatterPayload[1],
+//                        "SERVER: Game will now finish"
+//                    ));
+//                    GameState.endRace();
+//                    return;
+//            }
+//        }
+//        GameState.broadcastChatter(
+//            ServerPacketParser.extractChatterText(chatterPayload)
+//        );
     }
 }

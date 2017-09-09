@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -23,6 +24,7 @@ import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.Colors;
 import seng302.model.RaceState;
+import seng302.utilities.Sounds;
 import seng302.visualiser.ClientToServerThread;
 
 /**
@@ -30,6 +32,10 @@ import seng302.visualiser.ClientToServerThread;
  * Created by wmu16 on 10/07/17.
  */
 public class LobbyController {
+
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
+    }
 
     public enum CloseStatus {
         LEAVE,
@@ -153,6 +159,7 @@ public class LobbyController {
 
     @FXML
     public void customize() {
+        Sounds.playButtonClick();
         Parent root;
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(LobbyController.class.getResource("/views/customizeView.fxml"));
@@ -184,6 +191,7 @@ public class LobbyController {
 
     @FXML
     public void leaveLobbyButtonPressed() {
+        Sounds.playButtonClick();
         // TODO: 10/07/17 wmu16 - Finish function!
         GameState.setCurrentStage(GameStages.CANCELLED);
         // TODO: 20/07/17 wmu16 - Implement some way of terminating the game
@@ -193,6 +201,7 @@ public class LobbyController {
 
     @FXML
     public void readyButtonPressed() {
+        Sounds.playButtonClick();
         GameState.setCurrentStage(GameStages.PRE_RACE);
         // Do countdown logic here
 

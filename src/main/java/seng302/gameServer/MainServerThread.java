@@ -85,17 +85,20 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-                terminate();
+                broadcastMessage(makeRaceStatusMessage());
+                try {
+                    Thread.sleep(1000); //Hackish fix to make sure all threads have sent closing RaceStatus
+                    terminate();
+                } catch (InterruptedException ie) {
+                    serverLog("Thread interrupted while waiting to terminate clients", 1);
+                }
             }
         }
-
-        // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
         try {
             for (ServerToClientThread serverToClientThread : serverToClientThreads) {
                 serverToClientThread.terminate();
             }
             serverSocket.close();
-            return;
         } catch (IOException e) {
             System.out.println("IO error in server thread handler upon closing socket");
         }
@@ -199,6 +202,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     @Override
     public void clientConnected(ServerToClientThread serverToClientThread) {
         logger.debug("Player Connected From " + serverToClientThread.getThread().getName(), 0);
+        if (serverToClientThreads.size() == 0) { //Sets first client as host.
+            serverToClientThread.setAsHost();
+        }
         serverToClientThreads.add(serverToClientThread);
         serverToClientThread.addConnectionListener(this::sendSetupMessages);
         serverToClientThread.addDisconnectListener(this::clientDisconnected);

@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
@@ -45,7 +46,6 @@ public class GameState implements Runnable {
 
     @FunctionalInterface
     interface NewMessageListener {
-
         void notify(Message message);
     }
 
@@ -70,6 +70,7 @@ public class GameState implements Runnable {
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
+    private static Double speedMultiplier = 1d;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
 
@@ -99,7 +100,7 @@ public class GameState implements Runnable {
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
-
+        speedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
         //set this when game stage changes to prerace
@@ -431,7 +432,7 @@ public class GameState implements Runnable {
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
                 maxBoatSpeed *= 2;
@@ -756,6 +757,35 @@ public class GameState implements Runnable {
     }
 
 
+    public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
+        String chatterText = chatterMessage.getMessage();
+        String[] words = chatterText.split("\\s+");
+        if (words.length > 2 && isHost) {
+            switch (words[2].trim()) {
+                case ">speed":
+                    try {
+                        setSpeedMultiplier(Double.valueOf(words[3]));
+                        notifyMessageListeners(new ChatterMessage(
+                            chatterMessage.getMessage_type(),
+                            "SERVER: Speed modifier set to x" + words[3]
+                        ));
+                    } catch (Exception e) {
+                        Logger logger = LoggerFactory.getLogger(GameState.class);
+                        logger.error("cannot parse >speed value");
+                    }
+                    return;
+                case ">finish":
+                    notifyMessageListeners(new ChatterMessage(
+                        chatterMessage.getMessage_type(),
+                        "SERVER: Game will now finish"
+                    ));
+                    endRace();
+                    return;
+            }
+        }
+        notifyMessageListeners(chatterMessage);
+    }
+
     public static void addMessageEventListener(NewMessageListener listener) {
         markListeners.add(listener);
     }
@@ -772,4 +802,16 @@ public class GameState implements Runnable {
         customizationFlag = false;
     }
 
+    public static void endRace () {
+        yachts.forEach((id, yacht) -> yacht.setBoatStatus(BoatStatus.FINISHED));
+        currentStage = GameStages.FINISHED;
+    }
+
+    public static void setSpeedMultiplier (double multiplier) {
+        speedMultiplier = multiplier;
+    }
+
+    public static double getSpeedMultiplier () {
+        return speedMultiplier;
+    }
 }

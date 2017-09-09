@@ -15,6 +15,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seng302.model.stream.parser.RaceStartData;
 import seng302.model.stream.parser.RaceStatusData;
+import seng302.utilities.Sounds;
 
 /**
  * Class for storing race data that does not relate to specific vessels or marks such as time or wind.
@@ -34,6 +35,7 @@ public class RaceState {
     private long serverSystemTime;
     private long expectedStartTime;
     private boolean isRaceStarted = false;
+    private boolean gunFired = false;
     long timeTillStart;
     private ObservableList<ClientYacht> playerPositions;
     private List<ClientYacht> collisions = new ArrayList<>();
@@ -64,6 +66,10 @@ public class RaceState {
         if (raceTime < 0) {
             return "-" + DATE_TIME_FORMAT.format(-1 * (raceTime - 1000));
         } else {
+            if (!gunFired) {
+                gunFired = true;
+                Sounds.playCapGunSound();
+            }
             return DATE_TIME_FORMAT.format(serverSystemTime - expectedStartTime);
         }
     }
