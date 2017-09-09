@@ -223,12 +223,14 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         ServerToClientThread closedConnection = null;
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             if (serverToClientThread.getSocket() == player.getSocket()) {
-                serverToClientThreads.remove(closedConnection);
-                closedConnection.terminate();
+                closedConnection = serverToClientThread;
             }
         }
 
-        if (GameState.getCurrentStage() != GameStages.RACING) {
+        serverToClientThreads.remove(closedConnection);
+        closedConnection.terminate();
+
+        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
             sendSetupMessages();
         }
     }
