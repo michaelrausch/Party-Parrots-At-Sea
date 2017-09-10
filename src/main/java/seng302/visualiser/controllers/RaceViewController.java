@@ -112,6 +112,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         windArrowHolder.getChildren().addAll(windArrow);
         windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
         windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
+
     }
 
     public void loadRace (
@@ -143,7 +144,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView.getAssets()));
         gameView.setBoats(new ArrayList<>(participants.values()));
-//        gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateBorder(raceData.getCourseLimit());
 //        gameView.updateTokens(raceData.getTokens());
         gameView.updateCourse(
             new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()

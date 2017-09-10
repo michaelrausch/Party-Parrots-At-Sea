@@ -9,15 +9,12 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.ParallelCamera;
-import javafx.scene.SceneAntialiasing;
-import javafx.scene.SubScene;
+import javafx.scene.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
@@ -31,10 +28,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.assets_2D.AnnotationBox;
-import seng302.visualiser.fxObjects.assets_2D.BoatObject;
-import seng302.visualiser.fxObjects.assets_2D.CourseBoundary;
-import seng302.visualiser.fxObjects.assets_2D.Gate;
+import seng302.visualiser.fxObjects.assets_2D.*;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
@@ -47,10 +41,11 @@ public class GameView3D {
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_DEPTH = 100;
 
-    Group root3D;
-    SubScene view;
-    ParallelCamera camera;
-    Group gameObjects;
+    private Group root3D;
+    private SubScene view;
+//    ParallelCamera camera;
+    private PerspectiveCamera camera;
+    private Group gameObjects;
 
     private double bufferSize = 0;
     private double canvasWidth = 200;
@@ -69,7 +64,7 @@ public class GameView3D {
     final double SCALE_DELTA = 1.1;
 
     private Text fpsDisplay = new Text();
-    private Polygon raceBorder = new CourseBoundary();
+    private Group raceBorder = new Group();
 
     /* Note that if either of these is null then values for it have not been added and the other
        should be used as the limits of the map. */
@@ -112,16 +107,18 @@ public class GameView3D {
 
 
     public GameView3D () {
-//        camera = new PerspectiveCamera(true);
-        camera = new ParallelCamera();
+        camera = new PerspectiveCamera(true);
+//        camera = new ParallelCamera();
+//        gameObjects.getTransforms().add(new Scale(4,4,4));
+//        camera.setLayoutX(camera.getLayoutX()-400);
+//        camera.setLayoutY(camera.getLayoutY()-400);
         camera.getTransforms().addAll(
             new Translate(0,0, -DEFAULT_CAMERA_DEPTH)
         );
         camera.setFarClip(Double.MAX_VALUE);
         camera.setNearClip(0.1);
-//        camera.setFieldOfView(FOV);
+        camera.setFieldOfView(FOV);
         gameObjects = new Group();
-        gameObjects.getTransforms().add(new Scale(4,4,4));
         root3D = new Group(camera, gameObjects);
         view = new SubScene(
             root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
@@ -129,11 +126,11 @@ public class GameView3D {
         view.setCamera(camera);
         view.setFill(Color.SKYBLUE);
         camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
-        camera.setLayoutX(camera.getLayoutX()-400);
-        camera.setLayoutY(camera.getLayoutX()-600);
 //        gameObjects.getChildren().addAll(raceBorder, markers, tokens);
+
         gameObjects.getChildren().addAll(
-            ModelFactory.importModel(ModelType.OCEAN).getAssets(), markers
+            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
+            raceBorder, markers
         );
 
 //        Sphere s = new Sphere(1);
@@ -203,33 +200,33 @@ public class GameView3D {
             );
         }
 
-        final List<Gate> gates = new ArrayList<>();
-        Paint colour = Color.BLACK;
+        final List<Group> gates = new ArrayList<>();
+
         //Creates new markers
         for (CompoundMark cMark : newCourse) {
-            //Set start and end colour
-//            if (cMark.getId() == sequence.get(0).getCompoundMarkID()) {
-//                colour = Color.GREEN;
-//            } else if (cMark.getId() == sequence.get(sequence.size() - 1).getCompoundMarkID()) {
-//                colour = Color.RED;
-//            }
-            //Create mark dots
             for (Mark mark : cMark.getMarks()) {
-                makeAndBindMarker(mark);
+                if (cMark.getId() == sequence.get(0).getCompoundMarkID()) {
+                    makeAndBindMarker(mark, ModelType.START_MARKER);
+                } else if (cMark.getId() == sequence.get(sequence.size() - 1).getCompoundMarkID()) {
+                    makeAndBindMarker(mark, ModelType.FINISH_MARKER);
+                } else {
+                    makeAndBindMarker(mark, ModelType.PLAIN_MARKER);
+                }
             }
-//            //Create gate line
-//            if (cMark.isGate()) {
-//                for (int i = 1; i < cMark.getMarks().size(); i++) {
-//                    gates.add(
-//                        makeAndBindGate(
-//                            markerObjects.get(cMark.getSubMark(i)),
-//                            markerObjects.get(cMark.getSubMark(i + 1)),
-//                            colour
-//                        )
-//                    );
-//                }
-//            }
-//            colour = Color.BLACK;
+            //Create gate line
+            if (cMark.isGate()) {
+                ModelType gateType;
+                if (cMark.getId() == sequence.get(0).getCompoundMarkID()) {
+                    gateType = ModelType.START_LINE;
+                } else if (cMark.getId() == sequence.get(sequence.size() - 1).getCompoundMarkID()) {
+                    gateType = ModelType.FINISH_LINE;
+                } else {
+                    gateType = ModelType.GATE_LINE;
+                }
+                gates.add(makeAndBindGate(
+                    cMark.getSubMark(1), cMark.getSubMark(2), gateType
+                ));
+            }
         }
 
         //Scale race to markers if there is no border.
@@ -254,10 +251,11 @@ public class GameView3D {
      * Creates a new Marker and binds it's position to the given Mark.
      *
      * @param observableMark The mark to bind the marker to.
+     * @param markerType the type of marker as a ModelType. Should be PLAIN_MARKER, START_MARKER or END_MARKER
      */
-    private void makeAndBindMarker(Mark observableMark) {
+    private void makeAndBindMarker(Mark observableMark, ModelType markerType) {
 
-        Group marker = ModelFactory.importModel(ModelType.PLAIN_MARKER).getAssets();
+        Group marker = ModelFactory.importModel(markerType).getAssets();
 
         markerObjects.put(observableMark, marker);
         observableMark.addPositionListener((mark, lat, lon) -> {
@@ -265,6 +263,35 @@ public class GameView3D {
             markerObjects.get(mark).setLayoutX(p2d.getX());
             markerObjects.get(mark).setLayoutY(p2d.getY());
         });
+    }
+
+    /**
+     * Creates a new gate connecting the given marks.
+     *
+     * @param m1 The first Mark of the gate.
+     * @param m2 The second Mark of the gate.
+     * @param gateType The type of model for the gate.
+     * @return the new gate.
+     */
+    private Group makeAndBindGate(Mark m1, Mark m2, ModelType gateType) {
+        Point2D m1Location = findScaledXY(m1);
+        Point2D m2Location = findScaledXY(m2);
+
+        Group barrier = ModelFactory.importModel(gateType).getAssets();
+        barrier.getTransforms().addAll(
+            new Rotate(
+                Math.toDegrees(
+                    Math.atan2(m2Location.getY() - m1Location.getY(), m2Location.getX() - m1Location.getX())
+                ) + 90,
+                new Point3D(0,1,0)
+            ),
+            new Scale(1, 1, m1Location.distance(m2Location) / 10)
+        );
+
+        Point2D midPoint = m2Location.midpoint(m1Location);
+        barrier.setLayoutX(midPoint.getX());
+        barrier.setLayoutY(midPoint.getY());
+        return barrier;
     }
 
 
@@ -417,16 +444,16 @@ public class GameView3D {
 
     public void cameraMovement(KeyEvent event) {
         switch (event.getCode()) {
-            case UP:
+            case NUMPAD8:
                 camera.getTransforms().addAll(new Rotate(0.5, new Point3D(1,0,0)));
                 break;
-            case DOWN:
+            case NUMPAD2:
                 camera.getTransforms().addAll(new Rotate(-0.5, new Point3D(1,0,0)));
                 break;
-            case LEFT:
+            case NUMPAD4:
                 camera.getTransforms().addAll(new Rotate(-0.5, new Point3D(0,1,0)));
                 break;
-            case RIGHT:
+            case NUMPAD6:
                 camera.getTransforms().addAll(new Rotate(0.5, new Point3D(0,1,0)));
                 break;
             case X:
@@ -436,10 +463,10 @@ public class GameView3D {
                 camera.getTransforms().addAll(new Translate(0, 0, -1.5));
                 break;
             case W:
-                camera.getTransforms().addAll(new Translate(0, 1, 0));
+                camera.getTransforms().addAll(new Translate(0, -1, 0));
                 break;
             case S:
-                camera.getTransforms().addAll(new Translate(0, -1, 0));
+                camera.getTransforms().addAll(new Translate(0, 1, 0));
                 break;
             case A:
                 camera.getTransforms().addAll(new Translate(-1, 0, 0));
@@ -506,5 +533,71 @@ public class GameView3D {
 
     public Node getAssets () {
         return view;
+    }
+
+    /**
+     * Adds a border to the GameView and rescales to the size of the border, does not rescale if a
+     * border already exists. Assumes the border is larger than the course.
+     *
+     * @param border the race border to be drawn.
+     */
+    public void updateBorder(List<Limit> border) {
+        if (borderPoints == null) {
+            borderPoints = border;
+            rescaleRace(new ArrayList<>(borderPoints));
+        }
+        List<Node> boundaryAssets = new ArrayList<>();
+
+        Point2D lastLocation = findScaledXY(border.get(0).getLat(), border.get(0).getLng());
+        Group pylon = ModelFactory.importModel(ModelType.BORDER_PYLON).getAssets();
+        pylon.setLayoutX(lastLocation.getX());
+        pylon.setLayoutY(lastLocation.getY());
+        boundaryAssets.add(pylon);
+
+        for (int i=1; i<border.size(); i++) {
+            Point2D location = findScaledXY(border.get(i).getLat(), border.get(i).getLng());
+            pylon = ModelFactory.importModel(ModelType.BORDER_PYLON).getAssets();
+            pylon.setLayoutX(location.getX());
+            pylon.setLayoutY(location.getY());
+
+            Group barrier = ModelFactory.importModel(ModelType.BORDER_BARRIER).getAssets();
+            barrier.getTransforms().addAll(
+                new Rotate(
+                    Math.toDegrees(
+                        Math.atan2(location.getY() - lastLocation.getY(), location.getX() - lastLocation.getX())
+                    ),
+                    new Point3D(0,1,0)
+                ),
+                new Scale((lastLocation.distance(location) / 15)-0.2, 1, 1)
+            );
+
+            Point2D midPoint = location.midpoint(lastLocation);
+            barrier.setLayoutX(midPoint.getX());
+            barrier.setLayoutY(midPoint.getY());
+
+            lastLocation = location;
+
+            boundaryAssets.add(barrier);
+            boundaryAssets.add(pylon);
+        }
+
+        Point2D firstLocation = findScaledXY(border.get(0).getLat(), border.get(0).getLng());
+        Group barrier = ModelFactory.importModel(ModelType.BORDER_BARRIER).getAssets();
+        barrier.getTransforms().addAll(
+            new Rotate(
+                Math.toDegrees(
+                    Math.atan2(lastLocation.getY() - firstLocation.getY(), lastLocation.getX() - firstLocation.getX())
+                ),
+                new Point3D(0,1,0)
+            ),
+            new Scale((firstLocation.distance(lastLocation) / 15)-0.2, 1, 1)
+        );
+
+        Point2D midPoint = lastLocation.midpoint(firstLocation);
+        barrier.setLayoutX(midPoint.getX());
+        barrier.setLayoutY(midPoint.getY());
+        boundaryAssets.add(barrier);
+
+        Platform.runLater(() -> raceBorder.getChildren().setAll(boundaryAssets));
     }
 }

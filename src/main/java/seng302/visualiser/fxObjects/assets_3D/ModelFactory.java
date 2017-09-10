@@ -12,6 +12,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 
 /**
  * Factory class for creating 3D models of boats.
@@ -55,7 +56,7 @@ public class ModelFactory {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().setAll(
             new Rotate(-90, new Point3D(0,0,1)),
-            new Scale(0.2, 0.2, 0.2)
+            new Scale(0.05, 0.05, 0.05)
         );
         return new BoatModel(boatAssets, null, boatType);
     }
@@ -96,6 +97,13 @@ public class ModelFactory {
                 return makeMarker(assets);
             case OCEAN:
                 return makeOcean(assets);
+            case BORDER_PYLON:
+            case BORDER_BARRIER:
+                return makeBarrier(assets);
+            case FINISH_LINE:
+            case START_LINE:
+            case GATE_LINE:
+                return makeGate(assets);
             default:
                 return new Model(assets, null);
         }
@@ -137,5 +145,20 @@ public class ModelFactory {
         ocean.setStroke(Color.TRANSPARENT);
         group.getChildren().add(ocean);
         return new Model(group, null);
+    }
+
+    private static Model makeBarrier(Group assets) {
+        assets.getTransforms().addAll(
+            new Rotate(90, new Point3D(1,0,0)),
+            new Scale(1.5,1.5,1.5)
+        );
+        return new Model(assets, null);
+    }
+
+    private static Model makeGate(Group assets) {
+        assets.getTransforms().addAll(
+            new Rotate(90, new Point3D(1,0,0))
+        );
+        return new Model(assets, null);
     }
 }

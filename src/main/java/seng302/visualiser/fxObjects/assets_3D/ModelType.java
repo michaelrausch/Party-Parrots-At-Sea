@@ -12,8 +12,11 @@ public enum ModelType {
     PLAIN_MARKER ("plain_marker.dae"),
     MARK_AREA ("mark_area.dae"),
     OCEAN (null),
-    BORDER_PYLON (null),
-    BORDER_BARRIER (null);
+    BORDER_PYLON ("barrier_pole.dae"),
+    BORDER_BARRIER ("barrier_segment.dae"),
+    FINISH_LINE ("finish_line.dae"),
+    START_LINE ("start_line.dae"),
+    GATE_LINE ("gate_line.dae");
 
     final String filename;
 
