@@ -2,8 +2,11 @@ package seng302.visualiser.controllers.cells;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
+import com.sun.org.apache.bcel.internal.classfile.Unknown;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 
 import com.jfoenix.controls.JFXTextField;
@@ -25,7 +28,6 @@ public class ServerCell implements Initializable {
     //Layout
     @FXML
     private GridPane serverListCell;
-
     //Server Information
     @FXML
     private Label serverName;
@@ -46,17 +48,16 @@ public class ServerCell implements Initializable {
     private String hostName;
     private Integer portNumber;
 
-
     public ServerCell(ServerDescription server) {
         this.name = server.getName();
 
         this.currPlayerCount = server.getNumPlayers().toString() + "/" + server.getCapacity().toString();
         this.mapNameString = server.getMapName();
 
+        // Can cause issues on windows PCs without the bonjour service installed.
         this.hostName = server.getAddress();
         this.portNumber = server.portNumber();
     }
-
 
     public void initialize(URL location, ResourceBundle resources) {
         serverName.setText(name);
@@ -67,9 +68,7 @@ public class ServerCell implements Initializable {
     }
 
     public void joinServer() {
-        // TODO: 7/09/17 ajm412: Connect to a server here with the values stored in the hostName/portNumber variables.
         System.out.println("Connecting to " + serverName.getText());
-
         ViewManager.getInstance().getGameClient().runAsClient(hostName, portNumber);
     }
 

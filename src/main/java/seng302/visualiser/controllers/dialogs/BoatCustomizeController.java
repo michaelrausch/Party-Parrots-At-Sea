@@ -50,9 +50,8 @@ public class BoatCustomizeController implements Initializable{
     @FXML
     public void submitCustomization() {
         socketThread.sendCustomizationRequest(CustomizeRequestType.NAME, boatName.getText().getBytes());
-        // TODO: 16/08/17 ajm412: Turn colors into byte array.
-        Color color = colorPicker.getValue();
 
+        Color color = colorPicker.getValue();
         short red = (short) (color.getRed() * 255);
         short green = (short) (color.getGreen() * 255);
         short blue = (short) (color.getBlue() * 255);

@@ -3,24 +3,36 @@ package seng302.visualiser.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
+import com.sun.org.apache.xpath.internal.SourceTree;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import com.jfoenix.controls.JFXTextField;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javax.net.ssl.HostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerDescription;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
+import sun.net.util.IPAddressUtil;
+import sun.security.util.HostnameChecker;
 
 public class ServerListController implements Initializable, ServerListenerDelegate {
 
@@ -46,24 +58,42 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private JFXTextField serverPortNumber;
     //---------FXML END---------//
 
+    private Label noServersFound;
     private Logger logger = LoggerFactory.getLogger(ServerListController.class);
 
     public void initialize(URL location, ResourceBundle resources) {
 
         serverListVBox.minWidthProperty().bind(serverListScrollPane.widthProperty());
 
-        connectButton.setOnMouseReleased(event -> goToDirectConnectLobby());
+        // Set Event Bindings
+        connectButton.setOnMouseReleased(event -> attemptToDirectConnect());
+        for (JFXTextField textField : Arrays.asList(serverHostName, serverPortNumber)) {
+            textField.setOnKeyPressed(event -> {
+                if (event.getCode().equals(KeyCode.ENTER)) {
+                    attemptToDirectConnect();
+                }
+            });
+        }
 
+        // Start listening for servers on network
         try {
             ServerListener.getInstance().setDelegate(this);
         } catch (IOException e) {
             logger.warn("Could not start Server Listener Delegate");
         }
 
+        noServersFound = new Label();
+        noServersFound.setText("No Servers Found");
+        noServersFound.setTextFill(Color.BLACK);
+        noServersFound.setAlignment(Pos.CENTER);
+        noServersFound.minWidthProperty().bind(serverListVBox.widthProperty());
+        noServersFound.setStyle("-fx-font-size: 30px; -fx-padding:50px;");
+
+        serverListVBox.getChildren().add(noServersFound);
+        // Set up dialog for server creation
         Platform.runLater(() -> {
             FXMLLoader dialogContent = new FXMLLoader(getClass().getResource(
                 "/views/dialogs/ServerCreationDialog.fxml"));
-
             try {
                 JFXDialog dialog = new JFXDialog(serverListMainStackPane, dialogContent.load(),
                     DialogTransition.CENTER);
@@ -74,8 +104,47 @@ public class ServerListController implements Initializable, ServerListenerDelega
         });
     }
 
-    private void goToDirectConnectLobby() {
-        // TODO: 7/09/17 Error handling
+    /**
+     *
+     */
+    private void attemptToDirectConnect() {
+        if (validateHostName() && validatePortNumber()) {
+            System.out.println("Do some stuff");
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
+    private Boolean validateHostName() {
+        // Validate the Host Name here.
+        return true;
+    }
+
+    /**
+     *
+     * @return
+     */
+    private Boolean validatePortNumber() {
+        if (serverPortNumber.getLength() == 0) return false;
+        try {
+            Integer portNum = Integer.parseInt(serverPortNumber.getText());
+            if (portNum > 1024 && portNum <= 65536) {
+                return true;
+            } else {
+                System.out.println(portNum.toString() + "is not a valid port number");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Not a valid number.");
+        }
+        return false;
+    }
+
+    /**
+     *
+     */
+    private void DirectConnect() {
         ViewManager.getInstance().getGameClient().runAsClient(serverHostName.getText(), Integer.parseInt(serverPortNumber.getText()));
     }
 
@@ -89,28 +158,35 @@ public class ServerListController implements Initializable, ServerListenerDelega
         Platform.runLater(() -> refreshServers(servers));
     }
 
+    /**
+     *
+     * @param servers
+     */
     private void refreshServers(List<ServerDescription> servers) {
         // TODO: 7/09/17 ajm412: Add some way to force a refresh.
         // TODO: 7/09/17 ajm412: Add something for No Servers Found.
         serverListVBox.getChildren().clear();
 
-        // Populate the server list with a series of server cell objects.
-        for (ServerDescription server : servers){
-            VBox pane = null;
+        if (servers.size() == 0) {
+            serverListVBox.getChildren().add(noServersFound);
+        } else {
+            // Populate the server list with a series of server cell objects.
+            for (ServerDescription server : servers) {
+                VBox pane = null;
 
-            FXMLLoader loader = new FXMLLoader(
+                FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/views/cells/ServerCell.fxml"));
 
-            loader.setController(new ServerCell(server));
+                loader.setController(new ServerCell(server));
 
-            try {
-                pane = loader.load();
-            } catch (IOException e) {
-                e.printStackTrace();
+                try {
+                    pane = loader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                serverListVBox.getChildren().add(pane);
             }
-
-            serverListVBox.getChildren().add(pane);
         }
-
     }
 }
