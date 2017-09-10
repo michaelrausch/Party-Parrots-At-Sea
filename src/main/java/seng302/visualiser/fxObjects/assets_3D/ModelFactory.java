@@ -104,8 +104,10 @@ public class ModelFactory {
             case START_LINE:
             case GATE_LINE:
                 return makeGate(assets);
+            case WAKE:
+                return makeWake(assets);
             default:
-                return new Model(assets, null);
+                return new Model(new Group(assets), null);
         }
     }
 
@@ -118,7 +120,7 @@ public class ModelFactory {
             new Translate(0,-1,0),
             new Rotate(0 ,new Point3D(1,1,1))
         );
-        return new Model(assets, new AnimationTimer() {
+        return new Model(new Group(assets), new AnimationTimer() {
 
             private double rotation = 0;
             private Group group = assets;
@@ -137,14 +139,14 @@ public class ModelFactory {
         Group area = new Group(importer.getImport());
         area.getChildren().add(marker);
         area.getTransforms().add(new Rotate(90, new Point3D(1, 0, 0)));
-        return new Model(area, null);
+        return new Model(new Group(area), null);
     }
 
     private static Model makeOcean(Group group) {
 //        group.setScaleY(Double.MAX_VALUE);
 //        group.setScaleX(Double.MAX_VALUE);
 //        group.getTransforms().add(new Rotate(90, new Point3D(1, 0, 0)));
-        Circle ocean = new Circle(0,0,1000, Color.DEEPSKYBLUE);
+        Circle ocean = new Circle(0,0,1000, Color.DARKSEAGREEN);
         ocean.setStroke(Color.TRANSPARENT);
         group.getChildren().add(ocean);
         return new Model(group, null);
@@ -155,13 +157,22 @@ public class ModelFactory {
             new Rotate(90, new Point3D(1,0,0)),
             new Scale(1.5,1.5,1.5)
         );
-        return new Model(assets, null);
+        return new Model(new Group(assets), null);
     }
 
     private static Model makeGate(Group assets) {
         assets.getTransforms().addAll(
             new Rotate(90, new Point3D(1,0,0))
         );
-        return new Model(assets, null);
+        return new Model(new Group(assets), null);
+    }
+
+    private static Model makeWake(Group assets) {
+        assets.getTransforms().setAll(
+            new Rotate(-90, new Point3D(0,0,1)),
+            new Rotate(90, new Point3D(1,0,0)),
+            new Scale(0.5, 0.5, 0.5)
+        );
+        return new Model(new Group(assets), null);
     }
 }

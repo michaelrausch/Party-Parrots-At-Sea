@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -20,6 +21,7 @@ import javafx.scene.transform.Translate;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 import seng302.visualiser.fxObjects.assets_3D.BoatModel;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
+import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -61,7 +63,7 @@ public class BoatObject extends Group {
 //    private Polygon boatPoly;
     private BoatModel boatPoly;
     private Polygon sail;
-    private Wake wake;
+    private Group wake;
     private Line leftLayLine;
     private Line rightLayline;
     private double distanceTravelled, lastRotation;
@@ -133,8 +135,8 @@ public class BoatObject extends Group {
         rightLayline = new Line();
         trail.getStrokeDashArray().setAll(5d, 10d);
         trail.setCache(true);
-        wake = new Wake(0, -BOAT_HEIGHT);
-        wake.setVisible(true);
+
+        wake = ModelFactory.importModel(ModelType.WAKE).getAssets();
 
         sail = new Polygon(0.0,BOAT_HEIGHT / 4,
             0.0, BOAT_HEIGHT);
@@ -162,7 +164,7 @@ public class BoatObject extends Group {
 //        super.getChildren().add(pointLight);
         AmbientLight light = new AmbientLight(new Color(0.5,0.5,0.5,1));
         super.getChildren().add(light);
-        super.getChildren().addAll(boatPoly.getAssets());//, sail);
+        super.getChildren().addAll(boatPoly.getAssets());
     }
 
     public void setFill (Color value) {
@@ -229,8 +231,8 @@ public class BoatObject extends Group {
 //                sail.setLayoutX(x);
 //                sail.setLayoutY(y);
 //            }
-//            wake.setLayoutX(x);
-//            wake.setLayoutY(y);
+            wake.setLayoutX(x);
+            wake.setLayoutY(y);
         });
 //        wake.setRotation(rotation, velocity);
 //        rotateTo(rotation);
@@ -262,6 +264,7 @@ public class BoatObject extends Group {
 
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
         rotation.setAngle(heading);
+        wake.getTransforms().setAll(new Rotate(heading, new Point3D(0,0,1)));
         if (!sailsIn) {
             boatPoly.showSail();
             Double sailWindOffset = 30.0;
@@ -270,19 +273,19 @@ public class BoatObject extends Group {
             Double normalizedHeading = normalizeHeading(heading, windDir);
             if (normalizedHeading < 180) {
                 if (normalizedHeading < sailWindOffset + upwindAngleLimit){
-                    boatPoly.rotateSail(heading + 90 - upwindAngleLimit);
+                    boatPoly.rotateSail(90 - upwindAngleLimit);
                 } else if (normalizedHeading > 90 + sailWindOffset){
-                    boatPoly.rotateSail(heading + downwindAngleLimit);
+                    boatPoly.rotateSail(downwindAngleLimit);
                 } else {
-                    boatPoly.rotateSail(windDir + 90 + sailWindOffset);
+                    boatPoly.rotateSail(90 + sailWindOffset);
                 }
             } else {
                 if (normalizedHeading > 360 - (sailWindOffset + upwindAngleLimit)){
-                    boatPoly.rotateSail(heading + 90 + upwindAngleLimit);
+                    boatPoly.rotateSail(90 + upwindAngleLimit);
                 } else if (normalizedHeading < 270 - sailWindOffset){
-                    boatPoly.rotateSail(heading + 180 - downwindAngleLimit);
+                    boatPoly.rotateSail(180 - downwindAngleLimit);
                 } else {
-                    boatPoly.rotateSail(windDir + 90 - sailWindOffset);
+                    boatPoly.rotateSail(90 - sailWindOffset);
                 }
             }
         } else {
@@ -447,7 +450,7 @@ public class BoatObject extends Group {
     }
 
     public void setTrajectory(double heading, double velocity, double windDir) {
-        wake.setRotation(lastHeading - heading, velocity);
+//        wake.r(lastHeading - heading, velocity);
 //        rotateTo(heading, false, windDir);
         xVelocity = Math.cos(Math.toRadians(heading)) * velocity;
         yVelocity = Math.sin(Math.toRadians(heading)) * velocity;

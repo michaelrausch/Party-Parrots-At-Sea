@@ -13,6 +13,8 @@ import javafx.scene.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Sphere;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -126,9 +128,35 @@ public class GameView3D {
         camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
 //        gameObjects.getChildren().addAll(raceBorder, markers, tokens);
 
+        Sphere red = new Sphere(1);
+        red.setMaterial(new PhongMaterial(Color.RED));
+        red.setLayoutX(0);
+        red.setLayoutY(0);
+
+        Sphere blue = new Sphere(1);
+        blue.setMaterial(new PhongMaterial(Color.BLUE));
+        blue.setLayoutX(1);
+        blue.setLayoutY(0);
+
+        Sphere green = new Sphere(1);
+        green.setMaterial(new PhongMaterial(Color.GREEN));
+        green.setLayoutX(-.5);
+        green.setLayoutY(0);
+
+        Sphere white = new Sphere(1);
+        white.setMaterial(new PhongMaterial(Color.WHITE));
+        white.setLayoutX(-.25);
+        white.setLayoutY(0);
+
+        Sphere black = new Sphere(1);
+        black.setMaterial(new PhongMaterial(Color.BLACK));
+        black.setLayoutX(-.125);
+        black.setLayoutY(0);
+
         gameObjects.getChildren().addAll(
             ModelFactory.importModel(ModelType.OCEAN).getAssets(),
-            raceBorder, markers, tokens
+            raceBorder, markers, tokens,
+            white, blue, green, black, red
         );
 
 //        Sphere s = new Sphere(1);
@@ -281,9 +309,9 @@ public class GameView3D {
                 Math.toDegrees(
                     Math.atan2(m2Location.getY() - m1Location.getY(), m2Location.getX() - m1Location.getX())
                 ) + 90,
-                new Point3D(0,1,0)
+                new Point3D(0,0,1)
             ),
-            new Scale(1, 1, m1Location.distance(m2Location) / 10)
+            new Scale(1, m1Location.distance(m2Location) / 10, 1)
         );
 
         Point2D midPoint = m2Location.midpoint(m1Location);
@@ -411,28 +439,20 @@ public class GameView3D {
             minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
         );
         if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
-            xAxisLocation += Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
+            yAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
         } else if (angleFromReference >= 0) {
             angleFromReference = angleFromReference - Math.PI / 2;
-            xAxisLocation += Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation += distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
+            yAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
         } else if (angleFromReference < 0 && angleFromReference >= -Math.PI / 2) {
             angleFromReference = Math.abs(angleFromReference);
-            xAxisLocation -= Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation -= distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
+            yAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
         } else {
             angleFromReference = Math.abs(angleFromReference) - Math.PI / 2;
-            xAxisLocation -= Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
+            yAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
         }
         if (horizontalInversion) {
             xAxisLocation = canvasWidth - bufferSize - (xAxisLocation - bufferSize);
@@ -502,8 +522,8 @@ public class GameView3D {
             newBoat.setFill(colour);
             boatObjects.put(clientYacht, newBoat);
 //            createAndBindAnnotationBox(clientYacht, colour);
-//            wakesGroup.getChildren().add(newBoat.getWake());
-//            wakes.add(newBoat.getWake());
+            wakesGroup.getChildren().add(newBoat.getWake());
+            wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
 //            trails.getChildren().add(newBoat.getTrail());
 
@@ -521,9 +541,10 @@ public class GameView3D {
         }
 //        annotationsGroup.getChildren().addAll(annotations.values());
         Platform.runLater(() -> {
-            gameObjects.getChildren().addAll(boatObjectGroup);
+
 //            gameObjects.addAll(trails);
-//            gameObjects.addAll(wakes);
+            gameObjects.getChildren().addAll(wakes);
+            gameObjects.getChildren().addAll(boatObjectGroup);
 //            gameObjects.addAll(annotationsGroup);
 //            gameObjects.addAll(boatObjectGroup);
         });
@@ -564,7 +585,7 @@ public class GameView3D {
                     Math.toDegrees(
                         Math.atan2(location.getY() - lastLocation.getY(), location.getX() - lastLocation.getX())
                     ),
-                    new Point3D(0,1,0)
+                    new Point3D(0,0,1)
                 ),
                 new Scale((lastLocation.distance(location) / 15)-0.2, 1, 1)
             );
@@ -586,7 +607,7 @@ public class GameView3D {
                 Math.toDegrees(
                     Math.atan2(lastLocation.getY() - firstLocation.getY(), lastLocation.getX() - firstLocation.getX())
                 ),
-                new Point3D(0,1,0)
+                new Point3D(0,0,1)
             ),
             new Scale((firstLocation.distance(lastLocation) / 15)-0.2, 1, 1)
         );
