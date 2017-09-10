@@ -49,6 +49,12 @@
     -fx-prompt-text-fill: -fx-pp-light-text-color;
 }
 
+
+#serverHostName .error-label, #serverPortNumber .error-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: palevioletred;
+}
+
 #connectGridPane {
     -fx-background-color: -fx-pp-theme-color;
 }

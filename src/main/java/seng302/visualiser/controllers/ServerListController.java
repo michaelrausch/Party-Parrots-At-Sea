@@ -3,9 +3,12 @@ package seng302.visualiser.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
+import com.jfoenix.validation.RequiredFieldValidator;
 import com.sun.org.apache.xpath.internal.SourceTree;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -13,6 +16,8 @@ import com.jfoenix.controls.JFXTextField;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -73,7 +78,13 @@ public class ServerListController implements Initializable, ServerListenerDelega
                     attemptToDirectConnect();
                 }
             });
+
+            RequiredFieldValidator validator = new RequiredFieldValidator();
+            textField.getValidators().add(validator);
         }
+
+        serverHostName.getValidators().get(0).setMessage("Correct HostName Required");
+        serverPortNumber.getValidators().get(0).setMessage("Correct Port Number Required");
 
         // Start listening for servers on network
         try {
@@ -82,14 +93,18 @@ public class ServerListController implements Initializable, ServerListenerDelega
             logger.warn("Could not start Server Listener Delegate");
         }
 
+        // Create Label for no servers found.
         noServersFound = new Label();
-        noServersFound.setText("No Servers Found");
-        noServersFound.setTextFill(Color.BLACK);
-        noServersFound.setAlignment(Pos.CENTER);
         noServersFound.minWidthProperty().bind(serverListVBox.widthProperty());
-        noServersFound.setStyle("-fx-font-size: 30px; -fx-padding:50px;");
-
+        noServersFound.setAlignment(Pos.CENTER);
+        noServersFound.setText("No Servers Found");
+        noServersFound.setStyle(
+            "-fx-font-size: 30px;"
+          + "-fx-padding:50px;"
+          + "-fx-text-fill: -fx-pp-dark-text-color;"
+        );
         serverListVBox.getChildren().add(noServersFound);
+
         // Set up dialog for server creation
         Platform.runLater(() -> {
             FXMLLoader dialogContent = new FXMLLoader(getClass().getResource(
@@ -108,8 +123,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
      *
      */
     private void attemptToDirectConnect() {
-        if (validateHostName() && validatePortNumber()) {
-            System.out.println("Do some stuff");
+        if (validateHostName(serverHostName.getText()) && validatePortNumber(serverPortNumber.getText())) {
+            DirectConnect();
         }
     }
 
@@ -117,17 +132,29 @@ public class ServerListController implements Initializable, ServerListenerDelega
      *
      * @return
      */
-    private Boolean validateHostName() {
+    private Boolean validateHostName(String hostName) {
+        if (hostName.length() == 0) {
+            serverHostName.validate();
+            return false;
+        }
         // Validate the Host Name here.
-        return true;
+        try {
+            /* The result of this is ignored. All We want to do is test that
+               the hostname matches some form. I'm not 100% sure how valid this is. */
+            InetAddress.getByName(hostName);
+            return true;
+        } catch (UnknownHostException e) {
+            // Fails to resolve the host name.
+            serverHostName.validate();
+            return false;
+        }
     }
 
     /**
      *
      * @return
      */
-    private Boolean validatePortNumber() {
-        if (serverPortNumber.getLength() == 0) return false;
+    private Boolean validatePortNumber(String portNumber) {
         try {
             Integer portNum = Integer.parseInt(serverPortNumber.getText());
             if (portNum > 1024 && portNum <= 65536) {
@@ -136,6 +163,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
                 System.out.println(portNum.toString() + "is not a valid port number");
             }
         } catch (NumberFormatException e) {
+            serverPortNumber.validate();
             System.out.println("Not a valid number.");
         }
         return false;
@@ -163,14 +191,11 @@ public class ServerListController implements Initializable, ServerListenerDelega
      * @param servers
      */
     private void refreshServers(List<ServerDescription> servers) {
-        // TODO: 7/09/17 ajm412: Add some way to force a refresh.
-        // TODO: 7/09/17 ajm412: Add something for No Servers Found.
         serverListVBox.getChildren().clear();
 
-        if (servers.size() == 0) {
+        if (servers.size() == 0) { // "No Servers Found"
             serverListVBox.getChildren().add(noServersFound);
-        } else {
-            // Populate the server list with a series of server cell objects.
+        } else { // Populate the server list with a series of server cell objects.
             for (ServerDescription server : servers) {
                 VBox pane = null;
 
