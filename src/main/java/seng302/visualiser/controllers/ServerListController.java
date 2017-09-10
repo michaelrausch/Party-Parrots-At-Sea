@@ -3,8 +3,8 @@ package seng302.visualiser.controllers;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
+import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
-import com.sun.org.apache.xpath.internal.SourceTree;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
@@ -12,13 +12,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
-import com.jfoenix.controls.JFXTextField;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -28,16 +22,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javax.net.ssl.HostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerDescription;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
-import sun.net.util.IPAddressUtil;
-import sun.security.util.HostnameChecker;
 
 public class ServerListController implements Initializable, ServerListenerDelegate {
 
@@ -82,7 +72,6 @@ public class ServerListController implements Initializable, ServerListenerDelega
             RequiredFieldValidator validator = new RequiredFieldValidator();
             textField.getValidators().add(validator);
         }
-
         serverHostName.getValidators().get(0).setMessage("Correct HostName Required");
         serverPortNumber.getValidators().get(0).setMessage("Correct Port Number Required");
 
@@ -161,6 +150,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
                 return true;
             } else {
                 System.out.println(portNum.toString() + "is not a valid port number");
+                serverPortNumber.validate();
             }
         } catch (NumberFormatException e) {
             serverPortNumber.validate();
