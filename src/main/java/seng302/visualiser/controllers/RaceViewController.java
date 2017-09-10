@@ -42,8 +42,7 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.visualiser.GameView;
-import seng302.visualiser.controllers.annotations.Annotation;
+import seng302.visualiser.GameView3D;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
@@ -86,7 +85,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Map<Integer, ClientYacht> participants;
     private Map<Integer, CompoundMark> markers;
     private RaceXMLData courseData;
-    private GameView gameView;
+    private GameView3D gameView;
     private RaceState raceState;
 
     private Timeline timerTimeline;
@@ -140,32 +139,32 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         });
 
         updateOrder(raceState.getPlayerPositions());
-        gameView = new GameView();
-        gameView.setFrameRateFXText(fpsDisplay);
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
-            gameView.setBoats(new ArrayList<>(participants.values()));
-            gameView.updateBorder(raceData.getCourseLimit());
-        gameView.updateTokens(raceData.getTokens());
-            gameView.updateCourse(
-                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
-            );
-        gameView.enableZoom();
-        gameView.setBoatAsPlayer(player);
-        gameView.startRace();
-
-        raceState.addCollisionListener(gameView::drawCollision);
-        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
-            gameView.setWindDir(newDirection.doubleValue());
-            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
-        });
-        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
-            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
+        gameView = new GameView3D();
+//        gameView.setFrameRateFXText(fpsDisplay);
+        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView.getAssets()));
+        gameView.setBoats(new ArrayList<>(participants.values()));
+//        gameView.updateBorder(raceData.getCourseLimit());
+//        gameView.updateTokens(raceData.getTokens());
+        gameView.updateCourse(
+            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
-        Platform.runLater(() -> {
-            updateWindDirection(raceState.windDirectionProperty().doubleValue());
-            updateWindSpeed(raceState.getWindSpeed());
-        });
-        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
+//        gameView.enableZoom();
+//        gameView.setBoatAsPlayer(player);
+//        gameView.startRace();
+
+//        raceState.addCollisionListener(gameView::drawCollision);
+//        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
+//            gameView.setWindDir(newDirection.doubleValue());
+//            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
+//        });
+//        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
+//            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
+//        );
+//        Platform.runLater(() -> {
+//            updateWindDirection(raceState.windDirectionProperty().doubleValue());
+//            updateWindSpeed(raceState.getWindSpeed());
+//        });
+//        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
     }
 
     /**
@@ -207,9 +206,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     private void initialiseFPSCheckBox() {
-        toggleFps.selectedProperty().addListener((obs, oldVal, newVal) ->
-            gameView.setFPSVisibility(toggleFps.isSelected())
-        );
+//        toggleFps.selectedProperty().addListener((obs, oldVal, newVal) ->
+//            gameView.setFPSVisibility(toggleFps.isSelected())
+//        );
     }
 
     private void initialiseAnnotationSlider() {
@@ -550,7 +549,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         //Null check is if the listener is fired but nothing selected
         yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
             if (selectedBoat != null) {
-                gameView.selectBoat(selectedBoat);
+//                gameView.selectBoat(selectedBoat);
             }
         });
     }
@@ -582,31 +581,31 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     private void setAnnotations(Integer annotationLevel) {
-        switch (annotationLevel) {
-            // No Annotations
-            case 0:
-                gameView.setAnnotationVisibilities(
-                    false, false, false, false, false, false
-                );
-                break;
-            // Important Annotations
-            case 1:
-                gameView.setAnnotationVisibilities(
-                    importantAnnotations.getAnnotationState(Annotation.NAME),
-                    importantAnnotations.getAnnotationState(Annotation.SPEED),
-                    importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK),
-                    importantAnnotations.getAnnotationState(Annotation.LEGTIME),
-                    importantAnnotations.getAnnotationState(Annotation.TRACK),
-                    importantAnnotations.getAnnotationState(Annotation.WAKE)
-                );
-                break;
-            // All Annotations
-            case 2:
-                gameView.setAnnotationVisibilities(
-                    true, true, true, true, true, true
-                );
-                break;
-        }
+//        switch (annotationLevel) {
+//            // No Annotations
+//            case 0:
+//                gameView.setAnnotationVisibilities(
+//                    false, false, false, false, false, false
+//                );
+//                break;
+//            // Important Annotations
+//            case 1:
+//                gameView.setAnnotationVisibilities(
+//                    importantAnnotations.getAnnotationState(Annotation.NAME),
+//                    importantAnnotations.getAnnotationState(Annotation.SPEED),
+//                    importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK),
+//                    importantAnnotations.getAnnotationState(Annotation.LEGTIME),
+//                    importantAnnotations.getAnnotationState(Annotation.TRACK),
+//                    importantAnnotations.getAnnotationState(Annotation.WAKE)
+//                );
+//                break;
+//            // All Annotations
+//            case 2:
+//                gameView.setAnnotationVisibilities(
+//                    true, true, true, true, true, true
+//                );
+//                break;
+//        }
     }
 
 
@@ -630,7 +629,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateRaceData (RaceXMLData raceData) {
-        gameView.updateBorder(raceData.getCourseLimit());
-        gameView.updateTokens(raceData.getTokens());
+//        gameView.updateBorder(raceData.getCourseLimit());
+//        gameView.updateTokens(raceData.getTokens());
     }
 }

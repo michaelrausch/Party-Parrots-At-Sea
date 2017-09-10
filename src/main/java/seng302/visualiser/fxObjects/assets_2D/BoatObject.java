@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
-import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -103,9 +102,9 @@ public class BoatObject extends Group {
     private void initChildren(double... points) {
         boatPoly = makeBoatPolygon();
         boatPoly.getAssets().getTransforms().addAll(
-            new Rotate(-40, new Point3D(1,0,0)),
-            rotation,
-            new Rotate(-90, new Point3D(0,0,1))
+//            new Rotate(-40, new Point3D(1,0,0)),
+            rotation
+//            new Rotate(-90, new Point3D(0,0,1))
         );
         boatPoly.getAssets().getTransforms().add(new Scale(5, 5, 5));
 //        boatPoly.setDrawMode(DrawMode.FILL);
@@ -219,21 +218,21 @@ public class BoatObject extends Group {
             rotateTo(rotation, sailIn, windDir);
             boatPoly.getAssets().setLayoutX(x);
             boatPoly.getAssets().setLayoutY(y);
-            if (sailIn) {
-//                sail.getPoints().clear();
-//                sail.getPoints().addAll(0.0, 0.0, 4.0, 1.5, 8.0, 3.0, 12.0, 3.5, 16.0, 3.0, 20.0, 1.5, 24.0, 0.0);
-//                sail.getPoints().addAll(0.0, 0.0, 24.0, 0.0);
-                sail.setLayoutX(x);
-                sail.setLayoutY(y);
-            } else {
-                animateSail();
-                sail.setLayoutX(x);
-                sail.setLayoutY(y);
-            }
-            wake.setLayoutX(x);
-            wake.setLayoutY(y);
+//            if (sailIn) {
+////                sail.getPoints().clear();
+////                sail.getPoints().addAll(0.0, 0.0, 4.0, 1.5, 8.0, 3.0, 12.0, 3.5, 16.0, 3.0, 20.0, 1.5, 24.0, 0.0);
+////                sail.getPoints().addAll(0.0, 0.0, 24.0, 0.0);
+//                sail.setLayoutX(x);
+//                sail.setLayoutY(y);
+//            } else {
+////                animateSail();
+//                sail.setLayoutX(x);
+//                sail.setLayoutY(y);
+//            }
+//            wake.setLayoutX(x);
+//            wake.setLayoutY(y);
         });
-        wake.setRotation(rotation, velocity);
+//        wake.setRotation(rotation, velocity);
 //        rotateTo(rotation);
 //        boatPoly.setLayoutX(x);
 //        boatPoly.setLayoutY(y);
@@ -263,7 +262,7 @@ public class BoatObject extends Group {
 
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
         rotation.setAngle(heading);
-        if (sailsIn) {
+        if (!sailsIn) {
             boatPoly.showSail();
             Double sailWindOffset = 30.0;
             Double upwindAngleLimit = 15.0;
