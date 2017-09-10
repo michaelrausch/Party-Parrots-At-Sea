@@ -108,7 +108,6 @@ public class LobbyController implements Initializable {
 
     public void leaveLobby() {
         // TODO: 10/07/17 wmu16 - Finish function!
-        GameState.setCurrentStage(GameStages.CANCELLED);
 //        for (LobbyController_old.LobbyCloseListener readyListener : lobbyListeners)
 //            readyListener.notify(LobbyController_old.CloseStatus.LEAVE);
         ViewManager.getInstance().getGameClient().stopGame();

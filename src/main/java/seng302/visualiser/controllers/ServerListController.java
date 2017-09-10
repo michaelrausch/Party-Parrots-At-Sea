@@ -56,7 +56,6 @@ public class ServerListController implements Initializable, ServerListenerDelega
 
         try {
             ServerListener.getInstance().setDelegate(this);
-            System.out.println("Setting DH");
         } catch (IOException e) {
             logger.warn("Could not start Server Listener Delegate");
         }

@@ -16,6 +16,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.ServerDescription;
@@ -437,6 +438,7 @@ public class GameClient {
     }
 
     public void stopGame() {
+        GameState.setCurrentStage(GameStages.CANCELLED);
         if (server != null) server.terminate();
         if (socketThread != null) socketThread.setSocketToClose();
     }

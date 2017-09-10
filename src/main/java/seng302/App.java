@@ -67,38 +67,9 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
-        primaryStage.setTitle("Party Parrots At Sea");
-
-        JFXDecorator decorator = new JFXDecorator(primaryStage, root,false, true, true);
-        decorator.setCustomMaximize(true);
-        decorator.applyCss();
-        decorator.getStylesheets()
-                .add(getClass().getResource("/css/master.css").toExternalForm());
-
-        ViewManager.getInstance().setDecorator(decorator);
-
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
-        Scene scene = new Scene(decorator, 1200, 800);
-        primaryStage.setMinHeight(800);
-        primaryStage.setMinWidth(1200);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
-        primaryStage.setOnCloseRequest(e -> closeAll());
-
-        decorator.setOnCloseButtonAction(this::closeAll);
+        ViewManager.getInstance().initialStartView(primaryStage);
     }
 
-    private void closeAll(){
-        try {
-            ServerAdvertiser.getInstance().unregister();
-        } catch (IOException e1) {
-            logger.warn("Could not un-register game");
-        }
-
-        System.exit(0);
-    }
 
     public static void main(String[] args) {
         try {

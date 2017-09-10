@@ -7,10 +7,14 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.ServerAdvertiser;
 import seng302.visualiser.GameClient;
 
 import java.io.IOException;
@@ -22,12 +26,13 @@ public class ViewManager {
     private static ViewManager instance;
     private GameClient gameClient;
     private JFXDecorator decorator;
-    private HashMap<String, String> props; //TODO is this the best way to do this??
+    private HashMap<String, String> properties; //TODO is this the best way to do this??
     private ObservableList<String> playerList;
     private Logger logger = LoggerFactory.getLogger(ViewManager.class);
+    private Stage stage;
 
     private ViewManager(){
-        props = new HashMap<>();
+        properties = new HashMap<>();
         gameClient = new GameClient(decorator);
     }
 
@@ -45,11 +50,46 @@ public class ViewManager {
         return instance;
     }
 
-    public void setDecorator(JFXDecorator decorator){
+    /**
+     * Initialize the start view in the given stage.
+     */
+    public void initialStartView(Stage stage) throws Exception {
+        this.stage = stage;
+        Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
+        stage.setTitle("Party Parrots At Sea");
+
+        JFXDecorator decorator = new JFXDecorator(stage, root, false, true, true);
+        decorator.setCustomMaximize(true);
+        decorator.applyCss();
+        decorator.getStylesheets()
+            .add(getClass().getResource("/css/master.css").toExternalForm());
+
         this.decorator = decorator;
+
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
+        Scene scene = new Scene(decorator, 1200, 800);
+        stage.setMinHeight(800);
+        stage.setMinWidth(1200);
+        stage.setScene(scene);
+        stage.show();
+
+        stage.setOnCloseRequest(e -> closeAll());
+
+        decorator.setOnCloseButtonAction(this::closeAll);
+
     }
 
-    public JFXDecorator getDecorator(){
+    private void closeAll() {
+        try {
+            ServerAdvertiser.getInstance().unregister();
+        } catch (IOException e1) {
+            logger.warn("Could not un-register game");
+        }
+
+        System.exit(0);
+    }
+
+    public JFXDecorator getDecorator() {
         return decorator;
     }
 
@@ -57,11 +97,15 @@ public class ViewManager {
         Platform.runLater(() -> decorator.setContent(scene));
     }
 
+    /**
+     * Create a new stage and re-initialize the start view in the new stage.
+     */
     public void goToStartView() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
-            this.setScene(root);
-        } catch (IOException e) {
+            this.stage.close();
+            Stage stage = new Stage();
+            initialStartView(stage);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -71,11 +115,11 @@ public class ViewManager {
     }
 
     public String getProperty(String key){
-        return props.get(key);
+        return properties.get(key);
     }
 
     public void setProperty(String key, String val){
-        props.put(key, val);
+        properties.put(key, val);
     }
 
     public void setPlayerList(ObservableList<String> playerList) {
