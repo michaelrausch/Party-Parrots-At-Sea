@@ -145,7 +145,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView.getAssets()));
         gameView.setBoats(new ArrayList<>(participants.values()));
         gameView.updateBorder(raceData.getCourseLimit());
-//        gameView.updateTokens(raceData.getTokens());
+        gameView.updateTokens(raceData.getTokens());
         gameView.updateCourse(
             new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
@@ -630,7 +630,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateRaceData (RaceXMLData raceData) {
-//        gameView.updateBorder(raceData.getCourseLimit());
-//        gameView.updateTokens(raceData.getTokens());
+        gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateTokens(raceData.getTokens());
     }
 }

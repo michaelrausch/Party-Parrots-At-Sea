@@ -89,7 +89,7 @@ public class ModelFactory {
             assets = new Group(importer.getImport());
         }
         switch (tokenType) {
-            case VELOCITY_COIN:
+            case VELOCITY_PICKUP:
                 return makeCoinPickup(assets);
             case FINISH_MARKER:
             case PLAIN_MARKER:
@@ -114,7 +114,10 @@ public class ModelFactory {
         assets.setRotate(90);
         assets.setTranslateX(0.2);
         assets.setTranslateY(1);
-        assets.getTransforms().add(new Rotate(0 ,new Point3D(0,1,0)));
+        assets.getTransforms().addAll(
+            new Translate(0,-1,0),
+            new Rotate(0 ,new Point3D(1,1,1))
+        );
         return new Model(assets, new AnimationTimer() {
 
             private double rotation = 0;
@@ -122,8 +125,8 @@ public class ModelFactory {
 
             @Override
             public void handle(long now) {
-                rotation += 0.5;
-                ((Rotate) group.getTransforms().get(0)).setAngle(rotation);
+                rotation += 1;
+                ((Rotate) group.getTransforms().get(1)).setAngle(rotation);
             }
         });
     }

@@ -13,9 +13,6 @@ import javafx.scene.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -27,6 +24,7 @@ import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
+import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.assets_2D.*;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
@@ -130,7 +128,7 @@ public class GameView3D {
 
         gameObjects.getChildren().addAll(
             ModelFactory.importModel(ModelType.OCEAN).getAssets(),
-            raceBorder, markers
+            raceBorder, markers, tokens
         );
 
 //        Sphere s = new Sphere(1);
@@ -163,7 +161,7 @@ public class GameView3D {
 //        Node marker = ModelFactory.importModel(ModelType.PLAIN_MARKER).getAssets();
 //        marker.getTransforms().add(0, new Translate(30, 0, 0));
 //
-//        Node coin = ModelFactory.importModel(ModelType.VELOCITY_COIN).getAssets();
+//        Node coin = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
 //        coin.setTranslateX(coin.getTranslateX() - 30);
 //
 //        gameObjects.getChildren().addAll(
@@ -223,7 +221,7 @@ public class GameView3D {
                 } else {
                     gateType = ModelType.GATE_LINE;
                 }
-                gates.add(makeAndBindGate(
+                gates.add(makeGate(
                     cMark.getSubMark(1), cMark.getSubMark(2), gateType
                 ));
             }
@@ -273,7 +271,7 @@ public class GameView3D {
      * @param gateType The type of model for the gate.
      * @return the new gate.
      */
-    private Group makeAndBindGate(Mark m1, Mark m2, ModelType gateType) {
+    private Group makeGate(Mark m1, Mark m2, ModelType gateType) {
         Point2D m1Location = findScaledXY(m1);
         Point2D m2Location = findScaledXY(m2);
 
@@ -599,5 +597,25 @@ public class GameView3D {
         boundaryAssets.add(barrier);
 
         Platform.runLater(() -> raceBorder.getChildren().setAll(boundaryAssets));
+    }
+
+    /**
+     * Replaces all tokens in the course with those passed in
+     *
+     * @param newTokens the tokens to be put on the course.
+     */
+    public void updateTokens(List<Token> newTokens) {
+        mapTokens = new ArrayList<>();
+        for (Token token : newTokens) {
+            Point2D location = findScaledXY(token.getLat(), token.getLng());
+            Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
+            tokenObject.setLayoutX(location.getX());
+            tokenObject.setLayoutY(location.getY());
+            mapTokens.add(tokenObject);
+        }
+
+        Platform.runLater(() -> {
+            tokens.getChildren().setAll(mapTokens);
+        });
     }
 }

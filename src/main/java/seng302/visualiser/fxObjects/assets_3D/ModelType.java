@@ -6,7 +6,7 @@ package seng302.visualiser.fxObjects.assets_3D;
  */
 public enum ModelType {
 
-    VELOCITY_COIN ("velocity_pickup.dae"),
+    VELOCITY_PICKUP("velocity_pickup.dae"),
     FINISH_MARKER ("finish_marker.dae"),
     START_MARKER ("start_marker.dae"),
     PLAIN_MARKER ("plain_marker.dae"),

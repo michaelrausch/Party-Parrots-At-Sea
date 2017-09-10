@@ -473,7 +473,7 @@ public class GameView extends Pane {
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
             Point2D location = findScaledXY(token.getLat(), token.getLng());
-            Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_COIN).getAssets();
+            Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
             tokenObject.setLayoutX(location.getX());
             tokenObject.setLayoutY(location.getY());
             mapTokens.add(tokenObject);
