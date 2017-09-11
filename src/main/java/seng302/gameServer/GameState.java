@@ -403,7 +403,6 @@ public class GameState implements Runnable {
             serverYacht.setLocation(
                 calculateBounceBack(serverYacht, originalLocation, BOUNCE_DISTANCE_YACHT)
             );
-            System.out.println("DID BOUNCE BACK");
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
@@ -424,7 +423,6 @@ public class GameState implements Runnable {
                 calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
             );
 
-            System.out.println("DID BOUNCE BACK2");
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
@@ -440,7 +438,6 @@ public class GameState implements Runnable {
                     BOUNCE_DISTANCE_YACHT)
             );
 
-            System.out.println("DID BOUNCE BACK3");
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
