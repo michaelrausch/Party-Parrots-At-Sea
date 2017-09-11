@@ -27,7 +27,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -43,7 +43,6 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.model.token.Token;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.annotations.Annotation;
@@ -79,7 +78,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Text timerLabel;
     @FXML
-    private AnchorPane contentAnchorPane;
+    private GridPane contentGridPane;
     @FXML
     private Text windArrowText, windDirectionText;
     @FXML
@@ -115,9 +114,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         importantAnnotations = new ImportantAnnotationsState();
 
         //Formatting the y axis of the sparkline
-        raceSparkLine.getYAxis().setRotate(180);
-        raceSparkLine.getYAxis().setTickLabelRotation(180);
-        raceSparkLine.getYAxis().setTranslateX(-5);
+//        raceSparkLine.getYAxis().setRotate(180);
+//        raceSparkLine.getYAxis().setTickLabelRotation(180);
+//        raceSparkLine.getYAxis().setTranslateX(-5);
         raceSparkLine.visibleProperty().setValue(false);
         raceSparkLine.getYAxis().setAutoRanging(false);
         sparklineYAxis.setTickMarkVisible(false);
@@ -142,8 +141,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
 //            chatHistory.setScrollTop(Double.MAX_VALUE);
 //        });
-        contentAnchorPane.setOnMouseClicked((event) ->
-                contentAnchorPane.requestFocus()
+        contentGridPane.setOnMouseClicked((event) ->
+            contentGridPane.requestFocus()
         );
     }
 
@@ -168,12 +167,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView();
         gameView.setFrameRateFXText(fpsDisplay);
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView));
-            gameView.setBoats(new ArrayList<>(participants.values()));
-            gameView.updateBorder(raceData.getCourseLimit());
-            gameView.updateTokens(raceData.getTokens());
-            gameView.updateCourse(
-                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+        Platform.runLater(() -> contentGridPane.getChildren().add(0, gameView));
+        gameView.setBoats(new ArrayList<>(participants.values()));
+        gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateTokens(raceData.getTokens());
+        gameView.updateCourse(
+            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
         gameView.setBoatAsPlayer(player);
         gameView.startRace();
@@ -590,9 +589,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/FinishView.fxml"));
 
         try {
-            contentAnchorPane.getChildren().removeAll();
-            contentAnchorPane.getChildren().clear();
-            contentAnchorPane.getChildren().addAll((Pane) loader.load());
+            contentGridPane.getChildren().removeAll();
+            contentGridPane.getChildren().clear();
+            contentGridPane.getChildren().addAll((Pane) loader.load());
 
         } catch (javafx.fxml.LoadException e) {
             System.err.println(e.getCause().toString());

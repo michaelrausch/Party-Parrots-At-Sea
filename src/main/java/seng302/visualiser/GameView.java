@@ -11,6 +11,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
@@ -25,6 +27,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
@@ -51,7 +54,7 @@ import seng302.visualiser.map.CanvasMap;
 public class GameView extends Pane {
 
     private double bufferSize = 50;
-    private double panelWidth = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private double panelWidth = 1280;
     private double panelHeight = 960;
     private double canvasWidth = 1100;
     private double canvasHeight = 920;
@@ -63,7 +66,6 @@ public class GameView extends Pane {
     private double referencePointX, referencePointY;
     private double metersPerPixelX, metersPerPixelY;
 
-    final double SCALE_DELTA = 1.1;
     private boolean isZoom = false;
 
     private Text fpsDisplay = new Text();
@@ -110,7 +112,7 @@ public class GameView extends Pane {
     }
 
     private void zoomIn() {
-        scaleFactor = 0.10;
+        scaleFactor = 0.1;
         if (this.isZoom && this.getScaleX() < 2.5) {
             this.setScaleX(this.getScaleX() + scaleFactor);
             this.setScaleY(this.getScaleY() + scaleFactor);
@@ -152,6 +154,40 @@ public class GameView extends Pane {
                 disableZoom();
             }
         }));
+
+        this.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+                Number newValue) {
+                scaleFactor = getWidth() / panelWidth;
+
+                if (panelHeight * scaleFactor < getHeight()) {
+                    Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+                    getTransforms().remove(0, getTransforms().size());
+                    getTransforms().add(scale);
+
+                    setPrefWidth(getWidth() / scaleFactor);
+                    setPrefHeight(getHeight() / scaleFactor);
+                }
+            }
+        });
+
+        this.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+                Number newValue) {
+                scaleFactor = getHeight() / panelHeight;
+
+                if (panelWidth * scaleFactor < getWidth()) {
+                    Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+                    getTransforms().remove(0, getTransforms().size());
+                    getTransforms().add(scale);
+
+                    setPrefWidth(getWidth() / scaleFactor);
+                    setPrefHeight(getHeight() / scaleFactor);
+                }
+            }
+        });
     }
 
     private void initializeTimer() {
