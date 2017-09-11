@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -176,7 +177,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView3D();
 //        gameView.setFrameRateFXText(fpsDisplay);
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView.getAssets()));
+        Platform.runLater(() -> {
+            contentAnchorPane.getChildren().add(0, gameView.getAssets());
+            ((SubScene) gameView.getAssets()).widthProperty()
+                .bind(ViewManager.getInstance().getStage().widthProperty());
+            ((SubScene) gameView.getAssets()).heightProperty()
+                .bind(ViewManager.getInstance().getStage().heightProperty());
+            System.out.println(((SubScene) gameView.getAssets()).getHeight());
+            System.out.println(((SubScene) gameView.getAssets()).getWidth());
+
+        });
         gameView.setBoats(new ArrayList<>(participants.values()));
         gameView.updateBorder(raceData.getCourseLimit());
         gameView.updateTokens(raceData.getTokens());

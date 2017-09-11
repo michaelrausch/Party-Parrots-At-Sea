@@ -34,6 +34,11 @@ public class ViewManager {
     private HashMap<String, String> properties; //TODO is this the best way to do this??
     private ObservableList<String> playerList;
     private Logger logger = LoggerFactory.getLogger(ViewManager.class);
+
+    public Stage getStage() {
+        return stage;
+    }
+
     private Stage stage;
 
     private ViewManager() {
@@ -170,21 +175,31 @@ public class ViewManager {
         Platform.runLater(() -> {
             try {
                 stage.close();
+                stage = new Stage();
 
-                Scene scene = new Scene(loader.load());
+                JFXDecorator decorator = new JFXDecorator(stage, loader.load(), false, true, true);
+                decorator.setCustomMaximize(true);
+                decorator.applyCss();
+                decorator.getStylesheets()
+                    .add(getClass().getResource("/css/master.css").toExternalForm());
+
+                Scene scene = new Scene(decorator);
                 // set key press event to catch key stoke
                 scene.setOnKeyPressed(gameClient::keyPressed);
                 scene.setOnKeyReleased(gameClient::keyReleased);
 
-                Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-                stage = new Stage();
+                // uncomment to make it full screen
+//                Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+//                stage.setX(visualBounds.getMinX());
+//                stage.setY(visualBounds.getMinY());
+//                stage.setWidth(visualBounds.getWidth());
+//                stage.setHeight(visualBounds.getHeight());
+//                stage.setMaximized(true);
+//                stage.setFullScreen(true);
+
+                stage.setMinHeight(500);
+                stage.setMinWidth(800);
                 stage.setOnCloseRequest(e -> closeAll());
-                stage.setX(visualBounds.getMinX());
-                stage.setY(visualBounds.getMinY());
-                stage.setWidth(visualBounds.getWidth());
-                stage.setHeight(visualBounds.getHeight());
-                stage.setMaximized(true);
-                stage.setFullScreen(true);
                 stage.setScene(scene);
                 stage.show();
             } catch (Exception e) {
