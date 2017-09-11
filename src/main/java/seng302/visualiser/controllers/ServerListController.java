@@ -72,8 +72,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
             RequiredFieldValidator validator = new RequiredFieldValidator();
             textField.getValidators().add(validator);
         }
-        serverHostName.getValidators().get(0).setMessage("Correct HostName Required");
-        serverPortNumber.getValidators().get(0).setMessage("Correct Port Number Required");
+        serverHostName.getValidators().get(0).setMessage("Incorrect Host Name");
+        serverPortNumber.getValidators().get(0).setMessage("Incorrect Port Number");
 
         // Start listening for servers on network
         try {
@@ -112,9 +112,16 @@ public class ServerListController implements Initializable, ServerListenerDelega
      *
      */
     private void attemptToDirectConnect() {
-        if (validateHostName(serverHostName.getText()) && validatePortNumber(serverPortNumber.getText())) {
+        if (validateDirectConnection(serverHostName.getText(), serverPortNumber.getText())) {
             DirectConnect();
         }
+    }
+
+
+    private Boolean validateDirectConnection(String hostName, String portNumber) {
+        Boolean hostNameValid = validateHostName(hostName);
+        Boolean portNumberValid = validatePortNumber(portNumber);
+        return hostNameValid && portNumberValid;
     }
 
     /**
@@ -149,13 +156,12 @@ public class ServerListController implements Initializable, ServerListenerDelega
             if (portNum > 1024 && portNum <= 65536) {
                 return true;
             } else {
-                System.out.println(portNum.toString() + "is not a valid port number");
-                serverPortNumber.validate();
+                System.out.println(portNum.toString() + " is not a valid port number");
             }
         } catch (NumberFormatException e) {
-            serverPortNumber.validate();
             System.out.println("Not a valid number.");
         }
+        serverPortNumber.validate();
         return false;
     }
 

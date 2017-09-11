@@ -2,7 +2,9 @@ package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
+import com.jfoenix.validation.RequiredFieldValidator;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import com.jfoenix.controls.JFXTextField;
@@ -27,14 +29,28 @@ public class ServerCreationController implements Initializable {
     private JFXButton submitBtn;
     //---------FXML END---------//
 
+    RequiredFieldValidator validator;
+
     public void initialize(URL location, ResourceBundle resources) {
         updateMaxPlayerLabel();
         maxPlayersSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             updateMaxPlayerLabel();
         });
 
+        validator = new RequiredFieldValidator();
+        serverName.getValidators().add(validator);
+
         submitBtn.setOnMouseClicked(event -> submitBtn.setText("CREATING..."));
-        submitBtn.setOnMouseReleased(event -> createServer());
+        submitBtn.setOnMouseReleased(event -> validateServerSettings());
+    }
+
+    private void validateServerSettings() {
+        if (serverName.getText().length() >= 40) {
+            validator.setMessage("HI");
+        } else if (serverName.getText().length() == 0) {
+            validator.setMessage("Server Name Required.");
+        }
+        serverName.validate();
     }
 
     public void createServer() {

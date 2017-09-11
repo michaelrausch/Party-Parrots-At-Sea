@@ -52,7 +52,7 @@
 
 #serverHostName .error-label, #serverPortNumber .error-label {
     -fx-font-size: 12px;
-    -fx-text-fill: palevioletred;
+    -fx-text-fill: lightblue;
 }
 
 #connectGridPane {
