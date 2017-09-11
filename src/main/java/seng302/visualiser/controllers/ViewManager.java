@@ -182,6 +182,7 @@ public class ViewManager {
         controller.setPlayerColor(playerColor);
         controller.setPlayerName(name);
         controller.setServerThread(gameClient.getServerThread());
+        controller.setPlayerColor(lobbyController.playersColor);
 
 
         return customizationDialog;

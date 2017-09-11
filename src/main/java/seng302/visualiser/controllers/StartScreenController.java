@@ -23,16 +23,15 @@ import java.util.ResourceBundle;
 
 public class StartScreenController implements Initializable{
 
+    //--------FXML BEGIN--------//
     @FXML
     private Label headText;
-
     @FXML
     private JFXButton startBtn;
+    //---------FXML END---------//
 
     private Node serverList;
-
     private Logger logger = LoggerFactory.getLogger(StartScreenController.class);
-
     private List<ServerDescription> servers;
     private GameClient gameClient;
 //    public void initialize(URL url,  ResourceBundle resourceBundle) {
@@ -53,6 +52,17 @@ public class StartScreenController implements Initializable{
 ////        gameClient = new GameClient(holder);
 //    }
 
+    public void initialize(URL location, ResourceBundle resources) {
+        startBtn.setOnMousePressed(event -> startBtn.setText("LOADING..."));
+        startBtn.setOnMouseReleased(event -> goToServerBrowser());
+
+        setInitialDropShadow();
+        preloadServerListView();
+    }
+
+    /**
+     *
+     */
     private void setInitialDropShadow() {
         DropShadow dropShadow = new DropShadow();
         dropShadow.setRadius(10.0);
@@ -62,6 +72,9 @@ public class StartScreenController implements Initializable{
         headText.setEffect(dropShadow);
     }
 
+    /**
+     *
+     */
     private void preloadServerListView(){
         try {
             serverList = FXMLLoader
@@ -72,22 +85,15 @@ public class StartScreenController implements Initializable{
         }
     }
 
+    /**
+     *
+     */
     private void goToServerBrowser() {
         try {
             ViewManager.getInstance().setScene(serverList);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void initialize(URL location, ResourceBundle resources) {
-        startBtn.setOnMousePressed(event -> startBtn.setText("LOADING..."));
-        startBtn.setOnMouseReleased(event -> goToServerBrowser());
-
-        setInitialDropShadow();
-        preloadServerListView();
-
-
     }
 
     public void toggleMusic(ActionEvent actionEvent) {

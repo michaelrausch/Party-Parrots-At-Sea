@@ -27,30 +27,32 @@ import seng302.visualiser.controllers.cells.PlayerCell;
 
 public class LobbyController implements Initializable {
 
+    //--------FXML BEGIN--------//
     @FXML
     private VBox playerListVBox;
-
     @FXML
-    private ScrollPane playerListScrollpane;
-
+    private ScrollPane playerListScrollPane;
     @FXML
     private JFXButton customizeButton, leaveLobbyButton, beginRaceButton;
-
     @FXML
     private StackPane serverListMainStackPane;
-
     @FXML
     private Label serverName;
-
     @FXML
     private Label mapName;
+    //---------FXML END---------//
 
     private List<LobbyController_old.LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private RaceState raceState;
     private JFXDialog customizationDialog;
+    private Color playersColor;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        if (this.playersColor == null) {
+            this.playersColor = Colors.getColor(ViewManager.getInstance().getGameClient().getServerThread().getClientId() - 1);
+        }
 
         leaveLobbyButton.setOnMouseReleased(event -> leaveLobby());
         beginRaceButton.setOnMouseReleased(event -> beginRace());
@@ -76,6 +78,9 @@ public class LobbyController implements Initializable {
 
     }
 
+    /**
+     *
+     */
     private void beginRace() {
         beginRaceButton.setDisable(true);
         customizeButton.setDisable(true);
@@ -84,6 +89,9 @@ public class LobbyController implements Initializable {
         Platform.runLater(()-> ViewManager.getInstance().getGameClient().startGame());
     }
 
+    /**
+     *
+     */
     private void refreshPlayerList() {
         playerListVBox.getChildren().clear();
 
@@ -106,19 +114,26 @@ public class LobbyController implements Initializable {
         }
     }
 
-    public void leaveLobby() {
-        // TODO: 10/07/17 wmu16 - Finish function!
-//        for (LobbyController_old.LobbyCloseListener readyListener : lobbyListeners)
-//            readyListener.notify(LobbyController_old.CloseStatus.LEAVE);
+    /**
+     *
+     */
+    private void leaveLobby() {
         ViewManager.getInstance().getGameClient().stopGame();
         ViewManager.getInstance().goToStartView();
     }
 
-    public void disableReadyButton() {
+    /**
+     *
+     */
+    private void disableReadyButton() {
         this.beginRaceButton.setDisable(true);
         this.beginRaceButton.setText("Waiting for host...");
     }
-    
+
+    /**
+     *
+     * @param raceState
+     */
     public void updateRaceState(RaceState raceState){
         this.raceState = raceState;
         this.beginRaceButton.setText("Starting in: " + raceState.getRaceTimeStr());

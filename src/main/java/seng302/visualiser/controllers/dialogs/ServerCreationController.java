@@ -13,6 +13,7 @@ import seng302.visualiser.validators.FieldLengthValidator;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import seng302.visualiser.validators.ValidationTools;
 
 public class ServerCreationController implements Initializable {
 
@@ -27,34 +28,39 @@ public class ServerCreationController implements Initializable {
     private JFXButton submitBtn;
     //---------FXML END---------//
 
-    FieldLengthValidator fieldLengthValidator;
-    RequiredFieldValidator fieldRequiredValidator;
-
     public void initialize(URL location, ResourceBundle resources) {
         updateMaxPlayerLabel();
         maxPlayersSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             updateMaxPlayerLabel();
         });
 
-        fieldLengthValidator = new FieldLengthValidator(40);
-        fieldLengthValidator.setMessage("Server Name Too Long");
-        fieldRequiredValidator = new RequiredFieldValidator();
-        fieldRequiredValidator.setMessage("Server Name is Required.");
+        FieldLengthValidator fieldLengthValidator = new FieldLengthValidator(40);
+        fieldLengthValidator.setMessage("Server name too long.");
+
+        RequiredFieldValidator fieldRequiredValidator = new RequiredFieldValidator();
+        fieldRequiredValidator.setMessage("Server name is required.");
+
         serverName.setValidators(fieldLengthValidator, fieldRequiredValidator);
 
-        submitBtn.setOnMouseClicked(event -> submitBtn.setText("CREATING..."));
         submitBtn.setOnMouseReleased(event -> validateServerSettings());
     }
 
+    /**
+     *
+     */
     private void validateServerSettings() {
-        serverName.validate();
-        System.out.println(serverName.getActiveValidator());
-        createServer();
+        submitBtn.setText("CREATING...");
+        if (ValidationTools.validateTextField(serverName)) {
+            createServer();
+        } else {
+            submitBtn.setText("SUBMIT");
+        }
     }
 
-
-    public void createServer() {
-
+    /**
+     *
+     */
+    private void createServer() {
         ServerDescription serverDescription = ViewManager.getInstance().getGameClient()
             .runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayersSlider
                 .getValue());
@@ -63,6 +69,9 @@ public class ServerCreationController implements Initializable {
         ViewManager.getInstance().setProperty("mapName", serverDescription.getMapName());
     }
 
+    /**
+     *
+     */
     private void updateMaxPlayerLabel() {
         maxPlayersSlider.setValue(Math.floor(maxPlayersSlider.getValue()));
         maxPlayersLabel.setText(String.format("YOU SELECTED: %.0f", maxPlayersSlider.getValue()));

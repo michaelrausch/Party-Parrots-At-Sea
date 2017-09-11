@@ -31,6 +31,7 @@ import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
 import seng302.visualiser.validators.HostNameFieldValidator;
 import seng302.visualiser.validators.NumberRangeValidator;
+import seng302.visualiser.validators.ValidationTools;
 
 public class ServerListController implements Initializable, ServerListenerDelegate {
 
@@ -42,11 +43,9 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private ScrollPane serverListScrollPane;
     @FXML
     private StackPane serverListMainStackPane;
-
     // Host Button
     @FXML
     private JFXButton serverListHostButton;
-
     //Direct Connect
     @FXML
     private JFXButton connectButton;
@@ -55,11 +54,6 @@ public class ServerListController implements Initializable, ServerListenerDelega
     @FXML
     private JFXTextField serverPortNumber;
     //---------FXML END---------//
-
-    //Validators
-    private HostNameFieldValidator hostNameValidator;
-    private NumberRangeValidator portNumberValidator;
-
 
     private Label noServersFound;
     private Logger logger = LoggerFactory.getLogger(ServerListController.class);
@@ -85,12 +79,13 @@ public class ServerListController implements Initializable, ServerListenerDelega
         }
 
         // Validating the hostname
-        hostNameValidator = new HostNameFieldValidator();
-        hostNameValidator.setMessage("Host Name is Incorrect");
+        HostNameFieldValidator hostNameValidator = new HostNameFieldValidator();
+        hostNameValidator.setMessage("Host name incorrect");
         serverHostName.getValidators().add(hostNameValidator);
 
-        portNumberValidator = new NumberRangeValidator(1025, 65536);
-        portNumberValidator.setMessage("Port Number is Incorrect");
+        // Validating the port number
+        NumberRangeValidator portNumberValidator = new NumberRangeValidator(1025, 65536);
+        portNumberValidator.setMessage("Port number incorrect");
         serverPortNumber.getValidators().add(portNumberValidator);
 
         // Start listening for servers on network
@@ -135,27 +130,17 @@ public class ServerListController implements Initializable, ServerListenerDelega
         }
     }
 
-
-    private Boolean validateDirectConnection(String hostName, String portNumber) {
-        Boolean hostNameValid = validateTextField(serverHostName);
-        Boolean portNumberValid = validateTextField(serverPortNumber);
-
-        return hostNameValid && portNumberValid;
-    }
-
-
     /**
      *
+     * @param hostName
+     * @param portNumber
      * @return
      */
-    private Boolean validateTextField(JFXTextField textField) {
-        textField.validate();
-        for (ValidatorBase validator : textField.getValidators()) {
-            if (validator.getHasErrors()) {
-                return false;
-            }
-        }
-        return true;
+    private Boolean validateDirectConnection(String hostName, String portNumber) {
+        Boolean hostNameValid = ValidationTools.validateTextField(serverHostName);
+        Boolean portNumberValid = ValidationTools.validateTextField(serverPortNumber);
+
+        return hostNameValid && portNumberValid;
     }
 
     /**
@@ -163,16 +148,6 @@ public class ServerListController implements Initializable, ServerListenerDelega
      */
     private void DirectConnect() {
         ViewManager.getInstance().getGameClient().runAsClient(serverHostName.getText(), Integer.parseInt(serverPortNumber.getText()));
-    }
-
-    @Override
-    public void serverRemoved(List<ServerDescription> servers) {
-        Platform.runLater(() -> refreshServers(servers));
-    }
-
-    @Override
-    public void serverDetected(ServerDescription serverDescription, List<ServerDescription> servers) {
-        Platform.runLater(() -> refreshServers(servers));
     }
 
     /**
@@ -202,5 +177,15 @@ public class ServerListController implements Initializable, ServerListenerDelega
                 serverListVBox.getChildren().add(pane);
             }
         }
+    }
+
+    @Override
+    public void serverRemoved(List<ServerDescription> servers) {
+        Platform.runLater(() -> refreshServers(servers));
+    }
+
+    @Override
+    public void serverDetected(ServerDescription serverDescription, List<ServerDescription> servers) {
+        Platform.runLater(() -> refreshServers(servers));
     }
 }

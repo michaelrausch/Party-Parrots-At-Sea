@@ -67,7 +67,10 @@ public class ServerCell implements Initializable {
         serverConnButton.setOnMouseReleased(event -> joinServer());
     }
 
-    public void joinServer() {
+    /**
+     *
+     */
+    private void joinServer() {
         System.out.println("Connecting to " + serverName.getText());
         ViewManager.getInstance().getGameClient().runAsClient(hostName, portNumber);
     }
