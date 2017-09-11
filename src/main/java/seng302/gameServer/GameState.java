@@ -396,11 +396,14 @@ public class GameState implements Runnable {
     public static void checkCollision(ServerYacht serverYacht) {
         //Yacht Collision
         ServerYacht collidedYacht = checkYachtCollision(serverYacht);
+        Mark collidedMark = checkMarkCollision(serverYacht);
+
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
             serverYacht.setLocation(
                 calculateBounceBack(serverYacht, originalLocation, BOUNCE_DISTANCE_YACHT)
             );
+            System.out.println("DID BOUNCE BACK");
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
@@ -416,11 +419,12 @@ public class GameState implements Runnable {
         }
 
         //Mark Collision
-        Mark collidedMark = checkMarkCollision(serverYacht);
-        if (collidedMark != null) {
+        else if (collidedMark != null) {
             serverYacht.setLocation(
                 calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
             );
+
+            System.out.println("DID BOUNCE BACK2");
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
@@ -430,11 +434,13 @@ public class GameState implements Runnable {
         }
 
         //Boundary Collision
-        if (checkBoundaryCollision(serverYacht)) {
+        else if (checkBoundaryCollision(serverYacht)) {
             serverYacht.setLocation(
                 calculateBounceBack(serverYacht, serverYacht.getLocation(),
                     BOUNCE_DISTANCE_YACHT)
             );
+
+            System.out.println("DID BOUNCE BACK3");
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
