@@ -4,13 +4,16 @@
     <RaceStartTime Start="${raceStartTime}" Postpone="False" />
     <RaceID>15082901</RaceID>
     <RaceType>Fleet</RaceType>
-
     <Participants>
         <#list boats as boat>
             <Yacht SourceID="${boat.sourceId}"/>
         </#list>
     </Participants>
-
+    <Tokens>
+        <#list tokens as token>
+            <Token TokenType="${token.tokenType}" TargetLat="${token.lat?c}" TargetLng="${token.lng?c}"/>
+        </#list>
+    </Tokens>
     <Course>
         <CompoundMark CompoundMarkID="1" Name="Mark0">
             <Mark SeqID="1" Name="Start Line 1" TargetLat="57.670603" TargetLng="11.828262" SourceID="122" />

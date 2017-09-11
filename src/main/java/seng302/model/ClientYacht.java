@@ -15,7 +15,6 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.model.mark.CompoundMark;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -32,7 +31,7 @@ public class ClientYacht extends Observable {
 
     @FunctionalInterface
     public interface MarkRoundingListener {
-        void notifyRounding(ClientYacht yacht, CompoundMark markPassed, int legNumber);
+        void notifyRounding(ClientYacht yacht, int legNumber);
     }
 
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
@@ -63,7 +62,6 @@ public class ClientYacht extends Observable {
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
     private ReadOnlyIntegerWrapper placingProperty = new ReadOnlyIntegerWrapper();
-    private CompoundMark lastMarkRounded;
     private Color colour;
 
     public ClientYacht(String boatType, Integer sourceId, String hullID, String shortName,
@@ -189,14 +187,6 @@ public class ClientYacht extends Observable {
         return markRoundTime;
     }
 
-    public CompoundMark getLastMarkRounded() {
-        return lastMarkRounded;
-    }
-
-    public void setLastMarkRounded(CompoundMark lastMarkRounded) {
-        this.lastMarkRounded = lastMarkRounded;
-    }
-
     public GeoPoint getLocation() {
         return location;
     }
@@ -286,13 +276,12 @@ public class ClientYacht extends Observable {
         return sailIn;
     }
 
-    public void roundMark(CompoundMark mark, long markRoundTime, long timeSinceLastMark) {
+    public void roundMark(long markRoundTime, long timeSinceLastMark) {
         this.markRoundTime = markRoundTime;
         timeSinceLastMarkProperty.set(timeSinceLastMark);
-        lastMarkRounded = mark;
         legNumber++;
         for (MarkRoundingListener listener : markRoundingListeners) {
-            listener.notifyRounding(this, lastMarkRounded, legNumber);
+            listener.notifyRounding(this, legNumber);
         }
     }
 }

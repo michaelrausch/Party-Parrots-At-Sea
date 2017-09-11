@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatActionMessage;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
 import seng302.gameServer.messages.CustomizeRequestMessage;
 import seng302.gameServer.messages.CustomizeRequestType;
@@ -32,8 +33,6 @@ import seng302.model.stream.packets.StreamPacket;
  * its own thread.
  */
 public class ClientToServerThread implements Runnable {
-
-
 
     /**
      * Functional interface for receiving packets from client socket.
@@ -95,7 +94,7 @@ public class ClientToServerThread implements Runnable {
 
         sendRegistrationRequest();
 
-        thread = new Thread(this);
+        thread = new Thread(this, "ClientToServer");
         thread.start();
     }
 
@@ -283,9 +282,17 @@ public class ClientToServerThread implements Runnable {
      * @param message The given message type.
      */
     private void sendBoatActionMessage(BoatActionMessage message) {
+        sendByteBuffer(message.getBuffer());
+    }
+
+    public void sendChatterMessage(String message) {
+        sendByteBuffer(new ChatterMessage(clientId, message).getBuffer());
+    }
+
+    private void sendByteBuffer(byte[] bytes) {
         if (clientId != -1) {
             try {
-                os.write(message.getBuffer());
+                os.write(bytes);
             } catch (IOException e) {
                 logger.warn("IOException on attempting to sendBoatAction from Client");
                 notifyDisconnectListeners("Cannot communicate with server");
@@ -294,7 +301,7 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
-    private void closeSocket() {
+    public void closeSocket() {
         try {
             socket.close();
             socketOpen = false;

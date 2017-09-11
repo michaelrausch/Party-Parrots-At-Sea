@@ -57,7 +57,7 @@ public class RaceStatusData {
      * Returns the data for boats collected form race status packets.
      *
      * @return A list of boat data. Boat data is in the form
-     * [boatID, estTimeToNextMark, estTimeToFinish, legNumber].
+     * [boatID, estTimeToNextMark, estTimeToFinish, legNumber, status].
      */
     public List<long[]> getBoatData () {
         return boatData;

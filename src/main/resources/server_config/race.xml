@@ -12,6 +12,8 @@
         <Yacht SourceID="105" />
         <Yacht SourceID="106" />
     </Participants>
+    <Tokens>
+    </Tokens>
     <Course>
         <CompoundMark CompoundMarkID="1" Name="Mark0">
             <Mark SeqID="1" Name="Start Line 1" TargetLat="57.6703330" TargetLng="11.8278330" SourceID="122" />

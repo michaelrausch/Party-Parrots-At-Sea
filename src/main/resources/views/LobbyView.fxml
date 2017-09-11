@@ -37,9 +37,9 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button fx:id="readyButton" focusTraversable="false" mnemonicParsing="false" onAction="#readyButtonPressed" prefWidth="101.0" text="Ready" GridPane.halignment="CENTER" />
-            <Button focusTraversable="false" mnemonicParsing="false" onAction="#leaveLobbyButtonPressed" text="Leave Lobby" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
-            <Button fx:id="customizeButton" focusTraversable="false" mnemonicParsing="false" onAction="#customize" text="Customization" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <Button fx:id="readyButton" focusTraversable="false" mnemonicParsing="false" onAction="#readyButtonPressed" onMouseEntered="#playButtonHoverSound" prefWidth="101.0" text="Ready" GridPane.halignment="CENTER" />
+            <Button focusTraversable="false" mnemonicParsing="false" onAction="#leaveLobbyButtonPressed" onMouseEntered="#playButtonHoverSound" text="Leave Lobby" GridPane.columnIndex="2" GridPane.halignment="CENTER" />
+            <Button fx:id="customizeButton" focusTraversable="false" mnemonicParsing="false" onAction="#customize" onMouseEntered="#playButtonHoverSound" text="Customization" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
          </children>
       </GridPane>
       <GridPane GridPane.rowIndex="1">

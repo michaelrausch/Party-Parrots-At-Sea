@@ -2,6 +2,7 @@ package seng302.gameServer;
 
 import java.util.Arrays;
 import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.Message;
@@ -27,6 +28,19 @@ public class ServerPacketParser {
         byte[] payload = packet.getPayload();
         long type = Message.bytesToLong(Arrays.copyOfRange(payload, 4, 5));
         return CustomizeRequestType.getRequestType((int) type);
+    }
+
+    public static ChatterMessage extractChatterText(byte[] payload) {
+        return new ChatterMessage(
+            payload[1], new String(Arrays.copyOfRange(payload, 3, payload.length))
+        );
+    }
+
+    public static ChatterMessage extractChatterText(StreamPacket packet) {
+        byte[] payload = packet.getPayload();
+        return new ChatterMessage(
+            payload[1], new String(Arrays.copyOfRange(payload, 3, payload.length))
+        );
     }
 }
 

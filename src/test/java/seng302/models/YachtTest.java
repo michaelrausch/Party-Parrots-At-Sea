@@ -2,7 +2,10 @@ package seng302.models;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import javafx.util.Pair;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,6 +24,7 @@ public class YachtTest {
 
     @BeforeClass
     public static void setUp() {
+        new GameState("localhost");
         y1 = new ServerYacht("Yacht", 1, "Y1", "Y1", "Yacht 1", "C1");
         gs = new GameState("localhost");
     }
@@ -52,7 +56,7 @@ public class YachtTest {
         Double upwind = PolarTable.getOptimalUpwindVMG(windSpeed).keySet().iterator().next();
         Double downwind = PolarTable.getOptimalDownwindVMG(windSpeed).keySet().iterator().next();
 
-        HashMap<Double, Double> values = new HashMap<>();
+        List<Pair<Double, Double>> values = new ArrayList<>();
 
         upwind = (double) Math.floorMod(upwind.longValue() + windDirection.longValue(), 360L);
         Double upwindRight = upwind;
@@ -61,19 +65,19 @@ public class YachtTest {
         Double downwindRight = downwind;
         Double downwindLeft = 360 - downwindRight;
 
-        values.put(190d, upwindRight);
-        values.put(170d, upwindLeft);
-        values.put(10d, downwindLeft);
-        values.put(350d, downwindRight);
+        values.add(new Pair<>(190d, upwindRight));
+        values.add(new Pair<>(170d, upwindLeft));
+        values.add(new Pair<>(10d, downwindLeft));
+        values.add(new Pair<>(350d, downwindRight));
 
-        for (Double begin : values.keySet()) {
-            y1.setHeading(begin);
+        for (Pair<Double, Double> beginEndPair : values) {
+            y1.setHeading(beginEndPair.getKey());
             y1.turnToVMG();
             for (int i = 0; i < 200; i++) {
                 y1.runAutoPilot();
             }
             y1.disableAutoPilot();
-            assertEquals(values.get(begin), y1.getHeading(), 5.0);
+            assertEquals(beginEndPair.getValue(), y1.getHeading(), 5.0);
         }
 
     }
