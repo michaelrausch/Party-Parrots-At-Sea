@@ -4,35 +4,23 @@ package seng302.gameServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.*;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatLocationMessage;
-import seng302.gameServer.messages.ClientType;
-import seng302.gameServer.messages.CustomizeRequestType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RegistrationResponseMessage;
-import seng302.gameServer.messages.RegistrationResponseStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.Race;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.utilities.XMLGenerator;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.model.stream.xml.generator.RegattaXMLTemplate;
-import seng302.model.token.Token;
-import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -220,26 +208,22 @@ public class ServerToClientThread implements Runnable {
     }
 
     public void sendSetupMessages() {
-        xml = new XMLGenerator();
-        Race race = new Race();
+        xmlGenerator = new XMLGenerator();
+        RaceXMLTemplate race = new RaceXMLTemplate(new ArrayList<>(GameState.getYachts().values()), new ArrayList<>());
 
-        for (ServerYacht yacht : GameState.getYachts().values()) {
-            race.addBoat(yacht);
-        }
-
-        xml.setRace(race);
+        xmlGenerator.setRaceTemplate(race);
 
         XMLMessage xmlMessage;
-        xmlMessage = new XMLMessage(xml.getRegattaAsXml(), XMLMessageSubType.REGATTA,
-                xml.getRegattaAsXml().length());
+        xmlMessage = new XMLMessage(xmlGenerator.getRegattaAsXml(), XMLMessageSubType.REGATTA,
+                xmlGenerator.getRegattaAsXml().length());
         sendMessage(xmlMessage);
 
-        xmlMessage = new XMLMessage(xml.getBoatsAsXml(), XMLMessageSubType.BOAT,
-                xml.getBoatsAsXml().length());
+        xmlMessage = new XMLMessage(xmlGenerator.getBoatsAsXml(), XMLMessageSubType.BOAT,
+                xmlGenerator.getBoatsAsXml().length());
         sendMessage(xmlMessage);
 
-        xmlMessage = new XMLMessage(xml.getRaceAsXml(), XMLMessageSubType.RACE,
-                xml.getRaceAsXml().length());
+        xmlMessage = new XMLMessage(xmlGenerator.getRaceAsXml(), XMLMessageSubType.RACE,
+                xmlGenerator.getRaceAsXml().length());
         sendMessage(xmlMessage);
     }
 

@@ -2,17 +2,17 @@ package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
-import com.jfoenix.validation.RequiredFieldValidator;
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.validation.RequiredFieldValidator;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import seng302.gameServer.ServerDescription;
-import seng302.visualiser.validators.FieldLengthValidator;
 import seng302.visualiser.controllers.ViewManager;
+import seng302.visualiser.validators.FieldLengthValidator;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class ServerCreationController implements Initializable {
 
@@ -49,6 +49,7 @@ public class ServerCreationController implements Initializable {
     private void validateServerSettings() {
         serverName.validate();
         System.out.println(serverName.getActiveValidator());
+        createServer();
     }
 
 

@@ -4,16 +4,13 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.model.stream.xml.generator.Race;
-import seng302.model.stream.xml.generator.Regatta;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.model.stream.xml.generator.RegattaXMLTemplate;
-import seng302.gameServer.messages.XMLMessageSubType;
 import java.util.Random;
 
 /**
@@ -25,12 +22,10 @@ public class XMLGenerator {
     private static final String BOATS_TEMPLATE_NAME = "boats.ftlh";
     private static final String RACE_TEMPLATE_NAME = "race.ftlh";
     private Configuration configuration;
-    private static Regatta regatta = null;
-    private Race race;
     private RegattaXMLTemplate regatta;
     private RaceXMLTemplate race;
 
-    public static Regatta DEFAULT_REGATTA = new Regatta("Party Parrot Test Server " + new Random().nextInt(100),
+    public static RegattaXMLTemplate DEFAULT_REGATTA = new RegattaXMLTemplate("Party Parrot Test Server " + new Random().nextInt(100),
             "Bermuda",
             57.6679590,
             11.8503233);

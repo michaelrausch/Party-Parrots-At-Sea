@@ -1,15 +1,7 @@
 package seng302.visualiser.controllers;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -30,14 +22,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.StringConverter;
-import seng302.gameServer.messages.BoatStatus;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
@@ -49,6 +38,10 @@ import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 import seng302.visualiser.fxObjects.assets_2D.BoatObject;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Controller class that manages the display of a race
@@ -112,12 +105,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         //positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         //selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
-        rvAnchorPane.prefWidthProperty().bind(ViewManager.getInstance().getDecorator().widthProperty());
-        rvAnchorPane.prefHeightProperty().bind(ViewManager.getInstance().getDecorator().heightProperty());
-        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
-        windArrowHolder.getChildren().addAll(windArrow);
-        windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
-        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
+//        rvAnchorPane.prefWidthProperty().bind(ViewManager.getInstance().getDecorator().widthProperty());
+//        rvAnchorPane.prefHeightProperty().bind(ViewManager.getInstance().getDecorator().heightProperty());
+//        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+//        windArrowHolder.getChildren().addAll(windArrow);
+//        windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
+//        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
 
     }
 

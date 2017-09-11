@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.*;
+import seng302.gameServer.messages.Message;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
@@ -33,9 +31,6 @@ import java.util.*;
  * Created by wmu16 on 13/07/17.
  */
 public class MainServerThread implements Runnable, ClientConnectionDelegate {
-
-    private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
-
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
 
@@ -203,22 +198,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.setWindDirection(direction.doubleValue());
     }
 
-    // TODO: 29/08/17 wmu16 - This should not be in one function (init and a scheduling update)
-    public void startGame() {
-        initialiseBoatPositions();
-        Timer t = new Timer();
 
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                broadcastMessage(MessageFactory.getRaceStatusMessage());
-                if (GameState.getCurrentStage() == GameStages.PRE_RACE
-                    || GameState.getCurrentStage() == GameStages.LOBBYING) {
-                    broadcastMessage(MessageFactory.getRaceStartStatusMessage());
-                }
-            }
-        }, 0, 500);
-    }
 
 
     // TODO: 29/08/17 wmu16 - This sort of update should be in game state
@@ -331,14 +311,13 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                broadcastMessage(makeRaceStatusMessage());
-                if (GameState.getCurrentStage() == GameStages.PRE_RACE || GameState.getCurrentStage() == GameStages.LOBBYING) {
-                    broadcastMessage(makeRaceStartMessage());
+                broadcastMessage(MessageFactory.getRaceStatusMessage());
+                if (GameState.getCurrentStage() == GameStages.PRE_RACE
+                        || GameState.getCurrentStage() == GameStages.LOBBYING) {
+                    broadcastMessage(MessageFactory.getRaceStartStatusMessage());
                 }
-                serverToClientThreads.remove(closedConnection);
-                closedConnection.terminate();
             }
-        }
+        }, 0, 500);
 
 
         if (GameState.getCurrentStage() != GameStages.RACING) {
