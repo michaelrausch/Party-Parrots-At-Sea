@@ -60,7 +60,8 @@
 }
 
 #serverMap {
-    -fx-background-image: url("/images/bg.jpg");
-    -fx-background-repeat: no-repeat;
-    -fx-background-size: cover;
+    /*-fx-background-image: url("/images/mapbg.jpg");*/
+    /*-fx-background-repeat: no-repeat;*/
+    /*-fx-background-size: cover;*/
+    -fx-background-color: dodgerblue;
 }

@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXDialog;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -16,14 +17,21 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.Colors;
+import seng302.model.Limit;
 import seng302.model.RaceState;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Corner;
+import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.Sounds;
+import seng302.utilities.XMLGenerator;
+import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.cells.PlayerCell;
 
 public class LobbyController implements Initializable {
@@ -41,12 +49,16 @@ public class LobbyController implements Initializable {
     private Label serverName;
     @FXML
     private Label mapName;
+    @FXML
+    private Pane serverMap;
     //---------FXML END---------//
 
     private List<LobbyController_old.LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private RaceState raceState;
     private JFXDialog customizationDialog;
     public Color playersColor;
+    private Double mapWidth, mapHeight;
+    private GameView gameView;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -93,6 +105,45 @@ public class LobbyController implements Initializable {
         customizeButton.setOnMouseEntered(e -> Sounds.playHoverSound());
         beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
 
+        initMapPreview();
+    }
+
+    private void refreshMapView(){
+        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
+        List<Limit> border = raceData.getCourseLimit();
+        List<CompoundMark> marks = new ArrayList<CompoundMark>(raceData.getCompoundMarks().values());
+        List<Corner> corners = raceData.getMarkSequence();
+
+        gameView.setSize(mapWidth, mapHeight);
+
+        // Update game view
+        gameView.updateBorder(border);
+        gameView.updateCourse(marks, corners);
+    }
+
+    /**
+     *
+     */
+    private void initMapPreview() {
+        gameView = new GameView();
+        gameView.setHorizontalBuffer(330d);
+
+        mapWidth = 770d;
+        mapHeight = 574d;
+
+        // Add game view
+        serverMap.getChildren().clear();
+        serverMap.getChildren().add(gameView);
+
+        serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
+            mapWidth = newValue.doubleValue();
+            refreshMapView();
+        });
+
+        serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
+            mapHeight = newValue.doubleValue();
+            refreshMapView();
+        });
     }
 
     /**
