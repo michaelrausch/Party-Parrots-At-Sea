@@ -1,10 +1,13 @@
 package seng302.visualiser;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
@@ -14,14 +17,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import seng302.gameServer.GameStages;
+import javafx.util.Pair;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.ServerDescription;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.YachtEventType;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -32,6 +38,7 @@ import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.utilities.Sounds;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
@@ -56,6 +63,8 @@ public class GameClient {
     private RaceState raceState = new RaceState();
     private LobbyController lobbyController;
 
+    private ArrayList<ClientYacht> finishedBoats = new ArrayList<>();
+
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
     /**
@@ -75,12 +84,11 @@ public class GameClient {
     public void runAsClient(String ipAddress, Integer portNumber) {
         try {
             startClientToServerThread(ipAddress, portNumber);
-
-//            socketThread.addDisconnectionListener((cause) -> {
-//                showConnectionError(cause);
-//                Platform.runLater(this::loadStartScreen);
-//            });
-
+            socketThread.addDisconnectionListener((cause) -> {
+                showConnectionError(cause);
+                tearDownConnection();
+                Platform.runLater(this::loadStartScreen);
+            });
             socketThread.addStreamObserver(this::parsePackets);
 
             ViewManager.getInstance().setPlayerList(clientLobbyList);
@@ -203,9 +211,19 @@ public class GameClient {
         raceView = fxmlLoader.getController();
         ClientYacht player = allBoatsMap.get(socketThread.getClientId());
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
+        raceView.getSendPressedProperty().addListener((obs, old, isPressed) -> {
+            if (isPressed) {
+                formatAndSendChatMessage(raceView.readChatInput());
+            }
+        });
     }
 
+
+
     private void loadFinishScreenView() {
+        Sounds.stopMusic();
+        Sounds.stopSoundEffects();
+        Sounds.playFinishMusic();
         FXMLLoader fxmlLoader = loadFXMLToHolder("/views/FinishScreenView.fxml");
         FinishScreenViewController controller = fxmlLoader.getController();
         controller.setFinishers(raceState.getPlayerPositions());
@@ -233,6 +251,7 @@ public class GameClient {
             switch (packet.getType()) {
                 case RACE_STATUS:
                     processRaceStatusUpdate(StreamParser.extractRaceStatus(packet));
+
                     if (raceState.getTimeTillStart() <= 5000) {
                         startRaceIfAllDataReceived();
                     }
@@ -288,8 +307,21 @@ public class GameClient {
                     break;
 
                 case YACHT_EVENT_CODE:
-                    showCollisionAlert(StreamParser.extractYachtEventCode(packet));
+                    YachtEventData yachtEventData = StreamParser.extractYachtEventCode(packet);
+                    if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
+                        showCollisionAlert(StreamParser.extractYachtEventCode(packet));
+                    } else if (yachtEventData.getEventId() == YachtEventType.TOKEN.getCode()) {
+                        showPickUp();
+                    }
                     break;
+
+                case CHATTER_TEXT:
+                    Pair<Integer, String> playerIdMessagePair = StreamParser
+                        .extractChatterText(packet);
+                    raceView.updateChatHistory(
+                        allBoatsMap.get(playerIdMessagePair.getKey()).getColour(),
+                        playerIdMessagePair.getValue()
+                    );
             }
         }
     }
@@ -333,7 +365,6 @@ public class GameClient {
         if (allXMLReceived()) {
             ClientYacht clientYacht = allBoatsMap.get(roundingData.getBoatId());
             clientYacht.roundMark(
-                courseData.getCompoundMarks().get(roundingData.getMarkId()),
                 roundingData.getTimeStamp(),
                 raceState.getRaceTime() - roundingData.getTimeStamp()
             );
@@ -348,6 +379,9 @@ public class GameClient {
             for (ClientYacht yacht : allBoatsMap.values()) {
                 if (yacht.getBoatStatus() != BoatStatus.FINISHED.getCode()) {
                     raceFinished = false;
+                } else if (!finishedBoats.contains(yacht)) {
+                    finishedBoats.add(yacht);
+                    Sounds.playFinishSound();
                 }
             }
 
@@ -363,6 +397,7 @@ public class GameClient {
             }
 
             if (raceFinished) {
+                Sounds.playFinishSound();
                 close();
                 loadFinishScreenView();
             }
@@ -385,7 +420,13 @@ public class GameClient {
      * Handle the key-pressed event from the text field.
      * @param e The key event triggering this call
      */
-    public void keyPressed(KeyEvent e) {
+    private void keyPressed(KeyEvent e) {
+        if (raceView.isChatInputFocused()) {
+            if (e.getCode() == KeyCode.ENTER) {
+                formatAndSendChatMessage(raceView.readChatInput());
+            }
+            return;
+        }
         switch (e.getCode()) {
             case SPACE: // align with vmg
                 socketThread.sendBoatAction(BoatAction.VMG); break;
@@ -394,12 +435,16 @@ public class GameClient {
             case PAGE_DOWN: // downwind
                 socketThread.sendBoatAction(BoatAction.DOWNWIND); break;
             case ENTER: // tack/gybe
+                // if chat box is active take whatever is in there and send it to server
                 socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
         }
     }
 
 
-    public void keyReleased(KeyEvent e) {
+    private void keyReleased(KeyEvent e) {
+        if (raceView.isChatInputFocused()) {
+            return;
+        }
         switch (e.getCode()) {
             //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
             case SHIFT:  // sails in/sails out
@@ -420,31 +465,43 @@ public class GameClient {
      * Tells race view to show a collision animation.
      */
     private void showCollisionAlert(YachtEventData yachtEventData) {
-        // 33 is the agreed code to show collision
-        if (yachtEventData.getEventId() == 33) {
-            raceState.storeCollision(
-                allBoatsMap.get(
-                    yachtEventData.getSubjectId().intValue()
-                )
+        Sounds.playCrashSound();
+        raceState.storeCollision(
+            allBoatsMap.get(
+                yachtEventData.getSubjectId().intValue()
+            )
+        );
+    }
+
+    // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user
+    private void showPickUp() {
+        Sounds.playTokenPickupSound();
+    }
+
+    private void formatAndSendChatMessage(String rawChat) {
+        if (rawChat.length() > 0) {
+            socketThread.sendChatterMessage(
+                new SimpleDateFormat("[HH:mm:ss] ").format(new Date()) +
+                    allBoatsMap.get(socketThread.getClientId()).getShortName() + ": " + rawChat
             );
         }
     }
 
-    public void startGame(){
-        server.startGame();
-    }
-
-    public ClientToServerThread getServerThread() {
-        return socketThread;
-    }
-
-    public List<String> getPlayerNames(){
-        return Collections.unmodifiableList(clientLobbyList.sorted());
-    }
-
-    public void stopGame() {
-        GameState.setCurrentStage(GameStages.CANCELLED);
-        if (server != null) server.terminate();
-        if (socketThread != null) socketThread.setSocketToClose();
-    }
+//    public void startGame(){
+//        server.startGame();
+//    }
+//
+//    public ClientToServerThread getServerThread() {
+//        return socketThread;
+//    }
+//
+//    public List<String> getPlayerNames(){
+//        return Collections.unmodifiableList(clientLobbyList.sorted());
+//    }
+//
+//    public void stopGame() {
+//        GameState.setCurrentStage(GameStages.CANCELLED);
+//        if (server != null) server.terminate();
+//        if (socketThread != null) socketThread.setSocketToClose();
+//    }
 }

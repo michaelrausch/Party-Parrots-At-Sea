@@ -21,6 +21,27 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.ChatterMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RegistrationResponseMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.model.Player;
+import seng302.model.ServerYacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+import seng302.model.token.Token;
+import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -58,6 +79,7 @@ public class ServerToClientThread implements Runnable {
 
     private ClientType clientType;
     private Boolean isRegistered = false;
+    private Boolean isHost = false;
 
     private XMLGenerator xmlGenerator;
 
@@ -182,7 +204,12 @@ public class ServerToClientThread implements Runnable {
 
                                 completeRegistration(requestedType);
                                 break;
-
+                            case CHATTER_TEXT:
+                                ChatterMessage chatterMessage = ServerPacketParser
+                                    .extractChatterText(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                GameState.processChatter(chatterMessage, isHost);
+                                break;
                             case RACE_CUSTOMIZATION_REQUEST:
                                 Long sourceID = Message
                                     .bytesToLong(Arrays.copyOfRange(payload, 0, 3));
@@ -293,10 +320,6 @@ public class ServerToClientThread implements Runnable {
         return yacht;
     }
 
-    public void sendCollisionMessage(Integer yachtId) {
-        sendMessage(new YachtEventCodeMessage(yachtId));
-    }
-
     public void addConnectionListener(ConnectionListener listener) {
         connectionListeners.add(listener);
     }
@@ -315,5 +338,9 @@ public class ServerToClientThread implements Runnable {
 
     public void addDisconnectListener(DisconnectListener disconnectListener) {
         this.disconnectListener = disconnectListener;
+    }
+
+    public void setAsHost() {
+        isHost = true;
     }
 }

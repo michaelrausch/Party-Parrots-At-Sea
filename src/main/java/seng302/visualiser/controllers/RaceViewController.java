@@ -2,6 +2,8 @@ package seng302.visualiser.controllers;
 
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,7 +19,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -32,10 +35,15 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.utilities.Sounds;
+import seng302.visualiser.GameView;
+import seng302.visualiser.controllers.annotations.Annotation;
 import seng302.visualiser.GameView3D;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
+import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.ChatHistory;
 import seng302.visualiser.fxObjects.assets_2D.BoatObject;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 
@@ -48,6 +56,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
+    private final int CHAT_LIMIT = 128;
+
+    @FXML
+    private Pane basePane;
+    @FXML
+    private Button chatSend;
+    @FXML
+    private Pane chatHistoryHolder;
+    @FXML
+    private TextField chatInput;
     @FXML
     private LineChart<String, Double> raceSparkLine;
     @FXML
@@ -60,6 +78,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Text timerLabel;
     @FXML
     private StackPane contentAnchorPane;
+    private GridPane contentGridPane;
     @FXML
     private AnchorPane rvAnchorPane;
     @FXML
@@ -84,13 +103,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private GameView3D gameView;
     private RaceState raceState;
 
+    private ChatHistory chatHistory;
+
     private Timeline timerTimeline;
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
     private Polyline windArrow = new WindArrow(Color.LIGHTGRAY);
+    private ObservableList<ClientYacht> selectionComboBoxList = FXCollections.observableArrayList();
 
     public void initialize() {
+        Sounds.stopMusic();
+        Sounds.playRaceMusic();
         // Load a default important annotation state
         //importantAnnotations = new ImportantAnnotationsState();
 
@@ -103,6 +127,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         //sparklineYAxis.setTickMarkVisible(false);
 
         //positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+        raceSparkLine.visibleProperty().setValue(false);
+        raceSparkLine.getYAxis().setAutoRanging(false);
+        sparklineYAxis.setTickMarkVisible(false);
+        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         //selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
 //        rvAnchorPane.prefWidthProperty().bind(ViewManager.getInstance().getDecorator().widthProperty());
@@ -112,6 +140,28 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
 //        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
 
+        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
+            if (newLen.intValue() > CHAT_LIMIT) {
+                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
+            }
+        });
+        chatHistory = new ChatHistory();
+        chatHistoryHolder.getChildren().addAll(chatHistory);
+        chatHistory.prefWidthProperty().bind(
+            chatHistoryHolder.widthProperty()
+        );
+        chatHistory.prefHeightProperty().bind(
+            chatHistoryHolder.heightProperty()
+        );
+//        chatHistory.setFitToWidth(true);
+//        chatHistory.setFitToHeight(true);
+//        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
+//            chatHistory.setScrollTop(Double.MAX_VALUE);
+//        });
+        contentGridPane.setOnMouseClicked((event) ->
+            contentGridPane.requestFocus()
+        );
     }
 
     public void loadRace (
@@ -122,12 +172,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
         this.raceState = raceState;
-
-        initializeUpdateTimer();
-        initialiseFPSCheckBox();
-        initialiseAnnotationSlider();
-        initialiseBoatSelectionComboBox();
-        initialiseSparkLine();
 
         raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
             while (c.next()) {
@@ -165,6 +209,33 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //            updateWindSpeed(raceState.getWindSpeed());
 //        });
 //        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
+
+        //TODO extract chat stuff
+//        raceState.addCollisionListener(gameView::drawCollision);
+//        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
+//            gameView.setWindDir(newDirection.doubleValue());
+//            updateWindDirection(newDirection.doubleValue());
+//        });
+//        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) -> {
+//            updateWindSpeed(newSpeed.doubleValue());
+//        });
+//        updateWindDirection(raceState.windDirectionProperty().doubleValue());
+//        updateWindSpeed(raceState.getWindSpeed());
+//        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
+//        chatInput.focusedProperty().addListener((obs, oldValue, newValue) -> {
+//            if (newValue) {
+//                gameView.disableZoom();
+//            } else {
+//                gameView.enableZoom();
+//            }
+//        });
+//        Platform.runLater(() -> {
+//            initializeUpdateTimer();
+//            initialiseFPSCheckBox();
+//            initialiseAnnotationSlider();
+//            initialiseBoatSelectionComboBox();
+//            initialiseSparkLine();
+//        });
     }
 
     /**
@@ -315,13 +386,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 )
             );
         }
-//        XYChart.Series<String, Double> positionData =  sparkLineData.get(yacht.getSourceID());
-//        positionData.getData().add(
-//            new XYChart.Data<>(
-//                Integer.toString(legNumber),
-//                1.0 + participants.size() - yacht.getPlacing()
-//            )
-//        );
     }
 
 
@@ -552,6 +616,15 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //                gameView.selectBoat(selectedBoat);
 //            }
 //        });
+
+        //TODO uncomment out
+//        selectionComboBoxList.setAll(participants.values());
+//        yachtSelectionComboBox.setItems(selectionComboBoxList);
+//        yachtSelectionComboBox.valueProperty().addListener((obs, lastSelection, selectedBoat) -> {
+//            if (selectedBoat != null) {
+//                gameView.selectBoat(selectedBoat);
+//            }
+//        });
     }
 
     /**
@@ -561,9 +634,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/FinishView.fxml"));
 
         try {
-            contentAnchorPane.getChildren().removeAll();
-            contentAnchorPane.getChildren().clear();
-            contentAnchorPane.getChildren().addAll((Pane) loader.load());
+            contentGridPane.getChildren().removeAll();
+            contentGridPane.getChildren().clear();
+            contentGridPane.getChildren().addAll((Pane) loader.load());
 
         } catch (javafx.fxml.LoadException e) {
             System.err.println(e.getCause().toString());
@@ -632,4 +705,24 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         gameView.updateBorder(raceData.getCourseLimit());
         gameView.updateTokens(raceData.getTokens());
     }
+
+    public ReadOnlyBooleanProperty getSendPressedProperty() {
+        return chatSend.pressedProperty();
+    }
+
+    public boolean isChatInputFocused() {
+        return chatInput.focusedProperty().getValue();
+    }
+
+    public String readChatInput() {
+        String chat = chatInput.getText();
+        chatInput.clear();
+        basePane.requestFocus();
+        return chat;
+    }
+
+    public void updateChatHistory(Paint playerColour, String newMessage) {
+        Platform.runLater(() -> chatHistory.addMessage(playerColour, newMessage));
+    }
+
 }

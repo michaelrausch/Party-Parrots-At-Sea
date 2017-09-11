@@ -11,6 +11,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.*;
@@ -24,6 +26,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
@@ -42,6 +45,13 @@ import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory;
 import seng302.visualiser.fxObjects.assets_2D.Marker;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
+import seng302.utilities.Sounds;
+import seng302.visualiser.fxObjects.AnnotationBox;
+import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.CourseBoundary;
+import seng302.visualiser.fxObjects.Gate;
+import seng302.visualiser.fxObjects.MarkArrowFactory;
+import seng302.visualiser.fxObjects.Marker;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
 
@@ -51,7 +61,7 @@ import seng302.visualiser.map.CanvasMap;
 public class GameView extends Pane {
 
     private double bufferSize = 50;
-    private double panelWidth = 1260; // it should be 1280 but, minors 40 to cancel the bias.
+    private double panelWidth = 1280;
     private double panelHeight = 960;
     private double canvasWidth = 1100;
     private double canvasHeight = 920;
@@ -63,7 +73,7 @@ public class GameView extends Pane {
     private double referencePointX, referencePointY;
     private double metersPerPixelX, metersPerPixelY;
 
-    final double SCALE_DELTA = 1.1;
+    private boolean isZoom = false;
 
     private Text fpsDisplay = new Text();
     private Polygon raceBorder = new CourseBoundary();
@@ -165,6 +175,48 @@ public class GameView extends Pane {
         });
         initializeTimer();
         gameObjects.addAll(mapImage, raceBorder, markers, tokens, pl);
+        // TODO: 11/09/17 ajm412: do you even zoom bro?
+//        this.sceneProperty().addListener(((observable, oldValue, scene) -> {
+//            if (scene != null) {
+//                setupZoom();
+//            } else {
+//                disableZoom();
+//            }
+//        }));
+//
+//        this.widthProperty().addListener(new ChangeListener<Number>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+//                Number newValue) {
+//                scaleFactor = getWidth() / panelWidth;
+//
+//                if (panelHeight * scaleFactor < getHeight()) {
+//                    Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+//                    getTransforms().remove(0, getTransforms().size());
+//                    getTransforms().add(scale);
+//
+//                    setPrefWidth(getWidth() / scaleFactor);
+//                    setPrefHeight(getHeight() / scaleFactor);
+//                }
+//            }
+//        });
+//
+//        this.heightProperty().addListener(new ChangeListener<Number>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+//                Number newValue) {
+//                scaleFactor = getHeight() / panelHeight;
+//
+//                if (panelWidth * scaleFactor < getWidth()) {
+//                    Scale scale = new Scale(scaleFactor, scaleFactor, 0, 0);
+//                    getTransforms().remove(0, getTransforms().size());
+//                    getTransforms().add(scale);
+//
+//                    setPrefWidth(getWidth() / scaleFactor);
+//                    setPrefHeight(getHeight() / scaleFactor);
+//                }
+//            }
+//        });
     }
 
     private void initializeTimer() {
@@ -456,18 +508,18 @@ public class GameView extends Pane {
         raceBorder.getPoints().setAll(boundaryPoints);
     }
 
-    /**
-     * Rescales the race to the size of the window.
-     *
-     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
-     */
-    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
-        //Check is called once to avoid unnecessarily change the course limits once the race is running
-        findMinMaxPoint(limitingCoordinates);
-        double minLonToMaxLon = scaleRaceExtremities();
-        calculateReferencePointLocation(minLonToMaxLon);
-//        drawGoogleMap();
-    }
+//    /**
+//     * Rescales the race to the size of the window.
+//     *
+//     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
+//     */
+//    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
+//        //Check is called once to avoid unnecessarily change the course limits once the race is running
+//        findMinMaxPoint(limitingCoordinates);
+//        double minLonToMaxLon = scaleRaceExtremities();
+//        calculateReferencePointLocation(minLonToMaxLon);
+////        drawGoogleMap();
+//    }
 
     /**
      * Replaces all tokens in the course with those passed in
@@ -483,27 +535,46 @@ public class GameView extends Pane {
             tokenObject.setLayoutY(location.getY());
             mapTokens.add(tokenObject);
         }
-
         Platform.runLater(() -> {
             tokens.getChildren().clear();
             tokens.getChildren().addAll(mapTokens);
         });
     }
 
-    // TODO: 16/08/17 initialize zooming internal to GameView only
+//    // TODO: 16/08/17 initialize zooming internal to GameView only
+//    /**
+//     * Enables zoom. Has to be called after this is added to a scene.
+//     */
+//    private void setupZoom() {
+//        this.getScene().addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
+//            if (event.getCode() == KeyCode.Z) {
+//                zoomIn();
+//            } else if (event.getCode() == KeyCode.X) {
+//                zoomOut();
+//            }
+//        });
+//        enableZoom();
+//    }
+////
+//    public void enableZoom() {
+//        isZoom = true;
+//    }
+//
+//    public void disableZoom() {
+//        isZoom = false;
+//    }
+
     /**
-     * Enables zoom. Has to be called after this is added to a scene.
+     * Rescales the race to the size of the window.
+     *
+     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
      */
-    public void enableZoom () {
-        if (this.getScene() != null) {
-            this.getScene().addEventHandler(KeyEvent.KEY_PRESSED, (event) -> {
-                if (event.getCode() == KeyCode.Z) {
-                    zoomIn();
-                } else if (event.getCode() == KeyCode.X) {
-                    zoomOut();
-                }
-            });
-        }
+    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
+        //Check is called once to avoid unnecessarily change the course limits once the race is running
+        findMinMaxPoint(limitingCoordinates);
+        double minLonToMaxLon = scaleRaceExtremities();
+        calculateReferencePointLocation(minLonToMaxLon);
+//        drawGoogleMap();
     }
 
     private void setSelectedBoat(BoatObject bo, Boolean isSelected) {
@@ -825,17 +896,11 @@ public class GameView extends Pane {
         playerYacht.addMarkRoundingListener(this::updateMarkArrows);
     }
 
-    private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
+    private void updateMarkArrows (ClientYacht yacht, int legNumber) {
         //Only show arrows for this and next leg.
-//        System.out.println(markerObjects);
-        if (compoundMark != null) {
-            for (Mark mark : compoundMark.getMarks()) {
-//                System.out.println("markerObjects.get(mark) = " + markerObjects.get(mark));
-                markerObjects.get(mark).showNextExitArrow();
-            }
-        }
         CompoundMark nextMark = null;
         if (legNumber < course.size() - 1) {
+            Sounds.playMarkRoundingSound();
             nextMark = course.get(legNumber);
             for (Mark mark : nextMark.getMarks()) {
                 markerObjects.get(mark).showNextEnterArrow();
@@ -846,6 +911,14 @@ public class GameView extends Pane {
             if (lastMark != nextMark) {
                 for (Mark mark : lastMark.getMarks()) {
                     markerObjects.get(mark).hideAllArrows();
+                }
+            }
+        }
+        if (legNumber - 1 >= 0) {
+            CompoundMark thisMark = course.get(Math.max(0, legNumber - 1));
+            if (thisMark != nextMark) {
+                for (Mark mark : thisMark.getMarks()) {
+                    markerObjects.get(mark).showNextExitArrow();
                 }
             }
         }

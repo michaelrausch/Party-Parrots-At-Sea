@@ -96,7 +96,7 @@ public class MessageFactory {
 
     public static XMLMessage getRaceXML() {
         List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        List<Token> tokens = GameState.getTokens();
+        List<Token> tokens = GameState.getTokensInPlay();
         RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
         xmlGenerator.setRaceTemplate(raceXMLTemplate);
 
@@ -124,7 +124,7 @@ public class MessageFactory {
 
     public static XMLMessage getBoatXML() {
         List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        List<Token> tokens = GameState.getTokens();
+        List<Token> tokens = GameState.getTokensInPlay();
         RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
         xmlGenerator.setRaceTemplate(raceXMLTemplate);
 

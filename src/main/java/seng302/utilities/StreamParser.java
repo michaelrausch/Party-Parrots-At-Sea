@@ -2,9 +2,11 @@ package seng302.utilities;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javafx.util.Pair;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -62,31 +64,10 @@ public class StreamParser {
         long windDir = bytesToLong(Arrays.copyOfRange(payload, 18, 20));
         long rawWindSpeed = bytesToLong(Arrays.copyOfRange(payload, 20, 22));
 
-//        DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-//        currentTime = format.format((new Date(currentTime)))
-
         RaceStatusData data = new RaceStatusData(
             windDir, rawWindSpeed, raceStatus, currentTime, expectedStartTime
         );
 
-//        long timeTillStart =
-//            ((new Date(expectedStartTime)).getTime() - (new Date(currentTime)).getTime()) / 1000;
-//
-//        if (timeTillStart > 0) {
-//            timeSinceStart = timeTillStart;
-//        } else {
-//            if (raceStatus == 4 || raceStatus == 8) {
-//                raceFinished = true;
-//                raceStarted = false;
-//            } else if (!raceStarted) {
-//                raceStarted = true;
-//                raceFinished = false;
-//            }
-//            timeSinceStart = timeTillStart;
-//        }
-//
-
-//
         int noBoats = payload[22];
         int raceType = payload[23];
         long boatID, estTimeAtNextMark, estTimeAtFinish;
@@ -105,24 +86,6 @@ public class StreamParser {
         }
         return data;
     }
-
-//    private static void setBoatLegPosition(Yacht updatingBoat, Integer leg){
-//        Integer placing = 1;
-//        if (leg != updatingBoat.getLegNumber() && (raceStarted || raceFinished)) {
-//            for (Yacht boat : boats.values()) {
-//                if (boat.getLegNumber() != null && leg <= boat.getLegNumber()){
-//                    placing += 1;
-//                }
-//            }
-//            updatingBoat.setPlacing(placing.toString());
-//            updatingBoat.setLegNumber(leg);
-//            boatsPos.putIfAbsent(placing, updatingBoat);
-//            boatsPos.replace(placing, updatingBoat);
-//        } else if(updatingBoat.getLegNumber() == null){
-//            updatingBoat.setPlacing("1");
-//            updatingBoat.setLegNumber(leg);
-//        }
-//    }
 
     /**
      * Parses and returns the text from a StreamPacket containing text data for display.
@@ -255,15 +218,15 @@ public class StreamParser {
      * @return Chatter text message as a string. Returns null if the packet is not of type
      * CHATTER_TEXT.
      */
-    public static String extractChatterText(StreamPacket packet) {
+    public static Pair<Integer, String> extractChatterText(StreamPacket packet) {
         if (packet.getType() != PacketType.CHATTER_TEXT) {
             return null;
         }
         byte[] payload = packet.getPayload();
         int messageVersionNo = payload[0];
         int messageType = payload[1];
-        int length = payload[2];
-        return new String(Arrays.copyOfRange(payload, 3, 3 + length));
+        int length = (int) bytesToLong(new byte[]{payload[2]});
+        return new Pair<>(messageType, new String(Arrays.copyOfRange(payload, 3, 3 + length)));
     }
 
     /**
@@ -390,26 +353,6 @@ public class StreamParser {
         return new long[]{
             rawPeriod, rawSamplePeriod, period2, speed2, period3, speed3, period4, speed4, timeStamp
         };
-    }
-
-
-    public static void extractBoatAction(StreamPacket packet) {
-        byte[] payload = packet.getPayload();
-        int messageVersionNo = payload[0];
-        long actionType = bytesToLong(Arrays.copyOfRange(payload, 0, 1));
-        if (actionType == 1) {
-            System.out.println("VMG");
-        } else if (actionType == 2) {
-            System.out.println("SAILS IN");
-        } else if (actionType == 3) {
-            System.out.println("SAILS OUT");
-        } else if (actionType == 4) {
-            System.out.println("TACK/GYBE");
-        } else if (actionType == 5) {
-            System.out.println("UPWIND");
-        } else if (actionType == 6) {
-            System.out.println("DOWNWIND");
-        }
     }
 
     /**

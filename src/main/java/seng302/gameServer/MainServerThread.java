@@ -31,6 +31,9 @@ import java.util.*;
  * Created by wmu16 on 13/07/17.
  */
 public class MainServerThread implements Runnable, ClientConnectionDelegate {
+
+    private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
+
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
 
@@ -135,29 +138,32 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
             //FINISHED
             else if (GameState.getCurrentStage() == GameStages.FINISHED) {
-                terminate();
+                broadcastMessage(MessageFactory.getRaceStatusMessage());
+                try {
+                    Thread.sleep(1000); //Hackish fix to make sure all threads have sent closing RaceStatus
+                    terminate();
+                } catch (InterruptedException ie) {
+                    logger.trace("Thread interrupted while waiting to terminate clients", 1);
+                }
             }
         }
-
-        // TODO: 14/07/17 wmu16 - Send out disconnect packet to clients
         try {
             for (ServerToClientThread serverToClientThread : serverToClientThreads) {
                 serverToClientThread.terminate();
             }
             serverSocket.close();
-            return;
         } catch (IOException e) {
             System.out.println("IO error in server thread handler upon closing socket");
         }
     }
 
-    public void sendBoatLocations() {
+    private void sendBoatLocations() {
         for (ServerYacht serverYacht : GameState.getYachts().values()) {
             broadcastMessage(MessageFactory.getBoatLocationMessage(serverYacht));
         }
     }
 
-    public void sendSetupMessages() {
+    private void sendSetupMessages() {
         broadcastMessage(MessageFactory.getRaceXML());
         broadcastMessage(MessageFactory.getRegattaXML());
         broadcastMessage(MessageFactory.getBoatXML());
@@ -220,34 +226,10 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                spawnNewCoins();
+                GameState.spawnNewToken();
                 broadcastMessage(MessageFactory.getRaceXML());
             }
-        }, 0, 60000);
-    }
-
-    /**
-     * Randomly select a subset of tokens from a pre defined superset
-     * Broadasts a new race status message to show this update
-     */
-    private void spawnNewCoins() {
-
-        List<Token> allTokens = new ArrayList<>();
-        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
-        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
-        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
-        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
-        allTokens.add(token1);
-        allTokens.add(token2);
-        allTokens.add(token3);
-        allTokens.add(token4);
-
-        GameState.clearTokens();
-        Random random = new Random();
-        Collections.shuffle(allTokens);
-        for (int i = 0; i < random.nextInt(allTokens.size()); i++) {
-            GameState.addToken(allTokens.get(i));
-        }
+        }, 10000, 60000);
     }
 
     /**
@@ -258,6 +240,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     @Override
     public void clientConnected(ServerToClientThread serverToClientThread) {
         logger.debug("Player Connected From " + serverToClientThread.getThread().getName(), 0);
+        if (serverToClientThreads.size() == 0) { //Sets first client as host.
+            serverToClientThread.setAsHost();
+        }
         serverToClientThreads.add(serverToClientThread);
         serverToClientThread.addConnectionListener(this::sendSetupMessages);
         serverToClientThread.addDisconnectListener(this::clientDisconnected);
@@ -320,7 +305,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }, 0, 500);
 
 
-        if (GameState.getCurrentStage() != GameStages.RACING) {
+        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
             sendSetupMessages();
         }
     }
@@ -333,10 +318,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
      * Initialise boats to specific spaced out geopoints behind starting line.
      */
     private void initialiseBoatPositions() {
-        // Getting the start line compound marks
-//        if (gameClient== null) {
-//            return;
-//        }
         CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
         GeoPoint startMark1 = cm.getSubMark(1);
         GeoPoint startMark2 = cm.getSubMark(2);
