@@ -3,8 +3,10 @@ package seng302.visualiser.controllers.cells;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import seng302.utilities.Sounds;
 
 public class PlayerCell {
 
@@ -23,5 +25,9 @@ public class PlayerCell {
 
     public void initialize() {
         playerName.setText(name);
+    }
+
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
     }
 }

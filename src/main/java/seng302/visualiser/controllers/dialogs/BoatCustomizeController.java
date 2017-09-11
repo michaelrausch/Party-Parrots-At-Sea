@@ -10,6 +10,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.utilities.Sounds;
 import seng302.visualiser.ClientToServerThread;
 
 import java.net.URL;
@@ -39,6 +40,7 @@ public class BoatCustomizeController implements Initializable{
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         submitBtn.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
             submitCustomization();
         });
 
@@ -49,6 +51,8 @@ public class BoatCustomizeController implements Initializable{
         playerNameLengthValidator.setMessage("Player name too long.");
 
         boatName.setValidators(playerNameLengthValidator, playerNameReqValidator);
+
+        submitBtn.setOnMouseEntered(e -> Sounds.playHoverSound());
     }
 
     /**

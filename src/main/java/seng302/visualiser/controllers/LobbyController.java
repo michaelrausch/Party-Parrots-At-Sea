@@ -23,6 +23,7 @@ import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.Colors;
 import seng302.model.RaceState;
+import seng302.utilities.Sounds;
 import seng302.visualiser.controllers.cells.PlayerCell;
 
 public class LobbyController implements Initializable {
@@ -45,7 +46,7 @@ public class LobbyController implements Initializable {
     private List<LobbyController_old.LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private RaceState raceState;
     private JFXDialog customizationDialog;
-    private Color playersColor;
+    public Color playersColor;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,6 +57,15 @@ public class LobbyController implements Initializable {
 
         leaveLobbyButton.setOnMouseReleased(event -> leaveLobby());
         beginRaceButton.setOnMouseReleased(event -> beginRace());
+        leaveLobbyButton.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
+            leaveLobby();
+        });
+
+        beginRaceButton.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
+            beginRace();
+        });
 
         Platform.runLater(() -> {
             serverName.setText(ViewManager.getInstance().getProperty("serverName"));
@@ -73,8 +83,15 @@ public class LobbyController implements Initializable {
             Color playerColor = Colors.getColor( playerId - 1);
             customizationDialog = ViewManager.getInstance().loadCustomizationDialog(serverListMainStackPane, this, playerColor, name);
 
-            customizeButton.setOnMouseReleased(event -> customizationDialog.show());
+            customizeButton.setOnMouseReleased(event -> {
+                Sounds.playButtonClick();
+                customizationDialog.show();
+            });
         });
+
+        leaveLobbyButton.setOnMouseEntered(e -> Sounds.playHoverSound());
+        customizeButton.setOnMouseEntered(e -> Sounds.playHoverSound());
+        beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
 
     }
 
@@ -125,7 +142,7 @@ public class LobbyController implements Initializable {
     /**
      *
      */
-    private void disableReadyButton() {
+    public void disableReadyButton() {
         this.beginRaceButton.setDisable(true);
         this.beginRaceButton.setText("Waiting for host...");
     }

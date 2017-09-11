@@ -52,13 +52,6 @@ public class StartScreenController implements Initializable{
 ////        gameClient = new GameClient(holder);
 //    }
 
-    public void initialize(URL location, ResourceBundle resources) {
-        startBtn.setOnMousePressed(event -> startBtn.setText("LOADING..."));
-        startBtn.setOnMouseReleased(event -> goToServerBrowser());
-
-        setInitialDropShadow();
-        preloadServerListView();
-    }
 
     /**
      *
@@ -94,6 +87,18 @@ public class StartScreenController implements Initializable{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void initialize(URL location, ResourceBundle resources) {
+        startBtn.setOnMousePressed(event -> {
+            startBtn.setText("LOADING...");
+            Sounds.playButtonClick();
+        });
+
+        startBtn.setOnMouseReleased(event -> goToServerBrowser());
+
+        setInitialDropShadow();
+        preloadServerListView();
     }
 
     public void toggleMusic(ActionEvent actionEvent) {

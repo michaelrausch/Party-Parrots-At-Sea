@@ -15,6 +15,8 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerAdvertiser;
+import seng302.utilities.BonjourInstallChecker;
+import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
@@ -77,6 +79,16 @@ public class ViewManager {
 
         decorator.setOnCloseButtonAction(this::closeAll);
 
+        // TODO Platform.runLater(this::checkCompatibility);
+
+        Sounds.stopMusic();
+        Sounds.playMenuMusic();
+    }
+
+    private void checkCompatibility() {
+        if(BonjourInstallChecker.isBonjourSupported()){
+            BonjourInstallChecker.openInstallUrl();
+        }
     }
 
     private void closeAll() {
@@ -159,6 +171,8 @@ public class ViewManager {
         decorator.getScene().setOnKeyPressed(gameClient::keyPressed);
         decorator.getScene().setOnKeyReleased(gameClient::keyReleased);
 
+        Sounds.stopMusic();
+        Sounds.playRaceMusic();
         return loader.getController();
     }
 

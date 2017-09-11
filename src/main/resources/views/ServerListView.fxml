@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import java.lang.String?>
@@ -13,13 +19,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.ServerListController">
+<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.ServerListController">
     <children>
         <GridPane fx:id="serverListMainGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
             <children>
                 <GridPane fx:id="connectGridPane" GridPane.rowIndex="2">
                     <children>
-                        <JFXButton fx:id="connectButton" buttonType="RAISED" prefHeight="45.0" prefWidth="220.0" ripplerFill="#3493e3" text="CONNECT" textFill="WHITE" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
+                        <JFXButton fx:id="connectButton" buttonType="RAISED" onMouseEntered="#playButtonHoverSound" prefHeight="45.0" prefWidth="220.0" ripplerFill="#3493e3" text="CONNECT" textFill="WHITE" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                             <GridPane.margin>
                                 <Insets right="50.0" />
                             </GridPane.margin>
@@ -66,7 +72,7 @@
                 </ScrollPane>
                 <GridPane>
                     <children>
-                        <JFXButton id="hostButton" fx:id="serverListHostButton" buttonType="RAISED" prefHeight="45.0" prefWidth="220.0" text="HOST" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
+                        <JFXButton id="hostButton" fx:id="serverListHostButton" buttonType="RAISED" onMouseEntered="#playButtonHoverSound" prefHeight="45.0" prefWidth="220.0" text="HOST" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                             <GridPane.margin>
                                 <Insets right="50.0" />
                             </GridPane.margin>

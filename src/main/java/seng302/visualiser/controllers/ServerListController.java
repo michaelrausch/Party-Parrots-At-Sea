@@ -21,11 +21,13 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerDescription;
+import seng302.utilities.Sounds;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
@@ -63,7 +65,10 @@ public class ServerListController implements Initializable, ServerListenerDelega
         serverListVBox.minWidthProperty().bind(serverListScrollPane.widthProperty());
 
         // Set Event Bindings
-        connectButton.setOnMouseReleased(event -> attemptToDirectConnect());
+        connectButton.setOnMouseReleased(event -> {
+            attemptToDirectConnect();
+            Sounds.playButtonClick();
+        });
         for (JFXTextField textField : Arrays.asList(serverHostName, serverPortNumber)) {
             // Event for pressing enter to submit direct connection
             textField.setOnKeyPressed(event -> {
@@ -114,7 +119,10 @@ public class ServerListController implements Initializable, ServerListenerDelega
             try {
                 JFXDialog dialog = new JFXDialog(serverListMainStackPane, dialogContent.load(),
                     DialogTransition.CENTER);
-                serverListHostButton.setOnAction(action -> dialog.show());
+                serverListHostButton.setOnAction(action -> {
+                    dialog.show();
+                    Sounds.playButtonClick();
+                });
             } catch (IOException e) {
                 logger.warn("Could not create Server Creation Dialog.");
             }
@@ -147,6 +155,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
      *
      */
     private void DirectConnect() {
+        Sounds.playButtonClick();
         ViewManager.getInstance().getGameClient().runAsClient(serverHostName.getText(), Integer.parseInt(serverPortNumber.getText()));
     }
 
@@ -178,6 +187,11 @@ public class ServerListController implements Initializable, ServerListenerDelega
             }
         }
     }
+
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
+    }
+
 
     @Override
     public void serverRemoved(List<ServerDescription> servers) {

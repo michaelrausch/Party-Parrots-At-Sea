@@ -7,7 +7,9 @@ import com.jfoenix.validation.RequiredFieldValidator;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import seng302.gameServer.ServerDescription;
+import seng302.utilities.Sounds;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.validators.FieldLengthValidator;
 
@@ -43,6 +45,11 @@ public class ServerCreationController implements Initializable {
         serverName.setValidators(fieldLengthValidator, fieldRequiredValidator);
 
         submitBtn.setOnMouseReleased(event -> validateServerSettings());
+        submitBtn.setOnMouseClicked(event -> submitBtn.setText("CREATING..."));
+        submitBtn.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
+            validateServerSettings();
+        });
     }
 
     /**
@@ -76,4 +83,9 @@ public class ServerCreationController implements Initializable {
         maxPlayersSlider.setValue(Math.floor(maxPlayersSlider.getValue()));
         maxPlayersLabel.setText(String.format("YOU SELECTED: %.0f", maxPlayersSlider.getValue()));
     }
+
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
+    }
+
 }

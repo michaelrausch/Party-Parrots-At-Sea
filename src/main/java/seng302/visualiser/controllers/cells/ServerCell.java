@@ -16,9 +16,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import seng302.gameServer.ServerDescription;
+import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.ViewManager;
 
@@ -64,7 +66,10 @@ public class ServerCell implements Initializable {
         serverPlayerCount.setText(currPlayerCount);
         mapName.setText(mapNameString);
 
-        serverConnButton.setOnMouseReleased(event -> joinServer());
+        serverConnButton.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
+            joinServer();
+        });
     }
 
     /**
@@ -75,4 +80,7 @@ public class ServerCell implements Initializable {
         ViewManager.getInstance().getGameClient().runAsClient(hostName, portNumber);
     }
 
+    public void playButtonHoverSound(MouseEvent mouseEvent) {
+        Sounds.playHoverSound();
+    }
 }
