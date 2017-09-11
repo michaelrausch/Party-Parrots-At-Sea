@@ -111,6 +111,8 @@ public class ModelFactory {
                 return makeGate(assets);
             case WAKE:
                 return makeWake(assets);
+            case TRAIL_SEGMENT:
+                return makeTrail(assets);
             default:
                 return new Model(new Group(assets), null);
         }
@@ -183,5 +185,12 @@ public class ModelFactory {
             new Scale(0.5, 0.5, 0.5)
         );
         return new Model(new Group(assets), null);
+    }
+
+    private static Model makeTrail(Group trailPiece) {
+        trailPiece.getTransforms().addAll(
+            new Rotate(90, new Point3D(0,0,1))
+        );
+        return new Model(new Group(trailPiece), null);
     }
 }

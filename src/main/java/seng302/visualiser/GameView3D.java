@@ -5,11 +5,19 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
-import javafx.scene.*;
+import javafx.scene.AmbientLight;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.PointLight;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
@@ -29,7 +37,8 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.assets_2D.*;
+import seng302.visualiser.fxObjects.assets_2D.AnnotationBox;
+import seng302.visualiser.fxObjects.assets_2D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
@@ -78,11 +87,12 @@ public class GameView3D {
     private Group annotationsGroup = new Group();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
-    private Group trails = new Group();
     private Group markers = new Group();
     private Group tokens = new Group();
     private List<CompoundMark> course = new ArrayList<>();
     private List<Node> mapTokens;
+    private Timer trailMaker = new Timer();
+    private Group trail = new Group();
 
     private ImageView mapImage = new ImageView();
 
@@ -171,7 +181,7 @@ public class GameView3D {
 
         gameObjects.getChildren().addAll(
 //            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
-            raceBorder, markers, tokens,
+            raceBorder, trail, markers, tokens,
             white, blue, green, black, red
         );
 
@@ -659,5 +669,51 @@ public class GameView3D {
         Platform.runLater(() -> {
             tokens.getChildren().setAll(mapTokens);
         });
+    }
+
+    public void setBoatAsPlayer (ClientYacht playerYacht) {
+        this.playerYacht = playerYacht;
+
+        trailMaker.scheduleAtFixedRate(new TimerTask() {
+
+            private Point2D lastLocation = findScaledXY(playerYacht.getLocation());
+
+            @Override
+            public void run() {
+                Node segment = ModelFactory.importModel(ModelType.TRAIL_SEGMENT).getAssets();
+                Point2D location = findScaledXY(playerYacht.getLocation());
+                segment.getTransforms().addAll(
+                    new Translate(location.getX(), location.getY()),
+                    new Rotate(playerYacht.getHeading(), new Point3D(0,0,1)),
+                    new Scale(1, lastLocation.distance(location) / 5)
+                );
+                Platform.runLater(() -> {
+                    trail.getChildren().add(segment);
+                    if (trail.getChildren().size() > 100) {
+                        trail.getChildren().remove(0);
+                    }
+                });
+                lastLocation = location;
+            }
+        }, 0L, 500L);
+        
+//        playerYacht.toggleSail();
+//        boatObjects.get(playerYacht).setAsPlayer();
+//        CompoundMark currentMark = course.get(playerYacht.getLegNumber());
+//        for (Mark mark : currentMark.getMarks()) {
+//            markerObjects.get(mark).showNextExitArrow();
+//        }
+//        annotations.get(playerYacht).addAnnotation(
+//            "velocity",
+//            playerYacht.getVelocityProperty(),
+//            (velocity) -> String.format("Speed: %.2f ms", velocity.doubleValue())
+//        );
+//        Platform.runLater(() -> {
+//            boatObjectGroup.getChildren().remove(boatObjects.get(playerYacht));
+//            gameObjects.add(boatObjects.get(playerYacht));
+//            annotationsGroup.getChildren().remove(annotations.get(playerYacht));
+//            gameObjects.add(annotations.get(playerYacht));
+//        });
+//        playerYacht.addMarkRoundingListener(this::updateMarkArrows);
     }
 }
