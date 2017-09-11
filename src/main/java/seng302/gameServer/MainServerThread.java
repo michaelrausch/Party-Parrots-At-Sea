@@ -191,7 +191,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 GameState.spawnNewToken();
                 broadcastMessage(MessageFactory.getRaceXML());
             }
-        }, 0, 60000);
+        }, 10000, 60000);
     }
 
     /**

@@ -14,8 +14,9 @@ public class Sounds {
     private static MediaPlayer musicPlayer;
     private static MediaPlayer soundEffect;
     private static MediaPlayer soundPlayer;
-    private static AudioClip hoverSoundPlayer = new AudioClip(Sounds.class.getClassLoader().getResource("sounds/sound-over.wav").toExternalForm());;
+    private static MediaPlayer hoverSoundPlayer;
 
+    private static boolean hoverInitialized = false;
     private static boolean musicMuted = false;
     private static boolean soundEffectsMuted = false;
 
@@ -168,7 +169,17 @@ public class Sounds {
 
     public static void playHoverSound() {
         if (!soundEffectsMuted) {
-            hoverSoundPlayer.setVolume(2.5);
+            if (!hoverInitialized) {
+                Media crashSound = new Media(
+                    Sounds.class.getClassLoader().getResource("sounds/Error-sound-effect.mp3")
+                        .toString());
+                hoverSoundPlayer = new MediaPlayer(crashSound);
+                hoverInitialized = true;
+            }
+            hoverSoundPlayer.setVolume(0.5);
+            if (hoverSoundPlayer != null) {
+                hoverSoundPlayer.stop();
+            }
             hoverSoundPlayer.play();
         }
     }
