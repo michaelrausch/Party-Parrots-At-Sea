@@ -5,12 +5,15 @@ import com.jfoenix.controls.JFXDialog;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,18 +36,18 @@ public class ViewManager {
     private Logger logger = LoggerFactory.getLogger(ViewManager.class);
     private Stage stage;
 
-    private ViewManager(){
+    private ViewManager() {
         properties = new HashMap<>();
     }
 
     private FXMLLoader loadFxml(String fxmlLocation) {
         return new FXMLLoader(
-                getClass().getResource(fxmlLocation)
+            getClass().getResource(fxmlLocation)
         );
     }
 
-    public static ViewManager getInstance(){
-        if (instance == null){
+    public static ViewManager getInstance() {
+        if (instance == null) {
             instance = new ViewManager();
         }
 
@@ -86,7 +89,7 @@ public class ViewManager {
     }
 
     private void checkCompatibility() {
-        if(BonjourInstallChecker.isBonjourSupported()){
+        if (BonjourInstallChecker.isBonjourSupported()) {
             BonjourInstallChecker.openInstallUrl();
         }
     }
@@ -105,7 +108,7 @@ public class ViewManager {
         return decorator;
     }
 
-    public void setScene(Node scene){
+    public void setScene(Node scene) {
         Platform.runLater(() -> decorator.setContent(scene));
     }
 
@@ -122,15 +125,15 @@ public class ViewManager {
         }
     }
 
-    public GameClient getGameClient(){
+    public GameClient getGameClient() {
         return gameClient;
     }
 
-    public String getProperty(String key){
+    public String getProperty(String key) {
         return properties.get(key);
     }
 
-    public void setProperty(String key, String val){
+    public void setProperty(String key, String val) {
         properties.put(key, val);
     }
 
@@ -138,11 +141,11 @@ public class ViewManager {
         this.playerList = playerList;
     }
 
-    public ObservableList<String> getPlayerList(){
+    public ObservableList<String> getPlayerList() {
         return playerList;
     }
 
-    public LobbyController goToLobby(Boolean disableReadyButton){
+    public LobbyController goToLobby(Boolean disableReadyButton) {
         FXMLLoader loader = loadFxml("/views/LobbyView.fxml");
 
         try {
@@ -151,7 +154,7 @@ public class ViewManager {
             logger.error("Could not load lobby view");
         }
 
-        if (disableReadyButton){
+        if (disableReadyButton) {
             LobbyController lobbyController = loader.getController();
             lobbyController.disableReadyButton();
         }
@@ -162,33 +165,51 @@ public class ViewManager {
     public RaceViewController loadRaceView() {
         FXMLLoader loader = loadFxml("/views/RaceView.fxml");
 
-        try {
-            setScene(loader.load());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // have to create a new stage and set the race view maximized as JFoenix decorator has
+        // bug causes stage cannot be fully maximised.
+        Platform.runLater(() -> {
+            try {
+                stage.close();
 
-        decorator.getScene().setOnKeyPressed(gameClient::keyPressed);
-        decorator.getScene().setOnKeyReleased(gameClient::keyReleased);
+                Scene scene = new Scene(loader.load());
+                // set key press event to catch key stoke
+                scene.setOnKeyPressed(gameClient::keyPressed);
+                scene.setOnKeyReleased(gameClient::keyReleased);
+
+                Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+                stage = new Stage();
+                stage.setOnCloseRequest(e -> closeAll());
+                stage.setX(visualBounds.getMinX());
+                stage.setY(visualBounds.getMinY());
+                stage.setWidth(visualBounds.getWidth());
+                stage.setHeight(visualBounds.getHeight());
+                stage.setMaximized(true);
+                stage.setFullScreen(true);
+                stage.setScene(scene);
+                stage.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 
         Sounds.stopMusic();
         Sounds.playRaceMusic();
         return loader.getController();
     }
 
-    public JFXDialog loadCustomizationDialog(StackPane parent, LobbyController lobbyController, Color playerColor, String name) {
+    public JFXDialog loadCustomizationDialog(StackPane parent, LobbyController lobbyController,
+        Color playerColor, String name) {
         FXMLLoader dialog = loadFxml("/views/dialogs/BoatCustomizeDialog.fxml");
 
         JFXDialog customizationDialog = null;
 
         try {
             customizationDialog = new JFXDialog(parent, dialog.load(),
-                    JFXDialog.DialogTransition.CENTER);
+                JFXDialog.DialogTransition.CENTER);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         BoatCustomizeController controller = dialog.getController();
 
@@ -197,7 +218,6 @@ public class ViewManager {
         controller.setPlayerName(name);
         controller.setServerThread(gameClient.getServerThread());
         controller.setPlayerColor(lobbyController.playersColor);
-
 
         return customizationDialog;
     }

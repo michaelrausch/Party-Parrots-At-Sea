@@ -21,11 +21,18 @@
     -fx-background: transparent;
 }
 
-
 #customizeButton, #leaveLobbyButton, #beginRaceButton {
     -fx-background-color: -fx-pp-light-text-color; /* inverted */
     -fx-text-fill: -fx-pp-theme-color; /* inverted */
-    -fx-font-size: 16px;
+    -fx-font-size: 18px;
+}
+
+#customizeButton:hover, #leaveLobbyButton:hover, #beginRaceButton:hover {
+    -fx-font-size: 20px;
+}
+
+.invertedButton .jfx-rippler {
+    -jfx-rippler-fill: white;
 }
 
 #connectLabel, #serverPortNumber, #serverHostName {
@@ -50,12 +57,6 @@
 
 #playerList, #playerListScrollPane {
     -fx-background-color: transparent;
-}
-
-.invertedButton {
-    -fx-background-color: -fx-pp-light-text-color; /* inverted */
-    -fx-text-fill: -fx-pp-theme-color; /* inverted */
-    -fx-font-size: 16px;
 }
 
 #serverMap {

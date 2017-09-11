@@ -25,9 +25,11 @@
                 <RowConstraints maxHeight="164.0" minHeight="100.0" prefHeight="164.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <Label fx:id="hostDialogHeader" text="Customize Boat..." GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                <Label fx:id="hostDialogHeader" text="Customize Boat" GridPane.halignment="CENTER"
+                  GridPane.valignment="CENTER"/>
                 <JFXButton fx:id="submitBtn" prefHeight="45.0" prefWidth="220.0" text="Customize Boat" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-            <JFXTextField fx:id="boatName" promptText="Boat Name" GridPane.rowIndex="1">
+                <JFXTextField fx:id="boatName" focusColor="#6c6c6c" promptText="Boat Name"
+                  unFocusColor="#6b6b6b" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets left="30.0" right="30.0" />
                </GridPane.margin></JFXTextField>
@@ -40,14 +42,15 @@
                 <RowConstraints maxHeight="69.0" minHeight="10.0" percentHeight="60.0" prefHeight="19.6" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label fx:id="hostDialogHeader1" prefHeight="25.0" prefWidth="96.0" text="Boat Color">
+                   <Label fx:id="boatColorLabel" prefHeight="25.0" prefWidth="96.0"
+                     text="Boat Color">
                      <GridPane.margin>
                         <Insets top="-10.0" />
                      </GridPane.margin>
                   </Label>
                   <JFXColorPicker fx:id="colorPicker" onAction="#colorChanged" GridPane.columnIndex="1">
                      <GridPane.margin>
-                        <Insets top="-10.0" />
+                         <Insets left="30.0" top="-10.0"/>
                      </GridPane.margin>
                   </JFXColorPicker>
                </children>
@@ -59,7 +62,7 @@
         </GridPane>
     </children>
    <stylesheets>
-       <String fx:value="/css/dialogs/ServerCreation.css"/>
+       <String fx:value="/css/dialogs/BoatCustomize.css"/>
       <String fx:value="/css/master.css" />
    </stylesheets>
 </JFXDialogLayout>
