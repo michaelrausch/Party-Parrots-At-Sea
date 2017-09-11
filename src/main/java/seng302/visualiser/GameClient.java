@@ -460,6 +460,7 @@ public class GameClient {
         );
     }
 
+    // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user
     private void showPickUp() {
         Sounds.playTokenPickupSound();
     }
