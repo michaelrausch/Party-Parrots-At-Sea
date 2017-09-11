@@ -46,7 +46,7 @@ public class XMLGenerator {
     /**
      * Create an instance of the XML Generator
      */
-    public XMLGenerator(){
+    public XMLGenerator() {
         setupConfiguration();
     }
 
@@ -174,5 +174,9 @@ public class XMLGenerator {
 
     public static void setDefaultMapName(String mapName){
         DEFAULT_REGATTA.setCourseName(mapName);
+    }
+
+    public RegattaXMLTemplate getRegatta() {
+        return regatta;
     }
 }

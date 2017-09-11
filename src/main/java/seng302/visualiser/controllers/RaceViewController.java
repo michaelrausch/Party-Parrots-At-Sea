@@ -1,5 +1,6 @@
 package seng302.visualiser.controllers;
 
+import com.jfoenix.controls.JFXButton;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -67,7 +68,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private CheckBox toggleFps;
     @FXML
-    private Text timerLabel;
+    private Label timerLabel;
     @FXML
     private StackPane contentAnchorPane;
     private GridPane contentGridPane;
@@ -133,27 +134,27 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
 
 //        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
-//        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
-//            if (newLen.intValue() > CHAT_LIMIT) {
-//                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
-//            }
+        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
+            if (newLen.intValue() > CHAT_LIMIT) {
+                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
+            }
+        });
+        chatHistory = new ChatHistory();
+        chatHistoryHolder.getChildren().addAll(chatHistory);
+        chatHistory.prefWidthProperty().bind(
+            chatHistoryHolder.widthProperty()
+        );
+        chatHistory.prefHeightProperty().bind(
+            chatHistoryHolder.heightProperty()
+        );
+//        chatHistory.setFitToWidth(true);
+//        chatHistory.setFitToHeight(true);
+//        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
+//            chatHistory.setScrollTop(Double.MAX_VALUE);
 //        });
-//        chatHistory = new ChatHistory();
-//        chatHistoryHolder.getChildren().addAll(chatHistory);
-//        chatHistory.prefWidthProperty().bind(
-//            chatHistoryHolder.widthProperty()
-//        );
-//        chatHistory.prefHeightProperty().bind(
-//            chatHistoryHolder.heightProperty()
-//        );
-////        chatHistory.setFitToWidth(true);
-////        chatHistory.setFitToHeight(true);
-////        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
-////            chatHistory.setScrollTop(Double.MAX_VALUE);
-////        });
-//        contentGridPane.setOnMouseClicked((event) ->
-//            contentGridPane.requestFocus()
-//        );
+        rvAnchorPane.setOnMouseClicked((event) ->
+                rvAnchorPane.requestFocus()
+        );
     }
 
     public void loadRace (
@@ -230,13 +231,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //                gameView.enableZoom();
 //            }
 //        });
-//        Platform.runLater(() -> {
-//            initializeUpdateTimer();
+        Platform.runLater(() -> {
+            initializeUpdateTimer();
 //            initialiseFPSCheckBox();
 //            initialiseAnnotationSlider();
 //            initialiseBoatSelectionComboBox();
 //            initialiseSparkLine();
-//        });
+        });
     }
 
     /**
@@ -417,7 +418,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                updateRaceTime();
+                Platform.runLater(() -> updateRaceTime());
             }
         }, 0, 1000);
     }
@@ -473,12 +474,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the clock for the race
      */
     private void updateRaceTime() {
-//        if (!raceState.isRaceStarted()) {
-//            timerLabel.setFill(Color.RED);
-//            timerLabel.setText("Race Finished!");
-//        } else {
-//        timerLabel.setText(raceState.getRaceTimeStr());
-//        }
+        if (raceState.getTimeTillStart() <= 0L && !raceState.isRaceStarted()) {
+            timerLabel.setText("Race Finished!");
+        } else {
+            timerLabel.setText(raceState.getRaceTimeStr());
+        }
     }
 
     /**
@@ -719,7 +719,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public String readChatInput() {
         String chat = chatInput.getText();
         chatInput.clear();
-        basePane.requestFocus();
+        rvAnchorPane.requestFocus();
         return chat;
     }
 

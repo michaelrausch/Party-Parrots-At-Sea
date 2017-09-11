@@ -217,11 +217,7 @@ public class GameClient {
         raceView = fxmlLoader.getController();
         ClientYacht player = allBoatsMap.get(socketThread.getClientId());
         raceView.loadRace(allBoatsMap, courseData, raceState, player);
-        raceView.getSendPressedProperty().addListener((obs, old, isPressed) -> {
-            if (isPressed) {
-                formatAndSendChatMessage(raceView.readChatInput());
-            }
-        });
+
     }
 
 
@@ -338,6 +334,12 @@ public class GameClient {
 
             ClientYacht player = allBoatsMap.get(socketThread.getClientId());
             raceView.loadRace(allBoatsMap, courseData, raceState, player);
+
+            raceView.getSendPressedProperty().addListener((obs, old, isPressed) -> {
+                if (isPressed) {
+                    formatAndSendChatMessage(raceView.readChatInput());
+                }
+            });
         }
     }
 

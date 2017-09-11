@@ -1,0 +1,16 @@
+#timerGrid{
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+#timerLabel{
+    -fx-font-size: 21px;
+    -fx-font-family: "Baloo";
+}
+
+#chatArea{
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+#raceInfoArea{
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}

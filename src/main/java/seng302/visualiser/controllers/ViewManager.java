@@ -91,6 +91,17 @@ public class ViewManager {
 
         Sounds.stopMusic();
         Sounds.playMenuMusic();
+
+        decorator.setOnCloseButtonAction(() -> {
+            try {
+                ServerAdvertiser.getInstance().unregister();
+            } catch (IOException e) {
+                logger.warn("Couldn't unregister server");
+            }
+
+            gameClient.stopGame();
+            System.exit(0);
+        });
     }
 
     private void checkCompatibility() {
@@ -207,8 +218,14 @@ public class ViewManager {
             }
         });
 
-        Sounds.stopMusic();
-        Sounds.playRaceMusic();
+        while (loader.getController() == null){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         return loader.getController();
     }
 

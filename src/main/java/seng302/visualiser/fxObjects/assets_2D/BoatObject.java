@@ -246,7 +246,6 @@ public class BoatObject extends Group {
         wake.getTransforms().setAll(new Rotate(heading, new Point3D(0,0,1)));
         if (sailsIn) {
             boatAssets.showSail();
-            System.out.println("heading = " + heading);
             Double sailWindOffset = 30.0;
             Double upwindAngleLimit = 15.0;
             Double downwindAngleLimit = 10.0; //Upwind from normalised horizontal
