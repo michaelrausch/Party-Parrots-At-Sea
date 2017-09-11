@@ -41,8 +41,10 @@ import java.util.*;
 public class GameView extends Pane {
 
     private double bufferSize = 50;
+    private double horizontalBuffer = 0;
     private double panelWidth = 1280;
     private double panelHeight = 960;
+
     private double canvasWidth = 1100;
     private double canvasHeight = 920;
     private boolean horizontalInversion = false;
@@ -479,6 +481,9 @@ public class GameView extends Pane {
             borderPoints = border;
             rescaleRace(new ArrayList<>(borderPoints));
         }
+
+        rescaleRace(new ArrayList<>(border));
+
         List<Double> boundaryPoints = new ArrayList<>();
         for (Limit limit : border) {
             Point2D location = findScaledXY(limit.getLat(), limit.getLng());
@@ -549,7 +554,7 @@ public class GameView extends Pane {
      *
      * @param limitingCoordinates the set of geo points that contains the extremities of the race.
      */
-    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
+    public void rescaleRace(List<GeoPoint> limitingCoordinates) {
         //Check is called once to avoid unnecessarily change the course limits once the race is running
         findMinMaxPoint(limitingCoordinates);
         double minLonToMaxLon = scaleRaceExtremities();
@@ -707,6 +712,7 @@ public class GameView extends Pane {
             referencePointX +=
                 ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor))
                     / 2;
+            referencePointX += horizontalBuffer;
         }
         if (horizontalInversion) {
             referencePointX = canvasWidth - bufferSize - (referencePointX - bufferSize);
@@ -941,5 +947,17 @@ public class GameView extends Pane {
     public void setFrameRateFXText(Text fpsDisplay) {
         this.fpsDisplay = null;
         this.fpsDisplay = fpsDisplay;
+    }
+
+    public void setSize(Double width, Double height){
+        this.canvasWidth = width;
+        this.canvasHeight = height;
+
+        this.panelWidth = width;
+        this.panelHeight = height;
+    }
+
+    public void setHorizontalBuffer(Double buff){
+        this.horizontalBuffer = buff;
     }
 }
