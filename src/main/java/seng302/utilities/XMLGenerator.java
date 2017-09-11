@@ -11,6 +11,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+import seng302.gameServer.messages.XMLMessageSubType;
 import java.util.Random;
 
 /**
@@ -24,6 +27,8 @@ public class XMLGenerator {
     private Configuration configuration;
     private static Regatta regatta = null;
     private Race race;
+    private RegattaXMLTemplate regatta;
+    private RaceXMLTemplate race;
 
     public static Regatta DEFAULT_REGATTA = new Regatta("Party Parrot Test Server " + new Random().nextInt(100),
             "Bermuda",
@@ -55,7 +60,7 @@ public class XMLGenerator {
      * Note: This must be set before a regatta message can be generated
      * @param regatta The race regatta
      */
-    public void setRegatta(Regatta regatta){
+    public void setRegattaTemplate(RegattaXMLTemplate regatta) {
         this.regatta = regatta;
     }
 
@@ -64,7 +69,7 @@ public class XMLGenerator {
      * Note: This must be set before a boat or race message can be generated
      * @param race The race
      */
-    public void setRace(Race race){
+    public void setRaceTemplate(RaceXMLTemplate race) {
         this.race = race;
     }
 

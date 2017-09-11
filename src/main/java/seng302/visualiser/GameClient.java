@@ -146,13 +146,15 @@ public class GameClient {
         return new ServerDescription(serverName, regattaData.getCourseName(), GameState.getNumberOfPlayers(), GameState.getCapacity(), ipAddress, 4942);
     }
 
-    private void loadStartScreen() {
-
+    private void tearDownConnection() {
         socketThread.setSocketToClose();
         if (server != null) {
             server.terminate();
             server = null;
         }
+    }
+
+    private void loadStartScreen() {
         FXMLLoader fxmlLoader = new FXMLLoader(
             getClass().getResource("/views/StartScreenView.fxml"));
         try {
@@ -250,11 +252,14 @@ public class GameClient {
                     break;
 
                 case RACE_XML:
-                    courseData = XMLParser.parseRace(
+                    RaceXMLData raceXMLData = XMLParser.parseRace(
                         StreamParser.extractXmlMessage(packet)
                     );
+                    if (courseData == null) { //workaround for object comparisons. Avoid recreating
+                        courseData = raceXMLData;
+                    }
                     if (raceView != null) {
-                        raceView.updateRaceData(courseData);
+                        raceView.updateRaceData(raceXMLData);
                     }
                     break;
 

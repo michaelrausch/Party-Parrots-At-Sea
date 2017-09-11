@@ -32,6 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -42,12 +43,12 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.visualiser.GameView;
-import seng302.visualiser.controllers.annotations.Annotation;
+import seng302.visualiser.GameView3D;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
-import seng302.visualiser.fxObjects.BoatObject;
+import seng302.visualiser.fxObjects.assets_2D.BoatObject;
+import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 
 /**
  * Controller class that manages the display of a race
@@ -69,7 +70,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private AnchorPane rvAnchorPane;
     @FXML
-    private Text windArrowText, windDirectionText;
+    private Text windDirectionText;
+    @FXML
+    private AnchorPane windArrowHolder;
     @FXML
     private Slider annotationSlider;
     @FXML
@@ -85,13 +88,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Map<Integer, ClientYacht> participants;
     private Map<Integer, CompoundMark> markers;
     private RaceXMLData courseData;
-    private GameView gameView;
+    private GameView3D gameView;
     private RaceState raceState;
 
     private Timeline timerTimeline;
     private Timer timer = new Timer();
     private List<Series<String, Double>> sparkLineData = new ArrayList<>();
     private ImportantAnnotationsState importantAnnotations;
+    private Polyline windArrow = new WindArrow(Color.LIGHTGRAY);
 
     public void initialize() {
         // Load a default important annotation state
@@ -110,6 +114,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         //selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
         rvAnchorPane.prefWidthProperty().bind(ViewManager.getInstance().getDecorator().widthProperty());
         rvAnchorPane.prefHeightProperty().bind(ViewManager.getInstance().getDecorator().heightProperty());
+        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+        windArrowHolder.getChildren().addAll(windArrow);
+        windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
+        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
+
     }
 
     public void loadRace (
@@ -137,29 +146,32 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         });
 
         updateOrder(raceState.getPlayerPositions());
-        gameView = new GameView();
-        //gameView.setFrameRateFXText(fpsDisplay);
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(gameView));
-            gameView.setBoats(new ArrayList<>(participants.values()));
-            gameView.updateBorder(raceData.getCourseLimit());
-            gameView.updateCourse(
-                new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
+        gameView = new GameView3D();
+//        gameView.setFrameRateFXText(fpsDisplay);
+        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView.getAssets()));
+        gameView.setBoats(new ArrayList<>(participants.values()));
+        gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateTokens(raceData.getTokens());
+        gameView.updateCourse(
+            new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
-        gameView.enableZoom();
-        gameView.setBoatAsPlayer(player);
-        gameView.startRace();
+//        gameView.enableZoom();
+//        gameView.setBoatAsPlayer(player);
+//        gameView.startRace();
 
-        raceState.addCollisionListener(gameView::drawCollision);
-        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
-            gameView.setWindDir(newDirection.doubleValue());
-            updateWindDirection(newDirection.doubleValue());
-        });
-        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) -> {
-            updateWindSpeed(newSpeed.doubleValue());
-        });
-        updateWindDirection(raceState.windDirectionProperty().doubleValue());
-        updateWindSpeed(raceState.getWindSpeed());
-        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
+//        raceState.addCollisionListener(gameView::drawCollision);
+//        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
+//            gameView.setWindDir(newDirection.doubleValue());
+//            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
+//        });
+//        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
+//            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
+//        );
+//        Platform.runLater(() -> {
+//            updateWindDirection(raceState.windDirectionProperty().doubleValue());
+//            updateWindSpeed(raceState.getWindSpeed());
+//        });
+//        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
     }
 
     /**
@@ -576,31 +588,31 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     private void setAnnotations(Integer annotationLevel) {
-        switch (annotationLevel) {
-            // No Annotations
-            case 0:
-                gameView.setAnnotationVisibilities(
-                    false, false, false, false, false, false
-                );
-                break;
-            // Important Annotations
-            case 1:
-                gameView.setAnnotationVisibilities(
-                    importantAnnotations.getAnnotationState(Annotation.NAME),
-                    importantAnnotations.getAnnotationState(Annotation.SPEED),
-                    importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK),
-                    importantAnnotations.getAnnotationState(Annotation.LEGTIME),
-                    importantAnnotations.getAnnotationState(Annotation.TRACK),
-                    importantAnnotations.getAnnotationState(Annotation.WAKE)
-                );
-                break;
-            // All Annotations
-            case 2:
-                gameView.setAnnotationVisibilities(
-                    true, true, true, true, true, true
-                );
-                break;
-        }
+//        switch (annotationLevel) {
+//            // No Annotations
+//            case 0:
+//                gameView.setAnnotationVisibilities(
+//                    false, false, false, false, false, false
+//                );
+//                break;
+//            // Important Annotations
+//            case 1:
+//                gameView.setAnnotationVisibilities(
+//                    importantAnnotations.getAnnotationState(Annotation.NAME),
+//                    importantAnnotations.getAnnotationState(Annotation.SPEED),
+//                    importantAnnotations.getAnnotationState(Annotation.ESTTIMETONEXTMARK),
+//                    importantAnnotations.getAnnotationState(Annotation.LEGTIME),
+//                    importantAnnotations.getAnnotationState(Annotation.TRACK),
+//                    importantAnnotations.getAnnotationState(Annotation.WAKE)
+//                );
+//                break;
+//            // All Annotations
+//            case 2:
+//                gameView.setAnnotationVisibilities(
+//                    true, true, true, true, true, true
+//                );
+//                break;
+//        }
     }
 
 
@@ -624,7 +636,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public void updateRaceData (RaceXMLData raceData) {
-        this.courseData = raceData;
         gameView.updateBorder(raceData.getCourseLimit());
+        gameView.updateTokens(raceData.getTokens());
     }
 }

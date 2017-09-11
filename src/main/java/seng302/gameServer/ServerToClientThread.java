@@ -4,6 +4,16 @@ package seng302.gameServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.*;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RegistrationResponseMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
@@ -19,13 +29,17 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+import seng302.model.token.Token;
+import seng302.utilities.XMLGenerator;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
  * its own thread. All server threads created and owned by the server thread handler which can
  * trigger client updates on its threads Created by wmu16 on 13/07/17.
  */
-public class ServerToClientThread implements Runnable, Observer {
+public class ServerToClientThread implements Runnable {
 
     /**
      * Called to notify listeners when this thread receives a connection correctly.
@@ -57,7 +71,7 @@ public class ServerToClientThread implements Runnable, Observer {
     private ClientType clientType;
     private Boolean isRegistered = false;
 
-    private XMLGenerator xml;
+    private XMLGenerator xmlGenerator;
 
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
     private DisconnectListener disconnectListener;
@@ -109,19 +123,9 @@ public class ServerToClientThread implements Runnable, Observer {
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
 
-        yacht.addObserver(this); // TODO: yacht can notify mark rounding message hyi25 13/8/17
         player = new Player(socket, yacht);
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(player);
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        if (arg != null) {
-            sendMessage((Message) arg);
-        } else {
-            sendSetupMessages();
-        }
     }
 
     private void completeRegistration(ClientType clientType) throws IOException {
@@ -291,23 +295,6 @@ public class ServerToClientThread implements Runnable, Observer {
     private int getSeqNo() {
         seqNo++;
         return seqNo;
-    }
-
-
-    public void sendBoatLocationPackets() {
-        ArrayList<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        for (ServerYacht yacht : yachts) {
-            BoatLocationMessage boatLocationMessage =
-                new BoatLocationMessage(
-                    yacht.getSourceId(),
-                    getSeqNo(),
-                    yacht.getLocation().getLat(),
-                    yacht.getLocation().getLng(),
-                    yacht.getHeading(),
-                    yacht.getCurrentVelocity().longValue());
-
-            sendMessage(boatLocationMessage);
-        }
     }
 
     public Thread getThread() {

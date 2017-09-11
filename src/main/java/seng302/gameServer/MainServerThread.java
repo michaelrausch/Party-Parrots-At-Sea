@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.*;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
@@ -12,6 +14,8 @@ import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
@@ -22,7 +26,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.ServerSocket;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -31,17 +34,13 @@ import java.util.*;
  */
 public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
+    private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
+
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
-    private static final int LOG_LEVEL = 1;
-    private static final int WARNING_TIME = 10 * -1000;
-    private static final int PREPATORY_TIME = 5 * -1000;
-    public static final int TIME_TILL_START = 10 * 1000;
 
     private static final int MAX_WIND_SPEED = 12000;
     private static final int MIN_WIND_SPEED = 8000;
-
-    public static int windSpeed = 1000;
 
     private boolean terminated;
 
@@ -95,16 +94,18 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
-            serverLog("IO error in server thread handler upon trying to make new server socket", 0);
+            logger.trace("IO error in server thread handler upon trying to make new server socket",
+                0);
         }
 
         startAdvertisingServer();
 
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
-        GameState.addMarkPassListener(this::broadcastMessage);
+        GameState.addMessageEventListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");
         startUpdatingWind();
+        startSpawningTokens();
         thread.start();
     }
 
@@ -119,24 +120,22 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             try {
                 Thread.sleep(1000 / CLIENT_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
-                serverLog("Interrupted exception in Main Server Thread thread sleep", 1);
+                logger.trace("Interrupted exception in Main Server Thread thread sleep", 1);
             }
             if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState
                 .getCustomizationFlag()) {
                 // TODO: 16/08/17 ajm412: This can probably be done in a nicer way via those fancy functional interfaces.
-                for (ServerToClientThread thread : serverToClientThreads) {
-                    thread.sendSetupMessages();
-                }
+                sendSetupMessages();
                 GameState.resetCustomizationFlag();
             }
 
             if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
-                updateClients();
+                sendBoatLocations();
             }
 
             //RACING
             if (GameState.getCurrentStage() == GameStages.RACING) {
-                updateClients();
+                sendBoatLocations();
             }
 
             //FINISHED
@@ -157,10 +156,16 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }
     }
 
-    public void updateClients() {
-        for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-            serverToClientThread.sendBoatLocationPackets();
+    public void sendBoatLocations() {
+        for (ServerYacht serverYacht : GameState.getYachts().values()) {
+            broadcastMessage(MessageFactory.getBoatLocationMessage(serverYacht));
         }
+    }
+
+    public void sendSetupMessages() {
+        broadcastMessage(MessageFactory.getRaceXML());
+        broadcastMessage(MessageFactory.getRegattaXML());
+        broadcastMessage(MessageFactory.getBoatXML());
     }
 
     private void broadcastMessage(Message message) {
@@ -198,6 +203,25 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.setWindDirection(direction.doubleValue());
     }
 
+    // TODO: 29/08/17 wmu16 - This should not be in one function (init and a scheduling update)
+    public void startGame() {
+        initialiseBoatPositions();
+        Timer t = new Timer();
+
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                broadcastMessage(MessageFactory.getRaceStatusMessage());
+                if (GameState.getCurrentStage() == GameStages.PRE_RACE
+                    || GameState.getCurrentStage() == GameStages.LOBBYING) {
+                    broadcastMessage(MessageFactory.getRaceStartStatusMessage());
+                }
+            }
+        }, 0, 500);
+    }
+
+
+    // TODO: 29/08/17 wmu16 - This sort of update should be in game state
     private static void startUpdatingWind(){
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -208,11 +232,41 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }, 0, 500);
     }
 
+    /**
+     * Start spawning coins every 60s after the first minute
+     */
+    private void startSpawningTokens() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                spawnNewCoins();
+                broadcastMessage(MessageFactory.getRaceXML());
+            }
+        }, 0, 60000);
+    }
 
-    static void serverLog(String message, int logLevel) {
-        if (logLevel <= LOG_LEVEL) {
-            System.out.println(
-                "[SERVER " + LocalDateTime.now().toLocalTime().toString() + "] " + message);
+    /**
+     * Randomly select a subset of tokens from a pre defined superset
+     * Broadasts a new race status message to show this update
+     */
+    private void spawnNewCoins() {
+
+        List<Token> allTokens = new ArrayList<>();
+        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
+        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
+        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
+        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
+        allTokens.add(token1);
+        allTokens.add(token2);
+        allTokens.add(token3);
+        allTokens.add(token4);
+
+        GameState.clearTokens();
+        Random random = new Random();
+        Collections.shuffle(allTokens);
+        for (int i = 0; i < random.nextInt(allTokens.size()); i++) {
+            GameState.addToken(allTokens.get(i));
         }
     }
 
@@ -223,13 +277,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
      */
     @Override
     public void clientConnected(ServerToClientThread serverToClientThread) {
-        serverLog("Player Connected From " + serverToClientThread.getThread().getName(), 0);
+        logger.debug("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         serverToClientThreads.add(serverToClientThread);
-        serverToClientThread.addConnectionListener(() -> {
-            for (ServerToClientThread thread : serverToClientThreads) {
-                thread.sendSetupMessages();
-            }
-        });
+        serverToClientThread.addConnectionListener(this::sendSetupMessages);
         serverToClientThread.addDisconnectListener(this::clientDisconnected);
 
         try {
@@ -246,12 +296,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
      */
     @Override
     public void clientDisconnected(Player player) {
-//        try {
-//            player.getSocket().close();
-//        } catch (Exception e) {
-//            serverLog("Cannot disconnect the socket for the disconnected player.", 0);
-//        }
-        serverLog("Player " + player.getYacht().getSourceId() + "'s socket disconnected", 0);
+        logger.debug("Player " + player.getYacht().getSourceId() + "'s socket disconnected", 0);
         GameState.removeYacht(player.getYacht().getSourceId());
         GameState.removePlayer(player);
         ServerToClientThread closedConnection = null;
@@ -290,55 +335,15 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 if (GameState.getCurrentStage() == GameStages.PRE_RACE || GameState.getCurrentStage() == GameStages.LOBBYING) {
                     broadcastMessage(makeRaceStartMessage());
                 }
+                serverToClientThreads.remove(closedConnection);
+                closedConnection.terminate();
             }
-        }, 0, 500);
-    }
-
-
-    private RaceStartStatusMessage makeRaceStartMessage() {
-        Long raceStartTime = GameState.getStartTime();
-
-        return new RaceStartStatusMessage(1, raceStartTime ,
-                1, RaceStartNotificationType.SET_RACE_START_TIME);
-    }
-
-    private RaceStatusMessage makeRaceStatusMessage() {
-        // variables taken from GameServerThread
-
-        List<BoatSubMessage> boatSubMessages = new ArrayList<>();
-        RaceStatus raceStatus;
-
-        for (Player player : GameState.getPlayers()) {
-            ServerYacht y = player.getYacht();
-            BoatSubMessage m = new BoatSubMessage(y.getSourceId(), y.getBoatStatus(),
-                y.getLegNumber(),
-                0, 0, 1234L,
-                1234L);
-            boatSubMessages.add(m);
         }
 
-        long timeTillStart = System.currentTimeMillis() - GameState.getStartTime();
 
-        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
-            raceStatus = RaceStatus.PRESTART;
-        } else if (GameState.getCurrentStage() == GameStages.PRE_RACE) {
-            raceStatus = RaceStatus.PRESTART;
-
-            if (timeTillStart > WARNING_TIME) {
-                raceStatus = RaceStatus.WARNING;
-            }
-
-            if (timeTillStart > PREPATORY_TIME) {
-                raceStatus = RaceStatus.PREPARATORY;
-            }
-        } else {
-            raceStatus = RaceStatus.STARTED;
+        if (GameState.getCurrentStage() != GameStages.RACING) {
+            sendSetupMessages();
         }
-
-        return new RaceStatusMessage(1, raceStatus, GameState.getStartTime(),
-            GameState.getWindDirection(),
-            GameState.getWindSpeedMMS().longValue(), GameState.getPlayers().size(),
-            RaceType.MATCH_RACE, 1, boatSubMessages);
     }
 
     public void terminate() {

@@ -13,8 +13,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
-import javafx.scene.Node;
+import javafx.scene.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -26,22 +25,23 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import seng302.model.ClientYacht;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
-import seng302.model.Colors;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
+import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.AnnotationBox;
-import seng302.visualiser.fxObjects.BoatObject;
-import seng302.visualiser.fxObjects.CourseBoundary;
-import seng302.visualiser.fxObjects.Gate;
-import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.Marker;
+import seng302.visualiser.fxObjects.assets_2D.AnnotationBox;
+import seng302.visualiser.fxObjects.assets_2D.BoatObject;
+import seng302.visualiser.fxObjects.assets_2D.CourseBoundary;
+import seng302.visualiser.fxObjects.assets_2D.Gate;
+import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory;
+import seng302.visualiser.fxObjects.assets_2D.Marker;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
+import seng302.visualiser.fxObjects.assets_3D.ModelType;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
 
@@ -82,9 +82,12 @@ public class GameView extends Pane {
     private Group boatObjectGroup = new Group();
     private Group trails = new Group();
     private Group markers = new Group();
+    private Group tokens = new Group();
     private List<CompoundMark> course = new ArrayList<>();
+    private List<Node> mapTokens;
 
     private ImageView mapImage = new ImageView();
+    private Camera camera;
 
     //FRAME RATE
 
@@ -142,11 +145,26 @@ public class GameView extends Pane {
 
     public GameView () {
         gameObjects = this.getChildren();
+//        AmbientLight ambientLight = new AmbientLight(new Color(1,1,1,0.4));
+//        ambientLight.setOpacity(0.5);
+//        gameObjects.add(ambientLight);
         // create image view for map, bind panel size to image
-        gameObjects.add(mapImage);
-        gameObjects.add(raceBorder);
-        gameObjects.add(markers);
+        camera = new ParallelCamera();
+        camera.setTranslateZ(-500);
+        camera.setFarClip(Double.MAX_VALUE);
+        camera.setNearClip(0.1);
+        PointLight pl = new PointLight();
+        pl.setLightOn(true);
+        pl.layoutYProperty().bind(camera.layoutYProperty());
+        pl.layoutXProperty().bind(camera.layoutXProperty());
+//        gameObjects.add(camera);
+        this.sceneProperty().addListener((obs, oldValue, scene) -> {
+            if (scene != null) {
+                scene.setCamera(camera);
+            }
+        });
         initializeTimer();
+        gameObjects.addAll(mapImage, raceBorder, markers, tokens, pl);
     }
 
     private void initializeTimer() {
@@ -185,7 +203,7 @@ public class GameView extends Pane {
                         lastTime = now;
                     }
                 }
-                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
+//                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
             }
         };
     }
@@ -311,18 +329,16 @@ public class GameView extends Pane {
         for (int i=1; i < sequence.size()-1; i++) { //General case.
             double averageLat = 0;
             double averageLng = 0;
-            int numMarks = 0;
+            int numMarks = course.get(i-1).getMarks().size();
             for (Mark mark : course.get(i-1).getMarks()) {
-                numMarks += 1;
                 averageLat += mark.getLat();
                 averageLng += mark.getLng();
             }
             GeoPoint lastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
-            numMarks = 0;
+            numMarks = course.get(i+1).getMarks().size();
             averageLat = 0;
             averageLng = 0;
             for (Mark mark : course.get(i+1).getMarks()) {
-                numMarks += 1;
                 averageLat += mark.getLat();
                 averageLng += mark.getLng();
             }
@@ -440,6 +456,40 @@ public class GameView extends Pane {
         raceBorder.getPoints().setAll(boundaryPoints);
     }
 
+    /**
+     * Rescales the race to the size of the window.
+     *
+     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
+     */
+    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
+        //Check is called once to avoid unnecessarily change the course limits once the race is running
+        findMinMaxPoint(limitingCoordinates);
+        double minLonToMaxLon = scaleRaceExtremities();
+        calculateReferencePointLocation(minLonToMaxLon);
+//        drawGoogleMap();
+    }
+
+    /**
+     * Replaces all tokens in the course with those passed in
+     *
+     * @param newTokens the tokens to be put on the course.
+     */
+    public void updateTokens(List<Token> newTokens) {
+        mapTokens = new ArrayList<>();
+        for (Token token : newTokens) {
+            Point2D location = findScaledXY(token.getLat(), token.getLng());
+            Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
+            tokenObject.setLayoutX(location.getX());
+            tokenObject.setLayoutY(location.getY());
+            mapTokens.add(tokenObject);
+        }
+
+        Platform.runLater(() -> {
+            tokens.getChildren().clear();
+            tokens.getChildren().addAll(mapTokens);
+        });
+    }
+
     // TODO: 16/08/17 initialize zooming internal to GameView only
     /**
      * Enables zoom. Has to be called after this is added to a scene.
@@ -454,18 +504,6 @@ public class GameView extends Pane {
                 }
             });
         }
-    }
-    /**
-     * Rescales the race to the size of the window.
-     *
-     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
-     */
-    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
-        //Check is called once to avoid unnecessarily change the course limits once the race is running
-        findMinMaxPoint(limitingCoordinates);
-        double minLonToMaxLon = scaleRaceExtremities();
-        calculateReferencePointLocation(minLonToMaxLon);
-//        drawGoogleMap();
     }
 
     private void setSelectedBoat(BoatObject bo, Boolean isSelected) {
@@ -492,7 +530,7 @@ public class GameView extends Pane {
         BoatObject newBoat;
         final List<Group> wakes = new ArrayList<>();
         for (ClientYacht clientYacht : yachts) {
-            Paint colour = clientYacht.getColour();
+            Color colour = clientYacht.getColour();
             newBoat = new BoatObject();
             newBoat.addSelectedBoatListener(this::setSelectedBoat);
             newBoat.setFill(colour);
@@ -502,7 +540,7 @@ public class GameView extends Pane {
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
             trails.getChildren().add(newBoat.getTrail());
-            // TODO: 1/08/17 Make this less vile to look at.
+
             clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
                 Point2D p2d = findScaledXY(lat, lon);
@@ -789,8 +827,10 @@ public class GameView extends Pane {
 
     private void updateMarkArrows (ClientYacht yacht, CompoundMark compoundMark, int legNumber) {
         //Only show arrows for this and next leg.
+//        System.out.println(markerObjects);
         if (compoundMark != null) {
             for (Mark mark : compoundMark.getMarks()) {
+//                System.out.println("markerObjects.get(mark) = " + markerObjects.get(mark));
                 markerObjects.get(mark).showNextExitArrow();
             }
         }

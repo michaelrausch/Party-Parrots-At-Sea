@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import seng302.gameServer.GameState;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.model.mark.Mark;
+import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ import java.util.Observer;
  * compared to the XMLParser boat class, also done outside Boat class because some old variables are
  * not used anymore.
  */
-public class ServerYacht extends Observable {
+public class ServerYacht {
 
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
@@ -31,9 +32,7 @@ public class ServerYacht extends Observable {
     private String boatName;
     private String country;
     private BoatStatus boatStatus;
-
     private Color boatColor;
-
 
     //Location
     private Double lastHeading;
@@ -52,6 +51,10 @@ public class ServerYacht extends Observable {
     private Mark closestCurrentMark;
     private Boolean hasPassedLine;
     private Boolean hasPassedThroughGate;
+
+    //PowerUp
+    private TokenType powerUp;
+    private Long powerUpStartTime;
 
 
     public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
@@ -72,6 +75,7 @@ public class ServerYacht extends Observable {
         this.currentMarkSeqID = 0;
         this.legNumber = 0;
         this.boatColor = Colors.getColor(sourceId - 1);
+        this.powerUp = null;
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
@@ -102,13 +106,21 @@ public class ServerYacht extends Observable {
         location = geoPoint;
     }
 
-    /**
-     * Add ServerToClientThread as the observer, this observer pattern mainly server for the boat
-     * rounding package.
-     */
-    @Override
-    public void addObserver(Observer o) {
-        super.addObserver(o);
+    public void powerUp(TokenType powerUp) {
+        this.powerUp = powerUp;
+        powerUpStartTime = System.currentTimeMillis();
+    }
+
+    public void powerDown() {
+        this.powerUp = null;
+    }
+
+    public Long getPowerUpStartTime() {
+        return powerUpStartTime;
+    }
+
+    public TokenType getPowerUp() {
+        return powerUp;
     }
 
     /**

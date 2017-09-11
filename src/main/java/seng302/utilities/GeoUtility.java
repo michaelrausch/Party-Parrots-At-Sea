@@ -6,6 +6,7 @@ import seng302.model.GeoPoint;
 public class GeoUtility {
 
     private static double EARTH_RADIUS = 6378.137;
+//    private static double EARTH_RADIUS = 6378.13712121212121212121212121212121212121;
     private static Double MS_TO_KNOTS = 1.943844492;
 
     /**

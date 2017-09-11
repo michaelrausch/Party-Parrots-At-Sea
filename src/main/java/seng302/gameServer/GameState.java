@@ -10,6 +10,8 @@ import seng302.model.*;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
+import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLParser;
 
@@ -23,6 +25,7 @@ import java.util.*;
  * Created by wmu16 on 10/07/17.
  */
 public class GameState implements Runnable {
+
     @FunctionalInterface
     interface NewMessageListener {
 
@@ -31,13 +34,20 @@ public class GameState implements Runnable {
 
     private Logger logger = LoggerFactory.getLogger(GameState.class);
 
+
+    static final int WARNING_TIME = 10 * -1000;
+    static final int PREPATORY_TIME = 5 * -1000;
+    private static final int TIME_TILL_START = 10 * 1000;
+
+    private static final Long POWERUP_TIMEOUT_MS = 10_000L;
+
     private static final Integer STATE_UPDATES_PER_SECOND = 60;
-    public static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
-    public static final Double MARK_COLLISION_DISTANCE = 15d;
+    private static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
+    private static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
-    public static final Double BOUNCE_DISTANCE_MARK = 20.0;
+    private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
-    public static final Double COLLISION_VELOCITY_PENALTY = 0.3;
+    private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -48,6 +58,7 @@ public class GameState implements Runnable {
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
+    private static List<Token> tokens;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
@@ -76,6 +87,7 @@ public class GameState implements Runnable {
         windSpeed = 10000d;
         this.hostIpAddress = hostIpAddress;
         yachts = new HashMap<>();
+        tokens = new ArrayList<>();
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
@@ -122,6 +134,18 @@ public class GameState implements Runnable {
         return players;
     }
 
+    public static void addToken(Token token) {
+        tokens.add(token);
+    }
+
+    public static List<Token> getTokens() {
+        return tokens;
+    }
+
+    public static void clearTokens() {
+        tokens.clear();
+    }
+
     public static void addPlayer(Player player) {
         players.add(player);
         String playerText = player.getYacht().getSourceId() + " " + player.getYacht().getBoatName()
@@ -163,7 +187,7 @@ public class GameState implements Runnable {
     }
 
     public static void resetStartTime(){
-        startTime = System.currentTimeMillis() + MainServerThread.TIME_TILL_START;
+        startTime = System.currentTimeMillis() + TIME_TILL_START;
     }
 
     public static Double getWindDirection() {
@@ -261,10 +285,12 @@ public class GameState implements Runnable {
         }
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
+            checkPowerUpTimeout(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkCollision(yacht);
+                checkTokenPickUp(yacht);
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
@@ -274,6 +300,17 @@ public class GameState implements Runnable {
             currentStage = GameStages.FINISHED;
         }
     }
+
+
+    private void checkPowerUpTimeout(ServerYacht yacht) {
+        if (yacht.getPowerUp() != null) {
+            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > POWERUP_TIMEOUT_MS) {
+                yacht.powerDown();
+                logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+            }
+        }
+    }
+
 
     /**
      * Check if the yacht has crossed the course limit
@@ -294,6 +331,26 @@ public class GameState implements Runnable {
         }
         return false;
     }
+
+    /**
+     * Checks all tokens to see if a yacht has picked one up
+     *
+     * @param serverYacht The yacht to check for
+     */
+    private void checkTokenPickUp(ServerYacht serverYacht) {
+        for (Token token : tokens) {
+            Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
+            if (distance < YACHT_COLLISION_DISTANCE) {
+                tokens.remove(token);
+                serverYacht.powerUp(token.getTokenType());
+                logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + token
+                    .getTokenType());
+                notifyMessageListeners(MessageFactory.getRaceXML());
+                break;
+            }
+        }
+    }
+
 
     public static void checkCollision(ServerYacht serverYacht) {
         ServerYacht collidedYacht = checkYachtCollision(serverYacht);
@@ -346,25 +403,31 @@ public class GameState implements Runnable {
 
 
     private void updateVelocity(ServerYacht yacht) {
-        Double velocity = yacht.getCurrentVelocity();
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots);
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * 4;
+        if (yacht.getPowerUp() != null) {
+            if (yacht.getPowerUp().equals(TokenType.BOOST)) {
+                maxBoatSpeed *= 2;
+            }
+        }
+
+        Double currentVelocity = yacht.getCurrentVelocity();
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
-            if (velocity < maxBoatSpeed - 500) {
+            if (currentVelocity < maxBoatSpeed - 500) {
                 yacht.changeVelocity(maxBoatSpeed / 100);
-            } else if (velocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-velocity / 200);
+            } else if (currentVelocity > maxBoatSpeed + 500) {
+                yacht.changeVelocity(-currentVelocity / 200);
             } else {
                 yacht.setCurrentVelocity(maxBoatSpeed);
             }
         } else {
-            if (velocity > 3000) {
-                yacht.changeVelocity(-velocity / 200);
-            } else if (velocity > 100) {
-                yacht.changeVelocity(-velocity / 50);
-            } else if (velocity <= 100) {
+            if (currentVelocity > 3000) {
+                yacht.changeVelocity(-currentVelocity / 200);
+            } else if (currentVelocity > 100) {
+                yacht.changeVelocity(-currentVelocity / 50);
+            } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }
         }
@@ -648,7 +711,8 @@ public class GameState implements Runnable {
         // TODO: 13/8/17 figure out the rounding side, rounded mark source ID and boat status.
         Message markRoundingMessage = new MarkRoundingMessage(0, 0,
             sourceID, RoundingBoatStatus.RACING, roundingMark.getRoundingSide(), markType,
-            currentMarkSeqID + 1);
+            currentMark.getId());
+//            currentMarkSeqID + 1);
 
         notifyMessageListeners(markRoundingMessage);
     }
@@ -667,7 +731,7 @@ public class GameState implements Runnable {
     }
 
 
-    public static void addMarkPassListener(NewMessageListener listener) {
+    public static void addMessageEventListener(NewMessageListener listener) {
         markListeners.add(listener);
     }
 
@@ -702,4 +766,5 @@ public class GameState implements Runnable {
     public static void setMaxPlayers(Integer newMax){
         maxPlayers = newMax;
     }
+
 }
