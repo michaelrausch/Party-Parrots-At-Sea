@@ -1,5 +1,6 @@
 package seng302.utilities;
 
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
@@ -13,6 +14,7 @@ public class Sounds {
     private static MediaPlayer musicPlayer;
     private static MediaPlayer soundEffect;
     private static MediaPlayer soundPlayer;
+    private static AudioClip hoverSoundPlayer = new AudioClip(Sounds.class.getClassLoader().getResource("sounds/sound-over.wav").toExternalForm());;
 
     private static boolean musicMuted = false;
     private static boolean soundEffectsMuted = false;
@@ -72,6 +74,7 @@ public class Sounds {
         Media raceMusic = new Media(Sounds.class.getClassLoader().getResource("sounds/Music-loop-120-bpm.mp3").toString());
         musicPlayer = new MediaPlayer(raceMusic);
         musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        musicPlayer.setVolume(0.3);
         musicPlayer.play();
         raceMusic = new Media(Sounds.class.getClassLoader().getResource("sounds/Sounds-of-the-ocean.mp3").toString());
         soundEffect = new MediaPlayer(raceMusic);
@@ -87,6 +90,7 @@ public class Sounds {
             Sounds.class.getClassLoader().getResource("sounds/Elevator-music.mp3").toString());
         musicPlayer = new MediaPlayer(menuMusic);
         musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        musicPlayer.setVolume(0.3);
         musicPlayer.play();
     }
 
@@ -95,6 +99,7 @@ public class Sounds {
         Media finishMusic = new Media(Sounds.class.getClassLoader().getResource("sounds/Happy-birthday-song.mp3").toString());
         musicPlayer = new MediaPlayer(finishMusic);
         musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        musicPlayer.setVolume(0.3);
         musicPlayer.play();
         musicPlayer.setMute(musicMuted);
     }
@@ -105,6 +110,7 @@ public class Sounds {
                 Sounds.class.getClassLoader().getResource("sounds/Button-click-sound.mp3")
                     .toString());
             soundPlayer = new MediaPlayer(buttonClick);
+            soundPlayer.setVolume(0.5);
             soundPlayer.play();
             soundPlayer.setMute(soundEffectsMuted);
         }
@@ -123,7 +129,6 @@ public class Sounds {
 
     public static void playMarkRoundingSound() {
         if (!soundEffectsMuted) {
-
             Media markRoundingSound = new Media(
                 Sounds.class.getClassLoader().getResource("sounds/sms-tone.mp3").toString());
             soundPlayer = new MediaPlayer(markRoundingSound);
@@ -133,7 +138,6 @@ public class Sounds {
 
     public static void playCapGunSound() {
         if (!soundEffectsMuted) {
-
             Media gunSound = new Media(
                 Sounds.class.getClassLoader().getResource("sounds/Gunshot-sound.mp3").toString());
             soundPlayer = new MediaPlayer(gunSound);
@@ -153,9 +157,8 @@ public class Sounds {
 
     public static void playHoverSound() {
         if (!soundEffectsMuted) {
-            Media hoverSound = new Media(Sounds.class.getClassLoader().getResource("sounds/sound-over.wav").toString());
-        soundPlayer = new MediaPlayer(hoverSound);
-        soundPlayer.play();
+            hoverSoundPlayer.setVolume(2.5);
+            hoverSoundPlayer.play();
         }
     }
 
