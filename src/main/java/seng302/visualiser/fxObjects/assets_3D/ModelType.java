@@ -18,7 +18,7 @@ public enum ModelType {
     START_LINE ("start_line.dae"),
     GATE_LINE ("gate_line.dae"),
     WAKE ("wake.dae"),
-    TRAIL_SEGMENT ("trail_segment.dae");
+    TRAIL_SEGMENT ("trail_segment.dae"),
     PLAYER_IDENTIFIER ("player_identifier.dae");
 
     final String filename;
