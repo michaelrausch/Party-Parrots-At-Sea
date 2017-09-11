@@ -53,7 +53,7 @@ public class ChatHistory extends ScrollPane {
     public void addMessage (Paint colour, String Text) {
         String[] words = Text.split(":");
         if (words[0].trim().equals("SERVER")) {
-            Text text = new Text(Text + "\n\n");
+            Text text = new Text(Text + "\n");
             text.setStyle("-fx-font-weight: bolder");
             textFlow.getChildren().add(text);
         } else {
@@ -63,7 +63,7 @@ public class ChatHistory extends ScrollPane {
             timePlayer.setStyle("-fx-font-weight: bold");
             timePlayer.setFill(colour);
             Text message = new Text(
-                String.join(":", Arrays.copyOfRange(words, 3, words.length)) + "\n\n"
+                String.join(":", Arrays.copyOfRange(words, 3, words.length)) + "\n"
             );
             message.wrappingWidthProperty().bind(this.widthProperty());
             textFlow.getChildren().addAll(timePlayer, message);
