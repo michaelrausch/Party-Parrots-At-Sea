@@ -12,8 +12,6 @@ import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.model.token.Token;
-import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
@@ -24,7 +22,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.ServerSocket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -45,8 +46,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private Thread thread;
 
     private ServerSocket serverSocket = null;
-    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
-    private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
+    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();;
     private static Integer capacity;
 
     private void startAdvertisingServer() {

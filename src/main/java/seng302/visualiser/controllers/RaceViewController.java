@@ -15,16 +15,10 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
@@ -36,13 +30,10 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.Sounds;
-import seng302.visualiser.GameView;
-import seng302.visualiser.controllers.annotations.Annotation;
 import seng302.visualiser.GameView3D;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
-import seng302.visualiser.fxObjects.BoatObject;
 import seng302.visualiser.fxObjects.ChatHistory;
 import seng302.visualiser.fxObjects.assets_2D.BoatObject;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
@@ -127,10 +118,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         //sparklineYAxis.setTickMarkVisible(false);
 
         //positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-        raceSparkLine.visibleProperty().setValue(false);
-        raceSparkLine.getYAxis().setAutoRanging(false);
-        sparklineYAxis.setTickMarkVisible(false);
-        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+//        raceSparkLine.visibleProperty().setValue(false);
+//        raceSparkLine.getYAxis().setAutoRanging(false);
+//        sparklineYAxis.setTickMarkVisible(false);
+//        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
 
         //selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
 //        rvAnchorPane.prefWidthProperty().bind(ViewManager.getInstance().getDecorator().widthProperty());
@@ -140,28 +131,28 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
 //        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
 
-        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
-        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
-            if (newLen.intValue() > CHAT_LIMIT) {
-                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
-            }
-        });
-        chatHistory = new ChatHistory();
-        chatHistoryHolder.getChildren().addAll(chatHistory);
-        chatHistory.prefWidthProperty().bind(
-            chatHistoryHolder.widthProperty()
-        );
-        chatHistory.prefHeightProperty().bind(
-            chatHistoryHolder.heightProperty()
-        );
-//        chatHistory.setFitToWidth(true);
-//        chatHistory.setFitToHeight(true);
-//        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
-//            chatHistory.setScrollTop(Double.MAX_VALUE);
+//        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
+//        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
+//            if (newLen.intValue() > CHAT_LIMIT) {
+//                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
+//            }
 //        });
-        contentGridPane.setOnMouseClicked((event) ->
-            contentGridPane.requestFocus()
-        );
+//        chatHistory = new ChatHistory();
+//        chatHistoryHolder.getChildren().addAll(chatHistory);
+//        chatHistory.prefWidthProperty().bind(
+//            chatHistoryHolder.widthProperty()
+//        );
+//        chatHistory.prefHeightProperty().bind(
+//            chatHistoryHolder.heightProperty()
+//        );
+////        chatHistory.setFitToWidth(true);
+////        chatHistory.setFitToHeight(true);
+////        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
+////            chatHistory.setScrollTop(Double.MAX_VALUE);
+////        });
+//        contentGridPane.setOnMouseClicked((event) ->
+//            contentGridPane.requestFocus()
+//        );
     }
 
     public void loadRace (
@@ -711,7 +702,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public boolean isChatInputFocused() {
-        return chatInput.focusedProperty().getValue();
+//        return chatInput.focusedProperty().getValue();
+        return false;
     }
 
     public String readChatInput() {

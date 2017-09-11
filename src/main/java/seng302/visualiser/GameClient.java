@@ -1,15 +1,5 @@
 package seng302.visualiser;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.TimeZone;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,8 +10,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import seng302.gameServer.GameStages;
 import javafx.util.Pair;
+import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.ServerDescription;
@@ -43,7 +33,12 @@ import seng302.utilities.StreamParser;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.*;
-import seng302.visualiser.controllers.LobbyController_old.CloseStatus;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.*;
 
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
@@ -74,6 +69,17 @@ public class GameClient {
      */
     public GameClient(Pane holder) {
         this.holderPane = holder;
+//        if (holderPane.getParent() == null) {
+//            this.holderPane.parentProperty().addListener(((observable, oldValue, newValue) -> {
+//                if (newValue != null) {
+//                    newValue.getScene().setOnKeyPressed(this::keyPressed);
+//                    newValue.getScene().setOnKeyReleased(this::keyReleased);
+//                }
+//            }));
+//        } else {
+//            this.holderPane.getParent().getScene().setOnKeyPressed(this::keyPressed);
+//            this.holderPane.getParent().getScene().setOnKeyReleased(this::keyReleased);
+//        }
     }
 
     /**
@@ -420,7 +426,7 @@ public class GameClient {
      * Handle the key-pressed event from the text field.
      * @param e The key event triggering this call
      */
-    private void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent e) {
         if (raceView.isChatInputFocused()) {
             if (e.getCode() == KeyCode.ENTER) {
                 formatAndSendChatMessage(raceView.readChatInput());
@@ -441,7 +447,7 @@ public class GameClient {
     }
 
 
-    private void keyReleased(KeyEvent e) {
+    public void keyReleased(KeyEvent e) {
         if (raceView.isChatInputFocused()) {
             return;
         }
@@ -487,21 +493,21 @@ public class GameClient {
         }
     }
 
-//    public void startGame(){
-//        server.startGame();
-//    }
-//
-//    public ClientToServerThread getServerThread() {
-//        return socketThread;
-//    }
-//
-//    public List<String> getPlayerNames(){
-//        return Collections.unmodifiableList(clientLobbyList.sorted());
-//    }
-//
-//    public void stopGame() {
-//        GameState.setCurrentStage(GameStages.CANCELLED);
-//        if (server != null) server.terminate();
-//        if (socketThread != null) socketThread.setSocketToClose();
-//    }
+    public void startGame(){
+        server.startGame();
+    }
+
+    public ClientToServerThread getServerThread() {
+        return socketThread;
+    }
+
+    public List<String> getPlayerNames(){
+        return Collections.unmodifiableList(clientLobbyList.sorted());
+    }
+
+    public void stopGame() {
+        GameState.setCurrentStage(GameStages.CANCELLED);
+        if (server != null) server.terminate();
+        if (socketThread != null) socketThread.setSocketToClose();
+    }
 }

@@ -1,24 +1,14 @@
 package seng302.visualiser;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -26,7 +16,6 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
@@ -37,23 +26,14 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.assets_2D.AnnotationBox;
-import seng302.visualiser.fxObjects.assets_2D.BoatObject;
-import seng302.visualiser.fxObjects.assets_2D.CourseBoundary;
-import seng302.visualiser.fxObjects.assets_2D.Gate;
-import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory;
-import seng302.visualiser.fxObjects.assets_2D.Marker;
+import seng302.utilities.Sounds;
+import seng302.visualiser.fxObjects.assets_2D.*;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
-import seng302.utilities.Sounds;
-import seng302.visualiser.fxObjects.AnnotationBox;
-import seng302.visualiser.fxObjects.BoatObject;
-import seng302.visualiser.fxObjects.CourseBoundary;
-import seng302.visualiser.fxObjects.Gate;
-import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.Marker;
 import seng302.visualiser.map.Boundary;
 import seng302.visualiser.map.CanvasMap;
+
+import java.util.*;
 
 /**
  * Created by cir27 on 20/07/17.

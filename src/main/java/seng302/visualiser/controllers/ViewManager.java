@@ -16,10 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerAdvertiser;
 import seng302.visualiser.GameClient;
+import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
 import java.io.IOException;
 import java.util.HashMap;
-import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
 public class ViewManager {
 
@@ -33,7 +33,6 @@ public class ViewManager {
 
     private ViewManager(){
         properties = new HashMap<>();
-        gameClient = new GameClient(decorator);
     }
 
     private FXMLLoader loadFxml(String fxmlLocation) {
@@ -65,6 +64,7 @@ public class ViewManager {
             .add(getClass().getResource("/css/master.css").toExternalForm());
 
         this.decorator = decorator;
+        gameClient = new GameClient(decorator);
 
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
         Scene scene = new Scene(decorator, 1200, 800);
@@ -156,8 +156,8 @@ public class ViewManager {
             e.printStackTrace();
         }
 
-        decorator.getScene().setOnKeyPressed((ke) -> gameClient.keyPressed(ke));
-        decorator.getScene().setOnKeyReleased((ke) -> gameClient.keyReleased(ke));
+        decorator.getScene().setOnKeyPressed(gameClient::keyPressed);
+        decorator.getScene().setOnKeyReleased(gameClient::keyReleased);
 
         return loader.getController();
     }
