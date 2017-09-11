@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.*?>
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import java.lang.String?>
@@ -18,7 +12,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
 <StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.ServerListController">
     <children>
         <GridPane fx:id="serverListMainGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
@@ -104,7 +97,7 @@
                 <RowConstraints maxHeight="80.0" minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <stylesheets>
-                <String fx:value="/css/master.css" />
+                <String fx:value="/css/Master.css"/>
                 <String fx:value="/css/ServerListView.css" />
             </stylesheets>
         </GridPane>

@@ -12,7 +12,7 @@
   minHeight="-Infinity" minWidth="-Infinity" prefHeight="80.0"
   xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <stylesheets>
-       <String fx:value="/css/master.css" />
+       <String fx:value="/css/Master.css"/>
        <String fx:value="/css/cells/PlayerCell.css"/>
    </stylesheets>
    <children>

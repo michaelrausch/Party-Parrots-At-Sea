@@ -29,6 +29,7 @@
 #hostButton {
     -fx-background-color: -fx-pp-theme-color;
     -fx-font-size: 20px;
+    -fx-pref-height: 65px;
     -fx-text-fill: -fx-pp-light-text-color;
 }
 
@@ -41,6 +42,7 @@
     -fx-background-color: -fx-pp-light-text-color; /* inverted */
     -fx-text-fill: -fx-pp-theme-color; /* inverted */
     -fx-font-size: 20px;
+    -fx-pref-height: 65px;
 }
 
 #connectButton:hover {

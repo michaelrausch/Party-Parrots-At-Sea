@@ -4,8 +4,6 @@ import java.util.Arrays;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Background;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -29,7 +27,7 @@ public class ChatHistory extends ScrollPane {
         this.lookup(".scroll-pane").setStyle("-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1);");
 
         this.textFlow.setStyle(
-            "-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1);"
+            "-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1); -fx-padding: 10px"
         );
         //This makes the window auto scroll.
         textFlow.getChildren().addListener((ListChangeListener<Node>) c ->

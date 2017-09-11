@@ -2,18 +2,17 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.controls.JFXDialog;
+import java.io.IOException;
+import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +21,6 @@ import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
-
-import java.io.IOException;
-import java.util.HashMap;
 
 public class ViewManager {
 
@@ -71,7 +67,7 @@ public class ViewManager {
         decorator.setCustomMaximize(true);
         decorator.applyCss();
         decorator.getStylesheets()
-            .add(getClass().getResource("/css/master.css").toExternalForm());
+            .add(getClass().getResource("/css/Master.css").toExternalForm());
 
         this.decorator = decorator;
         gameClient = new GameClient(decorator);
@@ -192,7 +188,7 @@ public class ViewManager {
                 decorator.setCustomMaximize(true);
                 decorator.applyCss();
                 decorator.getStylesheets()
-                    .add(getClass().getResource("/css/master.css").toExternalForm());
+                    .add(getClass().getResource("/css/Master.css").toExternalForm());
 
                 Scene scene = new Scene(decorator);
                 // set key press event to catch key stoke

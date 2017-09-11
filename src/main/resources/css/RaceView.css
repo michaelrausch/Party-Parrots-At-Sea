@@ -1,0 +1,37 @@
+#timerGrid{
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+#timerLabel{
+    -fx-font-size: 21px;
+    -fx-font-family: "Baloo";
+}
+
+#raceInfoArea{
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+#chatGridPane {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+#chatHistoryHolder {
+
+}
+
+#chatSend {
+    -fx-background-color: -fx-pp-front-color;
+    -fx-text-fill: -fx-pp-theme-color;
+    -fx-font-size: 13px;
+    -fx-pref-height: 35px;
+}
+
+#chatSend:hover {
+    -fx-font-size: 15px;
+}
+
+#chatInput {
+    -jfx-focus-color: -fx-pp-light-theme-color;
+    -jfx-unfocus-color: -fx-pp-dark-text-color;
+    -fx-background-color: transparent;
+}

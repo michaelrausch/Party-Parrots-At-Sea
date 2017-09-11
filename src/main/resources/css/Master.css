@@ -15,9 +15,9 @@
     -fx-pp-dropshadow-dark: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10.0, 0.2, 5, 6);
 }
 
-GridPane .jfx-button {
-    -fx-min-height: 65px; /* because we changed the font, we now need to set mini height for all buttons */
-}
+/*GridPane .jfx-button {*/
+/*-fx-min-height: 65px; !* because we changed the font, we now need to set mini height for all buttons *!*/
+/*}*/
 
 .jfx-button {
     -fx-cursor: hand;
