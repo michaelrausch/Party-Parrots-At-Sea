@@ -83,6 +83,23 @@
             <version>0.2.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.interactivemesh.jfx.importer.col</groupId>
+            <artifactId>ColModelImporter</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/JFX3DModelImporters_EA_2014-02-09/jimColModelImporterJFX.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.interactivemesh.jfx.importer.stl</groupId>
+            <artifactId>StlMeshImporter</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/libs/JFX3DModelImporters_EA_2014-02-09/jimStlMeshImporterJFX.jar</systemPath>
+        </dependency>
+
+
     </dependencies>
 
     <build>
