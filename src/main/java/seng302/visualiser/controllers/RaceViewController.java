@@ -150,21 +150,21 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
 //        gameView.enableZoom();
-//        gameView.setBoatAsPlayer(player);
+        gameView.setBoatAsPlayer(player);
 //        gameView.startRace();
 
 //        raceState.addCollisionListener(gameView::drawCollision);
-//        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
+        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
 //            gameView.setWindDir(newDirection.doubleValue());
-//            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
-//        });
+            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
+        });
 //        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
 //            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
 //        );
-//        Platform.runLater(() -> {
-//            updateWindDirection(raceState.windDirectionProperty().doubleValue());
-//            updateWindSpeed(raceState.getWindSpeed());
-//        });
+        Platform.runLater(() -> {
+            updateWindDirection(raceState.windDirectionProperty().doubleValue());
+            updateWindSpeed(raceState.getWindSpeed());
+        });
 //        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
     }
 

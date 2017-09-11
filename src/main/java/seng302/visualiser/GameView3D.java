@@ -5,14 +5,25 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
-import javafx.scene.*;
+import javafx.scene.AmbientLight;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.PointLight;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Sphere;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -26,7 +37,8 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.assets_2D.*;
+import seng302.visualiser.fxObjects.assets_2D.AnnotationBox;
+import seng302.visualiser.fxObjects.assets_2D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
@@ -75,11 +87,12 @@ public class GameView3D {
     private Group annotationsGroup = new Group();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
-    private Group trails = new Group();
     private Group markers = new Group();
     private Group tokens = new Group();
     private List<CompoundMark> course = new ArrayList<>();
     private List<Node> mapTokens;
+    private Timer trailMaker = new Timer();
+    private Group trail = new Group();
 
     private ImageView mapImage = new ImageView();
 
@@ -117,20 +130,66 @@ public class GameView3D {
         camera.setNearClip(0.1);
         camera.setFieldOfView(FOV);
         gameObjects = new Group();
+        PointLight pl = new PointLight(Color.DARKGRAY);
+        pl.setLightOn(true);
+        pl.setBlendMode(BlendMode.ADD);
+        pl.setOpacity(0.5);
+        pl.getTransforms().add(new Translate(0,0,-500));
+        AmbientLight al = new AmbientLight();
+        al.setLightOn(true);
+        al.setBlendMode(BlendMode.SOFT_LIGHT);
+        al.getTransforms().add(new Translate(0, 0, -100));
         root3D = new Group(camera, gameObjects);
         view = new SubScene(
             root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
         );
         view.setCamera(camera);
-        view.setFill(Color.SKYBLUE);
+//        view.setFill(Color.LIGHTBLUE);
         camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
 //        gameObjects.getChildren().addAll(raceBorder, markers, tokens);
+        System.out.println(camera.getLayoutX());
+        System.out.println(camera.getTranslateX());
+        System.out.println(camera.getLayoutY());
+        System.out.println(camera.getTranslateY());
+        System.out.println(camera.getTranslateZ());
+        camera.setTranslateZ(-80);
+        camera.setTranslateY(150);
+        Sphere red = new Sphere(1);
+        red.setMaterial(new PhongMaterial(Color.RED));
+        red.setLayoutX(0);
+        red.setLayoutY(0);
+
+        Sphere blue = new Sphere(1);
+        blue.setMaterial(new PhongMaterial(Color.BLUE));
+        blue.setLayoutX(1);
+        blue.setLayoutY(0);
+
+        Sphere green = new Sphere(1);
+        green.setMaterial(new PhongMaterial(Color.GREEN));
+        green.setLayoutX(-.5);
+        green.setLayoutY(0);
+
+        Sphere white = new Sphere(1);
+        white.setMaterial(new PhongMaterial(Color.WHITE));
+        white.setLayoutX(-.25);
+        white.setLayoutY(0);
+
+        Sphere black = new Sphere(1);
+        black.setMaterial(new PhongMaterial(Color.BLACK));
+        black.setLayoutX(-.125);
+        black.setLayoutY(0);
 
         gameObjects.getChildren().addAll(
-            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
-            raceBorder, markers, tokens
+//            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
+            raceBorder, trail, markers, tokens,
+            white, blue, green, black, red
         );
 
+        System.out.println(camera.getLayoutX());
+        System.out.println(camera.getTranslateX());
+        System.out.println(camera.getLayoutY());
+        System.out.println(camera.getTranslateY());
+        System.out.println(camera.getTranslateZ());
 //        Sphere s = new Sphere(1);
 //        s.setMaterial(new PhongMaterial(Color.RED));
 //        Sphere left = new Sphere(1);
@@ -281,9 +340,9 @@ public class GameView3D {
                 Math.toDegrees(
                     Math.atan2(m2Location.getY() - m1Location.getY(), m2Location.getX() - m1Location.getX())
                 ) + 90,
-                new Point3D(0,1,0)
+                new Point3D(0,0,1)
             ),
-            new Scale(1, 1, m1Location.distance(m2Location) / 10)
+            new Scale(1, m1Location.distance(m2Location) / 10, 1)
         );
 
         Point2D midPoint = m2Location.midpoint(m1Location);
@@ -411,28 +470,20 @@ public class GameView3D {
             minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
         );
         if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
-            xAxisLocation += Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
+            yAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
         } else if (angleFromReference >= 0) {
             angleFromReference = angleFromReference - Math.PI / 2;
-            xAxisLocation += Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation += distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
+            yAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
         } else if (angleFromReference < 0 && angleFromReference >= -Math.PI / 2) {
             angleFromReference = Math.abs(angleFromReference);
-            xAxisLocation -= Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
-            yAxisLocation -= Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
+            xAxisLocation -= distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
+            yAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
         } else {
             angleFromReference = Math.abs(angleFromReference) - Math.PI / 2;
-            xAxisLocation -= Math
-                .round(distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference);
-            yAxisLocation += Math
-                .round(distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference);
+            xAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
+            yAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
         }
         if (horizontalInversion) {
             xAxisLocation = canvasWidth - bufferSize - (xAxisLocation - bufferSize);
@@ -502,8 +553,8 @@ public class GameView3D {
             newBoat.setFill(colour);
             boatObjects.put(clientYacht, newBoat);
 //            createAndBindAnnotationBox(clientYacht, colour);
-//            wakesGroup.getChildren().add(newBoat.getWake());
-//            wakes.add(newBoat.getWake());
+            wakesGroup.getChildren().add(newBoat.getWake());
+            wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
 //            trails.getChildren().add(newBoat.getTrail());
 
@@ -521,9 +572,10 @@ public class GameView3D {
         }
 //        annotationsGroup.getChildren().addAll(annotations.values());
         Platform.runLater(() -> {
-            gameObjects.getChildren().addAll(boatObjectGroup);
+
 //            gameObjects.addAll(trails);
-//            gameObjects.addAll(wakes);
+            gameObjects.getChildren().addAll(wakes);
+            gameObjects.getChildren().addAll(boatObjectGroup);
 //            gameObjects.addAll(annotationsGroup);
 //            gameObjects.addAll(boatObjectGroup);
         });
@@ -564,7 +616,7 @@ public class GameView3D {
                     Math.toDegrees(
                         Math.atan2(location.getY() - lastLocation.getY(), location.getX() - lastLocation.getX())
                     ),
-                    new Point3D(0,1,0)
+                    new Point3D(0,0,1)
                 ),
                 new Scale((lastLocation.distance(location) / 15)-0.2, 1, 1)
             );
@@ -586,7 +638,7 @@ public class GameView3D {
                 Math.toDegrees(
                     Math.atan2(lastLocation.getY() - firstLocation.getY(), lastLocation.getX() - firstLocation.getX())
                 ),
-                new Point3D(0,1,0)
+                new Point3D(0,0,1)
             ),
             new Scale((firstLocation.distance(lastLocation) / 15)-0.2, 1, 1)
         );
@@ -617,5 +669,51 @@ public class GameView3D {
         Platform.runLater(() -> {
             tokens.getChildren().setAll(mapTokens);
         });
+    }
+
+    public void setBoatAsPlayer (ClientYacht playerYacht) {
+        this.playerYacht = playerYacht;
+
+        trailMaker.scheduleAtFixedRate(new TimerTask() {
+
+            private Point2D lastLocation = findScaledXY(playerYacht.getLocation());
+
+            @Override
+            public void run() {
+                Node segment = ModelFactory.importModel(ModelType.TRAIL_SEGMENT).getAssets();
+                Point2D location = findScaledXY(playerYacht.getLocation());
+                segment.getTransforms().addAll(
+                    new Translate(location.getX(), location.getY()),
+                    new Rotate(playerYacht.getHeading(), new Point3D(0,0,1)),
+                    new Scale(1, lastLocation.distance(location) / 5)
+                );
+                Platform.runLater(() -> {
+                    trail.getChildren().add(segment);
+                    if (trail.getChildren().size() > 100) {
+                        trail.getChildren().remove(0);
+                    }
+                });
+                lastLocation = location;
+            }
+        }, 0L, 500L);
+        
+//        playerYacht.toggleSail();
+//        boatObjects.get(playerYacht).setAsPlayer();
+//        CompoundMark currentMark = course.get(playerYacht.getLegNumber());
+//        for (Mark mark : currentMark.getMarks()) {
+//            markerObjects.get(mark).showNextExitArrow();
+//        }
+//        annotations.get(playerYacht).addAnnotation(
+//            "velocity",
+//            playerYacht.getVelocityProperty(),
+//            (velocity) -> String.format("Speed: %.2f ms", velocity.doubleValue())
+//        );
+//        Platform.runLater(() -> {
+//            boatObjectGroup.getChildren().remove(boatObjects.get(playerYacht));
+//            gameObjects.add(boatObjects.get(playerYacht));
+//            annotationsGroup.getChildren().remove(annotations.get(playerYacht));
+//            gameObjects.add(annotations.get(playerYacht));
+//        });
+//        playerYacht.addMarkRoundingListener(this::updateMarkArrows);
     }
 }
