@@ -151,6 +151,16 @@ public class Sounds {
         }
     }
 
+    public static void playTokenPickupSound() {
+        if (!soundEffectsMuted) {
+            Media pickupSound = new Media(
+                Sounds.class.getClassLoader().getResource("sounds/Coin-pick-up-sound-effect.mp3")
+                    .toString());
+            soundPlayer = new MediaPlayer(pickupSound);
+            soundPlayer.play();
+        }
+    }
+
     public static void playHoverSound() {
         if (!soundEffectsMuted) {
             Media hoverSound = new Media(Sounds.class.getClassLoader().getResource("sounds/sound-over.wav").toString());

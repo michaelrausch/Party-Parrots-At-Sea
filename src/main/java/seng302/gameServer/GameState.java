@@ -24,6 +24,7 @@ import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoundingBoatStatus;
 import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventType;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.Player;
@@ -49,7 +50,7 @@ public class GameState implements Runnable {
         void notify(Message message);
     }
 
-    private Logger logger = LoggerFactory.getLogger(GameState.class);
+    private static Logger logger = LoggerFactory.getLogger(GameState.class);
 
 
     static final int WARNING_TIME = 10 * -1000;
@@ -300,7 +301,13 @@ public class GameState implements Runnable {
     }
 
     /**
-     * Called periodically in this GameState thread to update the GameState values
+     * Called periodically in this GameState thread to update the GameState values.
+     * -Updates yachts velocity
+     * -Updates locations
+     * -Checks for collisions
+     * -Checks for progression
+     *
+     * -Also checks things like the end of the race and race start time etc
      */
     public void update() {
         Boolean raceFinished = true;
@@ -317,7 +324,6 @@ public class GameState implements Runnable {
             yacht.updateLocation(timeInterval);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkCollision(yacht);
-                checkTokenPickUp(yacht);
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
@@ -361,25 +367,34 @@ public class GameState implements Runnable {
 
     /**
      * Checks all tokensInPlay to see if a yacht has picked one up
-     *
-     * @param serverYacht The yacht to check for
+     * @return Token which was collided with
+     * @param serverYacht The yacht to check for collision with a token
      */
-    private void checkTokenPickUp(ServerYacht serverYacht) {
+    private static Token checkTokenPickUp(ServerYacht serverYacht) {
         for (Token token : tokensInPlay) {
             Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
             if (distance < YACHT_COLLISION_DISTANCE) {
-                tokensInPlay.remove(token);
-                serverYacht.powerUp(token.getTokenType());
-                logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + token
-                    .getTokenType());
-                notifyMessageListeners(MessageFactory.getRaceXML());
-                break;
+                return token;
             }
         }
+
+        return null;
     }
 
 
+    /**
+     * Checks for collision with other in game objects for the given serverYacht. To be called each
+     * update. If there is a collision, Notifies the server to send the appropriate messages out.
+     * Checks for these items in turn:
+     * - Other yachts
+     * - Marks
+     * - Boundary
+     * - Tokens
+     *
+     * @param serverYacht The server yacht to check collisions with
+     */
     public static void checkCollision(ServerYacht serverYacht) {
+        //Yacht Collision
         ServerYacht collidedYacht = checkYachtCollision(serverYacht);
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
@@ -396,36 +411,51 @@ public class GameState implements Runnable {
                 collidedYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
             notifyMessageListeners(
-                new YachtEventCodeMessage(serverYacht.getSourceId())
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
             );
-        } else {
-            Mark collidedMark = checkMarkCollision(serverYacht);
-            if (collidedMark != null) {
-                serverYacht.setLocation(
-                    calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
-                );
-                serverYacht.setCurrentVelocity(
-                    serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
-                );
-                notifyMessageListeners(
-                    new YachtEventCodeMessage(serverYacht.getSourceId())
-                );
-            }
-            else{
-                if (checkBoundaryCollision(serverYacht)) {
-                    serverYacht.setLocation(
-                            calculateBounceBack(serverYacht, serverYacht.getLocation(),
-                                    BOUNCE_DISTANCE_YACHT)
-                    );
-                    serverYacht.setCurrentVelocity(
-                            serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
-                    );
-                    notifyMessageListeners(
-                            new YachtEventCodeMessage(serverYacht.getSourceId())
-                    );
-                }
-            }
         }
+
+        //Mark Collision
+        Mark collidedMark = checkMarkCollision(serverYacht);
+        if (collidedMark != null) {
+            serverYacht.setLocation(
+                calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
+            );
+            serverYacht.setCurrentVelocity(
+                serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+            );
+            notifyMessageListeners(
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
+            );
+        }
+
+        //Boundary Collision
+        if (checkBoundaryCollision(serverYacht)) {
+            serverYacht.setLocation(
+                calculateBounceBack(serverYacht, serverYacht.getLocation(),
+                    BOUNCE_DISTANCE_YACHT)
+            );
+            serverYacht.setCurrentVelocity(
+                serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+            );
+            notifyMessageListeners(
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
+            );
+        }
+
+        //Token Collision
+        Token collidedToken = checkTokenPickUp(serverYacht);
+        if (collidedToken != null) {
+            tokensInPlay.remove(collidedToken);
+            serverYacht.powerUp(collidedToken.getTokenType());
+            logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + collidedToken
+                .getTokenType());
+            notifyMessageListeners(MessageFactory.getRaceXML());
+            notifyMessageListeners(
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.TOKEN));
+        }
+
+
     }
 
 

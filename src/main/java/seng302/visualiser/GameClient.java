@@ -23,6 +23,7 @@ import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.YachtEventType;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
@@ -296,7 +297,12 @@ public class GameClient {
                     break;
 
                 case YACHT_EVENT_CODE:
-                    showCollisionAlert(StreamParser.extractYachtEventCode(packet));
+                    YachtEventData yachtEventData = StreamParser.extractYachtEventCode(packet);
+                    if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
+                        showCollisionAlert(StreamParser.extractYachtEventCode(packet));
+                    } else if (yachtEventData.getEventId() == YachtEventType.TOKEN.getCode()) {
+                        showPickUp();
+                    }
                     break;
 
                 case CHATTER_TEXT:
@@ -446,15 +452,16 @@ public class GameClient {
      * Tells race view to show a collision animation.
      */
     private void showCollisionAlert(YachtEventData yachtEventData) {
-        // 33 is the agreed code to show collision
-        if (yachtEventData.getEventId() == 33) {
-            Sounds.playCrashSound();
-            raceState.storeCollision(
-                allBoatsMap.get(
-                    yachtEventData.getSubjectId().intValue()
-                )
-            );
-        }
+        Sounds.playCrashSound();
+        raceState.storeCollision(
+            allBoatsMap.get(
+                yachtEventData.getSubjectId().intValue()
+            )
+        );
+    }
+
+    private void showPickUp() {
+        Sounds.playTokenPickupSound();
     }
 
     private void formatAndSendChatMessage(String rawChat) {
