@@ -322,8 +322,8 @@ public class GameState implements Runnable {
             checkPowerUpTimeout(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
+            checkCollision(yacht);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
-                checkCollision(yacht);
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
