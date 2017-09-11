@@ -104,6 +104,8 @@ public class ModelFactory {
             case START_LINE:
             case GATE_LINE:
                 return makeGate(assets);
+            case PLAYER_IDENTIFIER:
+                return makeIdentifierIcon(assets);
             default:
                 return new Model(assets, null);
         }
@@ -161,6 +163,14 @@ public class ModelFactory {
     private static Model makeGate(Group assets) {
         assets.getTransforms().addAll(
             new Rotate(90, new Point3D(1,0,0))
+        );
+        return new Model(assets, null);
+    }
+
+    private static Model makeIdentifierIcon(Group assets) {
+        assets.getTransforms().addAll(
+            new Rotate(90, new Point3D(1,0,0)),
+            new Scale(0.5, 0.5, 0.5)
         );
         return new Model(assets, null);
     }

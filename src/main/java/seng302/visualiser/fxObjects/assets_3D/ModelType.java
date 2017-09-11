@@ -16,7 +16,8 @@ public enum ModelType {
     BORDER_BARRIER ("barrier_segment.dae"),
     FINISH_LINE ("finish_line.dae"),
     START_LINE ("start_line.dae"),
-    GATE_LINE ("gate_line.dae");
+    GATE_LINE ("gate_line.dae"),
+    PLAYER_IDENTIFIER ("player_identifier.dae");
 
     final String filename;
 
