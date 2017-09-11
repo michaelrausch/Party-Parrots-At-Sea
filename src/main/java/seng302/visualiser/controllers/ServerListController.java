@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
+import com.jfoenix.validation.base.ValidatorBase;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
@@ -28,6 +29,8 @@ import seng302.gameServer.ServerDescription;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
+import seng302.visualiser.validators.HostNameFieldValidator;
+import seng302.visualiser.validators.NumberRangeValidator;
 
 public class ServerListController implements Initializable, ServerListenerDelegate {
 
@@ -53,6 +56,11 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private JFXTextField serverPortNumber;
     //---------FXML END---------//
 
+    //Validators
+    private HostNameFieldValidator hostNameValidator;
+    private NumberRangeValidator portNumberValidator;
+
+
     private Label noServersFound;
     private Logger logger = LoggerFactory.getLogger(ServerListController.class);
 
@@ -63,17 +71,27 @@ public class ServerListController implements Initializable, ServerListenerDelega
         // Set Event Bindings
         connectButton.setOnMouseReleased(event -> attemptToDirectConnect());
         for (JFXTextField textField : Arrays.asList(serverHostName, serverPortNumber)) {
+            // Event for pressing enter to submit direct connection
             textField.setOnKeyPressed(event -> {
                 if (event.getCode().equals(KeyCode.ENTER)) {
                     attemptToDirectConnect();
                 }
             });
 
+            // Validators as empty fields are invalid.
             RequiredFieldValidator validator = new RequiredFieldValidator();
+            validator.setMessage("Field is Required");
             textField.getValidators().add(validator);
         }
-        serverHostName.getValidators().get(0).setMessage("Incorrect Host Name");
-        serverPortNumber.getValidators().get(0).setMessage("Incorrect Port Number");
+
+        // Validating the hostname
+        hostNameValidator = new HostNameFieldValidator();
+        hostNameValidator.setMessage("Host Name is Incorrect");
+        serverHostName.getValidators().add(hostNameValidator);
+
+        portNumberValidator = new NumberRangeValidator(1025, 65536);
+        portNumberValidator.setMessage("Port Number is Incorrect");
+        serverPortNumber.getValidators().add(portNumberValidator);
 
         // Start listening for servers on network
         try {
@@ -119,50 +137,25 @@ public class ServerListController implements Initializable, ServerListenerDelega
 
 
     private Boolean validateDirectConnection(String hostName, String portNumber) {
-        Boolean hostNameValid = validateHostName(hostName);
-        Boolean portNumberValid = validatePortNumber(portNumber);
+        Boolean hostNameValid = validateTextField(serverHostName);
+        Boolean portNumberValid = validateTextField(serverPortNumber);
+
         return hostNameValid && portNumberValid;
     }
 
-    /**
-     *
-     * @return
-     */
-    private Boolean validateHostName(String hostName) {
-        if (hostName.length() == 0) {
-            serverHostName.validate();
-            return false;
-        }
-        // Validate the Host Name here.
-        try {
-            /* The result of this is ignored. All We want to do is test that
-               the hostname matches some form. I'm not 100% sure how valid this is. */
-            InetAddress.getByName(hostName);
-            return true;
-        } catch (UnknownHostException e) {
-            // Fails to resolve the host name.
-            serverHostName.validate();
-            return false;
-        }
-    }
 
     /**
      *
      * @return
      */
-    private Boolean validatePortNumber(String portNumber) {
-        try {
-            Integer portNum = Integer.parseInt(serverPortNumber.getText());
-            if (portNum > 1024 && portNum <= 65536) {
-                return true;
-            } else {
-                System.out.println(portNum.toString() + " is not a valid port number");
+    private Boolean validateTextField(JFXTextField textField) {
+        textField.validate();
+        for (ValidatorBase validator : textField.getValidators()) {
+            if (validator.getHasErrors()) {
+                return false;
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Not a valid number.");
         }
-        serverPortNumber.validate();
-        return false;
+        return true;
     }
 
     /**
