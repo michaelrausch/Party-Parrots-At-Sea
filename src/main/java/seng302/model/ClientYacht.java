@@ -47,7 +47,7 @@ public class ClientYacht extends Observable {
     private Integer position;
 
     private Long estimateTimeAtFinish;
-    private Boolean sailIn = true;
+    private Boolean sailIn = false;
     private Integer currentMarkSeqID = 0;
     private Long markRoundTime;
     private Long timeTillNext;

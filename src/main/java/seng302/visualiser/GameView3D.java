@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -119,15 +120,30 @@ public class GameView3D {
         camera.setNearClip(0.1);
         camera.setFieldOfView(FOV);
         gameObjects = new Group();
+        PointLight pl = new PointLight(Color.DARKGRAY);
+        pl.setLightOn(true);
+        pl.setBlendMode(BlendMode.ADD);
+        pl.setOpacity(0.5);
+        pl.getTransforms().add(new Translate(0,0,-500));
+        AmbientLight al = new AmbientLight();
+        al.setLightOn(true);
+        al.setBlendMode(BlendMode.SOFT_LIGHT);
+        al.getTransforms().add(new Translate(0, 0, -100));
         root3D = new Group(camera, gameObjects);
         view = new SubScene(
             root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
         );
         view.setCamera(camera);
-        view.setFill(Color.SKYBLUE);
+//        view.setFill(Color.LIGHTBLUE);
         camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
 //        gameObjects.getChildren().addAll(raceBorder, markers, tokens);
-
+        System.out.println(camera.getLayoutX());
+        System.out.println(camera.getTranslateX());
+        System.out.println(camera.getLayoutY());
+        System.out.println(camera.getTranslateY());
+        System.out.println(camera.getTranslateZ());
+        camera.setTranslateZ(-80);
+        camera.setTranslateY(150);
         Sphere red = new Sphere(1);
         red.setMaterial(new PhongMaterial(Color.RED));
         red.setLayoutX(0);
@@ -154,11 +170,16 @@ public class GameView3D {
         black.setLayoutY(0);
 
         gameObjects.getChildren().addAll(
-            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
+//            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
             raceBorder, markers, tokens,
             white, blue, green, black, red
         );
 
+        System.out.println(camera.getLayoutX());
+        System.out.println(camera.getTranslateX());
+        System.out.println(camera.getLayoutY());
+        System.out.println(camera.getTranslateY());
+        System.out.println(camera.getTranslateZ());
 //        Sphere s = new Sphere(1);
 //        s.setMaterial(new PhongMaterial(Color.RED));
 //        Sphere left = new Sphere(1);
