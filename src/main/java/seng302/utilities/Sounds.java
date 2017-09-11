@@ -79,7 +79,7 @@ public class Sounds {
         raceMusic = new Media(Sounds.class.getClassLoader().getResource("sounds/Sounds-of-the-ocean.mp3").toString());
         soundEffect = new MediaPlayer(raceMusic);
         soundEffect.setCycleCount(MediaPlayer.INDEFINITE);
-//        soundEffect.setVolume(0.3);
+        soundEffect.setVolume(0.3);
         soundEffect.play();
         musicPlayer.setMute(musicMuted);
         soundEffect.setMute(soundEffectsMuted);
@@ -122,6 +122,7 @@ public class Sounds {
                 Sounds.class.getClassLoader().getResource("sounds/Sms-notification.mp3")
                     .toString());
             soundPlayer = new MediaPlayer(finishSound);
+            soundPlayer.setVolume(0.5);
             soundPlayer.play();
         }
     }
