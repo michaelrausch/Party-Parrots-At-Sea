@@ -19,7 +19,7 @@ public class Model {
         }
     }
 
-    void setAnimation(AnimationTimer animation) {
+    public void setAnimation(AnimationTimer animation) {
         animationTimer = animation;
         if (animation != null) {
             animation.start();

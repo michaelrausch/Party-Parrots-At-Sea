@@ -1,5 +1,15 @@
 package seng302.visualiser;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,13 +42,11 @@ import seng302.utilities.Sounds;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
-import seng302.visualiser.controllers.*;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.*;
+import seng302.visualiser.controllers.FinishScreenViewController;
+import seng302.visualiser.controllers.LobbyController;
+import seng302.visualiser.controllers.LobbyController_old;
+import seng302.visualiser.controllers.RaceViewController;
+import seng302.visualiser.controllers.ViewManager;
 
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
@@ -293,6 +301,9 @@ public class GameClient {
                         clientLobbyList.add(boat.getBoatName())
                     );
                     raceState.setBoats(allBoatsMap.values());
+                    if (lobbyController != null) {
+                        lobbyController.setBoats(allBoatsMap);
+                    }
                     break;
 
                 case RACE_START_STATUS:
@@ -511,5 +522,9 @@ public class GameClient {
         GameState.setCurrentStage(GameStages.CANCELLED);
         if (server != null) server.terminate();
         if (socketThread != null) socketThread.setSocketToClose();
+    }
+
+    public Map<Integer, ClientYacht> getAllBoatsMap() {
+        return allBoatsMap;
     }
 }
