@@ -88,8 +88,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private AnchorPane rvAnchorPane;
     @FXML
-    private Text windDirectionText;
-    @FXML
     private AnchorPane windArrowHolder;
     @FXML
     private Slider annotationSlider;
@@ -100,9 +98,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Text fpsDisplay;
     @FXML
-    private Text windSpeedText;
-    @FXML
     private ImageView windImageView;
+    @FXML
+    private Label windDirectionLabel;
+    @FXML
+    private Label windSpeedLabel;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -216,12 +216,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 //        raceState.addCollisionListener(gameView::drawCollision);
         raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
-//            gameView.setWindDir(newDirection.doubleValue());
+            gameView.setWindDir(newDirection.doubleValue());
             Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
         });
-//        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
-//            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
-//        );
+        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
+            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
+        );
         Platform.runLater(() -> {
             updateWindDirection(raceState.windDirectionProperty().doubleValue());
             updateWindSpeed(raceState.getWindSpeed());
@@ -473,8 +473,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param direction the from north angle of the wind.
      */
     private void updateWindDirection(double direction) {
-//        windDirectionText.setText(String.format("%.1f°", direction));
-//        windArrowText.setRotate(direction);
+        windDirectionLabel.setText(String.format("%.1f°", direction));
+        windImageView.setRotate(direction);
     }
 
     /**
@@ -482,7 +482,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param windSpeed Windspeed in knots.
      */
     private void updateWindSpeed(double windSpeed) {
-//        windSpeedText.setText("Speed: " + String.format("%.1f", windSpeed) + " Knots");
+        windSpeedLabel.setText(String.format("%.1f", windSpeed) + " Knots");
     }
 
 
