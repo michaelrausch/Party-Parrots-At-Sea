@@ -2,6 +2,7 @@ package seng302.visualiser.fxObjects.assets_3D;
 
 import com.interactivemesh.jfx.importer.col.ColModelImporter;
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
+import java.util.Random;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
@@ -22,12 +23,29 @@ public class ModelFactory {
     public static BoatModel boatIconView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().addAll(
-            new Scale(20, 20, 20),
-            new Rotate(90, new Point3D(0,0,1)),
-            new Rotate(90, new Point3D(0, 1, 0))
+            new Scale(10, 10, 10),
+            new Rotate(45, new Point3D(0,0,1)),
+            new Rotate(90, new Point3D(0, 1, 0)),
+            new Rotate(270, new Point3D(1, 0, 0)),
+            new Translate(12, 14, 0)
         );
+
+        BoatModel bo = new BoatModel(boatAssets, null, boatType);
+        bo.showSail();
+        bo.rotateSail(45);
+        bo.setAnimation(new AnimationTimer() {
+            Group group = bo.getAssets();
+            double boatAngle = 0;
+            int id = new Random().nextInt();
+
+            @Override
+            public void handle(long now) {
+                ((Rotate) group.getTransforms().get(3)).setAngle(boatAngle++);
+                System.out.println("animating a thingy " + id);
+            }
+        });
         boatAssets.getChildren().add(new AmbientLight(new Color(1, 1, 1, 0.01)));
-        return new BoatModel(boatAssets, null, boatType);
+        return bo;
     }
 
     public static BoatModel boatRotatingView(BoatMeshType boatType, Color primaryColour) {
