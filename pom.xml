@@ -70,6 +70,31 @@
             <version>1.4</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.lwjgl/lwjgl -->
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl</artifactId>
+            <version>3.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>de.javagl</groupId>
+            <artifactId>obj</artifactId>
+            <version>0.2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.interactivemesh</groupId>
+            <artifactId>jimStlMeshImporter</artifactId>
+            <version>0.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.interactivemesh</groupId>
+            <artifactId>jimColModelImporter</artifactId>
+            <version>0.7</version>
+        </dependency>
+
         <dependency>
             <groupId>com.jfoenix</groupId>
             <artifactId>jfoenix</artifactId>
@@ -167,6 +192,12 @@
     </reporting>
 
     <repositories>
+        <repository>
+            <id>lib</id>
+            <name>third party libraries</name>
+            <url>file://${basedir}/lib</url>
+        </repository>
+
         <repository>
             <id>Homer-Core</id>
             <name>Homer-core-repo</name>

@@ -13,7 +13,6 @@ import seng302.model.ServerYacht;
 import seng302.visualiser.ClientToServerThread;
 
 /**
- * Cucumber test for toggling sail
  * Created by kre39 on 7/08/17.
  */
 public class ToggleSailSteps {
@@ -51,6 +50,5 @@ public class ToggleSailSteps {
             Assert.assertFalse(yacht.getSailIn());
         }
         mst.terminate();
-        client.closeSocket();
     }
 }

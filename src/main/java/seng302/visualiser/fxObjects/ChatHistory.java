@@ -70,4 +70,7 @@ public class ChatHistory extends ScrollPane {
         }
 
     }
+
+
+
 }

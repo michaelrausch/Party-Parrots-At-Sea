@@ -1,10 +1,17 @@
+@font-face {
+    src: url("DJB-Get-Digital.ttf");
+}
+
 #timerGrid{
     -fx-background-color: rgba(255, 255, 255, 0.6);
 }
 
+.timer Label {
+    -fx-font-family: "DJB Get Digital" !important;
+}
+
 #timerLabel{
     -fx-font-size: 21px;
-    -fx-font-family: "Baloo";
 }
 
 #raceInfoArea{
@@ -34,4 +41,8 @@
     -jfx-focus-color: -fx-pp-light-theme-color;
     -jfx-unfocus-color: -fx-pp-dark-text-color;
     -fx-background-color: transparent;
+}
+
+#windImageView {
+    -fx-image: url("/images/wind.png");
 }
