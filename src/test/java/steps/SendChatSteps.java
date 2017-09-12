@@ -5,6 +5,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import javafx.util.Pair;
 import org.junit.Assert;
+import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.utilities.StreamParser;
@@ -24,6 +25,11 @@ public class SendChatSteps {
     @Given("^There are two games running$")
     public void the_are_two_games_running() throws Throwable {
         mst = new MainServerThread();
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         host = new ClientToServerThread("localhost", 4942);
         try {
             Thread.sleep(100);

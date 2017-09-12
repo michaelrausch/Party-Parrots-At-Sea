@@ -68,9 +68,11 @@ public class ChatCommandsTest {
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
             }
+            mst.terminate();
             host = null;
             client = null;
             mst = null;
+
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -87,6 +89,11 @@ public class ChatCommandsTest {
         mst = new MainServerThread();
         host = null;
         try {
+            Thread.sleep(100);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
+        try {
             host = new ClientToServerThread("localhost", 4942);
         } catch (IOException ioe) {
             ioe.printStackTrace();
@@ -97,7 +104,7 @@ public class ChatCommandsTest {
             ie.printStackTrace();
         }
         mst.startGame();
-        host.sendChatterMessage("[time_prefix] <name_prefix> >speed 5.0");
+        host.sendChatterMessage("[time_prefix] <name_prefix> >speed 5");
         try {
             Thread.sleep(100);
         } catch (InterruptedException ie) {
@@ -106,7 +113,7 @@ public class ChatCommandsTest {
         Assert.assertEquals(5.0, GameState.getSpeedMultiplier(), 0.00001);
         mst.terminate();
         try {
-            Thread.sleep(2000);
+            Thread.sleep(200);
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }

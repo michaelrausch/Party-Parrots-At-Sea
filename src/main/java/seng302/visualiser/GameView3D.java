@@ -735,4 +735,8 @@ public class GameView3D {
 //        });
 //        playerYacht.addMarkRoundingListener(this::updateMarkArrows);
     }
+
+    public void setWindDir(double windDir) {
+        this.windDir = windDir;
+    }
 }
