@@ -4,7 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 
 /**
- * Created by CJIRWIN on 7/09/2017.
+ * Class for generic imported 3D model. Animation terminates on if removed from scene.
  */
 public class Model {
 
@@ -16,6 +16,12 @@ public class Model {
         this.animationTimer = animation;
         if (animation != null) {
             animation.start();
+            assets.sceneProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) {
+                    animationTimer.stop();
+                    animationTimer = null;
+                }
+            });
         }
     }
 
