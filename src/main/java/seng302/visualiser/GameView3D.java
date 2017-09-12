@@ -179,19 +179,19 @@ public class GameView3D {
         black.setLayoutX(-.125);
         black.setLayoutY(0);
 
-        ImagePattern oceanImage = new ImagePattern(
-            new Image(
-                GameView3D.class.getResourceAsStream(
-                    "/pics/creek.gif")
-            ), 0, 0, 1000, 1000, false
-        );
-
-        Circle ocean = new Circle(0, 0, 5000);
-        ocean.setFill(oceanImage);
-        ocean.getTransforms().add(new Scale(0.1, 0.1));
+//        ImagePattern oceanImage = new ImagePattern(
+//            new Image(
+//                GameView3D.class.getResourceAsStream(
+//                    "/pics/water.gif")
+//            ), 0, 0, 1000, 1000, false
+//        );
+//
+//        Circle ocean = new Circle(0, 0, 5000);
+//        ocean.setFill(oceanImage);
+//        ocean.getTransforms().add(new Scale(0.1, 0.1));
 
         gameObjects.getChildren().addAll(
-            ocean,
+//            ocean,
 //            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
             raceBorder, trail, markers, tokens, playerAnnotation,
             white, blue, green, black, red
@@ -749,5 +749,9 @@ public class GameView3D {
 //            gameObjects.add(annotations.get(playerYacht));
 //        });
 //        playerYacht.addMarkRoundingListener(this::updateMarkArrows);
+    }
+
+    public void setWindDir(double windDir) {
+        this.windDir = windDir;
     }
 }

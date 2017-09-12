@@ -244,27 +244,28 @@ public class BoatObject extends Group {
         wake.getTransforms().setAll(new Rotate(heading, new Point3D(0,0,1)));
         if (sailsIn) {
             boatAssets.showSail();
-            System.out.println("heading = " + heading);
             Double sailWindOffset = 30.0;
             Double upwindAngleLimit = 15.0;
             Double downwindAngleLimit = 10.0; //Upwind from normalised horizontal
             Double normalizedHeading = normalizeHeading(heading, windDir);
+            System.out.println("normalizedHeading = " + normalizedHeading);
             if (normalizedHeading < 180) {
                 if (normalizedHeading < sailWindOffset + upwindAngleLimit){
-                    boatAssets.rotateSail(-heading + 90 - upwindAngleLimit);
+                    boatAssets.rotateSail(-upwindAngleLimit);
                 } else if (normalizedHeading > 90 + sailWindOffset){
-                    boatAssets.rotateSail(-heading + downwindAngleLimit);
+                    boatAssets.rotateSail(-90 + downwindAngleLimit);
                 } else {
-                    boatAssets.rotateSail(-heading + 90 + sailWindOffset);
+                    boatAssets.rotateSail(-heading + windDir + sailWindOffset);
                 }
             } else {
-//                if (normalizedHeading > 360 - (sailWindOffset + upwindAngleLimit)){
-//                    boatAssets.rotateSail(-heading + 90 + upwindAngleLimit);
-//                } else if (normalizedHeading < 270 - sailWindOffset){
-//                    boatAssets.rotateSail(-heading + 180 - downwindAngleLimit);
-//                } else {
-//                    boatAssets.rotateSail(-heading + 90 - sailWindOffset);
-//                }
+                if (normalizedHeading > 360 - (sailWindOffset + upwindAngleLimit)) {
+                    boatAssets.rotateSail(upwindAngleLimit);
+                } else if (normalizedHeading < 270 - sailWindOffset) {
+                    boatAssets.rotateSail(90 - downwindAngleLimit);
+                } else {
+                    System.out.println("windDir = " + windDir);
+                    boatAssets.rotateSail(-heading + windDir - sailWindOffset);
+                }
             }
         } else {
             boatAssets.hideSail();

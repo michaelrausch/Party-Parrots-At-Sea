@@ -155,7 +155,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
 //        raceState.addCollisionListener(gameView::drawCollision);
         raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
-//            gameView.setWindDir(newDirection.doubleValue());
+            gameView.setWindDir(newDirection.doubleValue());
             Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
         });
 //        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
@@ -165,7 +165,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             updateWindDirection(raceState.windDirectionProperty().doubleValue());
             updateWindSpeed(raceState.getWindSpeed());
         });
-//        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
+        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
     }
 
     /**
