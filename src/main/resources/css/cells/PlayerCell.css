@@ -1,10 +1,10 @@
 #playerName {
-    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-text-fill: -fx-pp-light-text-color;
     -fx-font-size: 18px;
 }
 
 #playerListCell {
-    -fx-background-color: -fx-pp-front-color;
+    -fx-background-color: skyblue;
     -fx-effect: -fx-pp-dropshadow-light;
 }
 

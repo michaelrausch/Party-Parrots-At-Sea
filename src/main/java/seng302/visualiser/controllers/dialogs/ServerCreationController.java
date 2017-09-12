@@ -44,8 +44,6 @@ public class ServerCreationController implements Initializable {
 
         serverName.setValidators(fieldLengthValidator, fieldRequiredValidator);
 
-        submitBtn.setOnMouseReleased(event -> validateServerSettings());
-        submitBtn.setOnMouseClicked(event -> submitBtn.setText("CREATING..."));
         submitBtn.setOnMouseReleased(event -> {
             Sounds.playButtonClick();
             validateServerSettings();

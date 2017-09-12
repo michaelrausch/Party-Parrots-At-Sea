@@ -1,5 +1,13 @@
 package seng302.visualiser.controllers;
 
+import com.jfoenix.controls.JFXButton;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -10,13 +18,24 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
@@ -38,10 +57,6 @@ import seng302.visualiser.fxObjects.ChatHistory;
 import seng302.visualiser.fxObjects.assets_2D.BoatObject;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Controller class that manages the display of a race
  */
@@ -52,7 +67,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Pane basePane;
     @FXML
-    private Button chatSend;
+    private JFXButton chatSend;
     @FXML
     private Pane chatHistoryHolder;
     @FXML
@@ -66,14 +81,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private CheckBox toggleFps;
     @FXML
-    private Text timerLabel;
+    private Label timerLabel;
     @FXML
     private StackPane contentAnchorPane;
     private GridPane contentGridPane;
     @FXML
     private AnchorPane rvAnchorPane;
-    @FXML
-    private Text windDirectionText;
     @FXML
     private AnchorPane windArrowHolder;
     @FXML
@@ -85,7 +98,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Text fpsDisplay;
     @FXML
-    private Text windSpeedText;
+    private ImageView windImageView;
+    @FXML
+    private Label windDirectionLabel;
+    @FXML
+    private Label windSpeedLabel;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -106,6 +123,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public void initialize() {
         Sounds.stopMusic();
         Sounds.playRaceMusic();
+
         // Load a default important annotation state
         //importantAnnotations = new ImportantAnnotationsState();
 
@@ -132,27 +150,27 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
 
 //        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
-//        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
-//            if (newLen.intValue() > CHAT_LIMIT) {
-//                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
-//            }
+        chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
+            if (newLen.intValue() > CHAT_LIMIT) {
+                chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
+            }
+        });
+        chatHistory = new ChatHistory();
+        chatHistoryHolder.getChildren().addAll(chatHistory);
+        chatHistory.prefWidthProperty().bind(
+            chatHistoryHolder.widthProperty()
+        );
+        chatHistory.prefHeightProperty().bind(
+            chatHistoryHolder.heightProperty()
+        );
+//        chatHistory.setFitToWidth(true);
+//        chatHistory.setFitToHeight(true);
+//        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
+//            chatHistory.setScrollTop(Double.MAX_VALUE);
 //        });
-//        chatHistory = new ChatHistory();
-//        chatHistoryHolder.getChildren().addAll(chatHistory);
-//        chatHistory.prefWidthProperty().bind(
-//            chatHistoryHolder.widthProperty()
-//        );
-//        chatHistory.prefHeightProperty().bind(
-//            chatHistoryHolder.heightProperty()
-//        );
-////        chatHistory.setFitToWidth(true);
-////        chatHistory.setFitToHeight(true);
-////        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
-////            chatHistory.setScrollTop(Double.MAX_VALUE);
-////        });
-//        contentGridPane.setOnMouseClicked((event) ->
-//            contentGridPane.requestFocus()
-//        );
+        rvAnchorPane.setOnMouseClicked((event) ->
+                rvAnchorPane.requestFocus()
+        );
     }
 
     public void loadRace (
@@ -176,7 +194,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView3D();
 //        gameView.setFrameRateFXText(fpsDisplay);
-        Platform.runLater(() -> contentAnchorPane.getChildren().add(0, gameView.getAssets()));
+        Platform.runLater(() -> {
+            contentAnchorPane.getChildren().add(0, gameView.getAssets());
+            ((SubScene) gameView.getAssets()).widthProperty()
+                .bind(ViewManager.getInstance().getStage().widthProperty());
+            ((SubScene) gameView.getAssets()).heightProperty()
+                .bind(ViewManager.getInstance().getStage().heightProperty());
+            System.out.println(((SubScene) gameView.getAssets()).getHeight());
+            System.out.println(((SubScene) gameView.getAssets()).getWidth());
+
+        });
         gameView.setBoats(new ArrayList<>(participants.values()));
         gameView.updateBorder(raceData.getCourseLimit());
         gameView.updateTokens(raceData.getTokens());
@@ -184,21 +211,21 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
 //        gameView.enableZoom();
-//        gameView.setBoatAsPlayer(player);
+        gameView.setBoatAsPlayer(player);
 //        gameView.startRace();
 
 //        raceState.addCollisionListener(gameView::drawCollision);
-//        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
-//            gameView.setWindDir(newDirection.doubleValue());
-//            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
-//        });
-//        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
-//            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
-//        );
-//        Platform.runLater(() -> {
-//            updateWindDirection(raceState.windDirectionProperty().doubleValue());
-//            updateWindSpeed(raceState.getWindSpeed());
-//        });
+        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
+            gameView.setWindDir(newDirection.doubleValue());
+            Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
+        });
+        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) ->
+            Platform.runLater(() -> updateWindSpeed(newSpeed.doubleValue()))
+        );
+        Platform.runLater(() -> {
+            updateWindDirection(raceState.windDirectionProperty().doubleValue());
+            updateWindSpeed(raceState.getWindSpeed());
+        });
 //        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
 
         //TODO extract chat stuff
@@ -220,13 +247,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //                gameView.enableZoom();
 //            }
 //        });
-//        Platform.runLater(() -> {
-//            initializeUpdateTimer();
+        Platform.runLater(() -> {
+            initializeUpdateTimer();
 //            initialiseFPSCheckBox();
 //            initialiseAnnotationSlider();
 //            initialiseBoatSelectionComboBox();
 //            initialiseSparkLine();
-//        });
+        });
     }
 
     /**
@@ -407,7 +434,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                updateRaceTime();
+                Platform.runLater(() -> updateRaceTime());
             }
         }, 0, 1000);
     }
@@ -446,8 +473,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param direction the from north angle of the wind.
      */
     private void updateWindDirection(double direction) {
-//        windDirectionText.setText(String.format("%.1f°", direction));
-//        windArrowText.setRotate(direction);
+        windDirectionLabel.setText(String.format("%.1f°", direction));
+        windImageView.setRotate(direction);
     }
 
     /**
@@ -455,7 +482,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * @param windSpeed Windspeed in knots.
      */
     private void updateWindSpeed(double windSpeed) {
-//        windSpeedText.setText("Speed: " + String.format("%.1f", windSpeed) + " Knots");
+        windSpeedLabel.setText(String.format("%.1f", windSpeed) + " Knots");
     }
 
 
@@ -463,12 +490,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the clock for the race
      */
     private void updateRaceTime() {
-//        if (!raceState.isRaceStarted()) {
-//            timerLabel.setFill(Color.RED);
-//            timerLabel.setText("Race Finished!");
-//        } else {
-//        timerLabel.setText(raceState.getRaceTimeStr());
-//        }
+        if (raceState.getTimeTillStart() <= 0L && !raceState.isRaceStarted()) {
+            timerLabel.setText("Race Finished!");
+        } else {
+            timerLabel.setText(raceState.getRaceTimeStr());
+        }
     }
 
     /**
@@ -692,8 +718,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        }
     }
 
-    public void updateRaceData (RaceXMLData raceData) {
-        gameView.updateBorder(raceData.getCourseLimit());
+    public void updateTokens(RaceXMLData raceData) {
         gameView.updateTokens(raceData.getTokens());
     }
 
@@ -709,7 +734,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public String readChatInput() {
         String chat = chatInput.getText();
         chatInput.clear();
-        basePane.requestFocus();
+        rvAnchorPane.requestFocus();
         return chat;
     }
 

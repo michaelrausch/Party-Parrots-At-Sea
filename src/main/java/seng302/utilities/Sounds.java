@@ -1,6 +1,5 @@
 package seng302.utilities;
 
-import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
@@ -43,6 +42,11 @@ public class Sounds {
         if (soundEffect != null) {
             soundEffect.stop();
         }
+    }
+
+    public static void toggleAllSounds() {
+        toggleMuteEffects();
+        toggleMuteMusic();
     }
 
     public static void toggleMuteMusic() {

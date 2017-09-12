@@ -5,11 +5,8 @@ import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
-import com.jfoenix.validation.base.ValidatorBase;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -61,7 +58,6 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private Logger logger = LoggerFactory.getLogger(ServerListController.class);
 
     public void initialize(URL location, ResourceBundle resources) {
-
         serverListVBox.minWidthProperty().bind(serverListScrollPane.widthProperty());
 
         // Set Event Bindings

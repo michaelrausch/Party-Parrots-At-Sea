@@ -4,8 +4,6 @@ import java.util.Arrays;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Background;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -29,7 +27,7 @@ public class ChatHistory extends ScrollPane {
         this.lookup(".scroll-pane").setStyle("-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1);");
 
         this.textFlow.setStyle(
-            "-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1);"
+            "-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1); -fx-padding: 10px"
         );
         //This makes the window auto scroll.
         textFlow.getChildren().addListener((ListChangeListener<Node>) c ->
@@ -55,7 +53,7 @@ public class ChatHistory extends ScrollPane {
     public void addMessage (Paint colour, String Text) {
         String[] words = Text.split(":");
         if (words[0].trim().equals("SERVER")) {
-            Text text = new Text(Text + "\n\n");
+            Text text = new Text(Text + "\n");
             text.setStyle("-fx-font-weight: bolder");
             textFlow.getChildren().add(text);
         } else {
@@ -65,11 +63,14 @@ public class ChatHistory extends ScrollPane {
             timePlayer.setStyle("-fx-font-weight: bold");
             timePlayer.setFill(colour);
             Text message = new Text(
-                String.join(":", Arrays.copyOfRange(words, 3, words.length)) + "\n\n"
+                String.join(":", Arrays.copyOfRange(words, 3, words.length)) + "\n"
             );
             message.wrappingWidthProperty().bind(this.widthProperty());
             textFlow.getChildren().addAll(timePlayer, message);
         }
 
     }
+
+
+
 }

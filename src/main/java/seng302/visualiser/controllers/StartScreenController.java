@@ -1,6 +1,10 @@
 package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,11 +20,6 @@ import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
-
 public class StartScreenController implements Initializable{
 
     //--------FXML BEGIN--------//
@@ -34,24 +33,6 @@ public class StartScreenController implements Initializable{
     private Logger logger = LoggerFactory.getLogger(StartScreenController.class);
     private List<ServerDescription> servers;
     private GameClient gameClient;
-//    public void initialize(URL url,  ResourceBundle resourceBundle) {
-//        Sounds.stopMusic();
-//        Sounds.stopSoundEffects();
-//        Sounds.playMenuMusic();
-//        if (Sounds.isMusicMuted()) {
-//            muteMusicButton.setText("UnMute Music");
-//        } else {
-//            muteMusicButton.setText("Mute Music");
-//        }
-//        if (Sounds.isSoundEffectsMuted()) {
-//            muteSoundsButton.setText("UnMute Sounds");
-//        } else {
-//            muteSoundsButton.setText("Mute Sounds");
-//        }
-//        Sounds.setMutes();
-////        gameClient = new GameClient(holder);
-//    }
-
 
     /**
      *
@@ -99,6 +80,7 @@ public class StartScreenController implements Initializable{
 
         setInitialDropShadow();
         preloadServerListView();
+
     }
 
     public void toggleMusic(ActionEvent actionEvent) {

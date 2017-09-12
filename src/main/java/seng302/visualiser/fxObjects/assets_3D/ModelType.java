@@ -11,13 +11,15 @@ public enum ModelType {
     START_MARKER ("start_marker.dae"),
     PLAIN_MARKER ("plain_marker.dae"),
     MARK_AREA ("mark_area.dae"),
-    OCEAN (null),
+    OCEAN ("ocean.dae"),
     BORDER_PYLON ("barrier_pole.dae"),
     BORDER_BARRIER ("barrier_segment.dae"),
     FINISH_LINE ("finish_line.dae"),
     START_LINE ("start_line.dae"),
     GATE_LINE ("gate_line.dae"),
-    WAKE ("wake.dae");
+    WAKE ("wake.dae"),
+    TRAIL_SEGMENT ("trail_segment.dae"),
+    PLAYER_IDENTIFIER ("player_identifier.dae");
 
     final String filename;
 

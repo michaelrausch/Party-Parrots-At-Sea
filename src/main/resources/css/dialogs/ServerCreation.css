@@ -45,11 +45,3 @@
 .maxPlayers {
     -fx-font-size: 13px;
 }
-
-#maxPlayersSlider .thumb {
-    -fx-background-color: -fx-pp-theme-color;
-}
-
-#maxPlayersSlider .track {
-    -fx-background-color: -fx-pp-dark-text-color;
-}

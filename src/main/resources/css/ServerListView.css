@@ -29,13 +29,24 @@
 #hostButton {
     -fx-background-color: -fx-pp-theme-color;
     -fx-font-size: 20px;
+    -fx-pref-height: 65px;
     -fx-text-fill: -fx-pp-light-text-color;
+}
+
+#hostButton:hover {
+    -fx-background-color: -fx-pp-light-theme-color;
+    -fx-font-size: 23px;
 }
 
 #connectButton {
     -fx-background-color: -fx-pp-light-text-color; /* inverted */
     -fx-text-fill: -fx-pp-theme-color; /* inverted */
     -fx-font-size: 20px;
+    -fx-pref-height: 65px;
+}
+
+#connectButton:hover {
+    -fx-font-size: 23px;
 }
 
 #connectLabel, #serverPortNumber, #serverHostName {

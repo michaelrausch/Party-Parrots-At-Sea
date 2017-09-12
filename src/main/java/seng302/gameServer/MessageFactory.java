@@ -110,11 +110,6 @@ public class MessageFactory {
 
     public static XMLMessage getRegattaXML() {
         //@TODO calculate lat/lng values
-        xmlGenerator.setRegattaTemplate(
-            new RegattaXMLTemplate(
-                "Party Parrot Test Server", "Bermuda Test Course",
-                57.6679590, 11.8503233)
-        );
 
         return new XMLMessage(
             xmlGenerator.getRegattaAsXml(),

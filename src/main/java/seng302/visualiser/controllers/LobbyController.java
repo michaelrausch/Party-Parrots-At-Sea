@@ -2,13 +2,12 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
-
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -16,14 +15,21 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
+import seng302.model.ClientYacht;
 import seng302.model.Colors;
+import seng302.model.Limit;
 import seng302.model.RaceState;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Corner;
+import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.Sounds;
+import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.cells.PlayerCell;
 
 public class LobbyController implements Initializable {
@@ -41,15 +47,22 @@ public class LobbyController implements Initializable {
     private Label serverName;
     @FXML
     private Label mapName;
+    @FXML
+    private Pane serverMap;
     //---------FXML END---------//
 
     private List<LobbyController_old.LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private RaceState raceState;
     private JFXDialog customizationDialog;
     public Color playersColor;
+    private Map<Integer, ClientYacht> playerBoats;
+    private Double mapWidth, mapHeight;
+    private GameView gameView;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        this.playerBoats = ViewManager.getInstance().getGameClient().getAllBoatsMap();
 
         if (this.playersColor == null) {
             this.playersColor = Colors.getColor(ViewManager.getInstance().getGameClient().getServerThread().getClientId() - 1);
@@ -93,6 +106,49 @@ public class LobbyController implements Initializable {
         customizeButton.setOnMouseEntered(e -> Sounds.playHoverSound());
         beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
 
+        initMapPreview();
+    }
+
+    private void refreshMapView(){
+        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
+        List<Limit> border = raceData.getCourseLimit();
+        List<CompoundMark> marks = new ArrayList<CompoundMark>(raceData.getCompoundMarks().values());
+        List<Corner> corners = raceData.getMarkSequence();
+
+        gameView.setSize(mapWidth, mapHeight);
+
+        // Update game view
+        gameView.updateBorder(border);
+        gameView.updateCourse(marks, corners);
+    }
+
+    private void getPlayerColors() {
+
+    }
+
+    /**
+     *
+     */
+    private void initMapPreview() {
+        gameView = new GameView();
+        gameView.setHorizontalBuffer(330d);
+
+        mapWidth = 770d;
+        mapHeight = 574d;
+
+        // Add game view
+        serverMap.getChildren().clear();
+        serverMap.getChildren().add(gameView);
+
+        serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
+            mapWidth = newValue.doubleValue();
+            refreshMapView();
+        });
+
+        serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
+            mapHeight = newValue.doubleValue();
+            refreshMapView();
+        });
     }
 
     /**
@@ -111,23 +167,28 @@ public class LobbyController implements Initializable {
      */
     private void refreshPlayerList() {
         playerListVBox.getChildren().clear();
-
-        for (String player : ViewManager.getInstance().getPlayerList()) {
+        if (this.playerBoats == null || this.playerBoats.size() == 0) {
+            this.playerBoats = ViewManager.getInstance().getGameClient().getAllBoatsMap();
+        }
+        // TODO: 12/09/2017 ajm412: Make it so that it only removes players who's details have changed.
+        for (Integer playerId : playerBoats.keySet()) {
             VBox pane = null;
 
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/views/cells/PlayerCell.fxml"));
+            ClientYacht yacht = playerBoats.get(playerId);
 
-            loader.setController(new PlayerCell(player));
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/views/cells/PlayerCell.fxml"));
+
+            loader.setController(new PlayerCell(playerId, yacht.getBoatName(), yacht.getColour()));
 
             try {
                 pane = loader.load();
             } catch (IOException e) {
-                // TODO replace with logger
                 e.printStackTrace();
             }
 
             playerListVBox.getChildren().add(pane);
+
         }
     }
 
@@ -154,6 +215,10 @@ public class LobbyController implements Initializable {
     public void updateRaceState(RaceState raceState){
         this.raceState = raceState;
         this.beginRaceButton.setText("Starting in: " + raceState.getRaceTimeStr());
+    }
+
+    public void setBoats(Map<Integer, ClientYacht> boats) {
+        this.playerBoats = boats;
     }
 
     public void closeCustomizationDialog() {
