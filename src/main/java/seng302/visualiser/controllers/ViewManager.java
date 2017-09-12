@@ -1,16 +1,20 @@
 package seng302.visualiser.controllers;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.svg.SVGGlyph;
 import java.io.IOException;
 import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -69,7 +73,8 @@ public class ViewManager {
         decorator.getStylesheets()
             .add(getClass().getResource("/css/Master.css").toExternalForm());
 
-        this.decorator = decorator;
+        setDecorator(decorator);
+
         gameClient = new GameClient(decorator);
 
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
@@ -98,6 +103,53 @@ public class ViewManager {
             gameClient.stopGame();
             System.exit(0);
         });
+    }
+
+    private void setDecorator(JFXDecorator newDecorator) {
+        decorator = newDecorator;
+
+        //Injecting a volume toggle into the decorator.
+        //Get the button box
+        HBox btns = (HBox) decorator.getChildren().get(0);
+
+        //Create new button
+        JFXButton btnMute = new JFXButton();
+        btnMute.setText(" Toggle Sound");
+        btnMute.setStyle("-fx-text-fill:#fff");
+        btnMute.getStyleClass().add("jfx-decorator-button");
+        btnMute.setCursor(Cursor.HAND);
+
+        //Create Graphics
+        SVGGlyph spacer = new SVGGlyph(0, "SPACER", "", Color.WHITE);
+        SVGGlyph volumeOn = new SVGGlyph(0, "VOLUME_ON",
+            "M39.389,13.769 22.235,28.606 6,28.606 6,47.699 21.989,47.699 39.389,62.75 39.389,13.769 M 48.128,49.03 C 50.057,45.934 51.19,42.291 51.19,38.377 C 51.19,34.399 50.026,30.703 48.043,27.577 M 55.082,20.537 C 58.777,25.523 60.966,31.694 60.966,38.377 C 60.966,44.998 58.815,51.115 55.178,56.076 M 61.71,62.611 C 66.977,55.945 70.128,47.531 70.128,38.378 C 70.128,29.161 66.936,20.696 61.609,14.01",
+            Color.WHITE);
+        SVGGlyph volumeOff = new SVGGlyph(0, "VOLUME_ON",
+            "M39.389,13.769 22.235,28.606 6,28.606 6,47.699 21.989,47.699 39.389,62.75 39.389,13.769",
+            Color.WHITE);
+        volumeOn.setSize(16, 16);
+        volumeOff.setSize(12, 16);
+        spacer.setSize(40, 16);
+
+        // Determine which graphic should go on the button
+        if (Sounds.isMusicMuted() && Sounds.isSoundEffectsMuted()) {
+            btnMute.setGraphic(volumeOff);
+        } else {
+            btnMute.setGraphic(volumeOn);
+        }
+
+        // Add Buttons
+        btns.getChildren().add(0, spacer);
+        btns.getChildren().add(0, btnMute);
+        btnMute.setOnAction((action) -> {
+            Sounds.toggleAllSounds();
+            if (btnMute.getGraphic().equals(volumeOff)) {
+                btnMute.setGraphic(volumeOn);
+            } else {
+                btnMute.setGraphic(volumeOff);
+            }
+        });
+
     }
 
     private void checkCompatibility() {
@@ -189,7 +241,7 @@ public class ViewManager {
                 decorator.applyCss();
                 decorator.getStylesheets()
                     .add(getClass().getResource("/css/Master.css").toExternalForm());
-
+                setDecorator(decorator);
                 Scene scene = new Scene(decorator);
                 // set key press event to catch key stoke
                 scene.setOnKeyPressed(gameClient::keyPressed);

@@ -65,11 +65,6 @@
                 </ScrollPane>
                 <GridPane>
                     <children>
-                        <JFXButton id="hostButton" fx:id="serverListHostButton" buttonType="RAISED" onMouseEntered="#playButtonHoverSound" prefHeight="45.0" prefWidth="220.0" text="HOST" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
-                            <GridPane.margin>
-                                <Insets right="50.0" />
-                            </GridPane.margin>
-                        </JFXButton>
                         <Label text="Party Parrots At Sea" GridPane.valignment="CENTER">
                             <font>
                                 <Font size="31.0" />
@@ -78,6 +73,14 @@
                                 <Insets left="35.0" top="5.0" />
                             </padding>
                         </Label>
+                        <JFXButton id="hostButton" fx:id="serverListHostButton" buttonType="RAISED"
+                          onMouseEntered="#playButtonHoverSound" prefHeight="45.0" prefWidth="220.0"
+                          text="HOST" GridPane.columnIndex="1" GridPane.halignment="RIGHT"
+                          GridPane.valignment="CENTER">
+                            <GridPane.margin>
+                                <Insets right="50.0"/>
+                            </GridPane.margin>
+                        </JFXButton>
                     </children>
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

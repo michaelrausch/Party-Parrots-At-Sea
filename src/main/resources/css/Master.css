@@ -91,3 +91,11 @@
 .scroll-bar {
     -fx-background-insets: 0;
 }
+
+.slider .thumb {
+    -fx-background-color: -fx-pp-theme-color;
+}
+
+.slider .track {
+    -fx-background-color: -fx-pp-dark-text-color;
+}
