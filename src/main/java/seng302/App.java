@@ -1,20 +1,16 @@
 package seng302;
 
 import ch.qos.logback.classic.Level;
-import com.jfoenix.controls.JFXDecorator;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.visualiser.controllers.ViewManager;
-import seng302.gameServer.ServerAdvertiser;
-
-import java.io.IOException;
 
 public class App extends Application {
 

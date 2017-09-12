@@ -2,7 +2,6 @@ package seng302.visualiser.fxObjects.assets_3D;
 
 import com.interactivemesh.jfx.importer.col.ColModelImporter;
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
-import java.util.Random;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
@@ -15,6 +14,8 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 
+
+
 /**
  * Factory class for creating 3D models of boats.
  */
@@ -22,29 +23,30 @@ public class ModelFactory {
 
     public static BoatModel boatIconView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
+        final Rotate animationRotate = new Rotate(0, new Point3D(0,0,1));
         boatAssets.getTransforms().addAll(
-            new Scale(10, 10, 10),
-            new Rotate(45, new Point3D(0,0,1)),
-            new Rotate(90, new Point3D(0, 1, 0)),
-            new Rotate(270, new Point3D(1, 0, 0)),
-            new Translate(12, 14, 0)
+            new Scale(3.3, 3.3, 3.3),
+            new Rotate(-70, new Point3D(1,0,0)),
+            new Translate(13,50, 0),
+            animationRotate
         );
 
+        boatAssets.getTransforms().add(animationRotate);
         BoatModel bo = new BoatModel(boatAssets, null, boatType);
-        bo.showSail();
         bo.rotateSail(45);
-        bo.setAnimation(new AnimationTimer() {
-            Group group = bo.getAssets();
-            double boatAngle = 0;
-            int id = new Random().nextInt();
 
+        bo.setAnimation(new AnimationTimer() {
+            double boatAngle = 0;
+            Rotate rotate = animationRotate;
             @Override
             public void handle(long now) {
-                ((Rotate) group.getTransforms().get(3)).setAngle(boatAngle++);
-                System.out.println("animating a thingy " + id);
+                boatAngle += 0.5;
+                rotate.setAngle(boatAngle);
             }
         });
-        boatAssets.getChildren().add(new AmbientLight(new Color(1, 1, 1, 0.01)));
+        boatAssets.getChildren().addAll(
+            new AmbientLight()
+        );
         return bo;
     }
 
@@ -53,19 +55,21 @@ public class ModelFactory {
         boatAssets.getTransforms().addAll(
             new Scale(40, 40, 40),
             new Rotate(90, new Point3D(0,0,1)),
-            new Rotate(90, new Point3D(0, 1, 0)),
-            new Rotate(0, new Point3D(1,1,1))
+            new Rotate(90, new Point3D(0, 1, 0))
         );
-        // TODO: 7/09/17 This seems like it will never be garbage claimed. Might have to call BoatModel.stopAnimation();
+
+        final Rotate animationRotate = new Rotate(0, new Point3D(1,1,1));
+        boatAssets.getTransforms().add(animationRotate);
+
         return new BoatModel(boatAssets, new AnimationTimer() {
 
             private double rotation = 0;
-            private final Group group = boatAssets;
+            private Rotate rotate = animationRotate;
 
             @Override
             public void handle(long now) {
                 rotation += 0.5;
-                ((Rotate) group.getTransforms().get(3)).setAngle(rotation);
+                rotate.setAngle(rotation);
             }
         }, boatType);
     }

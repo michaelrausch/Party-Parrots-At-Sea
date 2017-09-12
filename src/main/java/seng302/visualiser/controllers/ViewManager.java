@@ -13,6 +13,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -78,7 +79,7 @@ public class ViewManager {
         gameClient = new GameClient(decorator);
 
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
-        Scene scene = new Scene(decorator, 1200, 800);
+        Scene scene = new Scene(decorator, 1200, 800, false, SceneAntialiasing.BALANCED);
         stage.setMinHeight(800);
         stage.setMinWidth(1200);
         stage.setScene(scene);
