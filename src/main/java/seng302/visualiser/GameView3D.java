@@ -19,10 +19,13 @@ import javafx.scene.PointLight;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Sphere;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
@@ -179,7 +182,19 @@ public class GameView3D {
         black.setLayoutX(-.125);
         black.setLayoutY(0);
 
+        ImagePattern oceanImage = new ImagePattern(
+            new Image(
+                GameView3D.class.getResourceAsStream(
+                    "/pics/creek.gif")
+            ), 0, 0, 1000, 1000, false
+        );
+
+        Circle ocean = new Circle(0, 0, 5000);
+        ocean.setFill(oceanImage);
+        ocean.getTransforms().add(new Scale(0.1, 0.1));
+
         gameObjects.getChildren().addAll(
+            ocean,
 //            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
             raceBorder, trail, markers, tokens,
             white, blue, green, black, red
@@ -696,7 +711,7 @@ public class GameView3D {
                 lastLocation = location;
             }
         }, 0L, 500L);
-        
+
 //        playerYacht.toggleSail();
 //        boatObjects.get(playerYacht).setAsPlayer();
 //        CompoundMark currentMark = course.get(playerYacht.getLegNumber());
