@@ -284,4 +284,8 @@ public class ClientYacht extends Observable {
             listener.notifyRounding(this, legNumber);
         }
     }
+
+    public Double getCurrentVelocity() {
+        return currentVelocity;
+    }
 }
