@@ -2,7 +2,6 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
-import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.svg.SVGGlyph;
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,7 +15,6 @@ import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -25,7 +23,6 @@ import seng302.gameServer.ServerAdvertiser;
 import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
-import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
 public class ViewManager {
 
@@ -295,31 +292,5 @@ public class ViewManager {
         }
 
         return loader.getController();
-    }
-
-    // TODO: 12/09/17 ajm412: Why is this here? is there no better way we can do this? Ideally inside the LobbyController.
-    public JFXDialog loadCustomizationDialog(StackPane parent, LobbyController lobbyController,
-        Color playerColor, String name) {
-        FXMLLoader dialog = loadFxml("/views/dialogs/BoatCustomizeDialog.fxml");
-
-        JFXDialog customizationDialog = null;
-
-        try {
-            customizationDialog = new JFXDialog(parent, dialog.load(),
-                JFXDialog.DialogTransition.CENTER);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        BoatCustomizeController controller = dialog.getController();
-
-        controller.setParentController(lobbyController);
-        controller.setPlayerColor(playerColor);
-        controller.setPlayerName(name);
-        controller.setServerThread(gameClient.getServerThread());
-        controller.setPlayerColor(lobbyController.playersColor);
-
-        return customizationDialog;
     }
 }

@@ -31,6 +31,7 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.cells.PlayerCell;
+import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
 public class LobbyController implements Initializable {
 
@@ -93,8 +94,8 @@ public class LobbyController implements Initializable {
             Integer playerId = ViewManager.getInstance().getGameClient().getServerThread().getClientId();
             String name = ViewManager.getInstance().getGameClient().getPlayerNames().get(playerId - 1);
 
-            Color playerColor = Colors.getColor( playerId - 1);
-            customizationDialog = ViewManager.getInstance().loadCustomizationDialog(serverListMainStackPane, this, playerColor, name);
+            playersColor = Colors.getColor(playerId - 1);
+            customizationDialog = createCustomizeDialog();
 
             customizeButton.setOnMouseReleased(event -> {
                 Sounds.playButtonClick();
@@ -107,6 +108,28 @@ public class LobbyController implements Initializable {
         beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
 
         initMapPreview();
+    }
+
+    private JFXDialog createCustomizeDialog() {
+        // TODO: 12/09/17 ajm412: Why is this here? is there no better way we can do this? Ideally inside the LobbyController.
+        FXMLLoader dialog = new FXMLLoader(
+            getClass().getResource("/views/dialogs/BoatCustomizeDialog.fxml"));
+
+        JFXDialog customizationDialog = null;
+
+        try {
+            customizationDialog = new JFXDialog(serverListMainStackPane, dialog.load(),
+                JFXDialog.DialogTransition.CENTER);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BoatCustomizeController controller = dialog.getController();
+
+        controller.setParentController(this);
+
+        return customizationDialog;
     }
 
     /**

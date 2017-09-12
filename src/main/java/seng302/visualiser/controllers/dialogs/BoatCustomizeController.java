@@ -14,6 +14,7 @@ import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.ClientToServerThread;
 import seng302.visualiser.controllers.LobbyController;
+import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.validators.FieldLengthValidator;
 import seng302.visualiser.validators.ValidationTools;
 
@@ -41,6 +42,10 @@ public class BoatCustomizeController implements Initializable{
             Sounds.playButtonClick();
             submitCustomization();
         });
+
+        setPlayerColor(lobbyController.playersColor);
+
+        socketThread = ViewManager.getInstance().getGameClient().getServerThread();
 
         RequiredFieldValidator playerNameReqValidator = new RequiredFieldValidator();
         playerNameReqValidator.setMessage("Player name required.");
@@ -84,10 +89,6 @@ public class BoatCustomizeController implements Initializable{
 
     public void setPlayerColor(Color playerColor) {
         this.colorPicker.setValue(playerColor);
-    }
-
-    public void setServerThread(ClientToServerThread ctsThread) {
-        this.socketThread = ctsThread;
     }
 
     public void setParentController(LobbyController lobbyController){
