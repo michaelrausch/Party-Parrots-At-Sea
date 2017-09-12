@@ -41,7 +41,6 @@ public class ModelFactory {
             @Override
             public void handle(long now) {
                 ((Rotate) group.getTransforms().get(3)).setAngle(boatAngle++);
-                System.out.println("animating a thingy " + id);
             }
         });
         boatAssets.getChildren().add(new AmbientLight(new Color(1, 1, 1, 0.01)));
