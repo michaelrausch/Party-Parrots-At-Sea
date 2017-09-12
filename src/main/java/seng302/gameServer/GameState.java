@@ -840,7 +840,7 @@ public class GameState implements Runnable {
     }
 
     public static Integer getNumberOfPlayers(){
-        Integer numPlayers = 0;
+        Integer numPlayers = 1;
 
         for(Player p : getPlayers()){
             if(p.getSocket().isConnected()){
