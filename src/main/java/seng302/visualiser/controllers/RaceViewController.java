@@ -519,9 +519,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
+    /**
+     * Updates player position with ordinal number up to 23rd position.
+     */
     private void updatePosition() {
         if (player.getPosition() == null) {
-            positionLabel.setText("Position:\n0");
+            positionLabel.setText("Position:\n-");
         } else {
             switch (player.getPosition()) {
                 case 1:
@@ -548,12 +551,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
+    /**
+     * Updates boat speed value displayed on race view.
+     */
     private void updateBoatSpeed() {
-        boatSpeedLabel.setText("Boat Speed:\n" + String.valueOf(player.getVelocityProperty().toString()));
+        boatSpeedLabel.setText("Boat Speed:\n" + String.valueOf(player.getCurrentVelocity()));
     }
 
+    /**
+     * Updates boat heading value displayed on race view.
+     */
     private void updateBoatHeading() {
-        boatHeadingLabel.setText("Boat Heading:\n" + String.valueOf(player.getHeading()));
+        boatHeadingLabel.setText(String.format("Boat Heading:\n%.1f°", player.getHeading()));
     }
 
     /**
