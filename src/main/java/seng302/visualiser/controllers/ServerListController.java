@@ -18,7 +18,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
@@ -57,10 +56,14 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private Label noServersFound;
     private Logger logger = LoggerFactory.getLogger(ServerListController.class);
 
+    // TODO: 12/09/17 ajm412: break this method down, its way too long.
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
         serverListVBox.minWidthProperty().bind(serverListScrollPane.widthProperty());
 
         // Set Event Bindings
+        connectButton.setOnMouseEntered(event -> Sounds.playHoverSound());
+        serverListHostButton.setOnMouseEntered(event -> Sounds.playHoverSound());
         connectButton.setOnMouseReleased(event -> {
             attemptToDirectConnect();
             Sounds.playButtonClick();
@@ -103,8 +106,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
         noServersFound.setText("No Servers Found");
         noServersFound.setStyle(
             "-fx-font-size: 30px;"
-          + "-fx-padding:50px;"
-          + "-fx-text-fill: -fx-pp-dark-text-color;"
+                + "-fx-padding:50px;"
+                + "-fx-text-fill: -fx-pp-dark-text-color;"
         );
         serverListVBox.getChildren().add(noServersFound);
 
@@ -126,7 +129,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
     }
 
     /**
-     *
+     * Validates the connection and attempts to connect to a given hostname and port number.
      */
     private void attemptToDirectConnect() {
         if (validateDirectConnection(serverHostName.getText(), serverPortNumber.getText())) {
@@ -135,10 +138,10 @@ public class ServerListController implements Initializable, ServerListenerDelega
     }
 
     /**
-     *
-     * @param hostName
-     * @param portNumber
-     * @return
+     * Checks if the hostName and portNumber are valid values to connect to.
+     * @param hostName host name to check.
+     * @param portNumber port number to check
+     * @return boolean value if host and port number are valid values
      */
     private Boolean validateDirectConnection(String hostName, String portNumber) {
         Boolean hostNameValid = ValidationTools.validateTextField(serverHostName);
@@ -148,7 +151,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
     }
 
     /**
-     *
+     * Connects the user to a lobby via the Direct Connect form.
      */
     private void DirectConnect() {
         Sounds.playButtonClick();
@@ -156,8 +159,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
     }
 
     /**
-     *
-     * @param servers
+     * Refreshes the list of available servers.
+     * @param servers A list of ServerDescription objects showing available servers.
      */
     private void refreshServers(List<ServerDescription> servers) {
         serverListVBox.getChildren().clear();
@@ -183,11 +186,6 @@ public class ServerListController implements Initializable, ServerListenerDelega
             }
         }
     }
-
-    public void playButtonHoverSound(MouseEvent mouseEvent) {
-        Sounds.playHoverSound();
-    }
-
 
     @Override
     public void serverRemoved(List<ServerDescription> servers) {

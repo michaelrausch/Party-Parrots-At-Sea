@@ -13,6 +13,7 @@
 
     -fx-pp-dropshadow-light: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10.0, 0.2, 3, 4);
     -fx-pp-dropshadow-dark: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10.0, 0.2, 5, 6);
+    -fx-pp-dropshadow-headers: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10.0, 0.2, 3, 4);
 }
 
 /*GridPane .jfx-button {*/

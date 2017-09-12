@@ -109,6 +109,9 @@ public class LobbyController implements Initializable {
         initMapPreview();
     }
 
+    /**
+     *
+     */
     private void refreshMapView(){
         RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
         List<Limit> border = raceData.getCourseLimit();
@@ -122,12 +125,8 @@ public class LobbyController implements Initializable {
         gameView.updateCourse(marks, corners);
     }
 
-    private void getPlayerColors() {
-
-    }
-
     /**
-     *
+     * Initializes a top down preview of the race course map.
      */
     private void initMapPreview() {
         gameView = new GameView();
@@ -163,7 +162,7 @@ public class LobbyController implements Initializable {
     }
 
     /**
-     *
+     * Refreshes the list of players and their boats, as a series of VBox PlayerCell objects.
      */
     private void refreshPlayerList() {
         playerListVBox.getChildren().clear();
@@ -192,17 +191,11 @@ public class LobbyController implements Initializable {
         }
     }
 
-    /**
-     *
-     */
     private void leaveLobby() {
         ViewManager.getInstance().getGameClient().stopGame();
         ViewManager.getInstance().goToStartView();
     }
 
-    /**
-     *
-     */
     public void disableReadyButton() {
         this.beginRaceButton.setDisable(true);
         this.beginRaceButton.setText("Waiting for host...");

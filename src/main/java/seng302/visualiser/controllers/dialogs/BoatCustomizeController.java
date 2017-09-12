@@ -4,17 +4,15 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.ClientToServerThread;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.validators.FieldLengthValidator;
 import seng302.visualiser.validators.ValidationTools;
@@ -56,7 +54,7 @@ public class BoatCustomizeController implements Initializable{
     }
 
     /**
-     *
+     * Attempts to submit a valid customization packet for boat name and boat color.
      */
     private void submitCustomization() {
 

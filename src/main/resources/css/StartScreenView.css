@@ -22,4 +22,5 @@
     -fx-background-color: transparent;
     -fx-font-size: 80px;
     -fx-text-fill: -fx-pp-light-text-color;
+    -fx-effect: -fx-pp-dropshadow-headers;
 }
