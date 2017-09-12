@@ -1,4 +1,4 @@
-package seng302.visualiser.fxObjects.assets_2D;
+package seng302.visualiser.fxObjects.assets_3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,15 +6,14 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
 import javafx.scene.transform.Scale;
-import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
-import seng302.visualiser.fxObjects.assets_3D.ModelType;
+import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory;
+import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory.RoundingSide;
 
 /**
  * Visual object for a mark. Contains a coloured circle and any specified arrows.
  */
-public class Marker extends Group {
+public class Marker3D extends Group {
 
     private Group mark = ModelFactory.importModel(ModelType.PLAIN_MARKER).getAssets();
     private Paint colour = Color.BLACK;
@@ -26,7 +25,7 @@ public class Marker extends Group {
     /**
      * Creates a new Marker containing only a circle. The default colour is black.
      */
-    public Marker() {
+    public Marker3D() {
 //        mark.setRadius(5);
 //        mark.setCenterX(0);
 //        mark.setCenterY(0);
@@ -40,7 +39,7 @@ public class Marker extends Group {
      * Creates a new Marker containing only a circle of the given colour.
      * @param colour the desired colour for the marker.
      */
-    public Marker(Paint colour) {
+    public Marker3D(Paint colour) {
         this();
         this.colour = colour;
 //        mark.setFill(colour);
@@ -53,7 +52,7 @@ public class Marker extends Group {
      * @param entryAngle The angle the arrow will point towards a marker
      * @param exitAngle The angle the arrow wil point from the marker.
      */
-    public void addArrows(MarkArrowFactory.RoundingSide roundingSide, double entryAngle,
+    public void addArrows(RoundingSide roundingSide, double entryAngle,
                           double exitAngle) {
         //Change Color.GRAY to this.colour to revert all gray arrows.
         enterArrows.add(

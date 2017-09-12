@@ -28,6 +28,7 @@ import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
 import seng302.visualiser.fxObjects.assets_2D.*;
+import seng302.visualiser.fxObjects.assets_3D.Marker3D;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
 import seng302.visualiser.map.Boundary;
@@ -63,7 +64,7 @@ public class GameView extends Pane {
     /* Note that if either of these is null then values for it have not been added and the other
        should be used as the limits of the map. */
     private List<Limit> borderPoints;
-    private Map<Mark, Marker> markerObjects;
+    private Map<Mark, Marker3D> markerObjects;
 
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private Map<ClientYacht, AnnotationBox> annotations = new HashMap<>();
@@ -342,10 +343,10 @@ public class GameView extends Pane {
             rescaleRace(new ArrayList<>(markerObjects.keySet()));
         }
         //Move the Markers to initial position.
-        markerObjects.forEach(((mark, marker) -> {
+        markerObjects.forEach(((mark, marker3D) -> {
             Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
-            marker.setLayoutX(p2d.getX());
-            marker.setLayoutY(p2d.getY());
+            marker3D.setLayoutX(p2d.getX());
+            marker3D.setLayoutY(p2d.getY());
         }));
         Platform.runLater(() -> {
             markers.getChildren().clear();
@@ -435,9 +436,9 @@ public class GameView extends Pane {
      * @param colour The desired colour of the mark
      */
     private void makeAndBindMarker(Mark observableMark, Paint colour) {
-        Marker marker = new Marker(colour);
+        Marker3D marker3D = new Marker3D(colour);
 //        marker.addArrows(MarkArrowFactory.RoundingSide.PORT, ThreadLocalRandom.current().nextDouble(91, 180), ThreadLocalRandom.current().nextDouble(1, 90));
-        markerObjects.put(observableMark, marker);
+        markerObjects.put(observableMark, marker3D);
         observableMark.addPositionListener((mark, lat, lon) -> {
             Point2D p2d = findScaledXY(lat, lon);
             markerObjects.get(mark).setLayoutX(p2d.getX());
@@ -453,7 +454,7 @@ public class GameView extends Pane {
      * @param colour The desired colour of the gate.
      * @return the new gate.
      */
-    private Gate makeAndBindGate(Marker m1, Marker m2, Paint colour) {
+    private Gate makeAndBindGate(Marker3D m1, Marker3D m2, Paint colour) {
         Gate gate = new Gate(colour);
         gate.startXProperty().bind(
             m1.layoutXProperty()
