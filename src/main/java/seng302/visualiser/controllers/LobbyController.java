@@ -52,7 +52,6 @@ public class LobbyController implements Initializable {
     private Pane serverMap;
     //---------FXML END---------//
 
-    private List<LobbyController_old.LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private RaceState raceState;
     private JFXDialog customizationDialog;
     public Color playersColor;
@@ -216,6 +215,7 @@ public class LobbyController implements Initializable {
     }
 
     private void leaveLobby() {
+
         ViewManager.getInstance().getGameClient().stopGame();
         ViewManager.getInstance().goToStartView();
     }
