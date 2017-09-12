@@ -103,6 +103,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Label windDirectionLabel;
     @FXML
     private Label windSpeedLabel;
+    @FXML
+    private Label positionLabel, boatSpeedLabel, boatHeadingLabel;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -119,6 +121,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ImportantAnnotationsState importantAnnotations;
     private Polyline windArrow = new WindArrow(Color.LIGHTGRAY);
     private ObservableList<ClientYacht> selectionComboBoxList = FXCollections.observableArrayList();
+    private ClientYacht player;
 
     public void initialize() {
         Sounds.stopMusic();
@@ -181,6 +184,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
         this.raceState = raceState;
+        this.player = player;
 
         raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
             while (c.next()) {
@@ -434,6 +438,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                Platform.runLater(() -> updatePosition());
+                Platform.runLater(() -> updateBoatSpeed());
+                Platform.runLater(() -> updateBoatHeading());
                 Platform.runLater(() -> updateRaceTime());
             }
         }, 0, 1000);
@@ -495,6 +502,43 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         } else {
             timerLabel.setText(raceState.getRaceTimeStr());
         }
+    }
+
+    private void updatePosition() {
+        if (player.getPosition() == null) {
+            positionLabel.setText("Position:\n0");
+        } else {
+            switch (player.getPosition()) {
+                case 1:
+                    positionLabel.setText("Position:\n1st");
+                    break;
+                case 2:
+                    positionLabel.setText("Position:\n2nd");
+                    break;
+                case 3:
+                    positionLabel.setText("Position:\n3rd");
+                    break;
+                case 21:
+                    positionLabel.setText("Position:\n21st");
+                    break;
+                case 22:
+                    positionLabel.setText("Position:\n22nd");
+                    break;
+                case 23:
+                    positionLabel.setText("Position:\n23rd");
+                    break;
+                default:
+                    positionLabel.setText("Position:\n" + player.getPosition() + "th");
+            }
+        }
+    }
+
+    private void updateBoatSpeed() {
+        boatSpeedLabel.setText("Boat Speed:\n" + String.valueOf(player.getVelocityProperty().toString()));
+    }
+
+    private void updateBoatHeading() {
+        boatHeadingLabel.setText("Boat Heading:\n" + String.valueOf(player.getHeading()));
     }
 
     /**

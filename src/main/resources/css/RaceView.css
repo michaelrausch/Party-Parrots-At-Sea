@@ -26,6 +26,14 @@
 
 }
 
+#windGridPane {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+#windHolder {
+
+}
+
 #chatSend {
     -fx-background-color: -fx-pp-front-color;
     -fx-text-fill: -fx-pp-theme-color;

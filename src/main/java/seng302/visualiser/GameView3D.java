@@ -150,7 +150,7 @@ public class GameView3D {
         System.out.println(camera.getTranslateY());
         System.out.println(camera.getTranslateZ());
         camera.setTranslateZ(-80);
-        camera.setTranslateY(150);
+        camera.setTranslateY(170);
         Sphere red = new Sphere(1);
         red.setMaterial(new PhongMaterial(Color.RED));
         red.setLayoutX(0);
