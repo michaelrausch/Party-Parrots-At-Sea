@@ -30,6 +30,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -100,6 +101,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Text fpsDisplay;
     @FXML
     private Text windSpeedText;
+    @FXML
+    private ImageView windImageView;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -120,6 +123,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public void initialize() {
         Sounds.stopMusic();
         Sounds.playRaceMusic();
+
         // Load a default important annotation state
         //importantAnnotations = new ImportantAnnotationsState();
 
