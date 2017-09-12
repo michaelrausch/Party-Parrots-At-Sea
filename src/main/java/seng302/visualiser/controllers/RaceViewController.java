@@ -727,8 +727,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public boolean isChatInputFocused() {
-//        return chatInput.focusedProperty().getValue();
-        return false;
+        return chatInput.focusedProperty().getValue();
     }
 
     public String readChatInput() {

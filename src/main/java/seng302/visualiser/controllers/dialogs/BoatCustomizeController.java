@@ -43,8 +43,6 @@ public class BoatCustomizeController implements Initializable{
             submitCustomization();
         });
 
-        setPlayerColor(lobbyController.playersColor);
-
         socketThread = ViewManager.getInstance().getGameClient().getServerThread();
 
         RequiredFieldValidator playerNameReqValidator = new RequiredFieldValidator();

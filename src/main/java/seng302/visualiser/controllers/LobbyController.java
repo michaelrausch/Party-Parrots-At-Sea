@@ -128,6 +128,7 @@ public class LobbyController implements Initializable {
         BoatCustomizeController controller = dialog.getController();
 
         controller.setParentController(this);
+        controller.setPlayerColor(this.playersColor);
 
         return customizationDialog;
     }
