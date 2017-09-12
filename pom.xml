@@ -84,19 +84,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.interactivemesh.jfx.importer.col</groupId>
-            <artifactId>ColModelImporter</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/libs/JFX3DModelImporters_EA_2014-02-09/jimColModelImporterJFX.jar</systemPath>
+            <groupId>com.interactivemesh</groupId>
+            <artifactId>jimStlMeshImporter</artifactId>
+            <version>0.7</version>
         </dependency>
 
         <dependency>
-            <groupId>com.interactivemesh.jfx.importer.stl</groupId>
-            <artifactId>StlMeshImporter</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/libs/JFX3DModelImporters_EA_2014-02-09/jimStlMeshImporterJFX.jar</systemPath>
+            <groupId>com.interactivemesh</groupId>
+            <artifactId>jimColModelImporter</artifactId>
+            <version>0.7</version>
         </dependency>
 
 
@@ -182,4 +178,12 @@
             </plugin>
         </plugins>
     </reporting>
+
+    <repositories>
+        <repository>
+            <id>lib</id>
+            <name>third party libraries</name>
+            <url>file://${basedir}/lib</url>
+        </repository>
+    </repositories>
 </project>
