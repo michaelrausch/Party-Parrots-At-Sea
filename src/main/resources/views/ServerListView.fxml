@@ -18,7 +18,10 @@
             <children>
                 <GridPane fx:id="connectGridPane" GridPane.rowIndex="2">
                     <children>
-                        <JFXButton fx:id="connectButton" buttonType="RAISED" onMouseEntered="#playButtonHoverSound" prefHeight="45.0" prefWidth="220.0" ripplerFill="#3493e3" text="CONNECT" textFill="WHITE" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
+                        <JFXButton fx:id="connectButton" buttonType="RAISED" prefHeight="45.0"
+                          prefWidth="220.0" ripplerFill="#3493e3" text="CONNECT" textFill="WHITE"
+                          GridPane.columnIndex="5" GridPane.halignment="RIGHT"
+                          GridPane.valignment="CENTER">
                             <GridPane.margin>
                                 <Insets right="50.0" />
                             </GridPane.margin>
@@ -74,7 +77,7 @@
                             </padding>
                         </Label>
                         <JFXButton id="hostButton" fx:id="serverListHostButton" buttonType="RAISED"
-                          onMouseEntered="#playButtonHoverSound" prefHeight="45.0" prefWidth="220.0"
+                          prefHeight="45.0" prefWidth="220.0"
                           text="HOST" GridPane.columnIndex="1" GridPane.halignment="RIGHT"
                           GridPane.valignment="CENTER">
                             <GridPane.margin>

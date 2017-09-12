@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -174,6 +176,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         rvAnchorPane.setOnMouseClicked((event) ->
                 rvAnchorPane.requestFocus()
         );
+
+        //Makes the chat history non transparent when clicked on
+        chatInput.focusedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+                Boolean newValue) {
+                if (newValue) {
+                    chatHistory.increaseOpacity();
+                } else {
+                    chatHistory.decreaseOpacity();
+                }
+            }
+        });
     }
 
     public void loadRace (
@@ -771,8 +786,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public boolean isChatInputFocused() {
-//        return chatInput.focusedProperty().getValue();
-        return false;
+        return chatInput.focusedProperty().getValue();
     }
 
     public String readChatInput() {

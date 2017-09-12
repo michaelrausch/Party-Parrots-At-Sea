@@ -31,6 +31,7 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.cells.PlayerCell;
+import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
 public class LobbyController implements Initializable {
 
@@ -51,7 +52,6 @@ public class LobbyController implements Initializable {
     private Pane serverMap;
     //---------FXML END---------//
 
-    private List<LobbyController_old.LobbyCloseListener> lobbyListeners = new ArrayList<>();
     private RaceState raceState;
     private JFXDialog customizationDialog;
     public Color playersColor;
@@ -93,8 +93,8 @@ public class LobbyController implements Initializable {
             Integer playerId = ViewManager.getInstance().getGameClient().getServerThread().getClientId();
             String name = ViewManager.getInstance().getGameClient().getPlayerNames().get(playerId - 1);
 
-            Color playerColor = Colors.getColor( playerId - 1);
-            customizationDialog = ViewManager.getInstance().loadCustomizationDialog(serverListMainStackPane, this, playerColor, name);
+            playersColor = Colors.getColor(playerId - 1);
+            customizationDialog = createCustomizeDialog();
 
             customizeButton.setOnMouseReleased(event -> {
                 Sounds.playButtonClick();
@@ -109,6 +109,32 @@ public class LobbyController implements Initializable {
         initMapPreview();
     }
 
+    private JFXDialog createCustomizeDialog() {
+        // TODO: 12/09/17 ajm412: Why is this here? is there no better way we can do this? Ideally inside the LobbyController.
+        FXMLLoader dialog = new FXMLLoader(
+            getClass().getResource("/views/dialogs/BoatCustomizeDialog.fxml"));
+
+        JFXDialog customizationDialog = null;
+
+        try {
+            customizationDialog = new JFXDialog(serverListMainStackPane, dialog.load(),
+                JFXDialog.DialogTransition.CENTER);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BoatCustomizeController controller = dialog.getController();
+
+        controller.setParentController(this);
+        controller.setPlayerColor(this.playersColor);
+
+        return customizationDialog;
+    }
+
+    /**
+     *
+     */
     private void refreshMapView(){
         RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
         List<Limit> border = raceData.getCourseLimit();
@@ -122,12 +148,8 @@ public class LobbyController implements Initializable {
         gameView.updateCourse(marks, corners);
     }
 
-    private void getPlayerColors() {
-
-    }
-
     /**
-     *
+     * Initializes a top down preview of the race course map.
      */
     private void initMapPreview() {
         gameView = new GameView();
@@ -163,7 +185,7 @@ public class LobbyController implements Initializable {
     }
 
     /**
-     *
+     * Refreshes the list of players and their boats, as a series of VBox PlayerCell objects.
      */
     private void refreshPlayerList() {
         playerListVBox.getChildren().clear();
@@ -192,17 +214,12 @@ public class LobbyController implements Initializable {
         }
     }
 
-    /**
-     *
-     */
     private void leaveLobby() {
+
         ViewManager.getInstance().getGameClient().stopGame();
         ViewManager.getInstance().goToStartView();
     }
 
-    /**
-     *
-     */
     public void disableReadyButton() {
         this.beginRaceButton.setDisable(true);
         this.beginRaceButton.setText("Waiting for host...");

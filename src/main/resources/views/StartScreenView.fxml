@@ -26,7 +26,8 @@
                    <Insets bottom="150.0" />
                </StackPane.margin>
             </Label>
-             <JFXButton fx:id="startBtn" buttonType="RAISED" onMouseEntered="#playButtonHoverSound" prefHeight="80.0" prefWidth="337.0" text="START">
+             <JFXButton fx:id="startBtn" buttonType="RAISED" prefHeight="80.0" prefWidth="337.0"
+               text="START">
                <font>
                    <Font size="20.0" />
                </font>
