@@ -287,8 +287,8 @@ public class GameClient {
                     if (courseData == null) { //workaround for object comparisons. Avoid recreating
                         courseData = raceXMLData;
                     }
-                    if (raceView != null) {
-                        raceView.updateRaceData(raceXMLData);
+                    if (raceView != null) {  //Token update
+                        raceView.updateTokens(raceXMLData);
                     }
                     break;
 

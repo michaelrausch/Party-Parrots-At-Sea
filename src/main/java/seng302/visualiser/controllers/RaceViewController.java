@@ -718,8 +718,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        }
     }
 
-    public void updateRaceData (RaceXMLData raceData) {
-        gameView.updateBorder(raceData.getCourseLimit());
+    public void updateTokens(RaceXMLData raceData) {
         gameView.updateTokens(raceData.getTokens());
     }
 
