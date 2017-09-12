@@ -26,7 +26,9 @@ public class Sounds {
         }
     }
 
-    public static void setMutes() {
+
+
+    static void setMutes() {
         if (soundPlayer != null) {
             soundPlayer.setMute(soundEffectsMuted);
         }
@@ -49,14 +51,14 @@ public class Sounds {
         toggleMuteMusic();
     }
 
-    public static void toggleMuteMusic() {
+    static void toggleMuteMusic() {
         musicMuted = !musicMuted;
         if (musicPlayer != null) {
             musicPlayer.setMute(musicMuted);
         }
     }
 
-    public static void toggleMuteEffects() {
+    static void toggleMuteEffects() {
         soundEffectsMuted = !soundEffectsMuted;
         if (soundPlayer != null) {
             soundPlayer.setMute(soundEffectsMuted);
@@ -187,6 +189,5 @@ public class Sounds {
             hoverSoundPlayer.play();
         }
     }
-
 
 }
