@@ -83,6 +83,31 @@
             <version>0.2.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.interactivemesh</groupId>
+            <artifactId>jimStlMeshImporter</artifactId>
+            <version>0.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.interactivemesh</groupId>
+            <artifactId>jimColModelImporter</artifactId>
+            <version>0.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jfoenix</groupId>
+            <artifactId>jfoenix</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/javax.jmdns/jmdns -->
+        <dependency>
+            <groupId>javax.jmdns</groupId>
+            <artifactId>jmdns</artifactId>
+            <version>3.4.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -165,4 +190,18 @@
             </plugin>
         </plugins>
     </reporting>
+
+    <repositories>
+        <repository>
+            <id>lib</id>
+            <name>third party libraries</name>
+            <url>file://${basedir}/lib</url>
+        </repository>
+
+        <repository>
+            <id>Homer-Core</id>
+            <name>Homer-core-repo</name>
+            <url>https://nexus.arcsmed.at/content/repositories/homer.core</url>
+        </repository>
+    </repositories>
 </project>

@@ -96,7 +96,7 @@ public class MessageFactory {
 
     public static XMLMessage getRaceXML() {
         List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        List<Token> tokens = GameState.getTokens();
+        List<Token> tokens = GameState.getTokensInPlay();
         RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
         xmlGenerator.setRaceTemplate(raceXMLTemplate);
 
@@ -110,11 +110,6 @@ public class MessageFactory {
 
     public static XMLMessage getRegattaXML() {
         //@TODO calculate lat/lng values
-        xmlGenerator.setRegattaTemplate(
-            new RegattaXMLTemplate(
-                "Party Parrot Test Server", "Bermuda Test Course",
-                57.6679590, 11.8503233)
-        );
 
         return new XMLMessage(
             xmlGenerator.getRegattaAsXml(),
@@ -124,7 +119,7 @@ public class MessageFactory {
 
     public static XMLMessage getBoatXML() {
         List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        List<Token> tokens = GameState.getTokens();
+        List<Token> tokens = GameState.getTokensInPlay();
         RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
         xmlGenerator.setRaceTemplate(raceXMLTemplate);
 

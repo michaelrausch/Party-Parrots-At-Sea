@@ -1,0 +1,17 @@
+#playerName {
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-font-size: 18px;
+}
+
+#playerListCell {
+    -fx-background-color: skyblue;
+    -fx-effect: -fx-pp-dropshadow-light;
+}
+
+#playerListCell:hover {
+    -fx-effect: -fx-pp-dropshadow-dark;
+}
+
+#playerCellVBox {
+    -fx-background-color: -fx-pp-background-color;
+}

@@ -18,13 +18,13 @@ public class YachtEventCodeMessage extends Message {
     private int eventId;
 
 
-    public YachtEventCodeMessage(Integer subjectId) {
+    public YachtEventCodeMessage(Integer subjectId, YachtEventType yachtEventType) {
         timeStamp = System.currentTimeMillis() / 1000L;
         ack = 0;
         raceId = 1;
         destSourceId = subjectId;  // collision boat source id
         incidentId = 0;
-        eventId = 33;
+        eventId = yachtEventType.getCode();
 
         setHeader(new Header(MESSAGE_TYPE, 0x01, (short) getSize()));
         allocateBuffer();

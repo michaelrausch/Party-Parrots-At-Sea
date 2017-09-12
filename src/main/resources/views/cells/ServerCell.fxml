@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<VBox fx:id="serverCellVBox" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" onMouseEntered="#playButtonHoverSound" prefHeight="95.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <stylesheets>
+       <String fx:value="/css/Master.css"/>
+       <String fx:value="/css/cells/ServerCell.css" />
+   </stylesheets>
+   <children>
+      <GridPane fx:id="serverListCell" prefHeight="80.0">
+         <columnConstraints>
+             <ColumnConstraints hgrow="SOMETIMES" maxWidth="330.0" minWidth="330.0" prefWidth="330.0" />
+             <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" />
+             <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="150.0" prefWidth="150.0" />
+             <ColumnConstraints hgrow="SOMETIMES" maxWidth="180.0" minWidth="180.0" prefWidth="180.0" />
+         </columnConstraints>
+         <rowConstraints>
+             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+             <GridPane>
+                 <columnConstraints>
+                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="10.0" minWidth="10.0" prefWidth="10.0" />
+                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="330.0" minWidth="330.0" prefWidth="330.0" />
+                 </columnConstraints>
+                 <rowConstraints>
+                     <RowConstraints maxHeight="52.0" minHeight="10.0" prefHeight="51.0" vgrow="SOMETIMES" />
+                     <RowConstraints maxHeight="43.0" minHeight="10.0" prefHeight="29.0" vgrow="SOMETIMES" />
+                 </rowConstraints>
+                 <children>
+                     <Label fx:id="serverName" text="Party Parrot Server 1" GridPane.columnIndex="1">
+                         <font>
+                             <Font size="19.0" />
+                         </font>
+                     </Label>
+                     <Label fx:id="mapName" text="Party parrots in space" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                 </children>
+             </GridPane>
+             <JFXButton fx:id="serverConnButton" buttonType="RAISED" prefHeight="39.0" prefWidth="123.0" text="JOIN GAME" GridPane.columnIndex="3" />
+             <Label fx:id="serverPlayerCount" text="2/8 Players" GridPane.columnIndex="2" />
+         </children>
+      </GridPane>
+   </children>
+   <padding>
+       <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</VBox>

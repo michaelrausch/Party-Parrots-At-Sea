@@ -49,5 +49,6 @@ public class ToggleSailSteps {
         } else {
             Assert.assertFalse(yacht.getSailIn());
         }
+        mst.terminate();
     }
 }

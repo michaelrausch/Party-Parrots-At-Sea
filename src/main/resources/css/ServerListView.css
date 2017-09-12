@@ -1,0 +1,82 @@
+#serverListMainGridPane {
+    -fx-background-color: -fx-pp-background-color;
+}
+
+.scroll-pane {
+    -fx-background: -fx-pp-background-color;
+    -fx-border-style: hidden;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.scroll-pane:focused {
+    -fx-background-insets: 0;
+}
+
+.scroll-pane .corner {
+    -fx-background-insets: 0;
+}
+
+#serverListVBox, #serverListScrollPane {
+    -fx-background: transparent;
+}
+
+.serverListing {
+    -fx-alignment: center;
+    -fx-background-color: transparent;
+}
+
+#hostButton {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-font-size: 20px;
+    -fx-pref-height: 65px;
+    -fx-text-fill: -fx-pp-light-text-color;
+}
+
+#hostButton:hover {
+    -fx-background-color: -fx-pp-light-theme-color;
+    -fx-font-size: 23px;
+}
+
+#connectButton {
+    -fx-background-color: -fx-pp-light-text-color; /* inverted */
+    -fx-text-fill: -fx-pp-theme-color; /* inverted */
+    -fx-font-size: 20px;
+    -fx-pref-height: 65px;
+}
+
+#connectButton:hover {
+    -fx-font-size: 23px;
+}
+
+#connectLabel, #serverPortNumber, #serverHostName {
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-font-size: 18px;
+}
+
+#serverHostName, #serverPortNumber {
+    -jfx-focus-color: -fx-pp-light-text-color;
+    -jfx-unfocus-color: -fx-pp-light-text-color;
+    -fx-prompt-text-fill: -fx-pp-light-text-color;
+}
+
+
+#serverHostName .error-label, #serverPortNumber .error-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: lightblue;
+}
+
+#connectGridPane {
+    -fx-background-color: -fx-pp-theme-color;
+}
+
+
+#serverListMainGridPane{
+    -fx-background-image: url("/images/waves.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+}
+
+#serverListPane{
+    -fx-background-color: transparent;
+}

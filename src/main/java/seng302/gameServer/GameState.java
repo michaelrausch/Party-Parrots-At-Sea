@@ -1,26 +1,30 @@
 package seng302.gameServer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import javafx.scene.paint.Color;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import seng302.gameServer.messages.*;
+import seng302.model.*;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoundingBoatStatus;
 import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventType;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.Player;
@@ -34,6 +38,10 @@ import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLParser;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.*;
+
 /**
  * A Static class to hold information about the current state of the game (model)
  * Also contains logic for updating itself on regular time intervals on its own thread
@@ -43,17 +51,15 @@ public class GameState implements Runnable {
 
     @FunctionalInterface
     interface NewMessageListener {
-
         void notify(Message message);
     }
 
-    private Logger logger = LoggerFactory.getLogger(GameState.class);
+    private static Logger logger = LoggerFactory.getLogger(GameState.class);
 
 
     static final int WARNING_TIME = 10 * -1000;
     static final int PREPATORY_TIME = 5 * -1000;
     private static final int TIME_TILL_START = 10 * 1000;
-    static Integer MAX_PLAYERS = 8;
 
     private static final Long POWERUP_TIMEOUT_MS = 10_000L;
 
@@ -68,51 +74,46 @@ public class GameState implements Runnable {
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
+    private static Double speedMultiplier = 1d;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
 
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
-    private static List<Token> tokens;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
     private static Set<Mark> marks;
     private static List<Limit> courseLimit;
+    private static Integer maxPlayers = 8;
 
-    private static List<NewMessageListener> markListeners;
+
+    private static List<Token> allTokens;
+    private static List<Token> tokensInPlay;
+
+    private static List<NewMessageListener> newMessageListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
-    /*
-        Ideally I would like to make this class an object instantiated by the server and given to
-        it's created threads if necessary. Outside of that I think the dependencies on it
-        (atm only Yacht & GameClient) can be removed from most other classes. The observable list of
-        players could be pulled directly from the server by the GameClient since it instantiates it
-        and it is reasonable for it to pull data. The current setup of publicly available statics is
-        pretty meh IMO because anything can change it making it unreliable and like people did with
-        the old ServerParser class everything that needs shared just gets thrown in the static
-        collections and things become a real mess.
-     */
 
     public GameState(String hostIpAddress) {
         windDirection = 180d;
         windSpeed = 10000d;
-        this.hostIpAddress = hostIpAddress;
         yachts = new HashMap<>();
-        tokens = new ArrayList<>();
+        tokensInPlay = new ArrayList<>();
 
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
-
+        speedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
-        markListeners = new ArrayList<>();
+        newMessageListeners = new ArrayList<>();
+        allTokens = makeTokens();
 
         resetStartTime();
 
@@ -137,6 +138,21 @@ public class GameState implements Runnable {
         courseLimit = XMLParser.parseRace(document).getCourseLimit();
     }
 
+
+    /**
+     * Make a pre defined set of tokensInPlay. //TODO wmu16 - Should read from some file for each
+     * race ideally
+     *
+     * @return A list of possible tokensInPlay for this race
+     */
+    private ArrayList<Token> makeTokens() {
+        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
+        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
+        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
+        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
+        return new ArrayList<>(Arrays.asList(token1, token2, token3, token4));
+    }
+
     public static String getHostIpAddress() {
         return hostIpAddress;
     }
@@ -149,16 +165,8 @@ public class GameState implements Runnable {
         return players;
     }
 
-    public static void addToken(Token token) {
-        tokens.add(token);
-    }
-
-    public static List<Token> getTokens() {
-        return tokens;
-    }
-
-    public static void clearTokens() {
-        tokens.clear();
+    public static List<Token> getTokensInPlay() {
+        return tokensInPlay;
     }
 
     public static void addPlayer(Player player) {
@@ -288,7 +296,23 @@ public class GameState implements Runnable {
     }
 
     /**
-     * Called periodically in this GameState thread to update the GameState values
+     * Randomly select a subset of tokensInPlay from a pre defined superset
+     * Broadasts a new race status message to show this update
+     */
+    public static void spawnNewToken() {
+        Random random = new Random();
+        tokensInPlay.clear();
+        tokensInPlay.add(allTokens.get(random.nextInt(allTokens.size())));
+    }
+
+    /**
+     * Called periodically in this GameState thread to update the GameState values.
+     * -Updates yachts velocity
+     * -Updates locations
+     * -Checks for collisions
+     * -Checks for progression
+     *
+     * -Also checks things like the end of the race and race start time etc
      */
     public void update() {
         Boolean raceFinished = true;
@@ -303,14 +327,11 @@ public class GameState implements Runnable {
             checkPowerUpTimeout(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
+            checkCollision(yacht);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
-                checkCollision(yacht);
-                checkTokenPickUp(yacht);
                 checkForLegProgression(yacht);
                 raceFinished = false;
             }
-
-
         }
 
         if (raceFinished) {
@@ -350,27 +371,38 @@ public class GameState implements Runnable {
     }
 
     /**
-     * Checks all tokens to see if a yacht has picked one up
-     *
-     * @param serverYacht The yacht to check for
+     * Checks all tokensInPlay to see if a yacht has picked one up
+     * @return Token which was collided with
+     * @param serverYacht The yacht to check for collision with a token
      */
-    private void checkTokenPickUp(ServerYacht serverYacht) {
-        for (Token token : tokens) {
+    private static Token checkTokenPickUp(ServerYacht serverYacht) {
+        for (Token token : tokensInPlay) {
             Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
             if (distance < YACHT_COLLISION_DISTANCE) {
-                tokens.remove(token);
-                serverYacht.powerUp(token.getTokenType());
-                logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + token
-                    .getTokenType());
-                notifyMessageListeners(MessageFactory.getRaceXML());
-                break;
+                return token;
             }
         }
+
+        return null;
     }
 
 
+    /**
+     * Checks for collision with other in game objects for the given serverYacht. To be called each
+     * update. If there is a collision, Notifies the server to send the appropriate messages out.
+     * Checks for these items in turn:
+     * - Other yachts
+     * - Marks
+     * - Boundary
+     * - Tokens
+     *
+     * @param serverYacht The server yacht to check collisions with
+     */
     public static void checkCollision(ServerYacht serverYacht) {
+        //Yacht Collision
         ServerYacht collidedYacht = checkYachtCollision(serverYacht);
+        Mark collidedMark = checkMarkCollision(serverYacht);
+
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
             serverYacht.setLocation(
@@ -386,35 +418,49 @@ public class GameState implements Runnable {
                 collidedYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
             notifyMessageListeners(
-                new YachtEventCodeMessage(serverYacht.getSourceId())
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
             );
-        } else {
-            Mark collidedMark = checkMarkCollision(serverYacht);
-            if (collidedMark != null) {
-                serverYacht.setLocation(
-                    calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
-                );
-                serverYacht.setCurrentVelocity(
-                    serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
-                );
-                notifyMessageListeners(
-                    new YachtEventCodeMessage(serverYacht.getSourceId())
-                );
-            }
-            else{
-                if (checkBoundaryCollision(serverYacht)) {
-                    serverYacht.setLocation(
-                            calculateBounceBack(serverYacht, serverYacht.getLocation(),
-                                    BOUNCE_DISTANCE_YACHT)
-                    );
-                    serverYacht.setCurrentVelocity(
-                            serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
-                    );
-                    notifyMessageListeners(
-                            new YachtEventCodeMessage(serverYacht.getSourceId())
-                    );
-                }
-            }
+        }
+
+        //Mark Collision
+        else if (collidedMark != null) {
+            serverYacht.setLocation(
+                calculateBounceBack(serverYacht, collidedMark, BOUNCE_DISTANCE_MARK)
+            );
+
+            serverYacht.setCurrentVelocity(
+                serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+            );
+            notifyMessageListeners(
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
+            );
+        }
+
+        //Boundary Collision
+        else if (checkBoundaryCollision(serverYacht)) {
+            serverYacht.setLocation(
+                calculateBounceBack(serverYacht, serverYacht.getLocation(),
+                    BOUNCE_DISTANCE_YACHT)
+            );
+
+            serverYacht.setCurrentVelocity(
+                serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
+            );
+            notifyMessageListeners(
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
+            );
+        }
+
+        //Token Collision
+        Token collidedToken = checkTokenPickUp(serverYacht);
+        if (collidedToken != null) {
+            tokensInPlay.remove(collidedToken);
+            serverYacht.powerUp(collidedToken.getTokenType());
+            logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + collidedToken
+                .getTokenType());
+            notifyMessageListeners(MessageFactory.getRaceXML());
+            notifyMessageListeners(
+                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.TOKEN));
         }
     }
 
@@ -422,9 +468,10 @@ public class GameState implements Runnable {
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * 4;
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
+                // TODO: 11/09/17 wmu16 CHANGE THIS TO MAGIC NUMBER
                 maxBoatSpeed *= 2;
             }
         }
@@ -728,15 +775,14 @@ public class GameState implements Runnable {
         // TODO: 13/8/17 figure out the rounding side, rounded mark source ID and boat status.
         Message markRoundingMessage = new MarkRoundingMessage(0, 0,
             sourceID, RoundingBoatStatus.RACING, roundingMark.getRoundingSide(), markType,
-            currentMark.getId());
-//            currentMarkSeqID + 1);
+            currentMarkSeqID + 1);
 
         notifyMessageListeners(markRoundingMessage);
     }
 
     private static void notifyMessageListeners(Message message) {
-        for (NewMessageListener mpl : markListeners) {
-            mpl.notify(message);
+        for (NewMessageListener ml : newMessageListeners) {
+            ml.notify(message);
         }
     }
 
@@ -748,8 +794,37 @@ public class GameState implements Runnable {
     }
 
 
+    public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
+        String chatterText = chatterMessage.getMessage();
+        String[] words = chatterText.split("\\s+");
+        if (words.length > 2 && isHost) {
+            switch (words[2].trim()) {
+                case ">speed":
+                    try {
+                        setSpeedMultiplier(Double.valueOf(words[3]));
+                        notifyMessageListeners(new ChatterMessage(
+                            chatterMessage.getMessage_type(),
+                            "SERVER: Speed modifier set to x" + words[3]
+                        ));
+                    } catch (Exception e) {
+                        Logger logger = LoggerFactory.getLogger(GameState.class);
+                        logger.error("cannot parse >speed value");
+                    }
+                    return;
+                case ">finish":
+                    notifyMessageListeners(new ChatterMessage(
+                        chatterMessage.getMessage_type(),
+                        "SERVER: Game will now finish"
+                    ));
+                    endRace();
+                    return;
+            }
+        }
+        notifyMessageListeners(chatterMessage);
+    }
+
     public static void addMessageEventListener(NewMessageListener listener) {
-        markListeners.add(listener);
+        newMessageListeners.add(listener);
     }
 
     public static void setCustomizationFlag() {
@@ -764,4 +839,36 @@ public class GameState implements Runnable {
         customizationFlag = false;
     }
 
+    public static Integer getNumberOfPlayers(){
+        Integer numPlayers = 0;
+
+        for(Player p : getPlayers()){
+            if(p.getSocket().isConnected()){
+                numPlayers++;
+            }
+        }
+
+        return numPlayers;
+    }
+
+    public static Integer getCapacity(){
+        return maxPlayers;
+    }
+
+    public static void setMaxPlayers(Integer newMax){
+        maxPlayers = newMax;
+    }
+
+    public static void endRace () {
+        yachts.forEach((id, yacht) -> yacht.setBoatStatus(BoatStatus.FINISHED));
+        currentStage = GameStages.FINISHED;
+    }
+
+    public static void setSpeedMultiplier (double multiplier) {
+        speedMultiplier = multiplier;
+    }
+
+    public static double getSpeedMultiplier () {
+        return speedMultiplier;
+    }
 }

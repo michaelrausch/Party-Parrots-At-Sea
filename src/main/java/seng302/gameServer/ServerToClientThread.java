@@ -1,19 +1,22 @@
 package seng302.gameServer;
 
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.*;
+import seng302.model.Player;
+import seng302.model.ServerYacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.utilities.XMLGenerator;
+
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
@@ -22,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.Message;
@@ -75,6 +79,7 @@ public class ServerToClientThread implements Runnable {
 
     private ClientType clientType;
     private Boolean isRegistered = false;
+    private Boolean isHost = false;
 
     private XMLGenerator xmlGenerator;
 
@@ -141,7 +146,7 @@ public class ServerToClientThread implements Runnable {
             return;
         }
 
-        if (GameState.getPlayers().size() >= GameState.MAX_PLAYERS){
+        if (GameState.getPlayers().size() >= GameState.getCapacity()){
             RegistrationResponseMessage responseMessage = new RegistrationResponseMessage(0, RegistrationResponseStatus.FAILURE_FULL);
             os.write(responseMessage.getBuffer());
             return;
@@ -199,7 +204,12 @@ public class ServerToClientThread implements Runnable {
 
                                 completeRegistration(requestedType);
                                 break;
-
+                            case CHATTER_TEXT:
+                                ChatterMessage chatterMessage = ServerPacketParser
+                                    .extractChatterText(
+                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                GameState.processChatter(chatterMessage, isHost);
+                                break;
                             case RACE_CUSTOMIZATION_REQUEST:
                                 Long sourceID = Message
                                     .bytesToLong(Arrays.copyOfRange(payload, 0, 3));
@@ -222,6 +232,28 @@ public class ServerToClientThread implements Runnable {
             }
         }
         logger.warn("Closed serverToClientThread" + thread, 1);
+    }
+
+    public void sendSetupMessages() {
+        xmlGenerator = new XMLGenerator();
+        RaceXMLTemplate race = new RaceXMLTemplate(new ArrayList<>(GameState.getYachts().values()), new ArrayList<>());
+
+        xmlGenerator.setRaceTemplate(race);
+
+        System.out.println(xmlGenerator.getRegatta().getName());
+
+        XMLMessage xmlMessage;
+        xmlMessage = new XMLMessage(xmlGenerator.getRegattaAsXml(), XMLMessageSubType.REGATTA,
+                xmlGenerator.getRegattaAsXml().length());
+        sendMessage(xmlMessage);
+
+        xmlMessage = new XMLMessage(xmlGenerator.getBoatsAsXml(), XMLMessageSubType.BOAT,
+                xmlGenerator.getBoatsAsXml().length());
+        sendMessage(xmlMessage);
+
+        xmlMessage = new XMLMessage(xmlGenerator.getRaceAsXml(), XMLMessageSubType.RACE,
+                xmlGenerator.getRaceAsXml().length());
+        sendMessage(xmlMessage);
     }
 
     private void closeSocket() {
@@ -290,10 +322,6 @@ public class ServerToClientThread implements Runnable {
         return yacht;
     }
 
-    public void sendCollisionMessage(Integer yachtId) {
-        sendMessage(new YachtEventCodeMessage(yachtId));
-    }
-
     public void addConnectionListener(ConnectionListener listener) {
         connectionListeners.add(listener);
     }
@@ -312,5 +340,9 @@ public class ServerToClientThread implements Runnable {
 
     public void addDisconnectListener(DisconnectListener disconnectListener) {
         this.disconnectListener = disconnectListener;
+    }
+
+    public void setAsHost() {
+        isHost = true;
     }
 }

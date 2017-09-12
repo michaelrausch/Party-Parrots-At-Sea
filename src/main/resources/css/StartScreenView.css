@@ -1,0 +1,25 @@
+#startBtn {
+    -fx-font-size: 20px;
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-background-color: -fx-pp-theme-color;
+}
+
+.jfx-rippler {
+    -jfx-rippler-fill: -fx-pp-light-theme-color; /* set rippler color for button */
+}
+
+#startBtn:hover {
+    -fx-font-size: 23px;
+    -fx-background-color: -fx-pp-light-theme-color;
+}
+
+#mainStackPane {
+    -fx-background-image: url("/images/waves.jpg");
+    -fx-background-size: cover;
+}
+
+#headText {
+    -fx-background-color: transparent;
+    -fx-font-size: 80px;
+    -fx-text-fill: -fx-pp-light-text-color;
+}

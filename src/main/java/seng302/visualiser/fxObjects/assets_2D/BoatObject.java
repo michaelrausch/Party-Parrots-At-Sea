@@ -1,7 +1,5 @@
 package seng302.visualiser.fxObjects.assets_2D;
 
-import java.util.ArrayList;
-import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -24,6 +22,9 @@ import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 import seng302.visualiser.fxObjects.assets_3D.BoatModel;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -189,6 +190,7 @@ public class BoatObject extends Group {
      * @param rotation The rotation by which the boat moves
      * @param velocity The velocity the boat is moving
      * @param sailIn Boolean to toggle sail state.
+     * @param windDir .
      */
     public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn, double windDir) {
         Double dx = Math.abs(boatAssets.getAssets().getLayoutX() - x);

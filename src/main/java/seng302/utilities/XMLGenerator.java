@@ -3,13 +3,15 @@ package seng302.utilities;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.model.stream.xml.generator.RegattaXMLTemplate;
-import seng302.gameServer.messages.XMLMessageSubType;
+import java.util.Random;
 
 /**
  * An XML generator to generate the Race, Boat, and Regatta XML dynamically
@@ -22,6 +24,11 @@ public class XMLGenerator {
     private Configuration configuration;
     private RegattaXMLTemplate regatta;
     private RaceXMLTemplate race;
+
+    public static RegattaXMLTemplate DEFAULT_REGATTA = new RegattaXMLTemplate("Party Parrot Test Server " + new Random().nextInt(100),
+            "Bermuda",
+            57.6679590,
+            11.8503233);
 
     /**
      * Set up a configuration instance for Apache Freemake
@@ -39,7 +46,7 @@ public class XMLGenerator {
     /**
      * Create an instance of the XML Generator
      */
-    public XMLGenerator(){
+    public XMLGenerator() {
         setupConfiguration();
     }
 
@@ -106,7 +113,7 @@ public class XMLGenerator {
     public String getRegattaAsXml(){
         String result = null;
 
-        if (regatta == null) return null;
+        if (regatta == null) regatta = DEFAULT_REGATTA;
 
         try {
             result = parseToXmlString(REGATTA_TEMPLATE_NAME, XMLMessageSubType.REGATTA);
@@ -159,5 +166,17 @@ public class XMLGenerator {
         }
 
         return result;
+    }
+
+    public static void setDefaultRaceName(String raceName){
+        DEFAULT_REGATTA.setRegattaName(raceName);
+    }
+
+    public static void setDefaultMapName(String mapName){
+        DEFAULT_REGATTA.setCourseName(mapName);
+    }
+
+    public RegattaXMLTemplate getRegatta() {
+        return regatta;
     }
 }
