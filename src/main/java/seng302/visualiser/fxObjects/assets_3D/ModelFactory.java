@@ -113,6 +113,8 @@ public class ModelFactory {
                 return makeWake(assets);
             case TRAIL_SEGMENT:
                 return makeTrail(assets);
+            case PLAYER_IDENTIFIER:
+                return makeIdentifierIcon(assets);
             default:
                 return new Model(new Group(assets), null);
         }
@@ -192,5 +194,13 @@ public class ModelFactory {
             new Rotate(90, new Point3D(0,0,1))
         );
         return new Model(new Group(trailPiece), null);
+    }
+
+    private static Model makeIdentifierIcon(Group assets) {
+        assets.getTransforms().addAll(
+            new Rotate(90, new Point3D(1,0,0)),
+            new Scale(0.5, 0.5, 0.5)
+        );
+        return new Model(assets, null);
     }
 }

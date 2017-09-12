@@ -40,7 +40,6 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.assets_2D.AnnotationBox;
 import seng302.visualiser.fxObjects.assets_2D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
@@ -85,18 +84,16 @@ public class GameView3D {
     private Map<Mark, Group> markerObjects;
 
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
-    private Map<ClientYacht, AnnotationBox> annotations = new HashMap<>();
     private BoatObject selectedBoat = null;
-    private Group annotationsGroup = new Group();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
     private Group markers = new Group();
     private Group tokens = new Group();
+    private Group playerAnnotation = new Group();
     private List<CompoundMark> course = new ArrayList<>();
     private List<Node> mapTokens;
-    private Timer trailMaker = new Timer();
+    private Timer playerBoatAnimationTimer = new Timer();
     private Group trail = new Group();
-
     private ImageView mapImage = new ImageView();
 
     //FRAME RATE
@@ -196,7 +193,7 @@ public class GameView3D {
         gameObjects.getChildren().addAll(
             ocean,
 //            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
-            raceBorder, trail, markers, tokens,
+            raceBorder, trail, markers, tokens, playerAnnotation,
             white, blue, green, black, red
         );
 
@@ -689,7 +686,14 @@ public class GameView3D {
     public void setBoatAsPlayer (ClientYacht playerYacht) {
         this.playerYacht = playerYacht;
 
-        trailMaker.scheduleAtFixedRate(new TimerTask() {
+        Platform.runLater(() ->
+            playerAnnotation.getChildren().setAll(ModelFactory.importModel(ModelType.PLAYER_IDENTIFIER).getAssets())
+        );
+        BoatObject playerAssets = boatObjects.get(playerYacht);
+        playerAnnotation.layoutXProperty().bind(playerAssets.layoutXProperty());
+        playerAnnotation.layoutYProperty().bind(playerAssets.layoutYProperty());
+
+        playerBoatAnimationTimer.scheduleAtFixedRate(new TimerTask() {
 
             private Point2D lastLocation = findScaledXY(playerYacht.getLocation());
 
@@ -709,6 +713,21 @@ public class GameView3D {
                     }
                 });
                 lastLocation = location;
+                // TODO: 11/09/2017 ROTATE PLAYER ICON
+//                double leg = playerYacht.getLegNumber();
+//                if (compoundMark != null) {
+//                    for (Mark mark : compoundMark.getMarks()) {
+////                System.out.println("markerObjects.get(mark) = " + markerObjects.get(mark));
+//                        markerObjects.get(mark).showNextExitArrow();
+//                    }
+//                }
+//                CompoundMark nextMark = null;
+//                if (legNumber < course.size() - 1) {
+//                    nextMark = course.get(legNumber);
+//                    for (Mark mark : nextMark.getMarks()) {
+//                        markerObjects.get(mark).showNextEnterArrow();
+//                    }
+//                }
             }
         }, 0L, 500L);
 
