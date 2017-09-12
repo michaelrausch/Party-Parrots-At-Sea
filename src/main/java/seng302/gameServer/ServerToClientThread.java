@@ -1,17 +1,12 @@
 package seng302.gameServer;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.*;
-import seng302.model.Player;
-import seng302.model.ServerYacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.utilities.XMLGenerator;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -24,7 +19,6 @@ import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatLocationMessage;
 import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
 import seng302.gameServer.messages.CustomizeRequestType;
@@ -33,14 +27,11 @@ import seng302.gameServer.messages.RegistrationResponseMessage;
 import seng302.gameServer.messages.RegistrationResponseStatus;
 import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.model.stream.xml.generator.RegattaXMLTemplate;
-import seng302.model.token.Token;
 import seng302.utilities.XMLGenerator;
 
 /**
@@ -102,6 +93,10 @@ public class ServerToClientThread implements Runnable {
 
         thread = new Thread(this, "ServerToClient");
         thread.start();
+    }
+
+    public Integer getSourceId() {
+        return sourceId;
     }
 
     private void setUpPlayer(){
@@ -228,9 +223,11 @@ public class ServerToClientThread implements Runnable {
                 }
             } catch (Exception e) {
                 closeSocket();
+                GameState.setPlayerHasLeftFlag(true);
                 return;
             }
         }
+        GameState.setPlayerHasLeftFlag(true);
         logger.warn("Closed serverToClientThread" + thread, 1);
     }
 
@@ -262,6 +259,10 @@ public class ServerToClientThread implements Runnable {
         } catch (IOException e) {
             System.out.println("IO error in server thread upon trying to close socket");
         }
+    }
+
+    public Boolean isSocketOpen() {
+        return !socket.isClosed();
     }
 
     private int readByte() throws Exception {

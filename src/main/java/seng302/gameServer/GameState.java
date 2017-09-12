@@ -9,12 +9,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import javafx.scene.paint.Color;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import seng302.gameServer.messages.*;
-import seng302.model.*;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.gameServer.messages.ChatterMessage;
@@ -37,10 +37,6 @@ import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLParser;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.*;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -77,6 +73,7 @@ public class GameState implements Runnable {
     private static Double speedMultiplier = 1d;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
+    private static Boolean playerHasLeftFlag;
 
     private static String hostIpAddress;
     private static List<Player> players;
@@ -106,6 +103,7 @@ public class GameState implements Runnable {
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
+        playerHasLeftFlag = false;
         speedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
@@ -837,6 +835,14 @@ public class GameState implements Runnable {
 
     public static void resetCustomizationFlag() {
         customizationFlag = false;
+    }
+
+    public static void setPlayerHasLeftFlag(Boolean flag) {
+        playerHasLeftFlag = flag;
+    }
+
+    public static Boolean getPlayerHasLeftFlag() {
+        return playerHasLeftFlag;
     }
 
     public static Integer getNumberOfPlayers(){
