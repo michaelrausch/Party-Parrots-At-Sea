@@ -40,7 +40,7 @@
               vgrow="SOMETIMES"/>
         </rowConstraints>
          <children>
-            <GridPane id="timerGrid" fx:id="timerGrid" prefWidth="192.0">
+             <GridPane id="timerGrid" fx:id="timerGrid" prefWidth="192.0" styleClass=".timer">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="50.0"
                     prefWidth="50.0"/>
@@ -122,7 +122,29 @@
                        </GridPane.margin>
                    </JFXTextField>
                </children>
-            </GridPane>
+             </GridPane>
+             <GridPane GridPane.halignment="CENTER" GridPane.rowIndex="2"
+               GridPane.valignment="BOTTOM">
+                 <columnConstraints>
+                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                 </columnConstraints>
+                 <rowConstraints>
+                     <RowConstraints maxHeight="100.0" minHeight="100.0" prefHeight="100.0"
+                       vgrow="SOMETIMES"/>
+                     <RowConstraints maxHeight="100.0" minHeight="100.0" prefHeight="100.0"
+                       vgrow="SOMETIMES"/>
+                     <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0"
+                       vgrow="SOMETIMES"/>
+                 </rowConstraints>
+                 <children>
+                     <ImageView fx:id="windImageView" fitHeight="92.0" fitWidth="109.0"
+                       pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER"
+                       GridPane.rowIndex="1" GridPane.valignment="CENTER"/>
+                     <Label fx:id="windLabel" text="112d   11.5knot" GridPane.halignment="CENTER"
+                       GridPane.rowIndex="2" GridPane.valignment="CENTER"/>
+                 </children>
+             </GridPane>
          </children>
       </GridPane>
    </children>
