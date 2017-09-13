@@ -212,7 +212,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView3D();
-//        gameView.setFrameRateFXText(fpsDisplay);
+        gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> {
             contentAnchorPane.getChildren().add(0, gameView.getAssets());
             ((SubScene) gameView.getAssets()).widthProperty()
@@ -313,11 +313,11 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
-    private void initialiseFPSCheckBox() {
+//    private void initialiseFPSCheckBox() {
 //        toggleFps.selectedProperty().addListener((obs, oldVal, newVal) ->
 //            gameView.setFPSVisibility(toggleFps.isSelected())
 //        );
-    }
+//    }
 
     private void initialiseAnnotationSlider() {
 //        annotationSlider.setLabelFormatter(new StringConverter<Double>() {

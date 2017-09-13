@@ -1,6 +1,7 @@
 package seng302.visualiser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -233,6 +234,49 @@ public class GameView3D {
                 scene.addEventHandler(KeyEvent.KEY_PRESSED, this::cameraMovement);
             }
         });
+
+        initializeTimer();
+    }
+
+    private void initializeTimer() {
+        Arrays.fill(frameTimes, 1_000_000_000 / 60);
+        timer = new AnimationTimer() {
+            private long lastTime = 0;
+            private int FPSCount = 30;
+            private Double frameRate = 60.0;
+            private int index = 0;
+            private boolean arrayFilled = false;
+            private long sum = 1_000_000_000 / 3;
+
+            @Override
+            public void handle(long now) {
+                System.out.println(now);
+                if (lastTime == 0) {
+                    lastTime = now;
+                } else {
+                    if (now - lastTime >= (1e8 / 60)) { //Fix for framerate going above 60 when minimized
+                        long oldFrameTime = frameTimes[frameTimeIndex];
+                        frameTimes[frameTimeIndex] = now;
+                        frameTimeIndex = (frameTimeIndex + 1) % frameTimes.length;
+                        if (frameTimeIndex == 0) {
+                            arrayFilled = true;
+                        }
+                        long elapsedNanos;
+                        if (arrayFilled) {
+                            elapsedNanos = now - oldFrameTime;
+                            long elapsedNanosPerFrame = elapsedNanos / frameTimes.length;
+                            frameRate = 1_000_000_000.0 / elapsedNanosPerFrame;
+                            if (FPSCount-- == 0) {
+                                FPSCount = 30;
+                                drawFps(frameRate);
+                            }
+                        }
+                        lastTime = now;
+                    }
+                }
+                boatObjects.forEach((boat, boatObject) -> boatObject.updateLocation());
+            }
+        };
     }
 
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
@@ -739,4 +783,18 @@ public class GameView3D {
     public void setWindDir(double windDir) {
         this.windDir = windDir;
     }
+
+    public void setFrameRateFXText(Text fpsDisplay) {
+        this.fpsDisplay = null;
+        this.fpsDisplay = fpsDisplay;
+    }
+
+    private void drawFps(Double fps) {
+        System.out.println(fps);
+        Platform.runLater(() -> fpsDisplay.setText(String.format("%d FPS", Math.round(fps))));
+    }
+
+//    public void setFPSVisibility(boolean visibility) {
+//        fpsDisplay.setVisible(visibility);
+//    }
 }

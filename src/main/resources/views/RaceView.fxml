@@ -73,6 +73,13 @@
               <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
+               <children>
+                  <Text fx:id="fpsDisplay" strokeType="OUTSIDE" strokeWidth="0.0" text="60 Fps" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
+                     <GridPane.margin>
+                        <Insets right="10.0" />
+                     </GridPane.margin>
+                  </Text>
+               </children>
             </GridPane>
              <GridPane fx:id="chatGridPane" GridPane.columnIndex="2" GridPane.rowIndex="2">
               <columnConstraints>
