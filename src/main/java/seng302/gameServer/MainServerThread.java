@@ -196,21 +196,21 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         if (Math.floorMod(random.nextInt(), 2) == 0){
             direction += random.nextInt(4);
-            windSpeed += random.nextInt(20) + 50;
+            windSpeed += random.nextInt(20) + 459;
         }
         else{
             direction -= random.nextInt(4);
-            windSpeed -= random.nextInt(20) + 50;
+            windSpeed -= random.nextInt(20) + 459;
         }
 
         direction = Math.floorMod(direction, 360);
 
         if (windSpeed > MAX_WIND_SPEED){
-            windSpeed -= random.nextInt(1000);
+            windSpeed -= random.nextInt(500);
         }
 
         if (windSpeed <= MIN_WIND_SPEED){
-            windSpeed += random.nextInt(1000);
+            windSpeed += random.nextInt(500);
         }
 
         GameState.setWindSpeed(Double.valueOf(windSpeed));

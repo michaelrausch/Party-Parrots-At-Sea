@@ -1,13 +1,15 @@
 @font-face {
-    src: url("DJB-Get-Digital.ttf");
+    src: url("digital-7-mono.ttf");
 }
 
 #timerGrid{
     -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-effect: -fx-pp-dropshadow-light;
 }
 
-.timer Label {
-    -fx-font-family: "DJB Get Digital" !important;
+GridPane .timer * {
+    -fx-font-family: "Digital-7 Mono" !important;
+    -fx-font-size: 30;
 }
 
 #timerLabel{
@@ -19,19 +21,26 @@
 }
 
 #chatGridPane {
-    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-background-color: transparent;
 }
 
 #chatHistoryHolder {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-effect: -fx-pp-dropshadow-light;
+}
 
+#chatInputHolder {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-effect: -fx-pp-dropshadow-light;
 }
 
 #windGridPane {
     -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-effect: -fx-pp-dropshadow-light;
 }
 
 #windHolder {
-    -fx-background-color: -fx-pp-front-color;
+    -fx-background-color: rgba(255, 255, 255, 0.5);
 }
 
 #chatSend {
@@ -52,5 +61,5 @@
 }
 
 #windImageView {
-    -fx-image: url("/images/wind.png");
+    -fx-image: url("/images/wind-180.png");
 }
