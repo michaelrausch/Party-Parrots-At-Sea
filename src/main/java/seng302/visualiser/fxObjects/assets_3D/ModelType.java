@@ -11,7 +11,7 @@ public enum ModelType {
     START_MARKER ("start_marker.dae"),
     PLAIN_MARKER ("plain_marker.dae"),
     MARK_AREA ("mark_area.dae"),
-    OCEAN ("ocean.dae"),
+    OCEAN (null),
     BORDER_PYLON ("barrier_pole.dae"),
     BORDER_BARRIER ("barrier_segment.dae"),
     FINISH_LINE ("finish_line.dae"),
@@ -19,7 +19,10 @@ public enum ModelType {
     GATE_LINE ("gate_line.dae"),
     WAKE ("wake.dae"),
     TRAIL_SEGMENT ("trail_segment.dae"),
-    PLAYER_IDENTIFIER ("player_identifier.dae");
+    PLAYER_IDENTIFIER ("player_identifier.dae"),
+    PLAIN_ARROW ("arrow.dae"),
+    START_ARROW ("finish_arrow.dae"),
+    FINISH_ARROW ("start_arrow.dae");
 
     final String filename;
 
@@ -27,4 +30,3 @@ public enum ModelType {
         this.filename = filename;
     }
 }
-

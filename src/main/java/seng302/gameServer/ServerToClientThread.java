@@ -1,17 +1,12 @@
 package seng302.gameServer;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.*;
-import seng302.model.Player;
-import seng302.model.ServerYacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.utilities.XMLGenerator;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -24,7 +19,6 @@ import java.util.zip.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatLocationMessage;
 import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
 import seng302.gameServer.messages.CustomizeRequestType;
@@ -33,14 +27,11 @@ import seng302.gameServer.messages.RegistrationResponseMessage;
 import seng302.gameServer.messages.RegistrationResponseStatus;
 import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.gameServer.messages.YachtEventCodeMessage;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.model.stream.xml.generator.RegattaXMLTemplate;
-import seng302.model.token.Token;
 import seng302.utilities.XMLGenerator;
 
 /**
@@ -239,8 +230,6 @@ public class ServerToClientThread implements Runnable {
         RaceXMLTemplate race = new RaceXMLTemplate(new ArrayList<>(GameState.getYachts().values()), new ArrayList<>());
 
         xmlGenerator.setRaceTemplate(race);
-
-        System.out.println(xmlGenerator.getRegatta().getName());
 
         XMLMessage xmlMessage;
         xmlMessage = new XMLMessage(xmlGenerator.getRegattaAsXml(), XMLMessageSubType.REGATTA,

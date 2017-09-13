@@ -4,45 +4,42 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.transform.Scale;
-import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory;
-import seng302.visualiser.fxObjects.assets_2D.MarkArrowFactory.RoundingSide;
+import seng302.visualiser.fxObjects.MarkArrowFactory;
+import seng302.visualiser.fxObjects.MarkArrowFactory.RoundingSide;
 
 /**
  * Visual object for a mark. Contains a coloured circle and any specified arrows.
  */
 public class Marker3D extends Group {
 
-    private Group mark = ModelFactory.importModel(ModelType.PLAIN_MARKER).getAssets();
-    private Paint colour = Color.BLACK;
+    private Model mark;
     private List<Group> enterArrows = new ArrayList<>();
     private List<Group> exitArrows = new ArrayList<>();
     private int enterArrowIndex = 0;
     private int exitArrowIndex = 0;
+    private ModelType markType;
+    private ModelType arrowType;
 
     /**
      * Creates a new Marker containing only a circle. The default colour is black.
      */
-    public Marker3D() {
-//        mark.setRadius(5);
-//        mark.setCenterX(0);
-//        mark.setCenterY(0);
-        Platform.runLater(() -> {
-            mark.getTransforms().add(new Scale(5,5,5));
-            this.getChildren().addAll(mark, new Group());
-        }); //Empty group placeholder or arrows.
-    }
-
-    /**
-     * Creates a new Marker containing only a circle of the given colour.
-     * @param colour the desired colour for the marker.
-     */
-    public Marker3D(Paint colour) {
-        this();
-        this.colour = colour;
-//        mark.setFill(colour);
+    public Marker3D(ModelType modelType) {
+        markType = modelType;
+        switch (markType) {
+            case PLAIN_MARKER:
+                arrowType = ModelType.PLAIN_ARROW;
+                break;
+            case FINISH_MARKER:
+                arrowType = ModelType.FINISH_ARROW;
+                break;
+            case START_MARKER:
+                arrowType = ModelType.START_ARROW;
+                break;
+        }
+        mark = ModelFactory.importModel(modelType);
+        Platform.runLater(() ->
+            this.getChildren().addAll(mark.getAssets())
+        );
     }
 
     /**
@@ -53,13 +50,13 @@ public class Marker3D extends Group {
      * @param exitAngle The angle the arrow wil point from the marker.
      */
     public void addArrows(RoundingSide roundingSide, double entryAngle,
-                          double exitAngle) {
+        double exitAngle) {
         //Change Color.GRAY to this.colour to revert all gray arrows.
         enterArrows.add(
-            MarkArrowFactory.constructEntryArrow(roundingSide, entryAngle, exitAngle, Color.GRAY)
+            MarkArrowFactory.constructEntryArrow3D(roundingSide, entryAngle, arrowType).getAssets()
         );
         exitArrows.add(
-            MarkArrowFactory.constructExitArrow(roundingSide, exitAngle, Color.GRAY)
+            MarkArrowFactory.constructExitArrow3D(roundingSide, exitAngle, arrowType).getAssets()
         );
     }
 
@@ -81,12 +78,9 @@ public class Marker3D extends Group {
 
     private void showArrow(List<Group> arrowList, int arrowListIndex) {
         if (arrowListIndex < arrowList.size()) {
-            if (arrowListIndex == 1) {;
-            }
-            Platform.runLater(() -> {
-                this.getChildren().remove(1);
-                this.getChildren().add(arrowList.get(arrowListIndex));
-            });
+            Platform.runLater(() ->
+                this.getChildren().setAll(mark.getAssets(), arrowList.get(arrowListIndex))
+            );
         }
     }
 
@@ -94,6 +88,6 @@ public class Marker3D extends Group {
      * Hides all arrows.
      */
     public void hideAllArrows() {
-        Platform.runLater(() -> this.getChildren().setAll(mark, new Group()));
+        Platform.runLater(() -> this.getChildren().setAll(mark.getAssets()));
     }
 }

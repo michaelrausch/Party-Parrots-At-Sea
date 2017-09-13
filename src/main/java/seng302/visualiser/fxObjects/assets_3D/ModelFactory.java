@@ -9,6 +9,7 @@ import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
@@ -78,7 +79,7 @@ public class ModelFactory {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().setAll(
             new Rotate(-90, new Point3D(0,0,1)),
-            new Scale(0.06, 0.06, 0.06)
+            new Scale(0.3, 0.3, 0.3)
         );
         return new BoatModel(boatAssets, null, boatType);
     }
@@ -137,6 +138,10 @@ public class ModelFactory {
                 return makeTrail(assets);
             case PLAYER_IDENTIFIER:
                 return makeIdentifierIcon(assets);
+            case START_ARROW:
+            case FINISH_ARROW:
+            case PLAIN_ARROW:
+                makeArrow(assets);
             default:
                 return new Model(new Group(assets), null);
         }
@@ -174,23 +179,17 @@ public class ModelFactory {
     }
 
     private static Model makeOcean(Group group) {
-//        group.setScaleY(Double.MAX_VALUE);
-//        group.setScaleX(Double.MAX_VALUE);
-        group.getTransforms().addAll(
-            new Rotate(90, new Point3D(1, 0, 0)),
-            new Scale(10,4,10)
+        Circle ocean = new Circle(
+            0,0,250, Color.SKYBLUE
         );
-//        group.getChildren().add(new AmbientLight());
-//        Circle ocean = new Circle(0,0,500, Color.SKYBLUE);
-//        ocean.setStroke(Color.TRANSPARENT);
-//        group.getChildren().add(ocean);
+        ocean.setStroke(Color.TRANSPARENT);
+        group.getChildren().add(ocean);
         return new Model(new Group(group), null);
     }
 
     private static Model makeBarrier(Group assets) {
         assets.getTransforms().addAll(
-            new Rotate(90, new Point3D(1,0,0)),
-            new Scale(1.5,1.5,1.5)
+            new Rotate(90, new Point3D(1,0,0))
         );
         return new Model(new Group(assets), null);
     }
@@ -213,7 +212,8 @@ public class ModelFactory {
 
     private static Model makeTrail(Group trailPiece) {
         trailPiece.getTransforms().addAll(
-            new Rotate(90, new Point3D(0,0,1))
+            new Rotate(-90, new Point3D(0,0,1)),
+            new Rotate(90, new Point3D(1,0,0))
         );
         return new Model(new Group(trailPiece), null);
     }
@@ -224,5 +224,13 @@ public class ModelFactory {
             new Scale(0.5, 0.5, 0.5)
         );
         return new Model(assets, null);
+    }
+
+    private static Model makeArrow(Group assets) {
+        assets.getTransforms().addAll(
+            new Rotate(90, new Point3D(1,0,0)),
+            new Scale(0.1, 0.1, 0.1)
+        );
+        return new Model(new Group(assets), null);
     }
 }

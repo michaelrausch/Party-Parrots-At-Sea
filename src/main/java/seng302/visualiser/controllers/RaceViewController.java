@@ -54,7 +54,7 @@ import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 import seng302.visualiser.fxObjects.ChatHistory;
-import seng302.visualiser.fxObjects.assets_2D.BoatObject;
+import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 
 /**
