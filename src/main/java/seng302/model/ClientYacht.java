@@ -253,7 +253,7 @@ public class ClientYacht extends Observable {
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
-//        this.currentVelocity = velocity;
+        this.currentVelocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
             yll.notifyLocation(this, lat, lng, heading, sailIn, velocity);
@@ -283,5 +283,9 @@ public class ClientYacht extends Observable {
         for (MarkRoundingListener listener : markRoundingListeners) {
             listener.notifyRounding(this, legNumber);
         }
+    }
+
+    public Double getCurrentVelocity() {
+        return currentVelocity;
     }
 }

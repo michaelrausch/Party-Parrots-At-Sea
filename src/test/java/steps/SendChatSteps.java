@@ -43,8 +43,11 @@ public class SendChatSteps {
             ie.printStackTrace();
         }
         mst.startGame();
-        Thread.sleep(200);
-    }
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }    }
 
 
     @When("^the first client has sent the message \"([^\"]*)\"$")
@@ -54,6 +57,11 @@ public class SendChatSteps {
 
     @Then("^the other client should receive the message \"([^\"]*)\"$")
     public void the_other_client_should_receive_the_message(String arg1) throws Throwable {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         Object[] packets = host.getPacketQueue().toArray();
         Pair<Integer, String> message = StreamParser.extractChatterText((StreamPacket) packets[packets.length - 1]);
         Assert.assertEquals("[time_prefix] <name_prefix> "  + arg1, message.getValue());

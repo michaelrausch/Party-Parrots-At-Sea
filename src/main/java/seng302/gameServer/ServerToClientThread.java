@@ -95,6 +95,10 @@ public class ServerToClientThread implements Runnable {
         thread.start();
     }
 
+    public Integer getSourceId() {
+        return sourceId;
+    }
+
     private void setUpPlayer(){
         BufferedReader fn;
         String fName = "";
@@ -219,9 +223,11 @@ public class ServerToClientThread implements Runnable {
                 }
             } catch (Exception e) {
                 closeSocket();
+                GameState.setPlayerHasLeftFlag(true);
                 return;
             }
         }
+        GameState.setPlayerHasLeftFlag(true);
         logger.warn("Closed serverToClientThread" + thread, 1);
     }
 
@@ -251,6 +257,10 @@ public class ServerToClientThread implements Runnable {
         } catch (IOException e) {
             System.out.println("IO error in server thread upon trying to close socket");
         }
+    }
+
+    public Boolean isSocketOpen() {
+        return !socket.isClosed();
     }
 
     private int readByte() throws Exception {

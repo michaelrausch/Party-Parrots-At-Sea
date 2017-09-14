@@ -1,33 +1,23 @@
 package seng302.visualiser.controllers.cells;
 
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDecorator;
-import com.sun.org.apache.bcel.internal.classfile.Unknown;
-import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ResourceBundle;
-
-import com.jfoenix.controls.JFXTextField;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.VBox;
 import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
-import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.ViewManager;
 
 public class ServerCell implements Initializable {
 
     //--------FXML BEGIN--------//
     //Layout
+    @FXML
+    private VBox serverCellVBox;
     @FXML
     private GridPane serverListCell;
     //Server Information
@@ -66,21 +56,21 @@ public class ServerCell implements Initializable {
         serverPlayerCount.setText(currPlayerCount);
         mapName.setText(mapNameString);
 
+        serverCellVBox.setOnMouseEntered(event -> Sounds.playHoverSound());
+
         serverConnButton.setOnMouseReleased(event -> {
             Sounds.playButtonClick();
             joinServer();
         });
+
     }
 
     /**
-     *
+     * Attempts to connect to the chosen server using the button on the serverCell.
      */
     private void joinServer() {
         System.out.println("Connecting to " + serverName.getText());
         ViewManager.getInstance().getGameClient().runAsClient(hostName, portNumber);
     }
 
-    public void playButtonHoverSound(MouseEvent mouseEvent) {
-        Sounds.playHoverSound();
-    }
 }

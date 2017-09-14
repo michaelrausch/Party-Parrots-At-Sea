@@ -5,15 +5,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerDescription;
@@ -34,20 +30,21 @@ public class StartScreenController implements Initializable{
     private List<ServerDescription> servers;
     private GameClient gameClient;
 
-    /**
-     *
-     */
-    private void setInitialDropShadow() {
-        DropShadow dropShadow = new DropShadow();
-        dropShadow.setRadius(10.0);
-        dropShadow.setOffsetX(3.0);
-        dropShadow.setOffsetY(4.0);
-        dropShadow.setColor(Color.color(0, 0, 0, 0.5));
-        headText.setEffect(dropShadow);
+    public void initialize(URL location, ResourceBundle resources) {
+        startBtn.setOnMousePressed(event -> {
+            startBtn.setText("LOADING...");
+            Sounds.playButtonClick();
+        });
+
+        startBtn.setOnMouseReleased(event -> goToServerBrowser());
+        startBtn.setOnMouseEntered(event -> Sounds.playHoverSound());
+
+        preloadServerListView();
+
     }
 
     /**
-     *
+     * Preloads the server list view to reduce load time between start screen and server list screen.
      */
     private void preloadServerListView(){
         try {
@@ -60,7 +57,7 @@ public class StartScreenController implements Initializable{
     }
 
     /**
-     *
+     * Changes the view to the Server Browser.
      */
     private void goToServerBrowser() {
         try {
@@ -70,40 +67,4 @@ public class StartScreenController implements Initializable{
         }
     }
 
-    public void initialize(URL location, ResourceBundle resources) {
-        startBtn.setOnMousePressed(event -> {
-            startBtn.setText("LOADING...");
-            Sounds.playButtonClick();
-        });
-
-        startBtn.setOnMouseReleased(event -> goToServerBrowser());
-
-        setInitialDropShadow();
-        preloadServerListView();
-
-    }
-
-    public void toggleMusic(ActionEvent actionEvent) {
-        Sounds.toggleMuteMusic();
-        Sounds.playButtonClick();
-        if (Sounds.isMusicMuted()) {
-//            muteMusicButton.setText("UnMute Music");
-        } else {
-//            muteMusicButton.setText("Mute Music");
-        }
-    }
-
-    public void toggleSounds(ActionEvent actionEvent) {
-        Sounds.toggleMuteEffects();
-        Sounds.playButtonClick();
-        if (Sounds.isSoundEffectsMuted()) {
-//            muteSoundsButton.setText("UnMute Sounds");
-        } else {
-//            muteSoundsButton.setText("Mute Sounds");
-        }
-    }
-
-    public void playButtonHoverSound(MouseEvent mouseEvent) {
-        Sounds.playHoverSound();
-    }
 }

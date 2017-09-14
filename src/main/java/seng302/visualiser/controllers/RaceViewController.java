@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -103,6 +105,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Label windDirectionLabel;
     @FXML
     private Label windSpeedLabel;
+    @FXML
+    private Label positionLabel, boatSpeedLabel, boatHeadingLabel;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -119,6 +123,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ImportantAnnotationsState importantAnnotations;
     private Polyline windArrow = new WindArrow(Color.LIGHTGRAY);
     private ObservableList<ClientYacht> selectionComboBoxList = FXCollections.observableArrayList();
+    private ClientYacht player;
 
     public void initialize() {
         Sounds.stopMusic();
@@ -171,6 +176,19 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         rvAnchorPane.setOnMouseClicked((event) ->
                 rvAnchorPane.requestFocus()
         );
+
+        //Makes the chat history non transparent when clicked on
+        chatInput.focusedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+                Boolean newValue) {
+                if (newValue) {
+                    chatHistory.increaseOpacity();
+                } else {
+                    chatHistory.decreaseOpacity();
+                }
+            }
+        });
     }
 
     public void loadRace (
@@ -181,6 +199,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         this.courseData = raceData;
         this.markers = raceData.getCompoundMarks();
         this.raceState = raceState;
+        this.player = player;
 
         raceState.getPlayerPositions().addListener((ListChangeListener<ClientYacht>) c -> {
             while (c.next()) {
@@ -410,6 +429,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                Platform.runLater(() -> updatePosition());
+                Platform.runLater(() -> updateBoatSpeed());
+                Platform.runLater(() -> updateBoatHeading());
                 Platform.runLater(() -> updateRaceTime());
             }
         }, 0, 1000);
@@ -471,6 +493,52 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         } else {
             timerLabel.setText(raceState.getRaceTimeStr());
         }
+    }
+
+    /**
+     * Updates player position with ordinal number up to 23rd position.
+     */
+    private void updatePosition() {
+        if (player.getPosition() == null) {
+            positionLabel.setText("Position:\n-");
+        } else {
+            switch (player.getPosition()) {
+                case 1:
+                    positionLabel.setText("Position:\n1st");
+                    break;
+                case 2:
+                    positionLabel.setText("Position:\n2nd");
+                    break;
+                case 3:
+                    positionLabel.setText("Position:\n3rd");
+                    break;
+                case 21:
+                    positionLabel.setText("Position:\n21st");
+                    break;
+                case 22:
+                    positionLabel.setText("Position:\n22nd");
+                    break;
+                case 23:
+                    positionLabel.setText("Position:\n23rd");
+                    break;
+                default:
+                    positionLabel.setText("Position:\n" + player.getPosition() + "th");
+            }
+        }
+    }
+
+    /**
+     * Updates boat speed value displayed on race view.
+     */
+    private void updateBoatSpeed() {
+        boatSpeedLabel.setText("Boat Speed:\n" + String.valueOf(player.getCurrentVelocity()));
+    }
+
+    /**
+     * Updates boat heading value displayed on race view.
+     */
+    private void updateBoatHeading() {
+        boatHeadingLabel.setText(String.format("Boat Heading:\n%.1f°", player.getHeading()));
     }
 
     /**
@@ -703,8 +771,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     }
 
     public boolean isChatInputFocused() {
-//        return chatInput.focusedProperty().getValue();
-        return false;
+        return chatInput.focusedProperty().getValue();
     }
 
     public String readChatInput() {

@@ -1,5 +1,15 @@
 package seng302.gameServer;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -15,17 +25,6 @@ import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -115,6 +114,20 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!terminated) {
+            if (GameState.getPlayerHasLeftFlag()) {
+                for (ServerToClientThread stc : serverToClientThreads) {
+                    if (!stc.isSocketOpen()) {
+                        GameState.getYachts().remove(stc.getSourceId());
+                        sendSetupMessages();
+                        try {
+                            stc.getSocket().close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                GameState.setPlayerHasLeftFlag(false);
+            }
             try {
                 Thread.sleep(1000 / CLIENT_UPDATES_PER_SECOND);
             } catch (InterruptedException e) {
@@ -183,21 +196,21 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         if (Math.floorMod(random.nextInt(), 2) == 0){
             direction += random.nextInt(4);
-            windSpeed += random.nextInt(20) + 50;
+            windSpeed += random.nextInt(20) + 459;
         }
         else{
             direction -= random.nextInt(4);
-            windSpeed -= random.nextInt(20) + 50;
+            windSpeed -= random.nextInt(20) + 459;
         }
 
         direction = Math.floorMod(direction, 360);
 
         if (windSpeed > MAX_WIND_SPEED){
-            windSpeed -= random.nextInt(1000);
+            windSpeed -= random.nextInt(500);
         }
 
         if (windSpeed <= MIN_WIND_SPEED){
-            windSpeed += random.nextInt(1000);
+            windSpeed += random.nextInt(500);
         }
 
         GameState.setWindSpeed(Double.valueOf(windSpeed));

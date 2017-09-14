@@ -2,7 +2,6 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
-import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.svg.SVGGlyph;
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,7 +15,6 @@ import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -25,7 +23,6 @@ import seng302.gameServer.ServerAdvertiser;
 import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
-import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
 public class ViewManager {
 
@@ -106,6 +103,12 @@ public class ViewManager {
         });
     }
 
+    /**
+     * Sets the decorator when a new one is created (and ideally the old one destroyed)
+     * Also allows injection of buttons into the decorator for custom functions.
+     *
+     * @param newDecorator The new JFXDecorator to handle the game window.
+     */
     private void setDecorator(JFXDecorator newDecorator) {
         decorator = newDecorator;
 
@@ -153,6 +156,9 @@ public class ViewManager {
 
     }
 
+    /**
+     * Determines if a PC has compatibility with the bonjour protocol for server detection.
+     */
     private void checkCompatibility() {
         if (BonjourInstallChecker.isBonjourSupported()) {
             BonjourInstallChecker.openInstallUrl();
@@ -210,6 +216,11 @@ public class ViewManager {
         return playerList;
     }
 
+    /**
+     * Change the view to the Lobby Screen
+     * @param disableReadyButton Boolean value so that clients can't try start a game.
+     * @return A LobbyController object for the Lobby Screen.
+     */
     public LobbyController goToLobby(Boolean disableReadyButton) {
         FXMLLoader loader = loadFxml("/views/LobbyView.fxml");
 
@@ -226,6 +237,11 @@ public class ViewManager {
 
         return loader.getController();
     }
+
+    /**
+     * Sets up the view for the race. Creating a new decorator and destroying the old one.
+     * @return A RaceViewController for the race view screen.
+     */
 
     public RaceViewController loadRaceView() {
         FXMLLoader loader = loadFxml("/views/RaceView.fxml");
@@ -276,30 +292,5 @@ public class ViewManager {
         }
 
         return loader.getController();
-    }
-
-    public JFXDialog loadCustomizationDialog(StackPane parent, LobbyController lobbyController,
-        Color playerColor, String name) {
-        FXMLLoader dialog = loadFxml("/views/dialogs/BoatCustomizeDialog.fxml");
-
-        JFXDialog customizationDialog = null;
-
-        try {
-            customizationDialog = new JFXDialog(parent, dialog.load(),
-                JFXDialog.DialogTransition.CENTER);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        BoatCustomizeController controller = dialog.getController();
-
-        controller.setParentController(lobbyController);
-        controller.setPlayerColor(playerColor);
-        controller.setPlayerName(name);
-        controller.setServerThread(gameClient.getServerThread());
-        controller.setPlayerColor(lobbyController.playersColor);
-
-        return customizationDialog;
     }
 }

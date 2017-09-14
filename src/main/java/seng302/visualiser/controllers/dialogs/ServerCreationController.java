@@ -4,6 +4,9 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -12,9 +15,6 @@ import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.validators.FieldLengthValidator;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 import seng302.visualiser.validators.ValidationTools;
 
 public class ServerCreationController implements Initializable {
@@ -48,10 +48,11 @@ public class ServerCreationController implements Initializable {
             Sounds.playButtonClick();
             validateServerSettings();
         });
+
     }
 
     /**
-     *
+     * Validates that a server has a valid name and creates the server.
      */
     private void validateServerSettings() {
         submitBtn.setText("CREATING...");
@@ -63,7 +64,7 @@ public class ServerCreationController implements Initializable {
     }
 
     /**
-     *
+     * Creates a server with a given set of details.
      */
     private void createServer() {
         ServerDescription serverDescription = ViewManager.getInstance().getGameClient()
@@ -75,7 +76,7 @@ public class ServerCreationController implements Initializable {
     }
 
     /**
-     *
+     * Updates a label as the user slides along the max players slider.
      */
     private void updateMaxPlayerLabel() {
         maxPlayersSlider.setValue(Math.floor(maxPlayersSlider.getValue()));

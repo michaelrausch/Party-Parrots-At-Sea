@@ -24,10 +24,10 @@ public class ChatHistory extends ScrollPane {
         this.setMaxWidth(Double.MAX_VALUE);
         this.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
         this.setHbarPolicy(ScrollBarPolicy.NEVER);
-        this.lookup(".scroll-pane").setStyle("-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1);");
+        this.lookup(".scroll-pane").setStyle("-fx-background: rgba(135, 206, 235, 0.0); -fx-background-color: rgba(135, 206, 235, 0.0);");
 
         this.textFlow.setStyle(
-            "-fx-background: rgba(255, 255, 255, 0.1); -fx-background-color: rgba(255, 255, 255, 0.1); -fx-padding: 10px"
+            "-fx-background: rgba(135, 206, 235, 0.0); -fx-background-color: rgba(135, 206, 235, 0.0); -fx-padding: 10px"
         );
         //This makes the window auto scroll.
         textFlow.getChildren().addListener((ListChangeListener<Node>) c ->
@@ -71,6 +71,19 @@ public class ChatHistory extends ScrollPane {
 
     }
 
+    public void increaseOpacity() {
+        this.lookup(".scroll-pane").setStyle("-fx-background: rgba(255, 255, 255, 0.2); -fx-background-color: rgba(255, 255, 255, 0.2);");
 
+        this.textFlow.setStyle(
+            "-fx-background: rgba(255, 255, 255, 0.2); -fx-background-color: rgba(255, 255, 255, 0.2); -fx-padding: 10px"
+        );
+    }
 
+    public void decreaseOpacity() {
+        this.lookup(".scroll-pane").setStyle("-fx-background: rgba(135, 206, 235, 0.0); -fx-background-color: rgba(135, 206, 235, 0.0);");
+
+        this.textFlow.setStyle(
+            "-fx-background: rgba(135, 206, 235, 0.0); -fx-background-color: rgba(135, 206, 235, 0.0); -fx-padding: 10px"
+        );
+    }
 }

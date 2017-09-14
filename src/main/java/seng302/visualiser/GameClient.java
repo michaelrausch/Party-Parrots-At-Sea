@@ -44,7 +44,6 @@ import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.FinishScreenViewController;
 import seng302.visualiser.controllers.LobbyController;
-import seng302.visualiser.controllers.LobbyController_old;
 import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
 
@@ -199,23 +198,6 @@ public class GameClient {
     private void startClientToServerThread (String ipAddress, int portNumber) throws IOException {
         socketThread = new ClientToServerThread(ipAddress, portNumber);
         socketThread.addStreamObserver(this::parsePackets);
-    }
-
-    /**
-     * Loads a view of the lobby into the clients pane
-     *
-     * @return the lobby controller.
-     */
-    private LobbyController_old loadLobby() {
-        FXMLLoader fxmlLoader = new FXMLLoader(
-            GameClient.class.getResource("/views/LobbyView.fxml"));
-        try {
-            holderPane.getChildren().clear();
-            holderPane.getChildren().add(fxmlLoader.load());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fxmlLoader.getController();
     }
 
     private void loadRaceView() {
