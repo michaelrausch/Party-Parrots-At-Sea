@@ -6,6 +6,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.StrokeLineCap;
@@ -38,31 +39,46 @@ public class MarkArrowFactory {
     public static Model constructEntryArrow3D (
         RoundingSide roundingSide, double angle, ModelType type) {
         Model entryArrow = ModelFactory.importModel(type);
+
+        double angleDeg = angle;
+        angle = 180 - angle;
         angle = Math.toRadians(angle);
+
         int multiplier = roundingSide == RoundingSide.STARBOARD ? 1 : -1;
-        double relativeX = multiplier * 10 * Math.sin(angle + Math.PI / 8);
-        double relativeY = multiplier * 10 * Math.cos(angle + Math.PI / 8);
-        double xStart = relativeX + multiplier * 10 * Math.sin(angle - Math.PI / 2);
-        double yStart = relativeY + multiplier * 10 * Math.cos(angle - Math.PI / 2);
+        double relativeX = multiplier * 5.7 * Math.sin(angle + Math.PI / 2);
+        double relativeY = multiplier * 5.7 * Math.cos(angle + Math.PI / 2);
+        double xStart = relativeX + multiplier * 8 * Math.sin(angle + Math.PI);
+        double yStart = relativeY + multiplier * 8 * Math.cos(angle + Math.PI);
         entryArrow.getAssets().getTransforms().addAll(
             new Translate(xStart, yStart, 0),
-            new Rotate(Math.toDegrees(angle), new Point3D(0,0,1))
+            new Rotate(angleDeg, new Point3D(0,0,1))
         );
-        return  entryArrow;
+        Circle c = new Circle(relativeX, relativeY, 1, Color.RED);
+        Circle v = new Circle(xStart, yStart, 1, Color.BLUE);
+        return new Model(new Group(c, v, entryArrow.getAssets()), null);
     }
 
     public static Model constructExitArrow3D (
         RoundingSide roundingSide, double angle, ModelType type) {
         Model exitArrow = ModelFactory.importModel(type);
+
+        double angleDeg = angle;
+        angle = 180 - angle;
         angle = Math.toRadians(angle);
+
         int multiplier = roundingSide == RoundingSide.STARBOARD ? 1 : -1;
-        double xStart = multiplier * 6 * Math.sin(angle + Math.PI / 8);
-        double yStart = multiplier * 6 * Math.cos(angle + Math.PI / 8);
+        double xStart = multiplier * 5.7 * Math.sin(angle + Math.PI / 2);
+        double yStart = multiplier * 5.7 * Math.cos(angle + Math.PI / 2);
+
         exitArrow.getAssets().getTransforms().addAll(
             new Translate(xStart, yStart, 0),
-            new Rotate(Math.toDegrees(angle), new Point3D(0,0,1))
+            new Rotate(angleDeg, new Point3D(0,0,1))
         );
-        return exitArrow;
+        Circle c = new Circle(xStart, yStart, 1, Color.RED);
+        if (roundingSide == RoundingSide.PORT) {
+            c = new Circle(xStart, yStart, 1, Color.GREENYELLOW);
+        }
+        return new Model(new Group(c, exitArrow.getAssets()), null);
     }
 
 

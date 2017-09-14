@@ -86,6 +86,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Label timerLabel;
     @FXML
     private StackPane contentAnchorPane;
+
     private GridPane contentGridPane;
     @FXML
     private AnchorPane rvAnchorPane;

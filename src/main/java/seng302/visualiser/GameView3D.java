@@ -590,7 +590,7 @@ public class GameView3D {
                         new Scale(1, lastLocation.distance(location) / 5, 1)
                     );
                     trail.getChildren().add(segment);
-                    if (trail.getChildren().size() > 100) {
+                    if (trail.getChildren().size() > 50) {
                         trail.getChildren().remove(0);
                     }
                     lastLocation = location;
