@@ -76,17 +76,6 @@ public class GameClient {
      */
     public GameClient(Pane holder) {
         this.holderPane = holder;
-//        if (holderPane.getParent() == null) {
-//            this.holderPane.parentProperty().addListener(((observable, oldValue, newValue) -> {
-//                if (newValue != null) {
-//                    newValue.getScene().setOnKeyPressed(this::keyPressed);
-//                    newValue.getScene().setOnKeyReleased(this::keyReleased);
-//                }
-//            }));
-//        } else {
-//            this.holderPane.getParent().getScene().setOnKeyPressed(this::keyPressed);
-//            this.holderPane.getParent().getScene().setOnKeyReleased(this::keyReleased);
-//        }
     }
 
     /**
@@ -117,22 +106,10 @@ public class GameClient {
             ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
             ViewManager.getInstance().setProperty("mapName", regattaData.getCourseName());
 
-            // TODO disable ready button;
-
-            //LobbyController_old lobbyController = loadLobby();
-            //lobbyController.setSocketThread(socketThread);
-            //lobbyController.setPlayerID(socketThread.getClientId());
-            //lobbyController.setPlayerListSource(clientLobbyList);
-            //lobbyController.disableReadyButton();
-
-
-
-//            lobbyController.addCloseListener((exitCause) -> this.loadStartScreen());
             this.lobbyController = ViewManager.getInstance().goToLobby(true);
 
         } catch (IOException ioe) {
             showConnectionError("Unable to find server");
-            //Platform.runLater(this::loadStartScreen);
         }
     }
 
@@ -214,6 +191,7 @@ public class GameClient {
         Sounds.stopMusic();
         Sounds.stopSoundEffects();
         Sounds.playFinishMusic();
+        System.out.println("ITS WORKING HERE");
         FXMLLoader fxmlLoader = loadFXMLToHolder("/views/FinishScreenView.fxml");
         FinishScreenViewController controller = fxmlLoader.getController();
         controller.setFinishers(raceState.getPlayerPositions());
