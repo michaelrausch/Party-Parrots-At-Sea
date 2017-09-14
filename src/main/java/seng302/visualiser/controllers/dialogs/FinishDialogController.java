@@ -30,8 +30,8 @@ public class FinishDialogController implements Initializable {
 
     public void setFinishedBoats(ArrayList<ClientYacht> finishedBoats) {
         finishersList.getItems().clear();
-        for (ClientYacht yacht : finishedBoats) {
-            finishersList.getItems().add(new Label(yacht.getBoatName()));
+        for (int i = 0; i < finishedBoats.size(); i++) {
+            finishersList.getItems().add(new Label(Integer.toString(i+1) +".  " + finishedBoats.get(i).getBoatName()));
         }
     }
 }
