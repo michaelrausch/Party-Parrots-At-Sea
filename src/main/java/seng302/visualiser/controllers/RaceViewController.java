@@ -88,6 +88,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Label timerLabel;
     @FXML
     private StackPane contentAnchorPane;
+
     private GridPane contentGridPane;
     @FXML
     private AnchorPane rvAnchorPane;
@@ -249,9 +250,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 .bind(ViewManager.getInstance().getStage().widthProperty());
             ((SubScene) gameView.getAssets()).heightProperty()
                 .bind(ViewManager.getInstance().getStage().heightProperty());
-            System.out.println(((SubScene) gameView.getAssets()).getHeight());
-            System.out.println(((SubScene) gameView.getAssets()).getWidth());
-
         });
         gameView.setBoats(new ArrayList<>(participants.values()));
         gameView.updateBorder(raceData.getCourseLimit());

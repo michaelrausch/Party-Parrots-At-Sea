@@ -245,11 +245,6 @@ public class GameView3D {
 
     private void createStartLineArrows () {
         for (Mark mark : course.get(0).getMarks()) {
-            System.out.println(
-                "GeoUtility.getBearing(mark, course.get(1).getMidPoint()) = " + GeoUtility
-                    .getBearing(mark, course.get(1).getMidPoint()));
-            System.out.println("mark = " + mark);
-            System.out.println("course.get(1) = " + course.get(1));
             markerObjects.get(mark).addArrows(
                 mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                 0d, //90
@@ -590,7 +585,7 @@ public class GameView3D {
                         new Scale(1, lastLocation.distance(location) / 5, 1)
                     );
                     trail.getChildren().add(segment);
-                    if (trail.getChildren().size() > 100) {
+                    if (trail.getChildren().size() > 50) {
                         trail.getChildren().remove(0);
                     }
                     lastLocation = location;
