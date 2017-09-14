@@ -210,8 +210,6 @@ public class GameClient {
 
     }
 
-
-
     private void loadFinishScreenView() {
         Sounds.stopMusic();
         Sounds.stopSoundEffects();
