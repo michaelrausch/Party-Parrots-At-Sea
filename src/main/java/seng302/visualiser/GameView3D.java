@@ -161,7 +161,7 @@ public class GameView3D {
             }
         }
 
-        createMarkArrows(sequence);
+        createMarkArrows();
 
         //Scale race to markers if there is no border.
         if (borderPoints == null) {
@@ -228,11 +228,9 @@ public class GameView3D {
     /**
      * Calculates all the data needed for to create mark arrows. Requires that a course has been
      * added to the gameview.
-     * @param sequence The order in which marks are traversed.
      */
-    private void createMarkArrows (List<Corner> sequence) {
-        for (int i=1; i < sequence.size()-1; i++) { //General case.
-            // TODO: 16/08/17 This comparison doesn't need to exist but ehhh....
+    private void createMarkArrows () {
+        for (int i=1; i < course.size()-1; i++) { //General case.
             for (Mark mark : course.get(i).getMarks()) {
                 markerObjects.get(mark).addArrows(
                     mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
@@ -247,6 +245,11 @@ public class GameView3D {
 
     private void createStartLineArrows () {
         for (Mark mark : course.get(0).getMarks()) {
+            System.out.println(
+                "GeoUtility.getBearing(mark, course.get(1).getMidPoint()) = " + GeoUtility
+                    .getBearing(mark, course.get(1).getMidPoint()));
+            System.out.println("mark = " + mark);
+            System.out.println("course.get(1) = " + course.get(1));
             markerObjects.get(mark).addArrows(
                 mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                 0d, //90

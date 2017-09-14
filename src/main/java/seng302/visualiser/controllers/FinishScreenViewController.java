@@ -42,8 +42,8 @@ public class FinishScreenViewController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         finishScreenGridPane.getStylesheets()
-            .add(getClass().getResource("/css/master.css").toString());
-        finishOrderTable.getStylesheets().add(getClass().getResource("/css/master.css").toString());
+            .add(getClass().getResource("/css/Master.css").toString());
+        finishOrderTable.getStylesheets().add(getClass().getResource("/css/Master.css").toString());
 
         // set up data for table
         finishOrderTable.setItems(data);

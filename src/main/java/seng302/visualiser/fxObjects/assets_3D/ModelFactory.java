@@ -228,8 +228,7 @@ public class ModelFactory {
 
     private static Model makeArrow(Group assets) {
         assets.getTransforms().addAll(
-            new Rotate(90, new Point3D(1,0,0)),
-            new Scale(0.1, 0.1, 0.1)
+            new Rotate(90, new Point3D(1,0,0))
         );
         return new Model(new Group(assets), null);
     }
