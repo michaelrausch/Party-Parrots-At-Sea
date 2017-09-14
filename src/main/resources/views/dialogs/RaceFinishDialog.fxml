@@ -35,7 +35,7 @@
         </GridPane>
     </children>
     <stylesheets>
-        <String fx:value="/css/dialogs/BoatCustomize.css"/>
+        <String fx:value="/css/dialogs/FinishScreen.css"/>
         <String fx:value="/css/Master.css"/>
     </stylesheets>
 </JFXDialogLayout>

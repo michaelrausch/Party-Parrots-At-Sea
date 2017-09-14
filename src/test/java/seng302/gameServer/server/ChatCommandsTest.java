@@ -61,7 +61,7 @@ public class ChatCommandsTest {
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
             }
-            host.sendChatterMessage("[time_prefix] <name_prefix> >finish");
+            host.sendChatterMessage("[time_prefix] <name_prefix> /finish");
             dcSent = true;
             try {
                 Thread.sleep(2000);
@@ -104,7 +104,7 @@ public class ChatCommandsTest {
             ie.printStackTrace();
         }
         mst.startGame();
-        host.sendChatterMessage("[time_prefix] <name_prefix> >speed 5");
+        host.sendChatterMessage("[time_prefix] <name_prefix> /speed 5");
         try {
             Thread.sleep(100);
         } catch (InterruptedException ie) {
@@ -143,7 +143,7 @@ public class ChatCommandsTest {
             ie.printStackTrace();
         }
         mst.startGame();
-        host.sendChatterMessage("[time_prefix] <name_prefix> >speed fdgdgdfg");
+        host.sendChatterMessage("[time_prefix] <name_prefix> /speed fdgdgdfg");
         try {
             Thread.sleep(100);
         } catch (InterruptedException ie) {
@@ -188,7 +188,7 @@ public class ChatCommandsTest {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        client.sendChatterMessage("[time_prefix] <name_prefix> >speed 5.0");
+        client.sendChatterMessage("[time_prefix] <name_prefix> /speed 5.0");
         try {
             Thread.sleep(200);
         } catch (InterruptedException ie) {
@@ -248,7 +248,7 @@ public class ChatCommandsTest {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-        host.sendChatterMessage("[time_prefix] <name_prefix> >finish");
+        host.sendChatterMessage("[time_prefix] <name_prefix> /finish");
         dcSent = true;
     }
 }

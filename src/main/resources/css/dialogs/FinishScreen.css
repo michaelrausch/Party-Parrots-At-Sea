@@ -1,0 +1,21 @@
+#raceFinishLabel {
+    -fx-font-size: 23px !important;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#finishersList {
+
+}
+
+#playAgain {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-font-size: 20px !important;
+    -fx-effect: -fx-pp-dropshadow-dark;
+    -fx-min-width: 130px;
+}
+
+#playAgain:hover {
+    -fx-font-size: 23px !important;
+    -fx-background-color: -fx-pp-light-theme-color;
+}
