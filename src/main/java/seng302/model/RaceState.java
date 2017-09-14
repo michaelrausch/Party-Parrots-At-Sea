@@ -3,11 +3,8 @@ package seng302.model;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Observable;
 import java.util.TimeZone;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
@@ -34,8 +31,9 @@ public class RaceState {
     private ReadOnlyDoubleWrapper windDirection = new ReadOnlyDoubleWrapper();
     private long serverSystemTime;
     private long expectedStartTime;
-    private boolean isRaceStarted = false;
+    private boolean raceRunning = false;
     private boolean gunFired = false;
+    private boolean raceFinished = false;
     long timeTillStart;
     private ObservableList<ClientYacht> playerPositions;
     private List<ClientYacht> collisions = new ArrayList<>();
@@ -50,7 +48,7 @@ public class RaceState {
         this.windDirection.set(data.getWindDirection());
         this.serverSystemTime = data.getCurrentTime();
         this.expectedStartTime = data.getExpectedStartTime();
-        this.isRaceStarted = data.isRaceStarted();
+        this.raceRunning = data.isRaceStarted();
     }
 
     public void setTimeZone (TimeZone timeZone) {
@@ -95,9 +93,12 @@ public class RaceState {
     }
 
     public boolean isRaceStarted () {
-        return isRaceStarted;
+        return raceRunning;
     }
 
+    public void setRaceStarted(Boolean value) {
+        this.raceRunning = value;
+    }
     public void setBoats(Collection<ClientYacht> clientYachts) {
         playerPositions.setAll(clientYachts);
     }
@@ -124,5 +125,13 @@ public class RaceState {
 
     public void removeCollisionListener(CollisionListener collisionListener) {
         collisionListeners.remove(collisionListener);
+    }
+
+    public void setRaceFinished() {
+        raceFinished = true;
+    }
+
+    public Boolean getRaceFinished() {
+        return raceFinished;
     }
 }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXDialogLayout?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import java.lang.String?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+  minWidth="-Infinity" prefWidth="400.0" xmlns="http://javafx.com/javafx/8"
+  xmlns:fx="http://javafx.com/fxml/1"
+  fx:controller="seng302.visualiser.controllers.dialogs.FinishDialogController">
+    <children>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="90.0" minHeight="90.0" prefHeight="90.0"
+                  vgrow="SOMETIMES"/>
+                <RowConstraints maxHeight="100.0" minHeight="100.0" prefHeight="100.0"
+                  vgrow="SOMETIMES"/>
+                <RowConstraints maxHeight="164.0" minHeight="100.0" prefHeight="126.0"
+                  vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <children>
+                <JFXButton fx:id="playAgain" prefHeight="45.0" prefWidth="220.0" text="PLAY AGAIN"
+                  GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER"/>
+                <JFXListView fx:id="finishersList" GridPane.rowIndex="1"/>
+                <Label fx:id="raceFinishLabel" text="RACE OVER" GridPane.halignment="CENTER"
+                  GridPane.valignment="CENTER"/>
+            </children>
+        </GridPane>
+    </children>
+    <stylesheets>
+        <String fx:value="/css/dialogs/BoatCustomize.css"/>
+        <String fx:value="/css/Master.css"/>
+    </stylesheets>
+</JFXDialogLayout>

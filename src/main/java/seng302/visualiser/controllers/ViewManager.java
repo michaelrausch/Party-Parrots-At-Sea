@@ -248,14 +248,12 @@ public class ViewManager {
 
     public RaceViewController loadRaceView() {
         FXMLLoader loader = loadFxml("/views/RaceView.fxml");
-
         // have to create a new stage and set the race view maximized as JFoenix decorator has
         // bug causes stage cannot be fully maximised.
         Platform.runLater(() -> {
             try {
                 stage.close();
                 stage = new Stage();
-
                 JFXDecorator decorator = new JFXDecorator(stage, loader.load(), false, true, true);
                 decorator.setCustomMaximize(true);
                 decorator.applyCss();
@@ -263,6 +261,8 @@ public class ViewManager {
                     .add(getClass().getResource("/css/Master.css").toExternalForm());
                 setDecorator(decorator);
                 Scene scene = new Scene(decorator);
+                RaceViewController raceViewController = loader.getController();
+                gameClient.setRaceViewController(raceViewController);
                 // set key press event to catch key stoke
                 scene.setOnKeyPressed(gameClient::keyPressed);
                 scene.setOnKeyReleased(gameClient::keyReleased);

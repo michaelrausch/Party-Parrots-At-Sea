@@ -14,7 +14,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
@@ -42,7 +41,6 @@ import seng302.utilities.Sounds;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
-import seng302.visualiser.controllers.FinishScreenViewController;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
@@ -64,6 +62,7 @@ public class GameClient {
     private RaceXMLData courseData;
     private RaceState raceState = new RaceState();
     private LobbyController lobbyController;
+    private RaceViewController raceViewController;
 
     private ArrayList<ClientYacht> finishedBoats = new ArrayList<>();
 
@@ -177,40 +176,8 @@ public class GameClient {
         socketThread.addStreamObserver(this::parsePackets);
     }
 
-    private void loadRaceView() {
-        FXMLLoader fxmlLoader = loadFXMLToHolder("/views/RaceView.fxml");
-        holderPane.getScene().setOnKeyPressed(this::keyPressed);
-        holderPane.getScene().setOnKeyReleased(this::keyReleased);
-        raceView = fxmlLoader.getController();
-        ClientYacht player = allBoatsMap.get(socketThread.getClientId());
-        raceView.loadRace(allBoatsMap, courseData, raceState, player);
-
-    }
-
-    private void loadFinishScreenView() {
-        Sounds.stopMusic();
-        Sounds.stopSoundEffects();
-        Sounds.playFinishMusic();
-        System.out.println("ITS WORKING HERE");
-        FXMLLoader fxmlLoader = loadFXMLToHolder("/views/FinishScreenView.fxml");
-        FinishScreenViewController controller = fxmlLoader.getController();
-        controller.setFinishers(raceState.getPlayerPositions());
-    }
-
-    private FXMLLoader loadFXMLToHolder(String fxmlLocation) {
-        FXMLLoader fxmlLoader = new FXMLLoader(
-            getClass().getResource(fxmlLocation)
-        );
-        try {
-            final Node fxmlLoaderFX = fxmlLoader.load();
-            Platform.runLater(() -> {
-                holderPane.getChildren().clear();
-                holderPane.getChildren().add(fxmlLoaderFX);
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fxmlLoader;
+    public void setRaceViewController(RaceViewController controller) {
+        this.raceViewController = controller;
     }
 
     private void parsePackets() {
@@ -374,10 +341,13 @@ public class GameClient {
             }
 
             if (raceFinished) {
+                System.out.println(raceViewController);
+                raceViewController.showFinishDialog(finishedBoats);
                 Sounds.playFinishSound();
                 close();
-                loadFinishScreenView();
+                //loadFinishScreenView();
             }
+            raceState.setRaceFinished();
         }
     }
 
@@ -391,7 +361,6 @@ public class GameClient {
     private void close() {
         socketThread.setSocketToClose();
     }
-
 
     /**
      * Handle the key-pressed event from the text field.
