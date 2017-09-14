@@ -110,7 +110,6 @@ public class LobbyController implements Initializable {
     }
 
     private JFXDialog createCustomizeDialog() {
-        // TODO: 12/09/17 ajm412: Why is this here? is there no better way we can do this? Ideally inside the LobbyController.
         FXMLLoader dialog = new FXMLLoader(
             getClass().getResource("/views/dialogs/BoatCustomizeDialog.fxml"));
 
@@ -119,7 +118,6 @@ public class LobbyController implements Initializable {
         try {
             customizationDialog = new JFXDialog(serverListMainStackPane, dialog.load(),
                 JFXDialog.DialogTransition.CENTER);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -128,6 +126,9 @@ public class LobbyController implements Initializable {
 
         controller.setParentController(this);
         controller.setPlayerColor(this.playersColor);
+        controller.setPlayerName(this.playerBoats
+            .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
+            .getBoatName());
 
         return customizationDialog;
     }
