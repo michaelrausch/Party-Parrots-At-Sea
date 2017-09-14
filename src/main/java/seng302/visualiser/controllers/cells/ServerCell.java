@@ -69,7 +69,6 @@ public class ServerCell implements Initializable {
      * Attempts to connect to the chosen server using the button on the serverCell.
      */
     private void joinServer() {
-        System.out.println("Connecting to " + serverName.getText());
         ViewManager.getInstance().getGameClient().runAsClient(hostName, portNumber);
     }
 
