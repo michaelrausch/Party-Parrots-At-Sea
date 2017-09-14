@@ -16,6 +16,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
+import seng302.visualiser.fxObjects.MarkArrowFactory;
 import seng302.visualiser.fxObjects.assets_2D.*;
 
 import java.util.*;

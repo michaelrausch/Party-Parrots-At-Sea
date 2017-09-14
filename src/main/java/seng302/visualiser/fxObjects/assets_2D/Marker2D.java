@@ -7,6 +7,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import seng302.visualiser.fxObjects.MarkArrowFactory;
 
 /**
  * Visual object for a mark. Contains a coloured circle and any specified arrows.
