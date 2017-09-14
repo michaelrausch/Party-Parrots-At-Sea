@@ -504,6 +504,8 @@ public class GameClient {
         GameState.setCurrentStage(GameStages.CANCELLED);
         if (server != null) server.terminate();
         if (socketThread != null) socketThread.setSocketToClose();
+        server = null;
+        socketThread = null;
     }
 
     public Map<Integer, ClientYacht> getAllBoatsMap() {

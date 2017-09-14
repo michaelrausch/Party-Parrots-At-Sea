@@ -135,7 +135,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             }
             if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState
                 .getCustomizationFlag()) {
-                // TODO: 16/08/17 ajm412: This can probably be done in a nicer way via those fancy functional interfaces.
                 sendSetupMessages();
                 GameState.resetCustomizationFlag();
             }
