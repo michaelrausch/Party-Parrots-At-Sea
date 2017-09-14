@@ -341,10 +341,10 @@ public class GameClient {
             }
 
             if (raceFinished) {
-                System.out.println(raceViewController);
                 raceViewController.showFinishDialog(finishedBoats);
                 Sounds.playFinishSound();
                 close();
+                ViewManager.getInstance().getGameClient().stopGame();
                 //loadFinishScreenView();
             }
             raceState.setRaceFinished();
@@ -450,7 +450,7 @@ public class GameClient {
         if (server != null) server.terminate();
         if (socketThread != null) socketThread.setSocketToClose();
         server = null;
-        socketThread = null;
+//        socketThread = null;
     }
 
     public Map<Integer, ClientYacht> getAllBoatsMap() {

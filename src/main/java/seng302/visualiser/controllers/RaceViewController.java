@@ -200,7 +200,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
         raceState.setRaceStarted(false);
         finishDialogController.setFinishedBoats(finishedBoats);
-        ViewManager.getInstance().getGameClient().stopGame();
         finishScreenDialog.show();
     }
 
