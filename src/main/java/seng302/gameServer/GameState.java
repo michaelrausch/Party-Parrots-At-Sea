@@ -1,35 +1,12 @@
 package seng302.gameServer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import javafx.scene.paint.Color;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatStatus;
-import seng302.gameServer.messages.ChatterMessage;
-import seng302.gameServer.messages.CustomizeRequestType;
-import seng302.gameServer.messages.MarkRoundingMessage;
-import seng302.gameServer.messages.MarkType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RoundingBoatStatus;
-import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.gameServer.messages.YachtEventType;
-import seng302.model.GeoPoint;
-import seng302.model.Limit;
-import seng302.model.Player;
-import seng302.model.PolarTable;
-import seng302.model.ServerYacht;
+import seng302.gameServer.messages.*;
+import seng302.model.*;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
@@ -37,6 +14,10 @@ import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.XMLParser;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.*;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -791,25 +772,27 @@ public class GameState implements Runnable {
                 roundingMark.getSourceID()));
     }
 
+    public static void sendServerMessage(String message){
+        notifyMessageListeners(new ChatterMessage(
+                420,
+                "SERVER: " + message
+        ));
+    }
 
     public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
         String chatterText = chatterMessage.getMessage();
         String[] words = chatterText.split("\\s+");
         if (words.length > 2 && isHost) {
             switch (words[2].trim()) {
-                case ">speed":
+                case "/speed":
                     try {
-                        setSpeedMultiplier(Double.valueOf(words[3]));
-                        notifyMessageListeners(new ChatterMessage(
-                            chatterMessage.getMessage_type(),
-                            "SERVER: Speed modifier set to x" + words[3]
-                        ));
+                        sendServerMessage("Speed modifier set to x" + words[3]);
                     } catch (Exception e) {
                         Logger logger = LoggerFactory.getLogger(GameState.class);
                         logger.error("cannot parse >speed value");
                     }
                     return;
-                case ">finish":
+                case "/finish":
                     notifyMessageListeners(new ChatterMessage(
                         chatterMessage.getMessage_type(),
                         "SERVER: Game will now finish"
