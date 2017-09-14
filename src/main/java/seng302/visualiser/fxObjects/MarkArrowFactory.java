@@ -6,7 +6,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.StrokeLineCap;
@@ -47,15 +46,13 @@ public class MarkArrowFactory {
         int multiplier = roundingSide == RoundingSide.STARBOARD ? 1 : -1;
         double relativeX = multiplier * 5.7 * Math.sin(angle + Math.PI / 2);
         double relativeY = multiplier * 5.7 * Math.cos(angle + Math.PI / 2);
-        double xStart = relativeX + multiplier * 8 * Math.sin(angle + Math.PI);
-        double yStart = relativeY + multiplier * 8 * Math.cos(angle + Math.PI);
+        double xStart = relativeX + -10 * Math.sin(angle);
+        double yStart = relativeY + -10 * Math.cos(angle);
         entryArrow.getAssets().getTransforms().addAll(
             new Translate(xStart, yStart, 0),
             new Rotate(angleDeg, new Point3D(0,0,1))
         );
-        Circle c = new Circle(relativeX, relativeY, 1, Color.RED);
-        Circle v = new Circle(xStart, yStart, 1, Color.BLUE);
-        return new Model(new Group(c, v, entryArrow.getAssets()), null);
+        return entryArrow;
     }
 
     public static Model constructExitArrow3D (
@@ -74,11 +71,8 @@ public class MarkArrowFactory {
             new Translate(xStart, yStart, 0),
             new Rotate(angleDeg, new Point3D(0,0,1))
         );
-        Circle c = new Circle(xStart, yStart, 1, Color.RED);
-        if (roundingSide == RoundingSide.PORT) {
-            c = new Circle(xStart, yStart, 1, Color.GREENYELLOW);
-        }
-        return new Model(new Group(c, exitArrow.getAssets()), null);
+
+        return exitArrow;
     }
 
 
