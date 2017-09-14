@@ -91,7 +91,6 @@ public class LobbyController implements Initializable {
 
         Platform.runLater(() -> {
             Integer playerId = ViewManager.getInstance().getGameClient().getServerThread().getClientId();
-            String name = ViewManager.getInstance().getGameClient().getPlayerNames().get(playerId - 1);
 
             playersColor = Colors.getColor(playerId - 1);
             customizationDialog = createCustomizeDialog();

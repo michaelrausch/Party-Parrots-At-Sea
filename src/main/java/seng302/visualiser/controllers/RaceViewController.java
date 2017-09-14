@@ -1,6 +1,7 @@
 package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +56,10 @@ import seng302.visualiser.GameView3D;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
+import seng302.visualiser.controllers.dialogs.FinishDialogController;
 import seng302.visualiser.fxObjects.ChatHistory;
-import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
+import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 /**
  * Controller class that manages the display of a race
@@ -124,10 +126,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Polyline windArrow = new WindArrow(Color.LIGHTGRAY);
     private ObservableList<ClientYacht> selectionComboBoxList = FXCollections.observableArrayList();
     private ClientYacht player;
+    private JFXDialog finishScreenDialog;
+    private FinishDialogController finishDialogController;
 
     public void initialize() {
         Sounds.stopMusic();
         Sounds.playRaceMusic();
+
+        finishScreenDialog = createFinishDialog();
 
         // Load a default important annotation state
         //importantAnnotations = new ImportantAnnotationsState();
@@ -189,6 +195,31 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
             }
         });
+    }
+
+    public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
+        raceState.setRaceStarted(false);
+        finishDialogController.setFinishedBoats(finishedBoats);
+        ViewManager.getInstance().getGameClient().stopGame();
+        finishScreenDialog.show();
+    }
+
+    private JFXDialog createFinishDialog() {
+        FXMLLoader dialog = new FXMLLoader(
+            getClass().getResource("/views/dialogs/RaceFinishDialog.fxml"));
+
+        JFXDialog finishScreenDialog = null;
+
+        try {
+            finishScreenDialog = new JFXDialog(contentAnchorPane, dialog.load(),
+                JFXDialog.DialogTransition.CENTER);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        finishDialogController = dialog.getController();
+
+        return finishScreenDialog;
     }
 
     public void loadRace (
