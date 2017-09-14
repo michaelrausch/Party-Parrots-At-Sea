@@ -38,10 +38,6 @@ public class BoatCustomizeController implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        submitBtn.setOnMouseReleased(event -> {
-            Sounds.playButtonClick();
-            submitCustomization();
-        });
 
         socketThread = ViewManager.getInstance().getGameClient().getServerThread();
 
@@ -52,6 +48,11 @@ public class BoatCustomizeController implements Initializable{
         playerNameLengthValidator.setMessage("Player name too long.");
 
         boatName.setValidators(playerNameLengthValidator, playerNameReqValidator);
+
+        submitBtn.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
+            submitCustomization();
+        });
 
         submitBtn.setOnMouseEntered(e -> Sounds.playHoverSound());
     }

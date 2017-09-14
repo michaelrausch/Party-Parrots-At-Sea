@@ -8,10 +8,10 @@ import javafx.scene.Group;
  */
 public class Model {
 
-    AnimationTimer animationTimer;
-    Group assets;
+    protected AnimationTimer animationTimer;
+    protected Group assets;
 
-    Model (Group assets, AnimationTimer animation) {
+    public Model (Group assets, AnimationTimer animation) {
         this.assets = assets;
         this.animationTimer = animation;
         if (animation != null) {
@@ -25,7 +25,7 @@ public class Model {
         }
     }
 
-    public void setAnimation(AnimationTimer animation) {
+    void setAnimation(AnimationTimer animation) {
         animationTimer = animation;
         if (animation != null) {
             animation.start();

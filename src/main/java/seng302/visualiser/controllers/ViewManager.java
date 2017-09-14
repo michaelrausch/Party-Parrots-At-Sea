@@ -70,10 +70,8 @@ public class ViewManager {
         decorator.applyCss();
         decorator.getStylesheets()
             .add(getClass().getResource("/css/Master.css").toExternalForm());
-
-        setDecorator(decorator);
-
         gameClient = new GameClient(decorator);
+        setDecorator(decorator);
 
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
         Scene scene = new Scene(decorator, 1200, 800, false, SceneAntialiasing.BALANCED);
@@ -112,6 +110,11 @@ public class ViewManager {
     private void setDecorator(JFXDecorator newDecorator) {
         decorator = newDecorator;
 
+        decorator.setOnCloseButtonAction(() -> {
+            gameClient.stopGame();
+            System.exit(0);
+        });
+
         //Injecting a volume toggle into the decorator.
         //Get the button box
         HBox btns = (HBox) decorator.getChildren().get(0);
@@ -126,13 +129,13 @@ public class ViewManager {
         //Create Graphics
         SVGGlyph spacer = new SVGGlyph(0, "SPACER", "", Color.WHITE);
         SVGGlyph volumeOn = new SVGGlyph(0, "VOLUME_ON",
-            "M39.389,13.769 22.235,28.606 6,28.606 6,47.699 21.989,47.699 39.389,62.75 39.389,13.769 M 48.128,49.03 C 50.057,45.934 51.19,42.291 51.19,38.377 C 51.19,34.399 50.026,30.703 48.043,27.577 M 55.082,20.537 C 58.777,25.523 60.966,31.694 60.966,38.377 C 60.966,44.998 58.815,51.115 55.178,56.076 M 61.71,62.611 C 66.977,55.945 70.128,47.531 70.128,38.378 C 70.128,29.161 66.936,20.696 61.609,14.01",
+            "M0,6 L0,12 L4,12 L9,17 L9,1 L4,6 L0,6 L0,6 Z M13.5,9 C13.5,7.2 12.5,5.7 11,5 L11,13 C12.5,12.3 13.5,10.8 13.5,9 L13.5,9 Z M11,0.2 L11,2.3 C13.9,3.2 16,5.8 16,9 C16,12.2 13.9,14.8 11,15.7 L11,17.8 C15,16.9 18,13.3 18,9 C18,4.7 15,1.1 11,0.2 L11,0.2 Z",
             Color.WHITE);
         SVGGlyph volumeOff = new SVGGlyph(0, "VOLUME_ON",
-            "M39.389,13.769 22.235,28.606 6,28.606 6,47.699 21.989,47.699 39.389,62.75 39.389,13.769",
+            "M13.5,9 C13.5,7.2 12.5,5.7 11,5 L11,7.2 L13.5,9.7 L13.5,9 L13.5,9 Z M16,9 C16,9.9 15.8,10.8 15.5,11.6 L17,13.1 C17.7,11.9 18,10.4 18,8.9 C18,4.6 15,1 11,0.1 L11,2.2 C13.9,3.2 16,5.8 16,9 L16,9 Z M1.3,0 L0,1.3 L4.7,6 L0,6 L0,12 L4,12 L9,17 L9,10.3 L13.3,14.6 C12.6,15.1 11.9,15.5 11,15.8 L11,17.9 C12.4,17.6 13.6,17 14.7,16.1 L16.7,18.1 L18,16.8 L9,7.8 L1.3,0 L1.3,0 Z M9,1 L6.9,3.1 L9,5.2 L9,1 L9,1 Z",
             Color.WHITE);
         volumeOn.setSize(16, 16);
-        volumeOff.setSize(12, 16);
+        volumeOff.setSize(16, 16);
         spacer.setSize(40, 16);
 
         // Determine which graphic should go on the button

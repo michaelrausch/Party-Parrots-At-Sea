@@ -237,8 +237,6 @@ public class ServerToClientThread implements Runnable {
 
         xmlGenerator.setRaceTemplate(race);
 
-        System.out.println(xmlGenerator.getRegatta().getName());
-
         XMLMessage xmlMessage;
         xmlMessage = new XMLMessage(xmlGenerator.getRegattaAsXml(), XMLMessageSubType.REGATTA,
                 xmlGenerator.getRegattaAsXml().length());

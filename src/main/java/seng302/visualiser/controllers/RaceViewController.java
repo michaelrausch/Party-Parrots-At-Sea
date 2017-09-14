@@ -56,7 +56,7 @@ import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationDelegate;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationsState;
 import seng302.visualiser.fxObjects.ChatHistory;
-import seng302.visualiser.fxObjects.assets_2D.BoatObject;
+import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 
 /**
@@ -245,33 +245,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             updateWindDirection(raceState.windDirectionProperty().doubleValue());
             updateWindSpeed(raceState.getWindSpeed());
         });
-//        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
-
-        //TODO extract chat stuff
-//        raceState.addCollisionListener(gameView::drawCollision);
-//        raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
-//            gameView.setWindDir(newDirection.doubleValue());
-//            updateWindDirection(newDirection.doubleValue());
-//        });
-//        raceState.windSpeedProperty().addListener((obs, oldSpeed, newSpeed) -> {
-//            updateWindSpeed(newSpeed.doubleValue());
-//        });
-//        updateWindDirection(raceState.windDirectionProperty().doubleValue());
-//        updateWindSpeed(raceState.getWindSpeed());
-//        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
-//        chatInput.focusedProperty().addListener((obs, oldValue, newValue) -> {
-//            if (newValue) {
-//                gameView.disableZoom();
-//            } else {
-//                gameView.enableZoom();
-//            }
-//        });
+        gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
         Platform.runLater(() -> {
             initializeUpdateTimer();
-//            initialiseFPSCheckBox();
-//            initialiseAnnotationSlider();
-//            initialiseBoatSelectionComboBox();
-//            initialiseSparkLine();
         });
     }
 
