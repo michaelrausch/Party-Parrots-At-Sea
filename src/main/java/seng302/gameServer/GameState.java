@@ -792,28 +792,40 @@ public class GameState implements Runnable {
     }
 
 
+    public static void sendServerMessage(Integer messageType, String message) {
+        notifyMessageListeners(new ChatterMessage(
+            messageType, "SERVER: " + message
+        ));
+    }
+
     public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
         String chatterText = chatterMessage.getMessage();
         String[] words = chatterText.split("\\s+");
         if (words.length > 2 && isHost) {
             switch (words[2].trim()) {
-                case ">speed":
+                case "/speed":
                     try {
                         setSpeedMultiplier(Double.valueOf(words[3]));
-                        notifyMessageListeners(new ChatterMessage(
-                            chatterMessage.getMessage_type(),
-                            "SERVER: Speed modifier set to x" + words[3]
-                        ));
+                        sendServerMessage(chatterMessage.getMessage_type(),
+                            "SERVER: Speed modifier set to x" + words[3]);
+                        System.out.println(chatterMessage.getMessage_type());
+//                        notifyMessageListeners(new ChatterMessage(
+//                            chatterMessage.getMessage_type(),
+//                            "SERVER: Speed modifier set to x" + words[3]
+//                        ));
                     } catch (Exception e) {
                         Logger logger = LoggerFactory.getLogger(GameState.class);
                         logger.error("cannot parse >speed value");
                     }
                     return;
-                case ">finish":
-                    notifyMessageListeners(new ChatterMessage(
-                        chatterMessage.getMessage_type(),
-                        "SERVER: Game will now finish"
-                    ));
+                case "/finish":
+                    sendServerMessage(chatterMessage.getMessage_type(),
+                        "SERVER: Game will now finish");
+                    System.out.println(chatterMessage.getMessage_type());
+//                    notifyMessageListeners(new ChatterMessage(
+//                        chatterMessage.getMessage_type(),
+//                        "SERVER: Game will now finish"
+//                    ));
                     endRace();
                     return;
             }
