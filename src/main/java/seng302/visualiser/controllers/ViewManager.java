@@ -4,25 +4,13 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
-import com.jfoenix.controls.events.JFXDialogEvent;
 import com.jfoenix.svg.SVGGlyph;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import java.io.IOException;
-import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
+import javafx.scene.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -32,6 +20,9 @@ import seng302.gameServer.ServerAdvertiser;
 import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 public class ViewManager {
 
@@ -187,15 +178,22 @@ public class ViewManager {
 
     }
 
+    /**
+     * Recursively find JFXDialog given a starting node. Will traverse children of StackPane.
+     *
+     * @param nodes children nodes to be check.
+     * @return true if node contains JFXDialog.
+     */
     private Boolean checkDialogOpened(ObservableList<Node> nodes) {
+        boolean foundJFXDialog = false;
         for (Node node : nodes) {
             if (node instanceof JFXDialog) {
                 return true;
             } else if (node instanceof StackPane) {
-                return checkDialogOpened(((StackPane) node).getChildren());
+                foundJFXDialog = checkDialogOpened(((StackPane) node).getChildren());
             }
         }
-        return false;
+        return foundJFXDialog;
     }
 
     private void showKeyBindingDialog() throws IOException {
