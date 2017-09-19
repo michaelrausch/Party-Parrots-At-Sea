@@ -47,6 +47,7 @@ public class GameState implements Runnable {
     private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
     private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
+    private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -453,8 +454,7 @@ public class GameState implements Runnable {
         Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
-                // TODO: 11/09/17 wmu16 CHANGE THIS TO MAGIC NUMBER
-                maxBoatSpeed *= 2;
+                maxBoatSpeed *= VELOCITY_BOOST_MULTIPLIER;
             }
         }
 

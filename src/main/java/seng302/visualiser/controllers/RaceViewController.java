@@ -20,6 +20,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.chart.LineChart;
@@ -47,10 +49,12 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import seng302.model.ClientYacht;
+import seng302.model.ClientYacht.PowerUpListener;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.token.TokenType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView3D;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
@@ -60,6 +64,8 @@ import seng302.visualiser.controllers.dialogs.FinishDialogController;
 import seng302.visualiser.fxObjects.ChatHistory;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
+import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
 /**
  * Controller class that manages the display of a race
@@ -110,6 +116,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Label windSpeedLabel;
     @FXML
     private Label positionLabel, boatSpeedLabel, boatHeadingLabel;
+    @FXML
+    private ImageView velocityIcon, handlingIcon, windWalkerIcon, bumperIcon;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -222,6 +230,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         return finishScreenDialog;
     }
 
+
     public void loadRace (
         Map<Integer, ClientYacht> participants, RaceXMLData raceData, RaceState raceState,
         ClientYacht player) {
@@ -237,6 +246,25 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 if (c.wasPermutated()) {
                     updateOrder(raceState.getPlayerPositions());
                     updateSparkLine();
+                }
+            }
+        });
+
+        player.addPowerUpListener((yacht, tokenType) -> {
+            if (yacht == player) {
+                switch (tokenType) {
+                    case BOOST:
+                        velocityIcon.setVisible(true);
+                        break;
+                    case HANDLING:
+                        handlingIcon.setVisible(true);
+                        break;
+                    case WIND_WALKER:
+                        windWalkerIcon.setVisible(true);
+                        break;
+                    case BUMPER:
+                        bumperIcon.setVisible(true);
+                        break;
                 }
             }
         });
@@ -278,6 +306,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             initializeUpdateTimer();
         });
     }
+
 
     /**
      * The important annotations have been changed, update this view

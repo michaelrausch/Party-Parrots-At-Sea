@@ -12,9 +12,13 @@ import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
+import jdk.nashorn.internal.objects.annotations.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.model.token.TokenType;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -34,6 +38,12 @@ public class ClientYacht extends Observable {
         void notifyRounding(ClientYacht yacht, int legNumber);
     }
 
+    @FunctionalInterface
+    public interface PowerUpListener {
+
+        void notifyPowerUp(ClientYacht yacht, TokenType tokenType);
+    }
+
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
 
@@ -44,6 +54,7 @@ public class ClientYacht extends Observable {
     private String boatName;
     private String country;
     private Integer position;
+    private TokenType powerUp;
 
     private Long estimateTimeAtFinish;
     private Boolean sailIn = false;
@@ -58,6 +69,7 @@ public class ClientYacht extends Observable {
 
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
     private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
+    private List<PowerUpListener> powerUpListeners = new ArrayList<>();
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
@@ -199,6 +211,17 @@ public class ClientYacht extends Observable {
         this.position = position;
     }
 
+    public void setPowerUp(TokenType tokenType) {
+        this.powerUp = tokenType;
+        for (PowerUpListener listener : powerUpListeners) {
+            listener.notifyPowerUp(this, tokenType);
+        }
+    }
+
+    public TokenType getPowerUp() {
+        return powerUp;
+    }
+
     public void toggleSail() {
         sailIn = !sailIn;
     }
@@ -266,6 +289,10 @@ public class ClientYacht extends Observable {
 
     public void addMarkRoundingListener(MarkRoundingListener listener) {
         markRoundingListeners.add(listener);
+    }
+
+    public void addPowerUpListener(PowerUpListener listener) {
+        powerUpListeners.add(listener);
     }
 
     public void removeMarkRoundingListener(MarkRoundingListener listener) {
