@@ -1,0 +1,28 @@
+#keyBindingDialogHeader {
+    -fx-font-size: 30px;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+JFXButton {
+    -fx-background-color: -fx-pp-light-text-color;
+    -fx-text-fill: -fx-pp-theme-color;
+    -fx-font-size: 17px;
+    -fx-effect: -fx-pp-dropshadow-dark;
+}
+
+Label {
+    -fx-font-size: 25px;
+    -fx-text-fill: -fx-pp-theme-color;
+    /*-fx-effect: -fx-pp-dropshadow-dark;*/
+}
+
+JFXButton:hover {
+    -fx-font-size: 20px;
+    -fx-background-color: -fx-pp-light-theme-color;
+}
+
+JFXButton:focused {
+    -fx-font-size: 20px;
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-light-text-color;
+}
