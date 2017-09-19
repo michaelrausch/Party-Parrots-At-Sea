@@ -323,6 +323,7 @@ public class GameState implements Runnable {
         if (yacht.getPowerUp() != null) {
             if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > POWERUP_TIMEOUT_MS) {
                 yacht.powerDown();
+                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + "'s power-up token expired");
                 logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
             }
         }
@@ -433,6 +434,7 @@ public class GameState implements Runnable {
         //Token Collision
         Token collidedToken = checkTokenPickUp(serverYacht);
         if (collidedToken != null) {
+            sendServerMessage(serverYacht.getSourceId(), serverYacht.getBoatName() + " has picked speed-up token");
             tokensInPlay.remove(collidedToken);
             serverYacht.powerUp(collidedToken.getTokenType());
             logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + collidedToken
@@ -531,6 +533,9 @@ public class GameState implements Runnable {
         }
 
         if (hasProgressed) {
+            if (currentMarkSeqID != 0 && !markOrder.isLastMark(currentMarkSeqID)) {
+                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed leg " + yacht.getLegNumber());
+            }
             yacht.incrementLegNumber();
             sendMarkRoundingMessage(yacht);
             logMarkRounding(yacht);
@@ -565,6 +570,7 @@ public class GameState implements Runnable {
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
                 yacht.setBoatStatus(BoatStatus.RACING);
+                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed start line");
                 return true;
             }
         }
@@ -668,6 +674,7 @@ public class GameState implements Runnable {
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
                 yacht.setBoatStatus(BoatStatus.FINISHED);
+                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed finish line");
                 return true;
             }
         }
@@ -788,12 +795,7 @@ public class GameState implements Runnable {
                     try {
                         setSpeedMultiplier(Double.valueOf(words[3]));
                         sendServerMessage(chatterMessage.getMessage_type(),
-                            "SERVER: Speed modifier set to x" + words[3]);
-                        System.out.println(chatterMessage.getMessage_type());
-//                        notifyMessageListeners(new ChatterMessage(
-//                            chatterMessage.getMessage_type(),
-//                            "SERVER: Speed modifier set to x" + words[3]
-//                        ));
+                                "Speed modifier set to x" + words[3]);
                     } catch (Exception e) {
                         Logger logger = LoggerFactory.getLogger(GameState.class);
                         logger.error("cannot parse >speed value");
@@ -801,12 +803,7 @@ public class GameState implements Runnable {
                     return;
                 case "/finish":
                     sendServerMessage(chatterMessage.getMessage_type(),
-                        "SERVER: Game will now finish");
-                    System.out.println(chatterMessage.getMessage_type());
-//                    notifyMessageListeners(new ChatterMessage(
-//                        chatterMessage.getMessage_type(),
-//                        "SERVER: Game will now finish"
-//                    ));
+                            "Game will now finish");
                     endRace();
                     return;
             }

@@ -24,7 +24,17 @@ public class ToggleSailSteps {
     @Given("^The game is running$")
     public void the_game_is_running() throws Throwable {
         mst = new MainServerThread();
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         client = new ClientToServerThread("localhost", 4942);
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+        }
         GameState.setCurrentStage(GameStages.RACING);
         Thread.sleep(200); // Sleep needed to help the threads all be up to speed with each other
         ServerYacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
@@ -50,5 +60,6 @@ public class ToggleSailSteps {
             Assert.assertFalse(yacht.getSailIn());
         }
         mst.terminate();
+        client.setSocketToClose();
     }
 }
