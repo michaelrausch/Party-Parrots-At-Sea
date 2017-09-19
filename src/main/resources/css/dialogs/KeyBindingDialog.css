@@ -19,6 +19,7 @@ Label {
 JFXButton:hover {
     -fx-font-size: 20px;
     -fx-background-color: -fx-pp-light-theme-color;
+    -fx-text-fill: -fx-pp-light-text-color;
 }
 
 JFXButton:focused {
