@@ -90,16 +90,16 @@ public class LobbyController implements Initializable {
             ViewManager.getInstance().getPlayerList().setAll(ViewManager.getInstance().getPlayerList().sorted());
         });
 
+        customizeButton.setOnMouseReleased(event -> {
+            customizationDialog = createCustomizeDialog();
+            Sounds.playButtonClick();
+            customizationDialog.show();
+        });
+
         Platform.runLater(() -> {
             Integer playerId = ViewManager.getInstance().getGameClient().getServerThread().getClientId();
 
             playersColor = Colors.getColor(playerId - 1);
-            customizationDialog = createCustomizeDialog();
-
-            customizeButton.setOnMouseReleased(event -> {
-                Sounds.playButtonClick();
-                customizationDialog.show();
-            });
         });
 
         leaveLobbyButton.setOnMouseEntered(e -> Sounds.playHoverSound());
