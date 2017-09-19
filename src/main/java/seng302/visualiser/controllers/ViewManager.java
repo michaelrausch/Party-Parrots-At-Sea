@@ -26,6 +26,7 @@ import seng302.gameServer.ServerAdvertiser;
 import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
+import seng302.visualiser.controllers.dialogs.KeyBindingDialogController;
 
 public class ViewManager {
 
@@ -207,6 +208,9 @@ public class ViewManager {
                 JFXDialog dialog = new JFXDialog((StackPane) node,
                     dialogContent.load(),
                     DialogTransition.CENTER);
+                KeyBindingDialogController keyBindingDialogController = dialogContent
+                    .getController();
+                keyBindingDialogController.init(gameClient.getKeyBind());
                 dialog.show();
                 Sounds.playButtonClick();
             }

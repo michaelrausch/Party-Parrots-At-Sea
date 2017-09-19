@@ -9,6 +9,7 @@ import javafx.scene.input.KeyEvent;
 
 import java.net.URL;
 import java.util.*;
+import seng302.model.GameClientAction;
 
 public class KeyBindingDialogController implements Initializable {
 
@@ -31,11 +32,25 @@ public class KeyBindingDialogController implements Initializable {
     private JFXButton downwindBtn;
     //---------FXML END---------//
 
-    private static Map<JFXButton, KeyCode> keys;  // static button and saved keybinding pair
+    private Map<JFXButton, KeyCode> keys;
     private List<JFXButton> buttons = new ArrayList<>();
+    private Map<GameClientAction, KeyCode> keyBind;
+    private LinkedHashMap<JFXButton, GameClientAction> buttonAndGameClientActionMap;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+    }
+
+    /**
+     * HAOMING HELP!!! CHANGE FUNCTION NAME PLS :))
+     *
+     * Takes in a map from GameClient and initialise button mapping to the keys.
+     *
+     * @param keyBind a map with GameClientAction and KeyCode pair to be used in GameClient.
+     */
+    public void init(Map<GameClientAction, KeyCode> keyBind) {
+        this.keyBind = keyBind;
+
         buttons = new ArrayList<>();
         Collections
             .addAll(buttons, zoomInbtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn,
@@ -50,17 +65,24 @@ public class KeyBindingDialogController implements Initializable {
      * to the new button which is created when javafx reinitialise a new controller.
      */
     private void initializeKeys() {
-        if (keys == null) {
-            initializeDefaultKeys();
-        } else {
-            Map<JFXButton, KeyCode> tempKey = new LinkedHashMap<>();
-            int buttonIndex = 0;
-            for (JFXButton jfxButton : keys.keySet()) {
-                tempKey.put(buttons.get(buttonIndex), keys.get(jfxButton));
-                buttonIndex++;
-            }
-            keys = tempKey;
-        }
+        initButtonAndGameClientActionMap();
+        initializeDefaultKeys();
+    }
+
+    /**
+     * HAOMING CHANGE FUNCTION NAME HERE TOO :) OR BETTER, REMOVE THIS FUNCTION
+     *
+     * Link buttons and the GameClientAction to be used in accessing keys.
+     */
+    private void initButtonAndGameClientActionMap() {
+        buttonAndGameClientActionMap = new LinkedHashMap<>();
+        buttonAndGameClientActionMap.put(zoomInbtn, GameClientAction.ZOOM_IN);
+        buttonAndGameClientActionMap.put(zoomOutBtn, GameClientAction.ZOOM_OUT);
+        buttonAndGameClientActionMap.put(vmgBtn, GameClientAction.VMG);
+        buttonAndGameClientActionMap.put(sailInOutBtn, GameClientAction.SAILS_STATE);
+        buttonAndGameClientActionMap.put(tackGybeBtn, GameClientAction.TACK_GYBE);
+        buttonAndGameClientActionMap.put(upwindBtn, GameClientAction.UPWIND);
+        buttonAndGameClientActionMap.put(downwindBtn, GameClientAction.DOWNWIND);
     }
 
     /**
@@ -68,13 +90,13 @@ public class KeyBindingDialogController implements Initializable {
      */
     private void initializeDefaultKeys() {
         keys = new LinkedHashMap<>();
-        keys.put(zoomInbtn, KeyCode.Z);
-        keys.put(zoomOutBtn, KeyCode.X);
-        keys.put(vmgBtn, KeyCode.SPACE);
-        keys.put(sailInOutBtn, KeyCode.SHIFT);
-        keys.put(tackGybeBtn, KeyCode.ENTER);
-        keys.put(upwindBtn, KeyCode.PAGE_UP);
-        keys.put(downwindBtn, KeyCode.PAGE_DOWN);
+        keys.put(zoomInbtn, keyBind.get(GameClientAction.ZOOM_IN));
+        keys.put(zoomOutBtn, keyBind.get(GameClientAction.ZOOM_OUT));
+        keys.put(vmgBtn, keyBind.get(GameClientAction.VMG));
+        keys.put(sailInOutBtn, keyBind.get(GameClientAction.SAILS_STATE));
+        keys.put(tackGybeBtn, keyBind.get(GameClientAction.TACK_GYBE));
+        keys.put(upwindBtn, keyBind.get(GameClientAction.UPWIND));
+        keys.put(downwindBtn, keyBind.get(GameClientAction.DOWNWIND));
     }
 
     /**
@@ -106,9 +128,11 @@ public class KeyBindingDialogController implements Initializable {
     private void doSomething(KeyEvent event, JFXButton button) {
         if (keys.containsValue(event.getCode())) {
             keys.replace(button, null);
+            keyBind.replace(buttonAndGameClientActionMap.get(button), null);
             button.setText("");
         } else {
             keys.replace(button, event.getCode());
+            keyBind.replace(buttonAndGameClientActionMap.get(button), event.getCode());
             button.setText(event.getCode().getName());
         }
     }
