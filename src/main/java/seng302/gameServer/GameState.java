@@ -281,7 +281,13 @@ public class GameState implements Runnable {
     public static void spawnNewToken() {
         Random random = new Random();
         tokensInPlay.clear();
-        tokensInPlay.add(allTokens.get(random.nextInt(allTokens.size())));
+
+        //Get a random token location
+        Token token = allTokens.get(random.nextInt(allTokens.size()));
+        //Set a random type to this token
+        token.setTokenType(TokenType.values()[random.nextInt(TokenType.values().length)]);
+
+        tokensInPlay.add(token);
     }
 
     /**
@@ -397,9 +403,7 @@ public class GameState implements Runnable {
             collidedYacht.setCurrentVelocity(
                 collidedYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
-            notifyMessageListeners(
-                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
-            );
+            notifyMessageListeners(MessageFactory.makeCollisionMessage(serverYacht));
         }
 
         //Mark Collision
@@ -411,9 +415,7 @@ public class GameState implements Runnable {
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
-            notifyMessageListeners(
-                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
-            );
+            notifyMessageListeners(MessageFactory.makeCollisionMessage(serverYacht));
         }
 
         //Boundary Collision
@@ -426,22 +428,21 @@ public class GameState implements Runnable {
             serverYacht.setCurrentVelocity(
                 serverYacht.getCurrentVelocity() * COLLISION_VELOCITY_PENALTY
             );
-            notifyMessageListeners(
-                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION)
-            );
+            notifyMessageListeners(MessageFactory.makeCollisionMessage(serverYacht));
         }
 
         //Token Collision
         Token collidedToken = checkTokenPickUp(serverYacht);
         if (collidedToken != null) {
-            sendServerMessage(serverYacht.getSourceId(), serverYacht.getBoatName() + " has picked speed-up token");
+            sendServerMessage(serverYacht.getSourceId(),
+                serverYacht.getBoatName() + " has picked up a " + collidedToken.getTokenType()
+                    .getName() + " token");
             tokensInPlay.remove(collidedToken);
             serverYacht.powerUp(collidedToken.getTokenType());
             logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + collidedToken
                 .getTokenType());
             notifyMessageListeners(MessageFactory.getRaceXML());
-            notifyMessageListeners(
-                new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.TOKEN));
+            notifyMessageListeners(MessageFactory.makePickupMessage(serverYacht, collidedToken));
         }
     }
 

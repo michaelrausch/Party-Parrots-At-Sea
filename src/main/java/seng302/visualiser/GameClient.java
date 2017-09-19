@@ -245,12 +245,7 @@ public class GameClient {
                     break;
 
                 case YACHT_EVENT_CODE:
-                    YachtEventData yachtEventData = StreamParser.extractYachtEventCode(packet);
-                    if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
-                        showCollisionAlert(StreamParser.extractYachtEventCode(packet));
-                    } else if (yachtEventData.getEventId() == YachtEventType.TOKEN.getCode()) {
-                        showPickUp();
-                    }
+                    displayYachtEvent(StreamParser.extractYachtEventCode(packet));
                     break;
 
                 case CHATTER_TEXT:
@@ -407,6 +402,28 @@ public class GameClient {
         return courseData;
     }
 
+
+    /**
+     * Appropriately displays the event client side given the YachtEventCode (collision / token..)
+     *
+     * @param yachtEventData The YachtEvent data packet
+     */
+    private void displayYachtEvent(YachtEventData yachtEventData) {
+        if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
+            showCollisionAlert(yachtEventData);
+        } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_VELOCITY.getCode()) {
+            showPickUp(yachtEventData);
+        } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_BUMPER.getCode()) {
+            showPickUp(yachtEventData);
+        } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_HANDLING.getCode()) {
+            showPickUp(yachtEventData);
+        } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_RANDOM.getCode()) {
+            showPickUp(yachtEventData);
+        } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_WIND_WALKER.getCode()) {
+            showPickUp(yachtEventData);
+        }
+    }
+
     /**
      * Tells race view to show a collision animation.
      */
@@ -420,7 +437,7 @@ public class GameClient {
     }
 
     // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user
-    private void showPickUp() {
+    private void showPickUp(YachtEventData yachtEventData) {
         Sounds.playTokenPickupSound();
     }
 

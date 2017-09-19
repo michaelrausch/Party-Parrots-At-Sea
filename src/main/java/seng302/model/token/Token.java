@@ -18,4 +18,8 @@ public class Token extends GeoPoint {
     public TokenType getTokenType() {
         return tokenType;
     }
+
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
+    }
 }

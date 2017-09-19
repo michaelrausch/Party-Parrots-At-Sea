@@ -11,11 +11,14 @@ import seng302.gameServer.messages.RaceStatusMessage;
 import seng302.gameServer.messages.RaceType;
 import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventType;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.XMLGenerator;
 
 /**
@@ -127,5 +130,31 @@ public class MessageFactory {
             xmlGenerator.getBoatsAsXml(),
             XMLMessageSubType.BOAT,
             xmlGenerator.getBoatsAsXml().length());
+    }
+
+    public static YachtEventCodeMessage makeCollisionMessage(ServerYacht serverYacht) {
+        return new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION);
+    }
+
+    public static YachtEventCodeMessage makePickupMessage(ServerYacht serverYacht, Token token) {
+        YachtEventType yachtEventType = null;
+        switch (token.getTokenType()) {
+            case BOOST:
+                yachtEventType = YachtEventType.TOKEN_VELOCITY;
+                break;
+            case HANDLING:
+                yachtEventType = YachtEventType.TOKEN_HANDLING;
+                break;
+            case WIND_WALKER:
+                yachtEventType = YachtEventType.TOKEN_WIND_WALKER;
+                break;
+            case BUMPER:
+                yachtEventType = YachtEventType.TOKEN_BUMPER;
+                break;
+            case RANDOM:
+                yachtEventType = YachtEventType.TOKEN_RANDOM;
+                break;
+        }
+        return new YachtEventCodeMessage(serverYacht.getSourceId(), yachtEventType);
     }
 }

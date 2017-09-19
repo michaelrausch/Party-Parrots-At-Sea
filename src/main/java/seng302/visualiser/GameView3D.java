@@ -27,6 +27,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
@@ -556,7 +557,27 @@ public class GameView3D {
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
             Point2D location = findScaledXY(token.getLat(), token.getLng());
-            Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
+
+            ModelType modelType = null;
+            switch (token.getTokenType()) {
+                case BOOST:
+                    modelType = ModelType.VELOCITY_PICKUP;
+                    break;
+                case HANDLING:
+                    modelType = ModelType.HANDLING_PICKUP;
+                    break;
+                case BUMPER:
+                    modelType = ModelType.BUMPER_PICKUP;
+                    break;
+                case RANDOM:
+                    modelType = ModelType.RANDOM_PICKUP;
+                    break;
+                case WIND_WALKER:
+                    modelType = ModelType.WIND_WALKER_PICKUP;
+                    break;
+            }
+
+            Node tokenObject = ModelFactory.importModel(modelType).getAssets();
             tokenObject.setLayoutX(location.getX());
             tokenObject.setLayoutY(location.getY());
             mapTokens.add(tokenObject);
