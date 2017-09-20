@@ -86,19 +86,19 @@ public class ModelFactory {
 
     private static Group getUnmodifiedBoatModel(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = new Group();
-        MeshView hull = importFile(boatType.hullFile);
+        MeshView hull = importSTL(boatType.hullFile);
         hull.setMaterial(new PhongMaterial(primaryColour));
-        MeshView mast = importFile(boatType.mastFile);
+        MeshView mast = importSTL(boatType.mastFile);
         mast.setMaterial(new PhongMaterial(primaryColour));
-        MeshView sail = importFile(boatType.sailFile);
+        MeshView sail = importSTL(boatType.sailFile);
         sail.setMaterial(new PhongMaterial(Color.WHITE));
         boatAssets.getChildren().addAll(hull, mast, sail);
         return boatAssets;
     }
 
-    private static MeshView importFile(String fileName) {
+    private static MeshView importSTL(String fileName) {
         StlMeshImporter importer = new StlMeshImporter();
-        importer.read(ModelFactory.class.getResource("/meshes/" + fileName));
+        importer.read(ModelFactory.class.getResource("/meshes/boatSTLs/" + fileName));
         MeshView importedFile = new MeshView(importer.getImport());
         importedFile.setCache(true);
         importedFile.setCacheHint(CacheHint.SCALE_AND_ROTATE);
