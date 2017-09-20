@@ -8,8 +8,8 @@ public enum TokenType {
     BOOST(0, "Boost"),
     HANDLING(1, "Handling"),
     BUMPER(2, "Bumper"),
-    RANDOM(3, "Random"),
-    WIND_WALKER(4, "Wind Walker");
+    WIND_WALKER(3, "Wind Walker"),
+    RANDOM(4, "Random");
 
     private int value;
     private String name;
@@ -25,16 +25,5 @@ public enum TokenType {
 
     public String getName() {
         return name;
-    }
-
-    public static TokenType getToken(int value) {
-        switch (value) {
-            case 0:
-                return BOOST;
-            case 1:
-                return HANDLING;
-            default:
-                return BOOST;
-        }
     }
 }

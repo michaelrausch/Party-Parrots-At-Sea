@@ -446,6 +446,16 @@ public class GameClient {
     // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user
     private void showTokenPickUp(TokenType tokenType) {
         Sounds.playTokenPickupSound();
+        switch (tokenType) {
+            case BOOST:
+                break;
+            case HANDLING:
+                break;
+            case WIND_WALKER:
+                break;
+            case BUMPER:
+                break;
+        }
     }
 
     private void formatAndSendChatMessage(String rawChat) {

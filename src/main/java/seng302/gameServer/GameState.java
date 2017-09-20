@@ -283,10 +283,9 @@ public class GameState implements Runnable {
         Random random = new Random();
         tokensInPlay.clear();
 
-        //Get a random token location
+        //Get a random token location with random type
         Token token = allTokens.get(random.nextInt(allTokens.size()));
-        //Set a random type to this token
-        token.setTokenType(TokenType.values()[random.nextInt(TokenType.values().length)]);
+        token.assignRandomType();
 
         tokensInPlay.add(token);
     }
@@ -389,6 +388,7 @@ public class GameState implements Runnable {
         //Yacht Collision
         ServerYacht collidedYacht = checkYachtCollision(serverYacht);
         Mark collidedMark = checkMarkCollision(serverYacht);
+        Token collidedToken = checkTokenPickUp(serverYacht);
 
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
@@ -433,8 +433,10 @@ public class GameState implements Runnable {
         }
 
         //Token Collision
-        Token collidedToken = checkTokenPickUp(serverYacht);
         if (collidedToken != null) {
+            if (collidedToken.getTokenType() == TokenType.RANDOM) {
+                collidedToken.realiseRandom();
+            }
             sendServerMessage(serverYacht.getSourceId(),
                 serverYacht.getBoatName() + " has picked up a " + collidedToken.getTokenType()
                     .getName() + " token");
