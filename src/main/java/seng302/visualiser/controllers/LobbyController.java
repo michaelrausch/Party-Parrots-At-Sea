@@ -130,7 +130,8 @@ public class LobbyController implements Initializable {
         controller.setPlayerName(this.playerBoats
             .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
             .getBoatName());
-        controller.setCurrentBoat(BoatMeshType.DINGHY);
+        controller.setCurrentBoat(this.playerBoats.get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
+            .getBoatType());
 
         return customizationDialog;
     }
@@ -204,7 +205,7 @@ public class LobbyController implements Initializable {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/views/cells/PlayerCell.fxml"));
 
-            loader.setController(new PlayerCell(playerId, yacht.getBoatName(), yacht.getColour()));
+            loader.setController(new PlayerCell(playerId, yacht.getBoatName(), yacht.getColour(), yacht.getBoatType()));
 
             try {
                 pane = loader.load();

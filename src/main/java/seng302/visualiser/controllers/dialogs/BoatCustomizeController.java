@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.PointLight;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -111,21 +112,35 @@ public class BoatCustomizeController implements Initializable{
         this.lobbyController = lobbyController;
     }
 
-    public void setCurrentBoat(BoatMeshType boatType) {
+    public void setCurrentBoat(String boatType) {
         Group group = new Group();
-        this.currentBoat = boatType;
+        this.currentBoat = BoatMeshType.getBoatMeshType(boatType);
         System.out.println(boatType.toString());
         boatPane.setBackground(new Background(new BackgroundFill(Color.SKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         boatPane.getChildren().add(group);
-        BoatModel bo = ModelFactory.boatCustomiseView(boatType, colorPicker.getValue());
+        BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
         group.getChildren().add(bo.getAssets());
+        group.getChildren().add(new PointLight());
     }
 
     public void nextBoat(ActionEvent actionEvent) {
         boatPane.getChildren().clear();
+        Group group = new Group();
+        boatPane.getChildren().add(group);
+        currentBoat = BoatMeshType.getNextBoatType(currentBoat);
+        BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
+        group.getChildren().add(bo.getAssets());
+        group.getChildren().add(new PointLight());
     }
 
     public void prevBoat(ActionEvent actionEvent) {
+        boatPane.getChildren().clear();
+        Group group = new Group();
+        boatPane.getChildren().add(group);
+        currentBoat = BoatMeshType.getPrevBoatType(currentBoat);
+        BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
+        group.getChildren().add(bo.getAssets());
+        group.getChildren().add(new PointLight());
     }
 
     private void RefreshBoat() {

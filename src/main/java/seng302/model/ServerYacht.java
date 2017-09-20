@@ -424,4 +424,8 @@ public class ServerYacht {
     public void setBoatType(String boatType) {
         this.boatType = boatType;
     }
+
+    public String getBoatType() {
+        return boatType;
+    }
 }

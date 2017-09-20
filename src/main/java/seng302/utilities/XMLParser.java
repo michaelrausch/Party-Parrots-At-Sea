@@ -146,9 +146,7 @@ public class XMLParser {
                     XMLParser.getNodeAttributeString(currentBoat, "BoatName"),
                     XMLParser.getNodeAttributeString(currentBoat, "Country"));
                 yacht.setColour(Color.web(getNodeAttributeString(currentBoat, "Color")));
-                if (yacht.getBoatType().equals("Yacht")) {
-                    competingBoats.put(yacht.getSourceId(), yacht);
-                }
+                competingBoats.put(yacht.getSourceId(), yacht);
             }
         }
         return competingBoats;

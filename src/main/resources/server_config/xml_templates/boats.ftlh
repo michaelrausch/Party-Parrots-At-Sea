@@ -12,7 +12,7 @@
     </BoatShapes>
     <Boats>
         <#list boats as boat>
-            <Boat Type="Yacht" SourceID="${boat.sourceId}" ShapeID="4" HullNum="${boat.hullID}" StoweName="${boat.shortName}" ShortName="${boat.shortName}"
+            <Boat Type="${boat.boatType}" SourceID="${boat.sourceId}" ShapeID="4" HullNum="${boat.hullID}" StoweName="${boat.shortName}" ShortName="${boat.shortName}"
                   BoatName="${boat.boatName}" Country="${boat.country}" Color="${boat.boatColor}">
                 <GPSposition Z="0" Y="3.7" X="0" />
                 <MastTop Z="0" Y="6.2" X="0" />

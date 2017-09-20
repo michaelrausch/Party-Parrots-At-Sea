@@ -30,6 +30,7 @@ import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.Marker3D;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
@@ -459,7 +460,7 @@ public class GameView3D {
         final List<Group> wakes = new ArrayList<>();
         for (ClientYacht clientYacht : yachts) {
             Color colour = clientYacht.getColour();
-            newBoat = new BoatObject();
+            newBoat = new BoatObject(BoatMeshType.getBoatMeshType(clientYacht.getBoatType()));
             newBoat.setFill(colour);
             boatObjects.put(clientYacht, newBoat);
             wakesGroup.getChildren().add(newBoat.getWake());

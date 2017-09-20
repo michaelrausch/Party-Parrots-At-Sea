@@ -7,6 +7,7 @@ import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
+import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
@@ -18,7 +19,7 @@ import javafx.scene.transform.Translate;
 
 
 /**
- * Factory class for creating 3D models of boats.
+ * Factory class for creating 3D models of boatTypes.
  */
 public class ModelFactory {
 
@@ -57,7 +58,7 @@ public class ModelFactory {
         boatAssets.getTransforms().addAll(
             new Scale(8.0, 8.0, 8.0),
             new Rotate(-70, new Point3D(1,0,0)),
-            new Translate(16,50, 0),
+            new Translate(16,50, 1),
             animationRotate
         );
 

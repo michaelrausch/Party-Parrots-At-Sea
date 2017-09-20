@@ -16,6 +16,7 @@ public enum BoatMeshType {
     final String hullFile, mastFile, sailFile, jibFile;
     final double mastOffset, sailOffset;
     final boolean fixedSail;
+    final static BoatMeshType[] boatTypes = new BoatMeshType[]{DINGHY, CAT_ATE_A_MERINGUE, PIRATE_SHIP};
 
     BoatMeshType(String hullFile, String mastFile, double mastOffset, String sailFile,
         double sailOffset, String jibFile, boolean fixedSail) {
@@ -26,5 +27,42 @@ public enum BoatMeshType {
         this.sailOffset = sailOffset;
         this.jibFile = jibFile;
         this.fixedSail = fixedSail;
+    }
+
+    public static BoatMeshType getBoatMeshType(String boatType) {
+        switch (boatType){
+            case "DINGHY":
+                return DINGHY;
+            case "CAT_ATE_A_MERINGUE":
+                return CAT_ATE_A_MERINGUE;
+            case "PIRATE_SHIP":
+                return PIRATE_SHIP;
+            default:
+                return DINGHY;
+        }
+    }
+
+
+    //TODO kre39 make something not terrible to cycle through boat types
+    public static BoatMeshType getNextBoatType(BoatMeshType boatType) {
+        for (int i = 0; i < boatTypes.length; i++) {
+            if (i == boatTypes.length -1) {
+                return boatTypes[0];
+            } else if (boatType == boatTypes[i]) {
+                return boatTypes[i+1];
+            }
+        }
+        return boatType;
+    }
+
+    public static BoatMeshType getPrevBoatType(BoatMeshType boatType) {
+        for (int i = 0; i < boatTypes.length; i++) {
+            if (i == 0 && boatType == boatTypes[i]) {
+                return boatTypes[boatTypes.length -1];
+            } else if (boatType == boatTypes[i]) {
+                return boatTypes[i-1];
+            }
+        }
+        return boatType;
     }
 }

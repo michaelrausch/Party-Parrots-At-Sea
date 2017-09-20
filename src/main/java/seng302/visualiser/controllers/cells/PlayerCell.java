@@ -24,11 +24,13 @@ public class PlayerCell {
     private String name;
     private Color boatColor;
     private Integer playerId;
+    private BoatMeshType boatype;
 
-    public PlayerCell(Integer playerId, String playerName, Color color) {
+    public PlayerCell(Integer playerId, String playerName, Color color, String boatType) {
         this.playerId = playerId;
         this.name = playerName;
         this.boatColor = color;
+        this.boatype = BoatMeshType.getBoatMeshType(boatType);
     }
 
     public void initialize() {
@@ -37,7 +39,7 @@ public class PlayerCell {
         // Add Rotating Boat to Player Cell with players color on it.
         Group group = new Group();
         boatPane.getChildren().add(group);
-        BoatModel bo = ModelFactory.boatIconView(BoatMeshType.PIRATE_SHIP, this.boatColor);
+        BoatModel bo = ModelFactory.boatIconView(this.boatype, this.boatColor);
         group.getChildren().add(bo.getAssets());
     }
 
