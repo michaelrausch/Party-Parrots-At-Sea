@@ -37,7 +37,7 @@ public class PlayerCell {
         // Add Rotating Boat to Player Cell with players color on it.
         Group group = new Group();
         boatPane.getChildren().add(group);
-        BoatModel bo = ModelFactory.boatIconView(BoatMeshType.CATAMARAN, this.boatColor);
+        BoatModel bo = ModelFactory.boatIconView(BoatMeshType.CAT_ATE_A_MERINGUE, this.boatColor);
         group.getChildren().add(bo.getAssets());
     }
 
