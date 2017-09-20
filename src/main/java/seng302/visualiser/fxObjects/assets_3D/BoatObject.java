@@ -36,7 +36,7 @@ public class BoatObject extends Group {
      * Creates a BoatGroup with the default triangular boat polygon.
      */
     public BoatObject() {
-        boatAssets = ModelFactory.boatGameView(BoatMeshType.CAT_ATE_A_MERINGUE, colour);
+        boatAssets = ModelFactory.boatGameView(BoatMeshType.PIRATE_SHIP, colour);
         boatAssets.hideSail();
         boatAssets.getAssets().getTransforms().addAll(
             rotation
