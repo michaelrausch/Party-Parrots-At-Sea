@@ -38,8 +38,6 @@ public class GameState implements Runnable {
     static final int PREPATORY_TIME = 5 * -1000;
     private static final int TIME_TILL_START = 10 * 1000;
 
-    private static final Long POWERUP_TIMEOUT_MS = 10_000L;
-
     private static final Integer STATE_UPDATES_PER_SECOND = 60;
     private static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
     private static final Double MARK_COLLISION_DISTANCE = 15d;
@@ -327,7 +325,8 @@ public class GameState implements Runnable {
 
     private void checkPowerUpTimeout(ServerYacht yacht) {
         if (yacht.getPowerUp() != null) {
-            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > POWERUP_TIMEOUT_MS) {
+            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > yacht.getPowerUp()
+                .getTimeout()) {
                 yacht.powerDown();
                 sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + "'s power-up token expired");
                 logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
