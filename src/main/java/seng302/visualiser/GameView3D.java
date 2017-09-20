@@ -569,6 +569,7 @@ public class GameView3D {
     }
 
     public void setBoatAsPlayer (ClientYacht playerYacht) {
+        playerYacht.toggleSail();
         playerBoatAnimationTimer = new AnimationTimer() {
 
             double count = 60;

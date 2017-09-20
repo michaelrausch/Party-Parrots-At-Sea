@@ -115,7 +115,6 @@ public class BoatCustomizeController implements Initializable{
     public void setCurrentBoat(String boatType) {
         Group group = new Group();
         this.currentBoat = BoatMeshType.getBoatMeshType(boatType);
-        System.out.println(boatType.toString());
         boatPane.setBackground(new Background(new BackgroundFill(Color.SKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         boatPane.getChildren().add(group);
         BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
