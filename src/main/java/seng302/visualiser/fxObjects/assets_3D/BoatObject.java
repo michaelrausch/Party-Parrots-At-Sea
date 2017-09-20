@@ -28,7 +28,7 @@ public class BoatObject extends Group {
     private Group wake;
     private Color colour = Color.BLACK;
     private Boolean isSelected = false;
-    private Rotate rotation = new Rotate(0,0,1);
+    private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
 
     private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
 
@@ -66,8 +66,6 @@ public class BoatObject extends Group {
      * @param windDir .
      */
     public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn, double windDir) {
-        Double dx = Math.abs(boatAssets.getAssets().getLayoutX() - x);
-        Double dy = Math.abs(boatAssets.getAssets().getLayoutY() - y);
         Platform.runLater(() -> {
             rotateTo(rotation, sailIn, windDir);
             this.layoutXProperty().setValue(x);
