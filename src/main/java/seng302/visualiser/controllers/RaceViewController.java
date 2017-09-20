@@ -73,6 +73,8 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
     private final int CHAT_LIMIT = 128;
+    private static final Double ICON_BLINK_TIMEOUT_RATIO = 0.6;
+    private static final Integer ICON_BLINK_PERIOD = 500;
 
     @FXML
     private Pane basePane;
@@ -250,24 +252,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             }
         });
 
-        player.addPowerUpListener((yacht, tokenType) -> {
-            if (yacht == player) {
-                switch (tokenType) {
-                    case BOOST:
-                        velocityIcon.setVisible(true);
-                        break;
-                    case HANDLING:
-                        handlingIcon.setVisible(true);
-                        break;
-                    case WIND_WALKER:
-                        windWalkerIcon.setVisible(true);
-                        break;
-                    case BUMPER:
-                        bumperIcon.setVisible(true);
-                        break;
-                }
-            }
-        });
+        player.addPowerUpListener(this::displayPowerUpIcon);
 
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView3D();
@@ -305,6 +290,61 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         Platform.runLater(() -> {
             initializeUpdateTimer();
         });
+    }
+
+    /**
+     * Displays the relevant icon, starts blinking it when it is close to turning off and then
+     * switches it off after the tokens time out
+     *
+     * @param yacht The yacht only for which we are displaying the icon
+     * @param tokenType The type of token, indicating what icon needs to be displayed
+     */
+    private void displayPowerUpIcon(ClientYacht yacht, TokenType tokenType) {
+        if (yacht == player) {
+            final ImageView iconToDisplay;
+
+            switch (tokenType) {
+                case BOOST:
+                    iconToDisplay = velocityIcon;
+                    break;
+                case HANDLING:
+                    iconToDisplay = handlingIcon;
+                    break;
+                case WIND_WALKER:
+                    iconToDisplay = windWalkerIcon;
+                    break;
+                case BUMPER:
+                    iconToDisplay = bumperIcon;
+                    break;
+                default:
+                    iconToDisplay = velocityIcon;
+            }
+
+            //Turn icon on
+            iconToDisplay.setVisible(true);
+
+            //Start blinking icon towards end
+            Timer blinkingTimer = new Timer();
+            blinkingTimer.schedule(new TimerTask() {
+                Boolean isVisible = true;
+
+                @Override
+                public void run() {
+                    isVisible = !isVisible;
+                    iconToDisplay.setVisible(isVisible);
+                }
+            }, (int) (tokenType.getTimeout() * ICON_BLINK_TIMEOUT_RATIO), ICON_BLINK_PERIOD);
+
+            //Turn icon off after the time out
+            Timer switchOffTimer = new Timer();
+            switchOffTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    blinkingTimer.cancel();
+                    iconToDisplay.setVisible(false);
+                }
+            }, tokenType.getTimeout());
+        }
     }
 
 

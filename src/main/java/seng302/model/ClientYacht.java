@@ -40,7 +40,6 @@ public class ClientYacht extends Observable {
 
     @FunctionalInterface
     public interface PowerUpListener {
-
         void notifyPowerUp(ClientYacht yacht, TokenType tokenType);
     }
 
