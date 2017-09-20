@@ -1,5 +1,9 @@
 package seng302.gameServer;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.io.IOException;
@@ -27,7 +31,7 @@ public class ServerAdvertiser {
      */
     private static String SERVICE = "_partyatsea";
     private static String PROTOCOL = "_tcp";
-    public static String SERVICE_TYPE = SERVICE + "." + PROTOCOL + ".local.";
+    public static String SERVICE_TYPE = SERVICE + "." + PROTOCOL + ".homekit.bonjour.michaelrausch.nz.";
 
     private static ServerAdvertiser instance = null;
     private static JmDNS jmdnsInstance = null;

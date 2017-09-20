@@ -10,11 +10,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.serverRepository.ServerRepository;
 import seng302.visualiser.controllers.ViewManager;
 
 public class App extends Application {
 
     private static Logger logger = LoggerFactory.getLogger(App.class);
+    private static boolean isRunningAsCache = false;
 
     public static void parseArgs(String[] args) throws ParseException {
         Options options = new Options();
@@ -25,8 +27,13 @@ public class App extends Application {
             .getLogger(Logger.ROOT_LOGGER_NAME);
 
         options.addOption("debugLevel", true, "Set the application debug level");
+        options.addOption("runAsCache", false, "Run as a server cache for server discovery");
 
         cmd = parser.parse(options, args);
+
+        if (cmd.hasOption("runAsCache")){
+            isRunningAsCache = true;
+        }
 
         if (cmd.hasOption("debugLevel")) {
 
@@ -67,14 +74,19 @@ public class App extends Application {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         try {
             parseArgs(args);
         } catch (ParseException e) {
             logger.error("Could not parse command line arguments");
         }
 
-        launch(args);
+        if (!isRunningAsCache){
+            launch(args);
+        }
+        else{
+            ServerRepository serverRepository = new ServerRepository();
+        }
     }
 }
 
