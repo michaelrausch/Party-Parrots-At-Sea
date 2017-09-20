@@ -51,6 +51,35 @@ public class ModelFactory {
         return bo;
     }
 
+    public static BoatModel boatCustomiseView(BoatMeshType boatType, Color primaryColour) {
+        Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
+        final Rotate animationRotate = new Rotate(0, new Point3D(0,0,1));
+        boatAssets.getTransforms().addAll(
+            new Scale(8.0, 8.0, 8.0),
+            new Rotate(-70, new Point3D(1,0,0)),
+            new Translate(16,50, 0),
+            animationRotate
+        );
+
+        boatAssets.getTransforms().add(animationRotate);
+        BoatModel bo = new BoatModel(boatAssets, null, boatType);
+        bo.rotateSail(45);
+
+        bo.setAnimation(new AnimationTimer() {
+            double boatAngle = 0;
+            Rotate rotate = animationRotate;
+            @Override
+            public void handle(long now) {
+                boatAngle += 0.5;
+                rotate.setAngle(boatAngle);
+            }
+        });
+        boatAssets.getChildren().addAll(
+            new AmbientLight()
+        );
+        return bo;
+    }
+
     public static BoatModel boatRotatingView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().addAll(

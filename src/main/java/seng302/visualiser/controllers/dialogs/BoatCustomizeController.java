@@ -9,12 +9,21 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.Group;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.ClientToServerThread;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.ViewManager;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.visualiser.fxObjects.assets_3D.BoatModel;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.validators.FieldLengthValidator;
 import seng302.visualiser.validators.ValidationTools;
 
@@ -28,13 +37,17 @@ public class BoatCustomizeController implements Initializable{
     @FXML
     private JFXTextField boatName;
     @FXML
+    private Pane boatPane;
+    @FXML
     void colorChanged(ActionEvent event) {
         Color color = colorPicker.getValue();
+        RefreshBoat();
     }
     //---------FXML END---------//
 
     private ClientToServerThread socketThread;
     private LobbyController lobbyController;
+    private BoatMeshType currentBoat;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -55,6 +68,7 @@ public class BoatCustomizeController implements Initializable{
         });
 
         submitBtn.setOnMouseEntered(e -> Sounds.playHoverSound());
+
     }
 
     /**
@@ -78,7 +92,10 @@ public class BoatCustomizeController implements Initializable{
             colorArray[2] = (byte) blue;
 
             socketThread.sendCustomizationRequest(CustomizeRequestType.COLOR, colorArray);
+            socketThread.sendCustomizationRequest(CustomizeRequestType.SHAPE, currentBoat.toString().getBytes());
             lobbyController.closeCustomizationDialog();
+
+
         }
     }
 
@@ -92,5 +109,30 @@ public class BoatCustomizeController implements Initializable{
 
     public void setParentController(LobbyController lobbyController){
         this.lobbyController = lobbyController;
+    }
+
+    public void setCurrentBoat(BoatMeshType boatType) {
+        Group group = new Group();
+        this.currentBoat = boatType;
+        System.out.println(boatType.toString());
+        boatPane.setBackground(new Background(new BackgroundFill(Color.SKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+        boatPane.getChildren().add(group);
+        BoatModel bo = ModelFactory.boatCustomiseView(boatType, colorPicker.getValue());
+        group.getChildren().add(bo.getAssets());
+    }
+
+    public void nextBoat(ActionEvent actionEvent) {
+        boatPane.getChildren().clear();
+    }
+
+    public void prevBoat(ActionEvent actionEvent) {
+    }
+
+    private void RefreshBoat() {
+        boatPane.getChildren().clear();
+        Group group = new Group();
+        boatPane.getChildren().add(group);
+        BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
+        group.getChildren().add(bo.getAssets());
     }
 }

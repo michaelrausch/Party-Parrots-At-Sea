@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 public class LobbyController implements Initializable {
 
@@ -129,6 +130,7 @@ public class LobbyController implements Initializable {
         controller.setPlayerName(this.playerBoats
             .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
             .getBoatName());
+        controller.setCurrentBoat(BoatMeshType.DINGHY);
 
         return customizationDialog;
     }

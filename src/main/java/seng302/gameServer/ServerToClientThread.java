@@ -125,7 +125,7 @@ public class ServerToClientThread implements Runnable {
         lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
 
         ServerYacht yacht = new ServerYacht(
-                "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
+                "DINGHY", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
 
         player = new Player(socket, yacht);

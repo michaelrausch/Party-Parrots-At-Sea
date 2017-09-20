@@ -421,4 +421,7 @@ public class ServerYacht {
         return boatColor;
     }
 
+    public void setBoatType(String boatType) {
+        this.boatType = boatType;
+    }
 }

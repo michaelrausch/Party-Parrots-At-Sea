@@ -702,6 +702,9 @@ public class GameState implements Runnable {
             int blue = customizeData[2] & 0xFF;
             Color yachtColor = Color.rgb(red, green, blue);
             playerYacht.setBoatColor(yachtColor);
+        } else if (requestType.equals(CustomizeRequestType.SHAPE)) {
+            String type = new String(customizeData);
+            playerYacht.setBoatType(type);
         }
     }
 
