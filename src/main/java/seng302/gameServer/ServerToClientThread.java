@@ -1,19 +1,15 @@
 package seng302.gameServer;
 
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 import org.slf4j.Logger;
@@ -31,7 +27,6 @@ import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.utilities.XMLGenerator;
 
 /**
@@ -100,30 +95,8 @@ public class ServerToClientThread implements Runnable {
     }
 
     private void setUpPlayer(){
-        BufferedReader fn;
-        String fName = "";
-        BufferedReader ln;
+        String fName = "Player " + GameState.getNumberOfPlayers().toString();
         String lName = "";
-
-        fn = new BufferedReader(
-                new InputStreamReader(
-                        ServerToClientThread.class.getResourceAsStream(
-                                "/server_config/CSV_Database_of_First_Names.csv"
-                        )
-                )
-        );
-        List<String> all = fn.lines().collect(Collectors.toList());
-        fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-        ln = new BufferedReader(
-                new InputStreamReader(
-                        ServerToClientThread.class.getResourceAsStream(
-                                "/server_config/CSV_Database_of_Last_Names.csv"
-                        )
-                )
-        );
-        all = ln.lines().collect(Collectors.toList());
-        lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-
         ServerYacht yacht = new ServerYacht(
                 "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
@@ -233,9 +206,9 @@ public class ServerToClientThread implements Runnable {
 
     public void sendSetupMessages() {
         xmlGenerator = new XMLGenerator();
-        RaceXMLTemplate race = new RaceXMLTemplate(new ArrayList<>(GameState.getYachts().values()), new ArrayList<>());
+//        RaceXMLTemplate race = new RaceXMLTemplate(new ArrayList<>(GameState.getYachts().values()), new ArrayList<>());
 
-        xmlGenerator.setRaceTemplate(race);
+//        xmlGenerator.setRaceTemplate(race);
 
         XMLMessage xmlMessage;
         xmlMessage = new XMLMessage(xmlGenerator.getRegattaAsXml(), XMLMessageSubType.REGATTA,

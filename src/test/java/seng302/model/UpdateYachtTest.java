@@ -1,12 +1,12 @@
 package seng302.model;
 
+import static seng302.gameServer.GameState.checkCollision;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import seng302.gameServer.GameState;
 import seng302.utilities.GeoUtility;
-
-import static seng302.gameServer.GameState.checkCollision;
 
 /**
  * Test update function in Yacht.java to make sure yacht will not be collide each other within 25.0
@@ -24,7 +24,7 @@ public class UpdateYachtTest {
         new GameState("");
         GameState.addYacht(1, yacht1);
         GameState.addYacht(2, yacht2);
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
     }
 
     @Test

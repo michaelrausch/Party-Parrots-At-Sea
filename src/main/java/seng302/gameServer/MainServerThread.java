@@ -97,7 +97,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         startAdvertisingServer();
 
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
         GameState.addMessageEventListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");

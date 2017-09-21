@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RaceDefinition>
+
+  <CourseName> HorseShoe </CourseName>
+
+  <CentralLat> -14.6457 </CentralLat>
+  <CentralLng> 47.612855 </CentralLng>
+
+  <Marks>
+    <CompoundMark CompoundMarkID="1">
+      <Mark Lat="-14.71412" Lng="47.5756"/>
+      <Mark Lat="-14.70814" Lng="47.58041"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="2">
+      <Mark Lat="-14.67194" Lng="47.53818" />
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="3">
+      <Mark Lat="-14.61248" Lng="47.58556" />
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="4">
+      <Mark Lat="-14.60584" Lng="47.63088"/>
+      <Mark Lat="-14.60617" Lng="47.6374" />
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="5">
+      <Mark Lat="-14.64637" Lng="47.60307"/>
+      <Mark Lat="-14.6477" Lng="47.61165"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="6">
+      <Mark Lat="-14.63839" Lng="47.6762"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="7">
+      <Mark Lat="-14.68954" Lng="47.66349"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="8">
+      <Mark Lat="-14.7025" Lng="47.60238"/>
+      <Mark Lat="-14.71047" Lng="47.60307"/>
+    </CompoundMark>
+  </Marks>
+
+  <Course>
+
+    <OpeningSegment>
+      <Corner CompoundMarkID="1" Rounding="PS"/>
+      <Corner CompoundMarkID="2" Rounding="S"/>
+      <Corner CompoundMarkID="3" Rounding="S"/>
+      <Corner CompoundMarkID="4" Rounding="SP"/>
+    </OpeningSegment>
+
+    <RepeatingSegment>
+      <Corner CompoundMarkID="5" Rounding="SP"/>
+      <Corner CompoundMarkID="4" Rounding="PS"/>
+    </RepeatingSegment>
+
+    <ClosingSegment>
+      <Corner CompoundMarkID="6" Rounding="S"/>
+      <Corner CompoundMarkID="7" Rounding="S"/>
+      <Corner CompoundMarkID="8" Rounding="SP" />
+    </ClosingSegment>
+
+  </Course>
+
+  <CourseLimit>
+    <Limit Lat="-14.73371" Lng="47.58213" />
+    <Limit Lat="-14.6653" Lng="47.51003" />
+    <Limit Lat="-14.59022" Lng="47.57286" />
+    <Limit Lat="-14.58723" Lng="47.64358" />
+    <Limit Lat="-14.6261" Lng="47.71293" />
+    <Limit Lat="-14.70814" Lng="47.6762" />
+    <Limit Lat="-14.72773" Lng="47.59689" />
+    <Limit Lat="-14.68323" Lng="47.59449" />
+    <Limit Lat="-14.64969" Lng="47.65113" />
+    <Limit Lat="-14.66131" Lng="47.5986" />
+    <Limit Lat="-14.63441" Lng="47.58419" />
+    <Limit Lat="-14.68091" Lng="47.59174" />
+  </CourseLimit>
+
+</RaceDefinition>

@@ -2,6 +2,12 @@ package seng302.model.mark;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,13 +17,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import seng302.gameServer.messages.RoundingSide;
-import seng302.model.ServerYacht;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.model.token.Token;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
-import java.util.*;
 
 /**
  * Class to hold the order of the marks in the race.
@@ -127,10 +129,11 @@ public class MarkOrder {
     private void loadRaceProperties(){
         XMLGenerator generator = new XMLGenerator();
 
-        // TODO: 29/08/17 wmu16 - This is terrible, having to make a template just to receive constant data
-        generator.setRaceTemplate(new RaceXMLTemplate(
-            new ArrayList<>(),
-            new ArrayList<>()));
+//        // TODO: 29/08/17 wmu16 - This is terrible, having to make a template just to receive constant data
+//        generator.setRaceTemplate(new RaceXMLTemplate(
+//            new ArrayList<>(),
+//            new ArrayList<>())
+//        );
 
         String raceXML = generator.getRaceAsXml();
 

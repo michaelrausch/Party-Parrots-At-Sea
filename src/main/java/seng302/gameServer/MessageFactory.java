@@ -13,8 +13,6 @@ import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
-import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.model.token.Token;
 import seng302.utilities.XMLGenerator;
 
@@ -97,8 +95,8 @@ public class MessageFactory {
     public static XMLMessage getRaceXML() {
         List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
         List<Token> tokens = GameState.getTokensInPlay();
-        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
-        xmlGenerator.setRaceTemplate(raceXMLTemplate);
+//        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
+//        xmlGenerator.setRaceTemplate(raceXMLTemplate);
 
         XMLMessage raceXMLMessage = new XMLMessage(
             xmlGenerator.getRaceAsXml(),
@@ -120,8 +118,8 @@ public class MessageFactory {
     public static XMLMessage getBoatXML() {
         List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
         List<Token> tokens = GameState.getTokensInPlay();
-        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
-        xmlGenerator.setRaceTemplate(raceXMLTemplate);
+//        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
+//        xmlGenerator.setRaceTemplate(raceXMLTemplate);
 
         return new XMLMessage(
             xmlGenerator.getBoatsAsXml(),
