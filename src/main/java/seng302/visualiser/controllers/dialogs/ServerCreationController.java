@@ -81,7 +81,7 @@ public class ServerCreationController implements Initializable {
             lastMap();
         });
 
-        XMLParser.parseRaceDef("/maps/default.xml", "test", 2);
+        XMLParser.parseRaceDef("/maps/horseshoe.xml", "test", 2);
     }
 
     /**
