@@ -1,6 +1,6 @@
 package seng302.gameServer.messages;
 
-import seng302.serverRepository.ServerListing;
+import seng302.discoveryServer.util.ServerListing;
 
 public class ServerRegistrationMessage extends Message {
     private int size;

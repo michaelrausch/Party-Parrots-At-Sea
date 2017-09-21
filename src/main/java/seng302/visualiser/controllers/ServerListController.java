@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
@@ -22,9 +23,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.discoveryServer.DiscoveryServer;
 import seng302.gameServer.ServerDescription;
-import seng302.serverRepository.ServerListing;
-import seng302.serverRepository.ServerRepositoryClient;
+import seng302.discoveryServer.util.ServerListing;
+import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.utilities.Sounds;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
@@ -169,10 +171,19 @@ public class ServerListController implements Initializable, ServerListenerDelega
 
     private void connectToRoomCode(String roomCode){
         try {
-            ServerListing serverListing = new ServerRepositoryClient().getServerForRoomCode(roomCode);
+            ServerListing serverListing = new DiscoveryServerClient().getServerForRoomCode(roomCode);
             ViewManager.getInstance().getGameClient().runAsClient(serverListing.getAddress(), serverListing.getPortNumber());
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch (java.net.ConnectException e){
+            //TODO Add proper dialog
+            logger.warn("Couldn't connect to discovery server");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Couldn't connect to discovery server");
+            alert.setContentText("Couldn't connect to " + DiscoveryServer.DISCOVERY_SERVER);
+            alert.showAndWait();
+        }
+        catch (Exception e) {
+            logger.warn("Error discovering room code");
         }
     }
 

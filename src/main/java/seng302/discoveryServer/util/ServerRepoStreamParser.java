@@ -1,4 +1,4 @@
-package seng302.serverRepository;
+package seng302.discoveryServer.util;
 
 
 import seng302.gameServer.messages.Message;

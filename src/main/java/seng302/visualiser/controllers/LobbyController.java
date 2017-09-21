@@ -22,7 +22,7 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.serverRepository.ServerRepositoryClient;
+import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.cells.PlayerCell;
@@ -83,8 +83,8 @@ public class LobbyController implements Initializable {
             serverName.setText(ViewManager.getInstance().getProperty("serverName"));
             mapName.setText(ViewManager.getInstance().getProperty("mapName"));
 
-            if (ServerRepositoryClient.getRoomCode() != null){
-                setRoomCode(ServerRepositoryClient.getRoomCode());
+            if (DiscoveryServerClient.getRoomCode() != null){
+                setRoomCode(DiscoveryServerClient.getRoomCode());
             }
 
             ViewManager.getInstance().getPlayerList().addListener((ListChangeListener<String>) c -> Platform.runLater(this::refreshPlayerList));

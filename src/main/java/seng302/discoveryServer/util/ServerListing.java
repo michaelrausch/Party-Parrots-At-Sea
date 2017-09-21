@@ -1,7 +1,7 @@
-package seng302.serverRepository;
+package seng302.discoveryServer.util;
 
 public class ServerListing {
-    private static final int SERVER_TTL_DEFAULT = 10;
+    public final static int SERVER_TTL_DEFAULT = 10;
 
     private String serverName = "";
     private String mapName = "";
@@ -105,5 +105,9 @@ public class ServerListing {
 
     public String getAddress() {
         return address;
+    }
+
+    public void setTtl(Integer ttl){
+        this.ttl = ttl;
     }
 }

@@ -10,7 +10,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.serverRepository.ServerRepository;
+import seng302.discoveryServer.DiscoveryServer;
 import seng302.visualiser.controllers.ViewManager;
 
 public class App extends Application {
@@ -27,45 +27,52 @@ public class App extends Application {
             .getLogger(Logger.ROOT_LOGGER_NAME);
 
         options.addOption("debugLevel", true, "Set the application debug level");
-        options.addOption("runAsCache", false, "Run as a server cache for server discovery");
+        options.addOption("runAsDiscoveryServer", false, "Run as a discovery server");
+        options.addOption("discoveryDevMode", false, "Use a local discovery server");
 
         cmd = parser.parse(options, args);
 
-        if (cmd.hasOption("runAsCache")){
+        if (cmd.hasOption("runAsDiscoveryServer")){
             isRunningAsCache = true;
+            rootLogger.setLevel(Level.ALL);
+            return;
+        }
+
+        if (cmd.hasOption("discoveryDevMode")) {
+            DiscoveryServer.DISCOVERY_SERVER = "localhost";
         }
 
         if (cmd.hasOption("debugLevel")) {
 
-            switch (cmd.getOptionValue("debugLevel")) {
-                case "DEBUG":
-                    rootLogger.setLevel(Level.DEBUG);
-                    break;
+        switch (cmd.getOptionValue("debugLevel")) {
+            case "DEBUG":
+                rootLogger.setLevel(Level.DEBUG);
+                break;
 
-                case "ALL":
-                    rootLogger.setLevel(Level.ALL);
-                    break;
+            case "ALL":
+                rootLogger.setLevel(Level.ALL);
+                break;
 
-                case "WARNING":
-                    rootLogger.setLevel(Level.WARN);
-                    break;
+            case "WARNING":
+                rootLogger.setLevel(Level.WARN);
+                break;
 
-                case "ERROR":
-                    rootLogger.setLevel(Level.ERROR);
-                    break;
+            case "ERROR":
+                rootLogger.setLevel(Level.ERROR);
+                break;
 
-                case "INFO":
-                    rootLogger.setLevel(Level.INFO);
+            case "INFO":
+                rootLogger.setLevel(Level.INFO);
 
-                case "TRACE":
-                    rootLogger.setLevel(Level.TRACE);
+            case "TRACE":
+                rootLogger.setLevel(Level.TRACE);
 
-                default:
-                    rootLogger.setLevel(Level.ALL);
-            }
-        } else {
-            rootLogger.setLevel(Level.WARN);
+            default:
+                rootLogger.setLevel(Level.ALL);
         }
+    } else {
+        rootLogger.setLevel(Level.WARN);
+    }
     }
 
     @Override
@@ -85,7 +92,7 @@ public class App extends Application {
             launch(args);
         }
         else{
-            ServerRepository serverRepository = new ServerRepository();
+            new DiscoveryServer();
         }
     }
 }
