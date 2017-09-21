@@ -23,6 +23,8 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerDescription;
+import seng302.serverRepository.ServerListing;
+import seng302.serverRepository.ServerRepositoryClient;
 import seng302.utilities.Sounds;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
@@ -51,6 +53,10 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private JFXTextField serverHostName;
     @FXML
     private JFXTextField serverPortNumber;
+    @FXML
+    private JFXButton roomConnectButton;
+    @FXML
+    private JFXTextField roomNumber;
     //---------FXML END---------//
 
     private Label noServersFound;
@@ -64,6 +70,17 @@ public class ServerListController implements Initializable, ServerListenerDelega
         // Set Event Bindings
         connectButton.setOnMouseEntered(event -> Sounds.playHoverSound());
         serverListHostButton.setOnMouseEntered(event -> Sounds.playHoverSound());
+
+        roomConnectButton.setOnMouseReleased(event -> {
+            connectToRoomCode(roomNumber.getText());
+            Sounds.playButtonClick();
+        });
+        roomNumber.setOnKeyPressed(event -> {
+            if (event.getCode().equals(KeyCode.ENTER)) {
+                connectToRoomCode(roomNumber.getText());
+            }
+        });
+
         connectButton.setOnMouseReleased(event -> {
             attemptToDirectConnect();
             Sounds.playButtonClick();
@@ -148,6 +165,15 @@ public class ServerListController implements Initializable, ServerListenerDelega
         Boolean portNumberValid = ValidationTools.validateTextField(serverPortNumber);
 
         return hostNameValid && portNumberValid;
+    }
+
+    private void connectToRoomCode(String roomCode){
+        try {
+            ServerListing serverListing = new ServerRepositoryClient().getServerForRoomCode(roomCode);
+            ViewManager.getInstance().getGameClient().runAsClient(serverListing.getAddress(), serverListing.getPortNumber());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

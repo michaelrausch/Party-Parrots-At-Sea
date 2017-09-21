@@ -57,9 +57,9 @@ public class ServerRepoStreamParser {
     }
 
     private String parseRoomCodeRequest(byte[] payload) {
-        int roomCodeLength = (int) Message.bytesToLong(Arrays.copyOfRange(payload, 0 ,4));
+        int roomCodeLength = (int) Message.bytesToLong(Arrays.copyOfRange(payload, 0 ,6));
 
-        return new String(Arrays.copyOfRange(payload, 4, 4+roomCodeLength));
+        return new String(Arrays.copyOfRange(payload, 6, 6+roomCodeLength));
     }
 
     public static ServerListing parseServerRegistration(byte[] payload) {

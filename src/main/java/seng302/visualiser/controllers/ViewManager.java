@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerAdvertiser;
+import seng302.serverRepository.ServerRepositoryClient;
 import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
@@ -233,8 +234,9 @@ public class ViewManager {
             logger.error("Could not load lobby view");
         }
 
+        LobbyController lobbyController = loader.getController();
+
         if (disableReadyButton) {
-            LobbyController lobbyController = loader.getController();
             lobbyController.disableReadyButton();
         }
 
@@ -245,7 +247,6 @@ public class ViewManager {
      * Sets up the view for the race. Creating a new decorator and destroying the old one.
      * @return A RaceViewController for the race view screen.
      */
-
     public RaceViewController loadRaceView() {
         FXMLLoader loader = loadFxml("/views/RaceView.fxml");
         // have to create a new stage and set the race view maximized as JFoenix decorator has

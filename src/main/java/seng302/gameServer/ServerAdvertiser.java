@@ -3,6 +3,8 @@ package seng302.gameServer;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.serverRepository.ServerListing;
+import seng302.serverRepository.ServerRepositoryClient;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -31,16 +33,19 @@ public class ServerAdvertiser {
      */
     private static String SERVICE = "_partyatsea";
     private static String PROTOCOL = "_tcp";
-    public static String SERVICE_TYPE = SERVICE + "." + PROTOCOL + ".homekit.bonjour.michaelrausch.nz.";
+    public static String SERVICE_TYPE = SERVICE + "." + PROTOCOL + ".local.";
 
     private static ServerAdvertiser instance = null;
     private static JmDNS jmdnsInstance = null;
     private ServiceInfo serviceInfo; // Note: Whenever this is changed, our service will be re-registered on the network.
+    private ServerRepositoryClient repositoryClient;
 
     private Hashtable<String ,String> props;
 
     private ServerAdvertiser() throws IOException{
         jmdnsInstance = JmDNS.create(InetAddress.getByName(getLocalHostIp()));
+
+        repositoryClient = new ServerRepositoryClient();
 
         props = new Hashtable<>();
         props.put("map", "");
@@ -130,6 +135,9 @@ public class ServerAdvertiser {
                     }
                 }
             }, 0);
+
+        ServerListing serverListing = new ServerListing(serverName, props.get("map"), getLocalHostIp(), portNo, Integer.parseInt(props.get("capacity")));
+        repositoryClient.register(serverListing);
     }
 
     /**

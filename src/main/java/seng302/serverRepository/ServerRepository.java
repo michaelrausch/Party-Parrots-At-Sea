@@ -20,17 +20,20 @@ public class ServerRepository {
         ServerSocket serverSocket = new ServerSocket(9999);
 
 
-        // TODO Remove later, this is for testing
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    new ServerRepositoryClient();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, 5000);
+//        // TODO Remove later, this is for testing
+//        new Timer().schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                try {
+//                    System.out.println("Starting repo client");
+//                    new ServerRepositoryClient();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }, 5000);
+
+
 
         while (true){
             Socket clientSocket = serverSocket.accept();
