@@ -15,6 +15,7 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -55,6 +56,8 @@ public class ClientYacht extends Observable {
     private GeoPoint location;
     private Integer boatStatus;
     private Double currentVelocity;
+
+    private BoatObject boatObject;
 
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
     private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
@@ -287,5 +290,13 @@ public class ClientYacht extends Observable {
 
     public Double getCurrentVelocity() {
         return currentVelocity;
+    }
+
+    public void setBoatObject(BoatObject newBoatObject) {
+        this.boatObject = newBoatObject;
+    }
+
+    public BoatObject getBoatObject() {
+        return this.boatObject;
     }
 }
