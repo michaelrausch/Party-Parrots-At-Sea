@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import seng302.gameServer.GameState;
 import seng302.utilities.GeoUtility;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 import static seng302.gameServer.GameState.checkCollision;
 
@@ -14,8 +15,10 @@ import static seng302.gameServer.GameState.checkCollision;
  */
 public class UpdateYachtTest {
 
-    private ServerYacht yacht1 = new ServerYacht("Yacht", 1, "1", "Yacht" + 1, "Yacht" + 1, "Test1");
-    private ServerYacht yacht2 = new ServerYacht("Yacht", 2, "2", "Yacht" + 2, "Yacht" + 2, "Test2");
+    private ServerYacht yacht1 = new ServerYacht(BoatMeshType.DINGHY, 1, "1", "Yacht" + 1,
+        "Yacht" + 1, "Test1");
+    private ServerYacht yacht2 = new ServerYacht(BoatMeshType.DINGHY, 2, "2", "Yacht" + 2,
+        "Yacht" + 2, "Test2");
     private GeoPoint geoPoint1 = new GeoPoint(50.0, 50.0);
     private GeoPoint geoPoint2 = GeoUtility.getGeoCoordinate(geoPoint1, 90.0, 50.0);
 

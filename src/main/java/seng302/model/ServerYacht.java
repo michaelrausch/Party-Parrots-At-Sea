@@ -12,6 +12,7 @@ import seng302.utilities.GeoUtility;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -20,12 +21,12 @@ import java.util.Observer;
  */
 public class ServerYacht {
 
-    private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
+    private Logger logger = LoggerFactory.getLogger(ServerYacht.class);
 
     public static final Double TURN_STEP = 5.0;
 
     //Boat info
-    private String boatType;
+    private BoatMeshType boatType;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -57,7 +58,7 @@ public class ServerYacht {
     private Long powerUpStartTime;
 
 
-    public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
+    public ServerYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
         this.boatStatus = BoatStatus.PRESTART;
@@ -421,4 +422,11 @@ public class ServerYacht {
         return boatColor;
     }
 
+    public void setBoatType(BoatMeshType boatType) {
+        this.boatType = boatType;
+    }
+
+    public BoatMeshType getBoatType() {
+        return boatType;
+    }
 }
