@@ -11,6 +11,7 @@ import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -25,6 +26,7 @@ public class ServerYacht {
     private String boatType;
     private Double turnStep = 10.0;
     private Double maxSpeedMultiplier = 1.0;
+    private Double acceleration = 1.0;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -423,10 +425,11 @@ public class ServerYacht {
     public void setBoatType(String boatType) {
         BoatMeshType boatMeshType;
         for (BoatMeshType boatMesh: BoatMeshType.values()) {
-            if (boatType == boatMesh.toString()) {
+            if (Objects.equals(boatType, boatMesh.toString())) {
                 boatMeshType = boatMesh;
                 turnStep = boatMeshType.turnStep;
                 maxSpeedMultiplier = boatMeshType.maxSpeedMultiplier;
+                acceleration = boatMeshType.accelerationMultiplier;
             }
         }
         this.boatType = boatType;
@@ -434,6 +437,10 @@ public class ServerYacht {
 
     public Double getMaxSpeedMultiplier() {
         return maxSpeedMultiplier;
+    }
+
+    public Double getAcceleration(){
+        return acceleration;
     }
 
     public String getBoatType() {

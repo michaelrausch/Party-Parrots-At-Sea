@@ -461,17 +461,17 @@ public class GameState implements Runnable {
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (currentVelocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity(maxBoatSpeed / 100);
+                yacht.changeVelocity((maxBoatSpeed / 100) * yacht.getAcceleration());
             } else if (currentVelocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAcceleration());
             } else {
-                yacht.setCurrentVelocity(maxBoatSpeed);
+                yacht.setCurrentVelocity((maxBoatSpeed) * yacht.getAcceleration());
             }
         } else {
             if (currentVelocity > 3000) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAcceleration());
             } else if (currentVelocity > 100) {
-                yacht.changeVelocity(-currentVelocity / 50);
+                yacht.changeVelocity((-currentVelocity / 50) * yacht.getAcceleration());
             } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }

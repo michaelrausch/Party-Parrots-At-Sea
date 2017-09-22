@@ -56,9 +56,9 @@ public class BoatCustomizeController implements Initializable{
     private ClientToServerThread socketThread;
     private LobbyController lobbyController;
     private BoatMeshType currentBoat;
-    private static Double maxSpeedMultiplier = 1.0;
-    private static Double maxTurnRate = 10.0;
-    private static Double maxAcceleration = 2.0;
+    private Double maxSpeedMultiplier = 1.0;
+    private Double maxTurnRate = 10.0;
+    private Double maxAcceleration = 1.0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
