@@ -6,24 +6,35 @@
 JFXButton {
     -fx-background-color: -fx-pp-light-text-color;
     -fx-text-fill: -fx-pp-theme-color;
-    -fx-font-size: 17px;
-    -fx-effect: -fx-pp-dropshadow-dark;
+    -fx-font-size: 15px;
+    -fx-effect: -fx-pp-dropshadow-light;
 }
 
 Label {
-    -fx-font-size: 25px;
+    -fx-font-size: 20px;
     -fx-text-fill: -fx-pp-theme-color;
-    /*-fx-effect: -fx-pp-dropshadow-dark;*/
+    -fx-effect: -fx-pp-dropshadow-light;
 }
 
 JFXButton:hover {
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-background-color: -fx-pp-light-theme-color;
     -fx-text-fill: -fx-pp-light-text-color;
 }
 
 JFXButton:focused {
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-background-color: -fx-pp-theme-color;
     -fx-text-fill: -fx-pp-light-text-color;
+}
+
+JFXToggleButton {
+    -jfx-toggle-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-theme-color;
+}
+
+#resetBtn, #confirmBtn {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-front-color;
+    -fx-effect: -fx-pp-dropshadow-light;
 }
