@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.PointLight;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -34,6 +35,12 @@ public class BoatCustomizeController implements Initializable{
     @FXML
     private JFXColorPicker colorPicker;
     @FXML
+    private ProgressBar speedBar;
+    @FXML
+    private ProgressBar accelBar;
+    @FXML
+    private ProgressBar handleBar;
+    @FXML
     private JFXButton submitBtn;
     @FXML
     private JFXTextField boatName;
@@ -49,12 +56,15 @@ public class BoatCustomizeController implements Initializable{
     private ClientToServerThread socketThread;
     private LobbyController lobbyController;
     private BoatMeshType currentBoat;
+    private static Double maxSpeedMultiplier = 1.0;
+    private static Double maxTurnRate = 10.0;
+    private static Double maxAcceleration = 2.0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         socketThread = ViewManager.getInstance().getGameClient().getServerThread();
-
+        generateMaxStats();
         RequiredFieldValidator playerNameReqValidator = new RequiredFieldValidator();
         playerNameReqValidator.setMessage("Player name required.");
 
@@ -120,6 +130,8 @@ public class BoatCustomizeController implements Initializable{
         BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
         group.getChildren().add(bo.getAssets());
         group.getChildren().add(new PointLight());
+        refreshStatBars(bo);
+
     }
 
     public void nextBoat(ActionEvent actionEvent) {
@@ -130,6 +142,8 @@ public class BoatCustomizeController implements Initializable{
         BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
         group.getChildren().add(bo.getAssets());
         group.getChildren().add(new PointLight());
+        refreshStatBars(bo);
+
     }
 
     public void prevBoat(ActionEvent actionEvent) {
@@ -140,6 +154,8 @@ public class BoatCustomizeController implements Initializable{
         BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
         group.getChildren().add(bo.getAssets());
         group.getChildren().add(new PointLight());
+        refreshStatBars(bo);
+
     }
 
     private void RefreshBoat() {
@@ -148,5 +164,26 @@ public class BoatCustomizeController implements Initializable{
         boatPane.getChildren().add(group);
         BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
         group.getChildren().add(bo.getAssets());
+        refreshStatBars(bo);
+    }
+
+    private void generateMaxStats() {
+        for (BoatMeshType bmt: BoatMeshType.values()) {
+            if (bmt.turnStep > maxTurnRate) {
+                maxTurnRate = bmt.turnStep;
+            }
+            if (bmt.maxSpeedMultiplier > maxSpeedMultiplier) {
+                maxSpeedMultiplier = bmt.maxSpeedMultiplier;
+            }
+            if (bmt.accelerationMultiplier > maxAcceleration) {
+                maxAcceleration = bmt.accelerationMultiplier;
+            }
+        }
+    }
+
+    private void refreshStatBars(BoatModel bo) {
+        speedBar.setProgress((bo.getMeshType().maxSpeedMultiplier) / maxSpeedMultiplier);
+        accelBar.setProgress(bo.getMeshType().accelerationMultiplier / maxAcceleration);
+        handleBar.setProgress(bo.getMeshType().turnStep / maxTurnRate);
     }
 }

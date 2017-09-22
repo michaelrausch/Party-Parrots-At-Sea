@@ -23,7 +23,8 @@ public class ServerYacht {
 
     //Boat info
     private String boatType;
-    private Double turn_step;
+    private Double turnStep = 10.0;
+    private Double maxSpeedMultiplier = 1.0;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -172,7 +173,7 @@ public class ServerYacht {
         if (isAuto) {
             turnTowardsHeading(autoHeading);
             if (Math.abs(heading - autoHeading)
-                <= turn_step) { //Cancel when within 1 turn step of target.
+                <= turnStep) { //Cancel when within 1 turn step of target.
                 isAuto = false;
             }
         }
@@ -187,20 +188,20 @@ public class ServerYacht {
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
-                adjustHeading(-turn_step);
+                adjustHeading(-turnStep);
             } else {
-                adjustHeading(turn_step);
+                adjustHeading(turnStep);
             }
         } else if (normalizedHeading == 180) {
             if (lastHeading < 180) {
-                adjustHeading(turn_step);
+                adjustHeading(turnStep);
             } else {
-                adjustHeading(-turn_step);
+                adjustHeading(-turnStep);
             }
         } else if (normalizedHeading < 180) {
-            adjustHeading(-turn_step);
+            adjustHeading(-turnStep);
         } else {
-            adjustHeading(turn_step);
+            adjustHeading(turnStep);
         }
     }
 
@@ -209,20 +210,20 @@ public class ServerYacht {
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
-                adjustHeading(turn_step);
+                adjustHeading(turnStep);
             } else {
-                adjustHeading(-turn_step);
+                adjustHeading(-turnStep);
             }
         } else if (normalizedHeading == 180) {
             if (lastHeading < 180) {
-                adjustHeading(-turn_step);
+                adjustHeading(-turnStep);
             } else {
-                adjustHeading(turn_step);
+                adjustHeading(turnStep);
             }
         } else if (normalizedHeading < 180) {
-            adjustHeading(turn_step);
+            adjustHeading(turnStep);
         } else {
-            adjustHeading(-turn_step);
+            adjustHeading(-turnStep);
         }
     }
 
@@ -266,9 +267,9 @@ public class ServerYacht {
     private void turnTowardsHeading(Double newHeading) {
         Double newVal = heading - newHeading;
         if (Math.floorMod(newVal.longValue(), 360L) > 180) {
-            adjustHeading(turn_step / 5);
+            adjustHeading(turnStep / 5);
         } else {
-            adjustHeading(-turn_step / 5);
+            adjustHeading(-turnStep / 5);
         }
     }
 
@@ -420,14 +421,19 @@ public class ServerYacht {
     }
 
     public void setBoatType(String boatType) {
-        if (boatType == BoatMeshType.DINGHY.toString()) {
-            turn_step = 5.0;
-        } else if (boatType == BoatMeshType.CAT_ATE_A_MERINGUE.toString()){
-            turn_step = 10.0;
-        } else {
-            turn_step = 7.0;
+        BoatMeshType boatMeshType;
+        for (BoatMeshType boatMesh: BoatMeshType.values()) {
+            if (boatType == boatMesh.toString()) {
+                boatMeshType = boatMesh;
+                turnStep = boatMeshType.turnStep;
+                maxSpeedMultiplier = boatMeshType.maxSpeedMultiplier;
+            }
         }
         this.boatType = boatType;
+    }
+
+    public Double getMaxSpeedMultiplier() {
+        return maxSpeedMultiplier;
     }
 
     public String getBoatType() {

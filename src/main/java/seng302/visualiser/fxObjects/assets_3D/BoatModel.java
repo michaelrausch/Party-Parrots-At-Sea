@@ -18,6 +18,9 @@ public class BoatModel extends Model {
     private static final int SAIL_INDEX = 2;
 
     private BoatMeshType meshType;
+    private Double maxSpeedMultiplier;
+    private Double turnStep;
+    private Double accelerationMultiplier;
 
     /**
      * Stores a model and it's optional animation.
@@ -70,5 +73,9 @@ public class BoatModel extends Model {
 
     private MeshView getMeshViewChild(int index) {
         return (MeshView) assets.getChildren().get(index);
+    }
+
+    public BoatMeshType getMeshType() {
+        return meshType;
     }
 }

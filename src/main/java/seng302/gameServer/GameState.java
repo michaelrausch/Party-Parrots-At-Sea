@@ -449,11 +449,10 @@ public class GameState implements Runnable {
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier * yacht.getMaxSpeedMultiplier();
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
                 // TODO: 11/09/17 wmu16 CHANGE THIS TO MAGIC NUMBER
-                // TODO 22/09/17 kre39 change this magic number to a variable
                 maxBoatSpeed *= 2;
             }
         }
