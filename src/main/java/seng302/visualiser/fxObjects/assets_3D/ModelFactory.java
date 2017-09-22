@@ -7,6 +7,7 @@ import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
+import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
@@ -18,7 +19,7 @@ import javafx.scene.transform.Translate;
 
 
 /**
- * Factory class for creating 3D models of boats.
+ * Factory class for creating 3D models of boatTypes.
  */
 public class ModelFactory {
 
@@ -29,6 +30,35 @@ public class ModelFactory {
             new Scale(3.3, 3.3, 3.3),
             new Rotate(-70, new Point3D(1,0,0)),
             new Translate(13,50, 0),
+            animationRotate
+        );
+
+        boatAssets.getTransforms().add(animationRotate);
+        BoatModel bo = new BoatModel(boatAssets, null, boatType);
+        bo.rotateSail(45);
+
+        bo.setAnimation(new AnimationTimer() {
+            double boatAngle = 0;
+            Rotate rotate = animationRotate;
+            @Override
+            public void handle(long now) {
+                boatAngle += 0.5;
+                rotate.setAngle(boatAngle);
+            }
+        });
+        boatAssets.getChildren().addAll(
+            new AmbientLight()
+        );
+        return bo;
+    }
+
+    public static BoatModel boatCustomiseView(BoatMeshType boatType, Color primaryColour) {
+        Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
+        final Rotate animationRotate = new Rotate(0, new Point3D(0,0,1));
+        boatAssets.getTransforms().addAll(
+            new Scale(8.0, 8.0, 8.0),
+            new Rotate(-70, new Point3D(1,0,0)),
+            new Translate(16,50, 1),
             animationRotate
         );
 
@@ -78,27 +108,35 @@ public class ModelFactory {
     public static BoatModel boatGameView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().setAll(
-            new Rotate(-90, new Point3D(0,0,1)),
             new Scale(0.3, 0.3, 0.3)
         );
         return new BoatModel(boatAssets, null, boatType);
     }
 
     private static Group getUnmodifiedBoatModel(BoatMeshType boatType, Color primaryColour) {
+
         Group boatAssets = new Group();
-        MeshView hull = importFile(boatType.hullFile);
+        MeshView hull = importSTL(boatType.hullFile);
         hull.setMaterial(new PhongMaterial(primaryColour));
-        MeshView mast = importFile(boatType.mastFile);
+        MeshView mast = importSTL(boatType.mastFile);
         mast.setMaterial(new PhongMaterial(primaryColour));
-        MeshView sail = importFile(boatType.sailFile);
+        MeshView sail = importSTL(boatType.sailFile);
         sail.setMaterial(new PhongMaterial(Color.WHITE));
-        boatAssets.getChildren().addAll(hull, mast, sail);
+
+        if (boatType.jibFile != null) {
+            MeshView jib = importSTL(boatType.jibFile);
+            sail.setMaterial(new PhongMaterial(Color.WHITE));
+            boatAssets.getChildren().addAll(hull, mast, sail, jib);
+        } else {
+            boatAssets.getChildren().addAll(hull, mast, sail);
+        }
+
         return boatAssets;
     }
 
-    private static MeshView importFile(String fileName) {
+    private static MeshView importSTL(String fileName) {
         StlMeshImporter importer = new StlMeshImporter();
-        importer.read(ModelFactory.class.getResource("/meshes/" + fileName));
+        importer.read(ModelFactory.class.getResource("/meshes/boatSTLs/" + fileName));
         MeshView importedFile = new MeshView(importer.getImport());
         importedFile.setCache(true);
         importedFile.setCacheHint(CacheHint.SCALE_AND_ROTATE);

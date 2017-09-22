@@ -338,6 +338,8 @@ public class ViewManager {
 
                 stage.setMinHeight(500);
                 stage.setMinWidth(800);
+                stage.setTitle("Party Parrots At Sea");
+                stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
                 stage.setOnCloseRequest(e -> closeAll());
                 stage.setScene(scene);
                 stage.show();
