@@ -31,7 +31,7 @@ public class PlayerCell {
         this.playerId = playerId;
         this.name = yacht.getBoatName();
         this.boatColor = yacht.getColour();
-        this.boatType = BoatMeshType.getBoatMeshType(yacht.getBoatType());
+        this.boatType = yacht.getBoatType();
     }
 
     public void initialize() {

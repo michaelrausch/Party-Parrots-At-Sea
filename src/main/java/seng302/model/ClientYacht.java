@@ -15,6 +15,7 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -37,7 +38,7 @@ public class ClientYacht extends Observable {
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
 
-    private String boatType;
+    private BoatMeshType boatType;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -64,7 +65,7 @@ public class ClientYacht extends Observable {
     private ReadOnlyIntegerWrapper placingProperty = new ReadOnlyIntegerWrapper();
     private Color colour;
 
-    public ClientYacht(String boatType, Integer sourceId, String hullID, String shortName,
+    public ClientYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
         this.boatType = boatType;
         this.sourceId = sourceId;
@@ -88,7 +89,7 @@ public class ClientYacht extends Observable {
         super.addObserver(o);
     }
 
-    public String getBoatType() {
+    public BoatMeshType getBoatType() {
         return boatType;
     }
 

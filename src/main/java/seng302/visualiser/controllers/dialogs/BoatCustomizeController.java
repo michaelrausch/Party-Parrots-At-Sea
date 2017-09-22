@@ -111,8 +111,8 @@ public class BoatCustomizeController implements Initializable{
         this.lobbyController = lobbyController;
     }
 
-    public void setCurrentBoat(String boatType) {
-        currentBoat = BoatMeshType.getBoatMeshType(boatType);
+    public void setCurrentBoat(BoatMeshType boatType) {
+        currentBoat = boatType;
         displayCurrentBoat();
     }
 
