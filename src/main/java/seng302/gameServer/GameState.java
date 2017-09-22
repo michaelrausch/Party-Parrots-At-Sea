@@ -92,7 +92,6 @@ public class GameState implements Runnable {
         windSpeed = 10000d;
         yachts = new HashMap<>();
         tokensInPlay = new ArrayList<>();
-
         players = new ArrayList<>();
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
@@ -688,7 +687,10 @@ public class GameState implements Runnable {
 
         if (hasProgressed) {
             if (currentMarkSeqID != 0 && !markOrder.isLastMark(currentMarkSeqID)) {
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed leg " + yacht.getLegNumber());
+
+                String logMessage = yacht.getBoatName() + " passed leg " + yacht.getLegNumber();
+                notifyMessageListeners(
+                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
             }
             yacht.incrementLegNumber();
             sendMarkRoundingMessage(yacht);
@@ -724,7 +726,9 @@ public class GameState implements Runnable {
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
                 yacht.setBoatStatus(BoatStatus.RACING);
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed start line");
+                String logMessage = yacht.getBoatName() + " passed start line";
+                notifyMessageListeners(
+                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
                 return true;
             }
         }
@@ -828,7 +832,10 @@ public class GameState implements Runnable {
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
                 yacht.setBoatStatus(BoatStatus.FINISHED);
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed finish line");
+
+                String logMessage = yacht.getBoatName() + " passed finish line";
+                notifyMessageListeners(
+                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
                 return true;
             }
         }
@@ -937,13 +944,6 @@ public class GameState implements Runnable {
                 roundingMark.getSourceID()));
     }
 
-
-    public static void sendServerMessage(Integer messageType, String message) {
-        notifyMessageListeners(new ChatterMessage(
-            messageType, "SERVER: " + message
-        ));
-    }
-
     public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
         String chatterText = chatterMessage.getMessage();
         String[] words = chatterText.split("\\s+");
@@ -951,17 +951,19 @@ public class GameState implements Runnable {
             switch (words[2].trim()) {
                 case "/speed":
                     try {
-                        setServerSpeedMultiplier(Double.valueOf(words[3]));
-                        sendServerMessage(chatterMessage.getMessage_type(),
-                                "Speed modifier set to x" + words[3]);
+                        serverSpeedMultiplier = Double.valueOf(words[3]);
+                        String logMessage = "Speed modifier set to x" + words[3];
+                        notifyMessageListeners(MessageFactory
+                            .makeChatterMessage(chatterMessage.getMessageType(), logMessage));
                     } catch (Exception e) {
                         Logger logger = LoggerFactory.getLogger(GameState.class);
                         logger.error("cannot parse >speed value");
                     }
                     return;
                 case "/finish":
-                    sendServerMessage(chatterMessage.getMessage_type(),
-                            "Game will now finish");
+                    String logMessage = "Game will now finish";
+                    notifyMessageListeners(MessageFactory
+                        .makeChatterMessage(chatterMessage.getMessageType(), logMessage));
                     endRace();
                     return;
             }
@@ -1016,10 +1018,6 @@ public class GameState implements Runnable {
     public static void endRace () {
         yachts.forEach((id, yacht) -> yacht.setBoatStatus(BoatStatus.FINISHED));
         currentStage = GameStages.FINISHED;
-    }
-
-    public static void setServerSpeedMultiplier(double multiplier) {
-        serverSpeedMultiplier = multiplier;
     }
 
     public static double getServerSpeedMultiplier() {
