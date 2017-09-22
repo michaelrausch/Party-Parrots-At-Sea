@@ -35,25 +35,35 @@ public class GameState implements Runnable {
     private static Logger logger = LoggerFactory.getLogger(GameState.class);
 
 
+    private static final Integer STATE_UPDATES_PER_SECOND = 60;
+
+    //Scheduling constants
     static final int WARNING_TIME = 10 * -1000;
     static final int PREPATORY_TIME = 5 * -1000;
     private static final int TIME_TILL_START = 10 * 1000;
 
-    private static final Integer STATE_UPDATES_PER_SECOND = 60;
-    private static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
+    //Wind Constants
+    private static final int MAX_WIND_SPEED = 12000;
+    private static final int MIN_WIND_SPEED = 8000;
+
+    //Rounding Constants
+    private static final Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
+
+    //Collision constants
     private static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
     private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
     private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
+    //Powerup Constants
     private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
     private static final Integer HANDLING_BOOST_MULTIPLIER = 2;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
-    private static Double serverSpeedMultiplier = 1d;
+    private static Double serverSpeedMultiplier;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
     private static Boolean playerHasLeftFlag;
@@ -90,7 +100,6 @@ public class GameState implements Runnable {
         serverSpeedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
-        //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         newMessageListeners = new ArrayList<>();
@@ -242,7 +251,15 @@ public class GameState implements Runnable {
             } catch (InterruptedException e) {
                 System.out.println("[GameState] interrupted exception");
             }
-            if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.RACING) {
+            if (currentStage == GameStages.PRE_RACE) {
+                update();
+                if (System.currentTimeMillis() > startTime) {
+                    startSpawningTokens();
+                    startUpdatingWind();
+                    GameState.setCurrentStage(GameStages.RACING);
+                }
+            }
+            if (currentStage == GameStages.RACING) {
                 update();
             }
 
@@ -251,6 +268,61 @@ public class GameState implements Runnable {
             }
         }
     }
+
+    /**
+     * Start spawning coins every 60s after the first minute
+     */
+    private void startSpawningTokens() {
+        Timer timer = new Timer("Token Spawning Timer");
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                spawnNewToken();
+                notifyMessageListeners(MessageFactory.getRaceXML());
+            }
+        }, 0, 60000);
+    }
+
+    // TODO: 29/08/17 wmu16 - This sort of update should be in game state
+    private static void startUpdatingWind() {
+        Timer timer = new Timer("Wind Updating Timer");
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateWind();
+            }
+        }, 0, 500);
+    }
+
+
+    private static void updateWind() {
+        Integer direction = GameState.getWindDirection().intValue();
+        Integer windSpeed = GameState.getWindSpeedMMS().intValue();
+
+        Random random = new Random();
+
+        if (Math.floorMod(random.nextInt(), 2) == 0) {
+            direction += random.nextInt(4);
+            windSpeed += random.nextInt(20) + 459;
+        } else {
+            direction -= random.nextInt(4);
+            windSpeed -= random.nextInt(20) + 459;
+        }
+
+        direction = Math.floorMod(direction, 360);
+
+        if (windSpeed > MAX_WIND_SPEED) {
+            windSpeed -= random.nextInt(500);
+        }
+
+        if (windSpeed <= MIN_WIND_SPEED) {
+            windSpeed += random.nextInt(500);
+        }
+
+        GameState.setWindSpeed(Double.valueOf(windSpeed));
+        GameState.setWindDirection(direction.doubleValue());
+    }
+
 
     public static void updateBoat(Integer sourceId, BoatAction actionType) {
         ServerYacht playerYacht = yachts.get(sourceId);
@@ -285,7 +357,7 @@ public class GameState implements Runnable {
         tokensInPlay.clear();
 
         //Get a random token location with random type
-        Token token = allTokens.get(random.nextInt(allTokens.size() - 1) + 1);
+        Token token = allTokens.get(random.nextInt(allTokens.size()));
         token.assignRandomType();
 
         logger.debug("Spawned token of type " + token.getTokenType());
@@ -307,9 +379,7 @@ public class GameState implements Runnable {
 
         Double timeInterval = (System.currentTimeMillis() - previousUpdateTime) / 1000000.0;
         previousUpdateTime = System.currentTimeMillis();
-        if (System.currentTimeMillis() > startTime) {
-            GameState.setCurrentStage(GameStages.RACING);
-        }
+
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
             yacht.runAutoPilot();
