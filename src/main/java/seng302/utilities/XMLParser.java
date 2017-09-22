@@ -18,6 +18,7 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * Utilities for parsing XML documents
@@ -139,16 +140,14 @@ public class XMLParser {
             if (currentBoat.getNodeName().equals("Boat")) {
 //                    Boat boat = new Boat(currentBoat);
                 ClientYacht yacht = new ClientYacht(
-                    XMLParser.getNodeAttributeString(currentBoat, "Type"),
+                    BoatMeshType.valueOf(XMLParser.getNodeAttributeString(currentBoat, "Type")),
                     XMLParser.getNodeAttributeInt(currentBoat, "SourceID"),
                     XMLParser.getNodeAttributeString(currentBoat, "HullNum"),
                     XMLParser.getNodeAttributeString(currentBoat, "ShortName"),
                     XMLParser.getNodeAttributeString(currentBoat, "BoatName"),
                     XMLParser.getNodeAttributeString(currentBoat, "Country"));
                 yacht.setColour(Color.web(getNodeAttributeString(currentBoat, "Color")));
-                if (yacht.getBoatType().equals("Yacht")) {
-                    competingBoats.put(yacht.getSourceId(), yacht);
-                }
+                competingBoats.put(yacht.getSourceId(), yacht);
             }
         }
         return competingBoats;
