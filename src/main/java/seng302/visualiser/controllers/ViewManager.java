@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
+import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.svg.SVGGlyph;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class ViewManager {
     private ObservableList<String> playerList;
     private Logger logger = LoggerFactory.getLogger(ViewManager.class);
     private Stage stage;
+    private JFXSnackbar jfxSnackbar;
 
     private ViewManager() {
         properties = new HashMap<>();
@@ -98,6 +100,10 @@ public class ViewManager {
             gameClient.stopGame();
             System.exit(0);
         });
+
+        jfxSnackbar = new JFXSnackbar();
+        decorator.getChildren().add(jfxSnackbar);
+        jfxSnackbar.registerSnackbarContainer(decorator);
     }
 
     /**
@@ -210,11 +216,20 @@ public class ViewManager {
                     DialogTransition.CENTER);
                 KeyBindingDialogController keyBindingDialogController = dialogContent
                     .getController();
-                keyBindingDialogController.init(gameClient.getKeyBind());
+                keyBindingDialogController.init(gameClient.getKeyBind(), this);
                 dialog.show();
                 Sounds.playButtonClick();
             }
         }
+    }
+
+    /**
+     * Show a snackbar at the bottom of the app for 1 second.
+     *
+     * @param snackbarText text to be displayed.
+     */
+    public void showSnackbar(String snackbarText) {
+        jfxSnackbar.show(snackbarText, 1000);
     }
 
     /**
@@ -361,5 +376,14 @@ public class ViewManager {
 
     public Stage getStage() {
         return stage;
+    }
+
+    /**
+     * Getter to return snackbar object.
+     *
+     * @return snackbar object.
+     */
+    public JFXSnackbar getJfxSnackbar() {
+        return jfxSnackbar;
     }
 }

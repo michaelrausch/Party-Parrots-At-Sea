@@ -9,9 +9,10 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
-<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-  minWidth="-Infinity" prefHeight="650.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/8"
-  xmlns:fx="http://javafx.com/fxml/1"
+
+<JFXDialogLayout fx:id="keyBindDialog" maxHeight="-Infinity" maxWidth="-Infinity"
+  minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="550.0"
+  xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="seng302.visualiser.controllers.dialogs.KeyBindingDialogController">
    <children>
       <GridPane>
@@ -68,31 +69,31 @@
                <GridPane.margin>
                    <Insets/>
                </GridPane.margin></Label>
-             <JFXButton fx:id="zoomInbtn" buttonType="RAISED" maxHeight="-Infinity"
+             <JFXButton id="ZOOM IN" fx:id="zoomInbtn" buttonType="RAISED" maxHeight="-Infinity"
                maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity" prefWidth="150.0" text="Z"
                GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1"
                GridPane.valignment="CENTER"/>
-             <JFXButton fx:id="zoomOutBtn" buttonType="RAISED" maxHeight="-Infinity"
+             <JFXButton id="ZOOM OUT" fx:id="zoomOutBtn" buttonType="RAISED" maxHeight="-Infinity"
                maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity" prefWidth="150.0" text="X"
                GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2"
                GridPane.valignment="CENTER"/>
-             <JFXButton fx:id="vmgBtn" buttonType="RAISED" maxHeight="-Infinity"
+             <JFXButton id="VMG" fx:id="vmgBtn" buttonType="RAISED" maxHeight="-Infinity"
                maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity" prefWidth="150.0"
                text="SPACE" GridPane.columnIndex="1" GridPane.halignment="CENTER"
                GridPane.rowIndex="3" GridPane.valignment="CENTER"/>
-             <JFXButton fx:id="sailInOutBtn" buttonType="RAISED" maxHeight="-Infinity"
-               maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity" prefWidth="150.0"
-               text="SHIFT" GridPane.columnIndex="1" GridPane.halignment="CENTER"
+             <JFXButton id="SAILS IN/OUT" fx:id="sailInOutBtn" buttonType="RAISED"
+               maxHeight="-Infinity" maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity"
+               prefWidth="150.0" text="SHIFT" GridPane.columnIndex="1" GridPane.halignment="CENTER"
                GridPane.rowIndex="4" GridPane.valignment="CENTER"/>
-             <JFXButton fx:id="tackGybeBtn" buttonType="RAISED" maxHeight="-Infinity"
+             <JFXButton id="TACK/GYBE" fx:id="tackGybeBtn" buttonType="RAISED" maxHeight="-Infinity"
                maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity" prefWidth="150.0"
                text="ENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER"
                GridPane.rowIndex="5" GridPane.valignment="CENTER"/>
-             <JFXButton fx:id="upwindBtn" buttonType="RAISED" maxHeight="-Infinity"
+             <JFXButton id="UPWIND" fx:id="upwindBtn" buttonType="RAISED" maxHeight="-Infinity"
                maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity" prefWidth="150.0"
                text="PAGE_UP" GridPane.columnIndex="1" GridPane.halignment="CENTER"
                GridPane.rowIndex="6" GridPane.valignment="CENTER"/>
-             <JFXButton fx:id="downwindBtn" buttonType="RAISED" maxHeight="-Infinity"
+             <JFXButton id="DOWNWIND" fx:id="downwindBtn" buttonType="RAISED" maxHeight="-Infinity"
                maxWidth="-Infinity" minHeight="40.0" minWidth="-Infinity" prefWidth="150.0"
                text="PAGE_DOWN" GridPane.columnIndex="1" GridPane.halignment="CENTER"
                GridPane.rowIndex="7" GridPane.valignment="CENTER"/>

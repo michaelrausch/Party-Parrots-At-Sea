@@ -100,3 +100,18 @@
 .slider .track {
     -fx-background-color: -fx-pp-dark-text-color;
 }
+
+.jfx-snackbar-content {
+    -fx-background-color: WHITE;
+    -fx-padding: 0 5 0 5;
+    -fx-spacing: 0 5 0 5;
+    -fx-font-size: 18px;
+}
+
+.jfx-snackbar-toast {
+    -fx-text-fill: -fx-pp-theme-color;
+}
+
+.jfx-snackbar-action {
+    -fx-text-fill: #ff4081;
+}

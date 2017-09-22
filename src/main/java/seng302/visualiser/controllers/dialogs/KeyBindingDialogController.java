@@ -1,19 +1,27 @@
 package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialogLayout;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-
-import java.net.URL;
-import java.util.*;
 import seng302.model.GameClientAction;
+import seng302.visualiser.controllers.ViewManager;
 
 public class KeyBindingDialogController implements Initializable {
 
     //--------FXML BEGIN--------//
+    @FXML
+    private JFXDialogLayout keyBindDialog;
     @FXML
     private Label keyBindingDialogHeader;
     @FXML
@@ -32,6 +40,8 @@ public class KeyBindingDialogController implements Initializable {
     private JFXButton downwindBtn;
     //---------FXML END---------//
 
+    private ViewManager viewManager;  // added viewManager to access snackbar. To be removed.
+
     private Map<JFXButton, KeyCode> keys;
     private List<JFXButton> buttons = new ArrayList<>();
     private Map<GameClientAction, KeyCode> keyBind;
@@ -48,8 +58,9 @@ public class KeyBindingDialogController implements Initializable {
      *
      * @param keyBind a map with GameClientAction and KeyCode pair to be used in GameClient.
      */
-    public void init(Map<GameClientAction, KeyCode> keyBind) {
+    public void init(Map<GameClientAction, KeyCode> keyBind, ViewManager viewManager) {
         this.keyBind = keyBind;
+        this.viewManager = viewManager;
 
         buttons = new ArrayList<>();
         Collections
@@ -130,10 +141,13 @@ public class KeyBindingDialogController implements Initializable {
             keys.replace(button, null);
             keyBind.replace(buttonAndGameClientActionMap.get(button), null);
             button.setText("");
+            viewManager
+                .showSnackbar(button.getId() + " can't be set to " + event.getCode().getName());
         } else {
             keys.replace(button, event.getCode());
             keyBind.replace(buttonAndGameClientActionMap.get(button), event.getCode());
             button.setText(event.getCode().getName());
+            viewManager.showSnackbar(button.getId() + " is set to " + event.getCode().getName());
         }
     }
 }
