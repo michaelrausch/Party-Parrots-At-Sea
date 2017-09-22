@@ -57,7 +57,7 @@ public class BoatCustomizeController implements Initializable{
     private LobbyController lobbyController;
     private BoatMeshType currentBoat;
     private Double maxSpeedMultiplier = 1.0;
-    private Double maxTurnRate = 10.0;
+    private Double maxTurnRate = 1.0;
     private Double maxAcceleration = 1.0;
 
     @Override

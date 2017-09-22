@@ -24,7 +24,7 @@ public class ServerYacht {
 
     //Boat info
     private String boatType;
-    private Double turnStep = 10.0;
+    private Double turnStep = 5.0;
     private Double maxSpeedMultiplier = 1.0;
     private Double acceleration = 1.0;
     private Integer sourceId;
@@ -427,7 +427,7 @@ public class ServerYacht {
         for (BoatMeshType boatMesh: BoatMeshType.values()) {
             if (Objects.equals(boatType, boatMesh.toString())) {
                 boatMeshType = boatMesh;
-                turnStep = boatMeshType.turnStep;
+                turnStep = turnStep * boatMeshType.turnStep;
                 maxSpeedMultiplier = boatMeshType.maxSpeedMultiplier;
                 acceleration = boatMeshType.accelerationMultiplier;
             }

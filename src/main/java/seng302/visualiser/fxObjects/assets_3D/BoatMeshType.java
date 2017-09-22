@@ -7,11 +7,11 @@ package seng302.visualiser.fxObjects.assets_3D;
  */
 public enum BoatMeshType {
 
-    DINGHY("dinghy_hull.stl", "dinghy_mast.stl", 1.36653, "dinghy_sail.stl", 1.36653, null, false, 1.7, 1.0, 5.0),
+    DINGHY("dinghy_hull.stl", "dinghy_mast.stl", 1.36653, "dinghy_sail.stl", 1.36653, null, false, 1.7, 1.0, 1.0),
     CAT_ATE_A_MERINGUE("catamaran_hull.stl", "catamaran_mast.stl", 0.997, "catamaran_sail.stl",
-        0.997, null, false, 1.0, 1.4, 10.0),
+        0.997, null, false, 1.0, 1.4, 2.0),
     PIRATE_SHIP("pirateship_hull.stl", "pirateship_mast.stl", -0.5415, "pirateship_mainsail.stl",
-        -0.5415, "pirateship_frontsail.stl", true, 1.2, 1.6, 6.0);
+        -0.5415, "pirateship_frontsail.stl", true, 1.2, 1.6, 1.2);
 
     final String hullFile, mastFile, sailFile, jibFile;
     final double mastOffset, sailOffset;
