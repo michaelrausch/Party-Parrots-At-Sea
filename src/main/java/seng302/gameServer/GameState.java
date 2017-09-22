@@ -46,12 +46,14 @@ public class GameState implements Runnable {
     private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
     private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
+
     private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
+    private static final Integer HANDLING_BOOST_MULTIPLIER = 2;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
-    private static Double speedMultiplier = 1d;
+    private static Double serverSpeedMultiplier = 1d;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
     private static Boolean playerHasLeftFlag;
@@ -85,7 +87,7 @@ public class GameState implements Runnable {
         GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
         playerHasLeftFlag = false;
-        speedMultiplier = 1.0;
+        serverSpeedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
         //set this when game stage changes to prerace
@@ -283,8 +285,10 @@ public class GameState implements Runnable {
         tokensInPlay.clear();
 
         //Get a random token location with random type
-        Token token = allTokens.get(random.nextInt(allTokens.size()));
+        Token token = allTokens.get(random.nextInt(allTokens.size() - 1) + 1);
         token.assignRandomType();
+
+        logger.debug("Spawned token of type " + token.getTokenType());
 
         tokensInPlay.add(token);
     }
@@ -308,10 +312,10 @@ public class GameState implements Runnable {
         }
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
-            checkPowerUpTimeout(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
             checkCollision(yacht);
+            preformTokenUpdates(yacht);     //This update must always be done lsat
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkForLegProgression(yacht);
                 raceFinished = false;
@@ -324,13 +328,77 @@ public class GameState implements Runnable {
     }
 
 
-    private void checkPowerUpTimeout(ServerYacht yacht) {
+    /**
+     * All token functionality entry points is taken care of here. So can be disabled and enabled
+     * easily
+     *
+     * @param yacht The yacht to perform token checks on
+     */
+    private void preformTokenUpdates(ServerYacht yacht) {
+        checkTokenPickUp(yacht);
+
         if (yacht.getPowerUp() != null) {
-            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > yacht.getPowerUp()
-                .getTimeout()) {
-                yacht.powerDown();
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + "'s power-up token expired");
-                logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+            switch (yacht.getPowerUp()) {
+                case WIND_WALKER:
+                    windWalk(yacht);
+                    break;
+                case BUMPER:
+                    break;
+            }
+
+            checkPowerUpTimeout(yacht);
+        }
+
+
+    }
+
+
+    /**
+     * Checks how long a powerup has been active for. If it has exceeded its timeout, it powers the
+     * yacht down. WARNING. Do not call if the yacht does not have an active power up. Check with
+     * yacht.getPowerup != null first
+     *
+     * @param yacht The yacht to check to power down
+     */
+    private void checkPowerUpTimeout(ServerYacht yacht) {
+        if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > yacht.getPowerUp()
+            .getTimeout()) {
+            yacht.powerDown();
+            String logMessage = yacht.getBoatName() + "'s power-up token expired";
+            notifyMessageListeners(
+                MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
+            logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+        }
+    }
+
+
+    /**
+     * This function changes the wind to be at an angle that causes the yacht in question to be at
+     * VMG.
+     *
+     * @param yacht The yacht to fix the wind for
+     */
+    private void windWalk(ServerYacht yacht) {
+        HashMap<Double, Double> upwindOptimal = PolarTable.getOptimalUpwindVMG(windSpeed);
+        Double optimalAngle = null;
+        for (Double windAngle : upwindOptimal.keySet()) {
+            optimalAngle = windAngle;
+        }
+
+        Double heading = yacht.getHeading();
+        if (heading < windDirection) {
+            Double diff = Math.abs(optimalAngle - (windDirection - heading));
+            if (windDirection - heading < optimalAngle) {
+                windDirection = (double) Math.floorMod(Math.round(windDirection + diff), 360L);
+            } else {
+                windDirection = (double) Math.floorMod(Math.round(windDirection - diff), 360L);
+            }
+        } else {
+            Double diff = Math.abs(optimalAngle - (heading - windDirection));
+            if (heading - windDirection < optimalAngle) {
+                windDirection = (double) Math.floorMod(Math.round(windDirection - diff), 360L);
+            } else {
+                windDirection = (double) Math.floorMod(Math.round(windDirection + diff), 360L);
             }
         }
     }
@@ -357,19 +425,53 @@ public class GameState implements Runnable {
     }
 
     /**
-     * Checks all tokensInPlay to see if a yacht has picked one up
-     * @return Token which was collided with
-     * @param serverYacht The yacht to check for collision with a token
+     * Checks all tokensInPlay to see if a yacht has picked one up. If so, the yacht is powered up
+     * in the appropriate way
+     * @param yacht The yacht to check for collision with a token
      */
-    private static Token checkTokenPickUp(ServerYacht serverYacht) {
+    private void checkTokenPickUp(ServerYacht yacht) {
+        Token collidedToken = null;
         for (Token token : tokensInPlay) {
-            Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
+            Double distance = GeoUtility.getDistance(token, yacht.getLocation());
             if (distance < YACHT_COLLISION_DISTANCE) {
-                return token;
+                collidedToken = token;
             }
         }
 
-        return null;
+        if (collidedToken != null) {
+            tokensInPlay.remove(collidedToken);
+            if (collidedToken.getTokenType() == TokenType.RANDOM) {
+                collidedToken.realiseRandom();
+            }
+
+            TokenType tokenType = collidedToken.getTokenType();
+            switch (tokenType) {
+                case BOOST:
+                    yacht.setSpeedMultiplier(VELOCITY_BOOST_MULTIPLIER);
+                    break;
+                case BUMPER:
+                    // TODO: 22/09/17 wmu16
+                    break;
+                case HANDLING:
+                    yacht.setHandlingMultiplier(HANDLING_BOOST_MULTIPLIER);
+                    break;
+                case WIND_WALKER:
+                    // TODO: 22/09/17 wmu16
+                    break;
+            }
+            yacht.powerUp(tokenType);
+
+            String logMessage =
+                yacht.getBoatName() + " has picked up a " + collidedToken.getTokenType().getName()
+                    + " token";
+            notifyMessageListeners(
+                MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
+            notifyMessageListeners(MessageFactory.getRaceXML());
+            notifyMessageListeners(MessageFactory.makePickupMessage(yacht, collidedToken));
+
+            logger.debug("Yacht: " + yacht.getShortName() + " got powerup " + collidedToken
+                .getTokenType());
+        }
     }
 
 
@@ -388,7 +490,6 @@ public class GameState implements Runnable {
         //Yacht Collision
         ServerYacht collidedYacht = checkYachtCollision(serverYacht);
         Mark collidedMark = checkMarkCollision(serverYacht);
-        Token collidedToken = checkTokenPickUp(serverYacht);
 
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
@@ -431,34 +532,14 @@ public class GameState implements Runnable {
             );
             notifyMessageListeners(MessageFactory.makeCollisionMessage(serverYacht));
         }
-
-        //Token Collision
-        if (collidedToken != null) {
-            if (collidedToken.getTokenType() == TokenType.RANDOM) {
-                collidedToken.realiseRandom();
-            }
-            sendServerMessage(serverYacht.getSourceId(),
-                serverYacht.getBoatName() + " has picked up a " + collidedToken.getTokenType()
-                    .getName() + " token");
-            tokensInPlay.remove(collidedToken);
-            serverYacht.powerUp(collidedToken.getTokenType());
-            logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + collidedToken
-                .getTokenType());
-            notifyMessageListeners(MessageFactory.getRaceXML());
-            notifyMessageListeners(MessageFactory.makePickupMessage(serverYacht, collidedToken));
-        }
     }
 
 
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
-        if (yacht.getPowerUp() != null) {
-            if (yacht.getPowerUp().equals(TokenType.BOOST)) {
-                maxBoatSpeed *= VELOCITY_BOOST_MULTIPLIER;
-            }
-        }
+        Double maxBoatSpeed =
+            GeoUtility.knotsToMMS(boatSpeedInKnots) * serverSpeedMultiplier * yacht.getSpeedMultiplier();
 
         Double currentVelocity = yacht.getCurrentVelocity();
         // TODO: 15/08/17 remove magic numbers from these equations.
@@ -700,6 +781,7 @@ public class GameState implements Runnable {
             String name = new String(customizeData);
             playerYacht.setBoatName(name);
         } else if (requestType.equals(CustomizeRequestType.COLOR)) {
+            //This low level stuff shouldnt be here alistair! In fact no logic LIKE THIS should! - wmu16
             int red = customizeData[0] & 0xFF;
             int green = customizeData[1] & 0xFF;
             int blue = customizeData[2] & 0xFF;
@@ -799,7 +881,7 @@ public class GameState implements Runnable {
             switch (words[2].trim()) {
                 case "/speed":
                     try {
-                        setSpeedMultiplier(Double.valueOf(words[3]));
+                        setServerSpeedMultiplier(Double.valueOf(words[3]));
                         sendServerMessage(chatterMessage.getMessage_type(),
                                 "Speed modifier set to x" + words[3]);
                     } catch (Exception e) {
@@ -866,11 +948,11 @@ public class GameState implements Runnable {
         currentStage = GameStages.FINISHED;
     }
 
-    public static void setSpeedMultiplier (double multiplier) {
-        speedMultiplier = multiplier;
+    public static void setServerSpeedMultiplier(double multiplier) {
+        serverSpeedMultiplier = multiplier;
     }
 
-    public static double getSpeedMultiplier () {
-        return speedMultiplier;
+    public static double getServerSpeedMultiplier() {
+        return serverSpeedMultiplier;
     }
 }

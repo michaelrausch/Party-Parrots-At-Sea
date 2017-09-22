@@ -39,6 +39,4 @@ public class Token extends GeoPoint {
         tokenTypeList.remove(TokenType.RANDOM);
         tokenType = tokenTypeList.get(random.nextInt(tokenTypeList.size()));
     }
-
-
 }

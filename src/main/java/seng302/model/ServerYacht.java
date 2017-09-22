@@ -56,6 +56,8 @@ public class ServerYacht {
     //PowerUp
     private TokenType powerUp;
     private Long powerUpStartTime;
+    private Integer speedMultiplier;
+    private Integer handlingMultiplier;
 
 
     public ServerYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
@@ -77,6 +79,8 @@ public class ServerYacht {
         this.legNumber = 0;
         this.boatColor = Colors.getColor(sourceId - 1);
         this.powerUp = null;
+        this.speedMultiplier = 1;
+        this.handlingMultiplier = 1;
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
@@ -114,6 +118,8 @@ public class ServerYacht {
 
     public void powerDown() {
         this.powerUp = null;
+        this.speedMultiplier = 1;
+        this.handlingMultiplier = 1;
     }
 
     public Long getPowerUpStartTime() {
@@ -130,7 +136,7 @@ public class ServerYacht {
      * @param amount the amount by which to adjust the boat heading.
      */
     public void adjustHeading(Double amount) {
-        Double newVal = heading + amount;
+        Double newVal = heading + amount * handlingMultiplier;
         lastHeading = heading;
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
@@ -428,5 +434,21 @@ public class ServerYacht {
 
     public BoatMeshType getBoatType() {
         return boatType;
+    }
+
+    public Integer getSpeedMultiplier() {
+        return speedMultiplier;
+    }
+
+    public void setSpeedMultiplier(Integer speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
+    }
+
+    public Integer getHandlingMultiplier() {
+        return handlingMultiplier;
+    }
+
+    public void setHandlingMultiplier(Integer handlingMultiplier) {
+        this.handlingMultiplier = handlingMultiplier;
     }
 }

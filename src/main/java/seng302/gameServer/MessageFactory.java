@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import seng302.gameServer.messages.BoatLocationMessage;
 import seng302.gameServer.messages.BoatSubMessage;
+import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.RaceStartNotificationType;
 import seng302.gameServer.messages.RaceStartStatusMessage;
 import seng302.gameServer.messages.RaceStatus;
@@ -156,5 +157,9 @@ public class MessageFactory {
                 break;
         }
         return new YachtEventCodeMessage(serverYacht.getSourceId(), yachtEventType);
+    }
+
+    public static ChatterMessage makeChatterMessage(Integer messageType, String message) {
+        return new ChatterMessage(messageType, "SERVER: " + message);
     }
 }
