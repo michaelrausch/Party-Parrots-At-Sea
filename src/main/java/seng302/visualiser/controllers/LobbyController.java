@@ -205,7 +205,7 @@ public class LobbyController implements Initializable {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/views/cells/PlayerCell.fxml"));
 
-            loader.setController(new PlayerCell(playerId, yacht.getBoatName(), yacht.getColour(), yacht.getBoatType()));
+            loader.setController(new PlayerCell(playerId, yacht));
 
             try {
                 pane = loader.load();

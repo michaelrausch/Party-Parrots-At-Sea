@@ -20,7 +20,7 @@ import java.util.Observer;
  */
 public class ServerYacht {
 
-    private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
+    private Logger logger = LoggerFactory.getLogger(ServerYacht.class);
 
     public static final Double TURN_STEP = 5.0;
 

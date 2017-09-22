@@ -6,7 +6,6 @@ import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -40,9 +39,8 @@ public class BoatCustomizeController implements Initializable{
     @FXML
     private Pane boatPane;
     @FXML
-    void colorChanged(ActionEvent event) {
-        Color color = colorPicker.getValue();
-        RefreshBoat();
+    void colorChanged() {
+        refreshBoat();
     }
     //---------FXML END---------//
 
@@ -62,6 +60,8 @@ public class BoatCustomizeController implements Initializable{
         playerNameLengthValidator.setMessage("Player name too long.");
 
         boatName.setValidators(playerNameLengthValidator, playerNameReqValidator);
+        boatPane.setBackground(
+            new Background(new BackgroundFill(Color.SKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         submitBtn.setOnMouseReleased(event -> {
             Sounds.playButtonClick();
@@ -69,7 +69,6 @@ public class BoatCustomizeController implements Initializable{
         });
 
         submitBtn.setOnMouseEntered(e -> Sounds.playHoverSound());
-
     }
 
     /**
@@ -113,36 +112,30 @@ public class BoatCustomizeController implements Initializable{
     }
 
     public void setCurrentBoat(String boatType) {
-        Group group = new Group();
-        this.currentBoat = BoatMeshType.getBoatMeshType(boatType);
-        boatPane.setBackground(new Background(new BackgroundFill(Color.SKYBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-        boatPane.getChildren().add(group);
-        BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
-        group.getChildren().add(bo.getAssets());
-        group.getChildren().add(new PointLight());
+        currentBoat = BoatMeshType.getBoatMeshType(boatType);
+        displayCurrentBoat();
     }
 
-    public void nextBoat(ActionEvent actionEvent) {
-        boatPane.getChildren().clear();
-        Group group = new Group();
-        boatPane.getChildren().add(group);
+    public void nextBoat() {
         currentBoat = BoatMeshType.getNextBoatType(currentBoat);
-        BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
-        group.getChildren().add(bo.getAssets());
-        group.getChildren().add(new PointLight());
+        displayCurrentBoat();
     }
 
-    public void prevBoat(ActionEvent actionEvent) {
+    public void prevBoat() {
+        currentBoat = BoatMeshType.getPrevBoatType(currentBoat);
+        displayCurrentBoat();
+    }
+
+    private void displayCurrentBoat() {
         boatPane.getChildren().clear();
         Group group = new Group();
         boatPane.getChildren().add(group);
-        currentBoat = BoatMeshType.getPrevBoatType(currentBoat);
         BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
         group.getChildren().add(bo.getAssets());
         group.getChildren().add(new PointLight());
     }
 
-    private void RefreshBoat() {
+    private void refreshBoat() {
         boatPane.getChildren().clear();
         Group group = new Group();
         boatPane.getChildren().add(group);

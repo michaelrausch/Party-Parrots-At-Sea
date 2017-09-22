@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import seng302.model.ClientYacht;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 import seng302.visualiser.fxObjects.assets_3D.BoatModel;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
@@ -24,13 +25,13 @@ public class PlayerCell {
     private String name;
     private Color boatColor;
     private Integer playerId;
-    private BoatMeshType boatype;
+    private BoatMeshType boatType;
 
-    public PlayerCell(Integer playerId, String playerName, Color color, String boatType) {
+    public PlayerCell(Integer playerId, ClientYacht yacht) {
         this.playerId = playerId;
-        this.name = playerName;
-        this.boatColor = color;
-        this.boatype = BoatMeshType.getBoatMeshType(boatType);
+        this.name = yacht.getBoatName();
+        this.boatColor = yacht.getColour();
+        this.boatType = BoatMeshType.getBoatMeshType(yacht.getBoatType());
     }
 
     public void initialize() {
@@ -39,7 +40,7 @@ public class PlayerCell {
         // Add Rotating Boat to Player Cell with players color on it.
         Group group = new Group();
         boatPane.getChildren().add(group);
-        BoatModel bo = ModelFactory.boatIconView(this.boatype, this.boatColor);
+        BoatModel bo = ModelFactory.boatIconView(boatType, boatColor);
         group.getChildren().add(bo.getAssets());
     }
 
