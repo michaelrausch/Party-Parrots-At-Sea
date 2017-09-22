@@ -8,10 +8,9 @@ import seng302.gameServer.messages.BoatStatus;
 import seng302.model.mark.Mark;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 import java.util.HashMap;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -22,10 +21,9 @@ public class ServerYacht {
 
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
-    public static final Double TURN_STEP = 5.0;
-
     //Boat info
     private String boatType;
+    private Double turn_step;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -59,7 +57,7 @@ public class ServerYacht {
 
     public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
-        this.boatType = boatType;
+        setBoatType(boatType);
         this.boatStatus = BoatStatus.PRESTART;
         this.sourceId = sourceId;
         this.hullID = hullID;
@@ -174,7 +172,7 @@ public class ServerYacht {
         if (isAuto) {
             turnTowardsHeading(autoHeading);
             if (Math.abs(heading - autoHeading)
-                <= TURN_STEP) { //Cancel when within 1 turn step of target.
+                <= turn_step) { //Cancel when within 1 turn step of target.
                 isAuto = false;
             }
         }
@@ -189,20 +187,20 @@ public class ServerYacht {
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
-                adjustHeading(-TURN_STEP);
+                adjustHeading(-turn_step);
             } else {
-                adjustHeading(TURN_STEP);
+                adjustHeading(turn_step);
             }
         } else if (normalizedHeading == 180) {
             if (lastHeading < 180) {
-                adjustHeading(TURN_STEP);
+                adjustHeading(turn_step);
             } else {
-                adjustHeading(-TURN_STEP);
+                adjustHeading(-turn_step);
             }
         } else if (normalizedHeading < 180) {
-            adjustHeading(-TURN_STEP);
+            adjustHeading(-turn_step);
         } else {
-            adjustHeading(TURN_STEP);
+            adjustHeading(turn_step);
         }
     }
 
@@ -211,20 +209,20 @@ public class ServerYacht {
         Double normalizedHeading = normalizeHeading();
         if (normalizedHeading == 0) {
             if (lastHeading < 180) {
-                adjustHeading(TURN_STEP);
+                adjustHeading(turn_step);
             } else {
-                adjustHeading(-TURN_STEP);
+                adjustHeading(-turn_step);
             }
         } else if (normalizedHeading == 180) {
             if (lastHeading < 180) {
-                adjustHeading(-TURN_STEP);
+                adjustHeading(-turn_step);
             } else {
-                adjustHeading(TURN_STEP);
+                adjustHeading(turn_step);
             }
         } else if (normalizedHeading < 180) {
-            adjustHeading(TURN_STEP);
+            adjustHeading(turn_step);
         } else {
-            adjustHeading(-TURN_STEP);
+            adjustHeading(-turn_step);
         }
     }
 
@@ -268,9 +266,9 @@ public class ServerYacht {
     private void turnTowardsHeading(Double newHeading) {
         Double newVal = heading - newHeading;
         if (Math.floorMod(newVal.longValue(), 360L) > 180) {
-            adjustHeading(TURN_STEP / 5);
+            adjustHeading(turn_step / 5);
         } else {
-            adjustHeading(-TURN_STEP / 5);
+            adjustHeading(-turn_step / 5);
         }
     }
 
@@ -422,6 +420,13 @@ public class ServerYacht {
     }
 
     public void setBoatType(String boatType) {
+        if (boatType == BoatMeshType.DINGHY.toString()) {
+            turn_step = 5.0;
+        } else if (boatType == BoatMeshType.CAT_ATE_A_MERINGUE.toString()){
+            turn_step = 10.0;
+        } else {
+            turn_step = 7.0;
+        }
         this.boatType = boatType;
     }
 
