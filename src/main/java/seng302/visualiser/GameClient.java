@@ -410,8 +410,15 @@ public class GameClient {
      * @param yachtEventData The YachtEvent data packet
      */
     private void processYachtEvent(YachtEventData yachtEventData) {
+        ClientYacht thisYacht = allBoatsMap.get(yachtEventData.getSubjectId().intValue());
+
         if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
             showCollisionAlert(yachtEventData);
+        } else if (yachtEventData.getEventId() == YachtEventType.POWER_DOWN.getCode()) {
+            thisYacht.powerDown();
+            Sounds.playTokenPickupSound();  // TODO: 23/09/17 This should be power down sound
+        } else if (yachtEventData.getEventId() == YachtEventType.BUMPER_CRASH.getCode()) {
+            // TODO: 23/09/17 notify the client that the yacht has been disabled
         } else {
             TokenType tokenType = null;
             if (yachtEventData.getEventId() == YachtEventType.TOKEN_VELOCITY.getCode()) {
@@ -427,7 +434,7 @@ public class GameClient {
             }
 
             showTokenPickUp(tokenType);
-            allBoatsMap.get(yachtEventData.getSubjectId().intValue()).setPowerUp(tokenType);
+            thisYacht.setPowerUp(tokenType);
         }
     }
 

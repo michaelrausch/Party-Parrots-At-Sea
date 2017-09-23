@@ -39,10 +39,21 @@ public class ClientYacht extends Observable {
         void notifyRounding(ClientYacht yacht, int legNumber);
     }
 
+    //This notifies RaceViewController so it can display icon - wmu16
     @FunctionalInterface
     public interface PowerUpListener {
+
         void notifyPowerUp(ClientYacht yacht, TokenType tokenType);
     }
+
+    //This notifies RaceViewController so it can remove token icon - wmu16
+    @FunctionalInterface
+    public interface PowerDownListener {
+
+        void notifyPowerDown(ClientYacht yacht);
+    }
+
+
 
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
@@ -70,6 +81,8 @@ public class ClientYacht extends Observable {
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
     private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
     private List<PowerUpListener> powerUpListeners = new ArrayList<>();
+    private List<PowerDownListener> powerDownListeners = new ArrayList<>();
+
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
@@ -211,6 +224,13 @@ public class ClientYacht extends Observable {
         this.position = position;
     }
 
+    public void powerDown() {
+        this.powerUp = null;
+        for (PowerDownListener listener : powerDownListeners) {
+            listener.notifyPowerDown(this);
+        }
+    }
+
     public void setPowerUp(TokenType tokenType) {
         this.powerUp = tokenType;
         for (PowerUpListener listener : powerUpListeners) {
@@ -293,6 +313,10 @@ public class ClientYacht extends Observable {
 
     public void addPowerUpListener(PowerUpListener listener) {
         powerUpListeners.add(listener);
+    }
+
+    public void addPowerDownListener(PowerDownListener listener) {
+        powerDownListeners.add(listener);
     }
 
     public void removeMarkRoundingListener(MarkRoundingListener listener) {

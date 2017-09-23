@@ -1,5 +1,6 @@
 package seng302.gameServer;
 
+import com.sun.corba.se.spi.activation.Server;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,7 @@ public class GameState implements Runnable {
     //Powerup Constants
     private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
     private static final Integer HANDLING_BOOST_MULTIPLIER = 2;
+    private static final Long BUMPER_DISABLE_TIME = 5_000L;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -279,7 +281,7 @@ public class GameState implements Runnable {
                 spawnNewToken();
                 notifyMessageListeners(MessageFactory.getRaceXML());
             }
-        }, 0, 60000);
+        }, 0, 15_000);
     }
 
     // TODO: 29/08/17 wmu16 - This sort of update should be in game state
@@ -351,13 +353,14 @@ public class GameState implements Runnable {
      * Randomly select a subset of tokensInPlay from a pre defined superset
      * Broadasts a new race status message to show this update
      */
-    public static void spawnNewToken() {
+    private void spawnNewToken() {
         Random random = new Random();
         tokensInPlay.clear();
 
         //Get a random token location with random type
         Token token = allTokens.get(random.nextInt(allTokens.size()));
-        token.assignRandomType();
+//        token.assignRandomType();
+        token.assignType(TokenType.BUMPER);
 
         logger.debug("Spawned token of type " + token.getTokenType());
 
@@ -383,8 +386,9 @@ public class GameState implements Runnable {
             updateVelocity(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
+            preformTokenUpdates(
+                yacht); //This update must be done before collision. Sorry sorta hacky rn.
             checkCollision(yacht);
-            preformTokenUpdates(yacht);     //This update must always be done lsat
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkForLegProgression(yacht);
                 raceFinished = false;
@@ -405,38 +409,66 @@ public class GameState implements Runnable {
      */
     private void preformTokenUpdates(ServerYacht yacht) {
         checkTokenPickUp(yacht);
+        checkPowerUpTimeout(yacht);
+        TokenType powerUp = yacht.getPowerUp();
 
-        if (yacht.getPowerUp() != null) {
-            switch (yacht.getPowerUp()) {
+        if (powerUp != null) {
+            switch (powerUp) {
                 case WIND_WALKER:
                     windWalk(yacht);
                     break;
                 case BUMPER:
+                    ServerYacht collidedYacht = checkYachtCollision(yacht);
+                    if (collidedYacht != null) {
+                        yacht.powerDown();
+                        boatTempShutDown(collidedYacht);
+                        notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
+                        notifyMessageListeners(
+                            MessageFactory.makeStatusEffectMessage(yacht, powerUp));
+                    }
                     break;
             }
-
-            checkPowerUpTimeout(yacht);
         }
+    }
 
+    // TODO: 23/09/17 wmu16 - This is a hacky way to have the boat power down. Need some sort of separation between token and status effect :/
 
+    /**
+     * Disables the given boat for BUMPER_DISABLE_TIME ms.
+     *
+     * @param yacht The yacht to disable
+     */
+    private void boatTempShutDown(ServerYacht yacht) {
+        yacht.setSpeedMultiplier(0);
+        Timer shutDownTimer = new Timer("Shutdown Timer");
+        shutDownTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                yacht.powerDown();  //Note this actually resets the boat to normal.
+            }
+        }, BUMPER_DISABLE_TIME);
     }
 
 
     /**
      * Checks how long a powerup has been active for. If it has exceeded its timeout, it powers the
-     * yacht down. WARNING. Do not call if the yacht does not have an active power up. Check with
-     * yacht.getPowerup != null first
+     * yacht down.
      *
      * @param yacht The yacht to check to power down
      */
     private void checkPowerUpTimeout(ServerYacht yacht) {
-        if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > yacht.getPowerUp()
-            .getTimeout()) {
-            yacht.powerDown();
-            String logMessage = yacht.getBoatName() + "'s power-up token expired";
-            notifyMessageListeners(
-                MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
-            logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+        if (yacht.getPowerUp() != null) {
+            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > yacht.getPowerUp()
+                .getTimeout()) {
+                String logMessage =
+                    yacht.getBoatName() + "'s " + yacht.getPowerUp().getName() + "  expired";
+                notifyMessageListeners(
+                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
+                notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
+                logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+
+                yacht.powerDown();
+            }
         }
     }
 

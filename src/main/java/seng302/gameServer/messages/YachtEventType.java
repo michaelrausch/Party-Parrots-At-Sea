@@ -9,7 +9,10 @@ public enum YachtEventType {
     TOKEN_BUMPER(35),
     TOKEN_HANDLING(36),
     TOKEN_WIND_WALKER(37),
-    TOKEN_RANDOM(38);
+    TOKEN_RANDOM(38),
+    POWER_DOWN(39),
+    BUMPER_CRASH(40);
+
 
     private int code;
 
