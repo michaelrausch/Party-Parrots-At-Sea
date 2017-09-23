@@ -1,7 +1,6 @@
 package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXToggleButton;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,15 +16,12 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import seng302.model.GameKeyBind;
 import seng302.model.KeyAction;
+import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.ViewManager;
 
 public class KeyBindingDialogController implements Initializable {
 
     //--------FXML BEGIN--------//
-    @FXML
-    private JFXDialogLayout keyBindDialog;
-    @FXML
-    private Label keyBindingDialogHeader;
     @FXML
     private JFXButton zoomInbtn;
     @FXML
@@ -43,7 +39,9 @@ public class KeyBindingDialogController implements Initializable {
     @FXML
     private JFXButton resetBtn;
     @FXML
-    private JFXButton confirmBtn;
+    private Label upwindLabel;
+    @FXML
+    private Label downwindLabel;
     @FXML
     private JFXToggleButton turningToggle;
     //---------FXML END---------//
@@ -51,6 +49,7 @@ public class KeyBindingDialogController implements Initializable {
     private GameKeyBind gameKeyBind;
     private List<JFXButton> buttons = new ArrayList<>();
     private Map<Button, KeyAction> buttonActionMap;
+    private GameClient gameClient; // to send turning mode packet
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -68,6 +67,8 @@ public class KeyBindingDialogController implements Initializable {
             button.setOnKeyPressed(event -> keyPressed(event, button));
         });
 
+        turningToggle.setOnMouseClicked(event -> toggleTurningMode());
+
         resetBtn.setOnMouseClicked(event -> {
             gameKeyBind.setToDefault();
             loadKeyBind();
@@ -81,8 +82,19 @@ public class KeyBindingDialogController implements Initializable {
         buttons.forEach(
             button -> button
                 .setText(gameKeyBind.getKeyCode(buttonActionMap.get(button)).getName()));
+        turningToggle.setSelected(gameKeyBind.isContinuouslyTurning());
+        if (gameKeyBind.isContinuouslyTurning()) {
+            upwindLabel.setText("ClOCKWISE TURNING");
+            downwindLabel.setText("ANTICLOCKWISE TURNING");
+        } else {
+            upwindLabel.setText("UPWIND");
+            downwindLabel.setText("DOWNWIND");
+        }
     }
 
+    /**
+     * Bind buttons with specific action in a map.
+     */
     private void bindButtonWithAction() {
         buttonActionMap = new HashMap<>();
         for (int i = 0; i < 7; i++) {
@@ -90,10 +102,17 @@ public class KeyBindingDialogController implements Initializable {
         }
     }
 
+    /**
+     * Prompt success / failure message for reassigning key action
+     */
     private void showSnackBar(String message) {
         ViewManager.getInstance().showSnackbar(message);
     }
 
+    /**
+     * When a mouse enters the button, the color and font size should change to highlight
+     * @param button
+     */
     private void mouseEnter(Button button) {
         button.setStyle(""
             + "-fx-background-color: -fx-pp-theme-color;"
@@ -101,10 +120,20 @@ public class KeyBindingDialogController implements Initializable {
             + "-fx-font-size: 15;");
     }
 
+    /**
+     * Prompt "press key..." to inform users assign a new key bind by pressing a key
+     * @param button
+     */
     private void buttonPressed(Button button) {
         button.setText("PRESS KEY...");
     }
 
+
+    /**
+     * When mouse leaves the button, return the button to the normal state in terms of text,
+     * color and font size
+     * @param button
+     */
     private void mouseExit(Button button) {
         button.setText(GameKeyBind.getInstance().getKeyCode(buttonActionMap.get(button)).getName());
         button.setStyle(""
@@ -113,6 +142,12 @@ public class KeyBindingDialogController implements Initializable {
             + "-fx-font-size: 13;");
     }
 
+    /**
+     * When a key is pressed, check if the new binding conflicts to any existed settings, if not
+     * assign the selected action with the new key binding to GameKeyBind.
+     * @param event
+     * @param button
+     */
     private void keyPressed(KeyEvent event, Button button) {
         KeyAction buttonAction = buttonActionMap.get(button);
         if (gameKeyBind.bindKeyToAction(event.getCode(), buttonAction)) {
@@ -122,5 +157,18 @@ public class KeyBindingDialogController implements Initializable {
             showSnackBar(event.getCode().getName() + " is already in use");
         }
         event.consume();
+    }
+
+    /**
+     * When the turning mode is toggled, update gameKeyBind and send out packet to notify the server
+     */
+    private void toggleTurningMode() {
+        gameKeyBind.toggleTurningMode();
+        gameClient.sendToggleTurningModePacket();
+        loadKeyBind();
+    }
+
+    public void setGameClient(GameClient gameClient) {
+        this.gameClient = gameClient;
     }
 }

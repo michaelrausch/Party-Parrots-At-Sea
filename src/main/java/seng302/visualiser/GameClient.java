@@ -460,4 +460,11 @@ public class GameClient {
         return allBoatsMap;
     }
 
+    public void sendToggleTurningModePacket() {
+        if (gameKeyBind.isContinuouslyTurning()) {
+            socketThread.sendBoatAction(BoatAction.CONTINUOUSLY_TURNING);
+        } else {
+            socketThread.sendBoatAction(BoatAction.DEFAULT_TURNING);
+        }
+    }
 }

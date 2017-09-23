@@ -59,13 +59,13 @@
                <GridPane.margin>
                    <Insets/>
                </GridPane.margin></Label>
-             <Label text="UPWIND" GridPane.halignment="CENTER" GridPane.rowIndex="6"
-               GridPane.valignment="CENTER">
+             <Label fx:id="upwindLabel" text="UPWIND" GridPane.halignment="CENTER"
+               GridPane.rowIndex="6" GridPane.valignment="CENTER">
                <GridPane.margin>
                    <Insets/>
                </GridPane.margin></Label>
-             <Label text="DOWNWIND" GridPane.halignment="CENTER" GridPane.rowIndex="7"
-               GridPane.valignment="CENTER">
+             <Label fx:id="downwindLabel" text="DOWNWIND" GridPane.halignment="CENTER"
+               GridPane.rowIndex="7" GridPane.valignment="CENTER">
                <GridPane.margin>
                    <Insets/>
                </GridPane.margin></Label>

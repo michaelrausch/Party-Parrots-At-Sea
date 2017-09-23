@@ -10,7 +10,7 @@ public class GameKeyBind {
     private static GameKeyBind instance;
     private Map<KeyCode, KeyAction> keyToActionMap;
     private Map<KeyAction, KeyCode> actionToKeyMap;
-    private boolean continuouslyTurning;
+    private Boolean continuouslyTurning;
 
 
     private GameKeyBind() {
@@ -71,7 +71,7 @@ public class GameKeyBind {
         continuouslyTurning = !continuouslyTurning;
     }
 
-    public boolean isContinuouslyTurning() {
+    public Boolean isContinuouslyTurning() {
         return continuouslyTurning;
     }
 

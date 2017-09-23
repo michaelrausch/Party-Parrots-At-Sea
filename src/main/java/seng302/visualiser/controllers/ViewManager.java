@@ -27,6 +27,7 @@ import seng302.gameServer.ServerAdvertiser;
 import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
+import seng302.visualiser.controllers.dialogs.KeyBindingDialogController;
 
 public class ViewManager {
 
@@ -213,6 +214,9 @@ public class ViewManager {
                 JFXDialog dialog = new JFXDialog((StackPane) node,
                     dialogContent.load(),
                     DialogTransition.CENTER);
+                KeyBindingDialogController keyBindingDialogController = dialogContent
+                    .getController();
+                keyBindingDialogController.setGameClient(this.gameClient);
                 dialog.show();
                 Sounds.playButtonClick();
             }
@@ -337,15 +341,6 @@ public class ViewManager {
                 // set key press event to catch key stoke
                 scene.setOnKeyPressed(gameClient::keyPressed);
                 scene.setOnKeyReleased(gameClient::keyReleased);
-
-                // uncomment to make it full screen
-//                Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-//                stage.setX(visualBounds.getMinX());
-//                stage.setY(visualBounds.getMinY());
-//                stage.setWidth(visualBounds.getWidth());
-//                stage.setHeight(visualBounds.getHeight());
-//                stage.setMaximized(true);
-//                stage.setFullScreen(true);
 
                 stage.setMinHeight(500);
                 stage.setMinWidth(800);
