@@ -35,19 +35,6 @@ public enum BoatMeshType {
         this.turnStep = turnStep;
     }
 
-    public static BoatMeshType getBoatMeshType(String boatType) {
-        switch (boatType){
-            case "DINGHY":
-                return DINGHY;
-            case "CAT_ATE_A_MERINGUE":
-                return CAT_ATE_A_MERINGUE;
-            case "PIRATE_SHIP":
-                return PIRATE_SHIP;
-            default:
-                return DINGHY;
-        }
-    }
-
 
     //TODO kre39 make something not terrible to cycle through boat types
     public static BoatMeshType getNextBoatType(BoatMeshType boatType) {

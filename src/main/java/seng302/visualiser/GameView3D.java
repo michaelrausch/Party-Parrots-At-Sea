@@ -460,7 +460,7 @@ public class GameView3D {
         final List<Group> wakes = new ArrayList<>();
         for (ClientYacht clientYacht : yachts) {
             Color colour = clientYacht.getColour();
-            newBoat = new BoatObject(BoatMeshType.getBoatMeshType(clientYacht.getBoatType()));
+            newBoat = new BoatObject(clientYacht.getBoatType());
             newBoat.setFill(colour);
             boatObjects.put(clientYacht, newBoat);
             wakesGroup.getChildren().add(newBoat.getWake());

@@ -25,11 +25,4 @@ public class BoatMeshTypeTest {
         Assert.assertEquals(BoatMeshType.DINGHY, prevBoat);
     }
 
-    @Test
-    public void testGetBoatMeshType() {
-        BoatMeshType currentBoat = BoatMeshType.getBoatMeshType("DINGHY");
-        Assert.assertEquals(BoatMeshType.DINGHY, currentBoat);
-        BoatMeshType wrongBoat = BoatMeshType.getBoatMeshType("NOT A REAL BOAT");
-        Assert.assertEquals(BoatMeshType.DINGHY, wrongBoat);
-    }
 }

@@ -12,6 +12,9 @@ import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -20,10 +23,10 @@ import java.util.Objects;
  */
 public class ServerYacht {
 
-    private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
+    private Logger logger = LoggerFactory.getLogger(ServerYacht.class);
 
     //Boat info
-    private String boatType;
+    private BoatMeshType boatType;
     private Double turnStep = 5.0;
     private Double maxSpeedMultiplier = 1.0;
     private Double acceleration = 1.0;
@@ -58,7 +61,7 @@ public class ServerYacht {
     private Long powerUpStartTime;
 
 
-    public ServerYacht(String boatType, Integer sourceId, String hullID, String shortName,
+    public ServerYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
         setBoatType(boatType);
         this.boatStatus = BoatStatus.PRESTART;
@@ -422,16 +425,7 @@ public class ServerYacht {
         return boatColor;
     }
 
-    public void setBoatType(String boatType) {
-        BoatMeshType boatMeshType;
-        for (BoatMeshType boatMesh: BoatMeshType.values()) {
-            if (Objects.equals(boatType, boatMesh.toString())) {
-                boatMeshType = boatMesh;
-                turnStep = turnStep * boatMeshType.turnStep;
-                maxSpeedMultiplier = boatMeshType.maxSpeedMultiplier;
-                acceleration = boatMeshType.accelerationMultiplier;
-            }
-        }
+    public void setBoatType(BoatMeshType boatType) {
         this.boatType = boatType;
     }
 
@@ -443,7 +437,8 @@ public class ServerYacht {
         return acceleration;
     }
 
-    public String getBoatType() {
+
+    public BoatMeshType getBoatType() {
         return boatType;
     }
 }
