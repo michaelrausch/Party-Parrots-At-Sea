@@ -123,6 +123,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
                     Sounds.playButtonClick();
                 });
             } catch (IOException e) {
+                e.printStackTrace();
                 logger.warn("Could not create Server Creation Dialog.");
             }
         });

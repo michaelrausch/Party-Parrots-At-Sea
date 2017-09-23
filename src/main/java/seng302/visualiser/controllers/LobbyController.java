@@ -153,7 +153,7 @@ public class LobbyController implements Initializable {
      * Initializes a top down preview of the race course map.
      */
     private void initMapPreview() {
-        gameView = new GameView();
+        gameView = new GameView(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         gameView.setHorizontalBuffer(330d);
 
         mapWidth = 770d;

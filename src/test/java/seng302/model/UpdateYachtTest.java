@@ -21,7 +21,7 @@ public class UpdateYachtTest {
 
     @Before
     public void setUpRace() {
-        new GameState("");
+        new GameState();
         GameState.addYacht(1, yacht1);
         GameState.addYacht(2, yacht2);
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));

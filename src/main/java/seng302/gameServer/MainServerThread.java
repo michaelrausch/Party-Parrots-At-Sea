@@ -1,30 +1,22 @@
 package seng302.gameServer;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import seng302.gameServer.messages.Message;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
+import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.XMLGenerator;
-import seng302.utilities.XMLParser;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -45,29 +37,12 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private Thread thread;
 
     private ServerSocket serverSocket = null;
-    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();;
+    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
     private static Integer capacity;
+    private RaceXMLData raceXMLData;
+    private RegattaXMLData regattaXMLData;
 
     private void startAdvertisingServer() {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db;
-        Document doc;
-        XMLGenerator generator = new XMLGenerator();
-
-        try {
-            db = dbf.newDocumentBuilder();
-            String regatta = generator.getRegattaAsXml();
-            StringReader stringReader = new StringReader(regatta);
-            InputSource is = new InputSource(stringReader);
-            doc = db.parse(is);
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            logger.warn("Couldn't load race regatta");
-            return;
-        }
-
-        RegattaXMLData regattaXMLData = XMLParser.parseRegatta(doc);
-
-
         Integer capacity = GameState.getCapacity();
         Integer numPlayers = GameState.getNumberOfPlayers();
         Integer spacesLeft = capacity - numPlayers;
@@ -79,33 +54,40 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         // Start advertising server
         try {
-            ServerAdvertiser.getInstance().setMapName(regattaXMLData.getCourseName()).setCapacity(capacity).setNumberOfPlayers(numPlayers);
-            ServerAdvertiser.getInstance().registerGame(PORT, regattaXMLData.getRegattaName());
+            ServerAdvertiser.getInstance()
+                .setMapName(regattaXMLData.getCourseName())
+                .setCapacity(capacity)
+                .setNumberOfPlayers(numPlayers)
+                .registerGame(PORT, regattaXMLData.getRegattaName());
         } catch (IOException e) {
             logger.warn("Could not register server");
         }
     }
 
     public MainServerThread() {
-        new GameState("localhost");
+        new GameState();
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
             logger.trace("IO error in server thread handler upon trying to make new server socket",
                 0);
         }
-
-        startAdvertisingServer();
-
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
-        GameState.addMessageEventListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");
-        startUpdatingWind();
-        startSpawningTokens();
         thread.start();
     }
 
+    private void startServer() {
+        MessageFactory.updateXMLGenerator(raceXMLData, regattaXMLData);
+        GameState.setRace(raceXMLData);
+        MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
+        startAdvertisingServer();
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
+        GameState.addMessageEventListener(this::broadcastMessage);
+        startUpdatingWind();
+        startSpawningTokens();
+        sendSetupMessages();
+    }
 
     public void run() {
 
@@ -133,8 +115,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             } catch (InterruptedException e) {
                 logger.trace("Interrupted exception in Main Server Thread thread sleep", 1);
             }
-            if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState
-                .getCustomizationFlag()) {
+            if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState.getCustomizationFlag()) {
+                MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
                 sendSetupMessages();
                 GameState.resetCustomizationFlag();
             }
@@ -254,11 +236,28 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         logger.debug("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         if (serverToClientThreads.size() == 0) { //Sets first client as host.
             serverToClientThread.setAsHost();
+            serverToClientThread.raceXMLProperty().addListener((obs, oldVal, race) -> {
+                if (race != null) {
+                    raceXMLData = race;
+                }
+                if (regattaXMLData != null) {
+                    startServer();
+                }
+            });
+            serverToClientThread.regattaXMLProperty().addListener((obs, oldVal, regatta) -> {
+                if (regatta != null) {
+                    regattaXMLData = regatta;
+                }
+                if (raceXMLData != null) {
+                    startServer();
+                }
+            });
+        } else {
+            serverToClientThread.addConnectionListener(this::sendSetupMessages);
+            MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
         }
         serverToClientThreads.add(serverToClientThread);
-        serverToClientThread.addConnectionListener(this::sendSetupMessages);
         serverToClientThread.addDisconnectListener(this::clientDisconnected);
-
         try {
             ServerAdvertiser.getInstance().setNumberOfPlayers(GameState.getNumberOfPlayers());
         } catch (IOException e) {

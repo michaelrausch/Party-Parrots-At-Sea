@@ -117,18 +117,18 @@ public class GameClient {
      * @param ipAddress IP to connect to.
      * @param portNumber Port to connect to.
      */
-    public ServerDescription runAsHost(String ipAddress, Integer portNumber, String serverName, Integer maxPlayers) {
+    public ServerDescription runAsHost(String ipAddress, Integer portNumber, String serverName, Integer maxPlayers, String race, Integer numLegs) {
         XMLGenerator.setDefaultRaceName(serverName);
-        GameState.setMaxPlayers(maxPlayers);
 
         server = new MainServerThread();
+        GameState.setMaxPlayers(maxPlayers);
 
         try {
             startClientToServerThread(ipAddress, 4942);
         } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
         }
-
+        socketThread.sendXML(race, serverName, numLegs);
         while (regattaData == null){
             try {
                 Thread.sleep(100);

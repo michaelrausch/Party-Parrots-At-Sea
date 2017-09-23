@@ -48,7 +48,9 @@ public class GameView extends Pane {
     private ObservableList<Node> gameObjects;
     private Group markers = new Group();
     private Group tokens = new Group();
-    private List<CompoundMark> course = new ArrayList<>();
+    private List<CompoundMark> orderedMarks = new ArrayList<>();
+    private List<CompoundMark> compoundMarks = new ArrayList<>();
+    private List<Corner> courseOrder = new ArrayList<>();
 
     private ImageView mapImage = new ImageView();
 
@@ -57,32 +59,52 @@ public class GameView extends Pane {
         VERTICAL
     }
 
-    public GameView () {
+    public GameView (List<CompoundMark> marks, List<Corner> course, List<Limit> border) {
+//        updateBorder(border);
+//        updateCourse(marks, orderedMarks);
+        this.compoundMarks = marks;
+        this.courseOrder = course;
+        this.borderPoints = border;
         gameObjects = this.getChildren();
         gameObjects.addAll(mapImage, raceBorder, markers, tokens);
+        this.parentProperty().addListener((obs, old, parent) -> {
+            if (parent != null) {
+                canvasWidth = parent.prefWidth(0) * 2;
+                canvasHeight = parent.prefHeight(0) * 2;
+//                rescaleRace(borderPoints);
+                updateBorder(borderPoints);
+                updateCourse(compoundMarks, courseOrder);
+            }
+        });
     }
 
     /**
-     * Adds a course to the GameView. The view is scaled accordingly unless a border is set in which
-     * case the course is added relative ot the border.
+     * Adds a orderedMarks to the GameView. The view is scaled accordingly unless a border is set in which
+     * case the orderedMarks is added relative ot the border.
      *
-     * @param newCourse the mark objects that make up the course.
+     * @param newCourse the mark objects that make up the orderedMarks.
      * @param sequence The sequence the marks travel through
      */
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
-        markerObjects = new HashMap<>();
 
-        for (Corner corner : sequence) { //Makes course out of all compound marks.
+        if (newCourse.size() == 0) {
+            return;
+        }
+        compoundMarks = newCourse;
+        markerObjects = new HashMap<>();
+        courseOrder = sequence;
+
+        for (Corner corner : courseOrder) { //Makes orderedMarks out of all compound marks.
             for (CompoundMark compoundMark : newCourse) {
                 if (corner.getCompoundMarkID() == compoundMark.getId()) {
-                    course.add(compoundMark);
+                    orderedMarks.add(compoundMark);
                 }
             }
         }
 
         // TODO: 16/08/17 Updating mark roundings here. It should not happen here. Nor should it be done this way.
         for (Corner corner : sequence){
-            CompoundMark compoundMark = course.get(corner.getSeqID() - 1);
+            CompoundMark compoundMark = orderedMarks.get(corner.getSeqID() - 1);
             compoundMark.setRoundingSide(
                 RoundingSide.getRoundingSide(corner.getRounding())
             );
@@ -137,7 +159,7 @@ public class GameView extends Pane {
     }
 
     /**
-     * Calculates all the data needed for to create mark arrows. Requires that a course has been
+     * Calculates all the data needed for to create mark arrows. Requires that a orderedMarks has been
      * added to the gameview.
      * @param sequence The order in which marks are traversed.
      */
@@ -145,22 +167,22 @@ public class GameView extends Pane {
         for (int i=1; i < sequence.size()-1; i++) { //General case.
             double averageLat = 0;
             double averageLng = 0;
-            int numMarks = course.get(i-1).getMarks().size();
-            for (Mark mark : course.get(i-1).getMarks()) {
+            int numMarks = orderedMarks.get(i-1).getMarks().size();
+            for (Mark mark : orderedMarks.get(i-1).getMarks()) {
                 averageLat += mark.getLat();
                 averageLng += mark.getLng();
             }
             GeoPoint lastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
-            numMarks = course.get(i+1).getMarks().size();
+            numMarks = orderedMarks.get(i+1).getMarks().size();
             averageLat = 0;
             averageLng = 0;
-            for (Mark mark : course.get(i+1).getMarks()) {
+            for (Mark mark : orderedMarks.get(i+1).getMarks()) {
                 averageLat += mark.getLat();
                 averageLng += mark.getLng();
             }
             GeoPoint nextMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
             // TODO: 16/08/17 This comparison doesn't need to exist but the alternative is to user server enum client side.
-            for (Mark mark : course.get(i).getMarks()) {
+            for (Mark mark : orderedMarks.get(i).getMarks()) {
                 markerObjects.get(mark).addArrows(
                     mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                     GeoUtility.getBearing(lastMarkAv, mark),
@@ -176,13 +198,13 @@ public class GameView extends Pane {
         double averageLat = 0;
         double averageLng = 0;
         int numMarks = 0;
-        for (Mark mark : course.get(1).getMarks()) {
+        for (Mark mark : orderedMarks.get(1).getMarks()) {
             numMarks += 1;
             averageLat += mark.getLat();
             averageLng += mark.getLng();
         }
         GeoPoint firstMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
-        for (Mark mark : course.get(0).getMarks()) {
+        for (Mark mark : orderedMarks.get(0).getMarks()) {
             markerObjects.get(mark).addArrows(
                 mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                 0d, //90
@@ -195,13 +217,13 @@ public class GameView extends Pane {
         double numMarks = 0;
         double averageLat = 0;
         double averageLng = 0;
-        for (Mark mark : course.get(course.size()-2).getMarks()) {
+        for (Mark mark : orderedMarks.get(orderedMarks.size()-2).getMarks()) {
             numMarks += 1;
             averageLat += mark.getLat();
             averageLng += mark.getLng();
         }
         GeoPoint secondToLastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
-        for (Mark mark : course.get(course.size()-1).getMarks()) {
+        for (Mark mark : orderedMarks.get(orderedMarks.size()-1).getMarks()) {
             markerObjects.get(mark).addArrows(
                 mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                 GeoUtility.getBearing(secondToLastMarkAv, mark),
@@ -254,17 +276,16 @@ public class GameView extends Pane {
 
     /**
      * Adds a border to the GameView and rescales to the size of the border, does not rescale if a
-     * border already exists. Assumes the border is larger than the course.
+     * border already exists. Assumes the border is larger than the orderedMarks.
      *
      * @param border the race border to be drawn.
      */
     public void updateBorder(List<Limit> border) {
-        if (borderPoints == null) {
-            borderPoints = border;
-            rescaleRace(new ArrayList<>(borderPoints));
+        if (border.size() == 0) {
+            return;
         }
-
-        rescaleRace(new ArrayList<>(border));
+        borderPoints = border;
+        rescaleRace(new ArrayList<>(borderPoints));
 
         List<Double> boundaryPoints = new ArrayList<>();
         for (Limit limit : border) {
@@ -280,8 +301,8 @@ public class GameView extends Pane {
      *
      * @param limitingCoordinates the set of geo points that contains the extremities of the race.
      */
-    public void rescaleRace(List<GeoPoint> limitingCoordinates) {
-        //Check is called once to avoid unnecessarily change the course limits once the race is running
+    public void rescaleRace(List<? extends GeoPoint> limitingCoordinates) {
+        //Check is called once to avoid unnecessarily change the orderedMarks limits once the race is running
         findMinMaxPoint(limitingCoordinates);
         double minLonToMaxLon = scaleRaceExtremities();
         calculateReferencePointLocation(minLonToMaxLon);
@@ -292,7 +313,7 @@ public class GameView extends Pane {
      * the leftmost point, rightmost point, southern most point and northern most point
      * respectively.
      */
-    private void findMinMaxPoint(List<GeoPoint> points) {
+    private void findMinMaxPoint(List<? extends GeoPoint> points) {
         List<GeoPoint> sortedPoints = new ArrayList<>(points);
         sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLat));
         minLatPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());

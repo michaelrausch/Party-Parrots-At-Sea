@@ -75,4 +75,12 @@ public class RaceXMLTemplate {
     public String getRaceStartTime(){
         return startTime.toString();
     }
+
+    public void setBoats(List<ServerYacht> boats) {
+        yachts = boats;
+    }
+
+    public void setTokens(List<Token> tokens) {
+        this.tokens = tokens;
+    }
 }

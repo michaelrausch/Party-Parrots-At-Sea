@@ -191,7 +191,7 @@ public class XMLParser {
     public static RaceXMLData parseRace(Document doc) {
         Element docEle = doc.getDocumentElement();
         return new RaceXMLData(
-            extractParticpantIDs(docEle),
+            extractParticipantIDs(docEle),
             extractTokens(docEle),
             extractCompoundMarks(docEle),
             extractMarkOrder(docEle),
@@ -263,7 +263,7 @@ public class XMLParser {
     /**
      * Extracts course participants data
      */
-    private static List<Integer> extractParticpantIDs (Element docEle) {
+    private static List<Integer> extractParticipantIDs(Element docEle) {
         List<Integer> boatIDs = new ArrayList<>();
         NodeList pList = docEle.getElementsByTagName("Participants").item(0).getChildNodes();
         for (int i = 0; i < pList.getLength(); i++) {
@@ -328,17 +328,26 @@ public class XMLParser {
         return subMarks;
     }
 
-    public static Pair<String, String> parseRaceDef(String url, String serverName, int repitions) {
+    /**
+     * This ungodly combination of existing methods and code blocks parses a race definition file.
+     * Look upon it and despair.
+     * @param url the location of the race def file
+     * @param serverName the name of the server
+     * @param repetitions the repetitions of a segment of the race def file.
+     * @return a pair which contains regatta string, race string as key, value pair.
+     */
+    public static Pair<String, String> parseRaceDef(String url, String serverName, int repetitions) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Document doc = null;
         try {
             db = dbf.newDocumentBuilder();
-            doc = db.parse(XMLParser.class.getResourceAsStream(url));
+            doc = db.parse(url);
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
         Element docEle = doc.getDocumentElement();
+
         RegattaXMLTemplate regattaXMLTemplate = new RegattaXMLTemplate(
             serverName, XMLParser.getElementString(docEle, "CourseName"),
             XMLParser.getElementDouble(docEle, "CentralLat"),
@@ -346,28 +355,14 @@ public class XMLParser {
         );
         XMLGenerator xmlGenerator = new XMLGenerator();
         xmlGenerator.setRegattaTemplate(regattaXMLTemplate);
-        System.out.println(xmlGenerator.getRegattaAsXml());
-//        List<Corner> markOrder = XMLParser.extractMarkOrderRaceDef(docEle, repitions);
-//        for (Corner c : markOrder) {
-//            System.out.println(c);
-//        }
-//        List<Limit> limits = XMLParser.extractCourseLimitRaceDef(docEle);
-//        for (Limit l : limits) {
-//            System.out.println(l);
-//        }
-//        List<CompoundMark> course = XMLParser.extractCompoundMarkRaceDef(docEle);
-//        System.out.println(course.size());
-//        for (CompoundMark compoundMark : course) {
-//            System.out.println(compoundMark);
-//        }
+
         RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(new ArrayList<>(), new ArrayList<>(),
-            XMLParser.extractMarkOrderRaceDef(docEle, repitions),
+            XMLParser.extractMarkOrderRaceDef(docEle, repetitions),
             XMLParser.extractCourseLimitRaceDef(docEle),
             XMLParser.extractCompoundMarksRaceDef(docEle)
         );
         xmlGenerator.setRaceTemplate(raceXMLTemplate);
-        System.out.println(xmlGenerator.getRaceAsXml());
-        return new Pair<>(null, null);
+        return new Pair<>(xmlGenerator.getRegattaAsXml(), xmlGenerator.getRaceAsXml());
     }
 
     private static List<Corner> extractMarkOrderRaceDef(Element docEle, int repitions){

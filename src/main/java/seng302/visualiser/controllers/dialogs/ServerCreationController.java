@@ -14,7 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
-import seng302.utilities.XMLParser;
+import seng302.visualiser.MapMaker;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.validators.FieldLengthValidator;
 import seng302.visualiser.validators.ValidationTools;
@@ -44,6 +44,8 @@ public class ServerCreationController implements Initializable {
     private JFXCheckBox pickupsCheckBox;
     @FXML
     private AnchorPane mapHolder;
+
+    private MapMaker mapMaker = MapMaker.getInstance();
 
     //---------FXML END---------//
 
@@ -81,7 +83,8 @@ public class ServerCreationController implements Initializable {
             lastMap();
         });
 
-        XMLParser.parseRaceDef("/maps/horseshoe.xml", "test", 2);
+        mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
+        mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
     }
 
     /**
@@ -102,7 +105,7 @@ public class ServerCreationController implements Initializable {
     private void createServer() {
         ServerDescription serverDescription = ViewManager.getInstance().getGameClient()
             .runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayersSlider
-                .getValue());
+                .getValue(), mapMaker.getCurrentRacePath(), (int) legsSlider.getValue());
 
         ViewManager.getInstance().setProperty("serverName", serverDescription.getName());
         ViewManager.getInstance().setProperty("mapName", serverDescription.getMapName());
@@ -129,11 +132,15 @@ public class ServerCreationController implements Initializable {
     }
 
     private void nextMap() {
-
+        mapMaker.next();
+        mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
+        mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
     }
 
     private void lastMap() {
-
+        mapMaker.previous();
+        mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
+        mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
     }
 
 }
