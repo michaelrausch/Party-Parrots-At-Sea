@@ -60,7 +60,7 @@ public class GameState implements Runnable {
     //Powerup Constants
     private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
     private static final Integer HANDLING_BOOST_MULTIPLIER = 2;
-    private static final Long BUMPER_DISABLE_TIME = 5_000L;
+    public static final Long BUMPER_DISABLE_TIME = 5_000L;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -359,8 +359,8 @@ public class GameState implements Runnable {
 
         //Get a random token location with random type
         Token token = allTokens.get(random.nextInt(allTokens.size()));
-//        token.assignRandomType();
-        token.assignType(TokenType.BUMPER);
+        token.assignRandomType();
+//        token.assignType(TokenType.BUMPER);
 
         logger.debug("Spawned token of type " + token.getTokenType());
 
@@ -386,8 +386,7 @@ public class GameState implements Runnable {
             updateVelocity(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
-            preformTokenUpdates(
-                yacht); //This update must be done before collision. Sorry sorta hacky rn.
+            preformTokenUpdates(yacht); //This update must be done before collision. Sorta hacky
             checkCollision(yacht);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkForLegProgression(yacht);
@@ -424,7 +423,7 @@ public class GameState implements Runnable {
                         boatTempShutDown(collidedYacht);
                         notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
                         notifyMessageListeners(
-                            MessageFactory.makeStatusEffectMessage(yacht, powerUp));
+                            MessageFactory.makeStatusEffectMessage(collidedYacht, powerUp));
                     }
                     break;
             }

@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,6 +21,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
@@ -413,12 +416,12 @@ public class GameClient {
         ClientYacht thisYacht = allBoatsMap.get(yachtEventData.getSubjectId().intValue());
 
         if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
-            showCollisionAlert(yachtEventData);
+            showCollisionAlert(thisYacht);
         } else if (yachtEventData.getEventId() == YachtEventType.POWER_DOWN.getCode()) {
             thisYacht.powerDown();
             Sounds.playTokenPickupSound();  // TODO: 23/09/17 This should be power down sound
         } else if (yachtEventData.getEventId() == YachtEventType.BUMPER_CRASH.getCode()) {
-            // TODO: 23/09/17 notify the client that the yacht has been disabled
+            showDisableAlert(thisYacht);
         } else {
             TokenType tokenType = null;
             if (yachtEventData.getEventId() == YachtEventType.TOKEN_VELOCITY.getCode()) {
@@ -438,16 +441,31 @@ public class GameClient {
         }
     }
 
+
+    /**
+     * Turns a disabled boat black until the bumper affect wears off
+     *
+     * @param yacht The yacht to show as disabled
+     */
+    private void showDisableAlert(ClientYacht yacht) {
+        Color originalColor = yacht.getColour();
+        yacht.setColour(Color.BLACK);
+
+        Timer disableTimer = new Timer("Disable Timer");
+        disableTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                yacht.setColour(originalColor);
+            }
+        }, GameState.BUMPER_DISABLE_TIME);
+    }
+
     /**
      * Tells race view to show a collision animation.
      */
-    private void showCollisionAlert(YachtEventData yachtEventData) {
+    private void showCollisionAlert(ClientYacht yacht) {
         Sounds.playCrashSound();
-        raceState.storeCollision(
-            allBoatsMap.get(
-                yachtEventData.getSubjectId().intValue()
-            )
-        );
+        raceState.storeCollision(yacht);
     }
 
     // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user

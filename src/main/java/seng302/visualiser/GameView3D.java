@@ -467,11 +467,8 @@ public class GameView3D {
             wakesGroup.getChildren().add(newBoat.getWake());
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
-            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
-                BoatObject bo = boatObjects.get(boat);
-                Point2D p2d = findScaledXY(lat, lon);
-                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
-            });
+            clientYacht.addLocationListener(this::updateBoatLocation);
+            clientYacht.addColorChangeListener(this::updateBoatColor);
         }
         Platform.runLater(() -> {
             gameObjects.getChildren().addAll(wakes);
@@ -481,6 +478,23 @@ public class GameView3D {
 
     public Node getAssets () {
         return view;
+    }
+
+    /**
+     * Updates the boatObjects color with that of the clientYachts object. Used in notification from
+     * a listener on this attribute in clientYacht to re paint the boat mesh
+     *
+     * @param clientYacht The yacht to update the colour for
+     */
+    private void updateBoatColor(ClientYacht clientYacht) {
+        boatObjects.get(clientYacht).setFill(clientYacht.getColour());
+    }
+
+    private void updateBoatLocation(ClientYacht boat, Double lat, Double lon, Double heading,
+        Boolean sailIn, Double velocity) {
+        BoatObject bo = boatObjects.get(boat);
+        Point2D p2d = findScaledXY(lat, lon);
+        bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
     }
 
     /**

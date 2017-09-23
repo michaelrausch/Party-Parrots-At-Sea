@@ -39,17 +39,21 @@ public class ClientYacht extends Observable {
         void notifyRounding(ClientYacht yacht, int legNumber);
     }
 
+    @FunctionalInterface
+    public interface ColorChangeListener {
+
+        void notifyColorChange(ClientYacht yacht);
+    }
+
     //This notifies RaceViewController so it can display icon - wmu16
     @FunctionalInterface
     public interface PowerUpListener {
-
         void notifyPowerUp(ClientYacht yacht, TokenType tokenType);
     }
 
     //This notifies RaceViewController so it can remove token icon - wmu16
     @FunctionalInterface
     public interface PowerDownListener {
-
         void notifyPowerDown(ClientYacht yacht);
     }
 
@@ -82,6 +86,7 @@ public class ClientYacht extends Observable {
     private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
     private List<PowerUpListener> powerUpListeners = new ArrayList<>();
     private List<PowerDownListener> powerDownListeners = new ArrayList<>();
+    private List<ColorChangeListener> colorChangeListeners = new ArrayList<>();
 
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
@@ -224,6 +229,9 @@ public class ClientYacht extends Observable {
         this.position = position;
     }
 
+    /**
+     * Powers down the boat and notifies the raceViewController to display
+     */
     public void powerDown() {
         this.powerUp = null;
         for (PowerDownListener listener : powerDownListeners) {
@@ -231,6 +239,11 @@ public class ClientYacht extends Observable {
         }
     }
 
+    /**
+     * powers up the boat and notifies the raceViewController to display
+     *
+     * @param tokenType The type of token that this boat is being powered up with
+     */
     public void setPowerUp(TokenType tokenType) {
         this.powerUp = tokenType;
         for (PowerUpListener listener : powerUpListeners) {
@@ -290,6 +303,9 @@ public class ClientYacht extends Observable {
 
     public void setColour(Color colour) {
         this.colour = colour;
+        for (ColorChangeListener listener : colorChangeListeners) {
+            listener.notifyColorChange(this);
+        }
     }
 
 
@@ -317,6 +333,10 @@ public class ClientYacht extends Observable {
 
     public void addPowerDownListener(PowerDownListener listener) {
         powerDownListeners.add(listener);
+    }
+
+    public void addColorChangeListener(ColorChangeListener listener) {
+        colorChangeListeners.add(listener);
     }
 
     public void removeMarkRoundingListener(MarkRoundingListener listener) {
