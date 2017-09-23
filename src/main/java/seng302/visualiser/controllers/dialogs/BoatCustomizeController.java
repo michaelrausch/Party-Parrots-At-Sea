@@ -55,14 +55,14 @@ public class BoatCustomizeController implements Initializable{
     private LobbyController lobbyController;
     private BoatMeshType currentBoat;
     private Double maxSpeedMultiplier = 1.0;
-    private Double maxTurnRate = 1.0;
-    private Double maxAcceleration = 1.0;
+    private Double maxTurnRateMultiplier = 1.0;
+    private Double maxAccelerationMultiplier = 1.0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         socketThread = ViewManager.getInstance().getGameClient().getServerThread();
-        generateMaxStats();
+        findMaxStats();
         RequiredFieldValidator playerNameReqValidator = new RequiredFieldValidator();
         playerNameReqValidator.setMessage("Player name required.");
 
@@ -158,23 +158,23 @@ public class BoatCustomizeController implements Initializable{
         refreshStatBars(currentBoat);
     }
 
-    private void generateMaxStats() {
+    private void findMaxStats() {
         for (BoatMeshType bmt: BoatMeshType.values()) {
-            if (bmt.turnStep > maxTurnRate) {
-                maxTurnRate = bmt.turnStep;
+            if (bmt.turnStep > maxTurnRateMultiplier) {
+                maxTurnRateMultiplier = bmt.turnStep;
             }
             if (bmt.maxSpeedMultiplier > maxSpeedMultiplier) {
                 maxSpeedMultiplier = bmt.maxSpeedMultiplier;
             }
-            if (bmt.accelerationMultiplier > maxAcceleration) {
-                maxAcceleration = bmt.accelerationMultiplier;
+            if (bmt.accelerationMultiplier > maxAccelerationMultiplier) {
+                maxAccelerationMultiplier = bmt.accelerationMultiplier;
             }
         }
     }
 
     private void refreshStatBars(BoatMeshType bo) {
         speedBar.setProgress((bo.maxSpeedMultiplier) / maxSpeedMultiplier);
-        accelBar.setProgress(bo.accelerationMultiplier / maxAcceleration);
-        handleBar.setProgress(bo.turnStep / maxTurnRate);
+        accelBar.setProgress(bo.accelerationMultiplier / maxAccelerationMultiplier);
+        handleBar.setProgress(bo.turnStep / maxTurnRateMultiplier);
     }
 }
