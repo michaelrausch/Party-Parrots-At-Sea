@@ -105,8 +105,8 @@ public class KeyBindingDialogController implements Initializable {
     /**
      * Prompt success / failure message for reassigning key action
      */
-    private void showSnackBar(String message) {
-        ViewManager.getInstance().showSnackbar(message);
+    private void showSnackBar(String message, Boolean isWarning) {
+        ViewManager.getInstance().showSnackbar(message, isWarning);
     }
 
     /**
@@ -151,10 +151,10 @@ public class KeyBindingDialogController implements Initializable {
     private void keyPressed(KeyEvent event, Button button) {
         KeyAction buttonAction = buttonActionMap.get(button);
         if (gameKeyBind.bindKeyToAction(event.getCode(), buttonAction)) {
-            showSnackBar(button.getId() + " is set to " + event.getCode().getName());
+            showSnackBar(button.getId() + " is set to " + event.getCode().getName(), false);
             button.setText(gameKeyBind.getKeyCode(buttonAction).getName());
         } else {
-            showSnackBar(event.getCode().getName() + " is already in use");
+            showSnackBar(event.getCode().getName() + " is already in use", true);
         }
         event.consume();
     }

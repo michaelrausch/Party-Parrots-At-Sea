@@ -101,9 +101,7 @@ public class ViewManager {
             System.exit(0);
         });
 
-        jfxSnackbar = new JFXSnackbar();
-        decorator.getChildren().add(jfxSnackbar);
-        jfxSnackbar.registerSnackbarContainer(decorator);
+        jfxSnackbar = new JFXSnackbar(decorator);
     }
 
     /**
@@ -228,8 +226,16 @@ public class ViewManager {
      *
      * @param snackbarText text to be displayed.
      */
-    public void showSnackbar(String snackbarText) {
-        jfxSnackbar.show(snackbarText, 1500);
+    public void showSnackbar(String snackbarText, boolean isWarning) {
+        if (isWarning) {
+            decorator.getStylesheets()
+                .add(getClass().getResource("/css/dialogs/Snackbar.css").toExternalForm());
+        } else {
+            if (decorator.getStylesheets().size() > 1) {
+                decorator.getStylesheets().remove(1);
+            }
+        }
+        jfxSnackbar.show(snackbarText, "fuck", 1500);
     }
 
     /**
