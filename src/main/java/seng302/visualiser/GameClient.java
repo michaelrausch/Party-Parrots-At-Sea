@@ -422,7 +422,7 @@ public class GameClient {
             Sounds.playTokenPickupSound();  // TODO: 23/09/17 This should be power down sound
         } else if (yachtEventData.getEventId() == YachtEventType.BUMPER_CRASH.getCode()) {
             showDisableAlert(thisYacht);
-        } else {
+        } else {        //Else all token pickup types
             TokenType tokenType = null;
             if (yachtEventData.getEventId() == YachtEventType.TOKEN_VELOCITY.getCode()) {
                 tokenType = TokenType.BOOST;
@@ -436,7 +436,7 @@ public class GameClient {
                 tokenType = TokenType.WIND_WALKER;
             }
 
-            showTokenPickUp(tokenType);
+            Sounds.playTokenPickupSound();
             thisYacht.setPowerUp(tokenType);
         }
     }
@@ -466,21 +466,6 @@ public class GameClient {
     private void showCollisionAlert(ClientYacht yacht) {
         Sounds.playCrashSound();
         raceState.storeCollision(yacht);
-    }
-
-    // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user
-    private void showTokenPickUp(TokenType tokenType) {
-        Sounds.playTokenPickupSound();
-        switch (tokenType) {
-            case BOOST:
-                break;
-            case HANDLING:
-                break;
-            case WIND_WALKER:
-                break;
-            case BUMPER:
-                break;
-        }
     }
 
     private void formatAndSendChatMessage(String rawChat) {
