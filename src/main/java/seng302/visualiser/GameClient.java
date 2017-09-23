@@ -7,7 +7,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -29,7 +28,8 @@ import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.gameServer.messages.YachtEventType;
 import seng302.model.ClientYacht;
-import seng302.model.GameClientAction;
+import seng302.model.GameKeyBind;
+import seng302.model.KeyAction;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.parser.MarkRoundingData;
@@ -67,7 +67,8 @@ public class GameClient {
     private RaceViewController raceViewController;
 
     private ArrayList<ClientYacht> finishedBoats = new ArrayList<>();
-    private Map<GameClientAction, KeyCode> keyBind = new HashMap<>();
+
+    private GameKeyBind gameKeyBind; // all the key binding setting.
 
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
@@ -78,21 +79,7 @@ public class GameClient {
      */
     public GameClient(Pane holder) {
         this.holderPane = holder;
-        initialiseKeyBind();
-    }
-
-    /**
-     * Initialise default keybind.
-     */
-    private void initialiseKeyBind() {
-        keyBind = new HashMap<>();
-        keyBind.put(GameClientAction.ZOOM_IN, KeyCode.Z);
-        keyBind.put(GameClientAction.ZOOM_OUT, KeyCode.X);
-        keyBind.put(GameClientAction.VMG, KeyCode.SPACE);
-        keyBind.put(GameClientAction.SAILS_STATE, KeyCode.SHIFT);
-        keyBind.put(GameClientAction.TACK_GYBE, KeyCode.ENTER);
-        keyBind.put(GameClientAction.UPWIND, KeyCode.PAGE_UP);
-        keyBind.put(GameClientAction.DOWNWIND, KeyCode.PAGE_DOWN);
+        this.gameKeyBind = GameKeyBind.getInstance();
     }
 
     /**
@@ -392,13 +379,13 @@ public class GameClient {
             return;
         }
 
-        if (keyBind.get(GameClientAction.VMG) == e.getCode()) { // align with vmg
+        if (gameKeyBind.getKeyCode(KeyAction.VMG) == e.getCode()) { // align with vmg
             socketThread.sendBoatAction(BoatAction.VMG);
-        } else if (keyBind.get(GameClientAction.UPWIND) == e.getCode()) { // upwind
+        } else if (gameKeyBind.getKeyCode(KeyAction.UPWIND) == e.getCode()) { // upwind
             socketThread.sendBoatAction(BoatAction.UPWIND);
-        } else if (keyBind.get(GameClientAction.DOWNWIND) == e.getCode()) { // downwind
+        } else if (gameKeyBind.getKeyCode(KeyAction.DOWNWIND) == e.getCode()) { // downwind
             socketThread.sendBoatAction(BoatAction.DOWNWIND);
-        } else if (keyBind.get(GameClientAction.TACK_GYBE) == e.getCode()) { // tack/gybe
+        } else if (gameKeyBind.getKeyCode(KeyAction.TACK_GYBE) == e.getCode()) { // tack/gybe
             // if chat box is active take whatever is in there and send it to server
             socketThread.sendBoatAction(BoatAction.TACK_GYBE);
         }
@@ -410,11 +397,11 @@ public class GameClient {
             return;
         }
 
-        if (keyBind.get(GameClientAction.SAILS_STATE) == e.getCode()) {  // sails in/sails out
+        if (gameKeyBind.getKeyCode(KeyAction.SAILS_STATE) == e.getCode()) {  // sails in/sails out
             socketThread.sendBoatAction(BoatAction.SAILS_IN);
             allBoatsMap.get(socketThread.getClientId()).toggleSail();
-        } else if (keyBind.get(GameClientAction.UPWIND) == e.getCode()
-            || keyBind.get(GameClientAction.DOWNWIND) == e.getCode()) {
+        } else if (gameKeyBind.getKeyCode(KeyAction.UPWIND) == e.getCode()
+            || gameKeyBind.getKeyCode(KeyAction.DOWNWIND) == e.getCode()) {
             socketThread.sendBoatAction(BoatAction.MAINTAIN_HEADING);
         }
     }
@@ -473,7 +460,4 @@ public class GameClient {
         return allBoatsMap;
     }
 
-    public Map<GameClientAction, KeyCode> getKeyBind() {
-        return keyBind;
-    }
 }

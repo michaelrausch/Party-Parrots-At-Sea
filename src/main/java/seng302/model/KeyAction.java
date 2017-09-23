@@ -3,7 +3,7 @@ package seng302.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum GameClientAction {
+public enum KeyAction {
     ZOOM_IN(1),
     ZOOM_OUT(2),
     VMG(3),
@@ -13,19 +13,19 @@ public enum GameClientAction {
     DOWNWIND(7);
 
     private final int type;
-    private static final Map<Integer, GameClientAction> intToTypeMap = new HashMap<>();
+    private static final Map<Integer, KeyAction> intToTypeMap = new HashMap<>();
 
     static {
-        for (GameClientAction type : GameClientAction.values()) {
+        for (KeyAction type : KeyAction.values()) {
             intToTypeMap.put(type.getValue(), type);
         }
     }
 
-    GameClientAction(int type) {
+    KeyAction(int type) {
         this.type = type;
     }
 
-    public static GameClientAction getType(int value) {
+    public static KeyAction getType(int value) {
         return intToTypeMap.get(value);
     }
 

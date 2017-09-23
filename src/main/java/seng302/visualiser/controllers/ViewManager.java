@@ -27,7 +27,6 @@ import seng302.gameServer.ServerAdvertiser;
 import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
-import seng302.visualiser.controllers.dialogs.KeyBindingDialogController;
 
 public class ViewManager {
 
@@ -137,7 +136,7 @@ public class ViewManager {
                     showKeyBindingDialog();
                 }
             } catch (IOException e) {
-                logger.warn("Could not create Key Binding Dialog.");
+                logger.warn("Something went wrong when opening key bind dialog");
             }
         }));
 
@@ -214,9 +213,6 @@ public class ViewManager {
                 JFXDialog dialog = new JFXDialog((StackPane) node,
                     dialogContent.load(),
                     DialogTransition.CENTER);
-                KeyBindingDialogController keyBindingDialogController = dialogContent
-                    .getController();
-                keyBindingDialogController.init(gameClient.getKeyBind(), this);
                 dialog.show();
                 Sounds.playButtonClick();
             }
@@ -229,7 +225,7 @@ public class ViewManager {
      * @param snackbarText text to be displayed.
      */
     public void showSnackbar(String snackbarText) {
-        jfxSnackbar.show(snackbarText, 1000);
+        jfxSnackbar.show(snackbarText, 1500);
     }
 
     /**
@@ -378,12 +374,4 @@ public class ViewManager {
         return stage;
     }
 
-    /**
-     * Getter to return snackbar object.
-     *
-     * @return snackbar object.
-     */
-    public JFXSnackbar getJfxSnackbar() {
-        return jfxSnackbar;
-    }
 }

@@ -2,19 +2,21 @@ package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialogLayout;
+import com.jfoenix.controls.JFXToggleButton;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import seng302.model.GameClientAction;
+import seng302.model.GameKeyBind;
+import seng302.model.KeyAction;
 import seng302.visualiser.controllers.ViewManager;
 
 public class KeyBindingDialogController implements Initializable {
@@ -38,116 +40,87 @@ public class KeyBindingDialogController implements Initializable {
     private JFXButton upwindBtn;
     @FXML
     private JFXButton downwindBtn;
+    @FXML
+    private JFXButton resetBtn;
+    @FXML
+    private JFXButton confirmBtn;
+    @FXML
+    private JFXToggleButton turningToggle;
     //---------FXML END---------//
 
-    private ViewManager viewManager;  // added viewManager to access snackbar. To be removed.
-
-    private Map<JFXButton, KeyCode> keys;
+    private GameKeyBind gameKeyBind;
     private List<JFXButton> buttons = new ArrayList<>();
-    private Map<GameClientAction, KeyCode> keyBind;
-    private LinkedHashMap<JFXButton, GameClientAction> buttonAndGameClientActionMap;
+    private Map<Button, KeyAction> buttonActionMap;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    }
-
-    /**
-     * HAOMING HELP!!! CHANGE FUNCTION NAME PLS :))
-     *
-     * Takes in a map from GameClient and initialise button mapping to the keys.
-     *
-     * @param keyBind a map with GameClientAction and KeyCode pair to be used in GameClient.
-     */
-    public void init(Map<GameClientAction, KeyCode> keyBind, ViewManager viewManager) {
-        this.keyBind = keyBind;
-        this.viewManager = viewManager;
-
+        gameKeyBind = GameKeyBind.getInstance();
         buttons = new ArrayList<>();
-        Collections
-            .addAll(buttons, zoomInbtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn,
-                downwindBtn);
+        Collections.addAll(buttons,
+            zoomInbtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn, downwindBtn);
+        bindButtonWithAction();
+        loadKeyBind();
 
-        initializeKeys();
-        initializeButtons();
+        buttons.forEach(button -> {
+            button.setOnMouseEntered(event -> mouseEnter(button));
+            button.setOnMousePressed(event -> buttonPressed(button));
+            button.setOnMouseExited(event -> mouseExit(button));
+            button.setOnKeyPressed(event -> keyPressed(event, button));
+        });
+
+        resetBtn.setOnMouseClicked(event -> {
+            gameKeyBind.setToDefault();
+            loadKeyBind();
+        });
     }
 
     /**
-     * Initialise default button-keybinding pair if not exist, else rebind the existing keybinding
-     * to the new button which is created when javafx reinitialise a new controller.
+     * Set buttons' label according to GameKeyBind settings
      */
-    private void initializeKeys() {
-        initButtonAndGameClientActionMap();
-        initializeDefaultKeys();
+    private void loadKeyBind() {
+        buttons.forEach(
+            button -> button
+                .setText(gameKeyBind.getKeyCode(buttonActionMap.get(button)).getName()));
     }
 
-    /**
-     * HAOMING CHANGE FUNCTION NAME HERE TOO :) OR BETTER, REMOVE THIS FUNCTION
-     *
-     * Link buttons and the GameClientAction to be used in accessing keys.
-     */
-    private void initButtonAndGameClientActionMap() {
-        buttonAndGameClientActionMap = new LinkedHashMap<>();
-        buttonAndGameClientActionMap.put(zoomInbtn, GameClientAction.ZOOM_IN);
-        buttonAndGameClientActionMap.put(zoomOutBtn, GameClientAction.ZOOM_OUT);
-        buttonAndGameClientActionMap.put(vmgBtn, GameClientAction.VMG);
-        buttonAndGameClientActionMap.put(sailInOutBtn, GameClientAction.SAILS_STATE);
-        buttonAndGameClientActionMap.put(tackGybeBtn, GameClientAction.TACK_GYBE);
-        buttonAndGameClientActionMap.put(upwindBtn, GameClientAction.UPWIND);
-        buttonAndGameClientActionMap.put(downwindBtn, GameClientAction.DOWNWIND);
-    }
-
-    /**
-     * Initialise default keybinding to a button.
-     */
-    private void initializeDefaultKeys() {
-        keys = new LinkedHashMap<>();
-        keys.put(zoomInbtn, keyBind.get(GameClientAction.ZOOM_IN));
-        keys.put(zoomOutBtn, keyBind.get(GameClientAction.ZOOM_OUT));
-        keys.put(vmgBtn, keyBind.get(GameClientAction.VMG));
-        keys.put(sailInOutBtn, keyBind.get(GameClientAction.SAILS_STATE));
-        keys.put(tackGybeBtn, keyBind.get(GameClientAction.TACK_GYBE));
-        keys.put(upwindBtn, keyBind.get(GameClientAction.UPWIND));
-        keys.put(downwindBtn, keyBind.get(GameClientAction.DOWNWIND));
-    }
-
-    /**
-     * Change button text to match current keybinding. Adds focusedProperty and keyPressed listener
-     * to each buttons.
-     */
-    private void initializeButtons() {
-        for (JFXButton jfxButton : buttons) {
-            if (keys.get(jfxButton) != null) {
-                jfxButton.setText(keys.get(jfxButton).getName());
-            } else {
-                jfxButton.setText("");
-            }
-            jfxButton.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                jfxButton.setOnKeyPressed(event -> {
-                    event.consume();
-                    doSomething(event, jfxButton);
-                });
-            });
+    private void bindButtonWithAction() {
+        buttonActionMap = new HashMap<>();
+        for (int i = 0; i < 7; i++) {
+            buttonActionMap.put(buttons.get(i), KeyAction.getType(i + 1));
         }
     }
 
-    /**
-     * HAOMING PLEASE CHANGE THIS DOCSTRING AND THE FUNCTION NAME!!!
-     *
-     * @param event BLAH
-     * @param button BLAH
-     */
-    private void doSomething(KeyEvent event, JFXButton button) {
-        if (keys.containsValue(event.getCode())) {
-            keys.replace(button, null);
-            keyBind.replace(buttonAndGameClientActionMap.get(button), null);
-            button.setText("");
-            viewManager
-                .showSnackbar(button.getId() + " can't be set to " + event.getCode().getName());
+    private void showSnackBar(String message) {
+        ViewManager.getInstance().showSnackbar(message);
+    }
+
+    private void mouseEnter(Button button) {
+        button.setStyle(""
+            + "-fx-background-color: -fx-pp-theme-color;"
+            + "-fx-text-fill: -fx-pp-front-color;"
+            + "-fx-font-size: 15;");
+    }
+
+    private void buttonPressed(Button button) {
+        button.setText("PRESS KEY...");
+    }
+
+    private void mouseExit(Button button) {
+        button.setText(GameKeyBind.getInstance().getKeyCode(buttonActionMap.get(button)).getName());
+        button.setStyle(""
+            + "-fx-background-color: -fx-pp-front-color; "
+            + "-fx-text-fill: -fx-pp-theme-color; "
+            + "-fx-font-size: 13;");
+    }
+
+    private void keyPressed(KeyEvent event, Button button) {
+        KeyAction buttonAction = buttonActionMap.get(button);
+        if (gameKeyBind.bindKeyToAction(event.getCode(), buttonAction)) {
+            showSnackBar(button.getId() + " is set to " + event.getCode().getName());
+            button.setText(gameKeyBind.getKeyCode(buttonAction).getName());
         } else {
-            keys.replace(button, event.getCode());
-            keyBind.replace(buttonAndGameClientActionMap.get(button), event.getCode());
-            button.setText(event.getCode().getName());
-            viewManager.showSnackbar(button.getId() + " is set to " + event.getCode().getName());
+            showSnackBar(event.getCode().getName() + " is already in use");
         }
+        event.consume();
     }
 }
