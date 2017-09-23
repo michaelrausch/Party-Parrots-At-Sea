@@ -122,7 +122,7 @@ public class BoatCustomizeController implements Initializable{
     }
 
     public void setCurrentBoat(String boatType) {
-        currentBoat = boatType;
+        currentBoat = BoatMeshType.valueOf(boatType);
         displayCurrentBoat();
         refreshStatBars(currentBoat);
     }
@@ -155,7 +155,7 @@ public class BoatCustomizeController implements Initializable{
         boatPane.getChildren().add(group);
         BoatModel bo = ModelFactory.boatCustomiseView(currentBoat, colorPicker.getValue());
         group.getChildren().add(bo.getAssets());
-        refreshStatBars(bo);
+        refreshStatBars(currentBoat);
     }
 
     private void generateMaxStats() {
@@ -172,9 +172,9 @@ public class BoatCustomizeController implements Initializable{
         }
     }
 
-    private void refreshStatBars(BoatModel bo) {
-        speedBar.setProgress((bo.getMeshType().maxSpeedMultiplier) / maxSpeedMultiplier);
-        accelBar.setProgress(bo.getMeshType().accelerationMultiplier / maxAcceleration);
-        handleBar.setProgress(bo.getMeshType().turnStep / maxTurnRate);
+    private void refreshStatBars(BoatMeshType bo) {
+        speedBar.setProgress((bo.maxSpeedMultiplier) / maxSpeedMultiplier);
+        accelBar.setProgress(bo.accelerationMultiplier / maxAcceleration);
+        handleBar.setProgress(bo.turnStep / maxTurnRate);
     }
 }

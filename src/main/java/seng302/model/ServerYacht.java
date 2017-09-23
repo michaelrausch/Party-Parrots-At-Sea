@@ -29,7 +29,8 @@ public class ServerYacht {
     private BoatMeshType boatType;
     private Double turnStep = 5.0;
     private Double maxSpeedMultiplier = 1.0;
-    private Double acceleration = 1.0;
+    private Double turnStepMultiplier = 1.0;
+    private Double accelerationMultiplier = 1.0;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -133,7 +134,7 @@ public class ServerYacht {
      * @param amount the amount by which to adjust the boat heading.
      */
     public void adjustHeading(Double amount) {
-        Double newVal = heading + amount;
+        Double newVal = heading + (amount * turnStepMultiplier);
         lastHeading = heading;
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
@@ -272,7 +273,7 @@ public class ServerYacht {
     private void turnTowardsHeading(Double newHeading) {
         Double newVal = heading - newHeading;
         if (Math.floorMod(newVal.longValue(), 360L) > 180) {
-            adjustHeading(turnStep / 5);
+            adjustHeading(turnStep  / 5);
         } else {
             adjustHeading(-turnStep / 5);
         }
@@ -426,6 +427,9 @@ public class ServerYacht {
     }
 
     public void setBoatType(BoatMeshType boatType) {
+        this.accelerationMultiplier = boatType.accelerationMultiplier;
+        this.maxSpeedMultiplier = boatType.maxSpeedMultiplier;
+        this.turnStepMultiplier = boatType.turnStep;
         this.boatType = boatType;
     }
 
@@ -433,8 +437,8 @@ public class ServerYacht {
         return maxSpeedMultiplier;
     }
 
-    public Double getAcceleration(){
-        return acceleration;
+    public Double getAccelerationMultiplier(){
+        return accelerationMultiplier;
     }
 
 
