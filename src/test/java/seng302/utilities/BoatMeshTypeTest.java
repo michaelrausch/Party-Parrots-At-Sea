@@ -15,12 +15,12 @@ public class BoatMeshTypeTest {
     public void testNextBoatMeshType() {
         BoatMeshType currentBoat = BoatMeshType.DINGHY;
         BoatMeshType nextBoat = BoatMeshType.getNextBoatType(currentBoat);
-        Assert.assertEquals(BoatMeshType.CAT_ATE_A_MERINGUE, nextBoat);
+        Assert.assertEquals(BoatMeshType.CATAMARAN, nextBoat);
     }
 
     @Test
     public void testPreviousBoatMeshType() {
-        BoatMeshType currentBoat = BoatMeshType.CAT_ATE_A_MERINGUE;
+        BoatMeshType currentBoat = BoatMeshType.CATAMARAN;
         BoatMeshType prevBoat = BoatMeshType.getPrevBoatType(currentBoat);
         Assert.assertEquals(BoatMeshType.DINGHY, prevBoat);
     }

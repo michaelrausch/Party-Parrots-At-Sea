@@ -1,6 +1,5 @@
 package seng302.gameServer;
 
-import com.sun.corba.se.spi.activation.Server;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -260,10 +259,6 @@ public class GameState implements Runnable {
                     GameState.setCurrentStage(GameStages.RACING);
                 }
             }
-            if (currentStage == GameStages.RACING) {
-                update();
-            }
-
             if (currentStage == GameStages.RACING) {
                 update();
             }
@@ -639,23 +634,23 @@ public class GameState implements Runnable {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
         Double maxBoatSpeed =
-            GeoUtility.knotsToMMS(boatSpeedInKnots) * serverSpeedMultiplier * yacht.getSpeedMultiplier();
+            GeoUtility.knotsToMMS(boatSpeedInKnots) * serverSpeedMultiplier * yacht.getSpeedMultiplier() * yacht.getMaxSpeedMultiplier();
 
         Double currentVelocity = yacht.getCurrentVelocity();
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (currentVelocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity(maxBoatSpeed / 100);
+                yacht.changeVelocity((maxBoatSpeed / 100) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else {
-                yacht.setCurrentVelocity(maxBoatSpeed);
+                yacht.setCurrentVelocity((maxBoatSpeed) * yacht.getAccelerationMultiplier());
             }
         } else {
             if (currentVelocity > 3000) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > 100) {
-                yacht.changeVelocity(-currentVelocity / 50);
+                yacht.changeVelocity((-currentVelocity / 50) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }

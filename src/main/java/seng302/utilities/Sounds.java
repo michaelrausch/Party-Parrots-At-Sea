@@ -14,8 +14,10 @@ public class Sounds {
     private static MediaPlayer soundEffect;
     private static MediaPlayer soundPlayer;
     private static MediaPlayer hoverSoundPlayer;
+    private static MediaPlayer crashSoundPlayer;
 
     private static boolean hoverInitialized = false;
+    private static boolean crashInitialized = false;
     private static boolean musicMuted = false;
     private static boolean soundEffectsMuted = false;
 
@@ -155,11 +157,17 @@ public class Sounds {
 
     public static void playCrashSound() {
         if (!soundEffectsMuted) {
-            Media crashSound = new Media(
-                Sounds.class.getClassLoader().getResource("sounds/Large-metal-door-slam.mp3")
-                    .toString());
-            soundPlayer = new MediaPlayer(crashSound);
-            soundPlayer.play();
+            if (!crashInitialized) {
+                Media pickupSound = new Media(
+                    Sounds.class.getClassLoader().getResource("sounds/Large-metal-door-slam.mp3")
+                        .toString());
+                crashSoundPlayer = new MediaPlayer(pickupSound);
+                crashInitialized = true;
+            }
+            if (crashSoundPlayer != null) {
+                crashSoundPlayer.stop();
+            }
+            crashSoundPlayer.play();
         }
     }
 
@@ -176,10 +184,10 @@ public class Sounds {
     public static void playHoverSound() {
         if (!soundEffectsMuted) {
             if (!hoverInitialized) {
-                Media crashSound = new Media(
+                Media hoverSound = new Media(
                     Sounds.class.getClassLoader().getResource("sounds/Error-sound-effect.mp3")
                         .toString());
-                hoverSoundPlayer = new MediaPlayer(crashSound);
+                hoverSoundPlayer = new MediaPlayer(hoverSound);
                 hoverInitialized = true;
             }
             hoverSoundPlayer.setVolume(0.5);
