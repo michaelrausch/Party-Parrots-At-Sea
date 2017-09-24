@@ -78,7 +78,6 @@ public class ModelFactory {
     public static BoatModel boatGameView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().setAll(
-            new Rotate(-90, new Point3D(0,0,1)),
             new Scale(0.3, 0.3, 0.3)
         );
         return new BoatModel(boatAssets, null, boatType);

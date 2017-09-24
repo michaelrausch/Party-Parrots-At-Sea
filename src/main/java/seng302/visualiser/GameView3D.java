@@ -30,6 +30,11 @@ import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
+import seng302.visualiser.cameras.ChaseCamera;
+import seng302.visualiser.cameras.IsometricCamera;
+import seng302.visualiser.cameras.RaceCamera;
+import seng302.visualiser.cameras.TopDownCamera;
+import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.Marker3D;
@@ -52,6 +57,8 @@ public class GameView3D {
     private SubScene view;
     //    ParallelCamera camera;
     private PerspectiveCamera camera;
+    private PerspectiveCamera camera2;
+    private PerspectiveCamera camera3;
     private Group gameObjects;
 
     private double bufferSize = 0;
@@ -88,13 +95,21 @@ public class GameView3D {
     }
 
     public GameView3D () {
-        camera = new PerspectiveCamera(true);
-        camera.getTransforms().addAll(
-            new Translate(DEFAULT_CAMERA_X,DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH)
-        );
+        camera = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH);
         camera.setFarClip(600);
         camera.setNearClip(0.1);
         camera.setFieldOfView(FOV);
+
+        camera2 = new TopDownCamera();
+        camera2.setFarClip(600);
+        camera2.setNearClip(0.1);
+        camera2.setFieldOfView(FOV);
+
+        camera3 = new ChaseCamera();
+        camera3.setFarClip(600);
+        camera3.setNearClip(0.1);
+        camera3.setFieldOfView(FOV);
+
         gameObjects = new Group();
         root3D = new Group(camera, gameObjects);
         view = new SubScene(
@@ -406,35 +421,46 @@ public class GameView3D {
     public void cameraMovement(KeyEvent event) {
         switch (event.getCode()) {
             case NUMPAD8:
-                camera.getTransforms().addAll(new Rotate(0.5, new Point3D(1,0,0)));
+                view.getCamera().getTransforms().addAll(new Rotate(0.5, new Point3D(1, 0, 0)));
                 break;
             case NUMPAD2:
-                camera.getTransforms().addAll(new Rotate(-0.5, new Point3D(1,0,0)));
+                view.getCamera().getTransforms().addAll(new Rotate(-0.5, new Point3D(1, 0, 0)));
                 break;
             case NUMPAD4:
-                camera.getTransforms().addAll(new Rotate(-0.5, new Point3D(0,1,0)));
+                view.getCamera().getTransforms().addAll(new Rotate(-0.5, new Point3D(0, 1, 0)));
                 break;
             case NUMPAD6:
-                camera.getTransforms().addAll(new Rotate(0.5, new Point3D(0,1,0)));
+                view.getCamera().getTransforms().addAll(new Rotate(0.5, new Point3D(0, 1, 0)));
                 break;
             case Z:
-                camera.getTransforms().addAll(new Translate(0, 0, 1.5));
+                ((RaceCamera) view.getCamera()).zoomIn();
                 break;
             case X:
-                camera.getTransforms().addAll(new Translate(0, 0, -1.5));
+                ((RaceCamera) view.getCamera()).zoomOut();
                 break;
             case W:
-                camera.getTransforms().addAll(new Translate(0, -1, 0));
+                view.getCamera().getTransforms().addAll(new Translate(0, -1, 0));
                 break;
             case S:
-                camera.getTransforms().addAll(new Translate(0, 1, 0));
+                view.getCamera().getTransforms().addAll(new Translate(0, 1, 0));
                 break;
             case A:
-                camera.getTransforms().addAll(new Translate(-1, 0, 0));
+                view.getCamera().getTransforms().addAll(new Translate(-1, 0, 0));
                 break;
             case D:
-                camera.getTransforms().addAll(new Translate(1, 0, 0));
+                view.getCamera().getTransforms().addAll(new Translate(1, 0, 0));
                 break;
+            case F1:
+                if (view.getCamera().equals(camera)) {
+                    view.setCamera(camera2);
+                    if (view.getCamera() instanceof TopDownCamera) {
+                        ((RaceCamera) view.getCamera()).zoomIn();
+                    }
+                } else if (view.getCamera().equals(camera2)) {
+                    view.setCamera(camera3);
+                } else {
+                    view.setCamera(camera);
+                }
         }
     }
 
@@ -471,6 +497,11 @@ public class GameView3D {
                 Point2D p2d = findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
             });
+
+            if (clientYacht.getSourceId().equals(
+                ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
+                ((ChaseCamera) camera3).setPlayerBoat(newBoat);
+            }
         }
         Platform.runLater(() -> {
             gameObjects.getChildren().addAll(wakes);
