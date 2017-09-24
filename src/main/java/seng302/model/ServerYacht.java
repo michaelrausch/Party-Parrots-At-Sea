@@ -11,12 +11,6 @@ import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
-
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
  * compared to the XMLParser boat class, also done outside Boat class because some old variables are
@@ -197,44 +191,52 @@ public class ServerYacht {
     public void turnUpwind() {
         disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
-        if (normalizedHeading == 0) {
-            if (lastHeading < 180) {
-                adjustHeading(-turnStep);
-            } else {
-                adjustHeading(turnStep);
-            }
-        } else if (normalizedHeading == 180) {
-            if (lastHeading < 180) {
-                adjustHeading(turnStep);
-            } else {
-                adjustHeading(-turnStep);
-            }
-        } else if (normalizedHeading < 180) {
-            adjustHeading(-turnStep);
-        } else {
+        if (continuouslyTurning) {
             adjustHeading(turnStep);
+        } else {
+            if (normalizedHeading == 0) {
+                if (lastHeading < 180) {
+                    adjustHeading(-turnStep);
+                } else {
+                    adjustHeading(turnStep);
+                }
+            } else if (normalizedHeading == 180) {
+                if (lastHeading < 180) {
+                    adjustHeading(turnStep);
+                } else {
+                    adjustHeading(-turnStep);
+                }
+            } else if (normalizedHeading < 180) {
+                adjustHeading(-turnStep);
+            } else {
+                adjustHeading(turnStep);
+            }
         }
     }
 
     public void turnDownwind() {
         disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
-        if (normalizedHeading == 0) {
-            if (lastHeading < 180) {
-                adjustHeading(turnStep);
-            } else {
-                adjustHeading(-turnStep);
-            }
-        } else if (normalizedHeading == 180) {
-            if (lastHeading < 180) {
-                adjustHeading(-turnStep);
-            } else {
-                adjustHeading(turnStep);
-            }
-        } else if (normalizedHeading < 180) {
-            adjustHeading(turnStep);
-        } else {
+        if (continuouslyTurning) {
             adjustHeading(-turnStep);
+        } else {
+            if (normalizedHeading == 0) {
+                if (lastHeading < 180) {
+                    adjustHeading(turnStep);
+                } else {
+                    adjustHeading(-turnStep);
+                }
+            } else if (normalizedHeading == 180) {
+                if (lastHeading < 180) {
+                    adjustHeading(-turnStep);
+                } else {
+                    adjustHeading(turnStep);
+                }
+            } else if (normalizedHeading < 180) {
+                adjustHeading(turnStep);
+            } else {
+                adjustHeading(-turnStep);
+            }
         }
     }
 
