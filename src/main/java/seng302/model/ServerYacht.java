@@ -11,6 +11,12 @@ import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
  * compared to the XMLParser boat class, also done outside Boat class because some old variables are
@@ -20,10 +26,12 @@ public class ServerYacht {
 
     private Logger logger = LoggerFactory.getLogger(ServerYacht.class);
 
-    public static final Double TURN_STEP = 5.0;
-
     //Boat info
     private BoatMeshType boatType;
+    private Double turnStep = 5.0;
+    private Double maxSpeedMultiplier = 1.0;
+    private Double turnStepMultiplier = 1.0;
+    private Double accelerationMultiplier = 1.0;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -59,7 +67,7 @@ public class ServerYacht {
 
     public ServerYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
-        this.boatType = boatType;
+        setBoatType(boatType);
         this.boatStatus = BoatStatus.PRESTART;
         this.sourceId = sourceId;
         this.hullID = hullID;
@@ -131,7 +139,7 @@ public class ServerYacht {
      * @param amount the amount by which to adjust the boat heading.
      */
     public void adjustHeading(Double amount) {
-        Double newVal = heading + amount;
+        Double newVal = heading + (amount * turnStepMultiplier);
         lastHeading = heading;
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
@@ -176,7 +184,7 @@ public class ServerYacht {
         if (isAuto) {
             turnTowardsHeading(autoHeading);
             if (Math.abs(heading - autoHeading)
-                <= TURN_STEP) { //Cancel when within 1 turn step of target.
+                <= turnStep) { //Cancel when within 1 turn step of target.
                 isAuto = false;
             }
         }
@@ -189,52 +197,44 @@ public class ServerYacht {
     public void turnUpwind() {
         disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
-        if (continuouslyTurning) {
-            adjustHeading(TURN_STEP);
-        } else {
-            if (normalizedHeading == 0) {
-                if (lastHeading < 180) {
-                    adjustHeading(-TURN_STEP);
-                } else {
-                    adjustHeading(TURN_STEP);
-                }
-            } else if (normalizedHeading == 180) {
-                if (lastHeading < 180) {
-                    adjustHeading(TURN_STEP);
-                } else {
-                    adjustHeading(-TURN_STEP);
-                }
-            } else if (normalizedHeading < 180) {
-                adjustHeading(-TURN_STEP);
+        if (normalizedHeading == 0) {
+            if (lastHeading < 180) {
+                adjustHeading(-turnStep);
             } else {
-                adjustHeading(TURN_STEP);
+                adjustHeading(turnStep);
             }
+        } else if (normalizedHeading == 180) {
+            if (lastHeading < 180) {
+                adjustHeading(turnStep);
+            } else {
+                adjustHeading(-turnStep);
+            }
+        } else if (normalizedHeading < 180) {
+            adjustHeading(-turnStep);
+        } else {
+            adjustHeading(turnStep);
         }
     }
 
     public void turnDownwind() {
         disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
-        if (continuouslyTurning) {
-            adjustHeading(-TURN_STEP);
-        } else {
-            if (normalizedHeading == 0) {
-                if (lastHeading < 180) {
-                    adjustHeading(TURN_STEP);
-                } else {
-                    adjustHeading(-TURN_STEP);
-                }
-            } else if (normalizedHeading == 180) {
-                if (lastHeading < 180) {
-                    adjustHeading(-TURN_STEP);
-                } else {
-                    adjustHeading(TURN_STEP);
-                }
-            } else if (normalizedHeading < 180) {
-                adjustHeading(TURN_STEP);
+        if (normalizedHeading == 0) {
+            if (lastHeading < 180) {
+                adjustHeading(turnStep);
             } else {
-                adjustHeading(-TURN_STEP);
+                adjustHeading(-turnStep);
             }
+        } else if (normalizedHeading == 180) {
+            if (lastHeading < 180) {
+                adjustHeading(-turnStep);
+            } else {
+                adjustHeading(turnStep);
+            }
+        } else if (normalizedHeading < 180) {
+            adjustHeading(turnStep);
+        } else {
+            adjustHeading(-turnStep);
         }
     }
 
@@ -278,9 +278,9 @@ public class ServerYacht {
     private void turnTowardsHeading(Double newHeading) {
         Double newVal = heading - newHeading;
         if (Math.floorMod(newVal.longValue(), 360L) > 180) {
-            adjustHeading(TURN_STEP / 5);
+            adjustHeading(turnStep  / 5);
         } else {
-            adjustHeading(-TURN_STEP / 5);
+            adjustHeading(-turnStep / 5);
         }
     }
 
@@ -432,8 +432,20 @@ public class ServerYacht {
     }
 
     public void setBoatType(BoatMeshType boatType) {
+        this.accelerationMultiplier = boatType.accelerationMultiplier;
+        this.maxSpeedMultiplier = boatType.maxSpeedMultiplier;
+        this.turnStepMultiplier = boatType.turnStep;
         this.boatType = boatType;
     }
+
+    public Double getMaxSpeedMultiplier() {
+        return maxSpeedMultiplier;
+    }
+
+    public Double getAccelerationMultiplier(){
+        return accelerationMultiplier;
+    }
+
 
     public BoatMeshType getBoatType() {
         return boatType;
