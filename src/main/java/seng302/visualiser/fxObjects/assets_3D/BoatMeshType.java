@@ -7,19 +7,22 @@ package seng302.visualiser.fxObjects.assets_3D;
  */
 public enum BoatMeshType {
 
-    DINGHY("dinghy_hull.stl", "dinghy_mast.stl", 1.36653, "dinghy_sail.stl", 1.36653, null, false),
-    CAT_ATE_A_MERINGUE("catamaran_hull.stl", "catamaran_mast.stl", 0.997, "catamaran_sail.stl",
-        0.997, null, false),
+    DINGHY("dinghy_hull.stl", "dinghy_mast.stl", 1.36653, "dinghy_sail.stl", 1.36653, null, false, 1.8, 1.0, 1.0),
+    CATAMARAN("catamaran_hull.stl", "catamaran_mast.stl", 0.997, "catamaran_sail.stl",
+        0.997, null, false, 1.0, 1.4, 2.0),
     PIRATE_SHIP("pirateship_hull.stl", "pirateship_mast.stl", -0.5415, "pirateship_mainsail.stl",
-        -0.5415, "pirateship_frontsail.stl", true);
+        -0.5415, "pirateship_frontsail.stl", true, 1.2, 1.6, 1.2);
 
     final String hullFile, mastFile, sailFile, jibFile;
     final double mastOffset, sailOffset;
+    public final double maxSpeedMultiplier;
+    public final double accelerationMultiplier;
+    public final double turnStep;
     final boolean fixedSail;
-    final static BoatMeshType[] boatTypes = new BoatMeshType[]{DINGHY, CAT_ATE_A_MERINGUE, PIRATE_SHIP};
+    final static BoatMeshType[] boatTypes = new BoatMeshType[]{DINGHY, CATAMARAN, PIRATE_SHIP};
 
     BoatMeshType(String hullFile, String mastFile, double mastOffset, String sailFile,
-        double sailOffset, String jibFile, boolean fixedSail) {
+        double sailOffset, String jibFile, boolean fixedSail, double maxSpeedMultiplier, double accelerationMultiplier, double turnStep) {
         this.hullFile = hullFile;
         this.mastFile = mastFile;
         this.mastOffset = mastOffset;
@@ -27,10 +30,12 @@ public enum BoatMeshType {
         this.sailOffset = sailOffset;
         this.jibFile = jibFile;
         this.fixedSail = fixedSail;
+        this.maxSpeedMultiplier = maxSpeedMultiplier;
+        this.accelerationMultiplier = accelerationMultiplier;
+        this.turnStep = turnStep;
     }
 
 
-    //TODO kre39 make something not terrible to cycle through boat types
     public static BoatMeshType getNextBoatType(BoatMeshType boatType) {
         for (int i = 0; i < boatTypes.length; i++) {
             if (i == boatTypes.length -1) {

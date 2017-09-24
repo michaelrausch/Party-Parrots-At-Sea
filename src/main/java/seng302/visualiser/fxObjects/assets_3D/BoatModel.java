@@ -71,4 +71,8 @@ public class BoatModel extends Model {
     private MeshView getMeshViewChild(int index) {
         return (MeshView) assets.getChildren().get(index);
     }
+
+    public BoatMeshType getMeshType() {
+        return meshType;
+    }
 }

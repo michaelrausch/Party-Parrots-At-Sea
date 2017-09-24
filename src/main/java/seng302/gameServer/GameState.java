@@ -450,7 +450,7 @@ public class GameState implements Runnable {
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier * yacht.getMaxSpeedMultiplier();
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
                 // TODO: 11/09/17 wmu16 CHANGE THIS TO MAGIC NUMBER
@@ -462,17 +462,17 @@ public class GameState implements Runnable {
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (currentVelocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity(maxBoatSpeed / 100);
+                yacht.changeVelocity((maxBoatSpeed / 100) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else {
-                yacht.setCurrentVelocity(maxBoatSpeed);
+                yacht.setCurrentVelocity((maxBoatSpeed) * yacht.getAccelerationMultiplier());
             }
         } else {
             if (currentVelocity > 3000) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > 100) {
-                yacht.changeVelocity(-currentVelocity / 50);
+                yacht.changeVelocity((-currentVelocity / 50) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }

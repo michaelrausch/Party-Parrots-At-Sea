@@ -131,7 +131,7 @@ public class LobbyController implements Initializable {
             .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
             .getBoatName());
         controller.setCurrentBoat(this.playerBoats.get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
-            .getBoatType());
+            .getBoatType().toString());
 
         return customizationDialog;
     }
