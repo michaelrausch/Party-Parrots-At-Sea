@@ -433,7 +433,7 @@ public class GameState implements Runnable {
      * @param yacht The yacht to disable
      */
     private void boatTempShutDown(ServerYacht yacht) {
-        yacht.setSpeedMultiplier(0);
+        yacht.setPowerUpSpeedMultiplier(0);
         Timer shutDownTimer = new Timer("Shutdown Timer");
         shutDownTimer.schedule(new TimerTask() {
             @Override
@@ -542,13 +542,13 @@ public class GameState implements Runnable {
             TokenType tokenType = collidedToken.getTokenType();
             switch (tokenType) {
                 case BOOST:
-                    yacht.setSpeedMultiplier(VELOCITY_BOOST_MULTIPLIER);
+                    yacht.setPowerUpSpeedMultiplier(VELOCITY_BOOST_MULTIPLIER);
                     break;
                 case BUMPER:
                     // TODO: 22/09/17 wmu16
                     break;
                 case HANDLING:
-                    yacht.setHandlingMultiplier(HANDLING_BOOST_MULTIPLIER);
+                    yacht.setPowerUpHandlingMultiplier(HANDLING_BOOST_MULTIPLIER);
                     break;
                 case WIND_WALKER:
                     // TODO: 22/09/17 wmu16
@@ -634,23 +634,29 @@ public class GameState implements Runnable {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
         Double maxBoatSpeed =
-            GeoUtility.knotsToMMS(boatSpeedInKnots) * serverSpeedMultiplier * yacht.getSpeedMultiplier() * yacht.getMaxSpeedMultiplier();
+            GeoUtility.knotsToMMS(boatSpeedInKnots) * serverSpeedMultiplier * yacht
+                .getPowerUpSpeedMultiplier() * yacht.getBoatTypeSpeedMultiplier();
 
         Double currentVelocity = yacht.getCurrentVelocity();
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (currentVelocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity((maxBoatSpeed / 100) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (maxBoatSpeed / 100) * yacht.getBoatTypeAccelerationMultiplier());
             } else if (currentVelocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (-currentVelocity / 200) * yacht.getBoatTypeAccelerationMultiplier());
             } else {
-                yacht.setCurrentVelocity((maxBoatSpeed) * yacht.getAccelerationMultiplier());
+                yacht
+                    .setCurrentVelocity((maxBoatSpeed) * yacht.getBoatTypeAccelerationMultiplier());
             }
         } else {
             if (currentVelocity > 3000) {
-                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (-currentVelocity / 200) * yacht.getBoatTypeAccelerationMultiplier());
             } else if (currentVelocity > 100) {
-                yacht.changeVelocity((-currentVelocity / 50) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (-currentVelocity / 50) * yacht.getBoatTypeAccelerationMultiplier());
             } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }

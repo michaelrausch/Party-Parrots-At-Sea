@@ -11,10 +11,6 @@ import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -28,9 +24,9 @@ public class ServerYacht {
     //Boat info
     private BoatMeshType boatType;
     private Double turnStep = 5.0;
-    private Double maxSpeedMultiplier = 1.0;
-    private Double turnStepMultiplier = 1.0;
-    private Double accelerationMultiplier = 1.0;
+    private Double boatTypeSpeedMultiplier = 1.0;
+    private Double boatTypeTurnStepMultiplier = 1.0;
+    private Double boatTypeAccelerationMultiplier = 1.0;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -60,8 +56,8 @@ public class ServerYacht {
     //PowerUp
     private TokenType powerUp;
     private Long powerUpStartTime;
-    private Integer speedMultiplier;
-    private Integer handlingMultiplier;
+    private Integer powerUpSpeedMultiplier;
+    private Integer powerUpHandlingMultiplier;
 
 
     public ServerYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
@@ -83,8 +79,8 @@ public class ServerYacht {
         this.legNumber = 0;
         this.boatColor = Colors.getColor(sourceId - 1);
         this.powerUp = null;
-        this.speedMultiplier = 1;
-        this.handlingMultiplier = 1;
+        this.powerUpSpeedMultiplier = 1;
+        this.powerUpHandlingMultiplier = 1;
 
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
@@ -122,8 +118,8 @@ public class ServerYacht {
 
     public void powerDown() {
         this.powerUp = null;
-        this.speedMultiplier = 1;
-        this.handlingMultiplier = 1;
+        this.powerUpSpeedMultiplier = 1;
+        this.powerUpHandlingMultiplier = 1;
     }
 
     public Long getPowerUpStartTime() {
@@ -140,7 +136,7 @@ public class ServerYacht {
      * @param amount the amount by which to adjust the boat heading.
      */
     public void adjustHeading(Double amount) {
-        Double newVal = heading + amount * handlingMultiplier * turnStepMultiplier;
+        Double newVal = heading + amount * powerUpHandlingMultiplier * boatTypeTurnStepMultiplier;
         lastHeading = heading;
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
@@ -433,18 +429,18 @@ public class ServerYacht {
     }
 
     public void setBoatType(BoatMeshType boatType) {
-        this.accelerationMultiplier = boatType.accelerationMultiplier;
-        this.maxSpeedMultiplier = boatType.maxSpeedMultiplier;
-        this.turnStepMultiplier = boatType.turnStep;
+        this.boatTypeAccelerationMultiplier = boatType.accelerationMultiplier;
+        this.boatTypeSpeedMultiplier = boatType.maxSpeedMultiplier;
+        this.boatTypeTurnStepMultiplier = boatType.turnStep;
         this.boatType = boatType;
     }
 
-    public Double getMaxSpeedMultiplier() {
-        return maxSpeedMultiplier;
+    public Double getBoatTypeSpeedMultiplier() {
+        return boatTypeSpeedMultiplier;
     }
 
-    public Double getAccelerationMultiplier(){
-        return accelerationMultiplier;
+    public Double getBoatTypeAccelerationMultiplier() {
+        return boatTypeAccelerationMultiplier;
     }
 
 
@@ -452,19 +448,19 @@ public class ServerYacht {
         return boatType;
     }
 
-    public Integer getSpeedMultiplier() {
-        return speedMultiplier;
+    public Integer getPowerUpSpeedMultiplier() {
+        return powerUpSpeedMultiplier;
     }
 
-    public void setSpeedMultiplier(Integer speedMultiplier) {
-        this.speedMultiplier = speedMultiplier;
+    public void setPowerUpSpeedMultiplier(Integer powerUpSpeedMultiplier) {
+        this.powerUpSpeedMultiplier = powerUpSpeedMultiplier;
     }
 
-    public Integer getHandlingMultiplier() {
-        return handlingMultiplier;
+    public Integer getPowerUpHandlingMultiplier() {
+        return powerUpHandlingMultiplier;
     }
 
-    public void setHandlingMultiplier(Integer handlingMultiplier) {
-        this.handlingMultiplier = handlingMultiplier;
+    public void setPowerUpHandlingMultiplier(Integer powerUpHandlingMultiplier) {
+        this.powerUpHandlingMultiplier = powerUpHandlingMultiplier;
     }
 }
