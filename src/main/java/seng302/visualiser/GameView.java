@@ -1,17 +1,21 @@
 package seng302.visualiser;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.*;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -20,9 +24,9 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.assets_2D.*;
-
-import java.util.*;
+import seng302.visualiser.fxObjects.assets_2D.CourseBoundary;
+import seng302.visualiser.fxObjects.assets_2D.Gate;
+import seng302.visualiser.fxObjects.assets_2D.Marker2D;
 
 /**
  * Created by cir27 on 20/07/17.
@@ -73,42 +77,20 @@ public class GameView extends Pane {
         gameObjects = this.getChildren();
         gameObjects.addAll(mapImage, raceBorder, markers, tokens);
         this.parentProperty().addListener((obs, old, parent) -> {
-            if (old != null) {
-                ((Pane) old).heightProperty().removeListener(heightChangeListener);
-            }
             if (parent != null) {
-                heightChangeListener = (observableValue, oldHeight, newHeight) -> {
-                    canvasWidth = ((Pane) parent).getWidth();
-                    canvasHeight = newHeight.doubleValue();
-                    updateBorder(borderPoints);
-                    updateCourse(compoundMarks, courseOrder);
-                };
-                ((Pane) parent).heightProperty().addListener(heightChangeListener);
-//            }
-//            if (parent != null) {
-//                canvasWidth = parent.prefWidth(1);
-//                canvasHeight = parent.prefHeight(1);
-//                rescaleRace(borderPoints);
-//                System.out.println("parent = " + parent.maxWidth(100));
-//                System.out.println("parent.minWidth(1) = " + parent.minWidth(100));
-//                System.out.println(canvasWidth);
-//                System.out.println(canvasHeight);
-                canvasWidth = ((Pane) parent).getHeight();
-                canvasWidth = ((Pane) parent).getWidth();
-                System.out.println("canvasWidth = " + canvasWidth);
-                System.out.println("canvasHeight = " + canvasHeight);
-                this.getChildren().add(new Circle(canvasWidth / 2, canvasHeight / 2, 7, Color.GREENYELLOW));
-                this.getChildren().add(new Circle(canvasWidth, canvasHeight, 7, Color.GREENYELLOW));
-                this.getChildren().add(new Circle(0,0, 7, Color.GREENYELLOW));
-                this.getChildren().add(new Circle(canvasWidth, 0, 7, Color.GREENYELLOW));
-                this.getChildren().add(new Circle(0,canvasHeight, 7, Color.GREENYELLOW));
-                Rectangle r = new Rectangle(canvasWidth, canvasHeight, Color.TRANSPARENT);
-                r.setStroke(Color.BLACK);
-                this.getChildren().add(r);
+                canvasWidth = parent.prefWidth(1);
+                canvasHeight = parent.prefHeight(1);
                 updateBorder(borderPoints);
                 updateCourse(compoundMarks, courseOrder);
             }
         });
+    }
+
+    public void setSize(double width, double height) {
+        canvasHeight = height;
+        canvasWidth = width;
+        updateBorder(borderPoints);
+        updateCourse(compoundMarks, courseOrder);
     }
 
     /**
@@ -510,12 +492,6 @@ public class GameView extends Pane {
             xAxisLocation = canvasWidth - bufferSize - (xAxisLocation - bufferSize);
         }
         return new Point2D(xAxisLocation, yAxisLocation);
-    }
-
-
-    public void setSize(Double width, Double height){
-        this.canvasWidth = width;
-        this.canvasHeight = height;
     }
 
     public void setHorizontalBuffer(Double buff){

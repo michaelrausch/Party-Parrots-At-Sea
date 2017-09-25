@@ -78,7 +78,7 @@
                                 <Insets bottom="15.0" left="7.0" right="15.0" top="15.0" />
                             </GridPane.margin>
                         </ScrollPane>
-                  <AnchorPane fx:id="serverMap" prefHeight="370.0" prefWidth="478.0" style="-fx-background-color: skyblue;">
+                  <AnchorPane fx:id="serverMap" style="-fx-background-color: skyblue;">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>

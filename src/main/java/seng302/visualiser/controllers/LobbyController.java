@@ -35,6 +35,9 @@ import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
 public class LobbyController implements Initializable {
 
+    private final double INITIAL_MAP_HEIGHT = 770d;
+    private final double INITIAL_MAP_WIDTH = 574d;
+
     //--------FXML BEGIN--------//
     @FXML
     private VBox playerListVBox;
@@ -56,7 +59,8 @@ public class LobbyController implements Initializable {
     private JFXDialog customizationDialog;
     public Color playersColor;
     private Map<Integer, ClientYacht> playerBoats;
-    private Double mapWidth, mapHeight;
+
+    private Double mapWidth = INITIAL_MAP_WIDTH, mapHeight = INITIAL_MAP_HEIGHT;
     private GameView gameView;
 
     @Override
@@ -104,16 +108,7 @@ public class LobbyController implements Initializable {
         leaveLobbyButton.setOnMouseEntered(e -> Sounds.playHoverSound());
         customizeButton.setOnMouseEntered(e -> Sounds.playHoverSound());
         beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
-        serverMap.setPrefWidth(serverMap.getWidth());
-        serverMap.setPrefHeight(serverMap.getHeight());
-        serverMap.widthProperty().addListener((obs, oldVal, newVal) -> {
-            System.out.println("LISTEN " + newVal);
-            serverMap.setPrefWidth(newVal.doubleValue());
-        });
-        serverMap.heightProperty().addListener((obs, oldVal, newVal) -> {
-            System.out.println("LISTEN HEIUGHT "+newVal);
-            serverMap.setPrefHeight(newVal.doubleValue());
-        });
+
         initMapPreview();
     }
 
@@ -142,51 +137,29 @@ public class LobbyController implements Initializable {
     }
 
     /**
-     *
-     */
-    private void refreshMapView(){
-        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
-        List<Limit> border = raceData.getCourseLimit();
-        List<CompoundMark> marks = new ArrayList<CompoundMark>(raceData.getCompoundMarks().values());
-        List<Corner> corners = raceData.getMarkSequence();
-
-        gameView.setSize(mapWidth, mapHeight);
-
-        // Update game view
-        gameView.updateBorder(border);
-        gameView.updateCourse(marks, corners);
-    }
-
-    /**
      * Initializes a top down preview of the race course map.
      */
     private void initMapPreview() {
-//        gameView = new GameView(marks, corners, border);
-//        gameView.setHorizontalBuffer(330d);
-
-//        mapWidth = 770d;
-//        mapHeight = 574d;
-
-        // Add game view
         RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
         List<Limit> border = raceData.getCourseLimit();
-        List<CompoundMark> marks = new ArrayList<CompoundMark>(raceData.getCompoundMarks().values());
+        List<CompoundMark> marks = new ArrayList<>(raceData.getCompoundMarks().values());
         List<Corner> corners = raceData.getMarkSequence();
-//        gameView.updateBorder(border);
-//        gameView.updateCourse(marks, corners);
+
         gameView = new GameView(marks, corners, border);
         serverMap.getChildren().clear();
         serverMap.getChildren().add(gameView);
 
-//        serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
-//            mapWidth = newValue.doubleValue();
-//            refreshMapView();
-//        });
+        gameView.setSize(mapWidth, mapHeight);
+
+        serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
+            mapWidth = newValue.doubleValue();
+            gameView.setSize(mapWidth, mapHeight);
+        });
 //
-//        serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
-//            mapHeight = newValue.doubleValue();
-//            refreshMapView();
-//        });
+        serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
+            mapHeight = newValue.doubleValue();
+            gameView.setSize(mapWidth, mapHeight);
+        });
     }
 
     /**
