@@ -65,6 +65,7 @@ public class ClientYacht extends Observable {
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
     private ReadOnlyIntegerWrapper placingProperty = new ReadOnlyIntegerWrapper();
+    private ReadOnlyDoubleWrapper headingProperty = new ReadOnlyDoubleWrapper();
     private Color colour;
 
     public ClientYacht(String boatType, Integer sourceId, String hullID, String shortName,
@@ -224,6 +225,7 @@ public class ClientYacht extends Observable {
 
     public void setHeading(Double heading) {
         this.heading = heading;
+        setHeadingProperty();
     }
 
     @Override
@@ -256,10 +258,20 @@ public class ClientYacht extends Observable {
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
+        setHeadingProperty();
         this.currentVelocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
             yll.notifyLocation(this, lat, lng, heading, sailIn, velocity);
+        }
+    }
+
+    private void setHeadingProperty() {
+        Double oldHeading = getHeadingProperty().get();
+        Double currHeading = heading;
+        while (oldHeading.equals(currHeading)) {
+            oldHeading++;
+            headingProperty.set(oldHeading);
         }
     }
 
@@ -299,4 +311,10 @@ public class ClientYacht extends Observable {
     public BoatObject getBoatObject() {
         return this.boatObject;
     }
+
+    public ReadOnlyDoubleWrapper getHeadingProperty() {
+
+        return headingProperty;
+    }
+
 }
