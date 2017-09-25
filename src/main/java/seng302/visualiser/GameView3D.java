@@ -117,8 +117,7 @@ public class GameView3D {
         view.setCamera(camera);
         camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
 
-        //TDBC: Fix
-        skybox = new Skybox(new Image("https://i.pinimg.com/originals/3a/24/14/3a24142dce7b271799b6501fabc4ee19.jpg"), 100000, camera);
+        skybox = new Skybox(new Image(getClass().getResourceAsStream("/images/skybox.jpg")), 100000, camera);
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
 
         Model land = ModelFactory.importModel(ModelType.LAND);
