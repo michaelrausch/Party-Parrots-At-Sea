@@ -30,6 +30,7 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLGenerator;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 import seng302.utilities.XMLParser;
 
 /**
@@ -104,7 +105,7 @@ public class ServerToClientThread implements Runnable {
         String fName = "Player " + GameState.getNumberOfPlayers().toString();
         String lName = "";
         ServerYacht yacht = new ServerYacht(
-                "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
+            BoatMeshType.DINGHY, sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
 
         player = new Player(socket, yacht);

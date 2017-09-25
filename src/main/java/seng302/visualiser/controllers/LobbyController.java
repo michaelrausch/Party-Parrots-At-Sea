@@ -59,7 +59,6 @@ public class LobbyController implements Initializable {
     private JFXDialog customizationDialog;
     public Color playersColor;
     private Map<Integer, ClientYacht> playerBoats;
-
     private Double mapWidth = INITIAL_MAP_WIDTH, mapHeight = INITIAL_MAP_HEIGHT;
     private GameView gameView;
 
@@ -93,16 +92,16 @@ public class LobbyController implements Initializable {
             ViewManager.getInstance().getPlayerList().setAll(ViewManager.getInstance().getPlayerList().sorted());
         });
 
+        customizeButton.setOnMouseReleased(event -> {
+            customizationDialog = createCustomizeDialog();
+            Sounds.playButtonClick();
+            customizationDialog.show();
+        });
+
         Platform.runLater(() -> {
             Integer playerId = ViewManager.getInstance().getGameClient().getServerThread().getClientId();
 
             playersColor = Colors.getColor(playerId - 1);
-            customizationDialog = createCustomizeDialog();
-
-            customizeButton.setOnMouseReleased(event -> {
-                Sounds.playButtonClick();
-                customizationDialog.show();
-            });
         });
 
         leaveLobbyButton.setOnMouseEntered(e -> Sounds.playHoverSound());
@@ -132,6 +131,8 @@ public class LobbyController implements Initializable {
         controller.setPlayerName(this.playerBoats
             .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
             .getBoatName());
+        controller.setCurrentBoat(this.playerBoats.get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
+            .getBoatType().toString());
 
         return customizationDialog;
     }
@@ -190,7 +191,7 @@ public class LobbyController implements Initializable {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/views/cells/PlayerCell.fxml"));
 
-            loader.setController(new PlayerCell(playerId, yacht.getBoatName(), yacht.getColour()));
+            loader.setController(new PlayerCell(playerId, yacht));
 
             try {
                 pane = loader.load();

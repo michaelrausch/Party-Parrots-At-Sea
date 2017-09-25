@@ -9,9 +9,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import javafx.scene.paint.Color;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.ChatterMessage;
+import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.gameServer.messages.MarkRoundingMessage;
+import seng302.gameServer.messages.MarkType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RoundingBoatStatus;
+import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventType;
+import seng302.model.GeoPoint;
+import seng302.model.Limit;
+import seng302.model.Player;
+import seng302.model.PolarTable;
+import seng302.model.ServerYacht;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.gameServer.messages.ChatterMessage;
@@ -34,6 +61,8 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.XMLParser;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -237,7 +266,6 @@ public class GameState implements Runnable {
                 System.out.println("[GameState] interrupted exception");
             }
             if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.RACING) {
-//                System.out.println("update");
                 update();
             }
         }
@@ -263,6 +291,12 @@ public class GameState implements Runnable {
                 break;
             case DOWNWIND:
                 playerYacht.turnDownwind();
+                break;
+            case CONTINUOUSLY_TURNING:
+                playerYacht.setContinuouslyTurning(true);
+                break;
+            case DEFAULT_TURNING:
+                playerYacht.setContinuouslyTurning(false);
                 break;
         }
     }
@@ -442,8 +476,7 @@ public class GameState implements Runnable {
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
-        System.out.println(maxBoatSpeed);
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier * yacht.getMaxSpeedMultiplier();
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
                 // TODO: 11/09/17 wmu16 CHANGE THIS TO MAGIC NUMBER
@@ -455,17 +488,17 @@ public class GameState implements Runnable {
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (currentVelocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity(maxBoatSpeed / 100);
+                yacht.changeVelocity((maxBoatSpeed / 100) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else {
-                yacht.setCurrentVelocity(maxBoatSpeed);
+                yacht.setCurrentVelocity((maxBoatSpeed) * yacht.getAccelerationMultiplier());
             }
         } else {
             if (currentVelocity > 3000) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > 100) {
-                yacht.changeVelocity(-currentVelocity / 50);
+                yacht.changeVelocity((-currentVelocity / 50) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }
@@ -696,6 +729,9 @@ public class GameState implements Runnable {
             int blue = customizeData[2] & 0xFF;
             Color yachtColor = Color.rgb(red, green, blue);
             playerYacht.setBoatColor(yachtColor);
+        } else if (requestType.equals(CustomizeRequestType.SHAPE)) {
+            String type = new String(customizeData);
+            playerYacht.setBoatType(BoatMeshType.valueOf(type));
         }
     }
 

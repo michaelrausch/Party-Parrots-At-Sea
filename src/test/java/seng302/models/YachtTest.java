@@ -4,6 +4,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import seng302.gameServer.GameState;
 import seng302.model.ServerYacht;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 
 public class YachtTest {
@@ -17,7 +19,7 @@ public class YachtTest {
     @BeforeClass
     public static void setUp() {
         new GameState();
-        y1 = new ServerYacht("Yacht", 1, "Y1", "Y1", "Yacht 1", "C1");
+        y1 = new ServerYacht(BoatMeshType.DINGHY, 1, "Y1", "Y1", "Yacht 1", "C1");
         gs = new GameState();
     }
 
