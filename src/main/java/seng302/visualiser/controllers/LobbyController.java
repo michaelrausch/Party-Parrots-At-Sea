@@ -153,25 +153,32 @@ public class LobbyController implements Initializable {
      * Initializes a top down preview of the race course map.
      */
     private void initMapPreview() {
-        gameView = new GameView(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-        gameView.setHorizontalBuffer(330d);
+//        gameView = new GameView(marks, corners, border);
+//        gameView.setHorizontalBuffer(330d);
 
-        mapWidth = 770d;
-        mapHeight = 574d;
+//        mapWidth = 770d;
+//        mapHeight = 574d;
 
         // Add game view
+        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
+        List<Limit> border = raceData.getCourseLimit();
+        List<CompoundMark> marks = new ArrayList<CompoundMark>(raceData.getCompoundMarks().values());
+        List<Corner> corners = raceData.getMarkSequence();
+//        gameView.updateBorder(border);
+//        gameView.updateCourse(marks, corners);
+        gameView = new GameView(marks, corners, border);
         serverMap.getChildren().clear();
         serverMap.getChildren().add(gameView);
 
-        serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
-            mapWidth = newValue.doubleValue();
-            refreshMapView();
-        });
-
-        serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
-            mapHeight = newValue.doubleValue();
-            refreshMapView();
-        });
+//        serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
+//            mapWidth = newValue.doubleValue();
+//            refreshMapView();
+//        });
+//
+//        serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
+//            mapHeight = newValue.doubleValue();
+//            refreshMapView();
+//        });
     }
 
     /**

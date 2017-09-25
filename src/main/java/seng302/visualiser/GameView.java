@@ -8,7 +8,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
@@ -26,7 +28,7 @@ import java.util.*;
  */
 public class GameView extends Pane {
 
-    private double bufferSize = 50;
+    private double bufferSize = 0;
     private double horizontalBuffer = 0;
 
     private double canvasWidth = 1100;
@@ -69,9 +71,21 @@ public class GameView extends Pane {
         gameObjects.addAll(mapImage, raceBorder, markers, tokens);
         this.parentProperty().addListener((obs, old, parent) -> {
             if (parent != null) {
-                canvasWidth = parent.prefWidth(0) * 2;
-                canvasHeight = parent.prefHeight(0) * 2;
+                canvasWidth = parent.prefWidth(1) * 1.5;
+                canvasHeight = parent.prefHeight(1) * 1.5;
 //                rescaleRace(borderPoints);
+                System.out.println("parent = " + parent.maxWidth(100));
+                System.out.println("parent.minWidth(1) = " + parent.minWidth(100));
+                System.out.println(canvasWidth);
+                System.out.println(canvasHeight);
+                this.getChildren().add(new Circle(canvasWidth / 2, canvasHeight / 2, 7, Color.GREENYELLOW));
+                this.getChildren().add(new Circle(canvasWidth, canvasHeight, 7, Color.GREENYELLOW));
+                this.getChildren().add(new Circle(0,0, 7, Color.GREENYELLOW));
+                this.getChildren().add(new Circle(canvasWidth, 0, 7, Color.GREENYELLOW));
+                this.getChildren().add(new Circle(0,canvasHeight, 7, Color.GREENYELLOW));
+                Rectangle r = new Rectangle(canvasWidth, canvasHeight, Color.TRANSPARENT);
+                r.setStroke(Color.BLACK);
+                this.getChildren().add(r);
                 updateBorder(borderPoints);
                 updateCourse(compoundMarks, courseOrder);
             }
@@ -285,7 +299,7 @@ public class GameView extends Pane {
             return;
         }
         borderPoints = border;
-        rescaleRace(new ArrayList<>(borderPoints));
+        rescaleRace(borderPoints);
 
         List<Double> boundaryPoints = new ArrayList<>();
         for (Limit limit : border) {
@@ -305,7 +319,7 @@ public class GameView extends Pane {
         //Check is called once to avoid unnecessarily change the orderedMarks limits once the race is running
         findMinMaxPoint(limitingCoordinates);
         double minLonToMaxLon = scaleRaceExtremities();
-        calculateReferencePointLocation(minLonToMaxLon);
+        calculateReferencePointLocation();
     }
 
     /**
@@ -324,55 +338,81 @@ public class GameView extends Pane {
         minLonPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
         GeoPoint maxLon = sortedPoints.get(sortedPoints.size() - 1);
         maxLonPoint = new GeoPoint(maxLon.getLat(), maxLon.getLng());
-        if (maxLonPoint.getLng() - minLonPoint.getLng() > 180) {
-            horizontalInversion = true;
-        }
+//        if (maxLonPoint.getLng() - minLonPoint.getLng() > 180) {
+//            horizontalInversion = true;
+//        }
     }
 
-    /**
-     * Calculates the location of a reference point, this is always the point with minimum latitude,
-     * in relation to the canvas.
-     *
-     * @param minLonToMaxLon The horizontal distance between the point of minimum longitude to
-     * maximum longitude.
-     */
-    private void calculateReferencePointLocation(double minLonToMaxLon) {
-        GeoPoint referencePoint = minLatPoint;
-        double referenceAngle;
+    private void calculateReferencePointLocation() {
 
-        if (scaleDirection == ScaleDirection.HORIZONTAL) {
-            referenceAngle = Math.abs(
-                GeoUtility.getBearingRad(referencePoint, minLonPoint)
-            );
-            referencePointX =
-                bufferSize + distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
-                    .getDistance(referencePoint, minLonPoint);
-            referenceAngle = Math.abs(GeoUtility.getDistance(referencePoint, maxLatPoint));
-            referencePointY = canvasHeight - (bufferSize + bufferSize);
-            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
-                .getDistance(referencePoint, maxLatPoint);
-            referencePointY = referencePointY / 2;
-            referencePointY += bufferSize;
-            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
-                .getDistance(referencePoint, maxLatPoint);
+        referencePointX = canvasWidth / 2;
+        referencePointY = canvasHeight / 2;
+        GeoPoint ref = new GeoPoint(
+            (maxLatPoint.getLat() - minLatPoint.getLat()) / 2 + minLatPoint.getLat(),
+            (maxLonPoint.getLng() - minLonPoint.getLng()) / 2 + minLonPoint.getLng()
+        );
+
+
+//        double vertAngle = Math.abs(
+//            GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
+//        );
+
+        double vertDistance = GeoUtility.getDistance(
+            ref, new GeoPoint(ref.getLat(), maxLonPoint.getLng())
+        ) * 2.1; //2.1 allows for empty space around the map.
+
+        double horiDistance = GeoUtility.getDistance(
+            ref, new GeoPoint(maxLatPoint.getLat(), ref.getLng())
+        ) * 2.1;
+
+        double vertScale = canvasHeight / vertDistance;
+
+        if (horiDistance * vertScale > canvasWidth) {
+            distanceScaleFactor = canvasWidth / horiDistance;
+            scaleDirection = ScaleDirection.HORIZONTAL;
         } else {
-            referencePointY = canvasHeight - bufferSize;
-            referenceAngle = Math.abs(
-                Math.toRadians(
-                    GeoUtility.getDistance(referencePoint, minLonPoint)
-                )
-            );
-            referencePointX = bufferSize;
-            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
-                .getDistance(referencePoint, minLonPoint);
-            referencePointX +=
-                ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor))
-                    / 2;
-            referencePointX += horizontalBuffer;
+            distanceScaleFactor = vertScale;
+            scaleDirection = ScaleDirection.VERTICAL;
         }
-        if (horizontalInversion) {
-            referencePointX = canvasWidth - bufferSize - (referencePointX - bufferSize);
-        }
+
+        minLatPoint = ref;
+
+
+
+//        Point2D center = new Point2D(canvasWidth / 2, canvasHeight / 2);
+//
+//        if (scaleDirection == ScaleDirection.HORIZONTAL) {
+//            referenceAngle = Math.abs(
+//                GeoUtility.getBearingRad(referencePoint, minLonPoint)
+//            );
+//            referencePointX =
+//                bufferSize + distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
+//                    .getDistance(referencePoint, minLonPoint);
+//            referenceAngle = Math.abs(GeoUtility.getDistance(referencePoint, maxLatPoint));
+//            referencePointY = canvasHeight - (bufferSize + bufferSize);
+//            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
+//                .getDistance(referencePoint, maxLatPoint);
+//            referencePointY = referencePointY / 2;
+//            referencePointY += bufferSize;
+//            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
+//                .getDistance(referencePoint, maxLatPoint);
+//        } else {
+//            referencePointY = canvasHeight - bufferSize;
+//            referenceAngle = Math.abs(
+//                Math.toRadians(
+//                    GeoUtility.getDistance(referencePoint, minLonPoint)
+//                )
+//            );
+//            referencePointX = bufferSize;
+//            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
+//                .getDistance(referencePoint, minLonPoint);
+//            referencePointX +=
+//                ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor))
+//                    / 2;
+//        }
+//        if (horizontalInversion) {
+//            referencePointX = canvasWidth - bufferSize - (referencePointX - bufferSize);
+//        }
     }
 
 
@@ -381,33 +421,34 @@ public class GameView extends Pane {
      * it to distanceScaleFactor Returns the max horizontal distance of the map.
      */
     private double scaleRaceExtremities() {
-
-        double vertAngle = Math.abs(
-            GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
-        );
-        double vertDistance =
-            Math.cos(vertAngle) * GeoUtility.getDistance(minLatPoint, maxLatPoint);
-        double horiAngle = Math.abs(
-            GeoUtility.getBearingRad(minLonPoint, maxLonPoint)
-        );
-        if (horiAngle <= (Math.PI / 2)) {
-            horiAngle = (Math.PI / 2) - horiAngle;
-        } else {
-            horiAngle = horiAngle - (Math.PI / 2);
-        }
-        double horiDistance =
-            Math.cos(horiAngle) * GeoUtility.getDistance(minLonPoint, maxLonPoint);
-
-        double vertScale = (canvasHeight - (bufferSize + bufferSize)) / vertDistance;
-
-        if ((horiDistance * vertScale) > (canvasWidth - (bufferSize + bufferSize))) {
-            distanceScaleFactor = (canvasWidth - (bufferSize + bufferSize)) / horiDistance;
-            scaleDirection = ScaleDirection.HORIZONTAL;
-        } else {
-            distanceScaleFactor = vertScale;
-            scaleDirection = ScaleDirection.VERTICAL;
-        }
-        return horiDistance;
+//
+//        double vertAngle = Math.abs(
+//            GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
+//        );
+//        double vertDistance =
+//            Math.cos(vertAngle) * GeoUtility.getDistance(minLatPoint, maxLatPoint);
+//        double horiAngle = Math.abs(
+//            GeoUtility.getBearingRad(minLonPoint, maxLonPoint)
+//        );
+//        if (horiAngle <= (Math.PI / 2)) {
+//            horiAngle = (Math.PI / 2) - horiAngle;
+//        } else {
+//            horiAngle = horiAngle - (Math.PI / 2);
+//        }
+//        double horiDistance =
+//            Math.cos(horiAngle) * GeoUtility.getDistance(minLonPoint, maxLonPoint);
+//
+//        double vertScale = canvasHeight / vertDistance;
+//
+//        if (horiDistance * vertScale > canvasWidth) {
+//            distanceScaleFactor = canvasWidth / horiDistance;
+//            scaleDirection = ScaleDirection.HORIZONTAL;
+//        } else {
+//            distanceScaleFactor = vertScale;
+//            scaleDirection = ScaleDirection.VERTICAL;
+//        }
+//        return horiDistance;
+        return 0;
     }
 
     private Point2D findScaledXY(double unscaledLat, double unscaledLon) {

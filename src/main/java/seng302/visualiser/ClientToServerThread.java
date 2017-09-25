@@ -195,8 +195,10 @@ public class ClientToServerThread implements Runnable {
      * @param packet The registration requests packet
      */
     private void processRegistrationResponse(StreamPacket packet){
-        int sourceId = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 0, 3));
+        int sourceId = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 0, 4));
         int statusCode = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 4,5));
+        System.out.println("sourceId = " + sourceId);
+        System.out.println("statusCode = " + statusCode);
 
         RegistrationResponseStatus status = RegistrationResponseStatus.getResponseStatus(statusCode);
 
