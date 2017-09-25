@@ -44,6 +44,11 @@
     -fx-border-color: -fx-decorator-color;
     -fx-border-width: 0 4 4 4;
 }
+
+.jfx-decorator-button {
+    -fx-focus-traversable: false; /* so decorator button will not be focused */
+}
+
 /********* customised scroll bar for scroll pane ***********/
 
 /* The main scrollbar **track** CSS class  */
@@ -99,4 +104,16 @@
 
 .slider .track {
     -fx-background-color: -fx-pp-dark-text-color;
+}
+
+.jfx-snackbar-content {
+    -fx-background-color: -fx-pp-front-color;
+    -fx-padding: 0 5 0 5;
+    -fx-spacing: 0 5 0 5;
+    -fx-font-size: 15;
+}
+
+.jfx-snackbar-toast {
+    -fx-text-fill: -fx-pp-theme-color;
+    -fx-font-size: 15;
 }
