@@ -29,7 +29,7 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
     public void setPlayerBoat(BoatObject playerBoat, ClientYacht playerYacht) {
         this.playerBoat = playerBoat;
         this.playerYacht = playerYacht;
-
+        System.out.println(playerYacht.getHeadingProperty().get());
         this.playerYacht.getHeadingProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
@@ -74,17 +74,21 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
         );
     }
 
+    private void adjustZoomFactor(Double adjustment) {
+        if (zoomFactor + adjustment < -15.0 && zoomFactor + adjustment > -125.0) {
+            zoomFactor = zoomFactor + adjustment;
+        }
+    }
+
     @Override
     public void zoomIn() {
-        //transforms.addAll(new Translate(0, 0, 1.5));
-        this.zoomFactor += 5;
+        adjustZoomFactor(5.0);
         repositionCamera();
     }
 
     @Override
     public void zoomOut() {
-        //transforms.addAll(new Translate(0, 0, -1.5));
-        this.zoomFactor -= 5;
+        adjustZoomFactor(-5.0);
         repositionCamera();
     }
 

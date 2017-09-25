@@ -15,8 +15,8 @@ import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -79,6 +79,7 @@ public class ClientYacht extends Observable {
         this.country = country;
         this.location = new GeoPoint(57.670341, 11.826856);
         this.heading = 120.0;   //In degrees
+        this.headingProperty.set(this.heading);
         this.currentVelocity = 0d;
         this.boatStatus = 1;
         this.colour = Color.rgb(0, 0, 0, 1.0);
@@ -271,7 +272,12 @@ public class ClientYacht extends Observable {
         Double oldHeading = getHeadingProperty().get();
         Double currHeading = heading;
         while (oldHeading.equals(currHeading)) {
-            oldHeading++;
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            oldHeading += 0.5;
             headingProperty.set(oldHeading);
         }
     }
@@ -314,7 +320,6 @@ public class ClientYacht extends Observable {
     }
 
     public ReadOnlyDoubleWrapper getHeadingProperty() {
-
         return headingProperty;
     }
 
