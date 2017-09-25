@@ -110,6 +110,8 @@
                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="45.0"
                prefWidth="150.0" text="RESET" GridPane.columnSpan="2" GridPane.halignment="CENTER"
                GridPane.rowIndex="9" GridPane.valignment="CENTER"/>
+             <Label fx:id="closeLabel" text="✖" translateY="-5.0" GridPane.columnIndex="1"
+               GridPane.halignment="RIGHT" GridPane.valignment="TOP"/>
          </children>
       </GridPane>
    </children>

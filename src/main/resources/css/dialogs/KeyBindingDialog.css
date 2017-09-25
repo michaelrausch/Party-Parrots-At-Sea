@@ -3,6 +3,16 @@
     -fx-text-fill: -fx-pp-dark-text-color;
 }
 
+#closeLabel {
+    -fx-font-size: 30;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#closeLabel:hover {
+    -fx-text-fill: -fx-pp-theme-color;
+    -fx-font-size: 33;
+}
+
 JFXButton {
     -fx-background-color: -fx-pp-light-text-color;
     -fx-text-fill: -fx-pp-theme-color;

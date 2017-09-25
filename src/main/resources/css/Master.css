@@ -44,6 +44,11 @@
     -fx-border-color: -fx-decorator-color;
     -fx-border-width: 0 4 4 4;
 }
+
+.jfx-decorator-button {
+    -fx-focus-traversable: false; /* so decorator button will not be focused */
+}
+
 /********* customised scroll bar for scroll pane ***********/
 
 /* The main scrollbar **track** CSS class  */

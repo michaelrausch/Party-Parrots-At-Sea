@@ -23,6 +23,8 @@ public class KeyBindingDialogController implements Initializable {
 
     //--------FXML BEGIN--------//
     @FXML
+    private Label closeLabel;
+    @FXML
     private JFXButton zoomInbtn;
     @FXML
     private JFXButton zoomOutBtn;
@@ -73,6 +75,8 @@ public class KeyBindingDialogController implements Initializable {
             gameKeyBind.setToDefault();
             loadKeyBind();
         });
+
+        closeLabel.setOnMouseClicked(event -> ViewManager.getInstance().closeKeyBindingDialog());
     }
 
     /**
@@ -171,4 +175,5 @@ public class KeyBindingDialogController implements Initializable {
     public void setGameClient(GameClient gameClient) {
         this.gameClient = gameClient;
     }
+
 }

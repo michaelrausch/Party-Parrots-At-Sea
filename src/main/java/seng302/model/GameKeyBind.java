@@ -53,7 +53,8 @@ public class GameKeyBind {
      * @return true if successfully bind
      */
     public boolean bindKeyToAction(KeyCode keyCode, KeyAction keyAction) {
-        if (instance.keyToActionMap.containsKey(keyCode)) {
+        if (instance.keyToActionMap.containsKey(keyCode) && !(instance.keyToActionMap.get(keyCode)
+            == keyAction)) {
             // if the key has been bound to other action, return false
             return false;
         } else {

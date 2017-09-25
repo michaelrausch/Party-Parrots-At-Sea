@@ -39,6 +39,7 @@ public class ViewManager {
     private Logger logger = LoggerFactory.getLogger(ViewManager.class);
     private Stage stage;
     private JFXSnackbar jfxSnackbar;
+    private JFXDialog keyBindingDialog;
 
     private ViewManager() {
         properties = new HashMap<>();
@@ -123,13 +124,14 @@ public class ViewManager {
         HBox btns = (HBox) decorator.getChildren().get(0);
 
         //Create settings button -- [WIP]
-        JFXButton btnSettings = new JFXButton();
-        btnSettings.setText(" Key Bindings");
-        btnSettings.setStyle("-fx-text-fill:#fff");
-        btnSettings.getStyleClass().add("jfx-decorator-button");
-        btnSettings.setCursor(Cursor.HAND);
+        JFXButton btnKeyBinding = new JFXButton();
+        btnKeyBinding.setText(" Key Bindings");
+        btnKeyBinding.setStyle("-fx-text-fill:#fff");
+        btnKeyBinding.getStyleClass().add("jfx-decorator-button");
+        btnKeyBinding.setCursor(Cursor.HAND);
+        btnKeyBinding.setFocusTraversable(false);
 
-        btnSettings.setOnMouseClicked(event -> Platform.runLater(() -> {
+        btnKeyBinding.setOnMouseClicked(event -> Platform.runLater(() -> {
             try {
                 if (!checkDialogOpened(decorator.getChildren())) {
                     showKeyBindingDialog();
@@ -145,6 +147,7 @@ public class ViewManager {
         btnMute.setStyle("-fx-text-fill:#fff");
         btnMute.getStyleClass().add("jfx-decorator-button");
         btnMute.setCursor(Cursor.HAND);
+        btnMute.setFocusTraversable(false);
 
         //Create Graphics
         SVGGlyph spacer = new SVGGlyph(0, "SPACER", "", Color.WHITE);
@@ -169,12 +172,12 @@ public class ViewManager {
             btnMute.setGraphic(volumeOn);
         }
 
-        btnSettings.setGraphic(keyBindingGlyph);
+        btnKeyBinding.setGraphic(keyBindingGlyph);
 
         // Add Buttons
         btns.getChildren().add(0, spacer);
         btns.getChildren().add(0, btnMute);
-        btns.getChildren().add(0, btnSettings);
+        btns.getChildren().add(0, btnKeyBinding);
         btnMute.setOnAction((action) -> {
             Sounds.toggleAllSounds();
             if (btnMute.getGraphic().equals(volumeOff)) {
@@ -209,16 +212,21 @@ public class ViewManager {
             "/views/dialogs/KeyBindingDialog.fxml"));
         for (Node node : decorator.getChildren()) {
             if (node instanceof StackPane) {
-                JFXDialog dialog = new JFXDialog((StackPane) node,
+                keyBindingDialog = new JFXDialog((StackPane) node,
                     dialogContent.load(),
                     DialogTransition.CENTER);
+
                 KeyBindingDialogController keyBindingDialogController = dialogContent
                     .getController();
                 keyBindingDialogController.setGameClient(this.gameClient);
-                dialog.show();
+                keyBindingDialog.show();
                 Sounds.playButtonClick();
             }
         }
+    }
+
+    public void closeKeyBindingDialog() {
+        keyBindingDialog.close();
     }
 
     /**
