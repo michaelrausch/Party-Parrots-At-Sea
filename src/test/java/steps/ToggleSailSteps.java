@@ -13,6 +13,7 @@ import seng302.model.ServerYacht;
 import seng302.visualiser.ClientToServerThread;
 
 /**
+ *
  * Created by kre39 on 7/08/17.
  */
 public class ToggleSailSteps {

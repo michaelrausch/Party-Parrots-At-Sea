@@ -18,6 +18,7 @@ import seng302.utilities.XMLParser;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.*;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * A Static class to hold information about the current state of the game (model)
@@ -453,7 +454,7 @@ public class GameState implements Runnable {
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier;
+        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier * yacht.getMaxSpeedMultiplier();
         if (yacht.getPowerUp() != null) {
             if (yacht.getPowerUp().equals(TokenType.BOOST)) {
                 maxBoatSpeed *= VELOCITY_BOOST_MULTIPLIER;
@@ -464,17 +465,17 @@ public class GameState implements Runnable {
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (currentVelocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity(maxBoatSpeed / 100);
+                yacht.changeVelocity((maxBoatSpeed / 100) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else {
-                yacht.setCurrentVelocity(maxBoatSpeed);
+                yacht.setCurrentVelocity((maxBoatSpeed) * yacht.getAccelerationMultiplier());
             }
         } else {
             if (currentVelocity > 3000) {
-                yacht.changeVelocity(-currentVelocity / 200);
+                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity > 100) {
-                yacht.changeVelocity(-currentVelocity / 50);
+                yacht.changeVelocity((-currentVelocity / 50) * yacht.getAccelerationMultiplier());
             } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }
@@ -705,6 +706,9 @@ public class GameState implements Runnable {
             int blue = customizeData[2] & 0xFF;
             Color yachtColor = Color.rgb(red, green, blue);
             playerYacht.setBoatColor(yachtColor);
+        } else if (requestType.equals(CustomizeRequestType.SHAPE)) {
+            String type = new String(customizeData);
+            playerYacht.setBoatType(BoatMeshType.valueOf(type));
         }
     }
 

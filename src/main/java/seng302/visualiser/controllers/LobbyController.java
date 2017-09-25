@@ -31,7 +31,11 @@ import seng302.visualiser.controllers.dialogs.DirectConnectController;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 public class LobbyController implements Initializable {
 
@@ -132,8 +136,10 @@ public class LobbyController implements Initializable {
         controller.setParentController(this);
         controller.setPlayerColor(this.playersColor);
         controller.setPlayerName(this.playerBoats
-                .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
-                .getBoatName());
+            .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
+            .getBoatName());
+        controller.setCurrentBoat(this.playerBoats.get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
+            .getBoatType().toString());
 
         return customizationDialog;
     }
@@ -208,7 +214,7 @@ public class LobbyController implements Initializable {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/views/cells/PlayerCell.fxml"));
 
-            loader.setController(new PlayerCell(playerId, yacht.getBoatName(), yacht.getColour()));
+            loader.setController(new PlayerCell(playerId, yacht));
 
             try {
                 pane = loader.load();

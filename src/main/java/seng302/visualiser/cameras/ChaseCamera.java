@@ -8,6 +8,7 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import seng302.model.ClientYacht;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 
@@ -15,55 +16,80 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
 
     private ObservableList<Transform> transforms;
     private BoatObject playerBoat;
+    private ClientYacht playerYacht;
+    private Double zoomFactor;
+    private Double horizontalPan;
+    private Double verticalPan;
+
 
     public ChaseCamera() {
         super(true);
         transforms = this.getTransforms();
+        this.zoomFactor = -75.0;
+        this.horizontalPan = 0.0;
+        this.verticalPan = 0.0;
     }
 
-    public void setPlayerBoat(BoatObject playerBoat) {
+    public void setPlayerBoat(BoatObject playerBoat, ClientYacht playerYacht) {
         this.playerBoat = playerBoat;
+        this.playerYacht = playerYacht;
+        this.playerYacht.getHeadingProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue,
+                Number newValue) {
+                repositionCamera();
+            }
+        });
 
         this.playerBoat.layoutXProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                updateCameraX((Double) oldValue, (Double) newValue);
+                repositionCamera();
             }
         });
         this.playerBoat.layoutYProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                updateCameraY((Double) oldValue, (Double) newValue);
+                repositionCamera();
             }
         });
     }
 
+    private void repositionCamera() {
+        transforms.clear();
+        transforms.addAll(
+            new Translate(playerBoat.getLayoutX(), playerBoat.getLayoutY(), 0),
+            new Rotate(playerYacht.getHeadingProperty().getValue() + horizontalPan,
+                new Point3D(0, 0, 1)),
+            new Rotate(60 + verticalPan, new Point3D(1, 0, 0)),
+            new Translate(0, 0, zoomFactor)
+        );
+    }
 
-    private void updateCameraX(Double oldXValue, Double newXValue) {
-        if (transforms.size() == 0) { // boat is placed and then moved at start,
-            transforms.addAll(
-                new Translate(playerBoat.getLayoutX() - 30, playerBoat.getLayoutY() - 30, -125),
-                new Rotate(80, new Point3D(0, 0, 1))
-            );
-        } else {
-            transforms.addAll(new Translate(newXValue - oldXValue, 0, 0));
+    private void adjustZoomFactor(Double adjustment) {
+        if (zoomFactor + adjustment < -15.0 && zoomFactor + adjustment > -125.0) {
+            zoomFactor = zoomFactor + adjustment;
+            repositionCamera();
         }
     }
 
-    private void updateCameraY(Double oldYValue, Double newYValue) {
-        transforms.addAll(new Translate(0, (newYValue - oldYValue), 0));
+    private void adjustVerticalPan(Double adjustment) {
+        if (verticalPan + adjustment >= -20 && verticalPan + adjustment <= 20) {
+            verticalPan += adjustment;
+            repositionCamera();
+        }
     }
 
     @Override
     public void zoomIn() {
-        transforms.addAll(new Translate(0, 0, 1.5));
+        adjustZoomFactor(5.0);
     }
 
     @Override
     public void zoomOut() {
-        transforms.addAll(new Translate(0, 0, -1.5));
+        adjustZoomFactor(-5.0);
     }
 
 
@@ -73,17 +99,23 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
 
     @Override
     public void panLeft() {
+        this.horizontalPan -= 5;
+        repositionCamera();
     }
 
     @Override
     public void panRight() {
+        this.horizontalPan += 5;
+        repositionCamera();
     }
 
     @Override
     public void panUp() {
+        adjustVerticalPan(-5.0);
     }
 
     @Override
     public void panDown() {
+        adjustVerticalPan(5.0);
     }
 }

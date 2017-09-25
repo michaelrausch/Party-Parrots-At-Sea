@@ -11,7 +11,7 @@ import javafx.scene.transform.Rotate;
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
  * dimensional boat. It contains a single polygon for the boat, a group of lines to show it's path,
- * a wake object and two text labels to annotate the boat teams name and the boats velocity. The
+ * a wake object and two text labels to annotate the boat teams name and the boatTypes velocity. The
  * boat will update it's position onscreen everytime UpdatePosition is called unless the window is
  * minimized in which case it attempts to store animations and apply them when the window is
  * maximised.
@@ -28,15 +28,15 @@ public class BoatObject extends Group {
     private Group wake;
     private Color colour = Color.BLACK;
     private Boolean isSelected = false;
-    private Rotate rotation = new Rotate(0,0,1);
+    private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
 
     private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
      */
-    public BoatObject() {
-        boatAssets = ModelFactory.boatGameView(BoatMeshType.DINGHY, colour);
+    public BoatObject(BoatMeshType boatMeshType) {
+        boatAssets = ModelFactory.boatGameView(boatMeshType, colour);
         boatAssets.hideSail();
         boatAssets.getAssets().getTransforms().addAll(
             rotation
@@ -66,8 +66,6 @@ public class BoatObject extends Group {
      * @param windDir .
      */
     public void moveTo(double x, double y, double rotation, double velocity, Boolean sailIn, double windDir) {
-        Double dx = Math.abs(boatAssets.getAssets().getLayoutX() - x);
-        Double dy = Math.abs(boatAssets.getAssets().getLayoutY() - y);
         Platform.runLater(() -> {
             rotateTo(rotation, sailIn, windDir);
             this.layoutXProperty().setValue(x);

@@ -46,7 +46,6 @@ import seng302.visualiser.fxObjects.assets_3D.*;
 
 public class GameView3D {
 
-
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_DEPTH = -125;
     private final double DEFAULT_CAMERA_X = 0;
@@ -101,12 +100,12 @@ public class GameView3D {
         camera.setFieldOfView(FOV);
 
         camera2 = new TopDownCamera();
-        camera2.setFarClip(600);
+        camera2.setFarClip(100000);
         camera2.setNearClip(0.1);
         camera2.setFieldOfView(FOV);
 
         camera3 = new ChaseCamera();
-        camera3.setFarClip(600);
+        camera3.setFarClip(100000);
         camera3.setNearClip(0.1);
         camera3.setFieldOfView(FOV);
 
@@ -118,6 +117,7 @@ public class GameView3D {
         view.setCamera(camera);
         camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
 
+        //TDBC: Fix
         skybox = new Skybox(new Image("https://i.pinimg.com/originals/3a/24/14/3a24142dce7b271799b6501fabc4ee19.jpg"), 100000, camera);
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
 
@@ -446,16 +446,16 @@ public class GameView3D {
                 ((RaceCamera) view.getCamera()).zoomOut();
                 break;
             case W:
-                view.getCamera().getTransforms().addAll(new Translate(0, -1, 0));
+                ((RaceCamera) view.getCamera()).panUp();
                 break;
             case S:
-                view.getCamera().getTransforms().addAll(new Translate(0, 1, 0));
+                ((RaceCamera) view.getCamera()).panDown();
                 break;
             case A:
-                view.getCamera().getTransforms().addAll(new Translate(-1, 0, 0));
+                ((RaceCamera) view.getCamera()).panLeft();
                 break;
             case D:
-                view.getCamera().getTransforms().addAll(new Translate(1, 0, 0));
+                ((RaceCamera) view.getCamera()).panRight();
                 break;
             case F1:
                 if (view.getCamera().equals(camera)) {
@@ -493,7 +493,7 @@ public class GameView3D {
         final List<Group> wakes = new ArrayList<>();
         for (ClientYacht clientYacht : yachts) {
             Color colour = clientYacht.getColour();
-            newBoat = new BoatObject();
+            newBoat = new BoatObject(clientYacht.getBoatType());
             newBoat.setFill(colour);
             boatObjects.put(clientYacht, newBoat);
             wakesGroup.getChildren().add(newBoat.getWake());
@@ -507,7 +507,8 @@ public class GameView3D {
 
             if (clientYacht.getSourceId().equals(
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
-                ((ChaseCamera) camera3).setPlayerBoat(newBoat);
+                ((ChaseCamera) camera3).setPlayerBoat(newBoat, clientYacht);
+                ((TopDownCamera) camera2).setPlayerBoat(newBoat);
             }
         }
         Platform.runLater(() -> {
@@ -627,6 +628,7 @@ public class GameView3D {
     }
 
     public void setBoatAsPlayer (ClientYacht playerYacht) {
+        playerYacht.toggleSail();
         playerBoatAnimationTimer = new AnimationTimer() {
 
             double count = 60;

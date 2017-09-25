@@ -33,6 +33,7 @@ import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.utilities.XMLGenerator;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -125,7 +126,7 @@ public class ServerToClientThread implements Runnable {
         lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
 
         ServerYacht yacht = new ServerYacht(
-                "Yacht", sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
+            BoatMeshType.DINGHY, sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
 
         player = new Player(socket, yacht);
