@@ -18,7 +18,7 @@ import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.XMLParser;
 
 /**
- * Created by cir27 on 23/09/17.
+ * Makes maps from map definition xml files.
  */
 public class MapMaker {
 

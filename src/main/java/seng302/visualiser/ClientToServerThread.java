@@ -72,7 +72,7 @@ public class ClientToServerThread implements Runnable {
     private Timer upWindPacketTimer = new Timer();
     private Timer downWindPacketTimer = new Timer();
     private boolean upwindTimerFlag = false, downwindTimerFlag = false;
-    static public final int PACKET_SENDING_INTERVAL_MS = 100;
+    public static final int PACKET_SENDING_INTERVAL_MS = 100;
 
     private int clientId = -1;
 

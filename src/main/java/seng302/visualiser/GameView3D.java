@@ -402,7 +402,6 @@ public class GameView3D extends GameView{
         playerYacht.toggleSail();
         playerBoatAnimationTimer = new AnimationTimer() {
 
-            double count = 60;
             Point2D lastLocation = scaledPoint.findScaledXY(playerYacht.getLocation());
 
             @Override
