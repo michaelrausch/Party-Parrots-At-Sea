@@ -7,7 +7,7 @@ import javafx.geometry.Point2D;
 import seng302.utilities.GeoUtility;
 
 /**
- * Created by cir27 on 26/09/17.
+ * Contains information on a scaled lat lon point for use with mapping geographical elements to a 2d plane.
  */
 public class ScaledPoint extends GeoPoint {
 

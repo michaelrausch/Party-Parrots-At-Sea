@@ -407,10 +407,10 @@ public class GameView3D extends GameView{
 
             @Override
             public void handle(long now) {
-                if (--count == 0) {
-                    count = 60;
+                Point2D location = scaledPoint.findScaledXY(playerYacht.getLocation());
+                if (Math.abs(lastLocation.distance(location)) > 2) {
                     Node segment = ModelFactory.importModel(ModelType.TRAIL_SEGMENT).getAssets();
-                    Point2D location = scaledPoint.findScaledXY(playerYacht.getLocation());
+                    location = scaledPoint.findScaledXY(playerYacht.getLocation());
                     segment.getTransforms().addAll(
                         new Translate(location.getX(), location.getY(), 0),
                         new Rotate(playerYacht.getHeading(), new Point3D(0,0,1))
