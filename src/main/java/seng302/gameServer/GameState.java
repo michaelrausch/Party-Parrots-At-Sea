@@ -1,23 +1,39 @@
 package seng302.gameServer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import seng302.gameServer.messages.*;
-import seng302.model.*;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatStatus;
+import seng302.gameServer.messages.ChatterMessage;
+import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.gameServer.messages.MarkRoundingMessage;
+import seng302.gameServer.messages.MarkType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RoundingBoatStatus;
+import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventType;
+import seng302.model.GeoPoint;
+import seng302.model.Limit;
+import seng302.model.Player;
+import seng302.model.PolarTable;
+import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
+import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.XMLParser;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.*;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
@@ -58,7 +74,6 @@ public class GameState implements Runnable {
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
     private static Boolean playerHasLeftFlag;
 
-    private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
     private static Boolean isRaceStarted;
@@ -77,14 +92,13 @@ public class GameState implements Runnable {
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
 
-    public GameState(String hostIpAddress) {
+    public GameState() {
         windDirection = 180d;
         windSpeed = 10000d;
         yachts = new HashMap<>();
         tokensInPlay = new ArrayList<>();
-
+        marks = new HashSet<>();
         players = new ArrayList<>();
-        GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
         playerHasLeftFlag = false;
         speedMultiplier = 1.0;
@@ -92,33 +106,19 @@ public class GameState implements Runnable {
         isRaceStarted = false;
         //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
-        markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         newMessageListeners = new ArrayList<>();
         allTokens = makeTokens();
-
         resetStartTime();
-
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
-
-        marks = new MarkOrder().getAllMarks();
-        setCourseLimit("/server_config/race.xml");
     }
 
-    private void setCourseLimit(String url) {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder;
-        Document document = null;
-        try {
-            documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            document = documentBuilder.parse(new InputSource(getClass().getResourceAsStream(url)));
-        } catch (Exception e) {
-            // sorry, we have to catch general one, otherwise we have to catch five different exceptions.
-            logger.trace("Failed to load course limit for boundary collision detection.", e);
+    public static void setRace(RaceXMLData raceXMLData) {
+        markOrder = new MarkOrder(raceXMLData);
+        for (CompoundMark compoundMark : raceXMLData.getCompoundMarks().values()){
+            marks.addAll(compoundMark.getMarks());
         }
-        courseLimit = XMLParser.parseRace(document).getCourseLimit();
+        courseLimit = raceXMLData.getCourseLimit();
     }
-
 
     /**
      * Make a pre defined set of tokensInPlay. //TODO wmu16 - Should read from some file for each
@@ -132,10 +132,6 @@ public class GameState implements Runnable {
         Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
         Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
         return new ArrayList<>(Arrays.asList(token1, token2, token3, token4));
-    }
-
-    public static String getHostIpAddress() {
-        return hostIpAddress;
     }
 
     public static Set<Mark> getMarks() {
@@ -245,10 +241,6 @@ public class GameState implements Runnable {
             if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.RACING) {
                 update();
             }
-
-            if (currentStage == GameStages.RACING) {
-                update();
-            }
         }
     }
 
@@ -272,6 +264,12 @@ public class GameState implements Runnable {
                 break;
             case DOWNWIND:
                 playerYacht.turnDownwind();
+                break;
+            case CONTINUOUSLY_TURNING:
+                playerYacht.setContinuouslyTurning(true);
+                break;
+            case DEFAULT_TURNING:
+                playerYacht.setContinuouslyTurning(false);
                 break;
         }
     }

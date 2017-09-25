@@ -31,7 +31,7 @@ public class ChatCommandsTest {
         }
         try {
             dcSent = false;
-            new GameState("localhost");
+            new GameState();
             mst = new MainServerThread();
             host = new ClientToServerThread("localhost", 4942);
             host.addStreamObserver(() -> {
@@ -85,7 +85,7 @@ public class ChatCommandsTest {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        new GameState("localhost");
+        new GameState();
         mst = new MainServerThread();
         host = null;
         try {
@@ -129,7 +129,7 @@ public class ChatCommandsTest {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        new GameState("localhost");
+        new GameState();
         mst = new MainServerThread();
         host = null;
         try {
@@ -212,7 +212,7 @@ public class ChatCommandsTest {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        new GameState("localhost");
+        new GameState();
         dcSent = false;
         mst = new MainServerThread();
         host = null;

@@ -1,15 +1,11 @@
 package seng302.visualiser.ClientToServerTests;
 
-import java.util.ArrayList;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
-import seng302.gameServer.messages.BoatAction;
-import seng302.model.ServerYacht;
 import seng302.visualiser.ClientToServerThread;
 
 /**
@@ -22,7 +18,7 @@ public class RegularPacketsTest {
 
     @Before
     public void setup() throws Exception {
-        new GameState("localhost");
+        new GameState();
         serverThread = new MainServerThread();
         clientThread = new ClientToServerThread("localhost", 4942);
         GameState.setCurrentStage(GameStages.RACING);

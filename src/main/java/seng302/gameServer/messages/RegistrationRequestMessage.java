@@ -4,8 +4,8 @@ package seng302.gameServer.messages;
 public class RegistrationRequestMessage extends Message {
     private static int MESSAGE_LENGTH = 2;
 
-    public RegistrationRequestMessage(ClientType type){
-        setHeader(new Header(MessageType.REGISTRATION_REQUEST, 1, (short) getSize()));
+    public RegistrationRequestMessage(ClientType type, int clientID){
+        setHeader(new Header(MessageType.REGISTRATION_REQUEST, clientID, (short) getSize()));
 
         allocateBuffer();
         writeHeaderToBuffer();

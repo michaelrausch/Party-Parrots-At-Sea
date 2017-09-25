@@ -15,4 +15,9 @@ public class Limit extends GeoPoint {
     public Integer getSeqID() {
         return seqID;
     }
+
+    @Override
+    public String toString(){
+        return "Limit = {seqID=" + seqID + ", lat=" + getLat() + ", lng=" + getLng() + "}";
+    }
 }

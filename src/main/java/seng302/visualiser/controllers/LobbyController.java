@@ -2,6 +2,12 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -9,7 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -24,20 +30,15 @@ import seng302.model.mark.Corner;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.utilities.Sounds;
-import seng302.visualiser.GameView;
+import seng302.visualiser.MapPreview;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 import seng302.visualiser.controllers.dialogs.DirectConnectController;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
-
 public class LobbyController implements Initializable {
+
+    private final double INITIAL_MAP_HEIGHT = 770d;
+    private final double INITIAL_MAP_WIDTH = 574d;
 
     //--------FXML BEGIN--------//
     @FXML
@@ -53,7 +54,7 @@ public class LobbyController implements Initializable {
     @FXML
     private Label mapName;
     @FXML
-    private Pane serverMap;
+    private AnchorPane serverMap;
     @FXML
     private Label roomLabel;
     //---------FXML END---------//
@@ -62,8 +63,8 @@ public class LobbyController implements Initializable {
     private JFXDialog customizationDialog;
     public Color playersColor;
     private Map<Integer, ClientYacht> playerBoats;
-    private Double mapWidth, mapHeight;
-    private GameView gameView;
+    private Double mapWidth = INITIAL_MAP_WIDTH, mapHeight = INITIAL_MAP_HEIGHT;
+    private MapPreview mapPreview;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -99,16 +100,16 @@ public class LobbyController implements Initializable {
             ViewManager.getInstance().getPlayerList().setAll(ViewManager.getInstance().getPlayerList().sorted());
         });
 
+        customizeButton.setOnMouseReleased(event -> {
+            customizationDialog = createCustomizeDialog();
+            Sounds.playButtonClick();
+            customizationDialog.show();
+        });
+
         Platform.runLater(() -> {
             Integer playerId = ViewManager.getInstance().getGameClient().getServerThread().getClientId();
 
             playersColor = Colors.getColor(playerId - 1);
-            customizationDialog = createCustomizeDialog();
-
-            customizeButton.setOnMouseReleased(event -> {
-                Sounds.playButtonClick();
-                customizationDialog.show();
-            });
         });
 
         leaveLobbyButton.setOnMouseEntered(e -> Sounds.playHoverSound());
@@ -146,43 +147,28 @@ public class LobbyController implements Initializable {
 
 
     /**
-     *
-     */
-    private void refreshMapView(){
-        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
-        List<Limit> border = raceData.getCourseLimit();
-        List<CompoundMark> marks = new ArrayList<CompoundMark>(raceData.getCompoundMarks().values());
-        List<Corner> corners = raceData.getMarkSequence();
-
-        gameView.setSize(mapWidth, mapHeight);
-
-        // Update game view
-        gameView.updateBorder(border);
-        gameView.updateCourse(marks, corners);
-    }
-
-    /**
      * Initializes a top down preview of the race course map.
      */
     private void initMapPreview() {
-        gameView = new GameView();
-        gameView.setHorizontalBuffer(330d);
+        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
+        List<Limit> border = raceData.getCourseLimit();
+        List<CompoundMark> marks = new ArrayList<>(raceData.getCompoundMarks().values());
+        List<Corner> corners = raceData.getMarkSequence();
 
-        mapWidth = 770d;
-        mapHeight = 574d;
-
-        // Add game view
+        mapPreview = new MapPreview(marks, corners, border);
         serverMap.getChildren().clear();
-        serverMap.getChildren().add(gameView);
+        serverMap.getChildren().add(mapPreview.getAssets());
+
+        mapPreview.setSize(mapWidth, mapHeight);
 
         serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
             mapWidth = newValue.doubleValue();
-            refreshMapView();
+            mapPreview.setSize(mapWidth, mapHeight);
         });
-
+//
         serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
             mapHeight = newValue.doubleValue();
-            refreshMapView();
+            mapPreview.setSize(mapWidth, mapHeight);
         });
     }
 

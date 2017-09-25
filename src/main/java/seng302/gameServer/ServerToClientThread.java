@@ -1,21 +1,18 @@
 package seng302.gameServer;
 
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import javafx.beans.property.SimpleObjectProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
@@ -25,15 +22,16 @@ import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RegistrationResponseMessage;
 import seng302.gameServer.messages.RegistrationResponseStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.utilities.StreamParser;
 import seng302.utilities.XMLGenerator;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.utilities.XMLParser;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -81,6 +79,9 @@ public class ServerToClientThread implements Runnable {
     private ServerYacht yacht;
     private Player player;
 
+    private SimpleObjectProperty<RaceXMLData> raceXMLProperty = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<RegattaXMLData> regattaXMLProperty = new SimpleObjectProperty<>();
+
     public ServerToClientThread(Socket socket) {
         this.socket = socket;
         seqNo = 0;
@@ -101,30 +102,8 @@ public class ServerToClientThread implements Runnable {
     }
 
     private void setUpPlayer(){
-        BufferedReader fn;
-        String fName = "";
-        BufferedReader ln;
+        String fName = "Player" + GameState.getNumberOfPlayers().toString();
         String lName = "";
-
-        fn = new BufferedReader(
-                new InputStreamReader(
-                        ServerToClientThread.class.getResourceAsStream(
-                                "/server_config/CSV_Database_of_First_Names.csv"
-                        )
-                )
-        );
-        List<String> all = fn.lines().collect(Collectors.toList());
-        fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-        ln = new BufferedReader(
-                new InputStreamReader(
-                        ServerToClientThread.class.getResourceAsStream(
-                                "/server_config/CSV_Database_of_Last_Names.csv"
-                        )
-                )
-        );
-        all = ln.lines().collect(Collectors.toList());
-        lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-
         ServerYacht yacht = new ServerYacht(
             BoatMeshType.DINGHY, sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
@@ -186,37 +165,51 @@ public class ServerToClientThread implements Runnable {
                     long computedCrc = checksum.getValue();
                     long packetCrc = Message.bytesToLong(getBytes(4));
                     if (computedCrc == packetCrc) {
+                        StreamPacket packet = new StreamPacket(type, payloadLength, timeStamp, payload);
                         switch (PacketType.assignPacketType(type, payload)) {
                             case BOAT_ACTION:
-                                BoatAction actionType = ServerPacketParser
-                                        .extractBoatAction(
-                                                new StreamPacket(type, payloadLength, timeStamp, payload));
+                                BoatAction actionType = ServerPacketParser.extractBoatAction(packet);
                                 GameState.updateBoat(sourceId, actionType);
                                 break;
 
                             case RACE_REGISTRATION_REQUEST:
-                                ClientType requestedType = ServerPacketParser.extractClientType(
-                                        new StreamPacket(type, payloadLength, timeStamp, payload));
-
+                                ClientType requestedType = ServerPacketParser
+                                    .extractClientType(packet);
                                 completeRegistration(requestedType);
                                 break;
                             case CHATTER_TEXT:
                                 ChatterMessage chatterMessage = ServerPacketParser
-                                    .extractChatterText(
-                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                    .extractChatterText(packet);
                                 GameState.processChatter(chatterMessage, isHost);
                                 break;
                             case RACE_CUSTOMIZATION_REQUEST:
-                                Long sourceID = Message
-                                    .bytesToLong(Arrays.copyOfRange(payload, 0, 3));
+                                Long sourceID = Message.bytesToLong(
+                                    Arrays.copyOfRange(payload, 0, 3)
+                                );
                                 CustomizeRequestType requestType = ServerPacketParser
-                                    .extractCustomizationType(
-                                        new StreamPacket(type, payloadLength, timeStamp, payload));
+                                    .extractCustomizationType(packet);
+
                                 GameState.customizePlayer(sourceID, requestType,
-                                    Arrays.copyOfRange(payload, 6, payload.length));
+                                    Arrays.copyOfRange(payload, 6, payload.length)
+                                );
                                 GameState.setCustomizationFlag();
                                 // TODO: 17/08/2017 ajm412: Send a response packet here, not really necessary until we do shapes.
                                 break;
+                            case RACE_XML:
+                                raceXMLProperty.set(
+                                    XMLParser.parseRace(
+                                        StreamParser.extractXmlMessage(packet)
+                                    )
+                                );
+                                break;
+                            case REGATTA_XML:
+                                regattaXMLProperty.set(
+                                    XMLParser.parseRegatta(
+                                        StreamParser.extractXmlMessage(packet)
+                                    )
+                                );
+                                break;
+
                         }
                     } else {
                         logger.warn("Packet has been dropped", 1);
@@ -233,23 +226,9 @@ public class ServerToClientThread implements Runnable {
     }
 
     public void sendSetupMessages() {
-        xmlGenerator = new XMLGenerator();
-        RaceXMLTemplate race = new RaceXMLTemplate(new ArrayList<>(GameState.getYachts().values()), new ArrayList<>());
-
-        xmlGenerator.setRaceTemplate(race);
-
-        XMLMessage xmlMessage;
-        xmlMessage = new XMLMessage(xmlGenerator.getRegattaAsXml(), XMLMessageSubType.REGATTA,
-                xmlGenerator.getRegattaAsXml().length());
-        sendMessage(xmlMessage);
-
-        xmlMessage = new XMLMessage(xmlGenerator.getBoatsAsXml(), XMLMessageSubType.BOAT,
-                xmlGenerator.getBoatsAsXml().length());
-        sendMessage(xmlMessage);
-
-        xmlMessage = new XMLMessage(xmlGenerator.getRaceAsXml(), XMLMessageSubType.RACE,
-                xmlGenerator.getRaceAsXml().length());
-        sendMessage(xmlMessage);
+        sendMessage(MessageFactory.getRegattaXML());
+        sendMessage(MessageFactory.getBoatXML());
+        sendMessage(MessageFactory.getRaceXML());
     }
 
     private void closeSocket() {
@@ -344,5 +323,13 @@ public class ServerToClientThread implements Runnable {
 
     public void setAsHost() {
         isHost = true;
+    }
+
+    public SimpleObjectProperty<RaceXMLData> raceXMLProperty() {
+        return raceXMLProperty;
+    }
+
+    public SimpleObjectProperty<RegattaXMLData> regattaXMLProperty() {
+        return regattaXMLProperty;
     }
 }

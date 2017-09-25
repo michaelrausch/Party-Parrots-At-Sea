@@ -1,19 +1,29 @@
 package seng302.utilities;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import seng302.model.ClientYacht;
+import seng302.model.Colors;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.model.token.Token;
@@ -139,14 +149,26 @@ public class XMLParser {
             Node currentBoat = boatsList.item(i);
             if (currentBoat.getNodeName().equals("Boat")) {
 //                    Boat boat = new Boat(currentBoat);
+                BoatMeshType boatMeshType;
+                try {
+                    boatMeshType = BoatMeshType.valueOf(XMLParser.getNodeAttributeString(currentBoat, "Type"));
+                } catch (IllegalArgumentException e){
+                    boatMeshType = BoatMeshType.DINGHY;
+                }
+                Color color;
+                try {
+                    color = Color.web(getNodeAttributeString(currentBoat, "Color"));
+                } catch (NullPointerException npe) {
+                    color = Colors.getColor(new Random().nextInt(8));
+                }
                 ClientYacht yacht = new ClientYacht(
-                    BoatMeshType.valueOf(XMLParser.getNodeAttributeString(currentBoat, "Type")),
+                    boatMeshType,
                     XMLParser.getNodeAttributeInt(currentBoat, "SourceID"),
                     XMLParser.getNodeAttributeString(currentBoat, "HullNum"),
                     XMLParser.getNodeAttributeString(currentBoat, "ShortName"),
                     XMLParser.getNodeAttributeString(currentBoat, "BoatName"),
                     XMLParser.getNodeAttributeString(currentBoat, "Country"));
-                yacht.setColour(Color.web(getNodeAttributeString(currentBoat, "Color")));
+                yacht.setColour(color);
                 competingBoats.put(yacht.getSourceId(), yacht);
             }
         }
@@ -182,7 +204,7 @@ public class XMLParser {
     public static RaceXMLData parseRace(Document doc) {
         Element docEle = doc.getDocumentElement();
         return new RaceXMLData(
-            extractParticpantIDs(docEle),
+            extractParticipantIDs(docEle),
             extractTokens(docEle),
             extractCompoundMarks(docEle),
             extractMarkOrder(docEle),
@@ -195,17 +217,20 @@ public class XMLParser {
      */
     private static List<Token> extractTokens(Element docEle) {
         List<Token> tokens = new ArrayList<>();
-        NodeList tokenList = docEle.getElementsByTagName("Tokens").item(0).getChildNodes();
-        for (int i = 0; i < tokenList.getLength(); i++) {
-            Node tokenNode = tokenList.item(i);
-            if (tokenNode.getNodeName().equals("Token")) {
-                String tokenType = getNodeAttributeString(tokenNode, "TokenType");
-                Double lat = getNodeAttributeDouble(tokenNode, "TargetLat");
-                Double lng = getNodeAttributeDouble(tokenNode, "TargetLng");
-                tokens.add(new Token(TokenType.valueOf(tokenType), lat, lng));
+        try {
+            NodeList tokenList = docEle.getElementsByTagName("Tokens").item(0).getChildNodes();
+            for (int i = 0; i < tokenList.getLength(); i++) {
+                Node tokenNode = tokenList.item(i);
+                if (tokenNode.getNodeName().equals("Token")) {
+                    String tokenType = getNodeAttributeString(tokenNode, "TokenType");
+                    Double lat = getNodeAttributeDouble(tokenNode, "TargetLat");
+                    Double lng = getNodeAttributeDouble(tokenNode, "TargetLng");
+                    tokens.add(new Token(TokenType.valueOf(tokenType), lat, lng));
+                }
             }
+        } catch (NullPointerException npe) {
+            return new ArrayList<>();
         }
-
         return tokens;
     }
 
@@ -218,13 +243,11 @@ public class XMLParser {
         for (int i = 0; i < limitList.getLength(); i++) {
             Node limitNode = limitList.item(i);
             if (limitNode.getNodeName().equals("Limit")) {
-                courseLimit.add(
-                    new Limit(
-                        XMLParser.getNodeAttributeInt(limitNode, "SeqID"),
-                        XMLParser.getNodeAttributeDouble(limitNode, "Lat"),
-                        XMLParser.getNodeAttributeDouble(limitNode, "Lon")
-                    )
-                );
+                courseLimit.add(new Limit(
+                    XMLParser.getNodeAttributeInt(limitNode, "SeqID"),
+                    XMLParser.getNodeAttributeDouble(limitNode, "Lat"),
+                    XMLParser.getNodeAttributeDouble(limitNode, "Lon")
+                ));
             }
         }
         return courseLimit;
@@ -256,7 +279,7 @@ public class XMLParser {
     /**
      * Extracts course participants data
      */
-    private static List<Integer> extractParticpantIDs (Element docEle) {
+    private static List<Integer> extractParticipantIDs(Element docEle) {
         List<Integer> boatIDs = new ArrayList<>();
         NodeList pList = docEle.getElementsByTagName("Participants").item(0).getChildNodes();
         for (int i = 0; i < pList.getLength(); i++) {
@@ -278,10 +301,11 @@ public class XMLParser {
         for (int i = 0; i < cMarkList.getLength(); i++) {
             Node cMarkNode = cMarkList.item(i);
             if (cMarkNode.getNodeName().equals("CompoundMark")) {
+                String name = XMLParser.getNodeAttributeString(cMarkNode, "Name");
+                name = (name == null || name.equals("")) ? "Mark " + i+1: name;
                 cMark = new CompoundMark(
                     XMLParser.getNodeAttributeInt(cMarkNode, "CompoundMarkID"),
-                    XMLParser.getNodeAttributeString(cMarkNode, "Name"),
-                    createMarks(cMarkNode)
+                    name, createMarks(cMarkNode)
                 );
                 allMarks.add(cMark);
             }
@@ -302,12 +326,154 @@ public class XMLParser {
             Node markNode = childMarks.item(i);
             if (markNode.getNodeName().equals("Mark")) {
                 Integer seqID = XMLParser.getNodeAttributeInt(markNode, "SeqID");
+                seqID = (seqID == null) ? i+1 : seqID;
+
                 Integer sourceID = XMLParser.getNodeAttributeInt(markNode, "SourceID");
+                sourceID = (sourceID == null) ? i+1 : sourceID;
+
                 String markName = XMLParser.getNodeAttributeString(markNode, "Name");
+                markName = (markName == null || markName.equals("")) ? cMarkName + " " + i+1: markName;
+
                 Double targetLat = XMLParser.getNodeAttributeDouble(markNode, "TargetLat");
                 Double targetLng = XMLParser.getNodeAttributeDouble(markNode, "TargetLng");
+
                 Mark mark = new Mark(markName, seqID, targetLat, targetLng, sourceID);
                 subMarks.add(mark);
+            }
+        }
+        return subMarks;
+    }
+
+    /**
+     * This ungodly combination of existing methods and code blocks parses a race definition file.
+     * Look upon it and despair.
+     * @param url the location of the race def file
+     * @param serverName the name of the server
+     * @param repetitions the repetitions of a segment of the race def file.
+     * @return a pair which contains regatta string, race string as key, value pair.
+     */
+    public static Pair<String, String> parseRaceDef(String url, String serverName, int repetitions) {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db;
+        Document doc = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            doc = db.parse(url);
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+        Element docEle = doc.getDocumentElement();
+
+        RegattaXMLTemplate regattaXMLTemplate = new RegattaXMLTemplate(
+            serverName, XMLParser.getElementString(docEle, "CourseName"),
+            XMLParser.getElementDouble(docEle, "CentralLat"),
+            XMLParser.getElementDouble(docEle, "CentralLng")
+        );
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        xmlGenerator.setRegattaTemplate(regattaXMLTemplate);
+
+        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(new ArrayList<>(), new ArrayList<>(),
+            XMLParser.extractMarkOrderRaceDef(docEle, repetitions),
+            XMLParser.extractCourseLimitRaceDef(docEle),
+            XMLParser.extractCompoundMarksRaceDef(docEle)
+        );
+        xmlGenerator.setRaceTemplate(raceXMLTemplate);
+        return new Pair<>(xmlGenerator.getRegattaAsXml(), xmlGenerator.getRaceAsXml());
+    }
+
+    private static List<Corner> extractMarkOrderRaceDef(Element docEle, int repitions){
+        List<Corner> compoundMarkSequence = new ArrayList<>();
+        NodeList cornerList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
+
+        int seqId = 1;
+        final int zoneSize = 3;
+
+        for (int i=0; i<cornerList.getLength(); i++) {
+            Node segment = cornerList.item(i);
+            if (segment.getNodeName().equals("OpeningSegment") ||
+                segment.getNodeName().equals("ClosingSegment")) {
+
+                seqId = parseCourseSegment(segment, seqId, compoundMarkSequence);
+
+            } else if (segment.getNodeName().equals("RepeatingSegment")) {
+                for (int k = 0; k < repitions; k++) {
+                    seqId = parseCourseSegment(segment, seqId, compoundMarkSequence);
+                }
+            }
+        }
+        return compoundMarkSequence;
+    }
+
+    /**
+     * Parses a segment of the course adding new Corners to the given list.
+     * @param segment Segment to parse
+     * @param seqID initial sequence ID
+     * @param course course to add corners to
+     * @return the last sequence id.
+     */
+    private static int parseCourseSegment(Node segment, int seqID, List<Corner> course) {
+        NodeList segmentList = segment.getChildNodes();
+        for (int j = 0; j < segmentList.getLength(); j++) {
+            Node corner = segmentList.item(j);
+            if (corner.getNodeName().equals("Corner")) {
+                String rounding = XMLParser.getNodeAttributeString(corner, "Rounding");
+                rounding = //Converting "P" to "Port" and "S" to "Stbd"
+                    rounding.equals("P") ? "Port" :
+                    rounding.equals("S") ? "Stbd" : rounding;
+                course.add(new Corner(
+                    seqID++, XMLParser.getNodeAttributeInt(corner, "CompoundMarkID"),
+                    rounding, 3
+                ));
+            }
+        }
+        return seqID;
+    }
+
+    private static List<Limit> extractCourseLimitRaceDef(Element docEle) {
+        List<Limit> courseLimit = new ArrayList<>();
+        NodeList limitList = docEle.getElementsByTagName("CourseLimit").item(0).getChildNodes();
+        int seqId = 1;
+        for (int i = 0; i < limitList.getLength(); i++) {
+            Node limitNode = limitList.item(i);
+            if (limitNode.getNodeName().equals("Limit")) {
+                courseLimit.add(new Limit(
+                    seqId++, XMLParser.getNodeAttributeDouble(limitNode, "Lat"),
+                    XMLParser.getNodeAttributeDouble(limitNode, "Lng")
+                ));
+            }
+        }
+        return courseLimit;
+    }
+
+    private static List<CompoundMark> extractCompoundMarksRaceDef(Element docEle){
+        List<CompoundMark> allMarks = new ArrayList<>();
+        NodeList cMarkList = docEle.getElementsByTagName("Marks").item(0).getChildNodes();
+        CompoundMark cMark;
+        int markCount = 200;
+        for (int i = 0; i < cMarkList.getLength(); i++) {
+            Node cMarkNode = cMarkList.item(i);
+            if (cMarkNode.getNodeName().equals("CompoundMark")) {
+                Integer id = XMLParser.getNodeAttributeInt(cMarkNode, "CompoundMarkID");
+                List<Mark> subMarks = createMarksRaceDef(cMarkNode, markCount,"Mark " + id);
+                markCount += subMarks.size();
+                allMarks.add(new CompoundMark(id, "Mark " + id, subMarks));
+            }
+        }
+        return allMarks;
+    }
+
+    private static List<Mark> createMarksRaceDef(Node compoundMark, int markCount, String markName) {
+        List<Mark> subMarks = new ArrayList<>();
+        NodeList childMarks = compoundMark.getChildNodes();
+        int seqID = 1;
+        for (int i = 0; i < childMarks.getLength(); i++) {
+            Node markNode = childMarks.item(i);
+            if (markNode.getNodeName().equals("Mark")) {
+                Double targetLat = XMLParser.getNodeAttributeDouble(markNode, "Lat");
+                Double targetLng = XMLParser.getNodeAttributeDouble(markNode, "Lng");
+                Mark mark = new Mark(markName + " subMark " + seqID, seqID, targetLat, targetLng, markCount++);
+                subMarks.add(mark);
+                seqID += 1;
             }
         }
         return subMarks;

@@ -1,0 +1,4 @@
+/* a separate file to dynamically change snackbar's color */
+.jfx-snackbar-toast {
+    -fx-text-fill: red !important;
+}

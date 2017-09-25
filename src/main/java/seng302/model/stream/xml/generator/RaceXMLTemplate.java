@@ -1,10 +1,12 @@
 package seng302.model.stream.xml.generator;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import seng302.model.Limit;
 import seng302.model.ServerYacht;
+import seng302.model.mark.CompoundMark;
+import seng302.model.mark.Corner;
 import seng302.model.token.Token;
 
 /**
@@ -15,10 +17,17 @@ public class RaceXMLTemplate {
     private List<ServerYacht> yachts;
     private LocalDateTime startTime;
     private List<Token> tokens;
+    private List<Corner> roundings;
+    private List<Limit> courseLimit;
+    private List<CompoundMark> course;
 
-    public RaceXMLTemplate(List<ServerYacht> yachts, List<Token> tokens) {
+    public RaceXMLTemplate(List<ServerYacht> yachts, List<Token> tokens, List<Corner> roundings,
+        List<Limit> limit, List<CompoundMark> course) {
         this.yachts = yachts;
         this.tokens = tokens;
+        this.roundings = roundings;
+        this.courseLimit = limit;
+        this.course = course;
         startTime = LocalDateTime.now();
     }
 
@@ -39,6 +48,18 @@ public class RaceXMLTemplate {
         return Collections.unmodifiableList(tokens);
     }
 
+    public List<CompoundMark> getCompoundMarks() {
+        return Collections.unmodifiableList(course);
+    }
+
+    public List<Limit> getCourseLimit() {
+        return Collections.unmodifiableList(courseLimit);
+    }
+
+    public List<Corner> getRoundings() {
+        return Collections.unmodifiableList(roundings);
+    }
+
     /**
      * Set the time until the race starts
      * @param seconds The time in seconds until the race starts
@@ -53,5 +74,13 @@ public class RaceXMLTemplate {
      */
     public String getRaceStartTime(){
         return startTime.toString();
+    }
+
+    public void setBoats(List<ServerYacht> boats) {
+        yachts = boats;
+    }
+
+    public void setTokens(List<Token> tokens) {
+        this.tokens = tokens;
     }
 }

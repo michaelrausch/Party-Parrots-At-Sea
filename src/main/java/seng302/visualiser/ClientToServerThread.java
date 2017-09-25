@@ -14,6 +14,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.BoatAction;
@@ -25,8 +26,11 @@ import seng302.gameServer.messages.CustomizeRequestType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RegistrationRequestMessage;
 import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
+import seng302.utilities.XMLParser;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on
@@ -44,7 +48,7 @@ public class ClientToServerThread implements Runnable {
 
     @FunctionalInterface
     public interface DisconnectedFromHostListener {
-        void notifYDisconnection (String message);
+        void notifyDisconnection(String message);
     }
 
     private class ByteReadException extends Exception {
@@ -68,7 +72,7 @@ public class ClientToServerThread implements Runnable {
     private Timer upWindPacketTimer = new Timer();
     private Timer downWindPacketTimer = new Timer();
     private boolean upwindTimerFlag = false, downwindTimerFlag = false;
-    static public final int PACKET_SENDING_INTERVAL_MS = 100;
+    public static final int PACKET_SENDING_INTERVAL_MS = 100;
 
     private int clientId = -1;
 
@@ -166,7 +170,7 @@ public class ClientToServerThread implements Runnable {
     private void notifyDisconnectListeners (String message) {
         if (socketOpen) {
             for (DisconnectedFromHostListener listener : disconnectionListeners) {
-                listener.notifYDisconnection(message);
+                listener.notifyDisconnection(message);
             }
         }
     }
@@ -175,7 +179,7 @@ public class ClientToServerThread implements Runnable {
      * Sends a request to the server asking for a source ID
      */
     private void sendRegistrationRequest() {
-        RegistrationRequestMessage requestMessage = new RegistrationRequestMessage(ClientType.PLAYER);
+        RegistrationRequestMessage requestMessage = new RegistrationRequestMessage(ClientType.PLAYER, clientId);
 
         try {
             os.write(requestMessage.getBuffer());
@@ -191,9 +195,8 @@ public class ClientToServerThread implements Runnable {
      * @param packet The registration requests packet
      */
     private void processRegistrationResponse(StreamPacket packet){
-        int sourceId = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 0, 3));
+        int sourceId = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 0, 4));
         int statusCode = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 4,5));
-
         RegistrationResponseStatus status = RegistrationResponseStatus.getResponseStatus(statusCode);
 
         if (status.equals(RegistrationResponseStatus.SUCCESS_PLAYING)){
@@ -243,7 +246,7 @@ public class ClientToServerThread implements Runnable {
                         new TimerTask() {
                             @Override
                             public void run() {
-                                sendBoatActionMessage(new BoatActionMessage(BoatAction.DOWNWIND));
+                                sendBoatActionMessage(new BoatActionMessage(BoatAction.DOWNWIND, clientId));
                             }
                         }, 0, PACKET_SENDING_INTERVAL_MS
                     );
@@ -256,14 +259,14 @@ public class ClientToServerThread implements Runnable {
                         new TimerTask() {
                             @Override
                             public void run() {
-                                sendBoatActionMessage(new BoatActionMessage(BoatAction.UPWIND));
+                                sendBoatActionMessage(new BoatActionMessage(BoatAction.UPWIND, clientId));
                             }
                         }, 0, PACKET_SENDING_INTERVAL_MS
                     );
                 }
                 break;
             default:
-                sendBoatActionMessage(new BoatActionMessage(actionType));
+                sendBoatActionMessage(new BoatActionMessage(actionType, clientId));
                 break;
         }
     }
@@ -368,5 +371,21 @@ public class ClientToServerThread implements Runnable {
 
     public int getClientId () {
         return clientId;
+    }
+
+    public void sendXML(String path, String serverName, int legRepeats) {
+        Pair<String, String> regattaRace = XMLParser.parseRaceDef(path, serverName, legRepeats);
+
+        sendByteBuffer(
+            new XMLMessage(
+                regattaRace.getKey(), XMLMessageSubType.REGATTA, regattaRace.getKey().length()
+            ).getBuffer()
+        );
+
+        sendByteBuffer(
+            new XMLMessage(
+                regattaRace.getValue(), XMLMessageSubType.RACE, regattaRace.getValue().length()
+            ).getBuffer()
+        );
     }
 }

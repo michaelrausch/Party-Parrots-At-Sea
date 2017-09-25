@@ -5,15 +5,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.LobbyController">
+<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.LobbyController">
     <children>
         <GridPane fx:id="serverListMainGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
             <children>
@@ -86,11 +86,14 @@
                                 <Insets bottom="15.0" left="7.0" right="15.0" top="15.0" />
                             </GridPane.margin>
                         </ScrollPane>
-                        <Pane fx:id="serverMap" style="-fx-background-color: skyblue;">
-                            <GridPane.margin>
-                                <Insets bottom="15.0" left="15.0" right="7.0" top="15.0" />
-                            </GridPane.margin>
-                        </Pane>
+                  <AnchorPane fx:id="serverMap" style="-fx-background-color: skyblue;">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <GridPane.margin>
+                        <Insets bottom="15.0" left="15.0" right="7.0" top="15.0" />
+                     </GridPane.margin>
+                  </AnchorPane>
                     </children>
                 </GridPane>
             </children>

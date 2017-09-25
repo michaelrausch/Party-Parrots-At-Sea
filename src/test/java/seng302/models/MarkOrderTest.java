@@ -7,8 +7,12 @@ import static junit.framework.TestCase.assertTrue;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.MarkOrder;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.utilities.StreamParser;
+import seng302.utilities.XMLParser;
 
 public class MarkOrderTest {
     private static MarkOrder markOrder;
@@ -16,7 +20,32 @@ public class MarkOrderTest {
 
     @BeforeClass
     public static void setup(){
-        markOrder = new MarkOrder();
+        /*
+                    %%%%%%
+                   %%%% = =
+                   %%C    >
+                    _)' _( .' ,
+                 __/ |_/\   " *. o
+                /` \_\ \/     %`= '_  .
+               /  )   \/|      .^',*. ,
+              /' /-   o/       - " % '_
+             /\_/     <       = , ^ ~ .
+             )_o|----'|          .`  '
+         ___// (_  - (\
+        ///-(    \'   \\
+
+         */
+        markOrder = new MarkOrder(
+            XMLParser.parseRace(
+                StreamParser.extractXmlMessage(
+                    new StreamPacket(
+                        XMLMessageSubType.RACE.getType(),
+                        XMLParser.parseRaceDef("/maps/default.xml", "test", 2).getValue().length(),
+                        0, XMLParser.parseRaceDef("/maps/default.xml", "test", 2).getValue().getBytes()
+                    )
+                )
+            )
+        );
         currentSeqID = 0;
     }
 

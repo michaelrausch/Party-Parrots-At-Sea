@@ -302,7 +302,7 @@
        </StackPane>
    </children>
     <stylesheets>
-        <String fx:value="/css/Master.css" />
-        <String fx:value="/css/RaceView.css" />
+        <String fx:value="/css/Master.css"/>
+        <String fx:value="/css/RaceView.css"/>
     </stylesheets>
-</AnchorPane>
+</StackPane>
