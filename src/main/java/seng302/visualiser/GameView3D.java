@@ -14,11 +14,13 @@ import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import org.fxyz3d.scene.Skybox;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
 import seng302.model.GeoPoint;
@@ -36,10 +38,7 @@ import seng302.visualiser.cameras.RaceCamera;
 import seng302.visualiser.cameras.TopDownCamera;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.assets_3D.BoatObject;
-import seng302.visualiser.fxObjects.assets_3D.Marker3D;
-import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
-import seng302.visualiser.fxObjects.assets_3D.ModelType;
+import seng302.visualiser.fxObjects.assets_3D.*;
 
 /**
  * Collection of animated3D assets that displays a race.
@@ -88,6 +87,7 @@ public class GameView3D {
     private AnimationTimer playerBoatAnimationTimer;
     private Group trail = new Group();
     private Double windDir;
+    private Skybox skybox;
 
     private enum ScaleDirection {
         HORIZONTAL,
@@ -96,7 +96,7 @@ public class GameView3D {
 
     public GameView3D () {
         camera = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH);
-        camera.setFarClip(600);
+        camera.setFarClip(100000);
         camera.setNearClip(0.1);
         camera.setFieldOfView(FOV);
 
@@ -113,15 +113,22 @@ public class GameView3D {
         gameObjects = new Group();
         root3D = new Group(camera, gameObjects);
         view = new SubScene(
-            root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
+            root3D, 5000, 3000, true, SceneAntialiasing.BALANCED
         );
         view.setCamera(camera);
         camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
 
+        skybox = new Skybox(new Image("https://i.pinimg.com/originals/3a/24/14/3a24142dce7b271799b6501fabc4ee19.jpg"), 100000, camera);
+        skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
+
+        Model land = ModelFactory.importModel(ModelType.LAND);
+        land.getAssets().getChildren().get(0).getTransforms().add(new Rotate(90, Rotate.X_AXIS));
+
         gameObjects.getChildren().addAll(
-            ModelFactory.importModel(ModelType.OCEAN).getAssets(),
-            raceBorder, trail, markers, tokens
+            raceBorder, trail, markers, tokens, skybox, land.getAssets().getChildren().get(0)
         );
+
+
         view.sceneProperty().addListener((obs, old, scene) -> {
             if (scene != null) {
                 scene.addEventHandler(KeyEvent.KEY_PRESSED, this::cameraMovement);

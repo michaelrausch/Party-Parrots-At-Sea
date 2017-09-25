@@ -38,14 +38,14 @@
     -fx-font-size: 23px;
 }
 
-#connectButton, #roomConnectButton {
+#connectButton, #roomConnectButton, #directConnectButton {
     -fx-background-color: -fx-pp-light-text-color; /* inverted */
     -fx-text-fill: -fx-pp-theme-color; /* inverted */
     -fx-font-size: 20px;
     -fx-pref-height: 45px;
 }
 
-#connectButton:hover, #roomConnectButton:hover {
+#connectButton:hover, #roomConnectButton:hover, #directConnectButton:hover {
     -fx-font-size: 23px;
 }
 

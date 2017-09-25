@@ -31,6 +31,7 @@ import seng302.utilities.Sounds;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
+import seng302.visualiser.controllers.dialogs.DirectConnectController;
 import seng302.visualiser.validators.HostNameFieldValidator;
 import seng302.visualiser.validators.NumberRangeValidator;
 import seng302.visualiser.validators.ValidationTools;
@@ -50,9 +51,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private JFXButton serverListHostButton;
     //Direct Connect
     @FXML
-    private JFXButton connectButton;
-    @FXML
-    private JFXTextField serverHostName;
+    private JFXButton directConnectButton;
     @FXML
     private JFXTextField serverPortNumber;
     @FXML
@@ -63,6 +62,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
 
     private Label noServersFound;
     private Logger logger = LoggerFactory.getLogger(ServerListController.class);
+    private JFXDialog directConnectDialog;
+
 
     // TODO: 12/09/17 ajm412: break this method down, its way too long.
     @Override
@@ -70,24 +71,23 @@ public class ServerListController implements Initializable, ServerListenerDelega
         serverListVBox.minWidthProperty().bind(serverListScrollPane.widthProperty());
 
         // Set Event Bindings
-        connectButton.setOnMouseEntered(event -> Sounds.playHoverSound());
+        directConnectButton.setOnMouseEntered(event -> Sounds.playHoverSound());
         serverListHostButton.setOnMouseEntered(event -> Sounds.playHoverSound());
 
-        roomConnectButton.setOnMouseReleased(event -> {
-            connectToRoomCode(roomNumber.getText());
-            Sounds.playButtonClick();
-        });
+
+
         roomNumber.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
                 connectToRoomCode(roomNumber.getText());
             }
         });
 
-        connectButton.setOnMouseReleased(event -> {
-            attemptToDirectConnect();
+        directConnectButton.setOnMouseReleased(event -> {
+            directConnectDialog.show();
             Sounds.playButtonClick();
         });
-        for (JFXTextField textField : Arrays.asList(serverHostName, serverPortNumber)) {
+
+        for (JFXTextField textField : Arrays.asList(roomNumber)) {
             // Event for pressing enter to submit direct connection
             textField.setOnKeyPressed(event -> {
                 if (event.getCode().equals(KeyCode.ENTER)) {
@@ -101,15 +101,18 @@ public class ServerListController implements Initializable, ServerListenerDelega
             textField.getValidators().add(validator);
         }
 
+        /*
         // Validating the hostname
         HostNameFieldValidator hostNameValidator = new HostNameFieldValidator();
         hostNameValidator.setMessage("Host name incorrect");
-        serverHostName.getValidators().add(hostNameValidator);
+        roomCodeInput.getValidators().add(hostNameValidator);
 
         // Validating the port number
         NumberRangeValidator portNumberValidator = new NumberRangeValidator(1025, 65536);
         portNumberValidator.setMessage("Port number incorrect");
         serverPortNumber.getValidators().add(portNumberValidator);
+        TODO later
+        */
 
         // Start listening for servers on network
         try {
@@ -130,6 +133,11 @@ public class ServerListController implements Initializable, ServerListenerDelega
         );
         serverListVBox.getChildren().add(noServersFound);
 
+        roomConnectButton.setOnMouseReleased(e -> {
+            String roomCode = roomNumber.getText();
+            connectToRoomCode(roomCode);
+        });
+
         // Set up dialog for server creation
         Platform.runLater(() -> {
             FXMLLoader dialogContent = new FXMLLoader(getClass().getResource(
@@ -144,16 +152,37 @@ public class ServerListController implements Initializable, ServerListenerDelega
             } catch (IOException e) {
                 logger.warn("Could not create Server Creation Dialog.");
             }
+
+            directConnectDialog = createDirectConnectDialog();
+
         });
+    }
+
+    private JFXDialog createDirectConnectDialog() {
+        FXMLLoader dialog = new FXMLLoader(
+                getClass().getResource("/views/dialogs/DirectConnect.fxml"));
+
+        JFXDialog dcDialog = null;
+
+        try {
+            dcDialog = new JFXDialog(serverListMainStackPane, dialog.load(),
+                    JFXDialog.DialogTransition.CENTER);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        DirectConnectController controller = dialog.getController();
+
+        return dcDialog;
     }
 
     /**
      * Validates the connection and attempts to connect to a given hostname and port number.
      */
     private void attemptToDirectConnect() {
-        if (validateDirectConnection(serverHostName.getText(), serverPortNumber.getText())) {
+        /*if (validateDirectConnection(serverHostName.getText(), serverPortNumber.getText())) {
             DirectConnect();
-        }
+        }*/
     }
 
     /**
@@ -163,10 +192,12 @@ public class ServerListController implements Initializable, ServerListenerDelega
      * @return boolean value if host and port number are valid values
      */
     private Boolean validateDirectConnection(String hostName, String portNumber) {
-        Boolean hostNameValid = ValidationTools.validateTextField(serverHostName);
+        /*Boolean hostNameValid = ValidationTools.validateTextField(serverHostName);
+        *
         Boolean portNumberValid = ValidationTools.validateTextField(serverPortNumber);
 
-        return hostNameValid && portNumberValid;
+        return hostNameValid && portNumberValid;*/
+        return true;
     }
 
     private void connectToRoomCode(String roomCode){
@@ -192,7 +223,7 @@ public class ServerListController implements Initializable, ServerListenerDelega
      */
     private void DirectConnect() {
         Sounds.playButtonClick();
-        ViewManager.getInstance().getGameClient().runAsClient(serverHostName.getText(), Integer.parseInt(serverPortNumber.getText()));
+       // ViewManager.getInstance().getGameClient().runAsClient(serverHostName.getText(), Integer.parseInt(serverPortNumber.getText()));
     }
 
     /**

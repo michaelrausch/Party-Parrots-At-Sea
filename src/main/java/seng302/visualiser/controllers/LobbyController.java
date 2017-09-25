@@ -27,6 +27,7 @@ import seng302.utilities.Sounds;
 import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
+import seng302.visualiser.controllers.dialogs.DirectConnectController;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,6 +50,8 @@ public class LobbyController implements Initializable {
     private Label mapName;
     @FXML
     private Pane serverMap;
+    @FXML
+    private Label roomLabel;
     //---------FXML END---------//
 
     private RaceState raceState;
@@ -60,7 +63,7 @@ public class LobbyController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        roomLabel.setText("");
         this.playerBoats = ViewManager.getInstance().getGameClient().getAllBoatsMap();
 
         if (this.playersColor == null) {
@@ -113,13 +116,13 @@ public class LobbyController implements Initializable {
 
     private JFXDialog createCustomizeDialog() {
         FXMLLoader dialog = new FXMLLoader(
-            getClass().getResource("/views/dialogs/BoatCustomizeDialog.fxml"));
+                getClass().getResource("/views/dialogs/BoatCustomizeDialog.fxml"));
 
         JFXDialog customizationDialog = null;
 
         try {
             customizationDialog = new JFXDialog(serverListMainStackPane, dialog.load(),
-                JFXDialog.DialogTransition.CENTER);
+                    JFXDialog.DialogTransition.CENTER);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,11 +132,12 @@ public class LobbyController implements Initializable {
         controller.setParentController(this);
         controller.setPlayerColor(this.playersColor);
         controller.setPlayerName(this.playerBoats
-            .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
-            .getBoatName());
+                .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId())
+                .getBoatName());
 
         return customizationDialog;
     }
+
 
     /**
      *
@@ -246,6 +250,6 @@ public class LobbyController implements Initializable {
     }
 
     public void setRoomCode(String roomCode) {
-        serverName.setText(serverName.getText() + " ( " + roomCode +" )");
+        roomLabel.setText("Room: " + roomCode);
     }
 }

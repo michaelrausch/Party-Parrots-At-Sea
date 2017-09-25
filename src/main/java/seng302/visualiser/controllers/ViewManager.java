@@ -159,15 +159,6 @@ public class ViewManager {
 
     }
 
-    /**
-     * Determines if a PC has compatibility with the bonjour protocol for server detection.
-     */
-    private void checkCompatibility() {
-        if (BonjourInstallChecker.isBonjourSupported()) {
-            BonjourInstallChecker.openInstallUrl();
-        }
-    }
-
     private void closeAll() {
         try {
             ServerAdvertiser.getInstance().unregister();
