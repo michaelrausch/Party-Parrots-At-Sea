@@ -105,10 +105,10 @@ public class GameView3D extends GameView{
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
 
         Model land = ModelFactory.importModel(ModelType.LAND_SMOOTH);
-        land.getAssets().getChildren().get(0).getTransforms().add(new Rotate(90, Rotate.X_AXIS));
+        land.getAssets().getTransforms().add(new Rotate(90, Rotate.X_AXIS));
 
         gameObjects.getChildren().addAll(
-            raceBorder, trail, markers, tokens, skybox, land.getAssets().getChildren().get(0)
+            raceBorder, trail, markers, tokens, skybox, land.getAssets()
         );
 
 
