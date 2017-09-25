@@ -29,7 +29,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.Sounds;
-import seng302.visualiser.GameView;
+import seng302.visualiser.MapPreview;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
@@ -60,7 +60,7 @@ public class LobbyController implements Initializable {
     public Color playersColor;
     private Map<Integer, ClientYacht> playerBoats;
     private Double mapWidth = INITIAL_MAP_WIDTH, mapHeight = INITIAL_MAP_HEIGHT;
-    private GameView gameView;
+    private MapPreview mapPreview;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -146,20 +146,20 @@ public class LobbyController implements Initializable {
         List<CompoundMark> marks = new ArrayList<>(raceData.getCompoundMarks().values());
         List<Corner> corners = raceData.getMarkSequence();
 
-        gameView = new GameView(marks, corners, border);
+        mapPreview = new MapPreview(marks, corners, border);
         serverMap.getChildren().clear();
-        serverMap.getChildren().add(gameView);
+        serverMap.getChildren().add(mapPreview.getAssets());
 
-        gameView.setSize(mapWidth, mapHeight);
+        mapPreview.setSize(mapWidth, mapHeight);
 
         serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
             mapWidth = newValue.doubleValue();
-            gameView.setSize(mapWidth, mapHeight);
+            mapPreview.setSize(mapWidth, mapHeight);
         });
 //
         serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
             mapHeight = newValue.doubleValue();
-            gameView.setSize(mapWidth, mapHeight);
+            mapPreview.setSize(mapWidth, mapHeight);
         });
     }
 

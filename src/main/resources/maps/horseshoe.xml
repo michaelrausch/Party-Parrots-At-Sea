@@ -8,32 +8,32 @@
 
   <Marks>
     <CompoundMark CompoundMarkID="1">
-      <Mark Lat="-14.71412" Lng="47.5756"/>
-      <Mark Lat="-14.70814" Lng="47.58041"/>
+      <Mark Lat="-14.071412" Lng="47.05756"/>
+      <Mark Lat="-14.070814" Lng="47.058041"/>
     </CompoundMark>
     <CompoundMark CompoundMarkID="2">
-      <Mark Lat="-14.67194" Lng="47.53818" />
+      <Mark Lat="-14.067194" Lng="47.053818" />
     </CompoundMark>
     <CompoundMark CompoundMarkID="3">
-      <Mark Lat="-14.61248" Lng="47.58556" />
+      <Mark Lat="-14.061248" Lng="47.058556" />
     </CompoundMark>
     <CompoundMark CompoundMarkID="4">
-      <Mark Lat="-14.60584" Lng="47.63088"/>
-      <Mark Lat="-14.60617" Lng="47.6374" />
+      <Mark Lat="-14.060584" Lng="47.063088"/>
+      <Mark Lat="-14.060617" Lng="47.06374" />
     </CompoundMark>
     <CompoundMark CompoundMarkID="5">
-      <Mark Lat="-14.64637" Lng="47.60307"/>
-      <Mark Lat="-14.6477" Lng="47.61165"/>
+      <Mark Lat="-14.064637" Lng="47.060307"/>
+      <Mark Lat="-14.06477" Lng="47.061165"/>
     </CompoundMark>
     <CompoundMark CompoundMarkID="6">
-      <Mark Lat="-14.63839" Lng="47.6762"/>
+      <Mark Lat="-14.063839" Lng="47.06762"/>
     </CompoundMark>
     <CompoundMark CompoundMarkID="7">
-      <Mark Lat="-14.68954" Lng="47.66349"/>
+      <Mark Lat="-14.068954" Lng="47.066349"/>
     </CompoundMark>
     <CompoundMark CompoundMarkID="8">
-      <Mark Lat="-14.7025" Lng="47.60238"/>
-      <Mark Lat="-14.71047" Lng="47.60307"/>
+      <Mark Lat="-14.07025" Lng="47.060238"/>
+      <Mark Lat="-14.071047" Lng="47.060307"/>
     </CompoundMark>
   </Marks>
 
@@ -60,18 +60,18 @@
   </Course>
 
   <CourseLimit>
-    <Limit Lat="-14.73371" Lng="47.58213" />
-    <Limit Lat="-14.6653" Lng="47.51003" />
-    <Limit Lat="-14.59022" Lng="47.57286" />
-    <Limit Lat="-14.58723" Lng="47.64358" />
-    <Limit Lat="-14.6261" Lng="47.71293" />
-    <Limit Lat="-14.70814" Lng="47.6762" />
-    <Limit Lat="-14.72773" Lng="47.59689" />
-    <Limit Lat="-14.68323" Lng="47.59449" />
-    <Limit Lat="-14.64969" Lng="47.65113" />
-    <Limit Lat="-14.66131" Lng="47.5986" />
-    <Limit Lat="-14.63441" Lng="47.58419" />
-    <Limit Lat="-14.68091" Lng="47.59174" />
+    <Limit Lat="-14.073371" Lng="47.058213" />
+    <Limit Lat="-14.06653" Lng="47.051003" />
+    <Limit Lat="-14.059022" Lng="47.057286" />
+    <Limit Lat="-14.058723" Lng="47.064358" />
+    <Limit Lat="-14.06261" Lng="47.071293" />
+    <Limit Lat="-14.070814" Lng="47.06762" />
+    <Limit Lat="-14.072773" Lng="47.059689" />
+    <Limit Lat="-14.068323" Lng="47.059449" />
+    <Limit Lat="-14.064969" Lng="47.065113" />
+    <Limit Lat="-14.066131" Lng="47.05986" />
+    <Limit Lat="-14.063441" Lng="47.058419" />
+    <Limit Lat="-14.068091" Lng="47.059174" />
   </CourseLimit>
 
 </RaceDefinition>

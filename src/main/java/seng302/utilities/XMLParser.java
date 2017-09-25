@@ -416,9 +416,13 @@ public class XMLParser {
         for (int j = 0; j < segmentList.getLength(); j++) {
             Node corner = segmentList.item(j);
             if (corner.getNodeName().equals("Corner")) {
+                String rounding = XMLParser.getNodeAttributeString(corner, "Rounding");
+                rounding = //Converting "P" to "Port" and "S" to "Stbd"
+                    rounding.equals("P") ? "Port" :
+                    rounding.equals("S") ? "Stbd" : rounding;
                 course.add(new Corner(
                     seqID++, XMLParser.getNodeAttributeInt(corner, "CompoundMarkID"),
-                    XMLParser.getNodeAttributeString(corner, "Rounding"), 3
+                    rounding, 3
                 ));
             }
         }

@@ -1,7 +1,6 @@
 package seng302.visualiser;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +20,8 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
-import seng302.model.GeoPoint;
 import seng302.model.Limit;
+import seng302.model.ScaledPoint;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -30,7 +29,6 @@ import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.Marker3D;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
@@ -40,57 +38,35 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
  * Collection of animated3D assets that displays a race.
  */
 
-public class GameView3D {
-
+public class GameView3D extends GameView{
 
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_DEPTH = -125;
     private final double DEFAULT_CAMERA_X = 0;
-    private final double DEFAULT_CAMERA_Y = 155;
+    private final double DEFAULT_CAMERA_Y = 100;
 
     private Group root3D;
     private SubScene view;
-    //    ParallelCamera camera;
     private PerspectiveCamera camera;
-    private Group gameObjects;
-
-    private double bufferSize = 0;
-    private double canvasWidth = 200;
-    private double canvasHeight = 200;
-    private boolean horizontalInversion = false;
-
-    private double distanceScaleFactor;
-    private ScaleDirection scaleDirection;
-    private GeoPoint minLatPoint, minLonPoint, maxLatPoint, maxLonPoint;
-    private double referencePointX, referencePointY;
     private Group raceBorder = new Group();
 
     /* Note that if either of these is null then values for it have not been added and the other
        should be used as the limits of the map. */
-    private List<Limit> borderPoints;
     private Map<Mark, Marker3D> markerObjects;
-
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private BoatObject selectedBoat = null;
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
-    private Group markers = new Group();
-    private Group tokens = new Group();
-    private List<CompoundMark> course = new ArrayList<>();
     private List<Node> mapTokens;
     private AnimationTimer playerBoatAnimationTimer;
     private Group trail = new Group();
     private Double windDir;
 
-    private enum ScaleDirection {
-        HORIZONTAL,
-        VERTICAL
-    }
-
     public GameView3D () {
+        canvasWidth = canvasHeight = 220;
         camera = new PerspectiveCamera(true);
         camera.getTransforms().addAll(
-            new Translate(DEFAULT_CAMERA_X,DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH)
+            new Translate(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH)
         );
         camera.setFarClip(600);
         camera.setNearClip(0.1);
@@ -114,8 +90,10 @@ public class GameView3D {
         });
     }
 
+    @Override
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
         markerObjects = new HashMap<>();
+        compoundMarks = newCourse;
 
         for (Corner corner : sequence) { //Makes course out of all compound marks.
             for (CompoundMark compoundMark : newCourse) {
@@ -166,11 +144,13 @@ public class GameView3D {
 
         //Scale race to markers if there is no border.
         if (borderPoints == null) {
-            rescaleRace(new ArrayList<>(markerObjects.keySet()));
+            scaledPoint = ScaledPoint.makeScaledPoint(
+                canvasWidth, canvasHeight, new ArrayList<>(markerObjects.keySet()), true
+            );
         }
         //Move the Markers to initial position.
         markerObjects.forEach(((mark, marker) -> {
-            Point2D p2d = findScaledXY(mark.getLat(), mark.getLng());
+            Point2D p2d = scaledPoint.findScaledXY(mark.getLat(), mark.getLng());
             marker.setLayoutX(p2d.getX());
             marker.setLayoutY(p2d.getY());
         }));
@@ -190,7 +170,7 @@ public class GameView3D {
     private void makeAndBindMarker(Mark observableMark, ModelType markerType) {
         markerObjects.put(observableMark, new Marker3D(markerType));
         observableMark.addPositionListener((mark, lat, lon) -> {
-            Point2D p2d = findScaledXY(lat, lon);
+            Point2D p2d = scaledPoint.findScaledXY(lat, lon);
             markerObjects.get(mark).setLayoutX(p2d.getX());
             markerObjects.get(mark).setLayoutY(p2d.getY());
         });
@@ -205,8 +185,8 @@ public class GameView3D {
      * @return the new gate.
      */
     private Group makeGate(Mark m1, Mark m2, ModelType gateType) {
-        Point2D m1Location = findScaledXY(m1);
-        Point2D m2Location = findScaledXY(m2);
+        Point2D m1Location = scaledPoint.findScaledXY(m1);
+        Point2D m2Location = scaledPoint.findScaledXY(m2);
 
         Group barrier = ModelFactory.importModel(gateType).getAssets();
         barrier.getTransforms().addAll(
@@ -264,145 +244,6 @@ public class GameView3D {
         }
     }
 
-    /**
-     * Sets the class variables minLatPoint, maxLatPoint, minLonPoint, maxLonPoint to the point with
-     * the leftmost point, rightmost point, southern most point and northern most point
-     * respectively.
-     */
-    private void findMinMaxPoint(List<GeoPoint> points) {
-        List<GeoPoint> sortedPoints = new ArrayList<>(points);
-        sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLat));
-        minLatPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
-        GeoPoint maxLat = sortedPoints.get(sortedPoints.size() - 1);
-        maxLatPoint = new GeoPoint(maxLat.getLat(), maxLat.getLng());
-
-        sortedPoints.sort(Comparator.comparingDouble(GeoPoint::getLng));
-        minLonPoint = new GeoPoint(sortedPoints.get(0).getLat(), sortedPoints.get(0).getLng());
-        GeoPoint maxLon = sortedPoints.get(sortedPoints.size() - 1);
-        maxLonPoint = new GeoPoint(maxLon.getLat(), maxLon.getLng());
-        if (maxLonPoint.getLng() - minLonPoint.getLng() > 180) {
-            horizontalInversion = true;
-        }
-    }
-
-    /**
-     * Calculates the location of a reference point, this is always the point with minimum latitude,
-     * in relation to the canvas.
-     *
-     * @param minLonToMaxLon The horizontal distance between the point of minimum longitude to
-     * maximum longitude.
-     */
-    private void calculateReferencePointLocation(double minLonToMaxLon) {
-        GeoPoint referencePoint = minLatPoint;
-        double referenceAngle;
-
-        if (scaleDirection == ScaleDirection.HORIZONTAL) {
-            referenceAngle = Math.abs(
-                GeoUtility.getBearingRad(referencePoint, minLonPoint)
-            );
-            referencePointX =
-                -100 + distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
-                    .getDistance(referencePoint, minLonPoint);
-            referenceAngle = Math.abs(GeoUtility.getDistance(referencePoint, maxLatPoint));
-            referencePointY = -100 + canvasHeight - (bufferSize + bufferSize);
-            referencePointY -= distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
-                .getDistance(referencePoint, maxLatPoint);
-            referencePointY = referencePointY / 2;
-            referencePointY += bufferSize;
-            referencePointY += distanceScaleFactor * Math.cos(referenceAngle) * GeoUtility
-                .getDistance(referencePoint, maxLatPoint);
-        } else {
-            referencePointY = -100 + canvasHeight - bufferSize;
-            referenceAngle = Math.abs(
-                Math.toRadians(
-                    GeoUtility.getDistance(referencePoint, minLonPoint)
-                )
-            );
-            referencePointX = -100 + bufferSize;
-            referencePointX += distanceScaleFactor * Math.sin(referenceAngle) * GeoUtility
-                .getDistance(referencePoint, minLonPoint);
-            referencePointX +=
-                ((canvasWidth - (bufferSize + bufferSize)) - (minLonToMaxLon * distanceScaleFactor))
-                    / 2;
-        }
-        if (horizontalInversion) {
-            referencePointX = -100 + canvasWidth - bufferSize - (referencePointX - bufferSize);
-        }
-    }
-
-
-    /**
-     * Finds the scale factor necessary to fit all race markers within the onscreen map and assigns
-     * it to distanceScaleFactor Returns the max horizontal distance of the map.
-     */
-    private double scaleRaceExtremities() {
-
-        double vertAngle = Math.abs(
-            GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
-        );
-        double vertDistance =
-            Math.cos(vertAngle) * GeoUtility.getDistance(minLatPoint, maxLatPoint);
-        double horiAngle = Math.abs(
-            GeoUtility.getBearingRad(minLonPoint, maxLonPoint)
-        );
-        if (horiAngle <= (Math.PI / 2)) {
-            horiAngle = (Math.PI / 2) - horiAngle;
-        } else {
-            horiAngle = horiAngle - (Math.PI / 2);
-        }
-        double horiDistance =
-            Math.cos(horiAngle) * GeoUtility.getDistance(minLonPoint, maxLonPoint);
-
-        double vertScale = (canvasHeight - (bufferSize + bufferSize)) / vertDistance;
-
-        if ((horiDistance * vertScale) > (canvasWidth - (bufferSize + bufferSize))) {
-            distanceScaleFactor = (canvasWidth - (bufferSize + bufferSize)) / horiDistance;
-            scaleDirection = ScaleDirection.HORIZONTAL;
-        } else {
-            distanceScaleFactor = vertScale;
-            scaleDirection = ScaleDirection.VERTICAL;
-        }
-        return horiDistance;
-    }
-
-    private Point2D findScaledXY(GeoPoint unscaled) {
-        return findScaledXY(unscaled.getLat(), unscaled.getLng());
-    }
-
-    private Point2D findScaledXY(double unscaledLat, double unscaledLon) {
-        double distanceFromReference;
-        double angleFromReference;
-        double xAxisLocation = referencePointX;
-        double yAxisLocation = referencePointY;
-
-        angleFromReference = GeoUtility.getBearingRad(
-            minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
-        );
-        distanceFromReference = GeoUtility.getDistance(
-            minLatPoint, new GeoPoint(unscaledLat, unscaledLon)
-        );
-        if (angleFromReference >= 0 && angleFromReference <= Math.PI / 2) {
-            xAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
-            yAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
-        } else if (angleFromReference >= 0) {
-            angleFromReference = angleFromReference - Math.PI / 2;
-            xAxisLocation += distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
-            yAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
-        } else if (angleFromReference < 0 && angleFromReference >= -Math.PI / 2) {
-            angleFromReference = Math.abs(angleFromReference);
-            xAxisLocation -= distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
-            yAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
-        } else {
-            angleFromReference = Math.abs(angleFromReference) - Math.PI / 2;
-            xAxisLocation -= distanceScaleFactor * Math.cos(angleFromReference) * distanceFromReference;
-            yAxisLocation += distanceScaleFactor * Math.sin(angleFromReference) * distanceFromReference;
-        }
-        if (horizontalInversion) {
-            xAxisLocation = canvasWidth - bufferSize - (xAxisLocation - bufferSize);
-        }
-        return new Point2D(xAxisLocation, yAxisLocation);
-    }
-
     public void cameraMovement(KeyEvent event) {
         switch (event.getCode()) {
             case NUMPAD8:
@@ -439,19 +280,6 @@ public class GameView3D {
     }
 
     /**
-     * Rescales the race to the size of the window.
-     *
-     * @param limitingCoordinates the set of geo points that contains the extremities of the race.
-     */
-    private void rescaleRace(List<GeoPoint> limitingCoordinates) {
-        //Check is called once to avoid unnecessarily change the course limits once the race is running
-        findMinMaxPoint(limitingCoordinates);
-        double minLonToMaxLon = scaleRaceExtremities();
-        calculateReferencePointLocation(minLonToMaxLon);
-//        drawGoogleMap();
-    }
-
-    /**
      * Draws all the boats.
      * @param  yachts The yachts to set in the race
      */
@@ -468,7 +296,7 @@ public class GameView3D {
             boatObjectGroup.getChildren().add(newBoat);
             clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
                 BoatObject bo = boatObjects.get(boat);
-                Point2D p2d = findScaledXY(lat, lon);
+                Point2D p2d = scaledPoint.findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
             });
         }
@@ -491,18 +319,20 @@ public class GameView3D {
     public void updateBorder(List<Limit> border) {
         if (borderPoints == null) {
             borderPoints = border;
-            rescaleRace(new ArrayList<>(borderPoints));
+            scaledPoint = ScaledPoint.makeScaledPoint(
+                canvasWidth, canvasHeight, new ArrayList<>(borderPoints), true
+            );
         }
         List<Node> boundaryAssets = new ArrayList<>();
 
-        Point2D lastLocation = findScaledXY(border.get(0).getLat(), border.get(0).getLng());
+        Point2D lastLocation = scaledPoint.findScaledXY(border.get(0).getLat(), border.get(0).getLng());
         Group pylon = ModelFactory.importModel(ModelType.BORDER_PYLON).getAssets();
         pylon.setLayoutX(lastLocation.getX());
         pylon.setLayoutY(lastLocation.getY());
         boundaryAssets.add(pylon);
 
         for (int i=1; i<border.size(); i++) {
-            Point2D location = findScaledXY(border.get(i).getLat(), border.get(i).getLng());
+            Point2D location = scaledPoint.findScaledXY(border.get(i).getLat(), border.get(i).getLng());
             pylon = ModelFactory.importModel(ModelType.BORDER_PYLON).getAssets();
             pylon.setLayoutX(location.getX());
             pylon.setLayoutY(location.getY());
@@ -528,7 +358,7 @@ public class GameView3D {
             boundaryAssets.add(pylon);
         }
 
-        Point2D firstLocation = findScaledXY(border.get(0).getLat(), border.get(0).getLng());
+        Point2D firstLocation = scaledPoint.findScaledXY(border.get(0).getLat(), border.get(0).getLng());
         Group barrier = ModelFactory.importModel(ModelType.BORDER_BARRIER).getAssets();
         barrier.getTransforms().addAll(
             new Rotate(
@@ -556,7 +386,7 @@ public class GameView3D {
     public void updateTokens(List<Token> newTokens) {
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
-            Point2D location = findScaledXY(token.getLat(), token.getLng());
+            Point2D location = scaledPoint.findScaledXY(token.getLat(), token.getLng());
             Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
             tokenObject.setLayoutX(location.getX());
             tokenObject.setLayoutY(location.getY());
@@ -573,18 +403,17 @@ public class GameView3D {
         playerBoatAnimationTimer = new AnimationTimer() {
 
             double count = 60;
-            Point2D lastLocation = findScaledXY(playerYacht.getLocation());
+            Point2D lastLocation = scaledPoint.findScaledXY(playerYacht.getLocation());
 
             @Override
             public void handle(long now) {
                 if (--count == 0) {
                     count = 60;
                     Node segment = ModelFactory.importModel(ModelType.TRAIL_SEGMENT).getAssets();
-                    Point2D location = findScaledXY(playerYacht.getLocation());
+                    Point2D location = scaledPoint.findScaledXY(playerYacht.getLocation());
                     segment.getTransforms().addAll(
                         new Translate(location.getX(), location.getY(), 0),
-                        new Rotate(playerYacht.getHeading(), new Point3D(0,0,1)),
-                        new Scale(1, lastLocation.distance(location) / 5, 1)
+                        new Rotate(playerYacht.getHeading(), new Point3D(0,0,1))
                     );
                     trail.getChildren().add(segment);
                     if (trail.getChildren().size() > 50) {

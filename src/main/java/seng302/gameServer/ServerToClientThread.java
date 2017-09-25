@@ -102,7 +102,7 @@ public class ServerToClientThread implements Runnable {
     }
 
     private void setUpPlayer(){
-        String fName = "Player " + GameState.getNumberOfPlayers().toString();
+        String fName = "Player" + GameState.getNumberOfPlayers().toString();
         String lName = "";
         ServerYacht yacht = new ServerYacht(
             BoatMeshType.DINGHY, sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"

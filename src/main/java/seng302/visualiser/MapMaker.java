@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.Node;
 import javafx.util.Pair;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,7 +22,7 @@ import seng302.utilities.XMLParser;
  */
 public class MapMaker {
 
-    private List<GameView> gameViews = new ArrayList<>();
+    private List<MapPreview> mapPreviews = new ArrayList<>();
     private List<RaceXMLData> races = new ArrayList<>();
     private List<RegattaXMLData> regattas = new ArrayList<>();
     private List<String> filePaths = new ArrayList<>();
@@ -61,11 +62,11 @@ public class MapMaker {
                     e.printStackTrace();
                 }
                 RaceXMLData race = XMLParser.parseRace(doc);
-                GameView gameView = new GameView(
+                MapPreview mapPreview = new MapPreview(
                     new ArrayList<>(race.getCompoundMarks().values()),
                     race.getMarkSequence(), race.getCourseLimit()
                 );
-                gameViews.add(gameView);
+                mapPreviews.add(mapPreview);
                 races.add(race);
             }
         }
@@ -73,7 +74,7 @@ public class MapMaker {
 
     public void next() {
         index += 1;
-        if (index >= gameViews.size()) {
+        if (index >= mapPreviews.size()) {
             index = 0;
         }
     }
@@ -81,12 +82,12 @@ public class MapMaker {
     public void previous() {
         index -= 1;
         if (index < 0) {
-            index = gameViews.size() - 1;
+            index = mapPreviews.size() - 1;
         }
     }
 
-    public GameView getCurrentGameView() {
-        return gameViews.get(index);
+    public Node getCurrentGameView() {
+        return mapPreviews.get(index).getAssets();
     }
 
     public RaceXMLData getCurrentRace() {
