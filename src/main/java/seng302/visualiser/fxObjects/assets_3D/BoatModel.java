@@ -34,14 +34,16 @@ public class BoatModel extends Model {
      * @param degrees The rotation of the sail in degrees
      */
     public void rotateSail(double degrees) {
-        MeshView mast = getMeshViewChild(MAST_INDEX);
-        MeshView sail = getMeshViewChild(SAIL_INDEX);
-        mast.getTransforms().setAll(
-                new Rotate(degrees, -meshType.mastOffset, 0,0, new Point3D(0, 0, 1))
-        );
-        sail.getTransforms().setAll(
-                new Rotate(degrees, -meshType.sailOffset, 0,0, new Point3D(0, 0, 1))
-        );
+        if (!meshType.fixedSail) {
+            MeshView mast = getMeshViewChild(MAST_INDEX);
+            MeshView sail = getMeshViewChild(SAIL_INDEX);
+            mast.getTransforms().setAll(
+                new Rotate(degrees, 0, -meshType.mastOffset, 0, new Point3D(0, 0, 1))
+            );
+            sail.getTransforms().setAll(
+                new Rotate(degrees, 0, -meshType.sailOffset,0, new Point3D(0, 0, 1))
+            );
+        }
     }
 
     public void hideSail() {
@@ -68,5 +70,9 @@ public class BoatModel extends Model {
 
     private MeshView getMeshViewChild(int index) {
         return (MeshView) assets.getChildren().get(index);
+    }
+
+    public BoatMeshType getMeshType() {
+        return meshType;
     }
 }

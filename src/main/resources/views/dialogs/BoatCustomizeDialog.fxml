@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXColorPicker?>
 <?import com.jfoenix.controls.JFXDialogLayout?>
@@ -10,54 +16,45 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
-<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-  minWidth="-Infinity" prefWidth="400.0" xmlns="http://javafx.com/javafx/8"
-  xmlns:fx="http://javafx.com/fxml/1"
-  fx:controller="seng302.visualiser.controllers.dialogs.BoatCustomizeController">
+
+<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.dialogs.BoatCustomizeController">
     <children>
         <GridPane>
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints maxHeight="90.0" minHeight="90.0" prefHeight="90.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="100.0" minHeight="100.0" prefHeight="100.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="125.0" minHeight="61.0" prefHeight="99.0"
-                  vgrow="SOMETIMES"/>
-                <RowConstraints maxHeight="164.0" minHeight="100.0" prefHeight="126.0"
-                  vgrow="SOMETIMES"/>
+                <RowConstraints maxHeight="90.0" minHeight="48.0" prefHeight="48.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="207.0" minHeight="93.0" prefHeight="181.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="207.0" minHeight="93.0" prefHeight="181.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="145.0" minHeight="66.0" prefHeight="109.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="125.0" minHeight="24.0" prefHeight="72.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="164.0" minHeight="100.0" prefHeight="105.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <Label fx:id="hostDialogHeader" text="Customize Boat" GridPane.halignment="CENTER"
-                  GridPane.valignment="CENTER"/>
-                <JFXButton fx:id="submitBtn" prefHeight="45.0" prefWidth="220.0" text="Customize Boat" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER" />
-                <JFXTextField fx:id="boatName" focusColor="#6c6c6c" promptText="Boat Name"
-                  unFocusColor="#6b6b6b" GridPane.rowIndex="1">
+                <Label fx:id="hostDialogHeader" text="Customize Boat" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                <JFXButton fx:id="submitBtn" prefHeight="45.0" prefWidth="220.0" text="Customize Boat" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER" />
+                <JFXTextField fx:id="boatName" focusColor="#6c6c6c" promptText="Boat Name" unFocusColor="#6b6b6b" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="30.0" right="30.0" />
                </GridPane.margin></JFXTextField>
-                <GridPane GridPane.halignment="CENTER" GridPane.rowIndex="2"
-                  GridPane.valignment="CENTER">
+                <GridPane GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER">
               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="139.0" minWidth="10.0"
-                    prefWidth="94.0"/>
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="203.0" minWidth="10.0"
-                    prefWidth="198.0"/>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="139.0" minWidth="10.0" prefWidth="94.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="203.0" minWidth="10.0" prefWidth="198.0" />
               </columnConstraints>
               <rowConstraints>
-                  <RowConstraints percentHeight="100.0" valignment="CENTER" vgrow="SOMETIMES"/>
+                  <RowConstraints percentHeight="100.0" valignment="CENTER" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                   <Label fx:id="boatColorLabel" prefHeight="25.0" prefWidth="96.0"
-                     text="Boat Color" GridPane.valignment="CENTER">
+                   <Label fx:id="boatColorLabel" prefHeight="25.0" prefWidth="96.0" text="Boat Color" GridPane.valignment="CENTER">
                      <GridPane.margin>
                         <Insets top="-10.0" />
                      </GridPane.margin>
                   </Label>
-                   <JFXColorPicker fx:id="colorPicker" onAction="#colorChanged"
-                     GridPane.columnIndex="1" GridPane.valignment="CENTER">
+                   <JFXColorPicker fx:id="colorPicker" onAction="#colorChanged" GridPane.columnIndex="1" GridPane.valignment="CENTER">
                      <GridPane.margin>
-                         <Insets left="30.0" top="-10.0"/>
+                         <Insets left="30.0" top="-10.0" />
                      </GridPane.margin>
                   </JFXColorPicker>
                </children>
@@ -65,11 +62,45 @@
                   <Insets left="30.0" right="30.0" />
                </GridPane.margin>
             </GridPane>
+            <GridPane GridPane.rowIndex="1">
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="256.0" minWidth="10.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Pane fx:id="boatPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
+                  <JFXButton buttonType="RAISED" onAction="#prevBoat" prefHeight="200.0" prefWidth="50.0" text="&lt;" />
+                  <JFXButton buttonType="RAISED" onAction="#nextBoat" prefHeight="200.0" prefWidth="50.0" text="&gt;" GridPane.columnIndex="2" />
+               </children>
+            </GridPane>
+            <GridPane GridPane.rowIndex="2">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Max Speed:" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Acceleration:" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Handling:" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER" />
+                  <ProgressBar fx:id="speedBar" focusTraversable="false" prefWidth="200.0" progress="0.0" GridPane.columnIndex="1" />
+                  <ProgressBar fx:id="accelBar" prefWidth="200.0" progress="0.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <ProgressBar fx:id="handleBar" prefWidth="200.0" progress="0.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
             </children>
         </GridPane>
     </children>
    <stylesheets>
-       <String fx:value="/css/dialogs/BoatCustomize.css"/>
-       <String fx:value="/css/Master.css"/>
+       <String fx:value="/css/dialogs/BoatCustomize.css" />
+       <String fx:value="/css/Master.css" />
    </stylesheets>
 </JFXDialogLayout>
