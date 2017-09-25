@@ -110,4 +110,8 @@ public class ServerListing {
     public void setTtl(Integer ttl){
         this.ttl = ttl;
     }
+
+    public boolean isMaxPlayersReached() {
+        return players >= capacity;
+    }
 }

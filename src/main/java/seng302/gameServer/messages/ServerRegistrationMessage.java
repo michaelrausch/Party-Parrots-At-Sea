@@ -17,6 +17,10 @@ public class ServerRegistrationMessage extends Message {
         createMessage(serverName, mapName, address, port, players, capacity, roomCode);
     }
 
+    public static ServerRegistrationMessage getEmptyRegistration() {
+        return new ServerRegistrationMessage("","","",0,0,0,"");
+    }
+
     @Override
     public int getSize() {
         return size;

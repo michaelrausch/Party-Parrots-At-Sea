@@ -9,6 +9,7 @@ import seng302.model.stream.packets.PacketType;
 import seng302.discoveryServer.util.ServerListing;
 import seng302.discoveryServer.util.ServerRepoStreamParser;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -79,6 +80,31 @@ public class DiscoveryServerClient {
         socket.close();
 
         return parser.getServerListing();
+    }
+
+    public ServerListing getRandomServer() throws Exception {
+        Socket socket = new Socket(DiscoveryServer.DISCOVERY_SERVER, DiscoveryServer.PORT_NUMBER);
+        ServerRepoStreamParser parser = new ServerRepoStreamParser(socket.getInputStream());
+
+        Message request = new RoomCodeRequest("0000");
+        socket.getOutputStream().write(request.getBuffer());
+
+        PacketType packetType = parser.parse();
+
+        if (packetType != PacketType.SERVER_REGISTRATION){
+            logger.error("Incorrect packet type received");
+            return null;
+        }
+
+        socket.close();
+
+        ServerListing serverListing = parser.getServerListing();
+
+        if (serverListing == null || serverListing.equals(ServerRegistrationMessage.getEmptyRegistration())){
+            return null;
+        }
+
+        return serverListing;
     }
 
     /**
