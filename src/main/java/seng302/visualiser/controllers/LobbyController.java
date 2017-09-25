@@ -246,6 +246,6 @@ public class LobbyController implements Initializable {
     }
 
     public void setRoomCode(String roomCode) {
-        serverName.setText(serverName.getText() + " ( " + roomCode +" )");
+        roomLabel.setText("Room#" + roomCode);
     }
 }
