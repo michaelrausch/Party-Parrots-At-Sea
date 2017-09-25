@@ -8,6 +8,7 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import seng302.model.ClientYacht;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 
@@ -15,45 +16,41 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
 
     private ObservableList<Transform> transforms;
     private BoatObject playerBoat;
+    private ClientYacht playerYacht;
+
 
     public ChaseCamera() {
         super(true);
         transforms = this.getTransforms();
     }
 
-    public void setPlayerBoat(BoatObject playerBoat) {
+    public void setPlayerBoat(BoatObject playerBoat, ClientYacht playerYacht) {
         this.playerBoat = playerBoat;
-
+        this.playerYacht = playerYacht;
         this.playerBoat.layoutXProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                updateCameraX((Double) oldValue, (Double) newValue);
+                repositionCamera();
             }
         });
         this.playerBoat.layoutYProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
                 Number newValue) {
-                updateCameraY((Double) oldValue, (Double) newValue);
+                repositionCamera();
             }
         });
     }
 
-
-    private void updateCameraX(Double oldXValue, Double newXValue) {
-        if (transforms.size() == 0) { // boat is placed and then moved at start,
-            transforms.addAll(
-                new Translate(playerBoat.getLayoutX() - 30, playerBoat.getLayoutY() - 30, -125),
-                new Rotate(80, new Point3D(0, 0, 1))
-            );
-        } else {
-            transforms.addAll(new Translate(newXValue - oldXValue, 0, 0));
-        }
-    }
-
-    private void updateCameraY(Double oldYValue, Double newYValue) {
-        transforms.addAll(new Translate(0, (newYValue - oldYValue), 0));
+    private void repositionCamera() {
+        transforms.clear();
+        transforms.addAll(
+            new Translate(playerBoat.getLayoutX(), playerBoat.getLayoutY(), 0),
+            new Rotate(playerYacht.getHeading(), new Point3D(0, 0, 1)),
+            new Rotate(60, new Point3D(1, 0, 0)),
+            new Translate(0, 0, -75)
+        );
     }
 
     @Override

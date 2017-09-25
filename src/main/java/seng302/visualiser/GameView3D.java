@@ -438,16 +438,16 @@ public class GameView3D {
                 ((RaceCamera) view.getCamera()).zoomOut();
                 break;
             case W:
-                view.getCamera().getTransforms().addAll(new Translate(0, -1, 0));
+                ((RaceCamera) view.getCamera()).panUp();
                 break;
             case S:
-                view.getCamera().getTransforms().addAll(new Translate(0, 1, 0));
+                ((RaceCamera) view.getCamera()).panDown();
                 break;
             case A:
-                view.getCamera().getTransforms().addAll(new Translate(-1, 0, 0));
+                ((RaceCamera) view.getCamera()).panLeft();
                 break;
             case D:
-                view.getCamera().getTransforms().addAll(new Translate(1, 0, 0));
+                ((RaceCamera) view.getCamera()).panRight();
                 break;
             case F1:
                 if (view.getCamera().equals(camera)) {
@@ -499,7 +499,8 @@ public class GameView3D {
 
             if (clientYacht.getSourceId().equals(
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
-                ((ChaseCamera) camera3).setPlayerBoat(newBoat);
+                ((ChaseCamera) camera3).setPlayerBoat(newBoat, clientYacht);
+                ((TopDownCamera) camera2).setPlayerBoat(newBoat);
             }
         }
         Platform.runLater(() -> {
