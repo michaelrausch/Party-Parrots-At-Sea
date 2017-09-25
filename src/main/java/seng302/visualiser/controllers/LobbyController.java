@@ -2,6 +2,12 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -9,7 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -27,13 +33,6 @@ import seng302.visualiser.GameView;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 public class LobbyController implements Initializable {
 
     //--------FXML BEGIN--------//
@@ -50,7 +49,7 @@ public class LobbyController implements Initializable {
     @FXML
     private Label mapName;
     @FXML
-    private Pane serverMap;
+    private AnchorPane serverMap;
     //---------FXML END---------//
 
     private RaceState raceState;
@@ -105,7 +104,16 @@ public class LobbyController implements Initializable {
         leaveLobbyButton.setOnMouseEntered(e -> Sounds.playHoverSound());
         customizeButton.setOnMouseEntered(e -> Sounds.playHoverSound());
         beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
-
+        serverMap.setPrefWidth(serverMap.getWidth());
+        serverMap.setPrefHeight(serverMap.getHeight());
+        serverMap.widthProperty().addListener((obs, oldVal, newVal) -> {
+            System.out.println("LISTEN " + newVal);
+            serverMap.setPrefWidth(newVal.doubleValue());
+        });
+        serverMap.heightProperty().addListener((obs, oldVal, newVal) -> {
+            System.out.println("LISTEN HEIUGHT "+newVal);
+            serverMap.setPrefHeight(newVal.doubleValue());
+        });
         initMapPreview();
     }
 

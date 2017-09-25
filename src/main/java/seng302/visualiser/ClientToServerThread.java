@@ -48,7 +48,7 @@ public class ClientToServerThread implements Runnable {
 
     @FunctionalInterface
     public interface DisconnectedFromHostListener {
-        void notifYDisconnection (String message);
+        void notifyDisconnection(String message);
     }
 
     private class ByteReadException extends Exception {
@@ -170,7 +170,7 @@ public class ClientToServerThread implements Runnable {
     private void notifyDisconnectListeners (String message) {
         if (socketOpen) {
             for (DisconnectedFromHostListener listener : disconnectionListeners) {
-                listener.notifYDisconnection(message);
+                listener.notifyDisconnection(message);
             }
         }
     }

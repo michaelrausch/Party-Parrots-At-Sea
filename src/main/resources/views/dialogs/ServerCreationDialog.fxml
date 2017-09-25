@@ -153,7 +153,7 @@
                           </rowConstraints>
                            <children>
                               <Label fx:id="mapNameLabel" text="MAP NAME" GridPane.halignment="CENTER" />
-                              <AnchorPane fx:id="mapHolder" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" />
+                              <AnchorPane fx:id="mapHolder" prefHeight="333.0" prefWidth="404.0" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
                      </children>

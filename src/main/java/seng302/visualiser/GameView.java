@@ -1,6 +1,7 @@
 package seng302.visualiser;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.*;
@@ -54,6 +55,8 @@ public class GameView extends Pane {
     private List<CompoundMark> compoundMarks = new ArrayList<>();
     private List<Corner> courseOrder = new ArrayList<>();
 
+    private ChangeListener<? super Number> heightChangeListener;
+
     private ImageView mapImage = new ImageView();
 
     private enum ScaleDirection {
@@ -70,14 +73,30 @@ public class GameView extends Pane {
         gameObjects = this.getChildren();
         gameObjects.addAll(mapImage, raceBorder, markers, tokens);
         this.parentProperty().addListener((obs, old, parent) -> {
+            if (old != null) {
+                ((Pane) old).heightProperty().removeListener(heightChangeListener);
+            }
             if (parent != null) {
-                canvasWidth = parent.prefWidth(1) * 1.5;
-                canvasHeight = parent.prefHeight(1) * 1.5;
+                heightChangeListener = (observableValue, oldHeight, newHeight) -> {
+                    canvasWidth = ((Pane) parent).getWidth();
+                    canvasHeight = newHeight.doubleValue();
+                    updateBorder(borderPoints);
+                    updateCourse(compoundMarks, courseOrder);
+                };
+                ((Pane) parent).heightProperty().addListener(heightChangeListener);
+//            }
+//            if (parent != null) {
+//                canvasWidth = parent.prefWidth(1);
+//                canvasHeight = parent.prefHeight(1);
 //                rescaleRace(borderPoints);
-                System.out.println("parent = " + parent.maxWidth(100));
-                System.out.println("parent.minWidth(1) = " + parent.minWidth(100));
-                System.out.println(canvasWidth);
-                System.out.println(canvasHeight);
+//                System.out.println("parent = " + parent.maxWidth(100));
+//                System.out.println("parent.minWidth(1) = " + parent.minWidth(100));
+//                System.out.println(canvasWidth);
+//                System.out.println(canvasHeight);
+                canvasWidth = ((Pane) parent).getHeight();
+                canvasWidth = ((Pane) parent).getWidth();
+                System.out.println("canvasWidth = " + canvasWidth);
+                System.out.println("canvasHeight = " + canvasHeight);
                 this.getChildren().add(new Circle(canvasWidth / 2, canvasHeight / 2, 7, Color.GREENYELLOW));
                 this.getChildren().add(new Circle(canvasWidth, canvasHeight, 7, Color.GREENYELLOW));
                 this.getChildren().add(new Circle(0,0, 7, Color.GREENYELLOW));
