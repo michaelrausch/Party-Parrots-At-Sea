@@ -81,6 +81,7 @@ public class GameState implements Runnable {
     private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
     private static final Integer HANDLING_BOOST_MULTIPLIER = 2;
     public static final Long BUMPER_DISABLE_TIME = 5_000L;
+    private static final Long TOKEN_SPAWN_TIME = 15_000L;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -297,7 +298,7 @@ public class GameState implements Runnable {
                 spawnNewToken();
                 notifyMessageListeners(MessageFactory.getRaceXML());
             }
-        }, 0, 15_000);
+        }, 0, TOKEN_SPAWN_TIME);
     }
 
     // TODO: 29/08/17 wmu16 - This sort of update should be in game state
@@ -382,7 +383,7 @@ public class GameState implements Runnable {
         //Get a random token location with random type
         Token token = allTokens.get(random.nextInt(allTokens.size()));
         token.assignRandomType();
-//        token.assignType(TokenType.BUMPER);
+        token.assignType(TokenType.WIND_WALKER);
 
         logger.debug("Spawned token of type " + token.getTokenType());
 
@@ -508,21 +509,7 @@ public class GameState implements Runnable {
         }
 
         Double heading = yacht.getHeading();
-        if (heading < windDirection) {
-            Double diff = Math.abs(optimalAngle - (windDirection - heading));
-            if (windDirection - heading < optimalAngle) {
-                windDirection = (double) Math.floorMod(Math.round(windDirection + diff), 360L);
-            } else {
-                windDirection = (double) Math.floorMod(Math.round(windDirection - diff), 360L);
-            }
-        } else {
-            Double diff = Math.abs(optimalAngle - (heading - windDirection));
-            if (heading - windDirection < optimalAngle) {
-                windDirection = (double) Math.floorMod(Math.round(windDirection - diff), 360L);
-            } else {
-                windDirection = (double) Math.floorMod(Math.round(windDirection + diff), 360L);
-            }
-        }
+        windDirection = (double) Math.floorMod(Math.round(heading + optimalAngle), 360L);
     }
 
 
