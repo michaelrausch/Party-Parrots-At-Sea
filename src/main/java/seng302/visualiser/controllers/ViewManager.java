@@ -24,7 +24,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerAdvertiser;
-import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.dialogs.KeyBindingDialogController;
@@ -187,6 +186,63 @@ public class ViewManager {
             }
         });
 
+    }
+
+    /**
+     * Recursively find JFXDialog given a starting node. Will traverse children of StackPane.
+     *
+     * @param nodes children nodes to be check.
+     * @return true if node contains JFXDialog.
+     */
+    private Boolean checkDialogOpened(ObservableList<Node> nodes) {
+        boolean foundJFXDialog = false;
+        for (Node node : nodes) {
+            if (node instanceof JFXDialog) {
+                return true;
+            } else if (node instanceof StackPane) {
+                foundJFXDialog = checkDialogOpened(((StackPane) node).getChildren());
+            }
+        }
+        return foundJFXDialog;
+    }
+
+    private void showKeyBindingDialog() throws IOException {
+        FXMLLoader dialogContent = new FXMLLoader(getClass().getResource(
+            "/views/dialogs/KeyBindingDialog.fxml"));
+        for (Node node : decorator.getChildren()) {
+            if (node instanceof StackPane) {
+                keyBindingDialog = new JFXDialog((StackPane) node,
+                    dialogContent.load(),
+                    DialogTransition.CENTER);
+
+                KeyBindingDialogController keyBindingDialogController = dialogContent
+                    .getController();
+                keyBindingDialogController.setGameClient(this.gameClient);
+                keyBindingDialog.show();
+                Sounds.playButtonClick();
+            }
+        }
+    }
+
+    public void closeKeyBindingDialog() {
+        keyBindingDialog.close();
+    }
+
+    /**
+     * Show a snackbar at the bottom of the app for 1 second.
+     *
+     * @param snackbarText text to be displayed.
+     */
+    public void showSnackbar(String snackbarText, boolean isWarning) {
+        if (isWarning) {
+            decorator.getStylesheets()
+                .add(getClass().getResource("/css/dialogs/Snackbar.css").toExternalForm());
+        } else {
+            if (decorator.getStylesheets().size() > 1) {
+                decorator.getStylesheets().remove(1);
+            }
+        }
+        jfxSnackbar.show(snackbarText, 1500);
     }
 
     private void closeAll() {

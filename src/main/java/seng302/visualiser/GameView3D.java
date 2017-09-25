@@ -104,7 +104,7 @@ public class GameView3D extends GameView{
         skybox = new Skybox(new Image(getClass().getResourceAsStream("/images/skybox.jpg")), 100000, camera);
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
 
-        Model land = ModelFactory.importModel(ModelType.LAND);
+        Model land = ModelFactory.importModel(ModelType.LAND_SMOOTH);
         land.getAssets().getChildren().get(0).getTransforms().add(new Rotate(90, Rotate.X_AXIS));
 
         gameObjects.getChildren().addAll(

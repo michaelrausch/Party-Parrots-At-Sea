@@ -305,4 +305,4 @@
         <String fx:value="/css/Master.css"/>
         <String fx:value="/css/RaceView.css"/>
     </stylesheets>
-</StackPane>
+</AnchorPane>
