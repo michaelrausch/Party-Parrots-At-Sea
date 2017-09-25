@@ -5,19 +5,19 @@ package seng302.gameServer.messages;
  */
 public class BoatActionMessage extends Message{
     private final MessageType MESSAGE_TYPE = MessageType.BOAT_ACTION;
-    private final int MESSAGE_SIZE = 1;
+    private final int MESSAGE_SIZE = 5;
     private BoatAction actionType;
 
-    public BoatActionMessage(BoatAction actionType) {
+    public BoatActionMessage(BoatAction actionType, int sourceId) {
         this.actionType = actionType;
-        setHeader(new Header(MessageType.BOAT_ACTION, 0, (short) 1)); // the second variable is the source id
+        setHeader(new Header(MessageType.BOAT_ACTION, sourceId, (short) MESSAGE_SIZE)); // the second variable is the source id
         allocateBuffer();
         writeHeaderToBuffer();
         // Write message fields
         putInt(actionType.getValue(), 1);
+        putInt(sourceId, 4);
         writeCRC();
         rewind();
-
     }
 
     @Override

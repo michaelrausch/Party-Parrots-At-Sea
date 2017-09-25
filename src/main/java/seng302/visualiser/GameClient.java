@@ -398,7 +398,11 @@ public class GameClient {
         }
 
         if (gameKeyBind.getKeyCode(KeyAction.SAILS_STATE) == e.getCode()) {  // sails in/sails out
-            socketThread.sendBoatAction(BoatAction.SAILS_IN);
+            if (allBoatsMap.get(socketThread.getClientId()).getSailIn()) {
+                socketThread.sendBoatAction(BoatAction.SAILS_OUT);
+            } else {
+                socketThread.sendBoatAction(BoatAction.SAILS_IN);
+            }
             allBoatsMap.get(socketThread.getClientId()).toggleSail();
         } else if (gameKeyBind.getKeyCode(KeyAction.UPWIND) == e.getCode()
             || gameKeyBind.getKeyCode(KeyAction.DOWNWIND) == e.getCode()) {
