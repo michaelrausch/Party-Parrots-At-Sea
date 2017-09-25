@@ -51,6 +51,7 @@ public class ServerCreationController implements Initializable {
 
     public void initialize(URL location, ResourceBundle resources) {
         legsSlider.setMax(10);
+        legsSlider.setValue(4);
         maxPlayersSlider.valueProperty().addListener(
             (observable, oldValue, newValue) -> updateMaxPlayerLabel()
         );
