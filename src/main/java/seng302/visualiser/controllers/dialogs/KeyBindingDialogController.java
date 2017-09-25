@@ -23,6 +23,8 @@ public class KeyBindingDialogController implements Initializable {
 
     //--------FXML BEGIN--------//
     @FXML
+    private Label keyBindingDialogHeader;
+    @FXML
     private Label closeLabel;
     @FXML
     private JFXButton zoomInbtn;
@@ -77,6 +79,9 @@ public class KeyBindingDialogController implements Initializable {
         });
 
         closeLabel.setOnMouseClicked(event -> ViewManager.getInstance().closeKeyBindingDialog());
+
+        keyBindingDialogHeader.setFocusTraversable(true);
+        keyBindingDialogHeader.requestFocus();
     }
 
     /**
@@ -153,14 +158,15 @@ public class KeyBindingDialogController implements Initializable {
      * @param button
      */
     private void keyPressed(KeyEvent event, Button button) {
+        event.consume();
         KeyAction buttonAction = buttonActionMap.get(button);
         if (gameKeyBind.bindKeyToAction(event.getCode(), buttonAction)) {
             showSnackBar(button.getId() + " is set to " + event.getCode().getName(), false);
             button.setText(gameKeyBind.getKeyCode(buttonAction).getName());
         } else {
+            loadKeyBind();
             showSnackBar(event.getCode().getName() + " is already in use", true);
         }
-        event.consume();
     }
 
     /**

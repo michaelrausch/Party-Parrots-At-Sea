@@ -48,6 +48,7 @@ GridPane .timer * {
     -fx-text-fill: -fx-pp-theme-color;
     -fx-font-size: 13px;
     -fx-pref-height: 35px;
+    -fx-focus-traversable: false;
 }
 
 #chatSend:hover {

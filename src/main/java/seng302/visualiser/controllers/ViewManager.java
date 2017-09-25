@@ -243,7 +243,7 @@ public class ViewManager {
                 decorator.getStylesheets().remove(1);
             }
         }
-        jfxSnackbar.show(snackbarText, "fuck", 1500);
+        jfxSnackbar.show(snackbarText, 1500);
     }
 
     /**
