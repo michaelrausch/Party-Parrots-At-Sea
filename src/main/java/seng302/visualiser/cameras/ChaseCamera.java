@@ -18,18 +18,21 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
     private BoatObject playerBoat;
     private ClientYacht playerYacht;
     private Double zoomFactor;
+    private Double horizontalPan;
+    private Double verticalPan;
 
 
     public ChaseCamera() {
         super(true);
         transforms = this.getTransforms();
         this.zoomFactor = -75.0;
+        this.horizontalPan = 0.0;
+        this.verticalPan = 0.0;
     }
 
     public void setPlayerBoat(BoatObject playerBoat, ClientYacht playerYacht) {
         this.playerBoat = playerBoat;
         this.playerYacht = playerYacht;
-        System.out.println(playerYacht.getHeadingProperty().get());
         this.playerYacht.getHeadingProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue,
@@ -58,18 +61,9 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
         transforms.clear();
         transforms.addAll(
             new Translate(playerBoat.getLayoutX(), playerBoat.getLayoutY(), 0),
-            new Rotate(playerYacht.getHeading(), new Point3D(0, 0, 1)),
-            new Rotate(60, new Point3D(1, 0, 0)),
-            new Translate(0, 0, zoomFactor)
-        );
-    }
-
-    private void repositionCamera(Double newHeading) {
-        transforms.clear();
-        transforms.addAll(
-            new Translate(playerBoat.getLayoutX(), playerBoat.getLayoutY(), 0),
-            new Rotate(newHeading, new Point3D(0, 0, 1)),
-            new Rotate(60, new Point3D(1, 0, 0)),
+            new Rotate(playerYacht.getHeadingProperty().getValue() + horizontalPan,
+                new Point3D(0, 0, 1)),
+            new Rotate(60 + verticalPan, new Point3D(1, 0, 0)),
             new Translate(0, 0, zoomFactor)
         );
     }
@@ -77,19 +71,25 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
     private void adjustZoomFactor(Double adjustment) {
         if (zoomFactor + adjustment < -15.0 && zoomFactor + adjustment > -125.0) {
             zoomFactor = zoomFactor + adjustment;
+            repositionCamera();
+        }
+    }
+
+    private void adjustVerticalPan(Double adjustment) {
+        if (verticalPan + adjustment >= -20 && verticalPan + adjustment <= 20) {
+            verticalPan += adjustment;
+            repositionCamera();
         }
     }
 
     @Override
     public void zoomIn() {
         adjustZoomFactor(5.0);
-        repositionCamera();
     }
 
     @Override
     public void zoomOut() {
         adjustZoomFactor(-5.0);
-        repositionCamera();
     }
 
 
@@ -99,17 +99,23 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
 
     @Override
     public void panLeft() {
+        this.horizontalPan -= 5;
+        repositionCamera();
     }
 
     @Override
     public void panRight() {
+        this.horizontalPan += 5;
+        repositionCamera();
     }
 
     @Override
     public void panUp() {
+        adjustVerticalPan(-5.0);
     }
 
     @Override
     public void panDown() {
+        adjustVerticalPan(5.0);
     }
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -57,6 +58,8 @@ public class ClientYacht extends Observable {
     private GeoPoint location;
     private Integer boatStatus;
     private Double currentVelocity;
+
+    Timer t;
 
     private BoatObject boatObject;
 
@@ -256,7 +259,6 @@ public class ClientYacht extends Observable {
         this.colour = colour;
     }
 
-
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
@@ -269,17 +271,7 @@ public class ClientYacht extends Observable {
     }
 
     private void setHeadingProperty() {
-        Double oldHeading = getHeadingProperty().get();
-        Double currHeading = heading;
-        while (oldHeading.equals(currHeading)) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            oldHeading += 0.5;
-            headingProperty.set(oldHeading);
-        }
+        headingProperty.set(heading);
     }
 
     public void addLocationListener(YachtLocationListener listener) {

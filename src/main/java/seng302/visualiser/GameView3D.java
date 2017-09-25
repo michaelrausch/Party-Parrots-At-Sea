@@ -35,7 +35,6 @@ import seng302.visualiser.cameras.RaceCamera;
 import seng302.visualiser.cameras.TopDownCamera;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.Marker3D;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
@@ -46,7 +45,6 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
  */
 
 public class GameView3D {
-
 
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_DEPTH = -125;
