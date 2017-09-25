@@ -9,10 +9,12 @@ import seng302.model.stream.packets.PacketType;
 import seng302.discoveryServer.util.ServerListing;
 import seng302.discoveryServer.util.ServerRepoStreamParser;
 import seng302.discoveryServer.util.ServerTable;
+import seng302.visualiser.ServerListener;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class DiscoveryServer {
@@ -20,6 +22,7 @@ public class DiscoveryServer {
     public static final String ANSI_YELLOW = "\u001B[33m";
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_RESET = "\u001B[0m";
+    private static final int MAX_SERVER_TRIES = 10;
     public static String DISCOVERY_SERVER = "party.sydney.srv.michaelrausch.nz";
 
     private ServerTable serverTable;
@@ -98,20 +101,52 @@ public class DiscoveryServer {
 
                 case ROOM_CODE_REQUEST:
                     String desiredRoomCode = parser.getRoomCode();
+                    ServerListing serverListing;
 
-                    ServerListing serverListing = serverTable.getServerByRoomCode(desiredRoomCode);
+                    if (desiredRoomCode.equals("0000")){
+                        serverListing = getRandomFreeServer();
+                    }
+                    else {
+                        serverListing = serverTable.getServerByRoomCode(desiredRoomCode);
+                    }
+
                     Message response;
 
                     if (serverListing != null){
                         response = new ServerRegistrationMessage(serverListing.getServerName(), serverListing.getMapName(), serverListing.getAddress(), serverListing.getPortNumber(), 0, 0, desiredRoomCode);
                     }
                     else{
-                        response = new ServerRegistrationMessage("", "", "", 0, 0, 0, "");
+                        response = ServerRegistrationMessage.getEmptyRegistration();
                     }
 
                     clientSocket.getOutputStream().write(response.getBuffer());
                     break;
             }
         }
+    }
+
+    public ServerListing getRandomFreeServer() {
+        ServerListing serverToJoin;
+
+        List<ServerListing> servers = serverTable.getAllServers();
+
+        if (servers.size() <= 0){
+            return null;
+        }
+
+        if (servers.size() == 1){
+            return servers.get(0);
+        }
+
+        serverToJoin = servers.get(new Random().nextInt(servers.size()));
+
+        int tries = 0;
+
+        while (serverToJoin != null && serverToJoin.isMaxPlayersReached() && tries < MAX_SERVER_TRIES){
+            serverToJoin = servers.get(new Random().nextInt(servers.size()));
+            tries++;
+        }
+
+        return serverToJoin;
     }
 }

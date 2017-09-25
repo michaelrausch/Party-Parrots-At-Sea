@@ -27,6 +27,7 @@ import seng302.discoveryServer.DiscoveryServer;
 import seng302.gameServer.ServerDescription;
 import seng302.discoveryServer.util.ServerListing;
 import seng302.discoveryServer.DiscoveryServerClient;
+import seng302.gameServer.messages.RoomCodeRequest;
 import seng302.utilities.Sounds;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
@@ -58,6 +59,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
     private JFXButton roomConnectButton;
     @FXML
     private JFXTextField roomNumber;
+    @FXML
+    private JFXButton autoSelectGame;
     //---------FXML END---------//
 
     private Label noServersFound;
@@ -100,6 +103,29 @@ public class ServerListController implements Initializable, ServerListenerDelega
             validator.setMessage("Field is Required");
             textField.getValidators().add(validator);
         }
+
+        autoSelectGame.setOnMouseReleased(e -> {
+            try {
+                ServerListing listing = new DiscoveryServerClient().getRandomServer();
+
+                if (listing == null){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Error finding game");
+                    alert.setContentText("No servers are up");
+                    alert.showAndWait();
+                }
+                else{
+                    ViewManager.getInstance().getGameClient().runAsClient(listing.getAddress(), listing.getPortNumber());
+                }
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                logger.error("Error getting listing");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Error finding game");
+                alert.setContentText("Couldn't contact matchmaking server");
+                alert.showAndWait();
+            }
+        });
 
         /*
         // Validating the hostname
