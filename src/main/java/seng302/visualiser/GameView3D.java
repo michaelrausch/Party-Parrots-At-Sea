@@ -28,7 +28,6 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
-import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
 import seng302.visualiser.cameras.ChaseCamera;
@@ -37,9 +36,9 @@ import seng302.visualiser.cameras.RaceCamera;
 import seng302.visualiser.cameras.TopDownCamera;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
-import seng302.visualiser.fxObjects.assets_3D.*;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.Marker3D;
+import seng302.visualiser.fxObjects.assets_3D.Model;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
@@ -61,15 +60,6 @@ public class GameView3D extends GameView{
     private PerspectiveCamera camera3;
     private Group gameObjects;
 
-    private double bufferSize = 0;
-    private double canvasWidth = 200;
-    private double canvasHeight = 200;
-    private boolean horizontalInversion = false;
-
-    private double distanceScaleFactor;
-    private ScaleDirection scaleDirection;
-    private GeoPoint minLatPoint, minLonPoint, maxLatPoint, maxLonPoint;
-    private double referencePointX, referencePointY;
     private Group raceBorder = new Group();
 
     /* Note that if either of these is null then values for it have not been added and the other
@@ -442,7 +432,7 @@ public class GameView3D extends GameView{
     public void updateTokens(List<Token> newTokens) {
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
-            Point2D location = findScaledXY(token.getLat(), token.getLng());
+            Point2D location = scaledPoint.findScaledXY(token.getLat(), token.getLng());
 
             ModelType modelType = null;
             switch (token.getTokenType()) {
