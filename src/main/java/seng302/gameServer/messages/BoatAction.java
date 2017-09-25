@@ -14,7 +14,9 @@ public enum BoatAction {
     TACK_GYBE(4),
     UPWIND(5),
     DOWNWIND(6),
-    MAINTAIN_HEADING(7);
+    MAINTAIN_HEADING(7),
+    CONTINUOUSLY_TURNING(8),
+    DEFAULT_TURNING(9);
 
     private final int type;
     private static final Map<Integer, BoatAction> intToTypeMap = new HashMap<>();

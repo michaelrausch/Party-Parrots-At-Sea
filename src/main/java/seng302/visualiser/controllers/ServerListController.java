@@ -112,16 +112,23 @@ public class ServerListController implements Initializable, ServerListenerDelega
         serverListVBox.getChildren().add(noServersFound);
 
         // Set up dialog for server creation
+        serverListHostButton.setOnAction(action -> {
+            showServerCreationDialog();
+        });
+    }
+
+    /**
+     * Shows Server Creation Dialog when "Host" button is clicked.
+     */
+    private void showServerCreationDialog() {
         Platform.runLater(() -> {
             FXMLLoader dialogContent = new FXMLLoader(getClass().getResource(
                 "/views/dialogs/ServerCreationDialog.fxml"));
             try {
                 JFXDialog dialog = new JFXDialog(serverListMainStackPane, dialogContent.load(),
                     DialogTransition.CENTER);
-                serverListHostButton.setOnAction(action -> {
-                    dialog.show();
-                    Sounds.playButtonClick();
-                });
+                dialog.show();
+                Sounds.playButtonClick();
             } catch (IOException e) {
                 logger.warn("Could not create Server Creation Dialog.");
             }

@@ -2,6 +2,7 @@
     -fx-font-size: 20px;
     -fx-text-fill: -fx-pp-light-text-color;
     -fx-background-color: -fx-pp-theme-color;
+    -fx-focus-traversable: false;
 }
 
 .jfx-rippler {

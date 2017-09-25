@@ -96,7 +96,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Label timerLabel;
     @FXML
-    private StackPane contentAnchorPane;
+    private StackPane contentStackPane;
 
     private GridPane contentGridPane;
     @FXML
@@ -149,8 +149,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         Sounds.stopMusic();
         Sounds.playRaceMusic();
 
-        finishScreenDialog = createFinishDialog();
-
         // Load a default important annotation state
         //importantAnnotations = new ImportantAnnotationsState();
 
@@ -195,9 +193,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 //        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
 //            chatHistory.setScrollTop(Double.MAX_VALUE);
 //        });
-        rvAnchorPane.setOnMouseClicked((event) ->
-                rvAnchorPane.requestFocus()
-        );
+
+        contentStackPane.setOnMouseClicked(event -> {
+            contentStackPane.requestFocus();
+        });
 
         //Makes the chat history non transparent when clicked on
         chatInput.focusedProperty().addListener(new ChangeListener<Boolean>() {
@@ -215,26 +214,27 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
         raceState.setRaceStarted(false);
-        finishDialogController.setFinishedBoats(finishedBoats);
-        finishScreenDialog.show();
+        createFinishDialog(finishedBoats);
     }
 
-    private JFXDialog createFinishDialog() {
+    /**
+     * Create finishScreenDialog and set up finishDialogController.
+     */
+    private void createFinishDialog(ArrayList<ClientYacht> finishedBoats) {
         FXMLLoader dialog = new FXMLLoader(
             getClass().getResource("/views/dialogs/RaceFinishDialog.fxml"));
 
-        JFXDialog finishScreenDialog = null;
-
-        try {
-            finishScreenDialog = new JFXDialog(contentAnchorPane, dialog.load(),
-                JFXDialog.DialogTransition.CENTER);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        finishDialogController = dialog.getController();
-
-        return finishScreenDialog;
+        Platform.runLater(() -> {
+            try {
+                finishScreenDialog = new JFXDialog(contentStackPane, dialog.load(),
+                    JFXDialog.DialogTransition.CENTER);
+                finishDialogController = dialog.getController();
+                finishDialogController.setFinishedBoats(finishedBoats);
+                finishScreenDialog.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 
@@ -264,7 +264,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         gameView = new GameView3D();
 //        gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> {
-            contentAnchorPane.getChildren().add(0, gameView.getAssets());
+            contentStackPane.getChildren().add(0, gameView.getAssets());
             ((SubScene) gameView.getAssets()).widthProperty()
                 .bind(ViewManager.getInstance().getStage().widthProperty());
             ((SubScene) gameView.getAssets()).heightProperty()
@@ -879,7 +879,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public String readChatInput() {
         String chat = chatInput.getText();
         chatInput.clear();
-        rvAnchorPane.requestFocus();
+        contentStackPane.requestFocus();
         return chat;
     }
 
