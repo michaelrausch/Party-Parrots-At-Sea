@@ -37,6 +37,11 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
         this.verticalPan = 0.0;
     }
 
+    /**
+     * Sets a player boat object to observe and update the camera with.
+     *
+     * @param playerBoat The player boat to be observed.
+     */
     public void setPlayerBoat(BoatObject playerBoat) {
         this.playerBoat = playerBoat;
 
@@ -47,6 +52,9 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
         }
     }
 
+    /**
+     * Moves the camera to a new position after some change (Zooming or Panning)
+     */
     private void repositionCamera() {
         transforms.clear();
         transforms.addAll(
@@ -58,6 +66,10 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
         );
     }
 
+    /**
+     * Adjusts the zoom amount (camera depth) by some adjustment value
+     * @param adjustment the adjustment to be made to the camera
+     */
     private void adjustZoomFactor(Double adjustment) {
         if (zoomFactor + adjustment < NEAR_ZOOM_LIMIT && zoomFactor + adjustment > FAR_ZOOM_LIMIT) {
             zoomFactor = zoomFactor + adjustment;
@@ -65,6 +77,10 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
         }
     }
 
+    /**
+     * Adjusts the Vertical Panning of the Camera
+     * @param adjustment the adjustment to be made to the camera
+     */
     private void adjustVerticalPan(Double adjustment) {
         if (verticalPan + adjustment >= -VERTICAL_PAN_LIMIT
             && verticalPan + adjustment <= VERTICAL_PAN_LIMIT) {
@@ -73,6 +89,10 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
         }
     }
 
+    /**
+     * Adjusts the Horizontal Panning of the Camera.
+     * @param adjustment the adjustment to be made to the camera
+     */
     private void adjustHorizontalPan(Double adjustment) {
         this.horizontalPan += adjustment;
         repositionCamera();

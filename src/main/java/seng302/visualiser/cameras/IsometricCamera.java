@@ -36,6 +36,9 @@ public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
         updateCamera();
     }
 
+    /**
+     * Moves the camera to a new position after some change (Zooming or Panning)
+     */
     private void updateCamera() {
         transforms.clear();
         transforms.addAll(
@@ -44,6 +47,11 @@ public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
         );
     }
 
+    /**
+     * Adjusts the zoom amount (camera depth) by some adjustment value
+     *
+     * @param adjustment the adjustment to be made to the camera
+     */
     private void adjustZoomFactor(Double adjustment) {
         if (zoomFactor + adjustment < NEAR_ZOOM_LIMIT && zoomFactor + adjustment > FAR_ZOOM_LIMIT) {
             zoomFactor = zoomFactor + adjustment;
@@ -51,6 +59,10 @@ public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
         }
     }
 
+    /**
+     * Adjusts the Vertical Panning of the Camera
+     * @param adjustment the adjustment to be made to the camera
+     */
     private void adjustVerticalPan(Double adjustment) {
         if (verticalPan + adjustment >= MIN_Y && verticalPan + adjustment <= MAX_Y) {
             verticalPan += adjustment;
@@ -58,6 +70,10 @@ public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
         }
     }
 
+    /**
+     * Adjusts the Horizontal Panning of the Camera.
+     * @param adjustment the adjustment to be made to the camera
+     */
     private void adjustHorizontalPan(Double adjustment) {
         if (horizontalPan + adjustment >= MIN_X && horizontalPan + adjustment <= MIN_Y) {
             this.horizontalPan += adjustment;
