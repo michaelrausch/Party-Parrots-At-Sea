@@ -3,6 +3,7 @@ package seng302.visualiser.fxObjects.assets_3D;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -30,12 +31,15 @@ public class BoatObject extends Group {
     private Boolean isSelected = false;
     private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
 
+    private ReadOnlyDoubleWrapper rotationProperty;
+
     private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
 
     /**
      * Creates a BoatGroup with the default triangular boat polygon.
      */
     public BoatObject(BoatMeshType boatMeshType) {
+        rotationProperty = new ReadOnlyDoubleWrapper(0.0);
         boatAssets = ModelFactory.boatGameView(boatMeshType, colour);
         boatAssets.hideSail();
         boatAssets.getAssets().getTransforms().addAll(
@@ -83,6 +87,7 @@ public class BoatObject extends Group {
 
 
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
+        rotationProperty.set(heading);
         rotation.setAngle(heading);
         wake.getTransforms().setAll(new Rotate(heading, new Point3D(0,0,1)));
         if (sailsIn) {
@@ -129,5 +134,9 @@ public class BoatObject extends Group {
 
     public void addSelectedBoatListener(SelectedBoatListener sbl) {
         selectedBoatListenerListeners.add(sbl);
+    }
+
+    public ReadOnlyDoubleWrapper getRotationProperty() {
+        return rotationProperty;
     }
 }
