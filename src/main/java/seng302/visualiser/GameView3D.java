@@ -49,7 +49,6 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
 public class GameView3D {
 
     private final double FOV = 60;
-    private final double DEFAULT_CAMERA_DEPTH = -125;
     private final double DEFAULT_CAMERA_X = 0;
     private final double DEFAULT_CAMERA_Y = 155;
 
@@ -96,8 +95,7 @@ public class GameView3D {
     }
 
     public GameView3D () {
-        isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y,
-            DEFAULT_CAMERA_DEPTH);
+        isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y);
         topDownCam = new TopDownCamera();
         chaseCam = new ChaseCamera();
 
@@ -113,8 +111,6 @@ public class GameView3D {
             root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
         );
         view.setCamera(isometricCam);
-        isometricCam.getTransforms()
-            .add(new Rotate(30, new Point3D(1, 0, 0))); //todo: move this into isometric cam?
 
         gameObjects.getChildren().addAll(
             ModelFactory.importModel(ModelType.OCEAN).getAssets(),
