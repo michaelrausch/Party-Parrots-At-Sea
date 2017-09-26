@@ -2,7 +2,6 @@ package seng302.visualiser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,6 @@ import javafx.scene.transform.Translate;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
 import seng302.model.GameKeyBind;
-import seng302.model.GeoPoint;
 import seng302.model.KeyAction;
 import seng302.model.Limit;
 import seng302.model.ScaledPoint;
@@ -78,6 +76,8 @@ public class GameView3D extends GameView{
         isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y);
         topDownCam = new TopDownCamera();
         chaseCam = new ChaseCamera();
+
+        canvasWidth = canvasHeight = 300;
 
         for (PerspectiveCamera pc : Arrays.asList(isometricCam, topDownCam, chaseCam)) {
             pc.setFarClip(600);
