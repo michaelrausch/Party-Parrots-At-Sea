@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.model.token.TokenType;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -82,6 +84,10 @@ public class ClientYacht extends Observable {
     private Integer boatStatus;
     private Double currentVelocity;
 
+    Timer t;
+
+    private BoatObject boatObject;
+
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
     private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
     private List<PowerUpListener> powerUpListeners = new ArrayList<>();
@@ -92,6 +98,7 @@ public class ClientYacht extends Observable {
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
     private ReadOnlyIntegerWrapper placingProperty = new ReadOnlyIntegerWrapper();
+    private ReadOnlyDoubleWrapper headingProperty = new ReadOnlyDoubleWrapper();
     private Color colour;
 
     public ClientYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
@@ -104,6 +111,7 @@ public class ClientYacht extends Observable {
         this.country = country;
         this.location = new GeoPoint(57.670341, 11.826856);
         this.heading = 120.0;   //In degrees
+        this.headingProperty.set(this.heading);
         this.currentVelocity = 0d;
         this.boatStatus = 1;
         this.colour = Color.rgb(0, 0, 0, 1.0);
@@ -277,6 +285,7 @@ public class ClientYacht extends Observable {
 
     public void setHeading(Double heading) {
         this.heading = heading;
+        setHeadingProperty();
     }
 
     @Override
@@ -308,15 +317,19 @@ public class ClientYacht extends Observable {
         }
     }
 
-
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
+        setHeadingProperty();
         this.currentVelocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
             yll.notifyLocation(this, lat, lng, heading, sailIn, velocity);
         }
+    }
+
+    private void setHeadingProperty() {
+        headingProperty.set(heading);
     }
 
     public void addLocationListener(YachtLocationListener listener) {
@@ -359,4 +372,17 @@ public class ClientYacht extends Observable {
     public Double getCurrentVelocity() {
         return currentVelocity;
     }
+
+    public void setBoatObject(BoatObject newBoatObject) {
+        this.boatObject = newBoatObject;
+    }
+
+    public BoatObject getBoatObject() {
+        return this.boatObject;
+    }
+
+    public ReadOnlyDoubleWrapper getHeadingProperty() {
+        return headingProperty;
+    }
+
 }

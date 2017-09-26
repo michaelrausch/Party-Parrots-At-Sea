@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import javafx.scene.paint.Color;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import seng302.model.ClientYacht;
+import seng302.model.Colors;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
@@ -139,14 +141,26 @@ public class XMLParser {
             Node currentBoat = boatsList.item(i);
             if (currentBoat.getNodeName().equals("Boat")) {
 //                    Boat boat = new Boat(currentBoat);
+                BoatMeshType boatMeshType;
+                try {
+                    boatMeshType = BoatMeshType.valueOf(XMLParser.getNodeAttributeString(currentBoat, "Type"));
+                } catch (IllegalArgumentException e){
+                    boatMeshType = BoatMeshType.DINGHY;
+                }
+                Color color;
+                try {
+                    color = Color.web(getNodeAttributeString(currentBoat, "Color"));
+                } catch (NullPointerException npe) {
+                    color = Colors.getColor(new Random().nextInt(8));
+                }
                 ClientYacht yacht = new ClientYacht(
-                    BoatMeshType.valueOf(XMLParser.getNodeAttributeString(currentBoat, "Type")),
+                    boatMeshType,
                     XMLParser.getNodeAttributeInt(currentBoat, "SourceID"),
                     XMLParser.getNodeAttributeString(currentBoat, "HullNum"),
                     XMLParser.getNodeAttributeString(currentBoat, "ShortName"),
                     XMLParser.getNodeAttributeString(currentBoat, "BoatName"),
                     XMLParser.getNodeAttributeString(currentBoat, "Country"));
-                yacht.setColour(Color.web(getNodeAttributeString(currentBoat, "Color")));
+                yacht.setColour(color);
                 competingBoats.put(yacht.getSourceId(), yacht);
             }
         }
@@ -195,17 +209,20 @@ public class XMLParser {
      */
     private static List<Token> extractTokens(Element docEle) {
         List<Token> tokens = new ArrayList<>();
-        NodeList tokenList = docEle.getElementsByTagName("Tokens").item(0).getChildNodes();
-        for (int i = 0; i < tokenList.getLength(); i++) {
-            Node tokenNode = tokenList.item(i);
-            if (tokenNode.getNodeName().equals("Token")) {
-                String tokenType = getNodeAttributeString(tokenNode, "TokenType");
-                Double lat = getNodeAttributeDouble(tokenNode, "TargetLat");
-                Double lng = getNodeAttributeDouble(tokenNode, "TargetLng");
-                tokens.add(new Token(TokenType.valueOf(tokenType), lat, lng));
+        try {
+            NodeList tokenList = docEle.getElementsByTagName("Tokens").item(0).getChildNodes();
+            for (int i = 0; i < tokenList.getLength(); i++) {
+                Node tokenNode = tokenList.item(i);
+                if (tokenNode.getNodeName().equals("Token")) {
+                    String tokenType = getNodeAttributeString(tokenNode, "TokenType");
+                    Double lat = getNodeAttributeDouble(tokenNode, "TargetLat");
+                    Double lng = getNodeAttributeDouble(tokenNode, "TargetLng");
+                    tokens.add(new Token(TokenType.valueOf(tokenType), lat, lng));
+                }
             }
+        } catch (NullPointerException npe) {
+            return new ArrayList<>();
         }
-
         return tokens;
     }
 

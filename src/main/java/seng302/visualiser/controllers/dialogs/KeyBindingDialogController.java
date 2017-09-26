@@ -48,6 +48,16 @@ public class KeyBindingDialogController implements Initializable {
     private Label downwindLabel;
     @FXML
     private JFXToggleButton turningToggle;
+    @FXML
+    private JFXButton viewButton;
+    @FXML
+    private JFXButton rightButton;
+    @FXML
+    private JFXButton leftButton;
+    @FXML
+    private JFXButton forwardButton;
+    @FXML
+    private JFXButton backwardButton;
     //---------FXML END---------//
 
     private GameKeyBind gameKeyBind;
@@ -60,7 +70,9 @@ public class KeyBindingDialogController implements Initializable {
         gameKeyBind = GameKeyBind.getInstance();
         buttons = new ArrayList<>();
         Collections.addAll(buttons,
-            zoomInbtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn, downwindBtn);
+            zoomInbtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn, downwindBtn,
+            viewButton,
+            rightButton, leftButton, forwardButton, backwardButton);
         bindButtonWithAction();
         loadKeyBind();
 
@@ -106,7 +118,7 @@ public class KeyBindingDialogController implements Initializable {
      */
     private void bindButtonWithAction() {
         buttonActionMap = new HashMap<>();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 12; i++) {
             buttonActionMap.put(buttons.get(i), KeyAction.getType(i + 1));
         }
     }
