@@ -37,10 +37,6 @@ public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
     }
 
     private void updateCamera() {
-        System.out.println("----");
-        System.out.println(horizontalPan);
-        System.out.println(verticalPan);
-        System.out.println("----");
         transforms.clear();
         transforms.addAll(
             new Translate(horizontalPan, verticalPan, zoomFactor),
