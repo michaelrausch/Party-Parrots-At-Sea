@@ -156,11 +156,11 @@ public class ServerYacht {
     /**
      * Enables the boats auto pilot feature, which will move the boat towards a given heading.
      *
-     * @param thisHeading The heading to move the boat towards.
+     * @param newHeading The heading to move the boat towards.
      */
-    private void setAutoPilot(Double thisHeading) {
+    private void setAutoPilot(Double newHeading) {
         isAuto = true;
-        autoHeading = thisHeading;
+        autoHeading = newHeading;
     }
 
     /**
@@ -178,8 +178,9 @@ public class ServerYacht {
         if (isAuto) {
             turnTowardsHeading(autoHeading);
             if (Math.abs(heading - autoHeading)
-                <= turnStep) { //Cancel when within 1 turn step of target.
+                <= turnStep*1.5) {
                 isAuto = false;
+                setHeading(autoHeading);
             }
         }
     }
@@ -265,7 +266,7 @@ public class ServerYacht {
 
             // Take optimal heading and turn into a boat heading rather than a wind heading.
             optimalHeading =
-                optimalHeading + GameState.getWindDirection();
+                (optimalHeading + GameState.getWindDirection()) % 360;
 
             setAutoPilot(optimalHeading);
         }
