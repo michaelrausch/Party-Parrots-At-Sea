@@ -52,6 +52,10 @@ public class GameKeyBind {
         return instance.actionToKeyMap.get(keyAction);
     }
 
+    public KeyAction getKeyAction(KeyCode keyCode) {
+        return instance.keyToActionMap.get(keyCode);
+    }
+
     /**
      * Binds a key to a key action
      *

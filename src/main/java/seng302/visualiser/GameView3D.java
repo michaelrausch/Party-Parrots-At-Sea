@@ -23,7 +23,9 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
+import seng302.model.GameKeyBind;
 import seng302.model.GeoPoint;
+import seng302.model.KeyAction;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
@@ -121,6 +123,8 @@ public class GameView3D {
                 scene.addEventHandler(KeyEvent.KEY_PRESSED, this::cameraMovement);
             }
         });
+
+
     }
 
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
@@ -345,7 +349,6 @@ public class GameView3D {
      * it to distanceScaleFactor Returns the max horizontal distance of the map.
      */
     private double scaleRaceExtremities() {
-
         double vertAngle = Math.abs(
             GeoUtility.getBearingRad(minLatPoint, maxLatPoint)
         );
@@ -413,38 +416,28 @@ public class GameView3D {
     }
 
     public void cameraMovement(KeyEvent event) {
-        switch (event.getCode()) {
-            case NUMPAD8:
-                view.getCamera().getTransforms().addAll(new Rotate(0.5, new Point3D(1, 0, 0)));
-                break;
-            case NUMPAD2:
-                view.getCamera().getTransforms().addAll(new Rotate(-0.5, new Point3D(1, 0, 0)));
-                break;
-            case NUMPAD4:
-                view.getCamera().getTransforms().addAll(new Rotate(-0.5, new Point3D(0, 1, 0)));
-                break;
-            case NUMPAD6:
-                view.getCamera().getTransforms().addAll(new Rotate(0.5, new Point3D(0, 1, 0)));
-                break;
-            case Z:
+        GameKeyBind keyBinds = GameKeyBind.getInstance();
+        KeyAction keyPressed = keyBinds.getKeyAction(event.getCode());
+        switch (keyPressed) {
+            case ZOOM_IN:
                 ((RaceCamera) view.getCamera()).zoomIn();
                 break;
-            case X:
+            case ZOOM_OUT:
                 ((RaceCamera) view.getCamera()).zoomOut();
                 break;
-            case W:
+            case FORWARD:
                 ((RaceCamera) view.getCamera()).panUp();
                 break;
-            case S:
+            case BACKWARD:
                 ((RaceCamera) view.getCamera()).panDown();
                 break;
-            case A:
+            case LEFT:
                 ((RaceCamera) view.getCamera()).panLeft();
                 break;
-            case D:
+            case RIGHT:
                 ((RaceCamera) view.getCamera()).panRight();
                 break;
-            case F1:
+            case VIEW:
                 toggleCamera();
                 break;
         }
