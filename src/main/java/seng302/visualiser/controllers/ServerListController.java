@@ -7,6 +7,7 @@ import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -27,6 +28,7 @@ import seng302.utilities.Sounds;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
+import seng302.visualiser.controllers.dialogs.ServerCreationController;
 import seng302.visualiser.validators.HostNameFieldValidator;
 import seng302.visualiser.validators.NumberRangeValidator;
 import seng302.visualiser.validators.ValidationTools;
@@ -55,6 +57,14 @@ public class ServerListController implements Initializable, ServerListenerDelega
 
     private Label noServersFound;
     private Logger logger = LoggerFactory.getLogger(ServerListController.class);
+    private JFXDialog serverCreationDialog;
+    private List<ServerCreationDialogListener> serverCreationDialogListeners = new ArrayList<>();
+
+    @FunctionalInterface
+    public interface ServerCreationDialogListener {
+
+        void notifyClosure();
+    }
 
     // TODO: 12/09/17 ajm412: break this method down, its way too long.
     @Override
@@ -115,6 +125,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
         serverListHostButton.setOnAction(action -> {
             showServerCreationDialog();
         });
+
+        addServerCreationDialogListener(this::closeServerCreationDialog);
     }
 
     /**
@@ -125,14 +137,20 @@ public class ServerListController implements Initializable, ServerListenerDelega
             FXMLLoader dialogContent = new FXMLLoader(getClass().getResource(
                 "/views/dialogs/ServerCreationDialog.fxml"));
             try {
-                JFXDialog dialog = new JFXDialog(serverListMainStackPane, dialogContent.load(),
+                serverCreationDialog = new JFXDialog(serverListMainStackPane, dialogContent.load(),
                     DialogTransition.CENTER);
-                dialog.show();
+                ServerCreationController serverCreationController = dialogContent.getController();
+                serverCreationController.setListener(serverCreationDialogListeners);
+                serverCreationDialog.show();
                 Sounds.playButtonClick();
             } catch (IOException e) {
                 logger.warn("Could not create Server Creation Dialog.");
             }
         });
+    }
+
+    private void closeServerCreationDialog() {
+        serverCreationDialog.close();
     }
 
     /**
@@ -202,5 +220,15 @@ public class ServerListController implements Initializable, ServerListenerDelega
     @Override
     public void serverDetected(ServerDescription serverDescription, List<ServerDescription> servers) {
         Platform.runLater(() -> refreshServers(servers));
+    }
+
+    private void addServerCreationDialogListener(
+        ServerCreationDialogListener serverCreationDialogListener) {
+        serverCreationDialogListeners.add(serverCreationDialogListener);
+    }
+
+    private void removeServerCreationDialogListener(
+        ServerCreationDialogListener serverCreationDialogListener) {
+        serverCreationDialogListeners.remove(serverCreationDialogListener);
     }
 }

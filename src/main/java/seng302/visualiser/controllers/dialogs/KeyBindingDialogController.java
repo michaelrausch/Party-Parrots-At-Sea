@@ -87,6 +87,7 @@ public class KeyBindingDialogController implements Initializable {
         resetBtn.setOnMouseClicked(event -> {
             gameKeyBind.setToDefault();
             loadKeyBind();
+            showSnackBar("All keys reset!", false);
         });
 
         closeLabel.setOnMouseClicked(event -> ViewManager.getInstance().closeKeyBindingDialog());
