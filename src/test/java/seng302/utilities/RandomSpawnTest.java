@@ -39,7 +39,7 @@ public class RandomSpawnTest {
             .getDirtyMidPoint(compoundMark1.getMidPoint(), compoundMark2.getMidPoint());
         Double maxDistance = GeoUtility.getDistance(testMidPoint, compoundMark2.getMidPoint());
         for (int i = 0; i < 1000; i++) {
-            Token token = randomSpawn.getRandomTokenLocation();
+            Token token = randomSpawn.getRandomToken();
             Double distanceFromCentreRadius = GeoUtility.getDistance(testMidPoint, token);
             assertTrue("Out of bounds token", distanceFromCentreRadius <= maxDistance);
         }

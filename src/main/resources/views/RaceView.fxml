@@ -284,7 +284,7 @@
                           GridPane.columnIndex="4" GridPane.halignment="CENTER"
                           GridPane.rowIndex="1" GridPane.valignment="CENTER">
                             <image>
-                                <Image url="@../icons/ayy_lmao.gif"/>
+                                <Image url="@../icons/slowedIcon.png"/>
                             </image>
                         </ImageView>
                     </children>

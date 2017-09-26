@@ -16,6 +16,7 @@ public class RandomSpawn {
     private static final Integer DEGREES_IN_CIRCLE = 360;
 
     private HashMap<GeoPoint, Double> spawnRadii;
+    private Object[] spawnCentres;
     private Random random;
 
     /**
@@ -27,6 +28,7 @@ public class RandomSpawn {
         random = new Random();
 
         spawnRadii = generateSpawnRadii(markOrder);
+        spawnCentres = spawnRadii.keySet().toArray();
     }
 
     private HashMap<GeoPoint, Double> generateSpawnRadii(List<CompoundMark> markOrder) {
@@ -48,9 +50,8 @@ public class RandomSpawn {
      * @return A random token type at a random location in a random radii of the set of possible
      * radii
      */
-    public Token getRandomTokenLocation() {
-        Object[] keys = spawnRadii.keySet().toArray();
-        GeoPoint randomSpawnCentre = (GeoPoint) keys[random.nextInt(keys.length)];
+    public Token getRandomToken() {
+        GeoPoint randomSpawnCentre = (GeoPoint) spawnCentres[random.nextInt(spawnCentres.length)];
         Double spawnRadius = spawnRadii.get(randomSpawnCentre);
         Double randomDistance = spawnRadius * random.nextDouble();
         Double randomAngle = random.nextDouble() * DEGREES_IN_CIRCLE;

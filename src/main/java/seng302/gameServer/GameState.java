@@ -1,8 +1,6 @@
 package seng302.gameServer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,8 +24,6 @@ import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoundingBoatStatus;
-import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.gameServer.messages.YachtEventType;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.Player;
@@ -359,8 +355,8 @@ public class GameState implements Runnable {
      */
     private void spawnNewToken() {
         tokensInPlay.clear();
-        Token token = randomSpawn.getRandomTokenLocation();
-//        token.assignType(TokenType.WIND_WALKER);
+        Token token = randomSpawn.getRandomToken();
+//        token.assignType(TokenType.RANDOM);
         logger.debug("Spawned token of type " + token.getTokenType());
         tokensInPlay.add(token);
     }
