@@ -360,7 +360,7 @@ public class GameState implements Runnable {
     private void spawnNewToken() {
         tokensInPlay.clear();
         Token token = randomSpawn.getRandomTokenLocation();
-        token.assignType(TokenType.WIND_WALKER);
+//        token.assignType(TokenType.WIND_WALKER);
         logger.debug("Spawned token of type " + token.getTokenType());
         tokensInPlay.add(token);
     }
