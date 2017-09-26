@@ -2,12 +2,6 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -19,6 +13,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.ClientYacht;
@@ -28,12 +23,17 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.utilities.Sounds;
 import seng302.visualiser.MapPreview;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
-import seng302.visualiser.controllers.dialogs.DirectConnectController;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 public class LobbyController implements Initializable {
 
@@ -90,6 +90,17 @@ public class LobbyController implements Initializable {
         Platform.runLater(() -> {
             serverName.setText(ViewManager.getInstance().getProperty("serverName"));
             mapName.setText(ViewManager.getInstance().getProperty("mapName"));
+
+            int tries = 0;
+
+            while (DiscoveryServerClient.getRoomCode() == null && tries <= 10){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                tries ++;
+            }
 
             if (DiscoveryServerClient.getRoomCode() != null){
                 setRoomCode(DiscoveryServerClient.getRoomCode());

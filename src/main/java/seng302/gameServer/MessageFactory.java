@@ -1,18 +1,6 @@
 package seng302.gameServer;
 
-import java.util.ArrayList;
-import java.util.List;
-import seng302.gameServer.messages.BoatLocationMessage;
-import seng302.gameServer.messages.BoatSubMessage;
-import seng302.gameServer.messages.RaceStartNotificationType;
-import seng302.gameServer.messages.RaceStartStatusMessage;
-import seng302.gameServer.messages.RaceStatus;
-import seng302.gameServer.messages.RaceStatusMessage;
-import seng302.gameServer.messages.RaceType;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.gameServer.messages.YachtEventType;
+import seng302.gameServer.messages.*;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.xml.generator.RaceXMLTemplate;
@@ -20,8 +8,10 @@ import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.model.token.Token;
-import seng302.model.token.TokenType;
 import seng302.utilities.XMLGenerator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Class for interfacing between the data we have in the GameState to the messages we need to send

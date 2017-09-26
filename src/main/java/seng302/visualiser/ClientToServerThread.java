@@ -1,36 +1,22 @@
 package seng302.visualiser;
 
+import javafx.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.*;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.utilities.XMLParser;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import javafx.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatActionMessage;
-import seng302.gameServer.messages.ChatterMessage;
-import seng302.gameServer.messages.ClientType;
-import seng302.gameServer.messages.CustomizeRequestMessage;
-import seng302.gameServer.messages.CustomizeRequestType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RegistrationRequestMessage;
-import seng302.gameServer.messages.RegistrationResponseStatus;
-import seng302.gameServer.messages.XMLMessage;
-import seng302.gameServer.messages.XMLMessageSubType;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.utilities.XMLParser;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on
@@ -137,8 +123,10 @@ public class ClientToServerThread implements Runnable {
                             else {
                                 if (clientId == -1) continue; // Do not continue if not registered
                                 streamPackets.add(new StreamPacket(type, payloadLength, timeStamp, payload));
-                                for (ClientSocketListener csl : listeners)
-                                    csl.newPacket();
+                                synchronized (this) {
+                                    for (ClientSocketListener csl : listeners)
+                                        csl.newPacket();
+                                }
                             }
                         }
                     } else {
@@ -322,7 +310,9 @@ public class ClientToServerThread implements Runnable {
     }
 
     public void addStreamObserver (ClientSocketListener streamListener) {
-        listeners.add(streamListener);
+        synchronized (this){
+            listeners.add(streamListener);
+        }
     }
 
     public void removeStreamObserver (ClientSocketListener streamListener) {
@@ -330,11 +320,15 @@ public class ClientToServerThread implements Runnable {
     }
 
     public void addDisconnectionListener (DisconnectedFromHostListener listener) {
-        disconnectionListeners.add(listener);
+        synchronized (this){
+            disconnectionListeners.add(listener);
+        }
     }
 
     public void removeDisconnectionListener (DisconnectedFromHostListener listener) {
-        disconnectionListeners.remove(listener);
+        synchronized (this){
+            disconnectionListeners.remove(listener);
+        }
     }
 
     private int readByte() throws ByteReadException {

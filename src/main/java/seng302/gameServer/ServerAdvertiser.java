@@ -1,7 +1,7 @@
 package seng302.gameServer;
 
-import seng302.discoveryServer.util.ServerListing;
 import seng302.discoveryServer.DiscoveryServerClient;
+import seng302.discoveryServer.util.ServerListing;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -133,7 +133,7 @@ public class ServerAdvertiser {
                 }
             }, 0);
 
-        ServerListing serverListing = new ServerListing(serverName, props.get("map"), getLocalHostIp(), portNo, Integer.parseInt(props.get("capacity")));
+        ServerListing serverListing = new ServerListing(serverName, props.get("map"), new DiscoveryServerClient().getInetIp(), portNo, Integer.parseInt(props.get("capacity")));
         repositoryClient.register(serverListing);
     }
 

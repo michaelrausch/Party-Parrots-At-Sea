@@ -5,17 +5,11 @@ import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
@@ -23,19 +17,21 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.discoveryServer.DiscoveryServer;
-import seng302.gameServer.ServerDescription;
-import seng302.discoveryServer.util.ServerListing;
 import seng302.discoveryServer.DiscoveryServerClient;
-import seng302.gameServer.messages.RoomCodeRequest;
+import seng302.discoveryServer.util.ServerListing;
+import seng302.gameServer.ServerDescription;
+import seng302.gameServer.messages.ServerRegistrationMessage;
 import seng302.utilities.Sounds;
 import seng302.visualiser.ServerListener;
 import seng302.visualiser.ServerListenerDelegate;
 import seng302.visualiser.controllers.cells.ServerCell;
 import seng302.visualiser.controllers.dialogs.DirectConnectController;
-import seng302.visualiser.validators.HostNameFieldValidator;
-import seng302.visualiser.validators.NumberRangeValidator;
-import seng302.visualiser.validators.ValidationTools;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class ServerListController implements Initializable, ServerListenerDelegate {
 
@@ -90,6 +86,8 @@ public class ServerListController implements Initializable, ServerListenerDelega
             Sounds.playButtonClick();
         });
 
+        directConnectDialog = createDirectConnectDialog();
+
         for (JFXTextField textField : Arrays.asList(roomNumber)) {
             // Event for pressing enter to submit direct connection
             textField.setOnKeyPressed(event -> {
@@ -105,26 +103,26 @@ public class ServerListController implements Initializable, ServerListenerDelega
         }
 
         autoSelectGame.setOnMouseReleased(e -> {
-            try {
-                ServerListing listing = new DiscoveryServerClient().getRandomServer();
+            ServerListing listing;
+            DiscoveryServerClient client = new DiscoveryServerClient();
 
-                if (listing == null){
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setHeaderText("Error finding game");
-                    alert.setContentText("No servers are up");
-                    alert.showAndWait();
-                }
-                else{
-                    ViewManager.getInstance().getGameClient().runAsClient(listing.getAddress(), listing.getPortNumber());
-                }
+            try {
+                listing = client.getRandomServer();
             } catch (Exception e1) {
-                e1.printStackTrace();
-                logger.error("Error getting listing");
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText("Error finding game");
-                alert.setContentText("Couldn't contact matchmaking server");
-                alert.showAndWait();
+                ViewManager.getInstance().showErrorSnackBar("Unable to connect to matchmaking server. Are you connected to the internet?");
+                return;
             }
+
+            if (client.didFail()){
+                return;
+            }
+
+            if (listing == null || listing.equals(ServerRegistrationMessage.getEmptyRegistration())) {
+                ViewManager.getInstance().showErrorSnackBar("There are currently no servers available for you to connect to.");
+                return;
+            }
+
+            ViewManager.getInstance().getGameClient().runAsClient(listing.getAddress(), listing.getPortNumber());
         });
 
         /*
@@ -186,9 +184,6 @@ public class ServerListController implements Initializable, ServerListenerDelega
                 e.printStackTrace();
                 logger.warn("Could not create Server Creation Dialog.");
             }
-
-            directConnectDialog = createDirectConnectDialog();
-
         });
     }
 
@@ -235,20 +230,30 @@ public class ServerListController implements Initializable, ServerListenerDelega
     }
 
     private void connectToRoomCode(String roomCode){
+        DiscoveryServerClient client = new DiscoveryServerClient();
+        ServerListing serverListing;
+
+        if (client.didFail()){
+            return;
+        }
+
         try {
-            ServerListing serverListing = new DiscoveryServerClient().getServerForRoomCode(roomCode);
+            serverListing = client.getServerForRoomCode(roomCode);
+        } catch (Exception e) {
+            ViewManager.getInstance().showErrorSnackBar("Error connecting to matchmaking server. Please try again later.");
+            return;
+        }
+
+        if (serverListing == null || serverListing.equals(new ServerListing("","","", 0, 0))){
+            ViewManager.getInstance().showErrorSnackBar("No servers could be found with that room code.");
+            return;
+        }
+
+        try {
             ViewManager.getInstance().getGameClient().runAsClient(serverListing.getAddress(), serverListing.getPortNumber());
         }
-        catch (java.net.ConnectException e){
-            //TODO Add proper dialog
-            logger.warn("Couldn't connect to discovery server");
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Couldn't connect to discovery server");
-            alert.setContentText("Couldn't connect to " + DiscoveryServer.DISCOVERY_SERVER);
-            alert.showAndWait();
-        }
         catch (Exception e) {
-            logger.warn("Error discovering room code");
+            ViewManager.getInstance().showErrorSnackBar("Error connecting to matchmaking service.");
         }
     }
 

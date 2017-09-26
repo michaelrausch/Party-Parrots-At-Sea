@@ -1,6 +1,21 @@
 package seng302.gameServer;
 
 
+import javafx.beans.property.SimpleObjectProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.*;
+import seng302.model.Player;
+import seng302.model.ServerYacht;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.utilities.StreamParser;
+import seng302.utilities.XMLGenerator;
+import seng302.utilities.XMLParser;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,26 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import javafx.beans.property.SimpleObjectProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.ChatterMessage;
-import seng302.gameServer.messages.ClientType;
-import seng302.gameServer.messages.CustomizeRequestType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RegistrationResponseMessage;
-import seng302.gameServer.messages.RegistrationResponseStatus;
-import seng302.model.Player;
-import seng302.model.ServerYacht;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.model.stream.xml.parser.RegattaXMLData;
-import seng302.utilities.StreamParser;
-import seng302.utilities.XMLGenerator;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
-import seng302.utilities.XMLParser;
 
 /**
  * A class describing a single connection to a Client for the purposes of sending and receiving on
@@ -196,6 +191,7 @@ public class ServerToClientThread implements Runnable {
                                 // TODO: 17/08/2017 ajm412: Send a response packet here, not really necessary until we do shapes.
                                 break;
                             case RACE_XML:
+                                System.out.println("Got raceXML from client");
                                 raceXMLProperty.set(
                                     XMLParser.parseRace(
                                         StreamParser.extractXmlMessage(packet)

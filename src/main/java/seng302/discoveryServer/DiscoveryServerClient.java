@@ -2,15 +2,19 @@ package seng302.discoveryServer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.discoveryServer.util.ServerListing;
+import seng302.discoveryServer.util.ServerRepoStreamParser;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoomCodeRequest;
 import seng302.gameServer.messages.ServerRegistrationMessage;
 import seng302.model.stream.packets.PacketType;
-import seng302.discoveryServer.util.ServerListing;
-import seng302.discoveryServer.util.ServerRepoStreamParser;
+import seng302.visualiser.controllers.ViewManager;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,9 +24,28 @@ public class DiscoveryServerClient {
     private static String roomCode = null;
     private Timer serverListingUpdateTimer;
     private Logger logger = LoggerFactory.getLogger(DiscoveryServerClient.class);
+    private String ip = "";
+    private Boolean isInInvalidState = false;
 
     public DiscoveryServerClient() {
+        try {
+            ip = getInetIpAddr();
+        } catch (Exception e) {
+            failError();
+        }
+    }
 
+    public String getInetIp(){
+        return ip;
+    }
+
+    private void failError() {
+        isInInvalidState = true;
+        ViewManager.getInstance().showErrorSnackBar("You do not appear to be able to connect to the internet. Matchmaking will be unavailable.");
+    }
+
+    public boolean didFail(){
+        return isInInvalidState;
     }
 
     /**
@@ -30,6 +53,8 @@ public class DiscoveryServerClient {
      * @param serverListing The listing to register
      */
     public void register(ServerListing serverListing){
+        if (isInInvalidState) return;
+
         if (serverListingUpdateTimer != null){
             serverListingUpdateTimer.cancel();
             serverListingUpdateTimer = null;
@@ -53,7 +78,8 @@ public class DiscoveryServerClient {
      * Stop updating the server registration updates
      */
     public void unregister(){
-        serverListingUpdateTimer.cancel();
+        if (serverListingUpdateTimer != null)
+            serverListingUpdateTimer.cancel();
     }
 
     /**
@@ -143,5 +169,27 @@ public class DiscoveryServerClient {
     public static String getRoomCode(){
         return roomCode;
     }
+
+    public static String getInetIpAddr() throws Exception {
+        URL myIp = new URL("http://checkip.amazonaws.com");
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new InputStreamReader(
+                    myIp.openStream()));
+            String ip = in.readLine();
+            return ip;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+
 }
 

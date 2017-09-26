@@ -48,7 +48,7 @@ public class ServerTable {
            updateTtlForServer(server);
            return;
         }
-        logger.debug("Added new server - " + server.getServerName());
+        logger.debug("Added new server - " + server.getServerName() + " at address: " + server.getAddress() + ":" + server.getPortNumber());
         servers.add(server);
     }
 

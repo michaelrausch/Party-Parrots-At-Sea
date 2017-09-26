@@ -80,6 +80,14 @@ public class App extends Application {
         ViewManager.getInstance().initialStartView(primaryStage);
     }
 
+    private static void runDiscoveryServer(){
+        try{
+            new DiscoveryServer();
+        }
+        catch (Exception e){
+            runDiscoveryServer();
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         try {
@@ -92,7 +100,7 @@ public class App extends Application {
             launch(args);
         }
         else{
-            new DiscoveryServer();
+            runDiscoveryServer();
         }
     }
 }

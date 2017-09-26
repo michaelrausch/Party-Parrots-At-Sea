@@ -1,11 +1,5 @@
 package seng302.gameServer;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.Message;
@@ -17,6 +11,13 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.GeoUtility;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -158,6 +159,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     }
 
     private void sendSetupMessages() {
+        MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
+
         broadcastMessage(MessageFactory.getRaceXML());
         broadcastMessage(MessageFactory.getRegattaXML());
         broadcastMessage(MessageFactory.getBoatXML());
@@ -253,16 +256,26 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 }
             });
         } else {
-            serverToClientThread.addConnectionListener(this::sendSetupMessages);
-            MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
+            //serverToClientThread.addConnectionListener(this::sendSetupMessages);
         }
         serverToClientThreads.add(serverToClientThread);
-        serverToClientThread.addDisconnectListener(this::clientDisconnected);
+
         try {
             ServerAdvertiser.getInstance().setNumberOfPlayers(GameState.getNumberOfPlayers());
         } catch (IOException e) {
             logger.warn("Couldn't update advertisement");
         }
+
+        while (regattaXMLData == null && raceXMLData == null){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+        serverToClientThread.addConnectionListener(this::sendSetupMessages);
+        serverToClientThread.addDisconnectListener(this::clientDisconnected);
     }
 
     /**
@@ -283,6 +296,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 serverToClientThread.sendSetupMessages();
             }
         }
+
         serverToClientThreads.remove(closedConnection);
 
         try {
