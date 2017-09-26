@@ -112,11 +112,29 @@ public class ServerYacht {
         location = geoPoint;
     }
 
+    /**
+     * Powers up a yacht with a given yacht, only after powering it down first to avoid double power
+     * ups
+     *
+     * @param powerUp The given power up
+     */
     public void powerUp(TokenType powerUp) {
+        powerDown();
+        switch (powerUp) {
+            case BOOST:
+                powerUpSpeedMultiplier = GameState.VELOCITY_BOOST_MULTIPLIER;
+                break;
+            case HANDLING:
+                powerUpHandlingMultiplier = GameState.HANDLING_BOOST_MULTIPLIER;
+                break;
+        }
         this.powerUp = powerUp;
         powerUpStartTime = System.currentTimeMillis();
     }
 
+    /**
+     * Powers down a yacht, returning its power multipliers back to 1
+     */
     public void powerDown() {
         this.powerUp = null;
         this.powerUpSpeedMultiplier = 1;

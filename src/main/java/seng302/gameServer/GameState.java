@@ -78,8 +78,8 @@ public class GameState implements Runnable {
     private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     //Powerup Constants
-    private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
-    private static final Integer HANDLING_BOOST_MULTIPLIER = 2;
+    public static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
+    public static final Integer HANDLING_BOOST_MULTIPLIER = 2;
     public static final Long BUMPER_DISABLE_TIME = 5_000L;
     private static final Long TOKEN_SPAWN_TIME = 15_000L;
 
@@ -550,20 +550,6 @@ public class GameState implements Runnable {
             }
 
             TokenType tokenType = collidedToken.getTokenType();
-            switch (tokenType) {
-                case BOOST:
-                    yacht.setPowerUpSpeedMultiplier(VELOCITY_BOOST_MULTIPLIER);
-                    break;
-                case BUMPER:
-                    // TODO: 22/09/17 wmu16
-                    break;
-                case HANDLING:
-                    yacht.setPowerUpHandlingMultiplier(HANDLING_BOOST_MULTIPLIER);
-                    break;
-                case WIND_WALKER:
-                    // TODO: 22/09/17 wmu16
-                    break;
-            }
             yacht.powerUp(tokenType);
 
             String logMessage =

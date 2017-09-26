@@ -55,6 +55,7 @@ import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView3D;
@@ -307,6 +308,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     private void displayPowerUpIcon(ClientYacht yacht, TokenType tokenType) {
         if (yacht == player) {
+            if (iconToDisplay != null) {
+                iconToDisplay.setVisible(false);
+            }
 
             switch (tokenType) {
                 case BOOST:
@@ -349,6 +353,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         if (yacht == player) {
             blinkingTimer.cancel();
             iconToDisplay.setVisible(false);
+            iconToDisplay = null;
         }
     }
 
