@@ -221,6 +221,7 @@ public class ViewManager {
                     .getController();
                 keyBindingDialogController.setGameClient(this.gameClient);
                 keyBindingDialog.show();
+                decorator.requestFocus();
                 Sounds.playButtonClick();
             }
         }

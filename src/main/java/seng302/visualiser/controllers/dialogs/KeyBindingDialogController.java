@@ -71,8 +71,7 @@ public class KeyBindingDialogController implements Initializable {
         buttons = new ArrayList<>();
         Collections.addAll(buttons,
             zoomInbtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn, downwindBtn,
-            viewButton,
-            rightButton, leftButton, forwardButton, backwardButton);
+            viewButton, rightButton, leftButton, forwardButton, backwardButton);
         bindButtonWithAction();
         loadKeyBind();
 
@@ -91,9 +90,6 @@ public class KeyBindingDialogController implements Initializable {
         });
 
         closeLabel.setOnMouseClicked(event -> ViewManager.getInstance().closeKeyBindingDialog());
-
-        keyBindingDialogHeader.setFocusTraversable(true);
-        keyBindingDialogHeader.requestFocus();
     }
 
     /**
@@ -161,6 +157,7 @@ public class KeyBindingDialogController implements Initializable {
             + "-fx-background-color: -fx-pp-front-color; "
             + "-fx-text-fill: -fx-pp-theme-color; "
             + "-fx-font-size: 13;");
+        keyBindingDialogHeader.requestFocus();
     }
 
     /**
