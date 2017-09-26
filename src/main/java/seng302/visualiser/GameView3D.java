@@ -1,6 +1,7 @@
 package seng302.visualiser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.Camera;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
@@ -53,11 +55,12 @@ public class GameView3D {
 
     private Group root3D;
     private SubScene view;
-    //    ParallelCamera camera;
-    private PerspectiveCamera camera;
-    private PerspectiveCamera camera2;
-    private PerspectiveCamera camera3;
     private Group gameObjects;
+
+    // Cameras
+    private PerspectiveCamera isometricCam;
+    private PerspectiveCamera topDownCam;
+    private PerspectiveCamera chaseCam;
 
     private double bufferSize = 0;
     private double canvasWidth = 200;
@@ -93,28 +96,25 @@ public class GameView3D {
     }
 
     public GameView3D () {
-        camera = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH);
-        camera.setFarClip(600);
-        camera.setNearClip(0.1);
-        camera.setFieldOfView(FOV);
+        isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y,
+            DEFAULT_CAMERA_DEPTH);
+        topDownCam = new TopDownCamera();
+        chaseCam = new ChaseCamera();
 
-        camera2 = new TopDownCamera();
-        camera2.setFarClip(600);
-        camera2.setNearClip(0.1);
-        camera2.setFieldOfView(FOV);
-
-        camera3 = new ChaseCamera();
-        camera3.setFarClip(600);
-        camera3.setNearClip(0.1);
-        camera3.setFieldOfView(FOV);
+        for (PerspectiveCamera pc : Arrays.asList(isometricCam, topDownCam, chaseCam)) {
+            pc.setFarClip(600);
+            pc.setNearClip(0.1);
+            pc.setFieldOfView(FOV);
+        }
 
         gameObjects = new Group();
-        root3D = new Group(camera, gameObjects);
+        root3D = new Group(isometricCam, gameObjects);
         view = new SubScene(
             root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
         );
-        view.setCamera(camera);
-        camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
+        view.setCamera(isometricCam);
+        isometricCam.getTransforms()
+            .add(new Rotate(30, new Point3D(1, 0, 0))); //todo: move this into isometric cam?
 
         gameObjects.getChildren().addAll(
             ModelFactory.importModel(ModelType.OCEAN).getAssets(),
@@ -449,16 +449,20 @@ public class GameView3D {
                 ((RaceCamera) view.getCamera()).panRight();
                 break;
             case F1:
-                if (view.getCamera().equals(camera)) {
-                    view.setCamera(camera2);
-                    if (view.getCamera() instanceof TopDownCamera) {
-                        ((RaceCamera) view.getCamera()).zoomIn();
-                    }
-                } else if (view.getCamera().equals(camera2)) {
-                    view.setCamera(camera3);
-                } else {
-                    view.setCamera(camera);
-                }
+                toggleCamera();
+                break;
+        }
+    }
+
+    private void toggleCamera() {
+        Camera currCamera = view.getCamera();
+
+        if (currCamera.equals(isometricCam)) {
+            view.setCamera(topDownCam);
+        } else if (currCamera.equals(topDownCam)) {
+            view.setCamera(chaseCam);
+        } else {
+            view.setCamera(isometricCam);
         }
     }
 
@@ -498,8 +502,8 @@ public class GameView3D {
 
             if (clientYacht.getSourceId().equals(
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
-                ((ChaseCamera) camera3).setPlayerBoat(newBoat, clientYacht);
-                ((TopDownCamera) camera2).setPlayerBoat(newBoat);
+                ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
+                ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
             }
         }
         Platform.runLater(() -> {

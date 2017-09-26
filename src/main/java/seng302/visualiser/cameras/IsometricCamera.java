@@ -7,6 +7,13 @@ import javafx.scene.transform.Translate;
 
 public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
 
+    private final Double PAN_LIMIT = 50.0;
+    private final Double NEAR_ZOOM_LIMIT = -15.0;
+    private final Double FAR_ZOOM_LIMIT = -125.0;
+
+    private Double horizontalAdjustment;
+    private Double verticalAdjustment;
+
     ObservableList<Transform> transforms;
 
     public IsometricCamera(Double cameraStartX, Double cameraStartY, Double cameraDepth) {
