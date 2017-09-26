@@ -17,6 +17,9 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
     private final Double NEAR_ZOOM_LIMIT = -15.0;
     private final Double FAR_ZOOM_LIMIT = -125.0;
 
+    private final Double ZOOM_STEP = 2.5;
+    private final Double PAN_STEP = 2.5;
+
     private ObservableList<Transform> transforms;
     private BoatObject playerBoat;
 
@@ -77,31 +80,31 @@ public class ChaseCamera extends PerspectiveCamera implements RaceCamera {
 
     @Override
     public void zoomIn() {
-        adjustZoomFactor(5.0);
+        adjustZoomFactor(ZOOM_STEP);
     }
 
     @Override
     public void zoomOut() {
-        adjustZoomFactor(-5.0);
+        adjustZoomFactor(-ZOOM_STEP);
     }
 
     @Override
     public void panLeft() {
-        adjustHorizontalPan(-5.0);
+        adjustHorizontalPan(-PAN_STEP);
     }
 
     @Override
     public void panRight() {
-        adjustHorizontalPan(5.0);
+        adjustHorizontalPan(PAN_STEP);
     }
 
     @Override
     public void panUp() {
-        adjustVerticalPan(-5.0);
+        adjustVerticalPan(-PAN_STEP);
     }
 
     @Override
     public void panDown() {
-        adjustVerticalPan(5.0);
+        adjustVerticalPan(PAN_STEP);
     }
 }
