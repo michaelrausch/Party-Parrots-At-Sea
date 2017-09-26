@@ -78,7 +78,6 @@ public class ServerToClientThread implements Runnable {
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
     private DisconnectListener disconnectListener;
 
-    private ServerYacht yacht;
     private Player player;
 
     public ServerToClientThread(Socket socket) {
@@ -101,33 +100,12 @@ public class ServerToClientThread implements Runnable {
     }
 
     private void setUpPlayer(){
-        BufferedReader fn;
-        String fName = "";
-        BufferedReader ln;
-        String lName = "";
+        String shortName = "p" + sourceId;
+        String longName = "player " + sourceId;
 
-        fn = new BufferedReader(
-                new InputStreamReader(
-                        ServerToClientThread.class.getResourceAsStream(
-                                "/server_config/CSV_Database_of_First_Names.csv"
-                        )
-                )
-        );
-        List<String> all = fn.lines().collect(Collectors.toList());
-        fName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
-        ln = new BufferedReader(
-                new InputStreamReader(
-                        ServerToClientThread.class.getResourceAsStream(
-                                "/server_config/CSV_Database_of_Last_Names.csv"
-                        )
-                )
-        );
-        all = ln.lines().collect(Collectors.toList());
-        lName = all.get(ThreadLocalRandom.current().nextInt(0, all.size()));
 
         ServerYacht yacht = new ServerYacht(
-            BoatMeshType.DINGHY, sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
-        );
+            BoatMeshType.DINGHY, sourceId, sourceId.toString(), shortName, longName, "NZ");
 
         player = new Player(socket, yacht);
         GameState.addYacht(sourceId, yacht);
@@ -316,10 +294,6 @@ public class ServerToClientThread implements Runnable {
 
     public Socket getSocket() {
         return socket;
-    }
-
-    public ServerYacht getYacht() {
-        return yacht;
     }
 
     public void addConnectionListener(ConnectionListener listener) {

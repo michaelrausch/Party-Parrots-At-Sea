@@ -382,8 +382,8 @@ public class GameState implements Runnable {
 
         //Get a random token location with random type
         Token token = allTokens.get(random.nextInt(allTokens.size()));
-        token.assignRandomType();
-        token.assignType(TokenType.WIND_WALKER);
+//        token.assignRandomType();
+        token.assignType(TokenType.BUMPER);
 
         logger.debug("Spawned token of type " + token.getTokenType());
 
