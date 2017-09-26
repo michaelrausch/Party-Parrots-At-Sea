@@ -14,8 +14,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -28,6 +26,8 @@ import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.gameServer.messages.YachtEventType;
 import seng302.model.ClientYacht;
+import seng302.model.GameKeyBind;
+import seng302.model.KeyAction;
 import seng302.model.RaceState;
 import seng302.model.stream.packets.StreamPacket;
 import seng302.model.stream.parser.MarkRoundingData;
@@ -44,6 +44,7 @@ import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
+import seng302.visualiser.controllers.dialogs.PopupDialogController;
 
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
@@ -66,6 +67,8 @@ public class GameClient {
 
     private ArrayList<ClientYacht> finishedBoats = new ArrayList<>();
 
+    private GameKeyBind gameKeyBind; // all the key binding setting.
+
     private ObservableList<String> clientLobbyList = FXCollections.observableArrayList();
 
     /**
@@ -75,6 +78,7 @@ public class GameClient {
      */
     public GameClient(Pane holder) {
         this.holderPane = holder;
+        this.gameKeyBind = GameKeyBind.getInstance();
     }
 
     /**
@@ -164,10 +168,12 @@ public class GameClient {
 
     private void showConnectionError (String message) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setHeaderText("Connection Error");
-            alert.setContentText(message);
-            alert.showAndWait();
+            PopupDialogController controller = ViewManager.getInstance().showPopupDialog();
+            controller.setHeader("Oops");
+            controller.setContent(message);
+            controller.setOptionButtonText("GO HOME");
+            controller
+                .setOptionButtonEventHandler(event -> ViewManager.getInstance().goToStartView());
         });
     }
 
@@ -373,16 +379,16 @@ public class GameClient {
             }
             return;
         }
-        switch (e.getCode()) {
-            case SPACE: // align with vmg
-                socketThread.sendBoatAction(BoatAction.VMG); break;
-            case PAGE_UP: // upwind
-                socketThread.sendBoatAction(BoatAction.UPWIND); break;
-            case PAGE_DOWN: // downwind
-                socketThread.sendBoatAction(BoatAction.DOWNWIND); break;
-            case ENTER: // tack/gybe
-                // if chat box is active take whatever is in there and send it to server
-                socketThread.sendBoatAction(BoatAction.TACK_GYBE); break;
+
+        if (gameKeyBind.getKeyCode(KeyAction.VMG) == e.getCode()) { // align with vmg
+            socketThread.sendBoatAction(BoatAction.VMG);
+        } else if (gameKeyBind.getKeyCode(KeyAction.UPWIND) == e.getCode()) { // upwind
+            socketThread.sendBoatAction(BoatAction.UPWIND);
+        } else if (gameKeyBind.getKeyCode(KeyAction.DOWNWIND) == e.getCode()) { // downwind
+            socketThread.sendBoatAction(BoatAction.DOWNWIND);
+        } else if (gameKeyBind.getKeyCode(KeyAction.TACK_GYBE) == e.getCode()) { // tack/gybe
+            // if chat box is active take whatever is in there and send it to server
+            socketThread.sendBoatAction(BoatAction.TACK_GYBE);
         }
     }
 
@@ -391,15 +397,17 @@ public class GameClient {
         if (raceView.isChatInputFocused()) {
             return;
         }
-        switch (e.getCode()) {
-            //TODO 12/07/17 Determine the sail state and send the appropriate packet (eg. if sails are in, send a sail out packet)
-            case SHIFT:  // sails in/sails out
+
+        if (gameKeyBind.getKeyCode(KeyAction.SAILS_STATE) == e.getCode()) {  // sails in/sails out
+            if (allBoatsMap.get(socketThread.getClientId()).getSailIn()) {
+                socketThread.sendBoatAction(BoatAction.SAILS_OUT);
+            } else {
                 socketThread.sendBoatAction(BoatAction.SAILS_IN);
-                allBoatsMap.get(socketThread.getClientId()).toggleSail();
-                break;
-            case PAGE_UP:
-            case PAGE_DOWN:
-                socketThread.sendBoatAction(BoatAction.MAINTAIN_HEADING); break;
+            }
+            allBoatsMap.get(socketThread.getClientId()).toggleSail();
+        } else if (gameKeyBind.getKeyCode(KeyAction.UPWIND) == e.getCode()
+            || gameKeyBind.getKeyCode(KeyAction.DOWNWIND) == e.getCode()) {
+            socketThread.sendBoatAction(BoatAction.MAINTAIN_HEADING);
         }
     }
 
@@ -455,5 +463,15 @@ public class GameClient {
 
     public Map<Integer, ClientYacht> getAllBoatsMap() {
         return allBoatsMap;
+    }
+
+    public void sendToggleTurningModePacket() {
+        if (socketThread != null) {
+            if (gameKeyBind.isContinuouslyTurning()) {
+                socketThread.sendBoatAction(BoatAction.CONTINUOUSLY_TURNING);
+            } else {
+                socketThread.sendBoatAction(BoatAction.DEFAULT_TURNING);
+            }
+        }
     }
 }

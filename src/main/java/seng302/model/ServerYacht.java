@@ -1,5 +1,6 @@
 package seng302.model;
 
+import java.util.HashMap;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,12 +9,6 @@ import seng302.gameServer.messages.BoatStatus;
 import seng302.model.mark.Mark;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
-
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
@@ -61,6 +56,8 @@ public class ServerYacht {
     private TokenType powerUp;
     private Long powerUpStartTime;
 
+    //turning mode
+    private Boolean continuouslyTurning;
 
     public ServerYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
         String boatName, String country) {
@@ -85,6 +82,8 @@ public class ServerYacht {
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
         this.hasPassedThroughGate = false;
+
+        this.continuouslyTurning = false;
     }
 
 
@@ -192,44 +191,52 @@ public class ServerYacht {
     public void turnUpwind() {
         disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
-        if (normalizedHeading == 0) {
-            if (lastHeading < 180) {
-                adjustHeading(-turnStep);
-            } else {
-                adjustHeading(turnStep);
-            }
-        } else if (normalizedHeading == 180) {
-            if (lastHeading < 180) {
-                adjustHeading(turnStep);
-            } else {
-                adjustHeading(-turnStep);
-            }
-        } else if (normalizedHeading < 180) {
-            adjustHeading(-turnStep);
-        } else {
+        if (continuouslyTurning) {
             adjustHeading(turnStep);
+        } else {
+            if (normalizedHeading == 0) {
+                if (lastHeading < 180) {
+                    adjustHeading(-turnStep);
+                } else {
+                    adjustHeading(turnStep);
+                }
+            } else if (normalizedHeading == 180) {
+                if (lastHeading < 180) {
+                    adjustHeading(turnStep);
+                } else {
+                    adjustHeading(-turnStep);
+                }
+            } else if (normalizedHeading < 180) {
+                adjustHeading(-turnStep);
+            } else {
+                adjustHeading(turnStep);
+            }
         }
     }
 
     public void turnDownwind() {
         disableAutoPilot();
         Double normalizedHeading = normalizeHeading();
-        if (normalizedHeading == 0) {
-            if (lastHeading < 180) {
-                adjustHeading(turnStep);
-            } else {
-                adjustHeading(-turnStep);
-            }
-        } else if (normalizedHeading == 180) {
-            if (lastHeading < 180) {
-                adjustHeading(-turnStep);
-            } else {
-                adjustHeading(turnStep);
-            }
-        } else if (normalizedHeading < 180) {
-            adjustHeading(turnStep);
-        } else {
+        if (continuouslyTurning) {
             adjustHeading(-turnStep);
+        } else {
+            if (normalizedHeading == 0) {
+                if (lastHeading < 180) {
+                    adjustHeading(turnStep);
+                } else {
+                    adjustHeading(-turnStep);
+                }
+            } else if (normalizedHeading == 180) {
+                if (lastHeading < 180) {
+                    adjustHeading(-turnStep);
+                } else {
+                    adjustHeading(turnStep);
+                }
+            } else if (normalizedHeading < 180) {
+                adjustHeading(turnStep);
+            } else {
+                adjustHeading(-turnStep);
+            }
         }
     }
 
@@ -444,5 +451,9 @@ public class ServerYacht {
 
     public BoatMeshType getBoatType() {
         return boatType;
+    }
+
+    public void setContinuouslyTurning(Boolean continuouslyTurning) {
+        this.continuouslyTurning = continuouslyTurning;
     }
 }

@@ -175,7 +175,7 @@ public class ClientToServerThread implements Runnable {
      * Sends a request to the server asking for a source ID
      */
     private void sendRegistrationRequest() {
-        RegistrationRequestMessage requestMessage = new RegistrationRequestMessage(ClientType.PLAYER);
+        RegistrationRequestMessage requestMessage = new RegistrationRequestMessage(ClientType.PLAYER, clientId);
 
         try {
             os.write(requestMessage.getBuffer());
@@ -193,7 +193,6 @@ public class ClientToServerThread implements Runnable {
     private void processRegistrationResponse(StreamPacket packet){
         int sourceId = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 0, 3));
         int statusCode = (int) Message.bytesToLong(Arrays.copyOfRange(packet.getPayload(), 4,5));
-
         RegistrationResponseStatus status = RegistrationResponseStatus.getResponseStatus(statusCode);
 
         if (status.equals(RegistrationResponseStatus.SUCCESS_PLAYING)){
@@ -243,7 +242,7 @@ public class ClientToServerThread implements Runnable {
                         new TimerTask() {
                             @Override
                             public void run() {
-                                sendBoatActionMessage(new BoatActionMessage(BoatAction.DOWNWIND));
+                                sendBoatActionMessage(new BoatActionMessage(BoatAction.DOWNWIND, clientId));
                             }
                         }, 0, PACKET_SENDING_INTERVAL_MS
                     );
@@ -256,14 +255,14 @@ public class ClientToServerThread implements Runnable {
                         new TimerTask() {
                             @Override
                             public void run() {
-                                sendBoatActionMessage(new BoatActionMessage(BoatAction.UPWIND));
+                                sendBoatActionMessage(new BoatActionMessage(BoatAction.UPWIND, clientId));
                             }
                         }, 0, PACKET_SENDING_INTERVAL_MS
                     );
                 }
                 break;
             default:
-                sendBoatActionMessage(new BoatActionMessage(actionType));
+                sendBoatActionMessage(new BoatActionMessage(actionType, clientId));
                 break;
         }
     }

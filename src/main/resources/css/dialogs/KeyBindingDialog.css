@@ -1,0 +1,59 @@
+#keyBindingDialogHeader {
+    -fx-font-size: 27px;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#closeLabel {
+    -fx-font-size: 30;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#closeLabel:hover {
+    -fx-text-fill: red;
+    -fx-font-size: 33px;
+}
+
+.sectionLabel {
+    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-font-size: 20px;
+}
+
+JFXButton {
+    -fx-background-color: -fx-pp-light-text-color;
+    -fx-text-fill: -fx-pp-theme-color;
+    -fx-font-size: 13px;
+}
+
+Label {
+    -fx-font-size: 15px;
+    -fx-text-fill: -fx-pp-theme-color;
+    -fx-effect: -fx-pp-dropshadow-light;
+}
+
+JFXToggleButton {
+    -jfx-toggle-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-theme-color;
+}
+
+#resetBtn {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-front-color;
+    -fx-effect: -fx-pp-dropshadow-light;
+    -fx-font-size: 18;
+}
+
+#resetBtn:hover {
+    -fx-font-size: 20;
+}
+
+.jfx-snackbar-content {
+    -fx-background-color: #323232;
+}
+
+.jfx-snackbar-toast {
+    -fx-text-fill: WHITE;
+}
+
+.jfx-snackbar-action {
+    -fx-text-fill: #ff4081;
+}
