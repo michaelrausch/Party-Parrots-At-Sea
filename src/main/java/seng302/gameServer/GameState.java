@@ -382,8 +382,8 @@ public class GameState implements Runnable {
 
         //Get a random token location with random type
         Token token = allTokens.get(random.nextInt(allTokens.size()));
-//        token.assignRandomType();
-        token.assignType(TokenType.BUMPER);
+        token.assignRandomType();
+//        token.assignType(TokenType.WIND_WALKER);
 
         logger.debug("Spawned token of type " + token.getTokenType());
 
@@ -440,8 +440,9 @@ public class GameState implements Runnable {
                     windWalk(yacht);
                     break;
                 case BUMPER:
-                    ServerYacht collidedYacht = checkYachtCollision(yacht);
+                    ServerYacht collidedYacht = checkYachtCollision(yacht, true);
                     if (collidedYacht != null) {
+                        System.out.println("WE OUT HERE");
                         yacht.powerDown();
                         boatTempShutDown(collidedYacht);
                         notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
@@ -497,17 +498,12 @@ public class GameState implements Runnable {
 
     /**
      * This function changes the wind to be at an angle that causes the yacht in question to be at
-     * VMG.
+     * its fastest velocity
      *
      * @param yacht The yacht to fix the wind for
      */
     private void windWalk(ServerYacht yacht) {
-        HashMap<Double, Double> upwindOptimal = PolarTable.getOptimalUpwindVMG(windSpeed);
-        Double optimalAngle = null;
-        for (Double windAngle : upwindOptimal.keySet()) {
-            optimalAngle = windAngle;
-        }
-
+        Double optimalAngle = PolarTable.getOptimalAngle();
         Double heading = yacht.getHeading();
         windDirection = (double) Math.floorMod(Math.round(heading + optimalAngle), 360L);
     }
@@ -597,7 +593,7 @@ public class GameState implements Runnable {
      */
     public static void checkCollision(ServerYacht serverYacht) {
         //Yacht Collision
-        ServerYacht collidedYacht = checkYachtCollision(serverYacht);
+        ServerYacht collidedYacht = checkYachtCollision(serverYacht, false);
         Mark collidedMark = checkMarkCollision(serverYacht);
 
         if (collidedYacht != null) {
@@ -946,15 +942,22 @@ public class GameState implements Runnable {
      * Collision detection which iterates through all the yachts and check if any yacht collided
      * with this yacht. Return collided yacht or null if no collision.
      *
+     * UPDATE: HACK!!! wmu16 - forBumperCollision is (the goddamn dirtiest) dirty flag to fix a
+     * weird bug where the bumper collision would not be registerd but the knock back collision would.
+     * In other words, only set the 'forBumperCollision' flag true if used for the bumper power up.
+     *
      * @return yacht to compare to all other yachts.
      */
-    private static ServerYacht checkYachtCollision(ServerYacht yacht) {
+    private static ServerYacht checkYachtCollision(ServerYacht yacht, Boolean forBumperCollision) {
+        Double collisionDistance =
+            (forBumperCollision) ? YACHT_COLLISION_DISTANCE + 2.5 : YACHT_COLLISION_DISTANCE;
 
         for (ServerYacht otherYacht : GameState.getYachts().values()) {
             if (otherYacht != yacht) {
                 Double distance = GeoUtility
                     .getDistance(otherYacht.getLocation(), yacht.getLocation());
-                if (distance < YACHT_COLLISION_DISTANCE) {
+                ;
+                if (distance < collisionDistance) {
                     return otherYacht;
                 }
             }

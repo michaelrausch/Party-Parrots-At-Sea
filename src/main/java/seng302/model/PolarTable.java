@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A static class for parsing and storing the polars. Will parse the whole polar table and also store the optimised
@@ -17,6 +19,7 @@ public final class PolarTable {
     private static HashMap<Double, HashMap<Double, Double>> polarTable;
     private static HashMap<Double, HashMap<Double, Double>> upwindOptimal;
     private static HashMap<Double, HashMap<Double, Double>> downwindOptimal;
+    private static Double optimalAngle;
 
     private static int upTwaIndex;
     private static int dnTwaIndex;
@@ -33,11 +36,13 @@ public final class PolarTable {
         upwindOptimal = new HashMap<>();
         downwindOptimal = new HashMap<>();
 
-        String line;
+        String line = null;
+        String check;
         Boolean isHeaderLine = true;
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(polarFile))) {
-            while ((line = br.readLine()) != null) {
+            while ((check = br.readLine()) != null) {
+                line = check;
                 String[] thisLine = line.split(",");
 
                 //Initial line in file
@@ -66,11 +71,35 @@ public final class PolarTable {
                     upwindOptimal.put(thisWindSpeed, thisUpWindPolar);
                     downwindOptimal.put(thisWindSpeed, thisDnWindPolar);
                 }
+
+
             }
+            getMaxSpeedAngle(line);
 
         } catch (IOException e) {
             System.out.println("[PolarTable] IO exception");
         }
+    }
+
+
+    /**
+     * Passes the final line of the polar table and iterates over the speeds for each
+     * angle, velocity pair to find the angle that produces the highest velocity
+     *
+     * @param line The last line of the polar file
+     */
+    private static void getMaxSpeedAngle(String line) {
+        String[] theLastLine = line.split(",");
+        Double maxWindVal = Double.parseDouble(theLastLine[0]);
+        Double optimalAngle = Double.parseDouble(theLastLine[1]);
+        Double maxSpeed = Double.parseDouble(theLastLine[2]);
+        for (Map.Entry<Double, Double> entry : polarTable.get(maxWindVal).entrySet()) {
+            if (entry.getValue() > maxSpeed) {
+                maxSpeed = entry.getValue();
+                optimalAngle = entry.getKey();
+            }
+        }
+        PolarTable.optimalAngle = optimalAngle;
     }
 
 
@@ -85,11 +114,15 @@ public final class PolarTable {
             String thisItem = thisLine[i];
             if (thisItem.toLowerCase().startsWith("uptwa")) {
                 upTwaIndex = i;
-            }
-            else if (thisItem.toLowerCase().startsWith("dntwa")) {
+            } else if (thisItem.toLowerCase().startsWith("dntwa")) {
                 dnTwaIndex = i;
             }
         }
+    }
+
+
+    public static Double getOptimalAngle() {
+        return optimalAngle;
     }
 
 
