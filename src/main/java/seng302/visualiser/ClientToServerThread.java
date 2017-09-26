@@ -30,6 +30,9 @@ import seng302.gameServer.messages.XMLMessage;
 import seng302.gameServer.messages.XMLMessageSubType;
 import seng302.model.stream.packets.PacketType;
 import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 
 /**
@@ -373,18 +376,23 @@ public class ClientToServerThread implements Runnable {
         return clientId;
     }
 
-    public void sendXML(String path, String serverName, int legRepeats) {
-        Pair<String, String> regattaRace = XMLParser.parseRaceDef(path, serverName, legRepeats);
-
+    public void sendXML(String path, String serverName, Integer legRepeats, Integer maxPlayers, Boolean tokensEnabled) {
+        Pair<RegattaXMLTemplate, RaceXMLTemplate> regattaRace = XMLParser.parseRaceDef(
+            path, serverName, legRepeats, maxPlayers, tokensEnabled
+        );
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        xmlGenerator.setRegattaTemplate(regattaRace.getKey());
+        xmlGenerator.setRaceTemplate(regattaRace.getValue());
+        String regatta = xmlGenerator.getRegattaAsXml();
+        String race = xmlGenerator.getRaceAsXml();
         sendByteBuffer(
             new XMLMessage(
-                regattaRace.getKey(), XMLMessageSubType.REGATTA, regattaRace.getKey().length()
+                regatta, XMLMessageSubType.REGATTA, regatta.length()
             ).getBuffer()
         );
-
         sendByteBuffer(
             new XMLMessage(
-                regattaRace.getValue(), XMLMessageSubType.RACE, regattaRace.getValue().length()
+                race, XMLMessageSubType.RACE, race.length()
             ).getBuffer()
         );
     }

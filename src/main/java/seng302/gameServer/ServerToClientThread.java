@@ -15,6 +15,7 @@ import java.util.zip.Checksum;
 import javafx.beans.property.SimpleObjectProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.ChatterMessage;
 import seng302.gameServer.messages.ClientType;
@@ -196,11 +197,11 @@ public class ServerToClientThread implements Runnable {
                                 // TODO: 17/08/2017 ajm412: Send a response packet here, not really necessary until we do shapes.
                                 break;
                             case RACE_XML:
+                                Document document = StreamParser.extractXmlMessage(packet);
                                 raceXMLProperty.set(
-                                    XMLParser.parseRace(
-                                        StreamParser.extractXmlMessage(packet)
-                                    )
+                                    XMLParser.parseRace(document)
                                 );
+                                GameState.setMaxPlayers(XMLParser.getMaxPlayers(document));
                                 break;
                             case REGATTA_XML:
                                 regattaXMLProperty.set(

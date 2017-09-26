@@ -56,7 +56,8 @@ public class MessageFactory {
                 new ArrayList<>(),
                 race.getMarkSequence(),
                 race.getCourseLimit(),
-                new ArrayList<>(race.getCompoundMarks().values())
+                new ArrayList<>(race.getCompoundMarks().values()),
+                GameState.getCapacity(), true
             )
         );
         String xmlStr = xmlGenerator.getRaceAsXml();
