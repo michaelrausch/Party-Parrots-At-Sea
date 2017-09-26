@@ -30,7 +30,6 @@ public class RandomSpawn {
     }
 
     private HashMap<GeoPoint, Double> generateSpawnRadii(List<CompoundMark> markOrder) {
-        System.out.println(markOrder);
         HashMap<GeoPoint, Double> spawnRadii = new HashMap<>();
         for (int i = 0; i < markOrder.size() - 1; i++) {
             GeoPoint spawnCentre = GeoUtility.getDirtyMidPoint(
