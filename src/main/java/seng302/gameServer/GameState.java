@@ -84,7 +84,7 @@ public class GameState implements Runnable {
     public static final Integer HANDLING_BOOST_MULTIPLIER = 2;
     private static final Double BAD_RANDOM_SPEED_PENALTY = 0.3;
     public static final Long BUMPER_DISABLE_TIME = 5_000L;
-    private static final Long TOKEN_SPAWN_TIME = 15_000L;
+    private static final Long TOKEN_SPAWN_TIME = 30_000L;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -360,6 +360,7 @@ public class GameState implements Runnable {
     private void spawnNewToken() {
         tokensInPlay.clear();
         Token token = randomSpawn.getRandomTokenLocation();
+        token.assignType(TokenType.WIND_WALKER);
         logger.debug("Spawned token of type " + token.getTokenType());
         tokensInPlay.add(token);
     }
@@ -436,26 +437,47 @@ public class GameState implements Runnable {
 
 
     /**
-     * Powers up a yacht with the given token type.
+     * Powers up a thisYacht with the given token type.
      *
-     * @param yacht The yacht to be powered up
-     * @param collidedToken The token which this yacht collided with
+     * @param thisYacht The yacht to be powered up
+     * @param collidedToken The token which this thisYacht collided with
      */
-    private void powerUpYacht(ServerYacht yacht, Token collidedToken) {
+    private void powerUpYacht(ServerYacht thisYacht, Token collidedToken) {
         //The random token has a 50% chance of becoming another token else becoming a speed detriment!
         if (collidedToken.getTokenType() == TokenType.RANDOM && new Random().nextBoolean()) {
             collidedToken.realiseRandom();
         }
 
-        yacht.powerUp(collidedToken.getTokenType());
+        //If another yacht has the wind walker token, They should be powered down. Only one allowed!
+        else if (collidedToken.getTokenType() == TokenType.WIND_WALKER) {
+            for (ServerYacht otherYacht : yachts.values()) {
+                if (otherYacht != thisYacht && otherYacht.getPowerUp() == TokenType.WIND_WALKER) {
+                    powerDownYacht(otherYacht);
+                }
+            }
+        }
+
+        thisYacht.powerUp(collidedToken.getTokenType());
         String logMessage =
-            yacht.getBoatName() + " has picked up a " + collidedToken.getTokenType().getName()
+            thisYacht.getBoatName() + " has picked up a " + collidedToken.getTokenType().getName()
                 + " token";
-        notifyMessageListeners(MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
+        notifyMessageListeners(
+            MessageFactory.makeChatterMessage(thisYacht.getSourceId(), logMessage));
         notifyMessageListeners(MessageFactory.getRaceXML());
-        notifyMessageListeners(MessageFactory.makePickupMessage(yacht, collidedToken));
+        notifyMessageListeners(MessageFactory.makePickupMessage(thisYacht, collidedToken));
         logger.debug(
-            "Yacht: " + yacht.getShortName() + " got powerup " + collidedToken.getTokenType());
+            "Yacht: " + thisYacht.getShortName() + " got powerup " + collidedToken.getTokenType());
+    }
+
+    private void powerDownYacht(ServerYacht yacht) {
+        String logMessage =
+            yacht.getBoatName() + "'s " + yacht.getPowerUp().getName() + "  expired";
+        notifyMessageListeners(
+            MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
+        notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
+        logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+
+        yacht.powerDown();
     }
 
     // TODO: 23/09/17 wmu16 - This is a hacky way to have the boat power down. Need some sort of separation between token and status effect :/
@@ -487,14 +509,7 @@ public class GameState implements Runnable {
         if (yacht.getPowerUp() != null) {
             if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > yacht.getPowerUp()
                 .getTimeout()) {
-                String logMessage =
-                    yacht.getBoatName() + "'s " + yacht.getPowerUp().getName() + "  expired";
-                notifyMessageListeners(
-                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
-                notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
-                logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
-
-                yacht.powerDown();
+                powerDownYacht(yacht);
             }
         }
     }
