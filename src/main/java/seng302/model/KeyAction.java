@@ -10,7 +10,12 @@ public enum KeyAction {
     SAILS_STATE(4),
     TACK_GYBE(5),
     UPWIND(6),
-    DOWNWIND(7);
+    DOWNWIND(7),
+    VIEW(8),
+    RIGHT(9),
+    LEFT(10),
+    FORWARD(11),
+    BACKWARD(12);
 
     private final int type;
     private static final Map<Integer, KeyAction> intToTypeMap = new HashMap<>();

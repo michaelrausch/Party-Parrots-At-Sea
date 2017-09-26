@@ -1,6 +1,8 @@
 package seng302.visualiser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.Camera;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
@@ -20,6 +23,9 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
+import seng302.model.GameKeyBind;
+import seng302.model.GeoPoint;
+import seng302.model.KeyAction;
 import seng302.model.Limit;
 import seng302.model.ScaledPoint;
 import seng302.model.mark.CompoundMark;
@@ -28,6 +34,11 @@ import seng302.model.mark.Mark;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
+import seng302.visualiser.cameras.ChaseCamera;
+import seng302.visualiser.cameras.IsometricCamera;
+import seng302.visualiser.cameras.RaceCamera;
+import seng302.visualiser.cameras.TopDownCamera;
+import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 import seng302.visualiser.fxObjects.assets_3D.Marker3D;
@@ -37,18 +48,19 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
 /**
  * Collection of animated3D assets that displays a race.
  */
-
 public class GameView3D extends GameView{
 
     private final double FOV = 60;
-    private final double DEFAULT_CAMERA_DEPTH = -125;
     private final double DEFAULT_CAMERA_X = 0;
     private final double DEFAULT_CAMERA_Y = 100;
 
     private Group root3D;
     private SubScene view;
-    private PerspectiveCamera camera;
     private Group raceBorder = new Group();
+    // Cameras
+    private PerspectiveCamera isometricCam;
+    private PerspectiveCamera topDownCam;
+    private PerspectiveCamera chaseCam;
 
     /* Note that if either of these is null then values for it have not been added and the other
        should be used as the limits of the map. */
@@ -63,21 +75,22 @@ public class GameView3D extends GameView{
     private Double windDir;
 
     public GameView3D () {
-        canvasWidth = canvasHeight = 220;
-        camera = new PerspectiveCamera(true);
-        camera.getTransforms().addAll(
-            new Translate(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH)
-        );
-        camera.setFarClip(600);
-        camera.setNearClip(0.1);
-        camera.setFieldOfView(FOV);
+        isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y);
+        topDownCam = new TopDownCamera();
+        chaseCam = new ChaseCamera();
+
+        for (PerspectiveCamera pc : Arrays.asList(isometricCam, topDownCam, chaseCam)) {
+            pc.setFarClip(600);
+            pc.setNearClip(0.1);
+            pc.setFieldOfView(FOV);
+        }
+
         gameObjects = new Group();
-        root3D = new Group(camera, gameObjects);
+        root3D = new Group(isometricCam, gameObjects);
         view = new SubScene(
             root3D, 1000, 1000, true, SceneAntialiasing.BALANCED
         );
-        view.setCamera(camera);
-        camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
+        view.setCamera(isometricCam);
 
         gameObjects.getChildren().addAll(
             ModelFactory.importModel(ModelType.OCEAN).getAssets(),
@@ -88,6 +101,8 @@ public class GameView3D extends GameView{
                 scene.addEventHandler(KeyEvent.KEY_PRESSED, this::cameraMovement);
             }
         });
+
+
     }
 
     @Override
@@ -245,37 +260,42 @@ public class GameView3D extends GameView{
     }
 
     public void cameraMovement(KeyEvent event) {
-        switch (event.getCode()) {
-            case NUMPAD8:
-                camera.getTransforms().addAll(new Rotate(0.5, new Point3D(1,0,0)));
+        GameKeyBind keyBinds = GameKeyBind.getInstance();
+        KeyAction keyPressed = keyBinds.getKeyAction(event.getCode());
+        switch (keyPressed) {
+            case ZOOM_IN:
+                ((RaceCamera) view.getCamera()).zoomIn();
                 break;
-            case NUMPAD2:
-                camera.getTransforms().addAll(new Rotate(-0.5, new Point3D(1,0,0)));
+            case ZOOM_OUT:
+                ((RaceCamera) view.getCamera()).zoomOut();
                 break;
-            case NUMPAD4:
-                camera.getTransforms().addAll(new Rotate(-0.5, new Point3D(0,1,0)));
+            case FORWARD:
+                ((RaceCamera) view.getCamera()).panUp();
                 break;
-            case NUMPAD6:
-                camera.getTransforms().addAll(new Rotate(0.5, new Point3D(0,1,0)));
+            case BACKWARD:
+                ((RaceCamera) view.getCamera()).panDown();
                 break;
-            case Z:
-                camera.getTransforms().addAll(new Translate(0, 0, 1.5));
+            case LEFT:
+                ((RaceCamera) view.getCamera()).panLeft();
                 break;
-            case X:
-                camera.getTransforms().addAll(new Translate(0, 0, -1.5));
+            case RIGHT:
+                ((RaceCamera) view.getCamera()).panRight();
                 break;
-            case W:
-                camera.getTransforms().addAll(new Translate(0, -1, 0));
+            case VIEW:
+                toggleCamera();
                 break;
-            case S:
-                camera.getTransforms().addAll(new Translate(0, 1, 0));
-                break;
-            case A:
-                camera.getTransforms().addAll(new Translate(-1, 0, 0));
-                break;
-            case D:
-                camera.getTransforms().addAll(new Translate(1, 0, 0));
-                break;
+        }
+    }
+
+    private void toggleCamera() {
+        Camera currCamera = view.getCamera();
+
+        if (currCamera.equals(isometricCam)) {
+            view.setCamera(topDownCam);
+        } else if (currCamera.equals(topDownCam)) {
+            view.setCamera(chaseCam);
+        } else {
+            view.setCamera(isometricCam);
         }
     }
 
@@ -299,6 +319,12 @@ public class GameView3D extends GameView{
                 Point2D p2d = scaledPoint.findScaledXY(lat, lon);
                 bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
             });
+
+            if (clientYacht.getSourceId().equals(
+                ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
+                ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
+                ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
+            }
         }
         Platform.runLater(() -> {
             gameObjects.getChildren().addAll(wakes);

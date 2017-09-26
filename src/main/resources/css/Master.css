@@ -51,6 +51,11 @@
 
 /********* customised scroll bar for scroll pane ***********/
 
+.scroll-pane {
+    -fx-focus-traversable: false;
+    -fx-border-style: none;
+}
+
 /* The main scrollbar **track** CSS class  */
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track {
