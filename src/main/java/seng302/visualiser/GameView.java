@@ -10,7 +10,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 
 /**
- * Created by cir27 on 26/09/17.
+ * Common elements of game visualizing classes.
  */
 public abstract class GameView {
 
