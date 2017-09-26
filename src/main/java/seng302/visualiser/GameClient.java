@@ -214,6 +214,7 @@ public class GameClient {
                     break;
 
                 case RACE_XML:
+                    System.out.println("HEY I GOT A RACE MANG AND I AM CLIENT " + ((Boolean) (server==null)).toString());
                     RaceXMLData raceXMLData = XMLParser.parseRace(
                         StreamParser.extractXmlMessage(packet)
                     );

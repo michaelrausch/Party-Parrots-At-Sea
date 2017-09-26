@@ -438,6 +438,7 @@ public class GameState implements Runnable {
             serverYacht.powerUp(collidedToken.getTokenType());
             logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + collidedToken
                 .getTokenType());
+            System.out.println("AGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG");
             notifyMessageListeners(MessageFactory.getRaceXML());
             notifyMessageListeners(
                 new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.TOKEN));

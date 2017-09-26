@@ -42,6 +42,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private static Integer capacity;
     private RaceXMLData raceXMLData;
     private RegattaXMLData regattaXMLData;
+    private boolean serverStarted = false;
 
     private void startAdvertisingServer() {
         Integer capacity = GameState.getCapacity();
@@ -83,10 +84,12 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.setRace(raceXMLData);
         MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
         startAdvertisingServer();
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
+        PolarTable
+            .parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
         GameState.addMessageEventListener(this::broadcastMessage);
         startUpdatingWind();
         startSpawningTokens();
+        System.out.println("SAAAANNNNNNNNNDDDDDDDDDDDDDDDDDDDDDDDDDDdd");
         sendSetupMessages();
     }
 
@@ -101,6 +104,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 for (ServerToClientThread stc : serverToClientThreads) {
                     if (!stc.isSocketOpen()) {
                         GameState.getYachts().remove(stc.getSourceId());
+                        System.out.println("AAAAAAAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
                         sendSetupMessages();
                         try {
                             stc.getSocket().close();
@@ -118,6 +122,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             }
             if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState.getCustomizationFlag()) {
                 MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
+                System.out.println("gfdgfdgfdg");
                 sendSetupMessages();
                 GameState.resetCustomizationFlag();
             }
@@ -255,7 +260,13 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             });
         } else {
             MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
-            serverToClientThread.addConnectionListener(this::sendSetupMessages);
+            for (ServerYacht serverYacht : GameState.getYachts().values()) {
+                System.out.println("Connecterino" + serverYacht);
+            }
+            serverToClientThread.addConnectionListener(() -> {
+                System.out.println("LUSTENER");
+                sendSetupMessages();
+            });
         }
         serverToClientThreads.add(serverToClientThread);
         serverToClientThread.addDisconnectListener(this::clientDisconnected);
@@ -317,9 +328,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }, 0, 500);
 
 
-        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
-            sendSetupMessages();
-        }
+//        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+//            sendSetupMessages();
+//        }
     }
 
     public void terminate() {

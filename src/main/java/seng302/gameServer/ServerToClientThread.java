@@ -108,10 +108,11 @@ public class ServerToClientThread implements Runnable {
         ServerYacht yacht = new ServerYacht(
             BoatMeshType.DINGHY, sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
         );
-
+        System.out.println(yacht);
         player = new Player(socket, yacht);
         GameState.addYacht(sourceId, yacht);
         GameState.addPlayer(player);
+        System.out.println(GameState.getYachts().size());
     }
 
     private void completeRegistration(ClientType clientType) throws IOException {
@@ -135,8 +136,9 @@ public class ServerToClientThread implements Runnable {
         this.sourceId = sourceId;
         isRegistered = true;
         os.write(responseMessage.getBuffer());
-
+        System.out.println("MAKING A PLAYER");
         setUpPlayer();
+        System.out.println("DONE MAKING A PLAYER");
 
         for (ConnectionListener listener : connectionListeners) {
             listener.notifyConnection();
