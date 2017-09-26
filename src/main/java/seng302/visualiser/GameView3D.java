@@ -417,28 +417,30 @@ public class GameView3D {
     public void cameraMovement(KeyEvent event) {
         GameKeyBind keyBinds = GameKeyBind.getInstance();
         KeyAction keyPressed = keyBinds.getKeyAction(event.getCode());
-        switch (keyPressed) {
-            case ZOOM_IN:
-                ((RaceCamera) view.getCamera()).zoomIn();
-                break;
-            case ZOOM_OUT:
-                ((RaceCamera) view.getCamera()).zoomOut();
-                break;
-            case FORWARD:
-                ((RaceCamera) view.getCamera()).panUp();
-                break;
-            case BACKWARD:
-                ((RaceCamera) view.getCamera()).panDown();
-                break;
-            case LEFT:
-                ((RaceCamera) view.getCamera()).panLeft();
-                break;
-            case RIGHT:
-                ((RaceCamera) view.getCamera()).panRight();
-                break;
-            case VIEW:
-                toggleCamera();
-                break;
+        if (keyPressed != null) {
+            switch (keyPressed) {
+                case ZOOM_IN:
+                    ((RaceCamera) view.getCamera()).zoomIn();
+                    break;
+                case ZOOM_OUT:
+                    ((RaceCamera) view.getCamera()).zoomOut();
+                    break;
+                case FORWARD:
+                    ((RaceCamera) view.getCamera()).panUp();
+                    break;
+                case BACKWARD:
+                    ((RaceCamera) view.getCamera()).panDown();
+                    break;
+                case LEFT:
+                    ((RaceCamera) view.getCamera()).panLeft();
+                    break;
+                case RIGHT:
+                    ((RaceCamera) view.getCamera()).panRight();
+                    break;
+                case VIEW:
+                    toggleCamera();
+                    break;
+            }
         }
     }
 

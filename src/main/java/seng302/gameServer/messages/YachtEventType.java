@@ -1,7 +1,7 @@
 package seng302.gameServer.messages;
 
 /**
- * Created by wmu16 on 11/09/17.
+ * Enum for different event types for the yacht
  */
 public enum YachtEventType {
     COLLISION(33),

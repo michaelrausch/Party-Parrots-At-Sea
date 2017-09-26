@@ -121,7 +121,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Label positionLabel, boatSpeedLabel, boatHeadingLabel;
     @FXML
-    private ImageView velocityIcon, handlingIcon, windWalkerIcon, bumperIcon;
+    private ImageView velocityIcon, handlingIcon, windWalkerIcon, bumperIcon, badRandomIcon;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -324,6 +324,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     break;
                 case BUMPER:
                     iconToDisplay = bumperIcon;
+                    break;
+                case RANDOM:
+                    iconToDisplay = badRandomIcon;
                     break;
                 default:
                     iconToDisplay = velocityIcon;

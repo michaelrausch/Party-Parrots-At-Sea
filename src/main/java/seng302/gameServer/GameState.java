@@ -78,10 +78,11 @@ public class GameState implements Runnable {
     private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
 
     //Powerup Constants
-    public static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
+    public static final Double VELOCITY_BOOST_MULTIPLIER = 2d;
     public static final Integer HANDLING_BOOST_MULTIPLIER = 2;
+    private static final Double BAD_RANDOM_SPEED_PENALTY = 0.3;
     public static final Long BUMPER_DISABLE_TIME = 5_000L;
-    private static final Long TOKEN_SPAWN_TIME = 15_000L;
+    private static final Long TOKEN_SPAWN_TIME = 30_000L;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -383,7 +384,7 @@ public class GameState implements Runnable {
         //Get a random token location with random type
         Token token = allTokens.get(random.nextInt(allTokens.size()));
         token.assignRandomType();
-//        token.assignType(TokenType.WIND_WALKER);
+//        token.assignType(TokenType.RANDOM);
 
         logger.debug("Spawned token of type " + token.getTokenType());
 
@@ -430,7 +431,12 @@ public class GameState implements Runnable {
      * @param yacht The yacht to perform token checks on
      */
     private void preformTokenUpdates(ServerYacht yacht) {
-        checkTokenPickUp(yacht);
+        Token collidedToken = checkTokenPickUp(yacht);
+        if (collidedToken != null) {
+            tokensInPlay.remove(collidedToken);
+            powerUpYacht(yacht, collidedToken);
+        }
+
         checkPowerUpTimeout(yacht);
         TokenType powerUp = yacht.getPowerUp();
 
@@ -442,7 +448,6 @@ public class GameState implements Runnable {
                 case BUMPER:
                     ServerYacht collidedYacht = checkYachtCollision(yacht, true);
                     if (collidedYacht != null) {
-                        System.out.println("WE OUT HERE");
                         yacht.powerDown();
                         boatTempShutDown(collidedYacht);
                         notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
@@ -450,8 +455,34 @@ public class GameState implements Runnable {
                             MessageFactory.makeStatusEffectMessage(collidedYacht, powerUp));
                     }
                     break;
+                case RANDOM:
+                    yacht.setPowerUpSpeedMultiplier(BAD_RANDOM_SPEED_PENALTY);
             }
         }
+    }
+
+
+    /**
+     * Powers up a yacht with the given token type.
+     *
+     * @param yacht The yacht to be powered up
+     * @param collidedToken The token which this yacht collided with
+     */
+    private void powerUpYacht(ServerYacht yacht, Token collidedToken) {
+        //The random token has a 50% chance of becoming another token else becoming a speed detriment!
+        if (collidedToken.getTokenType() == TokenType.RANDOM && new Random().nextBoolean()) {
+            collidedToken.realiseRandom();
+        }
+
+        yacht.powerUp(collidedToken.getTokenType());
+        String logMessage =
+            yacht.getBoatName() + " has picked up a " + collidedToken.getTokenType().getName()
+                + " token";
+        notifyMessageListeners(MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
+        notifyMessageListeners(MessageFactory.getRaceXML());
+        notifyMessageListeners(MessageFactory.makePickupMessage(yacht, collidedToken));
+        logger.debug(
+            "Yacht: " + yacht.getShortName() + " got powerup " + collidedToken.getTokenType());
     }
 
     // TODO: 23/09/17 wmu16 - This is a hacky way to have the boat power down. Need some sort of separation between token and status effect :/
@@ -462,7 +493,7 @@ public class GameState implements Runnable {
      * @param yacht The yacht to disable
      */
     private void boatTempShutDown(ServerYacht yacht) {
-        yacht.setPowerUpSpeedMultiplier(0);
+        yacht.setPowerUpSpeedMultiplier(0d);
         Timer shutDownTimer = new Timer("Shutdown Timer");
         shutDownTimer.schedule(new TimerTask() {
             @Override
@@ -533,36 +564,18 @@ public class GameState implements Runnable {
      * Checks all tokensInPlay to see if a yacht has picked one up. If so, the yacht is powered up
      * in the appropriate way
      * @param yacht The yacht to check for collision with a token
+     *
+     * @return The token collided with
      */
-    private void checkTokenPickUp(ServerYacht yacht) {
-        Token collidedToken = null;
+    private Token checkTokenPickUp(ServerYacht yacht) {
         for (Token token : tokensInPlay) {
             Double distance = GeoUtility.getDistance(token, yacht.getLocation());
             if (distance < YACHT_COLLISION_DISTANCE) {
-                collidedToken = token;
+                return token;
             }
         }
 
-        if (collidedToken != null) {
-            tokensInPlay.remove(collidedToken);
-            if (collidedToken.getTokenType() == TokenType.RANDOM) {
-                collidedToken.realiseRandom();
-            }
-
-            TokenType tokenType = collidedToken.getTokenType();
-            yacht.powerUp(tokenType);
-
-            String logMessage =
-                yacht.getBoatName() + " has picked up a " + collidedToken.getTokenType().getName()
-                    + " token";
-            notifyMessageListeners(
-                MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
-            notifyMessageListeners(MessageFactory.getRaceXML());
-            notifyMessageListeners(MessageFactory.makePickupMessage(yacht, collidedToken));
-
-            logger.debug("Yacht: " + yacht.getShortName() + " got powerup " + collidedToken
-                .getTokenType());
-        }
+        return null;
     }
 
 

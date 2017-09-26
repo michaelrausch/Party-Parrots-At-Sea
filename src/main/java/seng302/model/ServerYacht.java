@@ -55,7 +55,7 @@ public class ServerYacht {
     //PowerUp
     private TokenType powerUp;
     private Long powerUpStartTime;
-    private Integer powerUpSpeedMultiplier;
+    private Double powerUpSpeedMultiplier;
     private Integer powerUpHandlingMultiplier;
 
     //turning mode
@@ -80,7 +80,7 @@ public class ServerYacht {
         this.legNumber = 0;
         this.boatColor = Colors.getColor(sourceId - 1);
         this.powerUp = null;
-        this.powerUpSpeedMultiplier = 1;
+        this.powerUpSpeedMultiplier = 1d;
         this.powerUpHandlingMultiplier = 1;
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
@@ -137,7 +137,7 @@ public class ServerYacht {
      */
     public void powerDown() {
         this.powerUp = null;
-        this.powerUpSpeedMultiplier = 1;
+        this.powerUpSpeedMultiplier = 1d;
         this.powerUpHandlingMultiplier = 1;
     }
 
@@ -480,11 +480,11 @@ public class ServerYacht {
         this.continuouslyTurning = continuouslyTurning;
     }
 
-    public Integer getPowerUpSpeedMultiplier() {
+    public Double getPowerUpSpeedMultiplier() {
         return powerUpSpeedMultiplier;
     }
 
-    public void setPowerUpSpeedMultiplier(Integer powerUpSpeedMultiplier) {
+    public void setPowerUpSpeedMultiplier(Double powerUpSpeedMultiplier) {
         this.powerUpSpeedMultiplier = powerUpSpeedMultiplier;
     }
 
