@@ -102,8 +102,6 @@ public class ViewManager {
             gameClient.stopGame();
             System.exit(0);
         });
-
-        jfxSnackbar = new JFXSnackbar(decorator);
     }
 
     /**
@@ -188,6 +186,7 @@ public class ViewManager {
             }
         });
 
+        jfxSnackbar = new JFXSnackbar(decorator);
     }
 
     /**
@@ -221,6 +220,7 @@ public class ViewManager {
                     .getController();
                 keyBindingDialogController.setGameClient(this.gameClient);
                 keyBindingDialog.show();
+                decorator.requestFocus();
                 Sounds.playButtonClick();
             }
         }

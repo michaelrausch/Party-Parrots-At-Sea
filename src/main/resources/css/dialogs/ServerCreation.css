@@ -45,3 +45,13 @@
 .maxPlayers {
     -fx-font-size: 13px;
 }
+
+#closeLabel {
+    -fx-font-size: 30;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#closeLabel:hover {
+    -fx-text-fill: red;
+    -fx-font-size: 33px;
+}
