@@ -37,9 +37,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private static final int PORT = 4942;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
 
-    private static final int MAX_WIND_SPEED = 12000;
-    private static final int MIN_WIND_SPEED = 8000;
-
     private boolean terminated;
 
     private Thread thread;
@@ -101,8 +98,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         GameState.addMessageEventListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");
-        startUpdatingWind();
-        startSpawningTokens();
         thread.start();
     }
 
@@ -185,63 +180,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         for (ServerToClientThread serverToClientThread : serverToClientThreads) {
             serverToClientThread.sendMessage(message);
         }
-    }
-
-    private static void updateWind(){
-        Integer direction = GameState.getWindDirection().intValue();
-        Integer windSpeed = GameState.getWindSpeedMMS().intValue();
-
-        Random random = new Random();
-
-        if (Math.floorMod(random.nextInt(), 2) == 0){
-            direction += random.nextInt(4);
-            windSpeed += random.nextInt(20) + 459;
-        }
-        else{
-            direction -= random.nextInt(4);
-            windSpeed -= random.nextInt(20) + 459;
-        }
-
-        direction = Math.floorMod(direction, 360);
-
-        if (windSpeed > MAX_WIND_SPEED){
-            windSpeed -= random.nextInt(500);
-        }
-
-        if (windSpeed <= MIN_WIND_SPEED){
-            windSpeed += random.nextInt(500);
-        }
-
-        GameState.setWindSpeed(Double.valueOf(windSpeed));
-        GameState.setWindDirection(direction.doubleValue());
-    }
-
-
-
-
-    // TODO: 29/08/17 wmu16 - This sort of update should be in game state
-    private static void startUpdatingWind(){
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                updateWind();
-            }
-        }, 0, 500);
-    }
-
-    /**
-     * Start spawning coins every 60s after the first minute
-     */
-    private void startSpawningTokens() {
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                GameState.spawnNewToken();
-                broadcastMessage(MessageFactory.getRaceXML());
-            }
-        }, 10000, 60000);
     }
 
     /**

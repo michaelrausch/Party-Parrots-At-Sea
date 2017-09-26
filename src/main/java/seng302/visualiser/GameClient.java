@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,6 +19,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
@@ -37,6 +40,7 @@ import seng302.model.stream.parser.RaceStatusData;
 import seng302.model.stream.parser.YachtEventData;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
+import seng302.model.token.TokenType;
 import seng302.utilities.Sounds;
 import seng302.utilities.StreamParser;
 import seng302.utilities.XMLGenerator;
@@ -251,12 +255,7 @@ public class GameClient {
                     break;
 
                 case YACHT_EVENT_CODE:
-                    YachtEventData yachtEventData = StreamParser.extractYachtEventCode(packet);
-                    if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
-                        showCollisionAlert(StreamParser.extractYachtEventCode(packet));
-                    } else if (yachtEventData.getEventId() == YachtEventType.TOKEN.getCode()) {
-                        showPickUp();
-                    }
+                    processYachtEvent(StreamParser.extractYachtEventCode(packet));
                     break;
 
                 case CHATTER_TEXT:
@@ -415,21 +414,66 @@ public class GameClient {
         return courseData;
     }
 
+
+    /**
+     * Appropriately displays the event client side given the YachtEventCode (collision / token..)
+     *
+     * @param yachtEventData The YachtEvent data packet
+     */
+    private void processYachtEvent(YachtEventData yachtEventData) {
+        ClientYacht thisYacht = allBoatsMap.get(yachtEventData.getSubjectId().intValue());
+
+        if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
+            showCollisionAlert(thisYacht);
+        } else if (yachtEventData.getEventId() == YachtEventType.POWER_DOWN.getCode()) {
+            thisYacht.powerDown();
+            Sounds.playTokenPickupSound();  // TODO: 23/09/17 This should be power down sound
+        } else if (yachtEventData.getEventId() == YachtEventType.BUMPER_CRASH.getCode()) {
+            showDisableAlert(thisYacht);
+        } else {        //Else all token pickup types
+            TokenType tokenType = null;
+            if (yachtEventData.getEventId() == YachtEventType.TOKEN_VELOCITY.getCode()) {
+                tokenType = TokenType.BOOST;
+            } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_BUMPER.getCode()) {
+                tokenType = TokenType.BUMPER;
+            } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_HANDLING.getCode()) {
+                tokenType = TokenType.HANDLING;
+            } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_RANDOM.getCode()) {
+                tokenType = TokenType.RANDOM;
+            } else if (yachtEventData.getEventId() == YachtEventType.TOKEN_WIND_WALKER.getCode()) {
+                tokenType = TokenType.WIND_WALKER;
+            }
+
+            Sounds.playTokenPickupSound();
+            thisYacht.setPowerUp(tokenType);
+        }
+    }
+
+
+    /**
+     * Turns a disabled boat black until the bumper affect wears off
+     *
+     * @param yacht The yacht to show as disabled
+     */
+    private void showDisableAlert(ClientYacht yacht) {
+        Color originalColor = yacht.getColour();
+        yacht.setColour(Color.BLACK);
+
+        Timer disableTimer = new Timer("Disable Timer");
+        disableTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                yacht.setColour(originalColor);
+            }
+        }, GameState.BUMPER_DISABLE_TIME);
+    }
+
     /**
      * Tells race view to show a collision animation.
      */
-    private void showCollisionAlert(YachtEventData yachtEventData) {
+    private void showCollisionAlert(ClientYacht yacht) {
         Sounds.playCrashSound();
-        raceState.storeCollision(
-            allBoatsMap.get(
-                yachtEventData.getSubjectId().intValue()
-            )
-        );
-    }
-
-    // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user
-    private void showPickUp() {
-        Sounds.playTokenPickupSound();
+        raceState.storeCollision(yacht);
     }
 
     private void formatAndSendChatMessage(String rawChat) {

@@ -31,6 +31,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
 import seng302.visualiser.cameras.ChaseCamera;
@@ -123,8 +124,6 @@ public class GameView3D {
                 scene.addEventHandler(KeyEvent.KEY_PRESSED, this::cameraMovement);
             }
         });
-
-
     }
 
     public void updateCourse(List<CompoundMark> newCourse, List<Corner> sequence) {
@@ -418,28 +417,30 @@ public class GameView3D {
     public void cameraMovement(KeyEvent event) {
         GameKeyBind keyBinds = GameKeyBind.getInstance();
         KeyAction keyPressed = keyBinds.getKeyAction(event.getCode());
-        switch (keyPressed) {
-            case ZOOM_IN:
-                ((RaceCamera) view.getCamera()).zoomIn();
-                break;
-            case ZOOM_OUT:
-                ((RaceCamera) view.getCamera()).zoomOut();
-                break;
-            case FORWARD:
-                ((RaceCamera) view.getCamera()).panUp();
-                break;
-            case BACKWARD:
-                ((RaceCamera) view.getCamera()).panDown();
-                break;
-            case LEFT:
-                ((RaceCamera) view.getCamera()).panLeft();
-                break;
-            case RIGHT:
-                ((RaceCamera) view.getCamera()).panRight();
-                break;
-            case VIEW:
-                toggleCamera();
-                break;
+        if (keyPressed != null) {
+            switch (keyPressed) {
+                case ZOOM_IN:
+                    ((RaceCamera) view.getCamera()).zoomIn();
+                    break;
+                case ZOOM_OUT:
+                    ((RaceCamera) view.getCamera()).zoomOut();
+                    break;
+                case FORWARD:
+                    ((RaceCamera) view.getCamera()).panUp();
+                    break;
+                case BACKWARD:
+                    ((RaceCamera) view.getCamera()).panDown();
+                    break;
+                case LEFT:
+                    ((RaceCamera) view.getCamera()).panLeft();
+                    break;
+                case RIGHT:
+                    ((RaceCamera) view.getCamera()).panRight();
+                    break;
+                case VIEW:
+                    toggleCamera();
+                    break;
+            }
         }
     }
 
@@ -483,11 +484,8 @@ public class GameView3D {
             wakesGroup.getChildren().add(newBoat.getWake());
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
-            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
-                BoatObject bo = boatObjects.get(boat);
-                Point2D p2d = findScaledXY(lat, lon);
-                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
-            });
+            clientYacht.addLocationListener(this::updateBoatLocation);
+            clientYacht.addColorChangeListener(this::updateBoatColor);
 
             if (clientYacht.getSourceId().equals(
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
@@ -503,6 +501,23 @@ public class GameView3D {
 
     public Node getAssets () {
         return view;
+    }
+
+    /**
+     * Updates the boatObjects color with that of the clientYachts object. Used in notification from
+     * a listener on this attribute in clientYacht to re paint the boat mesh
+     *
+     * @param clientYacht The yacht to update the colour for
+     */
+    private void updateBoatColor(ClientYacht clientYacht) {
+        boatObjects.get(clientYacht).setFill(clientYacht.getColour());
+    }
+
+    private void updateBoatLocation(ClientYacht boat, Double lat, Double lon, Double heading,
+        Boolean sailIn, Double velocity) {
+        BoatObject bo = boatObjects.get(boat);
+        Point2D p2d = findScaledXY(lat, lon);
+        bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
     }
 
     /**
@@ -580,7 +595,27 @@ public class GameView3D {
         mapTokens = new ArrayList<>();
         for (Token token : newTokens) {
             Point2D location = findScaledXY(token.getLat(), token.getLng());
-            Node tokenObject = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
+
+            ModelType modelType = null;
+            switch (token.getTokenType()) {
+                case BOOST:
+                    modelType = ModelType.VELOCITY_PICKUP;
+                    break;
+                case HANDLING:
+                    modelType = ModelType.HANDLING_PICKUP;
+                    break;
+                case BUMPER:
+                    modelType = ModelType.BUMPER_PICKUP;
+                    break;
+                case RANDOM:
+                    modelType = ModelType.RANDOM_PICKUP;
+                    break;
+                case WIND_WALKER:
+                    modelType = ModelType.WIND_WALKER_PICKUP;
+                    break;
+            }
+
+            Node tokenObject = ModelFactory.importModel(modelType).getAssets();
             tokenObject.setLayoutX(location.getX());
             tokenObject.setLayoutY(location.getY());
             mapTokens.add(tokenObject);
