@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -38,6 +39,7 @@ import seng302.model.mark.MarkOrder;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.RandomSpawn;
 import seng302.utilities.XMLParser;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
@@ -82,7 +84,7 @@ public class GameState implements Runnable {
     public static final Integer HANDLING_BOOST_MULTIPLIER = 2;
     private static final Double BAD_RANDOM_SPEED_PENALTY = 0.3;
     public static final Long BUMPER_DISABLE_TIME = 5_000L;
-    private static final Long TOKEN_SPAWN_TIME = 30_000L;
+    private static final Long TOKEN_SPAWN_TIME = 15_000L;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
@@ -99,13 +101,12 @@ public class GameState implements Runnable {
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
-    private static Set<Mark> marks;
+    private static List<Mark> marks;
     private static List<Limit> courseLimit;
     private static Integer maxPlayers = 8;
 
-
-    private static List<Token> allTokens;
     private static List<Token> tokensInPlay;
+    private static RandomSpawn randomSpawn;
 
     private static List<NewMessageListener> newMessageListeners;
 
@@ -126,14 +127,12 @@ public class GameState implements Runnable {
         previousUpdateTime = System.currentTimeMillis();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         newMessageListeners = new ArrayList<>();
-        allTokens = makeTokens();
+        marks = new MarkOrder().getAllMarks();
+        randomSpawn = new RandomSpawn(markOrder.getOrderedUniqueCompoundMarks());
 
         resetStartTime();
-
-        new Thread(this, "GameState").start();   //Run the auto updates on the game state
-
-        marks = new MarkOrder().getAllMarks();
         setCourseLimit("/server_config/race.xml");
+        new Thread(this, "GameState").start();   //Run the auto updates on the game state
     }
 
     private void setCourseLimit(String url) {
@@ -151,27 +150,8 @@ public class GameState implements Runnable {
         courseLimit = XMLParser.parseRace(document).getCourseLimit();
     }
 
-
-    /**
-     * Make a pre defined set of tokensInPlay. //TODO wmu16 - Should read from some file for each
-     * race ideally
-     *
-     * @return A list of possible tokensInPlay for this race
-     */
-    private ArrayList<Token> makeTokens() {
-        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
-        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
-        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
-        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
-        return new ArrayList<>(Arrays.asList(token1, token2, token3, token4));
-    }
-
     public static String getHostIpAddress() {
         return hostIpAddress;
-    }
-
-    public static Set<Mark> getMarks() {
-        return Collections.unmodifiableSet(marks);
     }
 
     public static List<Player> getPlayers() {
@@ -378,16 +358,9 @@ public class GameState implements Runnable {
      * Broadasts a new race status message to show this update
      */
     private void spawnNewToken() {
-        Random random = new Random();
         tokensInPlay.clear();
-
-        //Get a random token location with random type
-        Token token = allTokens.get(random.nextInt(allTokens.size()));
-        token.assignRandomType();
-//        token.assignType(TokenType.RANDOM);
-
+        Token token = randomSpawn.getRandomTokenLocation();
         logger.debug("Spawned token of type " + token.getTokenType());
-
         tokensInPlay.add(token);
     }
 
@@ -912,7 +885,7 @@ public class GameState implements Runnable {
     }
 
     private static Mark checkMarkCollision(ServerYacht yacht) {
-        Set<Mark> marksInRace = GameState.getMarks();
+        Set<Mark> marksInRace = new HashSet<>(marks);
         for (Mark mark : marksInRace) {
             if (GeoUtility.getDistance(yacht.getLocation(), mark)
                 <= MARK_COLLISION_DISTANCE) {
