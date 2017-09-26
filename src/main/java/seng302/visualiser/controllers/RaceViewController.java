@@ -27,12 +27,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -68,6 +64,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
     private final int CHAT_LIMIT = 128;
 
+    @FXML
+    private AnchorPane loadingScreenPane;
+    @FXML
+    private ImageView loadingScreen;
     @FXML
     private Pane basePane;
     @FXML
@@ -131,6 +131,24 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private FinishDialogController finishDialogController;
 
     public void initialize() {
+        contentStackPane.setVisible(false);
+        Image loadingImage = new Image("PP.png");
+        loadingScreen.setImage(loadingImage);
+        //Centers the Image within the image view
+        double w = 0;
+        double h = 0;
+        double ratioX = loadingScreen.getFitWidth() / loadingImage.getWidth();
+        double ratioY = loadingScreen.getFitHeight() / loadingImage.getHeight();
+        double reduceRatio = 0;
+        if(ratioX >= ratioY) {
+            reduceRatio = ratioY;
+        } else {
+            reduceRatio = ratioX;
+        }
+        w = loadingImage.getWidth() * reduceRatio;
+        h = loadingImage.getHeight() * reduceRatio;
+        loadingScreen.setX((loadingScreen.getFitWidth() - w) / 2);
+        loadingScreen.setY((loadingScreen.getFitHeight() - h) / 2);
         Sounds.stopMusic();
         Sounds.playRaceMusic();
 
@@ -200,6 +218,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
         raceState.setRaceStarted(false);
         createFinishDialog(finishedBoats);
+    }
+
+    public void showView(){
+        loadingScreenPane.setVisible(false);
+        contentStackPane.setVisible(true);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                contentStackPane.requestFocus();
+            }
+        });
     }
 
     /**

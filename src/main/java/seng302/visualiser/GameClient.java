@@ -275,12 +275,13 @@ public class GameClient {
 
             ClientYacht player = allBoatsMap.get(socketThread.getClientId());
             raceView.loadRace(allBoatsMap, courseData, raceState, player);
-
+            raceView.showView();
             raceView.getSendPressedProperty().addListener((obs, old, isPressed) -> {
                 if (isPressed) {
                     formatAndSendChatMessage(raceView.readChatInput());
                 }
             });
+
         }
     }
 
