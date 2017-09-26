@@ -14,8 +14,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -46,6 +44,7 @@ import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
+import seng302.visualiser.controllers.dialogs.PopupDialogController;
 
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
@@ -169,10 +168,12 @@ public class GameClient {
 
     private void showConnectionError (String message) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setHeaderText("Connection Error");
-            alert.setContentText(message);
-            alert.showAndWait();
+            PopupDialogController controller = ViewManager.getInstance().showPopupDialog();
+            controller.setHeader("Oops");
+            controller.setContent(message);
+            controller.setOptionButtonText("GO HOME");
+            controller
+                .setOptionButtonEventHandler(event -> ViewManager.getInstance().goToStartView());
         });
     }
 
