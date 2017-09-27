@@ -61,6 +61,6 @@ GridPane .timer * {
     -fx-background-color: transparent;
 }
 
-#windImageView {
-    -fx-image: url("/images/wind-180.png");
-}
+/*#windImageView {*/
+/*-fx-image: url("/images/wind-180.png");*/
+/*}*/

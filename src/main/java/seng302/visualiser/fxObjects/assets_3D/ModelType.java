@@ -26,7 +26,8 @@ public enum ModelType {
     PLAYER_IDENTIFIER ("player_identifier.dae"),
     PLAIN_ARROW ("arrow.dae"),
     START_ARROW ("start_arrow.dae"),
-    FINISH_ARROW ("finish_arrow.dae");
+    FINISH_ARROW("finish_arrow.dae"),
+    WIND_ARROW("windFiles/log_arrow.dae");
 
     final String filename;
 

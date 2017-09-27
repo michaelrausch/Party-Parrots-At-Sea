@@ -7,7 +7,6 @@ import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
-import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
@@ -15,7 +14,6 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
-
 
 
 /**
@@ -271,5 +269,41 @@ public class ModelFactory {
             new Rotate(90, new Point3D(1,0,0))
         );
         return new Model(new Group(assets), null);
+    }
+
+    /**
+     * Create a 3D wind arrow.
+     *
+     * @return 3D wind arrow object
+     */
+    public static Model makeWindArrow() {
+        ColModelImporter importer = new ColModelImporter();
+        importer.read(ModelFactory.class.getResource("/meshes/" + ModelType.WIND_ARROW.filename));
+        Group assets = new Group(importer.getImport());
+        assets.setCache(true);
+        assets.setCacheHint(CacheHint.SCALE_AND_ROTATE);
+
+        Rotate animationRotate = new Rotate(0, new Point3D(0, 1, 0));
+        assets.getTransforms().addAll(
+            new Scale(6, 6, 6),
+            new Translate(7, 10, 0),
+            animationRotate
+        );
+
+        assets.getChildren().addAll(
+            new AmbientLight()
+        );
+
+        return new Model(new Group(assets), new AnimationTimer() {
+
+            private double rotation = 0;
+            private Rotate rotate = animationRotate;
+
+            @Override
+            public void handle(long now) {
+                rotation += 1;
+                rotate.setAngle(rotation);
+            }
+        });
     }
 }
