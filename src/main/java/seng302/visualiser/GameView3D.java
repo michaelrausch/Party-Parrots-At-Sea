@@ -2,7 +2,6 @@ package seng302.visualiser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,11 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import org.fxyz3d.scene.Skybox;
 import seng302.gameServer.messages.RoundingSide;
-import seng302.model.*;
+import seng302.model.ClientYacht;
+import seng302.model.GameKeyBind;
+import seng302.model.KeyAction;
+import seng302.model.Limit;
+import seng302.model.ScaledPoint;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -164,6 +167,7 @@ public class GameView3D extends GameView{
         }
 
         createMarkArrows();
+        course.get(0).getMarks().forEach((mark -> markerObjects.get(mark).showNextExitArrow()));
 
         //Scale race to markers if there is no border.
         if (borderPoints == null) {
@@ -505,6 +509,7 @@ public class GameView3D extends GameView{
 
     private void updateMarkArrows (ClientYacht yacht, int legNumber) {
         CompoundMark compoundMark;
+        legNumber += 1;
         if (legNumber - 1 >= 0) {
             Sounds.playMarkRoundingSound();
             compoundMark = course.get(legNumber-1);

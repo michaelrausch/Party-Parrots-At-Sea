@@ -45,7 +45,7 @@
       <Corner CompoundMarkID="1" Rounding="PS"/>
       <Corner CompoundMarkID="2" Rounding="S"/>
       <Corner CompoundMarkID="3" Rounding="S"/>
-      <Corner CompoundMarkID="4" Rounding="SP"/>
+      <Corner CompoundMarkID="4" Rounding="PS"/>
     </OpeningSegment>
 
     <RepeatingSegment>
