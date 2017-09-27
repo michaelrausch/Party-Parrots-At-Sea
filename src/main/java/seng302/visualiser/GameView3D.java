@@ -26,7 +26,6 @@ import org.fxyz3d.scene.Skybox;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
 import seng302.model.GameKeyBind;
-import seng302.model.GeoPoint;
 import seng302.model.KeyAction;
 import seng302.model.Limit;
 import seng302.model.ScaledPoint;
@@ -62,6 +61,7 @@ public class GameView3D extends GameView{
     private SubScene view;
     private Group gameObjects;
 
+    private Group raceBorder = new Group();
     // Cameras
     private PerspectiveCamera isometricCam;
     private PerspectiveCamera topDownCam;
@@ -100,6 +100,8 @@ public class GameView3D extends GameView{
         isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y);
         topDownCam = new TopDownCamera();
         chaseCam = new ChaseCamera();
+
+        canvasWidth = canvasHeight = 300;
 
         for (PerspectiveCamera pc : Arrays.asList(isometricCam, topDownCam, chaseCam)) {
             pc.setFarClip(100000);

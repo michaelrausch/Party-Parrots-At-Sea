@@ -5,13 +5,13 @@
     <RaceID>15082901</RaceID>
     <RaceType>Fleet</RaceType>
 
-    <Participants>
+    <Participants MaxPlayers="${maxPlayers}">
         <#list boats as boat>
             <Yacht SourceID="${boat.sourceId}"/>
         </#list>
     </Participants>
 
-    <Tokens>
+    <Tokens Enabled="${tokensEnabled}">
         <#list tokens as token>
             <Token TokenType="${token.tokenType}" TargetLat="${token.lat?c}" TargetLng="${token.lng?c}"/>
         </#list>

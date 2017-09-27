@@ -11,7 +11,6 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
@@ -56,14 +55,18 @@ public class ServerCreationController implements Initializable {
     private List<ServerCreationDialogListener> serverCreationDialogListeners;
 
     public void initialize(URL location, ResourceBundle resources) {
-        legsSlider.setMax(10);
-        legsSlider.setValue(4);
+
         maxPlayersSlider.valueProperty().addListener(
             (observable, oldValue, newValue) -> updateMaxPlayerLabel()
         );
+        maxPlayersSlider.setMax(mapMaker.getMaxPlayers());
+        maxPlayersSlider.setValue(mapMaker.getMaxPlayers());
+
         legsSlider.valueProperty().addListener(
             (obs, oldVal, newVal) -> updateLegSliderLabel()
         );
+        legsSlider.setMax(10);
+
         updateMaxPlayerLabel();
         updateLegSliderLabel();
 
@@ -113,7 +116,7 @@ public class ServerCreationController implements Initializable {
     private void createServer() {
         ServerDescription serverDescription = ViewManager.getInstance().getGameClient()
             .runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayersSlider
-                .getValue(), mapMaker.getCurrentRacePath(), (int) legsSlider.getValue());
+                .getValue(), mapMaker.getCurrentRacePath(), (int) legsSlider.getValue(), pickupsCheckBox.isSelected());
 
         ViewManager.getInstance().setProperty("serverName", serverDescription.getName());
         ViewManager.getInstance().setProperty("mapName", serverDescription.getMapName());
@@ -135,20 +138,25 @@ public class ServerCreationController implements Initializable {
 
     }
 
-    public void playButtonHoverSound(MouseEvent mouseEvent) {
+    public void playButtonHoverSound() {
         Sounds.playHoverSound();
     }
 
     private void nextMap() {
         mapMaker.next();
-        mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
-        mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
+        updateMap();
     }
 
     private void lastMap() {
         mapMaker.previous();
+        updateMap();
+    }
+
+    private void updateMap() {
         mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
         mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
+        maxPlayersSlider.setMax(mapMaker.getMaxPlayers());
+        maxPlayersSlider.setValue(mapMaker.getMaxPlayers());
     }
 
     public void setListener(List<ServerCreationDialogListener> serverCreationDialogListeners) {

@@ -131,18 +131,20 @@ public class GameClient {
      * @param ipAddress IP to connect to.
      * @param portNumber Port to connect to.
      */
-    public ServerDescription runAsHost(String ipAddress, Integer portNumber, String serverName, Integer maxPlayers, String race, Integer numLegs) {
+    public ServerDescription runAsHost(
+        String ipAddress, Integer portNumber, String serverName, Integer maxPlayers, String race,
+        Integer numLegs, Boolean tokensEnabled
+    ) {
         XMLGenerator.setDefaultRaceName(serverName);
 
         server = new MainServerThread();
-        GameState.setMaxPlayers(maxPlayers);
 
         try {
             startClientToServerThread(ipAddress, 4942);
         } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
         }
-        socketThread.sendXML(race, serverName, numLegs);
+        socketThread.sendXML(race, serverName, numLegs, maxPlayers, tokensEnabled);
         while (regattaData == null){
             try {
                 Thread.sleep(100);
@@ -222,6 +224,7 @@ public class GameClient {
                     break;
 
                 case RACE_XML:
+                    System.out.println("HEY I GOT A RACE MANG AND I AM CLIENT " + ((Boolean) (server==null)).toString());
                     RaceXMLData raceXMLData = XMLParser.parseRace(
                         StreamParser.extractXmlMessage(packet)
                     );

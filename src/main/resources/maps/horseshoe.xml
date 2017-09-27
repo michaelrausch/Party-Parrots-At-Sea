@@ -6,10 +6,12 @@
   <CentralLat> -14.6457 </CentralLat>
   <CentralLng> 47.612855 </CentralLng>
 
+  <MaxPlayers> 5 </MaxPlayers>
+
   <Marks>
     <CompoundMark CompoundMarkID="1">
       <Mark Lat="-14.071412" Lng="47.05756"/>
-      <Mark Lat="-14.070814" Lng="47.058041"/>
+      <Mark Lat="-14.069914" Lng="47.058541"/>
     </CompoundMark>
     <CompoundMark CompoundMarkID="2">
       <Mark Lat="-14.067194" Lng="47.053818" />
@@ -61,7 +63,7 @@
 
   <CourseLimit>
     <Limit Lat="-14.073371" Lng="47.058213" />
-    <Limit Lat="-14.06653" Lng="47.051003" />
+    <Limit Lat="-14.06453" Lng="47.050003" />
     <Limit Lat="-14.059022" Lng="47.057286" />
     <Limit Lat="-14.058723" Lng="47.064358" />
     <Limit Lat="-14.06261" Lng="47.071293" />

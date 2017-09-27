@@ -4,14 +4,20 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
+import java.io.IOException;
+import java.io.StringReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import seng302.gameServer.messages.XMLMessageSubType;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.MarkOrder;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.utilities.StreamParser;
+import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
 
 public class MarkOrderTest {
@@ -35,17 +41,22 @@ public class MarkOrderTest {
         ///-(    \'   \\
 
          */
-        markOrder = new MarkOrder(
-            XMLParser.parseRace(
-                StreamParser.extractXmlMessage(
-                    new StreamPacket(
-                        XMLMessageSubType.RACE.getType(),
-                        XMLParser.parseRaceDef("/maps/default.xml", "test", 2).getValue().length(),
-                        0, XMLParser.parseRaceDef("/maps/default.xml", "test", 2).getValue().getBytes()
-                    )
-                )
-            )
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        xmlGenerator.setRaceTemplate(
+            XMLParser.parseRaceDef(
+                "/maps/default.xml", "test", 2, null, false
+            ).getValue()
         );
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db;
+        Document doc = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            doc = db.parse(new InputSource(new StringReader(xmlGenerator.getRaceAsXml())));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+        markOrder = new MarkOrder(XMLParser.parseRace(doc));
         currentSeqID = 0;
     }
 

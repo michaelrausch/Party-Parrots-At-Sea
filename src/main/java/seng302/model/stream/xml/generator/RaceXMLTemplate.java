@@ -20,15 +20,19 @@ public class RaceXMLTemplate {
     private List<Corner> roundings;
     private List<Limit> courseLimit;
     private List<CompoundMark> course;
+    private Integer maxPlayers;
+    private Boolean tokensEnabled;
 
     public RaceXMLTemplate(List<ServerYacht> yachts, List<Token> tokens, List<Corner> roundings,
-        List<Limit> limit, List<CompoundMark> course) {
+        List<Limit> limit, List<CompoundMark> course, Integer maxPlayers, Boolean tokensEnabled) {
         this.yachts = yachts;
         this.tokens = tokens;
         this.roundings = roundings;
         this.courseLimit = limit;
         this.course = course;
         startTime = LocalDateTime.now();
+        this.maxPlayers = maxPlayers;
+        this.tokensEnabled = tokensEnabled;
     }
 
     /**
@@ -82,5 +86,13 @@ public class RaceXMLTemplate {
 
     public void setTokens(List<Token> tokens) {
         this.tokens = tokens;
+    }
+
+    public String getTokensEnabled() {
+        return tokensEnabled.toString();
+    }
+
+    public String getMaxPlayers() {
+        return maxPlayers.toString();
     }
 }

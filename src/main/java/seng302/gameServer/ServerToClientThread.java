@@ -5,6 +5,14 @@ import javafx.beans.property.SimpleObjectProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.*;
+import org.w3c.dom.Document;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.ChatterMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RegistrationResponseMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.packets.PacketType;
@@ -190,12 +198,11 @@ public class ServerToClientThread implements Runnable {
                                 // TODO: 17/08/2017 ajm412: Send a response packet here, not really necessary until we do shapes.
                                 break;
                             case RACE_XML:
-                                System.out.println("Got raceXML from client");
+                                Document document = StreamParser.extractXmlMessage(packet);
                                 raceXMLProperty.set(
-                                    XMLParser.parseRace(
-                                        StreamParser.extractXmlMessage(packet)
-                                    )
+                                    XMLParser.parseRace(document)
                                 );
+                                GameState.setMaxPlayers(XMLParser.getMaxPlayers(document));
                                 break;
                             case REGATTA_XML:
                                 regattaXMLProperty.set(

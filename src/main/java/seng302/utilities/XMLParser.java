@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -35,6 +36,8 @@ import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
  */
 public class XMLParser {
 
+    private static final int MAX_PLAYERS = 8;
+
     /**
      * Returns the text content of a given child element tag, assuming it exists, as an Integer.
      *
@@ -45,7 +48,7 @@ public class XMLParser {
     private static Integer getElementInt(Element ele, String tag) {
         NodeList tagList = ele.getElementsByTagName(tag);
         if (tagList.getLength() > 0) {
-            return Integer.parseInt(tagList.item(0).getTextContent());
+            return Integer.parseInt(tagList.item(0).getTextContent().replaceAll("\\s+",""));
         } else {
             return null;
         }
@@ -77,7 +80,7 @@ public class XMLParser {
     private static Double getElementDouble(Element ele, String tag) {
         NodeList tagList = ele.getElementsByTagName(tag);
         if (tagList.getLength() > 0) {
-            return Double.parseDouble(tagList.item(0).getTextContent());
+            return Double.parseDouble(tagList.item(0).getTextContent().replaceAll("\\s+",""));
         } else {
             return null;
         }
@@ -193,6 +196,31 @@ public class XMLParser {
         return new RegattaXMLData(
             regattaID, regattaName, courseName, centralLat, centralLng, utcOffset
         );
+    }
+
+    public static Boolean tokensEnabled(Document doc) {
+        Element docEle = doc.getDocumentElement();
+        try {
+            Node tokenNode = docEle.getAttributeNode("Tokens");
+            return Boolean.valueOf(XMLParser.getNodeAttributeString(tokenNode, "Enabled"));
+        } catch (NullPointerException npe) {
+            return false;
+        }
+    }
+
+    public static Integer getMaxPlayers(Document doc) {
+        Element docEle = doc.getDocumentElement();
+        try {
+            NamedNodeMap namedNodeMap = docEle.getElementsByTagName("Participants").item(0).getAttributes();
+            Node node = namedNodeMap.getNamedItem("MaxPlayers");
+            if (node != null) {
+                return Integer.parseInt(node.getNodeValue());
+            }
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+            return MAX_PLAYERS;
+        }
+        return MAX_PLAYERS;
     }
 
     /**
@@ -350,9 +378,13 @@ public class XMLParser {
      * @param url the location of the race def file
      * @param serverName the name of the server
      * @param repetitions the repetitions of a segment of the race def file.
+     * @param maxPlayers max number of players. uses the default race max if null or greater than the actual max.
+     * @param tokensEnabled if tokens are enabled
      * @return a pair which contains regatta string, race string as key, value pair.
      */
-    public static Pair<String, String> parseRaceDef(String url, String serverName, int repetitions) {
+    public static Pair<RegattaXMLTemplate, RaceXMLTemplate> parseRaceDef(
+        String url, String serverName, Integer repetitions, Integer maxPlayers, Boolean tokensEnabled
+    ) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Document doc = null;
@@ -369,16 +401,25 @@ public class XMLParser {
             XMLParser.getElementDouble(docEle, "CentralLat"),
             XMLParser.getElementDouble(docEle, "CentralLng")
         );
+
         XMLGenerator xmlGenerator = new XMLGenerator();
         xmlGenerator.setRegattaTemplate(regattaXMLTemplate);
 
-        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(new ArrayList<>(), new ArrayList<>(),
+        if (maxPlayers == null) {
+            maxPlayers = XMLParser.getElementInt(docEle, "MaxPlayers");
+        } else if (maxPlayers > XMLParser.getElementInt(docEle, "MaxPlayers")) {
+            maxPlayers = XMLParser.getElementInt(docEle, "MaxPlayers");
+        }
+
+        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(
+            new ArrayList<>(), new ArrayList<>(),
             XMLParser.extractMarkOrderRaceDef(docEle, repetitions),
             XMLParser.extractCourseLimitRaceDef(docEle),
-            XMLParser.extractCompoundMarksRaceDef(docEle)
+            XMLParser.extractCompoundMarksRaceDef(docEle),
+            maxPlayers, tokensEnabled
         );
         xmlGenerator.setRaceTemplate(raceXMLTemplate);
-        return new Pair<>(xmlGenerator.getRegattaAsXml(), xmlGenerator.getRaceAsXml());
+        return new Pair<>(regattaXMLTemplate, raceXMLTemplate);
     }
 
     private static List<Corner> extractMarkOrderRaceDef(Element docEle, int repitions){

@@ -17,6 +17,26 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import javafx.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.gameServer.messages.BoatAction;
+import seng302.gameServer.messages.BoatActionMessage;
+import seng302.gameServer.messages.ChatterMessage;
+import seng302.gameServer.messages.ClientType;
+import seng302.gameServer.messages.CustomizeRequestMessage;
+import seng302.gameServer.messages.CustomizeRequestType;
+import seng302.gameServer.messages.Message;
+import seng302.gameServer.messages.RegistrationRequestMessage;
+import seng302.gameServer.messages.RegistrationResponseStatus;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.model.stream.packets.PacketType;
+import seng302.model.stream.packets.StreamPacket;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+import seng302.utilities.XMLGenerator;
+import seng302.utilities.XMLParser;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on
@@ -367,18 +387,23 @@ public class ClientToServerThread implements Runnable {
         return clientId;
     }
 
-    public void sendXML(String path, String serverName, int legRepeats) {
-        Pair<String, String> regattaRace = XMLParser.parseRaceDef(path, serverName, legRepeats);
-
+    public void sendXML(String path, String serverName, Integer legRepeats, Integer maxPlayers, Boolean tokensEnabled) {
+        Pair<RegattaXMLTemplate, RaceXMLTemplate> regattaRace = XMLParser.parseRaceDef(
+            path, serverName, legRepeats, maxPlayers, tokensEnabled
+        );
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        xmlGenerator.setRegattaTemplate(regattaRace.getKey());
+        xmlGenerator.setRaceTemplate(regattaRace.getValue());
+        String regatta = xmlGenerator.getRegattaAsXml();
+        String race = xmlGenerator.getRaceAsXml();
         sendByteBuffer(
             new XMLMessage(
-                regattaRace.getKey(), XMLMessageSubType.REGATTA, regattaRace.getKey().length()
+                regatta, XMLMessageSubType.REGATTA, regatta.length()
             ).getBuffer()
         );
-
         sendByteBuffer(
             new XMLMessage(
-                regattaRace.getValue(), XMLMessageSubType.RACE, regattaRace.getValue().length()
+                race, XMLMessageSubType.RACE, race.length()
             ).getBuffer()
         );
     }

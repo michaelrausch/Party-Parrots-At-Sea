@@ -1,5 +1,13 @@
 package seng302.gameServer;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.messages.Message;
@@ -7,7 +15,6 @@ import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
-import seng302.model.mark.CompoundMark;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.GeoUtility;
@@ -39,6 +46,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private static Integer capacity;
     private RaceXMLData raceXMLData;
     private RegattaXMLData regattaXMLData;
+    private boolean serverStarted = false;
 
     private void startAdvertisingServer() {
         Integer capacity = GameState.getCapacity();
@@ -268,9 +276,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }, 0, 500);
 
 
-        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
-            sendSetupMessages();
-        }
+//        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+//            sendSetupMessages();
+//        }
     }
 
     public void terminate() {
@@ -281,39 +289,166 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
      * Initialise boats to specific spaced out geopoints behind starting line.
      */
     private void initialiseBoatPositions() {
-        CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
-        GeoPoint startMark1 = cm.getSubMark(1);
-        GeoPoint startMark2 = cm.getSubMark(2);
+//        CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
+//        GeoPoint startMark1 = cm.getSubMark(1);
+//        GeoPoint startMark2 = cm.getSubMark(2);
+//
+//        // Calculating midpoint
+//        Double perpendicularAngle = GeoUtility.getBearing(startMark1, startMark2);
+//        Double length = GeoUtility.getDistance(startMark1, startMark2);
+//        GeoPoint midpoint = GeoUtility.getGeoCoordinate(startMark1, perpendicularAngle, length / 2);
+//
+//        // Setting each boats position side by side
+//        final double SEPARATION = 50.0;  // distance apart in meters
+//
+//        int boatIndex = 0;
+//        for (ServerYacht yacht : GameState.getYachts().values()) {
+//            int distanceApart = boatIndex / 2;
+//
+//            if (boatIndex % 2 == 1 && boatIndex != 0) {
+//                distanceApart++;
+//                distanceApart *= -1;
+//            }
+//
+//            GeoPoint spawnMark = GeoUtility
+//                .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * SEPARATION);
+//
+//            if (yacht.getHeading() < perpendicularAngle) {
+//                spawnMark = GeoUtility
+//                    .getGeoCoordinate(spawnMark, perpendicularAngle + 90, SEPARATION);
+//            } else {
+//                spawnMark = GeoUtility
+//                    .getGeoCoordinate(spawnMark, perpendicularAngle + 270, SEPARATION);
+//            }
+//
+//            yacht.setLocation(spawnMark);
+//            boatIndex++;
+//        }
 
-        // Calculating midpoint
-        Double perpendicularAngle = GeoUtility.getBearing(startMark1, startMark2);
-        Double length = GeoUtility.getDistance(startMark1, startMark2);
-        GeoPoint midpoint = GeoUtility.getGeoCoordinate(startMark1, perpendicularAngle, length / 2);
+//        final double SEPARATION = 50.0;  // distance apart in meters
+//
+//        //Reverse of the angle from start to first mark
+//        double angleToFirstMark = 360 - GeoUtility.getBearing(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint(),
+//            GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint()
+//        );
+//
+//        //Length of start line
+//        double startLineLength = GeoUtility.getDistance(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+//        );
+//
+//        //Angle of start line
+//        double startMarkToMarkAngle = GeoUtility.getBearing(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+//        );
+//
+//        //How many yachts can fit along the start line
+//        int spacesAlongLine = (int) Math.round(startLineLength / SEPARATION);
+//        //The free space left by the boats.
+//        double buffer = (startLineLength % SEPARATION) / 2;
+//
+//        //Randomize starting order.
+//        List<ServerYacht> serverYachtList = new ArrayList<>(GameState.getYachts().values());
+//        Collections.shuffle(serverYachtList);
+//
+//        //set the starting point away from start line.
+//        GeoPoint startingPoint = GeoUtility.getGeoCoordinate(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+//            angleToFirstMark, SEPARATION
+//        );
+//
+//        //Move it along the start line
+//        startingPoint = GeoUtility.getGeoCoordinate(
+//            startingPoint, startMarkToMarkAngle, buffer
+//        );
+//
+//        int yachtCount = 0;
+//        int repeats = 0;
+//
+//        GeoPoint yachtLocation;
+//
+//        for (ServerYacht serverYacht : serverYachtList) {
+//
+//            //Move away from start line
+//            yachtLocation = GeoUtility.getGeoCoordinate(
+//                startingPoint, angleToFirstMark,repeats * SEPARATION
+//            );
+//            //Move along start line
+//            yachtLocation = GeoUtility.getGeoCoordinate(
+//                yachtLocation, startMarkToMarkAngle, yachtCount * SEPARATION
+//            );
+//            serverYacht.setLocation(yachtLocation);
+//            serverYacht.setHeading(GeoUtility.getBearing(
+//                yachtLocation, GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint()
+//            ));
+//            //Set location for next yacht
+//            yachtCount++;
+//            if (yachtCount > spacesAlongLine) {
+//                yachtCount = 0;
+//                repeats++;
+//            }
+//        }
 
-        // Setting each boats position side by side
-        double DISTANCE_FACTOR = 50.0;  // distance apart in meters
-        int boatIndex = 0;
-        for (ServerYacht yacht : GameState.getYachts().values()) {
-            int distanceApart = boatIndex / 2;
+        final double DISTANCE_TO_START = 75d;
+        final double YACHT_SEPARATION = 20d;
 
-            if (boatIndex % 2 == 1 && boatIndex != 0) {
-                distanceApart++;
-                distanceApart *= -1;
+        //Length of start line
+        double startLineLength = GeoUtility.getDistance(
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+        );
+
+        //How many yachts can fit along the start line
+        int spacesAlongLine = (int) Math.round(startLineLength / YACHT_SEPARATION);
+
+        //Angle of start line
+        double startMarkToMarkAngle = GeoUtility.getBearing(
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+        );
+
+        //angle from first mark to the start
+        double angleToStart = GeoUtility.getBearing(
+            GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint(),
+            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint()
+        );
+
+        double angleFromStart = GeoUtility.getBearing(
+            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint(),
+            GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint()
+        );
+
+        GeoPoint startingPoint = GeoUtility.getGeoCoordinate(
+            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint(),
+            angleToStart, DISTANCE_TO_START
+        );
+
+        List<ServerYacht> randomisedYachts = new ArrayList<>(GameState.getYachts().values());
+        Collections.shuffle(randomisedYachts);
+        while (randomisedYachts.size() > 0) {
+
+            int numYachtsInLine = spacesAlongLine > randomisedYachts.size() ? randomisedYachts.size() : spacesAlongLine;
+            double yachtSpace = numYachtsInLine * YACHT_SEPARATION / 2;
+
+            GeoPoint firstYachtPoint = GeoUtility.getGeoCoordinate(
+                startingPoint, startMarkToMarkAngle + 180, yachtSpace
+            );
+
+            for (int i=0; i<numYachtsInLine; i++){
+                randomisedYachts.get(0).setHeading(angleFromStart);
+                randomisedYachts.get(0).setLocation(firstYachtPoint);
+                firstYachtPoint = GeoUtility.getGeoCoordinate(
+                    firstYachtPoint, startMarkToMarkAngle, yachtSpace
+                );
+                randomisedYachts.remove(0);
             }
 
-            GeoPoint spawnMark = GeoUtility
-                .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCE_FACTOR);
-
-            if (yacht.getHeading() < perpendicularAngle) {
-                spawnMark = GeoUtility
-                    .getGeoCoordinate(spawnMark, perpendicularAngle + 90, DISTANCE_FACTOR);
-            } else {
-                spawnMark = GeoUtility
-                    .getGeoCoordinate(spawnMark, perpendicularAngle + 270, DISTANCE_FACTOR);
-            }
-
-            yacht.setLocation(spawnMark);
-            boatIndex++;
+            startingPoint = GeoUtility.getGeoCoordinate(
+                startingPoint, angleToStart, DISTANCE_TO_START
+            );
         }
     }
 }

@@ -64,7 +64,8 @@ public class MessageFactory {
                 new ArrayList<>(),
                 race.getMarkSequence(),
                 race.getCourseLimit(),
-                new ArrayList<>(race.getCompoundMarks().values())
+                new ArrayList<>(race.getCompoundMarks().values()),
+                GameState.getCapacity(), true
             )
         );
         String xmlStr = xmlGenerator.getRaceAsXml();
@@ -76,6 +77,9 @@ public class MessageFactory {
     }
 
     public static void updateBoats(List<ServerYacht> yachts) {
+        for (ServerYacht serverYacht : yachts) {
+            System.out.println(serverYacht);
+        }
         xmlGenerator.getRace().setBoats(yachts);
         String xmlStr = xmlGenerator.getBoatsAsXml();
         MessageFactory.boats = new XMLMessage(xmlStr, XMLMessageSubType.BOAT, xmlStr.length());
