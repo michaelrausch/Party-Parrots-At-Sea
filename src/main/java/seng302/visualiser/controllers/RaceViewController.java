@@ -194,10 +194,10 @@ public class RaceViewController extends Thread {
         miniMapButton.setOnMouseClicked((event) -> {
             if (miniMapPane.visibleProperty().get()) {
                 miniMapPane.setVisible(false);
-                miniMapButton.setText("✕");
+                miniMapButton.setText("✓");
             } else {
                 miniMapPane.setVisible(true);
-                miniMapButton.setText("✓");
+                miniMapButton.setText("✕");
             }
         });
 

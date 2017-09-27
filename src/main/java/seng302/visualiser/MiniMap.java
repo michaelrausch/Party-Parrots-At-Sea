@@ -5,8 +5,8 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
+import javafx.scene.transform.Rotate;
 import seng302.model.ClientYacht;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
@@ -15,11 +15,11 @@ import seng302.model.mark.Mark;
 import seng302.utilities.Sounds;
 
 /**
- * Created by cir27 on 28/09/17.
+ * Class converts a map preview to a minimap by adding boats.
  */
 public class MiniMap extends MapPreview {
 
-    private HashMap<ClientYacht, Circle> boatIcons = new HashMap<>();
+    private HashMap<ClientYacht, Polygon> boatIcons = new HashMap<>();
     private Polygon playerBoat;
     private double playerRotation;
     private List<ClientYacht> boats;
@@ -35,17 +35,19 @@ public class MiniMap extends MapPreview {
 
     public void setBoats(List<ClientYacht> yachts) {
         for (ClientYacht yacht : yachts) {
-            Circle boatIcon = new Circle(0, 0, 4);
+            Polygon boatIcon = new Polygon(0, -3.5, 3.5, 3.5, -3.5, 3.5);
             boatIcon.setStroke(Color.BLACK);
             boatIcon.setFill(Color.GRAY);
             boatIcon.setFill(yacht.getColour());
             boatIcon.setFill(yacht.getColour());
             boatIcons.put(yacht, boatIcon);
+            boatIcon.getTransforms().add(new Rotate(0));
             yacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
-                Circle bi = boatIcons.get(boat);
+                Polygon bi = boatIcons.get(boat);
                 Point2D p2d = scaledPoint.findScaledXY(lat, lon);
-                bi.setCenterX(p2d.getX());
-                bi.setCenterY(p2d.getY());
+                bi.setLayoutX(p2d.getX());
+                bi.setLayoutY(p2d.getY());
+                ((Rotate) bi.getTransforms().get(0)).setAngle(heading);
             });
         }
         Platform.runLater(() -> {

@@ -236,7 +236,7 @@
             <Insets right="15.0" top="15.0" />
          </StackPane.margin>
       </Pane>
-      <JFXButton fx:id="miniMapButton" style="-fx-background-color: white; -fx-opacity: 0.45; -fx-background-radius: 10;" text="✓" StackPane.alignment="TOP_RIGHT">
+      <JFXButton fx:id="miniMapButton" style="-fx-background-color: white; -fx-opacity: 0.45; -fx-background-radius: 10;" text="✕" StackPane.alignment="TOP_RIGHT">
          <font>
             <Font size="15.0" />
          </font>
