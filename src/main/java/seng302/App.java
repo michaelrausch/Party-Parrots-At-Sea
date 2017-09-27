@@ -80,12 +80,14 @@ public class App extends Application {
         ViewManager.getInstance().initialiseSplashScreen(primaryStage);
     }
 
-    private static void runDiscoveryServer(){
-        try{
-            new DiscoveryServer();
-        }
-        catch (Exception e){
-            runDiscoveryServer();
+    private static void runDiscoveryServer() throws Exception {
+        while (true){
+            try {
+                new DiscoveryServer();
+            }
+            catch (Exception ignored){
+                ;
+            }
         }
     }
 
