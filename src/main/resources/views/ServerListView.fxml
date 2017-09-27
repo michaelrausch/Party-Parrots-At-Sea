@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import java.lang.String?>
@@ -12,49 +18,60 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+
 <StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.ServerListController">
     <children>
         <GridPane fx:id="serverListMainGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
             <children>
-                <GridPane fx:id="connectGridPane" GridPane.rowIndex="2">
+                <GridPane fx:id="connectGridPane" prefHeight="70.0" prefWidth="888.0" GridPane.rowIndex="2">
                     <children>
-                        <JFXButton fx:id="connectButton" buttonType="RAISED" prefHeight="45.0"
-                          prefWidth="220.0" ripplerFill="#3493e3" text="CONNECT" textFill="WHITE"
-                          GridPane.columnIndex="5" GridPane.halignment="RIGHT"
-                          GridPane.valignment="CENTER">
+                        <JFXButton fx:id="directConnectButton" buttonType="RAISED" maxHeight="45.0" prefHeight="45.0" prefWidth="220.0" ripplerFill="#3493e3" text="Direct Connect" textFill="WHITE" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                             <GridPane.margin>
                                 <Insets right="50.0" />
                             </GridPane.margin>
                         </JFXButton>
-                        <JFXTextField fx:id="serverHostName" maxHeight="30.0" minHeight="30.0" prefHeight="30.0" promptText="Host Name" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-                            <GridPane.margin>
-                                <Insets left="20.0" right="20.0" />
-                            </GridPane.margin>
-                        </JFXTextField>
-                        <JFXTextField fx:id="serverPortNumber" maxHeight="30.0" minHeight="30.0" prefHeight="30.0" promptText="Port Number" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-                            <GridPane.margin>
-                                <Insets left="20.0" right="20.0" />
-                            </GridPane.margin>
-                        </JFXTextField>
-                        <Label fx:id="connectLabel" text="Direct Connect:" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
+                        <Label fx:id="connectLabel" text="Join Room: " GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                             <GridPane.margin>
                                 <Insets right="45.0" />
                             </GridPane.margin>
                         </Label>
+                  <JFXButton fx:id="roomConnectButton" maxHeight="45.0" prefHeight="45.0" prefWidth="220.0" text="Join Room" textFill="WHITE" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin>
+                  </JFXButton>
+                  <JFXTextField fx:id="roomNumber" promptText="Room Code" GridPane.columnIndex="3">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" right="20.0" top="5.0" />
+                     </GridPane.margin>
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </JFXTextField>
+                  <JFXButton fx:id="autoSelectGame" maxHeight="45.0" prefHeight="45.0" prefWidth="220.0" text="Auto-Select Game" textFill="WHITE" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
+                     <GridPane.margin>
+                        <Insets right="10.0" />
+                     </GridPane.margin>
+                  </JFXButton>
                     </children>
                     <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="280.0" minWidth="180.0" prefWidth="180.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="320.0" minWidth="280.0" prefWidth="280.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="180.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="17.0" minWidth="17.0" prefWidth="17.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="273.0" minWidth="250.0" prefWidth="273.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="280.0" minWidth="21.0" prefWidth="21.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="320.0" minWidth="70.0" prefWidth="112.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="260.0" minWidth="-Infinity" prefWidth="119.0" />
+                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="215.0" minWidth="17.0" prefWidth="148.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="1000.0" minWidth="17.0" prefWidth="77.0" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="326.0" minWidth="134.0" prefWidth="226.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="326.0" minWidth="198.0" prefWidth="198.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                 </GridPane>
-                <ScrollPane id="serverListPane" fx:id="serverListScrollPane" hbarPolicy="NEVER" prefHeight="1000.0" prefWidth="880.0" GridPane.rowIndex="1">
+                <ScrollPane id="serverListPane" fx:id="serverListScrollPane" hbarPolicy="NEVER" prefHeight="1000.0" prefWidth="900.0" GridPane.rowIndex="1">
                     <content>
                         <VBox id="serverListVBox" fx:id="serverListVBox" prefHeight="200.0" prefWidth="100.0">
                             <padding>
@@ -76,12 +93,9 @@
                                 <Insets left="35.0" top="5.0" />
                             </padding>
                         </Label>
-                        <JFXButton id="hostButton" fx:id="serverListHostButton" buttonType="RAISED"
-                          prefHeight="45.0" prefWidth="220.0"
-                          text="HOST" GridPane.columnIndex="1" GridPane.halignment="RIGHT"
-                          GridPane.valignment="CENTER">
+                        <JFXButton id="hostButton" fx:id="serverListHostButton" buttonType="RAISED" prefHeight="45.0" prefWidth="220.0" text="HOST" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                             <GridPane.margin>
-                                <Insets right="50.0"/>
+                                <Insets right="50.0" />
                             </GridPane.margin>
                         </JFXButton>
                     </children>
@@ -99,11 +113,11 @@
             </columnConstraints>
             <rowConstraints>
                 <RowConstraints maxHeight="80.0" minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="400.0" prefHeight="400.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="80.0" minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="400.0" prefHeight="459.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="70.0" minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <stylesheets>
-                <String fx:value="/css/Master.css"/>
+                <String fx:value="/css/Master.css" />
                 <String fx:value="/css/ServerListView.css" />
             </stylesheets>
         </GridPane>

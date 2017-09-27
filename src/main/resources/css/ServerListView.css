@@ -38,30 +38,31 @@
     -fx-font-size: 23px;
 }
 
-#connectButton {
+#connectButton, #roomConnectButton, #directConnectButton, #autoSelectGame {
     -fx-background-color: -fx-pp-light-text-color; /* inverted */
     -fx-text-fill: -fx-pp-theme-color; /* inverted */
     -fx-font-size: 20px;
-    -fx-pref-height: 65px;
+    -fx-pref-height: 45px;
+    -fx-effect: -fx-pp-dropshadow-dark;
 }
 
-#connectButton:hover {
-    -fx-font-size: 23px;
+#connectButton:hover, #roomConnectButton:hover, #directConnectButton:hover, #autoSelectGame:hover {
+    -fx-font-size: 21px;
 }
 
-#connectLabel, #serverPortNumber, #serverHostName {
+#connectLabel, #connectLabel1, #serverPortNumber, #roomNumber, #serverHostName {
     -fx-text-fill: -fx-pp-light-text-color;
     -fx-font-size: 18px;
 }
 
-#serverHostName, #serverPortNumber {
+#serverHostName, #serverPortNumber, #roomNumber {
     -jfx-focus-color: -fx-pp-light-text-color;
     -jfx-unfocus-color: -fx-pp-light-text-color;
     -fx-prompt-text-fill: -fx-pp-light-text-color;
 }
 
 
-#serverHostName .error-label, #serverPortNumber .error-label {
+#serverHostName .error-label, #serverPortNumber .error-label, #roomNumber .error-label {
     -fx-font-size: 12px;
     -fx-text-fill: lightblue;
 }

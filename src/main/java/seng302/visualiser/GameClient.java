@@ -49,6 +49,12 @@ import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.controllers.dialogs.PopupDialogController;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.*;
+
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
  * with a JavaFX Pane to insert itself into.
@@ -111,11 +117,21 @@ public class GameClient {
             ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
             ViewManager.getInstance().setProperty("mapName", regattaData.getCourseName());
 
+            getServerThread().setConnectionErrorListener((eMessage) -> {
+                ViewManager.getInstance().showErrorSnackBar(eMessage);
+                destroyClientToServerThread();
+            });
+
             this.lobbyController = ViewManager.getInstance().goToLobby(true);
 
         } catch (IOException ioe) {
-            showConnectionError("Unable to find server");
+            ViewManager.getInstance().showErrorSnackBar("There are no servers currently available.");
         }
+    }
+
+    private void destroyClientToServerThread() {
+        socketThread.closeSocket();
+        socketThread = null;
     }
 
     /**
@@ -123,9 +139,11 @@ public class GameClient {
      * @param ipAddress IP to connect to.
      * @param portNumber Port to connect to.
      */
-    public ServerDescription runAsHost(String ipAddress, Integer portNumber, String serverName, Integer maxPlayers) {
+    public ServerDescription runAsHost(
+        String ipAddress, Integer portNumber, String serverName, Integer maxPlayers, String race,
+        Integer numLegs, Boolean tokensEnabled
+    ) {
         XMLGenerator.setDefaultRaceName(serverName);
-        GameState.setMaxPlayers(maxPlayers);
 
         server = new MainServerThread();
 
@@ -134,7 +152,7 @@ public class GameClient {
         } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
         }
-
+        socketThread.sendXML(race, serverName, numLegs, maxPlayers, tokensEnabled);
         while (regattaData == null){
             try {
                 Thread.sleep(100);

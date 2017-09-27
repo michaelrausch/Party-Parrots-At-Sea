@@ -7,6 +7,10 @@ public class ServerDescription {
     private String serverName;
     private String mapName;
     private Integer numPlayers;
+    private Long lastUpdated;
+    private Long lastRefreshed;
+
+    private static Long EXPIRY_INTERVAL = 5000L;
 
     public ServerDescription(String serverName, String mapName, Integer numPlayers, Integer capacity, String address, Integer portNum){
         this.serverName = serverName;
@@ -15,6 +19,7 @@ public class ServerDescription {
         this.address = address;
         this.portNum = portNum;
         this.capacity = capacity;
+        lastUpdated = System.currentTimeMillis();
     }
 
 
@@ -79,5 +84,18 @@ public class ServerDescription {
     public int hashCode() {
         return this.getName().hashCode() + this.getAddress().hashCode() +
                 this.portNumber().hashCode() + this.getMapName().hashCode();
+    }
+
+    public Boolean hasExpired(){
+        return System.currentTimeMillis() - lastUpdated > EXPIRY_INTERVAL;
+    }
+
+    public Boolean serverShouldBeRemoved() {
+        if (lastRefreshed == null) return false;
+        return System.currentTimeMillis() - lastRefreshed > EXPIRY_INTERVAL;
+    }
+
+    public void hasBeenRefreshed(){
+        lastRefreshed = System.currentTimeMillis();
     }
 }

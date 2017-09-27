@@ -6,11 +6,10 @@ import seng302.gameServer.ServerDescription;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
+import javax.jmdns.impl.JmDNSImpl;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static seng302.gameServer.ServerAdvertiser.getLocalHostIp;
 
@@ -18,6 +17,7 @@ import static seng302.gameServer.ServerAdvertiser.getLocalHostIp;
  * Listens for servers on the local network
  */
 public class ServerListener{
+    private static Integer SERVICE_REFRESH_INTERVAL = 5 * 1000;
     private static ServerListener instance;
     private ServerListenerDelegate delegate;
     private JmDNS jmdns = null;
@@ -91,8 +91,16 @@ public class ServerListener{
 
     private ServerListener() throws IOException {
         jmdns = JmDNS.create(InetAddress.getByName(getLocalHostIp()));
+
         listener = new GameServeMonitor();
         jmdns.addServiceListener(ServerAdvertiser.SERVICE_TYPE, listener);
+
+        /*new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                refresh();
+            }
+        }, 50, SERVICE_REFRESH_INTERVAL);*/
     }
 
     public static ServerListener getInstance() throws IOException {
@@ -109,5 +117,26 @@ public class ServerListener{
      */
     public void setDelegate(ServerListenerDelegate delegate){
         this.delegate = delegate;
+    }
+
+    public void refresh(){
+        ArrayList<ServerDescription> servers = new ArrayList<>(listener.servers);
+
+        for (ServerDescription serverDescription : servers){
+            if (serverDescription.hasExpired()){
+                jmdns.requestServiceInfo(ServerAdvertiser.SERVICE_TYPE, serverDescription.getName());
+            }
+            else{
+                serverDescription.hasBeenRefreshed();
+            }
+        }
+
+        for (ServerDescription server : servers){
+            if (server.serverShouldBeRemoved()){
+                listener.servers.remove(server);
+                delegate.serverRemoved(new ArrayList<ServerDescription>(listener.servers));
+            }
+        }
+
     }
 }
