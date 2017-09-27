@@ -1,5 +1,6 @@
 package seng302.gameServer;
 
+import java.io.IOException;
 import java.util.*;
 
 import javafx.scene.paint.Color;
@@ -81,7 +82,7 @@ public class GameState implements Runnable {
     private static MarkOrder markOrder;
     private static long startTime;
     private static Set<Mark> marks = new HashSet<>();
-    private static List<Limit> courseLimit;
+    private static List<Limit> courseLimit = new ArrayList<>();
     private static Integer maxPlayers = 8;
 
     private static List<Token> tokensInPlay;
@@ -97,7 +98,6 @@ public class GameState implements Runnable {
         windSpeed = 10000d;
         yachts = new HashMap<>();
         tokensInPlay = new ArrayList<>();
-        marks = new HashSet<>();
         players = new ArrayList<>();
         customizationFlag = false;
         playerHasLeftFlag = false;
@@ -517,6 +517,7 @@ public class GameState implements Runnable {
                 return true;
             }
         }
+
         if (GeoUtility.checkCrossedLine(courseLimit.get(courseLimit.size() - 1), courseLimit.get(0),
             yacht.getLastLocation(), yacht.getLocation()) != 0) {
             return true;
@@ -1025,6 +1026,12 @@ public class GameState implements Runnable {
 
     public static void setMaxPlayers(Integer newMax){
         maxPlayers = newMax;
+
+        try {
+            ServerAdvertiser.getInstance().setCapacity(newMax);
+        } catch (IOException e) {
+            logger.warn("Couldn't update max players");
+        }
     }
 
     public static void endRace () {

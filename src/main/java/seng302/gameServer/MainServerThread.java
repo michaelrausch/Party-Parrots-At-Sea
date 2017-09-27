@@ -63,7 +63,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             ServerAdvertiser.getInstance()
                 .setMapName(regattaXMLData.getCourseName())
                 .setCapacity(capacity)
-                .setNumberOfPlayers(numPlayers)
+                .setNumberOfPlayers(numPlayers - 1)
                 .registerGame(PORT, regattaXMLData.getRegattaName());
         } catch (IOException e) {
             logger.warn("Could not register server");
@@ -84,11 +84,11 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     }
 
     private void startServer() {
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
         MessageFactory.updateXMLGenerator(raceXMLData, regattaXMLData);
         GameState.setRace(raceXMLData);
         MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
         startAdvertisingServer();
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
         GameState.addMessageEventListener(this::broadcastMessage);
         sendSetupMessages();
     }

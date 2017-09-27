@@ -92,13 +92,10 @@ public class ServerDescription {
 
     public Boolean serverShouldBeRemoved() {
         if (lastRefreshed == null) return false;
-
-        System.out.println("SBR" + (System.currentTimeMillis() - lastRefreshed > EXPIRY_INTERVAL));
         return System.currentTimeMillis() - lastRefreshed > EXPIRY_INTERVAL;
     }
 
     public void hasBeenRefreshed(){
-        System.out.println("Was refreshed");
         lastRefreshed = System.currentTimeMillis();
     }
 }

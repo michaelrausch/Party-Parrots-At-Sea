@@ -3,14 +3,28 @@ package steps;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import org.junit.Assert;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.gameServer.MainServerThread;
 import seng302.gameServer.messages.BoatAction;
 import seng302.model.ServerYacht;
+import seng302.model.mark.MarkOrder;
+import seng302.utilities.XMLGenerator;
+import seng302.utilities.XMLParser;
 import seng302.visualiser.ClientToServerThread;
+import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  *
@@ -36,7 +50,14 @@ public class ToggleSailSteps {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        xmlGenerator.setRaceTemplate(
+                XMLParser.parseRaceDef(
+                        "/maps/default.xml", "test", 2, null, false
+                ).getValue()
+        );
         GameState.setCurrentStage(GameStages.RACING);
+        GameState.addYacht(1, new ServerYacht(BoatMeshType.DINGHY, 1, "0", "", "", ""));
         Thread.sleep(200); // Sleep needed to help the threads all be up to speed with each other
         ServerYacht yacht = (new ArrayList<>(GameState.getYachts().values())).get(0);
         Assert.assertFalse(yacht.getSailIn());

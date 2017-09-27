@@ -26,21 +26,6 @@ public class MarkOrderTest {
 
     @BeforeClass
     public static void setup(){
-        /*
-                    %%%%%%
-                   %%%% = =
-                   %%C    >
-                    _)' _( .' ,
-                 __/ |_/\   " *. o
-                /` \_\ \/     %`= '_  .
-               /  )   \/|      .^',*. ,
-              /' /-   o/       - " % '_
-             /\_/     <       = , ^ ~ .
-             )_o|----'|          .`  '
-         ___// (_  - (\
-        ///-(    \'   \\
-
-         */
         XMLGenerator xmlGenerator = new XMLGenerator();
         xmlGenerator.setRaceTemplate(
             XMLParser.parseRaceDef(

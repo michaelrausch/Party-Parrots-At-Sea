@@ -37,6 +37,7 @@ import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
+import seng302.visualiser.controllers.ViewManager;
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on
@@ -168,6 +169,9 @@ public class ClientToServerThread implements Runnable {
         logger.warn("Closed connection to server", 1);
         notifyDisconnectListeners("Connection to server was terminated");
         closeSocket();
+
+        ViewManager.getInstance().goToStartView();
+        ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
     }
 
     public void sendCustomizationRequest(CustomizeRequestType reqType, byte[] payload) {
@@ -230,7 +234,6 @@ public class ClientToServerThread implements Runnable {
             return;
         }
 
-
         logger.error("Server Denied Connection, Exiting");
 
         final String alertErrorText;
@@ -243,7 +246,8 @@ public class ClientToServerThread implements Runnable {
         }
         handleConnectionError("Server no longer available.");
         notifyDisconnectListeners(alertErrorText);
-        closeSocket();
+
+        System.out.println();
     }
 
     /**

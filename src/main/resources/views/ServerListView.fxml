@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import java.lang.String?>
@@ -13,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.ServerListController">
+<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.ServerListController">
     <children>
         <GridPane fx:id="serverListMainGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
             <children>
@@ -36,8 +42,14 @@
                   </JFXButton>
                   <JFXTextField fx:id="roomNumber" promptText="Room Code" GridPane.columnIndex="3">
                      <GridPane.margin>
-                        <Insets right="20.0" />
+                        <Insets bottom="5.0" right="20.0" top="5.0" />
                      </GridPane.margin>
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
                   </JFXTextField>
                   <JFXButton fx:id="autoSelectGame" maxHeight="45.0" prefHeight="45.0" prefWidth="220.0" text="Auto-Select Game" textFill="WHITE" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                      <GridPane.margin>
