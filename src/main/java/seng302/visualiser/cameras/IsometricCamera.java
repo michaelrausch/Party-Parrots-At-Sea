@@ -16,8 +16,8 @@ public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
     private final Double MAX_Y = 170.0;
 
     private final Double PAN_LIMIT = 160.0;
-    private final Double NEAR_ZOOM_LIMIT = -50.0;
-    private final Double FAR_ZOOM_LIMIT = -160.0;
+    private final Double NEAR_ZOOM_LIMIT = -30.0;
+    private final Double FAR_ZOOM_LIMIT = -180.0;
 
     private Double horizontalPan;
     private Double verticalPan;
@@ -29,7 +29,8 @@ public class IsometricCamera extends PerspectiveCamera implements RaceCamera {
         super(true);
         transforms = this.getTransforms();
 
-        zoomFactor = (FAR_ZOOM_LIMIT + NEAR_ZOOM_LIMIT) / 2.0;
+//        zoomFactor = (FAR_ZOOM_LIMIT + NEAR_ZOOM_LIMIT) / 2.0;
+        zoomFactor = FAR_ZOOM_LIMIT;
         horizontalPan = cameraStartX;
         verticalPan = cameraStartY;
 

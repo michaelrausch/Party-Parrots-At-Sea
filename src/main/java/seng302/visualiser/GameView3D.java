@@ -54,7 +54,7 @@ public class GameView3D extends GameView{
 
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_X = 0;
-    private final double DEFAULT_CAMERA_Y = 100;
+    private final double DEFAULT_CAMERA_Y = 160;
 
     private Group root3D;
     private SubScene view;
@@ -509,8 +509,7 @@ public class GameView3D extends GameView{
 
     private void updateMarkArrows (ClientYacht yacht, int legNumber) {
         CompoundMark compoundMark;
-        legNumber += 1;
-        if (legNumber - 1 >= 0) {
+        if (legNumber - 1 >= 0 && legNumber-1 < course.size()) {
             Sounds.playMarkRoundingSound();
             compoundMark = course.get(legNumber-1);
             for (Mark mark : compoundMark.getMarks()) {
@@ -518,7 +517,7 @@ public class GameView3D extends GameView{
             }
         }
         CompoundMark nextMark = null;
-        if (legNumber < course.size() - 1) {
+        if (legNumber < course.size()) {
             Sounds.playMarkRoundingSound();
             nextMark = course.get(legNumber);
             for (Mark mark : nextMark.getMarks()) {

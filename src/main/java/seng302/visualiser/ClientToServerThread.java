@@ -1,14 +1,5 @@
 package seng302.visualiser;
 
-import javafx.application.Platform;
-import javafx.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.*;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.utilities.XMLParser;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +14,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
+import javafx.application.Platform;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +91,7 @@ public class ClientToServerThread implements Runnable {
 
     private ByteArrayOutputStream crcBuffer;
     private boolean socketOpen = true;
+    private boolean ignoreDC = false;
 
     /**
      * Constructor for ClientToServerThread which takes in ipAddress and portNumber and attempts to
@@ -181,8 +174,10 @@ public class ClientToServerThread implements Runnable {
         closeSocket();
 
         Platform.runLater(() -> {
-            ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
-            ViewManager.getInstance().goToStartView();
+            if (ignoreDC) {
+                ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
+                ViewManager.getInstance().goToStartView();
+            }
         });
     }
 
@@ -198,7 +193,7 @@ public class ClientToServerThread implements Runnable {
     }
 
     private void notifyDisconnectListeners (String message) {
-        if (socketOpen) {
+        if (socketOpen && !ignoreDC) {
             for (DisconnectedFromHostListener listener : disconnectionListeners) {
                 listener.notifyDisconnection(message);
             }
@@ -447,5 +442,9 @@ public class ClientToServerThread implements Runnable {
 
     public boolean hasStarted() {
         return isStarted;
+    }
+
+    public void ignoreDC() {
+        ignoreDC = true;
     }
 }

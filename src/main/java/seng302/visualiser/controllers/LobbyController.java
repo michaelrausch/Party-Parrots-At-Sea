@@ -225,7 +225,7 @@ public class LobbyController implements Initializable {
     }
 
     private void leaveLobby() {
-
+        System.out.println("LEFT LOBBY");
         ViewManager.getInstance().getGameClient().stopGame();
         ViewManager.getInstance().goToStartView();
     }

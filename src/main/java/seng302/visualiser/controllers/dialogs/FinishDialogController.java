@@ -5,7 +5,6 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -26,7 +25,10 @@ public class FinishDialogController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        playAgain.setOnAction(event -> ViewManager.getInstance().goToStartView());
+        playAgain.setOnAction(event -> {
+            System.out.println("CALLED HERE");
+            ViewManager.getInstance().goToStartView();
+        });
     }
 
     public void setFinishedBoats(ArrayList<ClientYacht> finishedBoats) {
