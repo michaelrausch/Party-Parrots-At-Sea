@@ -736,6 +736,10 @@ public class GameState implements Runnable {
      * @param yacht The current yacht to check for
      */
     private Boolean checkStartLineCrossing(ServerYacht yacht) {
+        long timeTillStart = System.currentTimeMillis() - this.getStartTime();
+        if (timeTillStart < 0){
+            return false;
+        }
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
         GeoPoint lastLocation = yacht.getLastLocation();
