@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
-import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -87,14 +87,11 @@ public class BoatObject extends Group {
         // calculate heading between boat and next mark
 
         System.out.println(markPoint);
-        ;
         Point2D boatLoc = new Point2D(this.getLayoutX(), this.getLayoutY());
         System.out.println(boatLoc);
 
         Double angle = Math.toDegrees(
             Math.atan2(boatLoc.getY() - markPoint.getY(), boatLoc.getX() - markPoint.getX())) - 90;
-
-        ObservableList<Transform> transforms = markIndicator.getTransforms();
 
         Double radius = 3.0;
         Double scale = 0.4;
@@ -104,13 +101,13 @@ public class BoatObject extends Group {
 
         Double transX = (radius * Math.cos(Math.toRadians(angle)));
         Double transY = (radius * Math.sin(Math.toRadians(angle)));
-
-        transforms.clear();
-        transforms.addAll(
-            new Rotate(angle, new Point3D(0, 0, 1))
-//            new Rotate(angle, 0,0, 0)
-            //new Translate(transX, transY, -1),
-            //new Scale(scale, scale, scale)
+        System.out.println(transX);
+        System.out.println(transY);
+        markIndicator.getTransforms().clear();
+        markIndicator.getTransforms().addAll(
+            new Rotate(angle, new Point3D(0, 0, 1)),
+            new Translate(0, -3, -0.1),
+            new Scale(scale, scale, scale / 3)
         );
     }
 

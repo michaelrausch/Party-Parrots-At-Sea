@@ -187,14 +187,7 @@ public class ModelFactory {
     }
 
     private static Model makeNextMarkIndicator(Group assets) {
-//        assets.getTransforms().addAll(
-//            new Translate(10, 10, 0),
-//            new Rotate(90, new Point3D(0,0,1)),
-//            new Scale(0.5, 0.5, 0.5)
-//        );
-
         assets.getChildren().add(new AmbientLight());
-
         return new Model(new Group(assets), null);
     }
 
