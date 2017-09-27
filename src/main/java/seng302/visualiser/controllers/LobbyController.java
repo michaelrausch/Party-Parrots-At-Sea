@@ -157,8 +157,14 @@ public class LobbyController implements Initializable {
         });
 
         //Hacky rotations for wind and random to level it in the plane
-        windWalkerToken.getTransforms().add(new Rotate(-70, new Point3D(1, 0, 0)));
-        randomToken.getTransforms().add(new Rotate(-90, new Point3D(1, 0, 0)));
+        windWalkerToken.getTransforms().addAll(
+            new Rotate(-70, new Point3D(1, 0, 0)),
+            new Translate(0, 2,0)
+        );
+        randomToken.getTransforms().addAll(
+            new Rotate(-90, new Point3D(1, 0, 0)),
+            new Translate(0, 0,1)
+        );
 
         speedTokenPane.getChildren().add(speedToken);
         handlingTokenPane.getChildren().add(handlingToken);
