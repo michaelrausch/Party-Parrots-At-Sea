@@ -509,9 +509,22 @@ public class GameView3D {
 
             for (ObservableValue o : Arrays
                 .asList(playerBoat.layoutXProperty(), playerBoat.layoutXProperty())) {
-                o.addListener((obs, oldVal, newVal) -> playerBoat.updateMarkIndicator(
-                    findScaledXY(course.get(playerYacht.getLegNumber()).getMidPoint())
-                ));
+                o.addListener((obs, oldVal, newVal) -> {
+
+                    List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
+                    Point2D midPoint = new Point2D(0, 0);
+                    if (marks.size() == 1) {
+                        midPoint = findScaledXY(marks.get(0));
+                    } else if (marks.size() == 2) {
+                        midPoint = (findScaledXY(marks.get(0)))
+                            .midpoint(findScaledXY(marks.get(1)));
+                    }
+
+                    if (midPoint != null) {
+                        playerBoat.updateMarkIndicator(midPoint);
+                    }
+
+                });
             }
             gameObjects.getChildren().addAll(wakes);
             gameObjects.getChildren().addAll(boatObjectGroup);
