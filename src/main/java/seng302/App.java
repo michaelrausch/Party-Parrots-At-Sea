@@ -77,7 +77,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        ViewManager.getInstance().initialStartView(primaryStage);
+        ViewManager.getInstance().initialiseSplashScreen(primaryStage);
     }
 
     private static void runDiscoveryServer(){

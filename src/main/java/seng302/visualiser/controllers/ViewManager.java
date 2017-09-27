@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerAdvertiser;
@@ -52,8 +53,16 @@ public class ViewManager {
         if (instance == null) {
             instance = new ViewManager();
         }
-
         return instance;
+    }
+
+    public void initialiseSplashScreen(Stage stage) throws IOException {
+        this.stage = stage;
+        Parent root = FXMLLoader.load(getClass().getResource("/views/SplashScreen.fxml"));
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.show();
     }
 
     /**
@@ -63,7 +72,6 @@ public class ViewManager {
         this.stage = stage;
         Parent root = FXMLLoader.load(getClass().getResource("/views/StartScreenView.fxml"));
         stage.setTitle("Party Parrots At Sea");
-
         JFXDecorator decorator = new JFXDecorator(stage, root, false, true, true);
         decorator.setCustomMaximize(true);
         decorator.applyCss();
