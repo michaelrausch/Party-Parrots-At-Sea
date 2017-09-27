@@ -142,6 +142,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timer blinkingTimer = new Timer();
     private ImageView iconToDisplay;
 
+    private Double lastWindDirection;
+
     public void initialize() {
         contentStackPane.setVisible(false);
         Image loadingImage = new Image("PP.png");
@@ -190,6 +192,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 chatHistory.decreaseOpacity();
             }
         });
+
+        lastWindDirection = 0d;
     }
 
     public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
@@ -435,15 +439,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the wind direction arrow and text as from info from the StreamParser
      * @param direction the from north angle of the wind.
      */
-    private double preDir = 0;
     private void updateWindDirection(double direction) {
         windDirectionLabel.setText(String.format("%.1f°", direction));
         RotateTransition rt = new RotateTransition(Duration.millis(300), windImageView);
-        rt.setByAngle(direction - preDir);
-        rt.setCycleCount(5);
+        rt.setByAngle(direction - lastWindDirection);
+        rt.setCycleCount(3);
         rt.setAutoReverse(true);
         rt.play();
-        preDir = direction;
+        lastWindDirection = direction;
 //        windImageView.setRotate(direction);
     }
 
