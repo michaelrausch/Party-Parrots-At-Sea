@@ -2,6 +2,14 @@
     -fx-font-family: monospace !important;
 }
 
+.sliderLabel {
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+.error-label * {
+    -fx-text-fill: red;
+}
+
 #submitBtn {
     -fx-background-color: -fx-pp-theme-color;
     -fx-text-fill: -fx-pp-light-text-color;
@@ -32,12 +40,7 @@
     -fx-font-size: 16px;
 }
 
-#maxPlayersLabel {
-    -fx-text-fill: -fx-pp-dark-text-color;
-    -fx-font-size: 16px;
-}
-
-#maxPlayerPromptLabel {
+.optionLabel {
     -fx-text-fill: -fx-pp-dark-text-color;
     -fx-font-size: 16px;
 }
@@ -54,4 +57,9 @@
 #closeLabel:hover {
     -fx-text-fill: red;
     -fx-font-size: 33px;
+}
+
+JFXCheckBox {
+    -jfx-checked-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-dark-text-color;
 }

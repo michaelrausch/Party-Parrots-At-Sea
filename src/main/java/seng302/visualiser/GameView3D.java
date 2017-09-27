@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Camera;
@@ -69,6 +70,8 @@ public class GameView3D extends GameView {
     /* Note that if either of these is null then values for it have not been added and the other
        should be used as the limits of the map. */
     private Map<Mark, Marker3D> markerObjects;
+
+    private BoatObject playerBoat;
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
@@ -334,9 +337,35 @@ public class GameView3D extends GameView {
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
                 ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
                 ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
+
+                newBoat.setMarkIndicator(ModelFactory.importSTL("mark_pointer.stl"));
+                playerBoat = newBoat;
+
             }
         }
         Platform.runLater(() -> {
+            ClientYacht playerYacht = ViewManager.getInstance().getGameClient().getAllBoatsMap()
+                .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId());
+
+            for (ObservableValue o : Arrays
+                .asList(playerBoat.layoutXProperty(), playerBoat.layoutXProperty())) {
+                o.addListener((obs, oldVal, newVal) -> {
+
+                    List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
+                    Point2D midPoint = new Point2D(0, 0);
+                    if (marks.size() == 1) {
+                        midPoint = scaledPoint.findScaledXY(marks.get(0));
+                    } else if (marks.size() == 2) {
+                        midPoint = (scaledPoint.findScaledXY(marks.get(0)))
+                            .midpoint(scaledPoint.findScaledXY(marks.get(1)));
+                    }
+
+                    if (midPoint != null) {
+                        playerBoat.updateMarkIndicator(midPoint);
+                    }
+
+                });
+            }
             gameObjects.getChildren().addAll(wakes);
             gameObjects.getChildren().addAll(boatObjectGroup);
         });
