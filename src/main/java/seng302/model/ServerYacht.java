@@ -23,9 +23,9 @@ public class ServerYacht {
     //Boat info
     private BoatMeshType boatType;
     private Double turnStep = 5.0;
-    private Double maxSpeedMultiplier = 1.0;
-    private Double turnStepMultiplier = 1.0;
-    private Double accelerationMultiplier = 1.0;
+    private Double boatTypeSpeedMultiplier = 1.0;
+    private Double boatTypeTurnStepMultiplier = 1.0;
+    private Double boatTypeAccelerationMultiplier = 1.0;
     private Integer sourceId;
     private String hullID; //matches HullNum in the XML spec.
     private String shortName;
@@ -55,6 +55,8 @@ public class ServerYacht {
     //PowerUp
     private TokenType powerUp;
     private Long powerUpStartTime;
+    private Double powerUpSpeedMultiplier;
+    private Integer powerUpHandlingMultiplier;
 
     //turning mode
     private Boolean continuouslyTurning;
@@ -78,11 +80,11 @@ public class ServerYacht {
         this.legNumber = 0;
         this.boatColor = Colors.getColor(sourceId - 1);
         this.powerUp = null;
-
+        this.powerUpSpeedMultiplier = 1d;
+        this.powerUpHandlingMultiplier = 1;
         this.hasEnteredRoundingZone = false;
         this.hasPassedLine = false;
         this.hasPassedThroughGate = false;
-
         this.continuouslyTurning = false;
     }
 
@@ -110,13 +112,33 @@ public class ServerYacht {
         location = geoPoint;
     }
 
+    /**
+     * Powers up a yacht with a given yacht, only after powering it down first to avoid double power
+     * ups
+     *
+     * @param powerUp The given power up
+     */
     public void powerUp(TokenType powerUp) {
+        powerDown();
+        switch (powerUp) {
+            case BOOST:
+                powerUpSpeedMultiplier = GameState.VELOCITY_BOOST_MULTIPLIER;
+                break;
+            case HANDLING:
+                powerUpHandlingMultiplier = GameState.HANDLING_BOOST_MULTIPLIER;
+                break;
+        }
         this.powerUp = powerUp;
         powerUpStartTime = System.currentTimeMillis();
     }
 
+    /**
+     * Powers down a yacht, returning its power multipliers back to 1
+     */
     public void powerDown() {
         this.powerUp = null;
+        this.powerUpSpeedMultiplier = 1d;
+        this.powerUpHandlingMultiplier = 1;
     }
 
     public Long getPowerUpStartTime() {
@@ -133,7 +155,7 @@ public class ServerYacht {
      * @param amount the amount by which to adjust the boat heading.
      */
     public void adjustHeading(Double amount) {
-        Double newVal = heading + (amount * turnStepMultiplier);
+        Double newVal = heading + amount * powerUpHandlingMultiplier * boatTypeTurnStepMultiplier;
         lastHeading = heading;
         heading = (double) Math.floorMod(newVal.longValue(), 360L);
     }
@@ -156,11 +178,11 @@ public class ServerYacht {
     /**
      * Enables the boats auto pilot feature, which will move the boat towards a given heading.
      *
-     * @param thisHeading The heading to move the boat towards.
+     * @param newHeading The heading to move the boat towards.
      */
-    private void setAutoPilot(Double thisHeading) {
+    private void setAutoPilot(Double newHeading) {
         isAuto = true;
-        autoHeading = thisHeading;
+        autoHeading = newHeading;
     }
 
     /**
@@ -178,8 +200,9 @@ public class ServerYacht {
         if (isAuto) {
             turnTowardsHeading(autoHeading);
             if (Math.abs(heading - autoHeading)
-                <= turnStep) { //Cancel when within 1 turn step of target.
+                <= turnStep*1.5) {
                 isAuto = false;
+                setHeading(autoHeading);
             }
         }
     }
@@ -265,7 +288,7 @@ public class ServerYacht {
 
             // Take optimal heading and turn into a boat heading rather than a wind heading.
             optimalHeading =
-                optimalHeading + GameState.getWindDirection();
+                (optimalHeading + GameState.getWindDirection()) % 360;
 
             setAutoPilot(optimalHeading);
         }
@@ -434,18 +457,18 @@ public class ServerYacht {
     }
 
     public void setBoatType(BoatMeshType boatType) {
-        this.accelerationMultiplier = boatType.accelerationMultiplier;
-        this.maxSpeedMultiplier = boatType.maxSpeedMultiplier;
-        this.turnStepMultiplier = boatType.turnStep;
+        this.boatTypeAccelerationMultiplier = boatType.accelerationMultiplier;
+        this.boatTypeSpeedMultiplier = boatType.maxSpeedMultiplier;
+        this.boatTypeTurnStepMultiplier = boatType.turnStep;
         this.boatType = boatType;
     }
 
-    public Double getMaxSpeedMultiplier() {
-        return maxSpeedMultiplier;
+    public Double getBoatTypeSpeedMultiplier() {
+        return boatTypeSpeedMultiplier;
     }
 
-    public Double getAccelerationMultiplier(){
-        return accelerationMultiplier;
+    public Double getBoatTypeAccelerationMultiplier() {
+        return boatTypeAccelerationMultiplier;
     }
 
 
@@ -455,5 +478,21 @@ public class ServerYacht {
 
     public void setContinuouslyTurning(Boolean continuouslyTurning) {
         this.continuouslyTurning = continuouslyTurning;
+    }
+
+    public Double getPowerUpSpeedMultiplier() {
+        return powerUpSpeedMultiplier;
+    }
+
+    public void setPowerUpSpeedMultiplier(Double powerUpSpeedMultiplier) {
+        this.powerUpSpeedMultiplier = powerUpSpeedMultiplier;
+    }
+
+    public Integer getPowerUpHandlingMultiplier() {
+        return powerUpHandlingMultiplier;
+    }
+
+    public void setPowerUpHandlingMultiplier(Integer powerUpHandlingMultiplier) {
+        this.powerUpHandlingMultiplier = powerUpHandlingMultiplier;
     }
 }

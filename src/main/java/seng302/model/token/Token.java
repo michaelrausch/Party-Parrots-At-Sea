@@ -15,9 +15,22 @@ public class Token extends GeoPoint {
     private TokenType tokenType;
     private Random random = new Random();
 
+    //Constructor for creating a specific type client side
     public Token(TokenType tokenType, double lat, double lng) {
         super(lat, lng);
         this.tokenType = tokenType;
+    }
+
+    //Making random type server side
+    public Token(double lat, double lng) {
+        super(lat, lng);
+        assignRandomType();
+    }
+
+    //Making random type server side
+    public Token(GeoPoint geoPoint) {
+        super(geoPoint.getLat(), geoPoint.getLng());
+        assignRandomType();
     }
 
     public TokenType getTokenType() {
@@ -40,5 +53,10 @@ public class Token extends GeoPoint {
         tokenType = tokenTypeList.get(random.nextInt(tokenTypeList.size()));
     }
 
-
+    /**
+     * Exists for testing purposes only
+     */
+    public void assignType(TokenType tokenType) {
+        this.tokenType = tokenType;
+    }
 }

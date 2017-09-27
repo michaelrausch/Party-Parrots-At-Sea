@@ -13,7 +13,9 @@ import seng302.model.stream.xml.parser.RaceXMLData;
  */
 public class MarkOrder {
     private List<CompoundMark> raceMarkOrder;
+    private List<CompoundMark> orderedUniqueCompoundMarks;
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
+    private List<Mark> allMarks;
 
 
     public MarkOrder(RaceXMLData raceXMLData){
@@ -37,6 +39,10 @@ public class MarkOrder {
             return null;
         }
         return Collections.unmodifiableList(raceMarkOrder);
+    }
+
+    public List<CompoundMark> getOrderedUniqueCompoundMarks() {
+        return orderedUniqueCompoundMarks;
     }
 
     /**

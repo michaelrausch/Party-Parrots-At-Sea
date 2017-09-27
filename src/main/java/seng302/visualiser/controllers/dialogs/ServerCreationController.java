@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -15,6 +16,7 @@ import javafx.scene.layout.AnchorPane;
 import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
 import seng302.visualiser.MapMaker;
+import seng302.visualiser.controllers.ServerListController.ServerCreationDialogListener;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.validators.FieldLengthValidator;
 import seng302.visualiser.validators.ValidationTools;
@@ -30,6 +32,8 @@ public class ServerCreationController implements Initializable {
     private Label maxPlayersLabel;
     @FXML
     private JFXButton submitBtn;
+    @FXML
+    private Label closeLabel;
     @FXML
     private JFXButton nextMapButton;
     @FXML
@@ -48,6 +52,8 @@ public class ServerCreationController implements Initializable {
     private MapMaker mapMaker = MapMaker.getInstance();
 
     //---------FXML END---------//
+
+    private List<ServerCreationDialogListener> serverCreationDialogListeners;
 
     public void initialize(URL location, ResourceBundle resources) {
         legsSlider.setMax(10);
@@ -86,6 +92,7 @@ public class ServerCreationController implements Initializable {
 
         mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
         mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
+        closeLabel.setOnMouseClicked(event -> notifyListeners());
     }
 
     /**
@@ -142,6 +149,16 @@ public class ServerCreationController implements Initializable {
         mapMaker.previous();
         mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
         mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
+    }
+
+    public void setListener(List<ServerCreationDialogListener> serverCreationDialogListeners) {
+        this.serverCreationDialogListeners = serverCreationDialogListeners;
+    }
+
+    public void notifyListeners() {
+        for (ServerCreationDialogListener serverCreationDialogListener : serverCreationDialogListeners) {
+            serverCreationDialogListener.notifyClosure();
+        }
     }
 
 }

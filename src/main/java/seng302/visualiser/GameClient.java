@@ -1,14 +1,25 @@
 package seng302.visualiser;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
@@ -37,6 +48,7 @@ import seng302.utilities.XMLParser;
 import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
+import seng302.visualiser.controllers.dialogs.PopupDialogController;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -166,10 +178,12 @@ public class GameClient {
 
     private void showConnectionError (String message) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setHeaderText("Connection Error");
-            alert.setContentText(message);
-            alert.showAndWait();
+            PopupDialogController controller = ViewManager.getInstance().showPopupDialog();
+            controller.setHeader("Oops");
+            controller.setContent(message);
+            controller.setOptionButtonText("GO HOME");
+            controller
+                .setOptionButtonEventHandler(event -> ViewManager.getInstance().goToStartView());
         });
     }
 
@@ -413,9 +427,16 @@ public class GameClient {
      * @param yachtEventData The YachtEvent data packet
      */
     private void processYachtEvent(YachtEventData yachtEventData) {
+        ClientYacht thisYacht = allBoatsMap.get(yachtEventData.getSubjectId().intValue());
+
         if (yachtEventData.getEventId() == YachtEventType.COLLISION.getCode()) {
-            showCollisionAlert(yachtEventData);
-        } else {
+            showCollisionAlert(thisYacht);
+        } else if (yachtEventData.getEventId() == YachtEventType.POWER_DOWN.getCode()) {
+            thisYacht.powerDown();
+            Sounds.playTokenPickupSound();  // TODO: 23/09/17 This should be power down sound
+        } else if (yachtEventData.getEventId() == YachtEventType.BUMPER_CRASH.getCode()) {
+            showDisableAlert(thisYacht);
+        } else {        //Else all token pickup types
             TokenType tokenType = null;
             if (yachtEventData.getEventId() == YachtEventType.TOKEN_VELOCITY.getCode()) {
                 tokenType = TokenType.BOOST;
@@ -429,36 +450,36 @@ public class GameClient {
                 tokenType = TokenType.WIND_WALKER;
             }
 
-            showTokenPickUp(tokenType);
-            allBoatsMap.get(yachtEventData.getSubjectId().intValue()).setPowerUp(tokenType);
+            Sounds.playTokenPickupSound();
+            thisYacht.setPowerUp(tokenType);
         }
+    }
+
+
+    /**
+     * Turns a disabled boat black until the bumper affect wears off
+     *
+     * @param yacht The yacht to show as disabled
+     */
+    private void showDisableAlert(ClientYacht yacht) {
+        Color originalColor = yacht.getColour();
+        yacht.setColour(Color.BLACK);
+
+        Timer disableTimer = new Timer("Disable Timer");
+        disableTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                yacht.setColour(originalColor);
+            }
+        }, GameState.BUMPER_DISABLE_TIME);
     }
 
     /**
      * Tells race view to show a collision animation.
      */
-    private void showCollisionAlert(YachtEventData yachtEventData) {
+    private void showCollisionAlert(ClientYacht yacht) {
         Sounds.playCrashSound();
-        raceState.storeCollision(
-            allBoatsMap.get(
-                yachtEventData.getSubjectId().intValue()
-            )
-        );
-    }
-
-    // TODO: 11/09/17 wmu16 - Add in functionality to viually indicate a pickup to a user
-    private void showTokenPickUp(TokenType tokenType) {
-        Sounds.playTokenPickupSound();
-        switch (tokenType) {
-            case BOOST:
-                break;
-            case HANDLING:
-                break;
-            case WIND_WALKER:
-                break;
-            case BUMPER:
-                break;
-        }
+        raceState.storeCollision(yacht);
     }
 
     private void formatAndSendChatMessage(String rawChat) {

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
+<?import javafx.scene.shape.*?>
 <?import com.jfoenix.controls.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
@@ -7,11 +9,23 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
 
 <StackPane fx:id="contentStackPane" maxHeight="1.7976931348623157E308"
-  maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
-  prefHeight="800.0" prefWidth="1200.0"
-  style="-fx-background-color: skyblue;" xmlns="http://javafx.com/javafx/8"
+  maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0"
+  prefWidth="1200.0" style="-fx-background-color: skyblue;" xmlns="http://javafx.com/javafx/8.0.111"
   xmlns:fx="http://javafx.com/fxml/1"
   fx:controller="seng302.visualiser.controllers.RaceViewController">
     <children>
@@ -32,17 +46,15 @@
                   valignment="BOTTOM" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <GridPane id="timerGrid" fx:id="timerGrid" prefWidth="192.0"
-                  styleClass="timer">
+                <GridPane id="timerGrid" fx:id="timerGrid" prefWidth="192.0" styleClass="timer">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="50.0"
                           prefWidth="50.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0"
-                          minWidth="135.0" prefWidth="135.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="135.0"
+                          prefWidth="135.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0"
-                          vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                     </rowConstraints>
                     <opaqueInsets>
                         <Insets/>
@@ -74,25 +86,20 @@
                 </GridPane>
                 <GridPane GridPane.columnIndex="2">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
-                          prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
-                          prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0"
-                          vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                     </rowConstraints>
                 </GridPane>
-                <GridPane fx:id="chatGridPane" GridPane.columnIndex="2"
-                  GridPane.rowIndex="2">
+                <GridPane fx:id="chatGridPane" GridPane.columnIndex="2" GridPane.rowIndex="2">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="390.0"
-                          minWidth="390.0" prefWidth="390.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="390.0" minWidth="390.0"
+                          prefWidth="390.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints maxHeight="1.7976931348623157E308"
-                          vgrow="SOMETIMES"/>
+                        <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES"/>
                         <RowConstraints maxHeight="60.0" minHeight="60.0" prefHeight="60.0"
                           vgrow="SOMETIMES"/>
                     </rowConstraints>
@@ -115,22 +122,21 @@
                                   minWidth="90.0" prefWidth="90.0"/>
                             </columnConstraints>
                             <rowConstraints>
-                                <RowConstraints maxHeight="50.0" minHeight="50.0"
-                                  prefHeight="50.0" valignment="CENTER" vgrow="SOMETIMES"/>
+                                <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="50.0"
+                                  valignment="CENTER" vgrow="SOMETIMES"/>
                             </rowConstraints>
                             <children>
-                                <JFXButton fx:id="chatSend" alignment="CENTER"
-                                  buttonType="RAISED" maxHeight="-Infinity"
+                                <JFXButton fx:id="chatSend" alignment="CENTER" buttonType="RAISED"
+                                  focusTraversable="false" maxHeight="-Infinity"
                                   maxWidth="1.7976931348623157E308" minHeight="-Infinity"
                                   minWidth="-Infinity" prefHeight="35.0" text="SEND"
                                   GridPane.columnIndex="1">
                                     <GridPane.margin>
-                                        <Insets bottom="10.0" left="10.0" right="10.0"
-                                          top="10.0"/>
+                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                                     </GridPane.margin>
                                 </JFXButton>
-                                <JFXTextField fx:id="chatInput" maxHeight="35.0"
-                                  minHeight="-Infinity" prefHeight="35.0">
+                                <JFXTextField fx:id="chatInput" focusTraversable="false"
+                                  maxHeight="35.0" minHeight="-Infinity" prefHeight="35.0">
                                     <GridPane.margin>
                                         <Insets bottom="10.0" left="20.0" right="10.0"/>
                                     </GridPane.margin>
@@ -152,28 +158,27 @@
                   prefHeight="150.0" prefWidth="240.0" GridPane.halignment="CENTER"
                   GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="110.0"
-                          minWidth="110.0" prefWidth="110.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="110.0" minWidth="110.0"
+                          prefWidth="110.0"/>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="132.0" minWidth="10.0"
                           prefWidth="132.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints maxHeight="120.0" minHeight="120.0"
-                          prefHeight="120.0" vgrow="SOMETIMES"/>
+                        <RowConstraints maxHeight="120.0" minHeight="120.0" prefHeight="120.0"
+                          vgrow="SOMETIMES"/>
                         <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0"
                           vgrow="SOMETIMES"/>
                     </rowConstraints>
                     <children>
-                        <Label fx:id="positionLabel" text="Position:"
-                          GridPane.columnIndex="1" GridPane.halignment="LEFT"
-                          GridPane.rowSpan="2" GridPane.valignment="TOP">
+                        <Label fx:id="positionLabel" text="Position:" GridPane.columnIndex="1"
+                          GridPane.halignment="LEFT" GridPane.rowSpan="2" GridPane.valignment="TOP">
                             <padding>
                                 <Insets bottom="5.0" left="10.0" right="5.0" top="5.0"/>
                             </padding>
                         </Label>
-                        <Label fx:id="boatSpeedLabel" text="Boat Speed:"
-                          GridPane.columnIndex="1" GridPane.halignment="LEFT"
-                          GridPane.rowSpan="2" GridPane.valignment="CENTER">
+                        <Label fx:id="boatSpeedLabel" text="Boat Speed:" GridPane.columnIndex="1"
+                          GridPane.halignment="LEFT" GridPane.rowSpan="2"
+                          GridPane.valignment="CENTER">
                             <opaqueInsets>
                                 <Insets/>
                             </opaqueInsets>
@@ -182,8 +187,8 @@
                             </padding>
                         </Label>
                         <Label fx:id="boatHeadingLabel" text="Boat Heading:"
-                          GridPane.columnIndex="1" GridPane.halignment="LEFT"
-                          GridPane.rowSpan="2" GridPane.valignment="BOTTOM">
+                          GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowSpan="2"
+                          GridPane.valignment="BOTTOM">
                             <padding>
                                 <Insets bottom="5.0" left="10.0" right="5.0" top="5.0"/>
                             </padding>
@@ -196,12 +201,12 @@
                             <rowConstraints>
                                 <RowConstraints maxHeight="120.0" minHeight="120.0"
                                   prefHeight="120.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="30.0" minHeight="30.0"
-                                  prefHeight="30.0" vgrow="SOMETIMES"/>
+                                <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0"
+                                  vgrow="SOMETIMES"/>
                             </rowConstraints>
                             <children>
-                                <ImageView fx:id="windImageView" fitHeight="92.0"
-                                  fitWidth="109.0" pickOnBounds="true" preserveRatio="true"
+                                <ImageView fx:id="windImageView" fitHeight="92.0" fitWidth="109.0"
+                                  pickOnBounds="true" preserveRatio="true"
                                   GridPane.halignment="CENTER" GridPane.rowSpan="2"
                                   GridPane.valignment="CENTER"/>
                                 <Label fx:id="windSpeedLabel" text="0.0 Knots"
@@ -230,30 +235,27 @@
                 </GridPane>
                 <GridPane GridPane.columnIndex="1" GridPane.rowIndex="2">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
-                          prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
-                          prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
-                          prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
-                          prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0"
+                        <RowConstraints maxHeight="152.0" minHeight="10.0" prefHeight="152.0"
                           vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0"
+                        <RowConstraints maxHeight="118.0" minHeight="10.0" prefHeight="98.0"
                           vgrow="SOMETIMES"/>
                     </rowConstraints>
                     <children>
-                        <ImageView fx:id="velocityIcon" fitHeight="123.0" fitWidth="139.0"
+                        <ImageView fx:id="velocityIcon" fitHeight="88.0" fitWidth="106.0"
                           pickOnBounds="true" preserveRatio="true" visible="false"
                           GridPane.halignment="CENTER" GridPane.rowIndex="1">
                             <image>
                                 <Image url="@../icons/velocity.png"/>
                             </image>
                         </ImageView>
-                        <ImageView fx:id="handlingIcon" fitHeight="123.0" fitWidth="139.0"
+                        <ImageView fx:id="handlingIcon" fitHeight="87.0" fitWidth="98.0"
                           pickOnBounds="true" preserveRatio="true" visible="false"
                           GridPane.columnIndex="1" GridPane.halignment="CENTER"
                           GridPane.rowIndex="1">
@@ -261,7 +263,7 @@
                                 <Image url="@../icons/handlingIcon.png"/>
                             </image>
                         </ImageView>
-                        <ImageView fx:id="windWalkerIcon" fitHeight="123.0" fitWidth="139.0"
+                        <ImageView fx:id="windWalkerIcon" fitHeight="83.0" fitWidth="100.0"
                           pickOnBounds="true" preserveRatio="true" visible="false"
                           GridPane.columnIndex="2" GridPane.halignment="CENTER"
                           GridPane.rowIndex="1">
@@ -269,12 +271,20 @@
                                 <Image url="@../icons/windWalkerIcon.png"/>
                             </image>
                         </ImageView>
-                        <ImageView fx:id="bumperIcon" fitHeight="123.0" fitWidth="139.0"
+                        <ImageView fx:id="bumperIcon" fitHeight="83.0" fitWidth="88.0"
                           pickOnBounds="true" preserveRatio="true" visible="false"
                           GridPane.columnIndex="3" GridPane.halignment="CENTER"
                           GridPane.rowIndex="1">
                             <image>
                                 <Image url="@../icons/bumperIcon.png"/>
+                            </image>
+                        </ImageView>
+                        <ImageView fx:id="badRandomIcon" fitHeight="69.0" fitWidth="103.0"
+                          pickOnBounds="true" preserveRatio="true" visible="false"
+                          GridPane.columnIndex="4" GridPane.halignment="CENTER"
+                          GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                            <image>
+                                <Image url="@../icons/slowedIcon.png"/>
                             </image>
                         </ImageView>
                     </children>

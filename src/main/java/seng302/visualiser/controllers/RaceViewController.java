@@ -44,12 +44,14 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javax.swing.ImageIcon;
 import seng302.model.ClientYacht;
 import seng302.model.ClientYacht.PowerUpListener;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView3D;
@@ -115,7 +117,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private Label positionLabel, boatSpeedLabel, boatHeadingLabel;
     @FXML
-    private ImageView velocityIcon, handlingIcon, windWalkerIcon, bumperIcon;
+    private ImageView velocityIcon, handlingIcon, windWalkerIcon, bumperIcon, badRandomIcon;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -135,6 +137,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ClientYacht player;
     private JFXDialog finishScreenDialog;
     private FinishDialogController finishDialogController;
+
+    //Icon stuff
+    private Timer blinkingTimer = new Timer();
+    private ImageView iconToDisplay;
 
     public void initialize() {
         Sounds.stopMusic();
@@ -213,6 +219,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         });
 
         player.addPowerUpListener(this::displayPowerUpIcon);
+        player.addPowerDownListener(this::removeIcon);
 
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView3D();
@@ -257,7 +264,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     private void displayPowerUpIcon(ClientYacht yacht, TokenType tokenType) {
         if (yacht == player) {
-            final ImageView iconToDisplay;
+            if (iconToDisplay != null) {
+                iconToDisplay.setVisible(false);
+            }
 
             switch (tokenType) {
                 case BOOST:
@@ -272,6 +281,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 case BUMPER:
                     iconToDisplay = bumperIcon;
                     break;
+                case RANDOM:
+                    iconToDisplay = badRandomIcon;
+                    break;
                 default:
                     iconToDisplay = velocityIcon;
             }
@@ -280,7 +292,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             iconToDisplay.setVisible(true);
 
             //Start blinking icon towards end
-            Timer blinkingTimer = new Timer();
+            if (blinkingTimer != null) {
+                blinkingTimer.cancel();
+            }
+            blinkingTimer = new Timer("Blinking Timer");
             blinkingTimer.schedule(new TimerTask() {
                 Boolean isVisible = true;
 
@@ -290,16 +305,14 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                     iconToDisplay.setVisible(isVisible);
                 }
             }, (int) (tokenType.getTimeout() * ICON_BLINK_TIMEOUT_RATIO), ICON_BLINK_PERIOD);
+        }
+    }
 
-            //Turn icon off after the time out
-            Timer switchOffTimer = new Timer();
-            switchOffTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    blinkingTimer.cancel();
-                    iconToDisplay.setVisible(false);
-                }
-            }, tokenType.getTimeout());
+    public void removeIcon(ClientYacht yacht) {
+        if (yacht == player) {
+            blinkingTimer.cancel();
+            iconToDisplay.setVisible(false);
+            iconToDisplay = null;
         }
     }
 

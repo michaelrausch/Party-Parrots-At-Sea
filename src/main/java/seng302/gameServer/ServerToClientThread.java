@@ -71,7 +71,6 @@ public class ServerToClientThread implements Runnable {
     private List<ConnectionListener> connectionListeners = new ArrayList<>();
     private DisconnectListener disconnectListener;
 
-    private ServerYacht yacht;
     private Player player;
 
     private SimpleObjectProperty<RaceXMLData> raceXMLProperty = new SimpleObjectProperty<>();
@@ -97,11 +96,11 @@ public class ServerToClientThread implements Runnable {
     }
 
     private void setUpPlayer(){
-        String fName = "Player" + GameState.getNumberOfPlayers().toString();
-        String lName = "";
+        String shortName = "P" + sourceId;
+        String longName = "Player " + sourceId;
+
         ServerYacht yacht = new ServerYacht(
-            BoatMeshType.DINGHY, sourceId, sourceId.toString(), fName, fName + " " + lName, "NZ"
-        );
+            BoatMeshType.DINGHY, sourceId, sourceId.toString(), shortName, longName, "NZ");
 
         player = new Player(socket, yacht);
         GameState.addYacht(sourceId, yacht);
@@ -291,10 +290,6 @@ public class ServerToClientThread implements Runnable {
 
     public Socket getSocket() {
         return socket;
-    }
-
-    public ServerYacht getYacht() {
-        return yacht;
     }
 
     public void addConnectionListener(ConnectionListener listener) {

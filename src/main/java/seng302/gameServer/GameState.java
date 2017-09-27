@@ -1,14 +1,7 @@
 package seng302.gameServer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +13,6 @@ import seng302.gameServer.messages.MarkRoundingMessage;
 import seng302.gameServer.messages.MarkType;
 import seng302.gameServer.messages.Message;
 import seng302.gameServer.messages.RoundingBoatStatus;
-import seng302.gameServer.messages.YachtEventCodeMessage;
-import seng302.gameServer.messages.YachtEventType;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.Player;
@@ -34,6 +25,8 @@ import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.RandomSpawn;
+import seng302.utilities.XMLParser;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
@@ -51,42 +44,55 @@ public class GameState implements Runnable {
     private static Logger logger = LoggerFactory.getLogger(GameState.class);
 
 
+    private static final Integer STATE_UPDATES_PER_SECOND = 60;
+
+    //Scheduling constants
     static final int WARNING_TIME = 10 * -1000;
     static final int PREPATORY_TIME = 5 * -1000;
     private static final int TIME_TILL_START = 10 * 1000;
 
-    private static final Long POWERUP_TIMEOUT_MS = 10_000L;
+    //Wind Constants
+    private static final int MAX_WIND_SPEED = 12000;
+    private static final int MIN_WIND_SPEED = 8000;
 
-    private static final Integer STATE_UPDATES_PER_SECOND = 60;
-    private static Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
+    //Rounding Constants
+    private static final Double ROUNDING_DISTANCE = 50d; // TODO: 14/08/17 wmu16 - Look into this value further
+
+    //Collision constants
     private static final Double MARK_COLLISION_DISTANCE = 15d;
     public static final Double YACHT_COLLISION_DISTANCE = 25.0;
     private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
     private static final Double COLLISION_VELOCITY_PENALTY = 0.3;
-    private static final Integer VELOCITY_BOOST_MULTIPLIER = 2;
+
+    //Powerup Constants
+    public static final Double VELOCITY_BOOST_MULTIPLIER = 2d;
+    public static final Integer HANDLING_BOOST_MULTIPLIER = 2;
+    private static final Double BAD_RANDOM_SPEED_PENALTY = 0.3;
+    public static final Long BUMPER_DISABLE_TIME = 5_000L;
+    private static final Long TOKEN_SPAWN_TIME = 30_000L;
 
     private static Long previousUpdateTime;
     public static Double windDirection;
     private static Double windSpeed;
-    private static Double speedMultiplier = 1d;
+    private static Double serverSpeedMultiplier;
 
     private static Boolean customizationFlag; // dirty flag to tell if a player has customized their boat.
     private static Boolean playerHasLeftFlag;
 
+    private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
     private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
-    private static Set<Mark> marks;
+    private static List<Mark> marks;
     private static List<Limit> courseLimit;
     private static Integer maxPlayers = 8;
 
-
-    private static List<Token> allTokens;
     private static List<Token> tokensInPlay;
+    private static RandomSpawn randomSpawn;
 
     private static List<NewMessageListener> newMessageListeners;
 
@@ -101,14 +107,16 @@ public class GameState implements Runnable {
         players = new ArrayList<>();
         customizationFlag = false;
         playerHasLeftFlag = false;
-        speedMultiplier = 1.0;
+        serverSpeedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
         isRaceStarted = false;
-        //set this when game stage changes to prerace
         previousUpdateTime = System.currentTimeMillis();
         newMessageListeners = new ArrayList<>();
-        allTokens = makeTokens();
+        marks = new MarkOrder().getAllMarks();
+        randomSpawn = new RandomSpawn(markOrder.getOrderedUniqueCompoundMarks());
+
         resetStartTime();
+        //setCourseLimit("/server_config/race.xml");
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
     }
 
@@ -120,30 +128,16 @@ public class GameState implements Runnable {
         courseLimit = raceXMLData.getCourseLimit();
     }
 
-    /**
-     * Make a pre defined set of tokensInPlay. //TODO wmu16 - Should read from some file for each
-     * race ideally
-     *
-     * @return A list of possible tokensInPlay for this race
-     */
-    private ArrayList<Token> makeTokens() {
-        Token token1 = new Token(TokenType.BOOST, 57.66946, 11.83154);
-        Token token2 = new Token(TokenType.BOOST, 57.66877, 11.83382);
-        Token token3 = new Token(TokenType.BOOST, 57.66914, 11.83965);
-        Token token4 = new Token(TokenType.BOOST, 57.66684, 11.83214);
-        return new ArrayList<>(Arrays.asList(token1, token2, token3, token4));
-    }
-
-    public static Set<Mark> getMarks() {
-        return Collections.unmodifiableSet(marks);
-    }
-
     public static List<Player> getPlayers() {
         return players;
     }
 
     public static List<Token> getTokensInPlay() {
         return tokensInPlay;
+    }
+
+    public static Set<Mark> getMarks() {
+        return Collections.unmodifiableSet(marks);
     }
 
     public static void addPlayer(Player player) {
@@ -238,11 +232,74 @@ public class GameState implements Runnable {
             } catch (InterruptedException e) {
                 System.out.println("[GameState] interrupted exception");
             }
-            if (currentStage == GameStages.PRE_RACE || currentStage == GameStages.RACING) {
+            if (currentStage == GameStages.PRE_RACE) {
+                update();
+                if (System.currentTimeMillis() > startTime) {
+                    startSpawningTokens();
+                    startUpdatingWind();
+                    GameState.setCurrentStage(GameStages.RACING);
+                }
+            }
+            if (currentStage == GameStages.RACING) {
                 update();
             }
         }
     }
+
+    /**
+     * Start spawning coins every 60s after the first minute
+     */
+    private void startSpawningTokens() {
+        Timer timer = new Timer("Token Spawning Timer");
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                spawnNewToken();
+                notifyMessageListeners(MessageFactory.getRaceXML());
+            }
+        }, 0, TOKEN_SPAWN_TIME);
+    }
+
+    // TODO: 29/08/17 wmu16 - This sort of update should be in game state
+    private static void startUpdatingWind() {
+        Timer timer = new Timer("Wind Updating Timer");
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateWind();
+            }
+        }, 0, 500);
+    }
+
+
+    private static void updateWind() {
+        Integer direction = GameState.getWindDirection().intValue();
+        Integer windSpeed = GameState.getWindSpeedMMS().intValue();
+
+        Random random = new Random();
+
+        if (Math.floorMod(random.nextInt(), 2) == 0) {
+            direction += random.nextInt(4);
+            windSpeed += random.nextInt(20) + 459;
+        } else {
+            direction -= random.nextInt(4);
+            windSpeed -= random.nextInt(20) + 459;
+        }
+
+        direction = Math.floorMod(direction, 360);
+
+        if (windSpeed > MAX_WIND_SPEED) {
+            windSpeed -= random.nextInt(500);
+        }
+
+        if (windSpeed <= MIN_WIND_SPEED) {
+            windSpeed += random.nextInt(500);
+        }
+
+        GameState.setWindSpeed(Double.valueOf(windSpeed));
+        GameState.setWindDirection(direction.doubleValue());
+    }
+
 
     public static void updateBoat(Integer sourceId, BoatAction actionType) {
         ServerYacht playerYacht = yachts.get(sourceId);
@@ -278,14 +335,11 @@ public class GameState implements Runnable {
      * Randomly select a subset of tokensInPlay from a pre defined superset
      * Broadasts a new race status message to show this update
      */
-    public static void spawnNewToken() {
-        Random random = new Random();
+    private void spawnNewToken() {
         tokensInPlay.clear();
-
-        //Get a random token location with random type
-        Token token = allTokens.get(random.nextInt(allTokens.size()));
-        token.assignRandomType();
-
+        Token token = randomSpawn.getRandomToken();
+//        token.assignType(TokenType.RANDOM);
+        logger.debug("Spawned token of type " + token.getTokenType());
         tokensInPlay.add(token);
     }
 
@@ -303,14 +357,12 @@ public class GameState implements Runnable {
 
         Double timeInterval = (System.currentTimeMillis() - previousUpdateTime) / 1000000.0;
         previousUpdateTime = System.currentTimeMillis();
-        if (System.currentTimeMillis() > startTime) {
-            GameState.setCurrentStage(GameStages.RACING);
-        }
+
         for (ServerYacht yacht : yachts.values()) {
             updateVelocity(yacht);
-            checkPowerUpTimeout(yacht);
             yacht.runAutoPilot();
             yacht.updateLocation(timeInterval);
+            preformTokenUpdates(yacht); //This update must be done before collision. Sorta hacky
             checkCollision(yacht);
             if (yacht.getBoatStatus() != BoatStatus.FINISHED) {
                 checkForLegProgression(yacht);
@@ -324,14 +376,133 @@ public class GameState implements Runnable {
     }
 
 
-    private void checkPowerUpTimeout(ServerYacht yacht) {
-        if (yacht.getPowerUp() != null) {
-            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > POWERUP_TIMEOUT_MS) {
-                yacht.powerDown();
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + "'s power-up token expired");
-                logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+    /**
+     * All token functionality entry points is taken care of here. So can be disabled and enabled
+     * easily
+     *
+     * @param yacht The yacht to perform token checks on
+     */
+    private void preformTokenUpdates(ServerYacht yacht) {
+        Token collidedToken = checkTokenPickUp(yacht);
+        if (collidedToken != null) {
+            tokensInPlay.remove(collidedToken);
+            powerUpYacht(yacht, collidedToken);
+        }
+
+        checkPowerUpTimeout(yacht);
+        TokenType powerUp = yacht.getPowerUp();
+
+        if (powerUp != null) {
+            switch (powerUp) {
+                case WIND_WALKER:
+                    windWalk(yacht);
+                    break;
+                case BUMPER:
+                    ServerYacht collidedYacht = checkYachtCollision(yacht, true);
+                    if (collidedYacht != null) {
+                        yacht.powerDown();
+                        boatTempShutDown(collidedYacht);
+                        notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
+                        notifyMessageListeners(
+                            MessageFactory.makeStatusEffectMessage(collidedYacht, powerUp));
+                    }
+                    break;
+                case RANDOM:
+                    yacht.setPowerUpSpeedMultiplier(BAD_RANDOM_SPEED_PENALTY);
             }
         }
+    }
+
+
+    /**
+     * Powers up a thisYacht with the given token type.
+     *
+     * @param thisYacht The yacht to be powered up
+     * @param collidedToken The token which this thisYacht collided with
+     */
+    private void powerUpYacht(ServerYacht thisYacht, Token collidedToken) {
+        //The random token has a 50% chance of becoming another token else becoming a speed detriment!
+        if (collidedToken.getTokenType() == TokenType.RANDOM && new Random().nextBoolean()) {
+            collidedToken.realiseRandom();
+        }
+
+        //If another yacht has the wind walker token, They should be powered down. Only one allowed!
+        else if (collidedToken.getTokenType() == TokenType.WIND_WALKER) {
+            for (ServerYacht otherYacht : yachts.values()) {
+                if (otherYacht != thisYacht && otherYacht.getPowerUp() == TokenType.WIND_WALKER) {
+                    powerDownYacht(otherYacht);
+                }
+            }
+        }
+
+        thisYacht.powerUp(collidedToken.getTokenType());
+        String logMessage =
+            thisYacht.getBoatName() + " has picked up a " + collidedToken.getTokenType().getName()
+                + " token";
+        notifyMessageListeners(
+            MessageFactory.makeChatterMessage(thisYacht.getSourceId(), logMessage));
+        notifyMessageListeners(MessageFactory.getRaceXML());
+        notifyMessageListeners(MessageFactory.makePickupMessage(thisYacht, collidedToken));
+        logger.debug(
+            "Yacht: " + thisYacht.getShortName() + " got powerup " + collidedToken.getTokenType());
+    }
+
+    private void powerDownYacht(ServerYacht yacht) {
+        String logMessage =
+            yacht.getBoatName() + "'s " + yacht.getPowerUp().getName() + "  expired";
+        notifyMessageListeners(
+            MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
+        notifyMessageListeners(MessageFactory.makePowerDownMessage(yacht));
+        logger.debug("Yacht: " + yacht.getShortName() + " powered down!");
+
+        yacht.powerDown();
+    }
+
+    // TODO: 23/09/17 wmu16 - This is a hacky way to have the boat power down. Need some sort of separation between token and status effect :/
+
+    /**
+     * Disables the given boat for BUMPER_DISABLE_TIME ms.
+     *
+     * @param yacht The yacht to disable
+     */
+    private void boatTempShutDown(ServerYacht yacht) {
+        yacht.setPowerUpSpeedMultiplier(0d);
+        Timer shutDownTimer = new Timer("Shutdown Timer");
+        shutDownTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                yacht.powerDown();  //Note this actually resets the boat to normal.
+            }
+        }, BUMPER_DISABLE_TIME);
+    }
+
+
+    /**
+     * Checks how long a powerup has been active for. If it has exceeded its timeout, it powers the
+     * yacht down.
+     *
+     * @param yacht The yacht to check to power down
+     */
+    private void checkPowerUpTimeout(ServerYacht yacht) {
+        if (yacht.getPowerUp() != null) {
+            if (System.currentTimeMillis() - yacht.getPowerUpStartTime() > yacht.getPowerUp()
+                .getTimeout()) {
+                powerDownYacht(yacht);
+            }
+        }
+    }
+
+
+    /**
+     * This function changes the wind to be at an angle that causes the yacht in question to be at
+     * its fastest velocity
+     *
+     * @param yacht The yacht to fix the wind for
+     */
+    private void windWalk(ServerYacht yacht) {
+        Double optimalAngle = PolarTable.getOptimalAngle();
+        Double heading = yacht.getHeading();
+        windDirection = (double) Math.floorMod(Math.round(heading + optimalAngle), 360L);
     }
 
 
@@ -356,13 +527,15 @@ public class GameState implements Runnable {
     }
 
     /**
-     * Checks all tokensInPlay to see if a yacht has picked one up
-     * @return Token which was collided with
-     * @param serverYacht The yacht to check for collision with a token
+     * Checks all tokensInPlay to see if a yacht has picked one up. If so, the yacht is powered up
+     * in the appropriate way
+     * @param yacht The yacht to check for collision with a token
+     *
+     * @return The token collided with
      */
-    private static Token checkTokenPickUp(ServerYacht serverYacht) {
+    private Token checkTokenPickUp(ServerYacht yacht) {
         for (Token token : tokensInPlay) {
-            Double distance = GeoUtility.getDistance(token, serverYacht.getLocation());
+            Double distance = GeoUtility.getDistance(token, yacht.getLocation());
             if (distance < YACHT_COLLISION_DISTANCE) {
                 return token;
             }
@@ -385,9 +558,8 @@ public class GameState implements Runnable {
      */
     public static void checkCollision(ServerYacht serverYacht) {
         //Yacht Collision
-        ServerYacht collidedYacht = checkYachtCollision(serverYacht);
+        ServerYacht collidedYacht = checkYachtCollision(serverYacht, false);
         Mark collidedMark = checkMarkCollision(serverYacht);
-        Token collidedToken = checkTokenPickUp(serverYacht);
 
         if (collidedYacht != null) {
             GeoPoint originalLocation = serverYacht.getLocation();
@@ -430,50 +602,36 @@ public class GameState implements Runnable {
             );
             notifyMessageListeners(MessageFactory.makeCollisionMessage(serverYacht));
         }
-
-        //Token Collision
-        if (collidedToken != null) {
-            if (collidedToken.getTokenType() == TokenType.RANDOM) {
-                collidedToken.realiseRandom();
-            }
-            sendServerMessage(serverYacht.getSourceId(),
-                serverYacht.getBoatName() + " has picked up a " + collidedToken.getTokenType()
-                    .getName() + " token");
-            tokensInPlay.remove(collidedToken);
-            serverYacht.powerUp(collidedToken.getTokenType());
-            logger.debug("Yacht: " + serverYacht.getShortName() + " got powerup " + collidedToken
-                .getTokenType());
-            notifyMessageListeners(MessageFactory.getRaceXML());
-            notifyMessageListeners(MessageFactory.makePickupMessage(serverYacht, collidedToken));
-        }
     }
 
 
     private void updateVelocity(ServerYacht yacht) {
         Double trueWindAngle = Math.abs(windDirection - yacht.getHeading());
         Double boatSpeedInKnots = PolarTable.getBoatSpeed(getWindSpeedKnots(), trueWindAngle);
-        Double maxBoatSpeed = GeoUtility.knotsToMMS(boatSpeedInKnots) * speedMultiplier * yacht.getMaxSpeedMultiplier();
-        if (yacht.getPowerUp() != null) {
-            if (yacht.getPowerUp().equals(TokenType.BOOST)) {
-                maxBoatSpeed *= VELOCITY_BOOST_MULTIPLIER;
-            }
-        }
+        Double maxBoatSpeed =
+            GeoUtility.knotsToMMS(boatSpeedInKnots) * serverSpeedMultiplier * yacht
+                .getPowerUpSpeedMultiplier() * yacht.getBoatTypeSpeedMultiplier();
 
         Double currentVelocity = yacht.getCurrentVelocity();
         // TODO: 15/08/17 remove magic numbers from these equations.
         if (yacht.getSailIn()) {
             if (currentVelocity < maxBoatSpeed - 500) {
-                yacht.changeVelocity((maxBoatSpeed / 100) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (maxBoatSpeed / 100) * yacht.getBoatTypeAccelerationMultiplier());
             } else if (currentVelocity > maxBoatSpeed + 500) {
-                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (-currentVelocity / 200) * yacht.getBoatTypeAccelerationMultiplier());
             } else {
-                yacht.setCurrentVelocity((maxBoatSpeed) * yacht.getAccelerationMultiplier());
+                yacht
+                    .setCurrentVelocity((maxBoatSpeed) * yacht.getBoatTypeAccelerationMultiplier());
             }
         } else {
             if (currentVelocity > 3000) {
-                yacht.changeVelocity((-currentVelocity / 200) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (-currentVelocity / 200) * yacht.getBoatTypeAccelerationMultiplier());
             } else if (currentVelocity > 100) {
-                yacht.changeVelocity((-currentVelocity / 50) * yacht.getAccelerationMultiplier());
+                yacht.changeVelocity(
+                    (-currentVelocity / 50) * yacht.getBoatTypeAccelerationMultiplier());
             } else if (currentVelocity <= 100) {
                 yacht.setCurrentVelocity(0d);
             }
@@ -536,7 +694,10 @@ public class GameState implements Runnable {
 
         if (hasProgressed) {
             if (currentMarkSeqID != 0 && !markOrder.isLastMark(currentMarkSeqID)) {
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed leg " + yacht.getLegNumber());
+
+                String logMessage = yacht.getBoatName() + " passed leg " + yacht.getLegNumber();
+                notifyMessageListeners(
+                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
             }
             yacht.incrementLegNumber();
             sendMarkRoundingMessage(yacht);
@@ -572,7 +733,9 @@ public class GameState implements Runnable {
             if (crossedLine == 2 && isClockwiseCross || crossedLine == 1 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
                 yacht.setBoatStatus(BoatStatus.RACING);
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed start line");
+                String logMessage = yacht.getBoatName() + " passed start line";
+                notifyMessageListeners(
+                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
                 return true;
             }
         }
@@ -676,7 +839,10 @@ public class GameState implements Runnable {
             if (crossedLine == 1 && isClockwiseCross || crossedLine == 2 && !isClockwiseCross) {
                 yacht.setClosestCurrentMark(mark1);
                 yacht.setBoatStatus(BoatStatus.FINISHED);
-                sendServerMessage(yacht.getSourceId(), yacht.getBoatName() + " passed finish line");
+
+                String logMessage = yacht.getBoatName() + " passed finish line";
+                notifyMessageListeners(
+                    MessageFactory.makeChatterMessage(yacht.getSourceId(), logMessage));
                 return true;
             }
         }
@@ -699,6 +865,7 @@ public class GameState implements Runnable {
             String name = new String(customizeData);
             playerYacht.setBoatName(name);
         } else if (requestType.equals(CustomizeRequestType.COLOR)) {
+            //This low level stuff shouldnt be here alistair! In fact no logic LIKE THIS should! - wmu16
             int red = customizeData[0] & 0xFF;
             int green = customizeData[1] & 0xFF;
             int blue = customizeData[2] & 0xFF;
@@ -711,7 +878,7 @@ public class GameState implements Runnable {
     }
 
     private static Mark checkMarkCollision(ServerYacht yacht) {
-        Set<Mark> marksInRace = GameState.getMarks();
+        Set<Mark> marksInRace = new HashSet<>(marks);
         for (Mark mark : marksInRace) {
             if (GeoUtility.getDistance(yacht.getLocation(), mark)
                 <= MARK_COLLISION_DISTANCE) {
@@ -740,15 +907,22 @@ public class GameState implements Runnable {
      * Collision detection which iterates through all the yachts and check if any yacht collided
      * with this yacht. Return collided yacht or null if no collision.
      *
+     * UPDATE: HACK!!! wmu16 - forBumperCollision is (the goddamn dirtiest) dirty flag to fix a
+     * weird bug where the bumper collision would not be registerd but the knock back collision would.
+     * In other words, only set the 'forBumperCollision' flag true if used for the bumper power up.
+     *
      * @return yacht to compare to all other yachts.
      */
-    private static ServerYacht checkYachtCollision(ServerYacht yacht) {
+    private static ServerYacht checkYachtCollision(ServerYacht yacht, Boolean forBumperCollision) {
+        Double collisionDistance =
+            (forBumperCollision) ? YACHT_COLLISION_DISTANCE + 2.5 : YACHT_COLLISION_DISTANCE;
 
         for (ServerYacht otherYacht : GameState.getYachts().values()) {
             if (otherYacht != yacht) {
                 Double distance = GeoUtility
                     .getDistance(otherYacht.getLocation(), yacht.getLocation());
-                if (distance < YACHT_COLLISION_DISTANCE) {
+                ;
+                if (distance < collisionDistance) {
                     return otherYacht;
                 }
             }
@@ -784,13 +958,6 @@ public class GameState implements Runnable {
                 roundingMark.getSourceID()));
     }
 
-
-    public static void sendServerMessage(Integer messageType, String message) {
-        notifyMessageListeners(new ChatterMessage(
-            messageType, "SERVER: " + message
-        ));
-    }
-
     public static void processChatter(ChatterMessage chatterMessage, boolean isHost) {
         String chatterText = chatterMessage.getMessage();
         String[] words = chatterText.split("\\s+");
@@ -798,17 +965,19 @@ public class GameState implements Runnable {
             switch (words[2].trim()) {
                 case "/speed":
                     try {
-                        setSpeedMultiplier(Double.valueOf(words[3]));
-                        sendServerMessage(chatterMessage.getMessage_type(),
-                                "Speed modifier set to x" + words[3]);
+                        serverSpeedMultiplier = Double.valueOf(words[3]);
+                        String logMessage = "Speed modifier set to x" + words[3];
+                        notifyMessageListeners(MessageFactory
+                            .makeChatterMessage(chatterMessage.getMessageType(), logMessage));
                     } catch (Exception e) {
                         Logger logger = LoggerFactory.getLogger(GameState.class);
                         logger.error("cannot parse >speed value");
                     }
                     return;
                 case "/finish":
-                    sendServerMessage(chatterMessage.getMessage_type(),
-                            "Game will now finish");
+                    String logMessage = "Game will now finish";
+                    notifyMessageListeners(MessageFactory
+                        .makeChatterMessage(chatterMessage.getMessageType(), logMessage));
                     endRace();
                     return;
             }
@@ -865,11 +1034,7 @@ public class GameState implements Runnable {
         currentStage = GameStages.FINISHED;
     }
 
-    public static void setSpeedMultiplier (double multiplier) {
-        speedMultiplier = multiplier;
-    }
-
-    public static double getSpeedMultiplier () {
-        return speedMultiplier;
+    public static double getServerSpeedMultiplier() {
+        return serverSpeedMultiplier;
     }
 }

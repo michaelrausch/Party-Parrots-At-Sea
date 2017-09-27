@@ -1,6 +1,8 @@
 package seng302.visualiser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.Camera;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
@@ -22,6 +25,9 @@ import javafx.scene.transform.Translate;
 import org.fxyz3d.scene.Skybox;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.ClientYacht;
+import seng302.model.GameKeyBind;
+import seng302.model.GeoPoint;
+import seng302.model.KeyAction;
 import seng302.model.Limit;
 import seng302.model.ScaledPoint;
 import seng302.model.mark.CompoundMark;
@@ -49,17 +55,27 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
 public class GameView3D extends GameView{
 
     private final double FOV = 60;
-    private final double DEFAULT_CAMERA_DEPTH = -125;
     private final double DEFAULT_CAMERA_X = 0;
     private final double DEFAULT_CAMERA_Y = 100;
 
     private Group root3D;
     private SubScene view;
-    private PerspectiveCamera camera;
-    private PerspectiveCamera camera2;
-    private PerspectiveCamera camera3;
     private Group gameObjects;
 
+    // Cameras
+    private PerspectiveCamera isometricCam;
+    private PerspectiveCamera topDownCam;
+    private PerspectiveCamera chaseCam;
+
+    private double bufferSize = 0;
+    private double canvasWidth = 200;
+    private double canvasHeight = 200;
+    private boolean horizontalInversion = false;
+
+    private double distanceScaleFactor;
+    private ScaleDirection scaleDirection;
+    private GeoPoint minLatPoint, minLonPoint, maxLatPoint, maxLonPoint;
+    private double referencePointX, referencePointY;
     private Group raceBorder = new Group();
 
     /* Note that if either of these is null then values for it have not been added and the other
@@ -75,31 +91,28 @@ public class GameView3D extends GameView{
     private Double windDir;
     private Skybox skybox;
 
+    private enum ScaleDirection {
+        HORIZONTAL,
+        VERTICAL
+    }
+
     public GameView3D () {
-        canvasWidth = canvasHeight = 220;
+        isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y);
+        topDownCam = new TopDownCamera();
+        chaseCam = new ChaseCamera();
 
-        camera = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y, DEFAULT_CAMERA_DEPTH);
-        camera.setFarClip(100000);
-        camera.setNearClip(0.1);
-        camera.setFieldOfView(FOV);
-
-        camera2 = new TopDownCamera();
-        camera2.setFarClip(100000);
-        camera2.setNearClip(0.1);
-        camera2.setFieldOfView(FOV);
-
-        camera3 = new ChaseCamera();
-        camera3.setFarClip(100000);
-        camera3.setNearClip(0.1);
-        camera3.setFieldOfView(FOV);
+        for (PerspectiveCamera pc : Arrays.asList(isometricCam, topDownCam, chaseCam)) {
+            pc.setFarClip(600);
+            pc.setNearClip(0.1);
+            pc.setFieldOfView(FOV);
+        }
 
         gameObjects = new Group();
-        root3D = new Group(camera, gameObjects);
+        root3D = new Group(isometricCam, gameObjects);
         view = new SubScene(
             root3D, 5000, 3000, true, SceneAntialiasing.BALANCED
         );
-        view.setCamera(camera);
-        camera.getTransforms().add(new Rotate(30, new Point3D(1,0,0)));
+        view.setCamera(isometricCam);
 
         skybox = new Skybox(new Image(getClass().getResourceAsStream("/images/skybox.jpg")), 100000, camera);
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
@@ -274,48 +287,44 @@ public class GameView3D extends GameView{
     }
 
     public void cameraMovement(KeyEvent event) {
-        switch (event.getCode()) {
-            case NUMPAD8:
-                view.getCamera().getTransforms().addAll(new Rotate(0.5, new Point3D(1, 0, 0)));
-                break;
-            case NUMPAD2:
-                view.getCamera().getTransforms().addAll(new Rotate(-0.5, new Point3D(1, 0, 0)));
-                break;
-            case NUMPAD4:
-                view.getCamera().getTransforms().addAll(new Rotate(-0.5, new Point3D(0, 1, 0)));
-                break;
-            case NUMPAD6:
-                view.getCamera().getTransforms().addAll(new Rotate(0.5, new Point3D(0, 1, 0)));
-                break;
-            case Z:
-                ((RaceCamera) view.getCamera()).zoomIn();
-                break;
-            case X:
-                ((RaceCamera) view.getCamera()).zoomOut();
-                break;
-            case W:
-                ((RaceCamera) view.getCamera()).panUp();
-                break;
-            case S:
-                ((RaceCamera) view.getCamera()).panDown();
-                break;
-            case A:
-                ((RaceCamera) view.getCamera()).panLeft();
-                break;
-            case D:
-                ((RaceCamera) view.getCamera()).panRight();
-                break;
-            case F1:
-                if (view.getCamera().equals(camera)) {
-                    view.setCamera(camera2);
-                    if (view.getCamera() instanceof TopDownCamera) {
-                        ((RaceCamera) view.getCamera()).zoomIn();
-                    }
-                } else if (view.getCamera().equals(camera2)) {
-                    view.setCamera(camera3);
-                } else {
-                    view.setCamera(camera);
-                }
+        GameKeyBind keyBinds = GameKeyBind.getInstance();
+        KeyAction keyPressed = keyBinds.getKeyAction(event.getCode());
+        if (keyPressed != null) {
+            switch (keyPressed) {
+                case ZOOM_IN:
+                    ((RaceCamera) view.getCamera()).zoomIn();
+                    break;
+                case ZOOM_OUT:
+                    ((RaceCamera) view.getCamera()).zoomOut();
+                    break;
+                case FORWARD:
+                    ((RaceCamera) view.getCamera()).panUp();
+                    break;
+                case BACKWARD:
+                    ((RaceCamera) view.getCamera()).panDown();
+                    break;
+                case LEFT:
+                    ((RaceCamera) view.getCamera()).panLeft();
+                    break;
+                case RIGHT:
+                    ((RaceCamera) view.getCamera()).panRight();
+                    break;
+                case VIEW:
+                    toggleCamera();
+                    break;
+            }
+        }
+    }
+
+    private void toggleCamera() {
+        Camera currCamera = view.getCamera();
+
+        if (currCamera.equals(isometricCam)) {
+            view.setCamera(topDownCam);
+        } else if (currCamera.equals(topDownCam)) {
+            view.setCamera(chaseCam);
+        } else {
+            view.setCamera(isometricCam);
         }
     }
 
@@ -334,16 +343,13 @@ public class GameView3D extends GameView{
             wakesGroup.getChildren().add(newBoat.getWake());
             wakes.add(newBoat.getWake());
             boatObjectGroup.getChildren().add(newBoat);
-            clientYacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
-                BoatObject bo = boatObjects.get(boat);
-                Point2D p2d = scaledPoint.findScaledXY(lat, lon);
-                bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
-            });
+            clientYacht.addLocationListener(this::updateBoatLocation);
+            clientYacht.addColorChangeListener(this::updateBoatColor);
 
             if (clientYacht.getSourceId().equals(
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
-                ((ChaseCamera) camera3).setPlayerBoat(newBoat, clientYacht);
-                ((TopDownCamera) camera2).setPlayerBoat(newBoat);
+                ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
+                ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
             }
         }
         Platform.runLater(() -> {
@@ -354,6 +360,23 @@ public class GameView3D extends GameView{
 
     public Node getAssets () {
         return view;
+    }
+
+    /**
+     * Updates the boatObjects color with that of the clientYachts object. Used in notification from
+     * a listener on this attribute in clientYacht to re paint the boat mesh
+     *
+     * @param clientYacht The yacht to update the colour for
+     */
+    private void updateBoatColor(ClientYacht clientYacht) {
+        boatObjects.get(clientYacht).setFill(clientYacht.getColour());
+    }
+
+    private void updateBoatLocation(ClientYacht boat, Double lat, Double lon, Double heading,
+        Boolean sailIn, Double velocity) {
+        BoatObject bo = boatObjects.get(boat);
+        Point2D p2d = findScaledXY(lat, lon);
+        bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
     }
 
     /**

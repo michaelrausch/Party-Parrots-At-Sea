@@ -1,6 +1,20 @@
 package seng302.gameServer;
 
 import seng302.gameServer.messages.*;
+import java.util.ArrayList;
+import java.util.List;
+import seng302.gameServer.messages.BoatLocationMessage;
+import seng302.gameServer.messages.BoatSubMessage;
+import seng302.gameServer.messages.ChatterMessage;
+import seng302.gameServer.messages.RaceStartNotificationType;
+import seng302.gameServer.messages.RaceStartStatusMessage;
+import seng302.gameServer.messages.RaceStatus;
+import seng302.gameServer.messages.RaceStatusMessage;
+import seng302.gameServer.messages.RaceType;
+import seng302.gameServer.messages.XMLMessage;
+import seng302.gameServer.messages.XMLMessageSubType;
+import seng302.gameServer.messages.YachtEventCodeMessage;
+import seng302.gameServer.messages.YachtEventType;
 import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.xml.generator.RaceXMLTemplate;
@@ -146,6 +160,14 @@ public class MessageFactory {
         return new YachtEventCodeMessage(serverYacht.getSourceId(), YachtEventType.COLLISION);
     }
 
+
+    /**
+     * Constructs a message to be sent out whenever a yacht picks up a boost
+     *
+     * @param serverYacht The yacht that has picked up a power up
+     * @param token The token which they picked up
+     * @return The corresponding YachtEventCodeMessage
+     */
     public static YachtEventCodeMessage makePickupMessage(ServerYacht serverYacht, Token token) {
         YachtEventType yachtEventType = null;
         switch (token.getTokenType()) {
@@ -166,5 +188,40 @@ public class MessageFactory {
                 break;
         }
         return new YachtEventCodeMessage(serverYacht.getSourceId(), yachtEventType);
+    }
+
+    /**
+     * Constructs a message representing a certain buff / debuff for a given yacht. For now this is
+     * just for the bumper debuff so the affected boat is aware that it has been crashed. This could
+     * however be extended to render affects for all boats given a certain debuff.
+     *
+     * @param yacht The yacht affected by some status
+     * @param token The token indicating what status they have
+     * @return A YachtEventCodeMessage
+     */
+    public static YachtEventCodeMessage makeStatusEffectMessage(ServerYacht yacht,
+        TokenType token) {
+        YachtEventType yachtEventType = null;
+        switch (token) {
+            case BUMPER:
+                yachtEventType = YachtEventType.BUMPER_CRASH;
+                break;
+        }
+        return new YachtEventCodeMessage(yacht.getSourceId(), yachtEventType);
+    }
+
+
+    /**
+     * Constructs a message to be sent out when a given yacht powers down (From a boost of any type)
+     *
+     * @param yacht The yacht that is powering down
+     * @return A YachtEventCodeMessage representing this action
+     */
+    public static YachtEventCodeMessage makePowerDownMessage(ServerYacht yacht) {
+        return new YachtEventCodeMessage(yacht.getSourceId(), YachtEventType.POWER_DOWN);
+    }
+
+    public static ChatterMessage makeChatterMessage(Integer messageType, String message) {
+        return new ChatterMessage(messageType, "SERVER: " + message);
     }
 }
