@@ -30,7 +30,12 @@ public class GameKeyBind {
         keys.add(KeyCode.ENTER);
         keys.add(KeyCode.PAGE_UP);
         keys.add(KeyCode.PAGE_DOWN);
-        for (int i = 0; i < 7; i++) {
+        keys.add(KeyCode.F1);
+        keys.add(KeyCode.D);
+        keys.add(KeyCode.A);
+        keys.add(KeyCode.W);
+        keys.add(KeyCode.S);
+        for (int i = 0; i < 12; i++) {
             actionToKeyMap.put(KeyAction.getType(i + 1), keys.get(i));
             keyToActionMap.put(keys.get(i), KeyAction.getType(i + 1));
         }
@@ -45,6 +50,10 @@ public class GameKeyBind {
 
     public KeyCode getKeyCode(KeyAction keyAction) {
         return instance.actionToKeyMap.get(keyAction);
+    }
+
+    public KeyAction getKeyAction(KeyCode keyCode) {
+        return instance.keyToActionMap.get(keyCode);
     }
 
     /**

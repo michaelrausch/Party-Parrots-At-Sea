@@ -1,0 +1,33 @@
+#headerLabel {
+    -fx-font-size: 20px;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#closeLabel {
+    -fx-font-size: 22px;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#closeLabel:hover {
+    -fx-font-size: 24px;
+    -fx-text-fill: red;
+}
+
+#contentLabel {
+    -fx-font-size: 22px;
+    -fx-text-fill: -fx-pp-dark-text-color;
+}
+
+#optionButton {
+    -fx-background-color: -fx-pp-theme-color;
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-font-size: 18px;
+    -fx-effect: -fx-pp-dropshadow-light;
+    -fx-max-height: 55;
+    -fx-focus-traversable: false;
+}
+
+#optionButton:hover {
+    -fx-font-size: 20px !important;
+    -fx-background-color: -fx-pp-light-theme-color;
+}

@@ -29,6 +29,7 @@ import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.dialogs.KeyBindingDialogController;
+import seng302.visualiser.controllers.dialogs.PopupDialogController;
 
 public class ViewManager {
 
@@ -109,8 +110,6 @@ public class ViewManager {
             gameClient.stopGame();
             System.exit(0);
         });
-
-        jfxSnackbar = new JFXSnackbar(decorator);
     }
 
     /**
@@ -195,6 +194,7 @@ public class ViewManager {
             }
         });
 
+        jfxSnackbar = new JFXSnackbar(decorator);
     }
 
     /**
@@ -228,6 +228,7 @@ public class ViewManager {
                     .getController();
                 keyBindingDialogController.setGameClient(this.gameClient);
                 keyBindingDialog.show();
+                decorator.requestFocus();
                 Sounds.playButtonClick();
             }
         }
@@ -235,6 +236,26 @@ public class ViewManager {
 
     public void closeKeyBindingDialog() {
         keyBindingDialog.close();
+    }
+
+    public PopupDialogController showPopupDialog() {
+        FXMLLoader dialogContent = new FXMLLoader(
+            getClass().getResource("/views/dialogs/PopupDialog.fxml"));
+        for (Node node : decorator.getChildren()) {
+            if (node instanceof StackPane) {
+                try {
+                    JFXDialog dialog = new JFXDialog((StackPane) node, dialogContent.load(),
+                        DialogTransition.CENTER);
+                    PopupDialogController popupDialogController = dialogContent.getController();
+                    popupDialogController.setPopupDialog(dialog);
+                    dialog.show();
+                    return popupDialogController;
+                } catch (IOException e) {
+                    logger.error("Cannot load Popup dialog");
+                }
+            }
+        }
+        return null;
     }
 
     /**

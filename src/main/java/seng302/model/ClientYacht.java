@@ -6,16 +6,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
+import jdk.nashorn.internal.objects.annotations.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import seng302.model.token.TokenType;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 /**
  * Yacht class for the racing boat. <p> Class created to store more variables (eg. boat statuses)
@@ -35,6 +41,26 @@ public class ClientYacht extends Observable {
         void notifyRounding(ClientYacht yacht, int legNumber);
     }
 
+    @FunctionalInterface
+    public interface ColorChangeListener {
+
+        void notifyColorChange(ClientYacht yacht);
+    }
+
+    //This notifies RaceViewController so it can display icon - wmu16
+    @FunctionalInterface
+    public interface PowerUpListener {
+        void notifyPowerUp(ClientYacht yacht, TokenType tokenType);
+    }
+
+    //This notifies RaceViewController so it can remove token icon - wmu16
+    @FunctionalInterface
+    public interface PowerDownListener {
+        void notifyPowerDown(ClientYacht yacht);
+    }
+
+
+
     private Logger logger = LoggerFactory.getLogger(ClientYacht.class);
 
 
@@ -45,6 +71,7 @@ public class ClientYacht extends Observable {
     private String boatName;
     private String country;
     private Integer position;
+    private TokenType powerUp;
 
     private Long estimateTimeAtFinish;
     private Boolean sailIn = true;
@@ -57,12 +84,21 @@ public class ClientYacht extends Observable {
     private Integer boatStatus;
     private Double currentVelocity;
 
+    Timer t;
+
+    private BoatObject boatObject;
+
     private List<YachtLocationListener> locationListeners = new ArrayList<>();
     private List<MarkRoundingListener> markRoundingListeners = new ArrayList<>();
+    private List<PowerUpListener> powerUpListeners = new ArrayList<>();
+    private List<PowerDownListener> powerDownListeners = new ArrayList<>();
+    private List<ColorChangeListener> colorChangeListeners = new ArrayList<>();
+
     private ReadOnlyDoubleWrapper velocityProperty = new ReadOnlyDoubleWrapper();
     private ReadOnlyLongWrapper timeTillNextProperty = new ReadOnlyLongWrapper();
     private ReadOnlyLongWrapper timeSinceLastMarkProperty = new ReadOnlyLongWrapper();
     private ReadOnlyIntegerWrapper placingProperty = new ReadOnlyIntegerWrapper();
+    private ReadOnlyDoubleWrapper headingProperty = new ReadOnlyDoubleWrapper();
     private Color colour;
 
     public ClientYacht(BoatMeshType boatType, Integer sourceId, String hullID, String shortName,
@@ -75,6 +111,7 @@ public class ClientYacht extends Observable {
         this.country = country;
         this.location = new GeoPoint(57.670341, 11.826856);
         this.heading = 120.0;   //In degrees
+        this.headingProperty.set(this.heading);
         this.currentVelocity = 0d;
         this.boatStatus = 1;
         this.colour = Color.rgb(0, 0, 0, 1.0);
@@ -200,6 +237,32 @@ public class ClientYacht extends Observable {
         this.position = position;
     }
 
+    /**
+     * Powers down the boat and notifies the raceViewController to display
+     */
+    public void powerDown() {
+        this.powerUp = null;
+        for (PowerDownListener listener : powerDownListeners) {
+            listener.notifyPowerDown(this);
+        }
+    }
+
+    /**
+     * powers up the boat and notifies the raceViewController to display
+     *
+     * @param tokenType The type of token that this boat is being powered up with
+     */
+    public void setPowerUp(TokenType tokenType) {
+        this.powerUp = tokenType;
+        for (PowerUpListener listener : powerUpListeners) {
+            listener.notifyPowerUp(this, tokenType);
+        }
+    }
+
+    public TokenType getPowerUp() {
+        return powerUp;
+    }
+
     public void toggleSail() {
         sailIn = !sailIn;
     }
@@ -222,6 +285,7 @@ public class ClientYacht extends Observable {
 
     public void setHeading(Double heading) {
         this.heading = heading;
+        setHeadingProperty();
     }
 
     @Override
@@ -248,17 +312,24 @@ public class ClientYacht extends Observable {
 
     public void setColour(Color colour) {
         this.colour = colour;
+        for (ColorChangeListener listener : colorChangeListeners) {
+            listener.notifyColorChange(this);
+        }
     }
-
 
     public void updateLocation(double lat, double lng, double heading, double velocity) {
         setLocation(lat, lng);
         this.heading = heading;
+        setHeadingProperty();
         this.currentVelocity = velocity;
         updateVelocityProperty(velocity);
         for (YachtLocationListener yll : locationListeners) {
             yll.notifyLocation(this, lat, lng, heading, sailIn, velocity);
         }
+    }
+
+    private void setHeadingProperty() {
+        headingProperty.set(heading);
     }
 
     public void addLocationListener(YachtLocationListener listener) {
@@ -267,6 +338,18 @@ public class ClientYacht extends Observable {
 
     public void addMarkRoundingListener(MarkRoundingListener listener) {
         markRoundingListeners.add(listener);
+    }
+
+    public void addPowerUpListener(PowerUpListener listener) {
+        powerUpListeners.add(listener);
+    }
+
+    public void addPowerDownListener(PowerDownListener listener) {
+        powerDownListeners.add(listener);
+    }
+
+    public void addColorChangeListener(ColorChangeListener listener) {
+        colorChangeListeners.add(listener);
     }
 
     public void removeMarkRoundingListener(MarkRoundingListener listener) {
@@ -289,4 +372,17 @@ public class ClientYacht extends Observable {
     public Double getCurrentVelocity() {
         return currentVelocity;
     }
+
+    public void setBoatObject(BoatObject newBoatObject) {
+        this.boatObject = newBoatObject;
+    }
+
+    public BoatObject getBoatObject() {
+        return this.boatObject;
+    }
+
+    public ReadOnlyDoubleWrapper getHeadingProperty() {
+        return headingProperty;
+    }
+
 }

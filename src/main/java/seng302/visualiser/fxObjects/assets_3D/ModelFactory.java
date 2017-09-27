@@ -156,7 +156,11 @@ public class ModelFactory {
         }
         switch (tokenType) {
             case VELOCITY_PICKUP:
-                return makeCoinPickup(assets);
+            case BUMPER_PICKUP:
+            case RANDOM_PICKUP:
+            case HANDLING_PICKUP:
+            case WIND_WALKER_PICKUP:
+                return makeTokenPickup(assets);
             case FINISH_MARKER:
             case PLAIN_MARKER:
             case START_MARKER:
@@ -185,24 +189,22 @@ public class ModelFactory {
         }
     }
 
-    private static Model makeCoinPickup(Group assets){
-        assets.setRotationAxis(new Point3D(1,0,0));
-        assets.setRotate(90);
-        assets.setTranslateX(0.2);
-        assets.setTranslateY(1);
+    private static Model makeTokenPickup(Group assets) {
+        Rotate animationRotate = new Rotate(0, new Point3D(0, 0, 1));
         assets.getTransforms().addAll(
-            new Translate(0,-1,0),
-            new Rotate(0 ,new Point3D(1,1,1))
+            animationRotate,
+            new Translate(0, 0, -1)
         );
+
         return new Model(new Group(assets), new AnimationTimer() {
 
             private double rotation = 0;
-            private Group group = assets;
+            private Rotate rotate = animationRotate;
 
             @Override
             public void handle(long now) {
                 rotation += 1;
-                ((Rotate) group.getTransforms().get(1)).setAngle(rotation);
+                rotate.setAngle(rotation);
             }
         });
     }

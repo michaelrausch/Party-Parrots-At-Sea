@@ -7,6 +7,10 @@ package seng302.visualiser.fxObjects.assets_3D;
 public enum ModelType {
 
     VELOCITY_PICKUP("velocity_pickup.dae"),
+    HANDLING_PICKUP("turning_pickup.dae"),
+    WIND_WALKER_PICKUP("wind_walker_pickup.dae"),
+    BUMPER_PICKUP("bumper_pickup.dae"),
+    RANDOM_PICKUP("random_pickup.dae"),
     FINISH_MARKER ("finish_marker.dae"),
     START_MARKER ("start_marker.dae"),
     PLAIN_MARKER ("plain_marker.dae"),

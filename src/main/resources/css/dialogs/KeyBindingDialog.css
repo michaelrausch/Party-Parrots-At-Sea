@@ -9,8 +9,13 @@
 }
 
 #closeLabel:hover {
-    -fx-text-fill: -fx-pp-theme-color;
-    -fx-font-size: 33;
+    -fx-text-fill: red;
+    -fx-font-size: 33px;
+}
+
+.sectionLabel {
+    -fx-text-fill: -fx-pp-dark-text-color;
+    -fx-font-size: 20px;
 }
 
 JFXButton {

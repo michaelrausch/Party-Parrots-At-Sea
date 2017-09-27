@@ -24,8 +24,9 @@ import java.util.*;
  */
 public class MarkOrder {
     private List<CompoundMark> raceMarkOrder;
+    private List<CompoundMark> orderedUniqueCompoundMarks;
     private Logger logger = LoggerFactory.getLogger(MarkOrder.class);
-    private Set<Mark> allMarks;
+    private List<Mark> allMarks;
 
     public MarkOrder(){
         loadRaceProperties();
@@ -42,6 +43,10 @@ public class MarkOrder {
         }
 
         return Collections.unmodifiableList(raceMarkOrder);
+    }
+
+    public List<CompoundMark> getOrderedUniqueCompoundMarks() {
+        return orderedUniqueCompoundMarks;
     }
 
     /**
@@ -75,8 +80,8 @@ public class MarkOrder {
         return raceMarkOrder.get(currentSeqID + 1);
     }
 
-    public Set<Mark> getAllMarks(){
-        return Collections.unmodifiableSet(allMarks);
+    public List<Mark> getAllMarks() {
+        return Collections.unmodifiableList(allMarks);
     }
 
     /**
@@ -89,7 +94,7 @@ public class MarkOrder {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Document doc;
-        allMarks = new HashSet<>();
+        allMarks = new ArrayList<>();
 
         try {
             db = dbf.newDocumentBuilder();
@@ -105,6 +110,7 @@ public class MarkOrder {
             logger.debug("Loaded RaceXML for mark order");
             List<Corner> corners = data.getMarkSequence();
             Map<Integer, CompoundMark> marks = data.getCompoundMarks();
+            orderedUniqueCompoundMarks = new ArrayList<>(marks.values());
             List<CompoundMark> course = new ArrayList<>();
             for (Corner corner : corners){
                 CompoundMark compoundMark = marks.get(corner.getCompoundMarkID());
