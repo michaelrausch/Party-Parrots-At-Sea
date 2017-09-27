@@ -11,7 +11,8 @@ public enum BoatMeshType {
     CATAMARAN("catamaran_hull.stl", "catamaran_mast.stl", 0.997, "catamaran_sail.stl",
         0.997, null, false, 1.0, 1.4, 2.0),
     PIRATE_SHIP("pirateship_hull.stl", "pirateship_mast.stl", -0.5415, "pirateship_mainsail.stl",
-        -0.5415, "pirateship_frontsail.stl", true, 1.2, 1.6, 1.2);
+        -0.5415, "pirateship_frontsail.stl", true, 1.2, 1.6, 1.2),
+    DUCKY("ducky_hull.stl", "ducky_mast.stl", -2.18539, "ducky_sail.stl", -2.18539, "ducky_eyes.stl", false, 1.2, 1.1, 1.4);
 
     final String hullFile, mastFile, sailFile, jibFile;
     final double mastOffset, sailOffset;
@@ -19,7 +20,7 @@ public enum BoatMeshType {
     public final double accelerationMultiplier;
     public final double turnStep;
     final boolean fixedSail;
-    final static BoatMeshType[] boatTypes = new BoatMeshType[]{DINGHY, CATAMARAN, PIRATE_SHIP};
+    final static BoatMeshType[] boatTypes = new BoatMeshType[]{DINGHY, CATAMARAN, PIRATE_SHIP, DUCKY};
 
     BoatMeshType(String hullFile, String mastFile, double mastOffset, String sailFile,
         double sailOffset, String jibFile, boolean fixedSail, double maxSpeedMultiplier, double accelerationMultiplier, double turnStep) {
