@@ -5,14 +5,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.LobbyController">
+
+<StackPane fx:id="serverListMainStackPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.LobbyController">
     <children>
         <GridPane fx:id="serverListMainGridPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
             <children>
@@ -37,8 +38,7 @@
                 </GridPane>
                 <GridPane>
                     <children>
-                        <Label fx:id="serverName" text="Party Parrots In Space"
-                          GridPane.valignment="CENTER">
+                        <Label fx:id="serverName" text="Party Parrots In Space" GridPane.valignment="CENTER">
                             <font>
                                 <Font size="31.0" />
                             </font>
@@ -46,16 +46,24 @@
                                 <Insets left="35.0" top="10.0" />
                             </padding>
                         </Label>
-                        <Label fx:id="mapName" text="This is a map, it's called Haoming"
-                          GridPane.rowIndex="1">
+                        <Label fx:id="mapName" text="This is a map, it's called Haoming" GridPane.rowIndex="1">
                             <padding>
                                 <Insets left="35.0" top="-15.0" />
                             </padding>
                         </Label>
+                  <Label fx:id="roomLabel" text="Room: 2145" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
+                     <font>
+                        <Font size="31.0" />
+                     </font>
+                     <GridPane.margin>
+                        <Insets right="20.0" top="10.0" />
+                     </GridPane.margin>
+                  </Label>
                     </children>
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="732.0" minWidth="10.0" prefWidth="586.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="120000.0" minWidth="10.0" prefWidth="314.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="445.0" minWidth="10.0" prefWidth="314.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints maxHeight="1.7976931348623157E308" minHeight="50.0" prefHeight="74.0" vgrow="SOMETIMES" />
@@ -73,17 +81,20 @@
                     <children>
                         <ScrollPane fx:id="playerListScrollPane" hbarPolicy="NEVER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                             <content>
-                                <VBox fx:id="playerListVBox" prefHeight="200.0" prefWidth="100.0"/>
+                                <VBox fx:id="playerListVBox" prefHeight="200.0" prefWidth="100.0" />
                             </content>
                             <GridPane.margin>
                                 <Insets bottom="15.0" left="7.0" right="15.0" top="15.0" />
                             </GridPane.margin>
                         </ScrollPane>
-                        <Pane fx:id="serverMap" style="-fx-background-color: skyblue;">
-                            <GridPane.margin>
-                                <Insets bottom="15.0" left="15.0" right="7.0" top="15.0" />
-                            </GridPane.margin>
-                        </Pane>
+                  <AnchorPane fx:id="serverMap" style="-fx-background-color: skyblue;">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <GridPane.margin>
+                        <Insets bottom="15.0" left="15.0" right="7.0" top="15.0" />
+                     </GridPane.margin>
+                  </AnchorPane>
                     </children>
                 </GridPane>
             </children>
@@ -96,7 +107,7 @@
                 <RowConstraints maxHeight="80.0" minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <stylesheets>
-                <String fx:value="/css/Master.css"/>
+                <String fx:value="/css/Master.css" />
                 <String fx:value="/css/LobbyView.css" />
             </stylesheets>
         </GridPane>

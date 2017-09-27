@@ -1,30 +1,30 @@
 package seng302.gameServer;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import seng302.gameServer.messages.Message;
 import seng302.model.GeoPoint;
 import seng302.model.Player;
 import seng302.model.PolarTable;
 import seng302.model.ServerYacht;
-import seng302.model.mark.CompoundMark;
+import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.XMLGenerator;
-import seng302.utilities.XMLParser;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A class describing the overall server, which creates and collects server threads for each client
@@ -42,29 +42,13 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private Thread thread;
 
     private ServerSocket serverSocket = null;
-    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();;
+    private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
     private static Integer capacity;
+    private RaceXMLData raceXMLData;
+    private RegattaXMLData regattaXMLData;
+    private boolean serverStarted = false;
 
     private void startAdvertisingServer() {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db;
-        Document doc;
-        XMLGenerator generator = new XMLGenerator();
-
-        try {
-            db = dbf.newDocumentBuilder();
-            String regatta = generator.getRegattaAsXml();
-            StringReader stringReader = new StringReader(regatta);
-            InputSource is = new InputSource(stringReader);
-            doc = db.parse(is);
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            logger.warn("Couldn't load race regatta");
-            return;
-        }
-
-        RegattaXMLData regattaXMLData = XMLParser.parseRegatta(doc);
-
-
         Integer capacity = GameState.getCapacity();
         Integer numPlayers = GameState.getNumberOfPlayers();
         Integer spacesLeft = capacity - numPlayers;
@@ -76,31 +60,38 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
         // Start advertising server
         try {
-            ServerAdvertiser.getInstance().setMapName(regattaXMLData.getCourseName()).setCapacity(capacity).setNumberOfPlayers(numPlayers);
-            ServerAdvertiser.getInstance().registerGame(PORT, regattaXMLData.getRegattaName());
+            ServerAdvertiser.getInstance()
+                .setMapName(regattaXMLData.getCourseName())
+                .setCapacity(capacity)
+                .setNumberOfPlayers(numPlayers - 1)
+                .registerGame(PORT, regattaXMLData.getRegattaName());
         } catch (IOException e) {
             logger.warn("Could not register server");
         }
     }
 
     public MainServerThread() {
-        new GameState("localhost");
+        new GameState();
         try {
             serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
             logger.trace("IO error in server thread handler upon trying to make new server socket",
                 0);
         }
-
-        startAdvertisingServer();
-
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
-        GameState.addMessageEventListener(this::broadcastMessage);
         terminated = false;
         thread = new Thread(this, "MainServer");
         thread.start();
     }
 
+    private void startServer() {
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
+        MessageFactory.updateXMLGenerator(raceXMLData, regattaXMLData);
+        GameState.setRace(raceXMLData);
+        MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
+        startAdvertisingServer();
+        GameState.addMessageEventListener(this::broadcastMessage);
+        sendSetupMessages();
+    }
 
     public void run() {
 
@@ -128,8 +119,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             } catch (InterruptedException e) {
                 logger.trace("Interrupted exception in Main Server Thread thread sleep", 1);
             }
-            if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState
-                .getCustomizationFlag()) {
+            if (GameState.getCurrentStage() == GameStages.LOBBYING && GameState.getCustomizationFlag()) {
+                MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
                 sendSetupMessages();
                 GameState.resetCustomizationFlag();
             }
@@ -171,6 +162,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     }
 
     private void sendSetupMessages() {
+        MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
         broadcastMessage(MessageFactory.getRaceXML());
         broadcastMessage(MessageFactory.getRegattaXML());
         broadcastMessage(MessageFactory.getBoatXML());
@@ -192,16 +184,43 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         logger.debug("Player Connected From " + serverToClientThread.getThread().getName(), 0);
         if (serverToClientThreads.size() == 0) { //Sets first client as host.
             serverToClientThread.setAsHost();
+            serverToClientThread.raceXMLProperty().addListener((obs, oldVal, race) -> {
+                if (race != null) {
+                    raceXMLData = race;
+                }
+                if (regattaXMLData != null) {
+                    startServer();
+                }
+            });
+            serverToClientThread.regattaXMLProperty().addListener((obs, oldVal, regatta) -> {
+                if (regatta != null) {
+                    regattaXMLData = regatta;
+                }
+                if (raceXMLData != null) {
+                    startServer();
+                }
+            });
+        } else {
+            //serverToClientThread.addConnectionListener(this::sendSetupMessages);
         }
         serverToClientThreads.add(serverToClientThread);
-        serverToClientThread.addConnectionListener(this::sendSetupMessages);
-        serverToClientThread.addDisconnectListener(this::clientDisconnected);
 
         try {
             ServerAdvertiser.getInstance().setNumberOfPlayers(GameState.getNumberOfPlayers());
         } catch (IOException e) {
             logger.warn("Couldn't update advertisement");
         }
+
+        while (regattaXMLData == null && raceXMLData == null){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+        serverToClientThread.addConnectionListener(this::sendSetupMessages);
+        serverToClientThread.addDisconnectListener(this::clientDisconnected);
     }
 
     /**
@@ -222,6 +241,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 serverToClientThread.sendSetupMessages();
             }
         }
+
         serverToClientThreads.remove(closedConnection);
 
         try {
@@ -255,9 +275,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         }, 0, 500);
 
 
-        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
-            sendSetupMessages();
-        }
+//        if (GameState.getCurrentStage() == GameStages.LOBBYING) {
+//            sendSetupMessages();
+//        }
     }
 
     public void terminate() {
@@ -268,39 +288,166 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
      * Initialise boats to specific spaced out geopoints behind starting line.
      */
     private void initialiseBoatPositions() {
-        CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
-        GeoPoint startMark1 = cm.getSubMark(1);
-        GeoPoint startMark2 = cm.getSubMark(2);
+//        CompoundMark cm = GameState.getMarkOrder().getMarkOrder().get(0);
+//        GeoPoint startMark1 = cm.getSubMark(1);
+//        GeoPoint startMark2 = cm.getSubMark(2);
+//
+//        // Calculating midpoint
+//        Double perpendicularAngle = GeoUtility.getBearing(startMark1, startMark2);
+//        Double length = GeoUtility.getDistance(startMark1, startMark2);
+//        GeoPoint midpoint = GeoUtility.getGeoCoordinate(startMark1, perpendicularAngle, length / 2);
+//
+//        // Setting each boats position side by side
+//        final double SEPARATION = 50.0;  // distance apart in meters
+//
+//        int boatIndex = 0;
+//        for (ServerYacht yacht : GameState.getYachts().values()) {
+//            int distanceApart = boatIndex / 2;
+//
+//            if (boatIndex % 2 == 1 && boatIndex != 0) {
+//                distanceApart++;
+//                distanceApart *= -1;
+//            }
+//
+//            GeoPoint spawnMark = GeoUtility
+//                .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * SEPARATION);
+//
+//            if (yacht.getHeading() < perpendicularAngle) {
+//                spawnMark = GeoUtility
+//                    .getGeoCoordinate(spawnMark, perpendicularAngle + 90, SEPARATION);
+//            } else {
+//                spawnMark = GeoUtility
+//                    .getGeoCoordinate(spawnMark, perpendicularAngle + 270, SEPARATION);
+//            }
+//
+//            yacht.setLocation(spawnMark);
+//            boatIndex++;
+//        }
 
-        // Calculating midpoint
-        Double perpendicularAngle = GeoUtility.getBearing(startMark1, startMark2);
-        Double length = GeoUtility.getDistance(startMark1, startMark2);
-        GeoPoint midpoint = GeoUtility.getGeoCoordinate(startMark1, perpendicularAngle, length / 2);
+//        final double SEPARATION = 50.0;  // distance apart in meters
+//
+//        //Reverse of the angle from start to first mark
+//        double angleToFirstMark = 360 - GeoUtility.getBearing(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint(),
+//            GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint()
+//        );
+//
+//        //Length of start line
+//        double startLineLength = GeoUtility.getDistance(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+//        );
+//
+//        //Angle of start line
+//        double startMarkToMarkAngle = GeoUtility.getBearing(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+//        );
+//
+//        //How many yachts can fit along the start line
+//        int spacesAlongLine = (int) Math.round(startLineLength / SEPARATION);
+//        //The free space left by the boats.
+//        double buffer = (startLineLength % SEPARATION) / 2;
+//
+//        //Randomize starting order.
+//        List<ServerYacht> serverYachtList = new ArrayList<>(GameState.getYachts().values());
+//        Collections.shuffle(serverYachtList);
+//
+//        //set the starting point away from start line.
+//        GeoPoint startingPoint = GeoUtility.getGeoCoordinate(
+//            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+//            angleToFirstMark, SEPARATION
+//        );
+//
+//        //Move it along the start line
+//        startingPoint = GeoUtility.getGeoCoordinate(
+//            startingPoint, startMarkToMarkAngle, buffer
+//        );
+//
+//        int yachtCount = 0;
+//        int repeats = 0;
+//
+//        GeoPoint yachtLocation;
+//
+//        for (ServerYacht serverYacht : serverYachtList) {
+//
+//            //Move away from start line
+//            yachtLocation = GeoUtility.getGeoCoordinate(
+//                startingPoint, angleToFirstMark,repeats * SEPARATION
+//            );
+//            //Move along start line
+//            yachtLocation = GeoUtility.getGeoCoordinate(
+//                yachtLocation, startMarkToMarkAngle, yachtCount * SEPARATION
+//            );
+//            serverYacht.setLocation(yachtLocation);
+//            serverYacht.setHeading(GeoUtility.getBearing(
+//                yachtLocation, GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint()
+//            ));
+//            //Set location for next yacht
+//            yachtCount++;
+//            if (yachtCount > spacesAlongLine) {
+//                yachtCount = 0;
+//                repeats++;
+//            }
+//        }
 
-        // Setting each boats position side by side
-        double DISTANCE_FACTOR = 50.0;  // distance apart in meters
-        int boatIndex = 0;
-        for (ServerYacht yacht : GameState.getYachts().values()) {
-            int distanceApart = boatIndex / 2;
+        final double DISTANCE_TO_START = 75d;
+        final double YACHT_SEPARATION = 20d;
 
-            if (boatIndex % 2 == 1 && boatIndex != 0) {
-                distanceApart++;
-                distanceApart *= -1;
+        //Length of start line
+        double startLineLength = GeoUtility.getDistance(
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+        );
+
+        //How many yachts can fit along the start line
+        int spacesAlongLine = (int) Math.round(startLineLength / YACHT_SEPARATION);
+
+        //Angle of start line
+        double startMarkToMarkAngle = GeoUtility.getBearing(
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
+            GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
+        );
+
+        //angle from first mark to the start
+        double angleToStart = GeoUtility.getBearing(
+            GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint(),
+            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint()
+        );
+
+        double angleFromStart = GeoUtility.getBearing(
+            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint(),
+            GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint()
+        );
+
+        GeoPoint startingPoint = GeoUtility.getGeoCoordinate(
+            GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint(),
+            angleToStart, DISTANCE_TO_START
+        );
+
+        List<ServerYacht> randomisedYachts = new ArrayList<>(GameState.getYachts().values());
+        Collections.shuffle(randomisedYachts);
+        while (randomisedYachts.size() > 0) {
+
+            int numYachtsInLine = spacesAlongLine > randomisedYachts.size() ? randomisedYachts.size() : spacesAlongLine;
+            double yachtSpace = numYachtsInLine * YACHT_SEPARATION / 2;
+
+            GeoPoint firstYachtPoint = GeoUtility.getGeoCoordinate(
+                startingPoint, startMarkToMarkAngle + 180, yachtSpace
+            );
+
+            for (int i=0; i<numYachtsInLine; i++){
+                randomisedYachts.get(0).setHeading(angleFromStart);
+                randomisedYachts.get(0).setLocation(firstYachtPoint);
+                firstYachtPoint = GeoUtility.getGeoCoordinate(
+                    firstYachtPoint, startMarkToMarkAngle, yachtSpace
+                );
+                randomisedYachts.remove(0);
             }
 
-            GeoPoint spawnMark = GeoUtility
-                .getGeoCoordinate(midpoint, perpendicularAngle, distanceApart * DISTANCE_FACTOR);
-
-            if (yacht.getHeading() < perpendicularAngle) {
-                spawnMark = GeoUtility
-                    .getGeoCoordinate(spawnMark, perpendicularAngle + 90, DISTANCE_FACTOR);
-            } else {
-                spawnMark = GeoUtility
-                    .getGeoCoordinate(spawnMark, perpendicularAngle + 270, DISTANCE_FACTOR);
-            }
-
-            yacht.setLocation(spawnMark);
-            boatIndex++;
+            startingPoint = GeoUtility.getGeoCoordinate(
+                startingPoint, angleToStart, DISTANCE_TO_START
+            );
         }
     }
 }

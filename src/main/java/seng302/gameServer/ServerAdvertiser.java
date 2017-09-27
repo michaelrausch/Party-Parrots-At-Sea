@@ -1,5 +1,10 @@
 package seng302.gameServer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import seng302.discoveryServer.DiscoveryServerClient;
+import seng302.discoveryServer.util.ServerListing;
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.io.IOException;
@@ -32,11 +37,15 @@ public class ServerAdvertiser {
     private static ServerAdvertiser instance = null;
     private static JmDNS jmdnsInstance = null;
     private ServiceInfo serviceInfo; // Note: Whenever this is changed, our service will be re-registered on the network.
+    private DiscoveryServerClient repositoryClient;
 
     private Hashtable<String ,String> props;
+    private Logger logger = LoggerFactory.getLogger(ServerAdvertiser.class);
 
     private ServerAdvertiser() throws IOException{
         jmdnsInstance = JmDNS.create(InetAddress.getByName(getLocalHostIp()));
+
+        repositoryClient = new DiscoveryServerClient();
 
         props = new Hashtable<>();
         props.put("map", "");
@@ -122,10 +131,13 @@ public class ServerAdvertiser {
                     try {
                         jmdnsInstance.registerService(serviceInfo);
                     } catch (IOException e) {
-                        System.out.println("Failed");
+                        logger.warn("Failed to register service info");
                     }
                 }
             }, 0);
+
+        ServerListing serverListing = new ServerListing(serverName, props.get("map"), new DiscoveryServerClient().getInetIp(), portNo, Integer.parseInt(props.get("capacity")));
+        repositoryClient.register(serverListing);
     }
 
     /**

@@ -26,7 +26,9 @@ public enum ModelType {
     PLAYER_IDENTIFIER ("player_identifier.dae"),
     PLAIN_ARROW ("arrow.dae"),
     START_ARROW ("start_arrow.dae"),
-    FINISH_ARROW("finish_arrow.dae"),
+    FINISH_ARROW ("finish_arrow.dae"),
+    LAND("land.dae"),
+    LAND_SMOOTH("land_smooth.dae"),
     NEXT_MARK_INDICATOR("indicator_arrow.dae"),
     PLAYER_IDENTIFIER_TORUS("torus.dae");
 

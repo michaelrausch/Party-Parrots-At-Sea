@@ -1,6 +1,7 @@
 package seng302.visualiser.controllers.dialogs;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
@@ -10,9 +11,10 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
+import seng302.visualiser.MapMaker;
 import seng302.visualiser.controllers.ServerListController.ServerCreationDialogListener;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.validators.FieldLengthValidator;
@@ -31,15 +33,42 @@ public class ServerCreationController implements Initializable {
     private JFXButton submitBtn;
     @FXML
     private Label closeLabel;
+    @FXML
+    private JFXButton nextMapButton;
+    @FXML
+    private JFXButton lastMapButton;
+    @FXML
+    private Label mapNameLabel;
+    @FXML
+    private JFXSlider legsSlider;
+    @FXML
+    private Label legsSliderLabel;
+    @FXML
+    private JFXCheckBox pickupsCheckBox;
+    @FXML
+    private AnchorPane mapHolder;
+
+    private MapMaker mapMaker = MapMaker.getInstance();
+
     //---------FXML END---------//
 
     private List<ServerCreationDialogListener> serverCreationDialogListeners;
 
     public void initialize(URL location, ResourceBundle resources) {
+
+        maxPlayersSlider.valueProperty().addListener(
+            (observable, oldValue, newValue) -> updateMaxPlayerLabel()
+        );
+        maxPlayersSlider.setMax(mapMaker.getMaxPlayers());
+        maxPlayersSlider.setValue(mapMaker.getMaxPlayers());
+
+        legsSlider.valueProperty().addListener(
+            (obs, oldVal, newVal) -> updateLegSliderLabel()
+        );
+        legsSlider.setMax(10);
+
         updateMaxPlayerLabel();
-        maxPlayersSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            updateMaxPlayerLabel();
-        });
+        updateLegSliderLabel();
 
         FieldLengthValidator fieldLengthValidator = new FieldLengthValidator(40);
         fieldLengthValidator.setMessage("Server name too long.");
@@ -54,7 +83,20 @@ public class ServerCreationController implements Initializable {
             validateServerSettings();
         });
 
-        closeLabel.setOnMouseClicked(event -> notifyListeners());
+        nextMapButton.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
+            nextMap();
+        });
+
+        lastMapButton.setOnMouseReleased(event -> {
+            Sounds.playButtonClick();
+            lastMap();
+        });
+
+        mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
+        mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
+        pickupsCheckBox.setSelected(true);
+        //closeLabel.setOnMouseClicked(event -> notifyListeners());
     }
 
     /**
@@ -75,7 +117,7 @@ public class ServerCreationController implements Initializable {
     private void createServer() {
         ServerDescription serverDescription = ViewManager.getInstance().getGameClient()
             .runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayersSlider
-                .getValue());
+                .getValue(), mapMaker.getCurrentRacePath(), (int) legsSlider.getValue(), pickupsCheckBox.isSelected());
 
         ViewManager.getInstance().setProperty("serverName", serverDescription.getName());
         ViewManager.getInstance().setProperty("mapName", serverDescription.getMapName());
@@ -86,11 +128,36 @@ public class ServerCreationController implements Initializable {
      */
     private void updateMaxPlayerLabel() {
         maxPlayersSlider.setValue(Math.floor(maxPlayersSlider.getValue()));
-        maxPlayersLabel.setText(String.format("YOU SELECTED: %.0f", maxPlayersSlider.getValue()));
+        maxPlayersLabel.setText(String.format("Max players: %.0f", maxPlayersSlider.getValue()));
     }
 
-    public void playButtonHoverSound(MouseEvent mouseEvent) {
+    private void updateLegSliderLabel() {
+        legsSlider.setValue(Math.floor(legsSlider.getValue()));
+        legsSliderLabel.setText(
+            String.format("A section of the race will repeat %.0f times", legsSlider.getValue())
+        );
+
+    }
+
+    public void playButtonHoverSound() {
         Sounds.playHoverSound();
+    }
+
+    private void nextMap() {
+        mapMaker.next();
+        updateMap();
+    }
+
+    private void lastMap() {
+        mapMaker.previous();
+        updateMap();
+    }
+
+    private void updateMap() {
+        mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
+        mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
+        maxPlayersSlider.setMax(mapMaker.getMaxPlayers());
+        maxPlayersSlider.setValue(mapMaker.getMaxPlayers());
     }
 
     public void setListener(List<ServerCreationDialogListener> serverCreationDialogListeners) {

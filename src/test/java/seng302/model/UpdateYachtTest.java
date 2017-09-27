@@ -1,13 +1,25 @@
 package seng302.model;
 
+import static seng302.gameServer.GameState.checkCollision;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import seng302.gameServer.GameState;
+import seng302.model.mark.MarkOrder;
 import seng302.utilities.GeoUtility;
+import seng302.utilities.XMLGenerator;
+import seng302.utilities.XMLParser;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
-import static seng302.gameServer.GameState.checkCollision;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.StringReader;
 
 /**
  * Test update function in Yacht.java to make sure yacht will not be collide each other within 25.0
@@ -24,10 +36,26 @@ public class UpdateYachtTest {
 
     @Before
     public void setUpRace() {
-        new GameState("");
+        new GameState();
         GameState.addYacht(1, yacht1);
         GameState.addYacht(2, yacht2);
-        PolarTable.parsePolarFile(getClass().getResourceAsStream("/config/acc_polars.csv"));
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        xmlGenerator.setRaceTemplate(
+                XMLParser.parseRaceDef(
+                        "/maps/default.xml", "test", 2, null, false
+                ).getValue()
+        );
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db;
+        Document doc = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            doc = db.parse(new InputSource(new StringReader(xmlGenerator.getRaceAsXml())));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+        GameState.setRace(XMLParser.parseRace(doc));
+        PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
     }
 
     @Test
@@ -59,7 +87,9 @@ public class UpdateYachtTest {
         if (!yacht1.getSailIn()) {
             yacht1.toggleSailIn();
         }
+
         checkCollision(yacht1);
+
         Assert.assertTrue(
             GameState.YACHT_COLLISION_DISTANCE < GeoUtility.getDistance(geoPoint1, geoPoint2
             )

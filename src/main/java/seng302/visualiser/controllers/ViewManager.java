@@ -6,16 +6,10 @@ import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
 import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.svg.SVGGlyph;
-import java.io.IOException;
-import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
+import javafx.scene.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -25,11 +19,13 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.gameServer.ServerAdvertiser;
-import seng302.utilities.BonjourInstallChecker;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.dialogs.KeyBindingDialogController;
 import seng302.visualiser.controllers.dialogs.PopupDialogController;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 public class ViewManager {
 
@@ -64,6 +60,8 @@ public class ViewManager {
         this.stage = stage;
         Parent root = FXMLLoader.load(getClass().getResource("/views/SplashScreen.fxml"));
         Scene scene = new Scene(root);
+        stage.setTitle("Party Parrots At Sea");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
         stage.setScene(scene);
         stage.initStyle(StageStyle.UNDECORATED);
         stage.show();
@@ -275,16 +273,9 @@ public class ViewManager {
         jfxSnackbar.show(snackbarText, 1500);
     }
 
-    /**
-     * Determines if a PC has compatibility with the bonjour protocol for server detection.
-     */
-    private void checkCompatibility() {
-        if (BonjourInstallChecker.isBonjourSupported()) {
-            BonjourInstallChecker.openInstallUrl();
-        }
-    }
-
     private void closeAll() {
+        if (stage!= null) stage.close();
+
         try {
             ServerAdvertiser.getInstance().unregister();
         } catch (IOException e1) {
@@ -350,8 +341,9 @@ public class ViewManager {
             logger.error("Could not load lobby view");
         }
 
+        LobbyController lobbyController = loader.getController();
+
         if (disableReadyButton) {
-            LobbyController lobbyController = loader.getController();
             lobbyController.disableReadyButton();
         }
 
@@ -363,7 +355,6 @@ public class ViewManager {
      *
      * @return A RaceViewController for the race view screen.
      */
-
     public RaceViewController loadRaceView() {
         FXMLLoader loader = loadFxml("/views/RaceView.fxml");
         // have to create a new stage and set the race view maximized as JFoenix decorator has
@@ -406,6 +397,14 @@ public class ViewManager {
         }
 
         return loader.getController();
+    }
+
+    public void showErrorSnackBar(String msg){
+        decorator.getStylesheets()
+                .add(getClass().getResource("/css/dialogs/Snackbar.css").toExternalForm());
+
+        JFXSnackbar bar = new JFXSnackbar(decorator);
+        bar.enqueue(new JFXSnackbar.SnackbarEvent(msg));
     }
 
     public Stage getStage() {

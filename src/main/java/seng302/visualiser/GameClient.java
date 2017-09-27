@@ -15,7 +15,6 @@ import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -49,6 +48,12 @@ import seng302.visualiser.controllers.LobbyController;
 import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.controllers.dialogs.PopupDialogController;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.*;
 
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
@@ -96,7 +101,6 @@ public class GameClient {
             socketThread.addDisconnectionListener((cause) -> {
                 showConnectionError(cause);
                 tearDownConnection();
-                Platform.runLater(this::loadStartScreen);
             });
             socketThread.addStreamObserver(this::parsePackets);
 
@@ -113,11 +117,21 @@ public class GameClient {
             ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
             ViewManager.getInstance().setProperty("mapName", regattaData.getCourseName());
 
+            getServerThread().setConnectionErrorListener((eMessage) -> {
+                ViewManager.getInstance().showErrorSnackBar(eMessage);
+                destroyClientToServerThread();
+            });
+
             this.lobbyController = ViewManager.getInstance().goToLobby(true);
 
         } catch (IOException ioe) {
-            showConnectionError("Unable to find server");
+            ViewManager.getInstance().showErrorSnackBar("There are no servers currently available.");
         }
+    }
+
+    private void destroyClientToServerThread() {
+        socketThread.closeSocket();
+        socketThread = null;
     }
 
     /**
@@ -125,9 +139,11 @@ public class GameClient {
      * @param ipAddress IP to connect to.
      * @param portNumber Port to connect to.
      */
-    public ServerDescription runAsHost(String ipAddress, Integer portNumber, String serverName, Integer maxPlayers) {
+    public ServerDescription runAsHost(
+        String ipAddress, Integer portNumber, String serverName, Integer maxPlayers, String race,
+        Integer numLegs, Boolean tokensEnabled
+    ) {
         XMLGenerator.setDefaultRaceName(serverName);
-        GameState.setMaxPlayers(maxPlayers);
 
         server = new MainServerThread();
 
@@ -136,7 +152,7 @@ public class GameClient {
         } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
         }
-
+        socketThread.sendXML(race, serverName, numLegs, maxPlayers, tokensEnabled);
         while (regattaData == null){
             try {
                 Thread.sleep(100);
@@ -159,16 +175,6 @@ public class GameClient {
         }
     }
 
-    private void loadStartScreen() {
-        FXMLLoader fxmlLoader = new FXMLLoader(
-            getClass().getResource("/views/StartScreenView.fxml"));
-        try {
-            holderPane.getChildren().clear();
-            holderPane.getChildren().add(fxmlLoader.load());
-        } catch (IOException e) {
-            showConnectionError("JavaFX crashed. Please restart the app");
-        }
-    }
 
     private void showConnectionError (String message) {
         Platform.runLater(() -> {
@@ -281,7 +287,7 @@ public class GameClient {
                     formatAndSendChatMessage(raceView.readChatInput());
                 }
             });
-
+            sendToggleTurningModePacket(); // notify the server about player's steering mode
         }
     }
 

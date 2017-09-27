@@ -1,21 +1,31 @@
 package seng302.utilities;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import seng302.model.ClientYacht;
 import seng302.model.Colors;
 import seng302.model.Limit;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
+import seng302.model.stream.xml.generator.RaceXMLTemplate;
+import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.model.token.Token;
@@ -27,6 +37,8 @@ import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
  */
 public class XMLParser {
 
+    private static final int MAX_PLAYERS = 8;
+
     /**
      * Returns the text content of a given child element tag, assuming it exists, as an Integer.
      *
@@ -37,7 +49,7 @@ public class XMLParser {
     private static Integer getElementInt(Element ele, String tag) {
         NodeList tagList = ele.getElementsByTagName(tag);
         if (tagList.getLength() > 0) {
-            return Integer.parseInt(tagList.item(0).getTextContent());
+            return Integer.parseInt(tagList.item(0).getTextContent().replaceAll("\\s+",""));
         } else {
             return null;
         }
@@ -69,7 +81,7 @@ public class XMLParser {
     private static Double getElementDouble(Element ele, String tag) {
         NodeList tagList = ele.getElementsByTagName(tag);
         if (tagList.getLength() > 0) {
-            return Double.parseDouble(tagList.item(0).getTextContent());
+            return Double.parseDouble(tagList.item(0).getTextContent().replaceAll("\\s+",""));
         } else {
             return null;
         }
@@ -187,6 +199,36 @@ public class XMLParser {
         );
     }
 
+    public static Boolean tokensEnabled(Document doc) {
+        Element docEle = doc.getDocumentElement();
+        try {
+            NamedNodeMap namedNodeMap = docEle.getElementsByTagName("Tokens").item(0).getAttributes();
+            Node node = namedNodeMap.getNamedItem("Enabled");
+            if (node != null) {
+                return Boolean.parseBoolean(node.getNodeValue());
+            }
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+
+    public static Integer getMaxPlayers(Document doc) {
+        Element docEle = doc.getDocumentElement();
+        try {
+            NamedNodeMap namedNodeMap = docEle.getElementsByTagName("Participants").item(0).getAttributes();
+            Node node = namedNodeMap.getNamedItem("MaxPlayers");
+            if (node != null) {
+                return Integer.parseInt(node.getNodeValue());
+            }
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+            return MAX_PLAYERS;
+        }
+        return MAX_PLAYERS;
+    }
+
     /**
      * Returns an object containing the data extracted from the given xml formatted document
      *
@@ -196,7 +238,7 @@ public class XMLParser {
     public static RaceXMLData parseRace(Document doc) {
         Element docEle = doc.getDocumentElement();
         return new RaceXMLData(
-            extractParticpantIDs(docEle),
+            extractParticipantIDs(docEle),
             extractTokens(docEle),
             extractCompoundMarks(docEle),
             extractMarkOrder(docEle),
@@ -235,13 +277,11 @@ public class XMLParser {
         for (int i = 0; i < limitList.getLength(); i++) {
             Node limitNode = limitList.item(i);
             if (limitNode.getNodeName().equals("Limit")) {
-                courseLimit.add(
-                    new Limit(
-                        XMLParser.getNodeAttributeInt(limitNode, "SeqID"),
-                        XMLParser.getNodeAttributeDouble(limitNode, "Lat"),
-                        XMLParser.getNodeAttributeDouble(limitNode, "Lon")
-                    )
-                );
+                courseLimit.add(new Limit(
+                    XMLParser.getNodeAttributeInt(limitNode, "SeqID"),
+                    XMLParser.getNodeAttributeDouble(limitNode, "Lat"),
+                    XMLParser.getNodeAttributeDouble(limitNode, "Lon")
+                ));
             }
         }
         return courseLimit;
@@ -273,7 +313,7 @@ public class XMLParser {
     /**
      * Extracts course participants data
      */
-    private static List<Integer> extractParticpantIDs (Element docEle) {
+    private static List<Integer> extractParticipantIDs(Element docEle) {
         List<Integer> boatIDs = new ArrayList<>();
         NodeList pList = docEle.getElementsByTagName("Participants").item(0).getChildNodes();
         for (int i = 0; i < pList.getLength(); i++) {
@@ -295,10 +335,11 @@ public class XMLParser {
         for (int i = 0; i < cMarkList.getLength(); i++) {
             Node cMarkNode = cMarkList.item(i);
             if (cMarkNode.getNodeName().equals("CompoundMark")) {
+                String name = XMLParser.getNodeAttributeString(cMarkNode, "Name");
+                name = (name == null || name.equals("")) ? "Mark " + i+1: name;
                 cMark = new CompoundMark(
                     XMLParser.getNodeAttributeInt(cMarkNode, "CompoundMarkID"),
-                    XMLParser.getNodeAttributeString(cMarkNode, "Name"),
-                    createMarks(cMarkNode)
+                    name, createMarks(cMarkNode)
                 );
                 allMarks.add(cMark);
             }
@@ -319,12 +360,167 @@ public class XMLParser {
             Node markNode = childMarks.item(i);
             if (markNode.getNodeName().equals("Mark")) {
                 Integer seqID = XMLParser.getNodeAttributeInt(markNode, "SeqID");
+                seqID = (seqID == null) ? i+1 : seqID;
+
                 Integer sourceID = XMLParser.getNodeAttributeInt(markNode, "SourceID");
+                sourceID = (sourceID == null) ? i+1 : sourceID;
+
                 String markName = XMLParser.getNodeAttributeString(markNode, "Name");
+                markName = (markName == null || markName.equals("")) ? cMarkName + " " + i+1: markName;
+
                 Double targetLat = XMLParser.getNodeAttributeDouble(markNode, "TargetLat");
                 Double targetLng = XMLParser.getNodeAttributeDouble(markNode, "TargetLng");
+
                 Mark mark = new Mark(markName, seqID, targetLat, targetLng, sourceID);
                 subMarks.add(mark);
+            }
+        }
+        return subMarks;
+    }
+
+    /**
+     * This ungodly combination of existing methods and code blocks parses a race definition file.
+     * Look upon it and despair.
+     * @param url The input file path
+     * @param serverName the name of the server
+     * @param repetitions the repetitions of a segment of the race def file.
+     * @param maxPlayers max number of players. uses the default race max if null or greater than the actual max.
+     * @param tokensEnabled if tokens are enabled
+     * @return a pair which contains regatta string, race string as key, value pair.
+     */
+    public static Pair<RegattaXMLTemplate, RaceXMLTemplate> parseRaceDef(
+            String url, String serverName, Integer repetitions, Integer maxPlayers, Boolean tokensEnabled
+    ) {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db;
+        Document doc = null;
+        try {
+            db = dbf.newDocumentBuilder();
+            doc = db.parse(XMLParser.class.getResourceAsStream(url));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            e.printStackTrace();
+        }
+        Element docEle = doc.getDocumentElement();
+
+        RegattaXMLTemplate regattaXMLTemplate = new RegattaXMLTemplate(
+            serverName, XMLParser.getElementString(docEle, "CourseName"),
+            XMLParser.getElementDouble(docEle, "CentralLat"),
+            XMLParser.getElementDouble(docEle, "CentralLng")
+        );
+
+        XMLGenerator xmlGenerator = new XMLGenerator();
+        xmlGenerator.setRegattaTemplate(regattaXMLTemplate);
+
+        if (maxPlayers == null) {
+            maxPlayers = XMLParser.getElementInt(docEle, "MaxPlayers");
+        } else if (maxPlayers > XMLParser.getElementInt(docEle, "MaxPlayers")) {
+            maxPlayers = XMLParser.getElementInt(docEle, "MaxPlayers");
+        }
+
+        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(
+            new ArrayList<>(), new ArrayList<>(),
+            XMLParser.extractMarkOrderRaceDef(docEle, repetitions),
+            XMLParser.extractCourseLimitRaceDef(docEle),
+            XMLParser.extractCompoundMarksRaceDef(docEle),
+            maxPlayers, tokensEnabled
+        );
+        xmlGenerator.setRaceTemplate(raceXMLTemplate);
+        return new Pair<>(regattaXMLTemplate, raceXMLTemplate);
+    }
+
+    private static List<Corner> extractMarkOrderRaceDef(Element docEle, int repitions){
+        List<Corner> compoundMarkSequence = new ArrayList<>();
+        NodeList cornerList = docEle.getElementsByTagName("Course").item(0).getChildNodes();
+
+        int seqId = 1;
+        final int zoneSize = 3;
+
+        for (int i=0; i<cornerList.getLength(); i++) {
+            Node segment = cornerList.item(i);
+            if (segment.getNodeName().equals("OpeningSegment") ||
+                segment.getNodeName().equals("ClosingSegment")) {
+
+                seqId = parseCourseSegment(segment, seqId, compoundMarkSequence);
+
+            } else if (segment.getNodeName().equals("RepeatingSegment")) {
+                for (int k = 0; k < repitions; k++) {
+                    seqId = parseCourseSegment(segment, seqId, compoundMarkSequence);
+                }
+            }
+        }
+        return compoundMarkSequence;
+    }
+
+    /**
+     * Parses a segment of the course adding new Corners to the given list.
+     * @param segment Segment to parse
+     * @param seqID initial sequence ID
+     * @param course course to add corners to
+     * @return the last sequence id.
+     */
+    private static int parseCourseSegment(Node segment, int seqID, List<Corner> course) {
+        NodeList segmentList = segment.getChildNodes();
+        for (int j = 0; j < segmentList.getLength(); j++) {
+            Node corner = segmentList.item(j);
+            if (corner.getNodeName().equals("Corner")) {
+                String rounding = XMLParser.getNodeAttributeString(corner, "Rounding");
+                rounding = //Converting "P" to "Port" and "S" to "Stbd"
+                    rounding.equals("P") ? "Port" :
+                    rounding.equals("S") ? "Stbd" : rounding;
+                course.add(new Corner(
+                    seqID++, XMLParser.getNodeAttributeInt(corner, "CompoundMarkID"),
+                    rounding, 3
+                ));
+            }
+        }
+        return seqID;
+    }
+
+    private static List<Limit> extractCourseLimitRaceDef(Element docEle) {
+        List<Limit> courseLimit = new ArrayList<>();
+        NodeList limitList = docEle.getElementsByTagName("CourseLimit").item(0).getChildNodes();
+        int seqId = 1;
+        for (int i = 0; i < limitList.getLength(); i++) {
+            Node limitNode = limitList.item(i);
+            if (limitNode.getNodeName().equals("Limit")) {
+                courseLimit.add(new Limit(
+                    seqId++, XMLParser.getNodeAttributeDouble(limitNode, "Lat"),
+                    XMLParser.getNodeAttributeDouble(limitNode, "Lng")
+                ));
+            }
+        }
+        return courseLimit;
+    }
+
+    private static List<CompoundMark> extractCompoundMarksRaceDef(Element docEle){
+        List<CompoundMark> allMarks = new ArrayList<>();
+        NodeList cMarkList = docEle.getElementsByTagName("Marks").item(0).getChildNodes();
+        CompoundMark cMark;
+        int markCount = 200;
+        for (int i = 0; i < cMarkList.getLength(); i++) {
+            Node cMarkNode = cMarkList.item(i);
+            if (cMarkNode.getNodeName().equals("CompoundMark")) {
+                Integer id = XMLParser.getNodeAttributeInt(cMarkNode, "CompoundMarkID");
+                List<Mark> subMarks = createMarksRaceDef(cMarkNode, markCount,"Mark " + id);
+                markCount += subMarks.size();
+                allMarks.add(new CompoundMark(id, "Mark " + id, subMarks));
+            }
+        }
+        return allMarks;
+    }
+
+    private static List<Mark> createMarksRaceDef(Node compoundMark, int markCount, String markName) {
+        List<Mark> subMarks = new ArrayList<>();
+        NodeList childMarks = compoundMark.getChildNodes();
+        int seqID = 1;
+        for (int i = 0; i < childMarks.getLength(); i++) {
+            Node markNode = childMarks.item(i);
+            if (markNode.getNodeName().equals("Mark")) {
+                Double targetLat = XMLParser.getNodeAttributeDouble(markNode, "Lat");
+                Double targetLng = XMLParser.getNodeAttributeDouble(markNode, "Lng");
+                Mark mark = new Mark(markName + " subMark " + seqID, seqID, targetLat, targetLng, markCount++);
+                subMarks.add(mark);
+                seqID += 1;
             }
         }
         return subMarks;

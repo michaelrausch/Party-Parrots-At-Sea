@@ -32,4 +32,10 @@ public class Corner {
     public Integer getZoneSize() {
         return zoneSize;
     }
+
+    @Override
+    public String toString() {
+        return "Corner = {seqID=" + seqID + ", compoundMarkID=" + compoundMarkID + ", rounding="
+            + rounding +", zoneSize=" + zoneSize + "}";
+    }
 }
