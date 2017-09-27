@@ -106,7 +106,7 @@ public class MarkArrowFactory {
         Arc roundSection = new Arc(
             0, 0, MARK_ARROW_SEPARATION, MARK_ARROW_SEPARATION,
             //Where to start drawing arc from
-            (roundingSide == RoundingSide.PORT ? 0 : angleOfEntry),
+            (roundingSide == RoundingSide.PORT ? 180 + angleOfEntry : angleOfEntry),
             //Which way to go around the mark. (clockwise vs anticlockwise)
             roundingSide == RoundingSide.PORT ? Math.abs(angleOfExit - angleOfEntry) : -Math.abs(angleOfEntry - angleOfExit)
         );

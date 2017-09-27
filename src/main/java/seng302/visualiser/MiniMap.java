@@ -30,7 +30,7 @@ public class MiniMap extends MapPreview {
         this.boats = boats;
         this.player = player;
         setBoats(boats);
-//        player.addMarkRoundingListener(this::updateMarkArrows);
+        player.addMarkRoundingListener(this::updateMarkArrows);
     }
 
     public void setBoats(List<ClientYacht> yachts) {
