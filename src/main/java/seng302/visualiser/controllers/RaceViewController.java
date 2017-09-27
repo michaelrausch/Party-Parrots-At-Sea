@@ -191,6 +191,7 @@ public class RaceViewController extends Thread {
             raceData.getMarkSequence(), raceData.getCourseLimit(),
             new ArrayList<>(participants.values()), player
         );
+
         miniMapButton.setOnMouseClicked((event) -> {
             if (miniMapPane.visibleProperty().get()) {
                 miniMapPane.setVisible(false);
