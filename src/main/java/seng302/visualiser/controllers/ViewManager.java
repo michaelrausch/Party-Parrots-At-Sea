@@ -302,7 +302,7 @@ public class ViewManager {
             Stage stage = new Stage();
             initialStartView(stage);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("Could not go to start view");
         }
     }
 
