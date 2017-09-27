@@ -59,7 +59,7 @@ public class StartScreenController implements Initializable{
     /**
      * Changes the view to the Server Browser.
      */
-    private void goToServerBrowser() {
+    public void goToServerBrowser() {
         try {
             ViewManager.getInstance().setScene(serverList);
         } catch (Exception e) {

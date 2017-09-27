@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.model.token.TokenType;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
+import seng302.model.token.TokenType;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 /**

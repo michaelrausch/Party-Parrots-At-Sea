@@ -1,6 +1,6 @@
 package seng302.model.mark;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import seng302.gameServer.messages.RoundingSide;
 import seng302.model.GeoPoint;
@@ -10,13 +10,13 @@ public class CompoundMark {
 
 	private int compoundMarkId;
 	private String name;
-	private List<Mark> marks = new ArrayList<>();
+	private List<Mark> marks;
     private GeoPoint midPoint;
 
     public CompoundMark(int markID, String name, List<Mark> marks) {
         this.compoundMarkId = markID;
         this.name = name;
-        this.marks.addAll(marks);
+        this.marks = Collections.unmodifiableList(marks);
         if (marks.size() > 1) {
             this.midPoint = GeoUtility.getDirtyMidPoint(marks.get(0), marks.get(1));
         } else {

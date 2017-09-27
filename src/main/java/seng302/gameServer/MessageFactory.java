@@ -1,5 +1,6 @@
 package seng302.gameServer;
 
+import seng302.gameServer.messages.*;
 import java.util.ArrayList;
 import java.util.List;
 import seng302.gameServer.messages.BoatLocationMessage;
@@ -18,9 +19,14 @@ import seng302.model.Player;
 import seng302.model.ServerYacht;
 import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.stream.xml.generator.RegattaXMLTemplate;
+import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.XMLGenerator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Class for interfacing between the data we have in the GameState to the messages we need to send
@@ -39,6 +45,51 @@ Ideally this class would be created with an instance of the GameState (I tried i
 public class MessageFactory {
 
     private static XMLGenerator xmlGenerator = new XMLGenerator();
+    private static XMLMessage race;
+    private static XMLMessage regatta;
+    private static XMLMessage boats;
+
+    public static void updateXMLGenerator(RaceXMLData race, RegattaXMLData regatta) {
+        xmlGenerator.setRegattaTemplate(
+            new RegattaXMLTemplate(
+                regatta.getRegattaName(),
+                regatta.getCourseName(),
+                regatta.getCentralLat(),
+                regatta.getCentralLng()
+            )
+        );
+        xmlGenerator.setRaceTemplate(
+            new RaceXMLTemplate(
+                new ArrayList<>(),
+                new ArrayList<>(),
+                race.getMarkSequence(),
+                race.getCourseLimit(),
+                new ArrayList<>(race.getCompoundMarks().values()),
+                GameState.getCapacity(), true
+            )
+        );
+        String xmlStr = xmlGenerator.getRaceAsXml();
+        MessageFactory.race = new XMLMessage(xmlStr, XMLMessageSubType.RACE, xmlStr.length());
+        xmlStr = xmlGenerator.getRegattaAsXml();
+        MessageFactory.regatta = new XMLMessage(xmlStr, XMLMessageSubType.REGATTA, xmlStr.length());
+        xmlStr = xmlGenerator.getBoatsAsXml();
+        MessageFactory.boats = new XMLMessage(xmlStr, XMLMessageSubType.BOAT, xmlStr.length());
+    }
+
+    public static void updateBoats(List<ServerYacht> yachts) {
+//        for (ServerYacht serverYacht : yachts) {
+//            System.out.println(serverYacht);
+//        }
+        xmlGenerator.getRace().setBoats(yachts);
+        String xmlStr = xmlGenerator.getBoatsAsXml();
+        MessageFactory.boats = new XMLMessage(xmlStr, XMLMessageSubType.BOAT, xmlStr.length());
+    }
+
+    public static void updateTokens(List<Token> tokens) {
+        xmlGenerator.getRace().setTokens(tokens);
+        String xmlStr = xmlGenerator.getRaceAsXml();
+        MessageFactory.race = new XMLMessage(xmlStr, XMLMessageSubType.RACE, xmlStr.length());
+    }
 
 
     public static RaceStartStatusMessage getRaceStartStatusMessage() {
@@ -99,38 +150,15 @@ public class MessageFactory {
     }
 
     public static XMLMessage getRaceXML() {
-        List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        List<Token> tokens = GameState.getTokensInPlay();
-        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
-        xmlGenerator.setRaceTemplate(raceXMLTemplate);
-
-        XMLMessage raceXMLMessage = new XMLMessage(
-            xmlGenerator.getRaceAsXml(),
-            XMLMessageSubType.RACE,
-            xmlGenerator.getRaceAsXml().length());
-
-        return raceXMLMessage;
+        return race;
     }
 
     public static XMLMessage getRegattaXML() {
-        //@TODO calculate lat/lng values
-
-        return new XMLMessage(
-            xmlGenerator.getRegattaAsXml(),
-            XMLMessageSubType.REGATTA,
-            xmlGenerator.getRegattaAsXml().length());
+       return regatta;
     }
 
     public static XMLMessage getBoatXML() {
-        List<ServerYacht> yachts = new ArrayList<>(GameState.getYachts().values());
-        List<Token> tokens = GameState.getTokensInPlay();
-        RaceXMLTemplate raceXMLTemplate = new RaceXMLTemplate(yachts, tokens);
-        xmlGenerator.setRaceTemplate(raceXMLTemplate);
-
-        return new XMLMessage(
-            xmlGenerator.getBoatsAsXml(),
-            XMLMessageSubType.BOAT,
-            xmlGenerator.getBoatsAsXml().length());
+        return boats;
     }
 
     public static YachtEventCodeMessage makeCollisionMessage(ServerYacht serverYacht) {
