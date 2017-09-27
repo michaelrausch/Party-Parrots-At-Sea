@@ -2,12 +2,12 @@ package seng302.visualiser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Camera;
@@ -24,7 +24,11 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import org.fxyz3d.scene.Skybox;
 import seng302.gameServer.messages.RoundingSide;
-import seng302.model.*;
+import seng302.model.ClientYacht;
+import seng302.model.GameKeyBind;
+import seng302.model.KeyAction;
+import seng302.model.Limit;
+import seng302.model.ScaledPoint;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -66,6 +70,8 @@ public class GameView3D extends GameView{
     /* Note that if either of these is null then values for it have not been added and the other
        should be used as the limits of the map. */
     private Map<Mark, Marker3D> markerObjects;
+
+    private BoatObject playerBoat;
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
@@ -331,9 +337,35 @@ public class GameView3D extends GameView{
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
                 ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
                 ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
+
+                newBoat.setMarkIndicator(ModelFactory.importSTL("mark_pointer.stl"));
+                playerBoat = newBoat;
+
             }
         }
         Platform.runLater(() -> {
+            ClientYacht playerYacht = ViewManager.getInstance().getGameClient().getAllBoatsMap()
+                .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId());
+
+            for (ObservableValue o : Arrays
+                .asList(playerBoat.layoutXProperty(), playerBoat.layoutXProperty())) {
+                o.addListener((obs, oldVal, newVal) -> {
+
+                    List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
+                    Point2D midPoint = new Point2D(0, 0);
+                    if (marks.size() == 1) {
+                        midPoint = scaledPoint.findScaledXY(marks.get(0));
+                    } else if (marks.size() == 2) {
+                        midPoint = (scaledPoint.findScaledXY(marks.get(0)))
+                            .midpoint(scaledPoint.findScaledXY(marks.get(1)));
+                    }
+
+                    if (midPoint != null) {
+                        playerBoat.updateMarkIndicator(midPoint);
+                    }
+
+                });
+            }
             gameObjects.getChildren().addAll(wakes);
             gameObjects.getChildren().addAll(boatObjectGroup);
         });

@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -30,9 +34,10 @@ public class BoatObject extends Group {
     private Color colour = Color.BLACK;
     private Boolean isSelected = false;
     private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
-//    private Rotate tilt = new Rotate(0, new Point3D(0, 1, 0));
-    private double previousRotation = 0;
 
+    // This stuff only matters to the players boat object.
+    private MeshView markIndicator;
+    private MeshView playerIndicator;
     private ReadOnlyDoubleWrapper rotationProperty;
 
     private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
@@ -81,6 +86,19 @@ public class BoatObject extends Group {
         });
     }
 
+    public void updateMarkIndicator(Point2D markPoint) {
+        Point2D boatLoc = new Point2D(this.getLayoutX(), this.getLayoutY());
+        Double angle = Math.toDegrees(
+            Math.atan2(boatLoc.getY() - markPoint.getY(), boatLoc.getX() - markPoint.getX())) - 90;
+
+        Double radius = 0.5;
+        markIndicator.getTransforms().clear();
+        markIndicator.getTransforms().addAll(
+            new Rotate(angle, new Point3D(0, 0, 1)),
+            new Translate(0, -radius, 0)
+        );
+    }
+
     private Double normalizeHeading(double heading, double windDirection) {
         Double normalizedHeading = heading - windDirection;
         normalizedHeading = (double) Math.floorMod(normalizedHeading.longValue(), 360L);
@@ -91,14 +109,6 @@ public class BoatObject extends Group {
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
         rotationProperty.set(heading);
         rotation.setAngle(heading);
-//        if (heading == previousRotation) {
-//            tilt.setAngle(0);
-//        } else if (heading < previousRotation) {
-//            tilt.setAngle(-10);
-//        } else {
-//            tilt.setAngle(10);
-//        }
-//        previousRotation = heading;
         wake.getTransforms().setAll(new Rotate(heading, new Point3D(0,0,1)));
         if (sailsIn) {
             boatAssets.showSail();
@@ -126,6 +136,26 @@ public class BoatObject extends Group {
         } else {
             boatAssets.hideSail();
         }
+    }
+
+    public void setMarkIndicator(MeshView indicator) {
+        this.markIndicator = indicator;
+        this.getChildren().add(markIndicator);
+        createPlayerIndicator();
+        setIndicatorColor();
+    }
+
+    private void createPlayerIndicator() {
+        MeshView torus = ModelFactory.importSTL("player_circle.stl");
+        playerIndicator = torus;
+        this.getChildren().add(torus);
+    }
+
+    public void setIndicatorColor() {
+        Platform.runLater(() -> {
+            markIndicator.setMaterial(new PhongMaterial(Color.DARKORANGE));
+            playerIndicator.setMaterial(new PhongMaterial(colour));
+        });
     }
 
     public Group getWake () {
