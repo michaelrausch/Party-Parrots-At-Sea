@@ -93,7 +93,6 @@ public class GameState implements Runnable {
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
-    private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
@@ -119,7 +118,6 @@ public class GameState implements Runnable {
         playerHasLeftFlag = false;
         serverSpeedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
-        isRaceStarted = false;
         previousUpdateTime = System.currentTimeMillis();
         markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         newMessageListeners = new ArrayList<>();
@@ -176,10 +174,6 @@ public class GameState implements Runnable {
 
     public static void removeYacht(Integer yachtId) {
         yachts.remove(yachtId);
-    }
-
-    public static Boolean getIsRaceStarted() {
-        return isRaceStarted;
     }
 
     public static GameStages getCurrentStage() {
