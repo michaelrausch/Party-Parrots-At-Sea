@@ -35,8 +35,6 @@ public class BoatObject extends Group {
     private Color colour = Color.BLACK;
     private Boolean isSelected = false;
     private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
-//    private Rotate tilt = new Rotate(0, new Point3D(0, 1, 0));
-    private double previousRotation = 0;
 
     // This stuff only matters to the players boat object.
     private Group markIndicator;
@@ -106,7 +104,7 @@ public class BoatObject extends Group {
         markIndicator.getTransforms().clear();
         markIndicator.getTransforms().addAll(
             new Rotate(angle, new Point3D(0, 0, 1)),
-            new Translate(0, -radius, 0.3`),
+            new Translate(0, -radius, 0.1),
             new Scale(scale, scale, scale / 10)
         );
     }
@@ -121,14 +119,6 @@ public class BoatObject extends Group {
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
         rotationProperty.set(heading);
         rotation.setAngle(heading);
-//        if (heading == previousRotation) {
-//            tilt.setAngle(0);
-//        } else if (heading < previousRotation) {
-//            tilt.setAngle(-10);
-//        } else {
-//            tilt.setAngle(10);
-//        }
-//        previousRotation = heading;
         wake.getTransforms().setAll(new Rotate(heading, new Point3D(0,0,1)));
         if (sailsIn) {
             boatAssets.showSail();
@@ -170,7 +160,7 @@ public class BoatObject extends Group {
         torus.getAssets().getTransforms().addAll(
             new Rotate(90, new Point3D(1, 0, 0)),
             new Scale(0.7, 0.7, 0.7),
-            new Translate(0, 0.5, 0)
+            new Translate(0, 0.1, 0)
         );
 
         this.getChildren().add(torus.getAssets());
