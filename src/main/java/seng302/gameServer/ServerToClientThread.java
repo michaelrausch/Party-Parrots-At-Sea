@@ -203,6 +203,7 @@ public class ServerToClientThread implements Runnable {
                                     XMLParser.parseRace(document)
                                 );
                                 GameState.setMaxPlayers(XMLParser.getMaxPlayers(document));
+                                GameState.setTokensEnabled(XMLParser.tokensEnabled(document));
                                 break;
                             case REGATTA_XML:
                                 regattaXMLProperty.set(

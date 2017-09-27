@@ -95,6 +95,7 @@ public class ServerCreationController implements Initializable {
 
         mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
         mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
+        pickupsCheckBox.setSelected(true);
         //closeLabel.setOnMouseClicked(event -> notifyListeners());
     }
 

@@ -163,7 +163,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private void sendSetupMessages() {
         MessageFactory.updateBoats(new ArrayList<>(GameState.getYachts().values()));
-
         broadcastMessage(MessageFactory.getRaceXML());
         broadcastMessage(MessageFactory.getRegattaXML());
         broadcastMessage(MessageFactory.getBoatXML());

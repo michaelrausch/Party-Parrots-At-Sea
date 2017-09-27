@@ -5,14 +5,7 @@ import java.util.*;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.BoatAction;
-import seng302.gameServer.messages.BoatStatus;
-import seng302.gameServer.messages.ChatterMessage;
-import seng302.gameServer.messages.CustomizeRequestType;
-import seng302.gameServer.messages.MarkRoundingMessage;
-import seng302.gameServer.messages.MarkType;
-import seng302.gameServer.messages.Message;
-import seng302.gameServer.messages.RoundingBoatStatus;
+import seng302.gameServer.messages.*;
 import seng302.model.GeoPoint;
 import seng302.model.Limit;
 import seng302.model.Player;
@@ -97,6 +90,7 @@ public class GameState implements Runnable {
     private static List<NewMessageListener> newMessageListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
+    private static boolean tokensEnabled = false;
 
     public GameState() {
         windDirection = 180d;
@@ -253,8 +247,10 @@ public class GameState implements Runnable {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                spawnNewToken();
-                notifyMessageListeners(MessageFactory.getRaceXML());
+                if (tokensEnabled) {
+                    spawnNewToken();
+                    notifyMessageListeners(MessageFactory.getRaceXML());
+                }
             }
         }, 0, TOKEN_SPAWN_TIME);
     }
@@ -340,6 +336,7 @@ public class GameState implements Runnable {
 //        token.assignType(TokenType.RANDOM);
         logger.debug("Spawned token of type " + token.getTokenType());
         tokensInPlay.add(token);
+        MessageFactory.updateTokens(tokensInPlay);
     }
 
     /**
@@ -386,6 +383,8 @@ public class GameState implements Runnable {
         if (collidedToken != null) {
             tokensInPlay.remove(collidedToken);
             powerUpYacht(yacht, collidedToken);
+            MessageFactory.updateTokens(tokensInPlay);
+            notifyMessageListeners(MessageFactory.getRaceXML());
         }
 
         checkPowerUpTimeout(yacht);
@@ -1035,5 +1034,9 @@ public class GameState implements Runnable {
 
     public static double getServerSpeedMultiplier() {
         return serverSpeedMultiplier;
+    }
+
+    public static void setTokensEnabled (boolean tokensEnabled) {
+        GameState.tokensEnabled = tokensEnabled;
     }
 }

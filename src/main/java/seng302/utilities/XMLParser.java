@@ -201,11 +201,16 @@ public class XMLParser {
     public static Boolean tokensEnabled(Document doc) {
         Element docEle = doc.getDocumentElement();
         try {
-            Node tokenNode = docEle.getAttributeNode("Tokens");
-            return Boolean.valueOf(XMLParser.getNodeAttributeString(tokenNode, "Enabled"));
+            NamedNodeMap namedNodeMap = docEle.getElementsByTagName("Tokens").item(0).getAttributes();
+            Node node = namedNodeMap.getNamedItem("Enabled");
+            if (node != null) {
+                return Boolean.parseBoolean(node.getNodeValue());
+            }
         } catch (NullPointerException npe) {
+            npe.printStackTrace();
             return false;
         }
+        return false;
     }
 
     public static Integer getMaxPlayers(Document doc) {

@@ -24,11 +24,7 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import org.fxyz3d.scene.Skybox;
 import seng302.gameServer.messages.RoundingSide;
-import seng302.model.ClientYacht;
-import seng302.model.GameKeyBind;
-import seng302.model.KeyAction;
-import seng302.model.Limit;
-import seng302.model.ScaledPoint;
+import seng302.model.*;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -67,22 +63,10 @@ public class GameView3D extends GameView{
     private PerspectiveCamera topDownCam;
     private PerspectiveCamera chaseCam;
 
-    private double bufferSize = 0;
-    private double canvasWidth = 200;
-    private double canvasHeight = 200;
-    private boolean horizontalInversion = false;
-
-    private double distanceScaleFactor;
-    private ScaleDirection scaleDirection;
-    private GeoPoint minLatPoint, minLonPoint, maxLatPoint, maxLonPoint;
-    private double referencePointX, referencePointY;
-    private Group raceBorder = new Group();
-
     /* Note that if either of these is null then values for it have not been added and the other
        should be used as the limits of the map. */
     private Map<Mark, Marker3D> markerObjects;
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
-    private BoatObject selectedBoat = null;
     private Group wakesGroup = new Group();
     private Group boatObjectGroup = new Group();
     private List<Node> mapTokens;
@@ -90,11 +74,6 @@ public class GameView3D extends GameView{
     private Group trail = new Group();
     private Double windDir;
     private Skybox skybox;
-
-    private enum ScaleDirection {
-        HORIZONTAL,
-        VERTICAL
-    }
 
     public GameView3D () {
         isometricCam = new IsometricCamera(DEFAULT_CAMERA_X, DEFAULT_CAMERA_Y);
