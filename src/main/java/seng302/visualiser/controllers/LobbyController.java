@@ -9,10 +9,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
 import seng302.model.ClientYacht;
@@ -23,7 +24,7 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.utilities.Sounds;
-import seng302.visualiser.GameView;
+import seng302.visualiser.MapPreview;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
 
@@ -33,9 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 public class LobbyController implements Initializable {
+
+    private final double INITIAL_MAP_HEIGHT = 770d;
+    private final double INITIAL_MAP_WIDTH = 574d;
 
     //--------FXML BEGIN--------//
     @FXML
@@ -51,19 +54,21 @@ public class LobbyController implements Initializable {
     @FXML
     private Label mapName;
     @FXML
-    private Pane serverMap;
+    private AnchorPane serverMap;
+    @FXML
+    private Label roomLabel;
     //---------FXML END---------//
 
     private RaceState raceState;
     private JFXDialog customizationDialog;
     public Color playersColor;
     private Map<Integer, ClientYacht> playerBoats;
-    private Double mapWidth, mapHeight;
-    private GameView gameView;
+    private Double mapWidth = INITIAL_MAP_WIDTH, mapHeight = INITIAL_MAP_HEIGHT;
+    private MapPreview mapPreview;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        roomLabel.setText("");
         this.playerBoats = ViewManager.getInstance().getGameClient().getAllBoatsMap();
 
         if (this.playersColor == null) {
@@ -85,6 +90,21 @@ public class LobbyController implements Initializable {
         Platform.runLater(() -> {
             serverName.setText(ViewManager.getInstance().getProperty("serverName"));
             mapName.setText(ViewManager.getInstance().getProperty("mapName"));
+
+            int tries = 0;
+
+            while (DiscoveryServerClient.getRoomCode() == null && tries <= 10){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                tries ++;
+            }
+
+            if (DiscoveryServerClient.getRoomCode() != null){
+                setRoomCode(DiscoveryServerClient.getRoomCode());
+            }
 
             ViewManager.getInstance().getPlayerList().addListener((ListChangeListener<String>) c -> Platform.runLater(this::refreshPlayerList));
 
@@ -112,13 +132,13 @@ public class LobbyController implements Initializable {
 
     private JFXDialog createCustomizeDialog() {
         FXMLLoader dialog = new FXMLLoader(
-            getClass().getResource("/views/dialogs/BoatCustomizeDialog.fxml"));
+                getClass().getResource("/views/dialogs/BoatCustomizeDialog.fxml"));
 
         JFXDialog customizationDialog = null;
 
         try {
             customizationDialog = new JFXDialog(serverListMainStackPane, dialog.load(),
-                JFXDialog.DialogTransition.CENTER);
+                    JFXDialog.DialogTransition.CENTER);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -136,44 +156,30 @@ public class LobbyController implements Initializable {
         return customizationDialog;
     }
 
-    /**
-     *
-     */
-    private void refreshMapView(){
-        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
-        List<Limit> border = raceData.getCourseLimit();
-        List<CompoundMark> marks = new ArrayList<CompoundMark>(raceData.getCompoundMarks().values());
-        List<Corner> corners = raceData.getMarkSequence();
-
-        gameView.setSize(mapWidth, mapHeight);
-
-        // Update game view
-        gameView.updateBorder(border);
-        gameView.updateCourse(marks, corners);
-    }
 
     /**
      * Initializes a top down preview of the race course map.
      */
     private void initMapPreview() {
-        gameView = new GameView();
-        gameView.setHorizontalBuffer(330d);
+        RaceXMLData raceData = ViewManager.getInstance().getGameClient().getCourseData();
+        List<Limit> border = raceData.getCourseLimit();
+        List<CompoundMark> marks = new ArrayList<>(raceData.getCompoundMarks().values());
+        List<Corner> corners = raceData.getMarkSequence();
 
-        mapWidth = 770d;
-        mapHeight = 574d;
-
-        // Add game view
+        mapPreview = new MapPreview(marks, corners, border);
         serverMap.getChildren().clear();
-        serverMap.getChildren().add(gameView);
+        serverMap.getChildren().add(mapPreview.getAssets());
+
+        mapPreview.setSize(mapWidth, mapHeight);
 
         serverMap.widthProperty().addListener((observable, oldValue, newValue) -> {
             mapWidth = newValue.doubleValue();
-            refreshMapView();
+            mapPreview.setSize(mapWidth, mapHeight);
         });
-
+//
         serverMap.heightProperty().addListener((observable, oldValue, newValue) -> {
             mapHeight = newValue.doubleValue();
-            refreshMapView();
+            mapPreview.setSize(mapWidth, mapHeight);
         });
     }
 
@@ -244,5 +250,9 @@ public class LobbyController implements Initializable {
 
     public void closeCustomizationDialog() {
         customizationDialog.close();
+    }
+
+    public void setRoomCode(String roomCode) {
+        roomLabel.setText("Room: " + roomCode);
     }
 }

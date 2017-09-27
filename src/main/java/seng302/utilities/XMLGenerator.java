@@ -179,4 +179,8 @@ public class XMLGenerator {
     public RegattaXMLTemplate getRegatta() {
         return regatta;
     }
+
+    public RaceXMLTemplate getRace() {
+        return race;
+    }
 }

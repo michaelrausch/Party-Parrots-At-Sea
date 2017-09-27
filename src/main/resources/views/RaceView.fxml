@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
+<?import javafx.scene.shape.*?>
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import java.lang.String?>
@@ -15,11 +24,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<StackPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: skyblue;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.RaceViewController">
+    <children>
 <StackPane fx:id="contentStackPane" maxHeight="1.7976931348623157E308"
   maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0"
   prefWidth="1200.0" style="-fx-background-color: skyblue;" xmlns="http://javafx.com/javafx/8.0.111"
-  xmlns:fx="http://javafx.com/fxml/1"
-  fx:controller="seng302.visualiser.controllers.RaceViewController">
+  xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
           prefHeight="800.0" prefWidth="1200.0">
@@ -280,6 +290,12 @@
                 </GridPane>
             </children>
         </GridPane>
+    </children>
+</StackPane>
+        <AnchorPane fx:id="loadingScreenPane">
+            <ImageView fx:id="loadingScreen" fitHeight="672.0" fitWidth="1200.0" pickOnBounds="true" preserveRatio="true" />
+            <JFXSpinner layoutX="566.0" layoutY="692.0" radius="30.0" />
+        </AnchorPane>
     </children>
     <stylesheets>
         <String fx:value="/css/Master.css"/>

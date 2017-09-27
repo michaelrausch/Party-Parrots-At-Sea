@@ -30,6 +30,8 @@ public class BoatObject extends Group {
     private Color colour = Color.BLACK;
     private Boolean isSelected = false;
     private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
+//    private Rotate tilt = new Rotate(0, new Point3D(0, 1, 0));
+    private double previousRotation = 0;
 
     private ReadOnlyDoubleWrapper rotationProperty;
 
@@ -89,6 +91,14 @@ public class BoatObject extends Group {
     private void rotateTo(double heading, boolean sailsIn, double windDir) {
         rotationProperty.set(heading);
         rotation.setAngle(heading);
+//        if (heading == previousRotation) {
+//            tilt.setAngle(0);
+//        } else if (heading < previousRotation) {
+//            tilt.setAngle(-10);
+//        } else {
+//            tilt.setAngle(10);
+//        }
+//        previousRotation = heading;
         wake.getTransforms().setAll(new Rotate(heading, new Point3D(0,0,1)));
         if (sailsIn) {
             boatAssets.showSail();

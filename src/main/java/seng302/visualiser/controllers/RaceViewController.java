@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -20,6 +21,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.chart.LineChart;
@@ -33,6 +36,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -46,11 +50,14 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javax.swing.ImageIcon;
 import seng302.model.ClientYacht;
+import seng302.model.ClientYacht.PowerUpListener;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView3D;
@@ -62,6 +69,8 @@ import seng302.visualiser.controllers.dialogs.FinishDialogController;
 import seng302.visualiser.fxObjects.ChatHistory;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
+import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
 /**
  * Controller class that manages the display of a race
@@ -72,6 +81,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private static final Double ICON_BLINK_TIMEOUT_RATIO = 0.6;
     private static final Integer ICON_BLINK_PERIOD = 500;
 
+    @FXML
+    private AnchorPane loadingScreenPane;
+    @FXML
+    private ImageView loadingScreen;
     @FXML
     private Pane basePane;
     @FXML
@@ -106,7 +119,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private ComboBox<ClientYacht> yachtSelectionComboBox;
     @FXML
     private Text fpsDisplay;
-    //    @FXML
+//    @FXML
 //    private ImageView windImageView;
     @FXML
     private Label windDirectionLabel;
@@ -142,36 +155,30 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timer blinkingTimer = new Timer();
     private ImageView iconToDisplay;
 
+    private Double lastWindDirection;
+
     public void initialize() {
+        contentStackPane.setVisible(false);
+        Image loadingImage = new Image("PP.png");
+        loadingScreen.setImage(loadingImage);
+        //Centers the Image within the image view
+        double w = 0;
+        double h = 0;
+        double ratioX = loadingScreen.getFitWidth() / loadingImage.getWidth();
+        double ratioY = loadingScreen.getFitHeight() / loadingImage.getHeight();
+        double reduceRatio = 0;
+        if(ratioX >= ratioY) {
+            reduceRatio = ratioY;
+        } else {
+            reduceRatio = ratioX;
+        }
+        w = loadingImage.getWidth() * reduceRatio;
+        h = loadingImage.getHeight() * reduceRatio;
+        loadingScreen.setX((loadingScreen.getFitWidth() - w) / 2);
+        loadingScreen.setY((loadingScreen.getFitHeight() - h) / 2);
         Sounds.stopMusic();
         Sounds.playRaceMusic();
 
-        // Load a default important annotation state
-        //importantAnnotations = new ImportantAnnotationsState();
-
-        //Formatting the y axis of the sparkline
-//        raceSparkLine.getYAxis().setRotate(180);
-//        raceSparkLine.getYAxis().setTickLabelRotation(180);
-//        raceSparkLine.getYAxis().setTranslateX(-5);
-        //raceSparkLine.visibleProperty().setValue(false);
-        //raceSparkLine.getYAxis().setAutoRanging(false);
-        //sparklineYAxis.setTickMarkVisible(false);
-
-        //positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-//        raceSparkLine.visibleProperty().setValue(false);
-//        raceSparkLine.getYAxis().setAutoRanging(false);
-//        sparklineYAxis.setTickMarkVisible(false);
-//        positionVbox.getStylesheets().add(getClass().getResource("/css/master.css").toString());
-
-        //selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
-//        rvAnchorPane.prefWidthProperty().bind(ViewManager.getInstance().getDecorator().widthProperty());
-//        rvAnchorPane.prefHeightProperty().bind(ViewManager.getInstance().getDecorator().heightProperty());
-//        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
-//        windArrowHolder.getChildren().addAll(windArrow);
-//        windArrow.setLayoutX(windArrowHolder.getWidth() / 2);
-//        windArrow.setLayoutY(windArrowHolder.getHeight() / 2);
-
-//        selectAnnotationBtn.setOnAction(event -> loadSelectAnnotationView());
         chatInput.lengthProperty().addListener((obs, oldLen, newLen) -> {
             if (newLen.intValue() > CHAT_LIMIT) {
                 chatInput.setText(chatInput.getText().substring(0, CHAT_LIMIT));
@@ -185,28 +192,21 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         chatHistory.prefHeightProperty().bind(
             chatHistoryHolder.heightProperty()
         );
-//        chatHistory.setFitToWidth(true);
-//        chatHistory.setFitToHeight(true);
-//        chatHistory.textProperty().addListener((obs, oldValue, newValue) -> {
-//            chatHistory.setScrollTop(Double.MAX_VALUE);
-//        });
 
         contentStackPane.setOnMouseClicked(event -> {
             contentStackPane.requestFocus();
         });
-
+        Platform.runLater(contentStackPane::requestFocus);
         //Makes the chat history non transparent when clicked on
-        chatInput.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
-                Boolean newValue) {
-                if (newValue) {
-                    chatHistory.increaseOpacity();
-                } else {
-                    chatHistory.decreaseOpacity();
-                }
+        chatInput.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                chatHistory.increaseOpacity();
+            } else {
+                chatHistory.decreaseOpacity();
             }
         });
+
+        lastWindDirection = 0d;
 
         initialiseWindArrow();
     }
@@ -232,6 +232,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
         raceState.setRaceStarted(false);
         createFinishDialog(finishedBoats);
+    }
+
+    public void showView(){
+        loadingScreenPane.setVisible(false);
+        contentStackPane.setVisible(true);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                contentStackPane.requestFocus();
+            }
+        });
     }
 
     /**
@@ -269,7 +281,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             while (c.next()) {
                 if (c.wasPermutated()) {
                     updateOrder(raceState.getPlayerPositions());
-                    updateSparkLine();
                 }
             }
         });
@@ -279,7 +290,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView3D();
-//        gameView.setFrameRateFXText(fpsDisplay);
         Platform.runLater(() -> {
             contentStackPane.getChildren().add(0, gameView.getAssets());
             ((SubScene) gameView.getAssets()).widthProperty()
@@ -293,11 +303,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         gameView.updateCourse(
             new ArrayList<>(raceData.getCompoundMarks().values()), raceData.getMarkSequence()
         );
-//        gameView.enableZoom();
         gameView.setBoatAsPlayer(player);
-//        gameView.startRace();
 
 //        raceState.addCollisionListener(gameView::drawCollision);
+
         raceState.windDirectionProperty().addListener((obs, oldDirection, newDirection) -> {
             gameView.setWindDir(newDirection.doubleValue());
             Platform.runLater(() -> updateWindDirection(newDirection.doubleValue()));
@@ -310,9 +319,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             updateWindSpeed(raceState.getWindSpeed());
         });
         gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
-        Platform.runLater(() -> {
-            initializeUpdateTimer();
-        });
+        Platform.runLater(this::initializeUpdateTimer);
     }
 
     /**
@@ -415,137 +422,6 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         }
     }
 
-    private void initialiseFPSCheckBox() {
-//        toggleFps.selectedProperty().addListener((obs, oldVal, newVal) ->
-//            gameView.setFPSVisibility(toggleFps.isSelected())
-//        );
-    }
-
-    private void initialiseAnnotationSlider() {
-//        annotationSlider.setLabelFormatter(new StringConverter<Double>() {
-//            @Override
-//            public String toString(Double n) {
-//                if (n == 0) {
-//                    return "None";
-//                }
-//                if (n == 1) {
-//                    return "Important";
-//                }
-//                if (n == 2) {
-//                    return "All";
-//                }
-//                return "All";
-//            }
-//
-//            @Override
-//            public Double fromString(String s) {
-//                switch (s) {
-//                    case "None":
-//                        return 0d;
-//                    case "Important":
-//                        return 1d;
-//                    case "All":
-//                        return 2d;
-//
-//                    default:
-//                        return 2d;
-//                }
-//            }
-//        });
-//        annotationSlider.setValue(2);
-//        annotationSlider.valueProperty().addListener((obs, oldVal, newVal) ->
-//            setAnnotations((int) annotationSlider.getValue())
-//        );
-    }
-
-
-    /**
-     * Used to add any new yachts into the race that may have started late or not have had data received yet
-     */
-    private void updateSparkLine(){
-//        // TODO: 2/08/17 there is about 0 chance of this working. Once we are keeping track of boat positions it can be fixed.
-//        // Collect the racing yachts that aren't already in the chart
-//        sparkLineData.clear();
-//        List<ClientYacht> sparkLineCandidates = new ArrayList<>(participants.values());
-//        // Create a new data series for new yachts
-//        sparkLineCandidates
-//            .stream()
-//            .filter(yacht -> yacht.getPosition() != null)
-//            .forEach(yacht -> {
-//                Series<String, Double> yachtData = new Series<>();
-//                yachtData.setName(yacht.getSourceId().toString());
-//                yachtData.getData().add(
-//                    new Data<>(
-//                        Integer.toString(yacht.getLegNumber()),
-//                        1.0 + participants.size() - yacht.getPosition()
-//                    )
-//                );
-//            sparkLineData.add(yachtData);
-//            });
-//
-//        // Lambda function to sort the series in order of leg (later legs shown more to the right)
-//        sparkLineData.sort((o1, o2) -> {
-//            Integer leg1 =  Integer.parseInt(o1.getData().get(o1.getData().size()-1).getXValue());
-//            Integer leg2 =  Integer.parseInt(o2.getData().get(o2.getData().size()-1).getXValue());
-//            if (leg2 < leg1){
-//                return 1;
-//            } else {
-//                return -1;
-//            }
-//        });
-//
-//        // Adds the new data series to the sparkline (and set the colour of the series)
-//        Platform.runLater(() -> {
-//            sparkLineData
-//                .stream()
-//                .filter(spark -> !raceSparkLine.getData().contains(spark))
-//                .forEach(spark -> {
-//                    raceSparkLine.getData().add(spark);
-//                    spark.getNode().lookup(".chart-series-line").setStyle("-fx-stroke:" + getBoatColorAsRGB(spark.getName()));
-//                });
-//        });
-    }
-
-    private void initialiseSparkLine() {
-//        sparklineYAxis.setUpperBound(participants.size() + 1);
-//        raceSparkLine.setCreateSymbols(false);
-    }
-
-    /**
-     * Updates the yachts sparkline of the desired yacht and using the new leg number
-     * @param yacht The yacht to be updated on the sparkline
-     * @param legNumber the leg number that the position will be assigned to
-     */
-    void updateYachtPositionSparkline(ClientYacht yacht, Integer legNumber){
-        for (XYChart.Series<String, Double> positionData : sparkLineData) {
-            positionData.getData().add(
-                new Data<>(
-                    Integer.toString(legNumber),
-                    1.0 + participants.size() - yacht.getPlacing()
-                )
-            );
-        }
-    }
-
-
-    /**
-     * gets the rgb string of the yachts colour to use for the chart via css
-     * @param yachtId id of yacht passed in to get the yachts colour
-     * @return the colour as an rgb string
-     */
-    private String getBoatColorAsRGB(String yachtId){
-        Color color = participants.get(Integer.valueOf(yachtId)).getColour();
-        if (color == null){
-            return String.format("#%02X%02X%02X",255,255,255);
-        }
-        return String.format( "#%02X%02X%02X",
-            (int)( color.getRed() * 255 ),
-            (int)( color.getGreen() * 255 ),
-            (int)( color.getBlue() * 255 )
-        );
-    }
-
-
     /**
      * Initialises a timer which updates elements of the RaceView such as wind direction, yacht
      * orderings etc.. which are dependent on the info from the stream parser constantly.
@@ -598,6 +474,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     private void updateWindDirection(double direction) {
         windDirectionLabel.setText(String.format("%.1f°", direction));
+//        RotateTransition rt = new RotateTransition(Duration.millis(300), windImageView);
+//        rt.setByAngle(direction - lastWindDirection);
+//        rt.setCycleCount(3);
+//        rt.setAutoReverse(true);
+//        rt.play();
+//        lastWindDirection = direction;
 //        windImageView.setRotate(direction);
     }
 

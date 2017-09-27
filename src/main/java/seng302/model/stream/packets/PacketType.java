@@ -20,7 +20,9 @@ public enum PacketType {
     RACE_REGISTRATION_REQUEST,
     RACE_REGISTRATION_RESPONSE,
     RACE_CUSTOMIZATION_REQUEST,
-    RACE_CUSTOMIZATION_RESPONSE;
+    RACE_CUSTOMIZATION_RESPONSE,
+
+    SERVER_REGISTRATION, ROOM_CODE_REQUEST, LOBBY_REQUEST;
 
     public static PacketType assignPacketType(int packetType, byte[] payload){
         switch(packetType){
@@ -65,6 +67,10 @@ public enum PacketType {
                 return RACE_CUSTOMIZATION_REQUEST;
             case 104:
                 return RACE_CUSTOMIZATION_RESPONSE;
+            case 201:
+                return SERVER_REGISTRATION;
+            case 202:
+                return ROOM_CODE_REQUEST;
             default:
         }
         return OTHER;

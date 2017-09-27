@@ -1,6 +1,8 @@
 package seng302.gameServer;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,12 +12,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import javafx.scene.paint.Color;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 import seng302.gameServer.messages.BoatAction;
 import seng302.gameServer.messages.BoatStatus;
 import seng302.gameServer.messages.ChatterMessage;
@@ -32,11 +30,11 @@ import seng302.model.ServerYacht;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.mark.MarkOrder;
+import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.RandomSpawn;
-import seng302.utilities.XMLParser;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
 
 /**
@@ -93,12 +91,11 @@ public class GameState implements Runnable {
     private static String hostIpAddress;
     private static List<Player> players;
     private static Map<Integer, ServerYacht> yachts;
-    private static Boolean isRaceStarted;
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
-    private static List<Mark> marks;
-    private static List<Limit> courseLimit;
+    private static Set<Mark> marks = new HashSet<>();
+    private static List<Limit> courseLimit = new ArrayList<>();
     private static Integer maxPlayers = 8;
 
     private static List<Token> tokensInPlay;
@@ -107,47 +104,33 @@ public class GameState implements Runnable {
     private static List<NewMessageListener> newMessageListeners;
 
     private static Map<Player, String> playerStringMap = new HashMap<>();
+    private static boolean tokensEnabled = false;
 
-    public GameState(String hostIpAddress) {
+    public GameState() {
         windDirection = 180d;
         windSpeed = 10000d;
         yachts = new HashMap<>();
         tokensInPlay = new ArrayList<>();
         players = new ArrayList<>();
-        GameState.hostIpAddress = hostIpAddress;
         customizationFlag = false;
         playerHasLeftFlag = false;
         serverSpeedMultiplier = 1.0;
         currentStage = GameStages.LOBBYING;
-        isRaceStarted = false;
         previousUpdateTime = System.currentTimeMillis();
-        markOrder = new MarkOrder(); //This could be instantiated at some point with a select map?
         newMessageListeners = new ArrayList<>();
-        marks = new MarkOrder().getAllMarks();
-        randomSpawn = new RandomSpawn(markOrder.getOrderedUniqueCompoundMarks());
 
         resetStartTime();
-        setCourseLimit("/server_config/race.xml");
+        //setCourseLimit("/server_config/race.xml");
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
     }
 
-    private void setCourseLimit(String url) {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        DocumentBuilder documentBuilder;
-        Document document = null;
-        try {
-            documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            document = documentBuilder.parse(new InputSource(getClass().getResourceAsStream(url)));
-        } catch (Exception e) {
-            // sorry, we have to catch general one, otherwise we have to catch five different exceptions.
-            logger.trace("Failed to load course limit for boundary collision detection.", e);
+    public static void setRace(RaceXMLData raceXMLData) {
+        markOrder = new MarkOrder(raceXMLData);
+        for (CompoundMark compoundMark : raceXMLData.getCompoundMarks().values()){
+            marks.addAll(compoundMark.getMarks());
         }
-        courseLimit = XMLParser.parseRace(document).getCourseLimit();
-    }
-
-    public static String getHostIpAddress() {
-        return hostIpAddress;
+        randomSpawn = new RandomSpawn(markOrder.getOrderedUniqueCompoundMarks());
+        courseLimit = raceXMLData.getCourseLimit();
     }
 
     public static List<Player> getPlayers() {
@@ -156,6 +139,10 @@ public class GameState implements Runnable {
 
     public static List<Token> getTokensInPlay() {
         return tokensInPlay;
+    }
+
+    public static Set<Mark> getMarks() {
+        return Collections.unmodifiableSet(marks);
     }
 
     public static void addPlayer(Player player) {
@@ -176,10 +163,6 @@ public class GameState implements Runnable {
 
     public static void removeYacht(Integer yachtId) {
         yachts.remove(yachtId);
-    }
-
-    public static Boolean getIsRaceStarted() {
-        return isRaceStarted;
     }
 
     public static GameStages getCurrentStage() {
@@ -272,8 +255,10 @@ public class GameState implements Runnable {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                spawnNewToken();
-                notifyMessageListeners(MessageFactory.getRaceXML());
+                if (tokensEnabled) {
+                    spawnNewToken();
+                    notifyMessageListeners(MessageFactory.getRaceXML());
+                }
             }
         }, 0, TOKEN_SPAWN_TIME);
     }
@@ -356,9 +341,10 @@ public class GameState implements Runnable {
     private void spawnNewToken() {
         tokensInPlay.clear();
         Token token = randomSpawn.getRandomToken();
-//        token.assignType(TokenType.RANDOM);
+//        token.assignType(TokenType.WIND_WALKER);
         logger.debug("Spawned token of type " + token.getTokenType());
         tokensInPlay.add(token);
+        MessageFactory.updateTokens(tokensInPlay);
     }
 
     /**
@@ -405,6 +391,8 @@ public class GameState implements Runnable {
         if (collidedToken != null) {
             tokensInPlay.remove(collidedToken);
             powerUpYacht(yacht, collidedToken);
+            MessageFactory.updateTokens(tokensInPlay);
+            notifyMessageListeners(MessageFactory.getRaceXML());
         }
 
         checkPowerUpTimeout(yacht);
@@ -537,6 +525,7 @@ public class GameState implements Runnable {
                 return true;
             }
         }
+
         if (GeoUtility.checkCrossedLine(courseLimit.get(courseLimit.size() - 1), courseLimit.get(0),
             yacht.getLastLocation(), yacht.getLocation()) != 0) {
             return true;
@@ -736,6 +725,10 @@ public class GameState implements Runnable {
      * @param yacht The current yacht to check for
      */
     private Boolean checkStartLineCrossing(ServerYacht yacht) {
+        long timeTillStart = System.currentTimeMillis() - this.getStartTime();
+        if (timeTillStart < 0){
+            return false;
+        }
         Integer currentMarkSeqID = yacht.getCurrentMarkSeqID();
         CompoundMark currentMark = markOrder.getCurrentMark(currentMarkSeqID);
         GeoPoint lastLocation = yacht.getLastLocation();
@@ -1045,6 +1038,12 @@ public class GameState implements Runnable {
 
     public static void setMaxPlayers(Integer newMax){
         maxPlayers = newMax;
+
+        try {
+            ServerAdvertiser.getInstance().setCapacity(newMax);
+        } catch (IOException e) {
+            logger.warn("Couldn't update max players");
+        }
     }
 
     public static void endRace () {
@@ -1054,5 +1053,9 @@ public class GameState implements Runnable {
 
     public static double getServerSpeedMultiplier() {
         return serverSpeedMultiplier;
+    }
+
+    public static void setTokensEnabled (boolean tokensEnabled) {
+        GameState.tokensEnabled = tokensEnabled;
     }
 }
