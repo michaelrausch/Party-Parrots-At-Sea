@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -43,6 +44,7 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
@@ -140,6 +142,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Timer blinkingTimer = new Timer();
     private ImageView iconToDisplay;
 
+    private Double lastWindDirection;
+
     public void initialize() {
         contentStackPane.setVisible(false);
         Image loadingImage = new Image("PP.png");
@@ -188,6 +192,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 chatHistory.decreaseOpacity();
             }
         });
+
+        lastWindDirection = 0d;
     }
 
     public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
@@ -435,7 +441,13 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      */
     private void updateWindDirection(double direction) {
         windDirectionLabel.setText(String.format("%.1f°", direction));
-        windImageView.setRotate(direction);
+        RotateTransition rt = new RotateTransition(Duration.millis(300), windImageView);
+        rt.setByAngle(direction - lastWindDirection);
+        rt.setCycleCount(3);
+        rt.setAutoReverse(true);
+        rt.play();
+        lastWindDirection = direction;
+//        windImageView.setRotate(direction);
     }
 
     /**

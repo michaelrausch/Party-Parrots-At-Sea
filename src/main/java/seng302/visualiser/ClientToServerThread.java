@@ -1,5 +1,6 @@
 package seng302.visualiser;
 
+import javafx.application.Platform;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -44,6 +50,8 @@ import seng302.visualiser.controllers.ViewManager;
  * its own thread.
  */
 public class ClientToServerThread implements Runnable {
+
+    private boolean isStarted = false;
 
     /**
      * Functional interface for receiving packets from client socket.
@@ -120,6 +128,8 @@ public class ClientToServerThread implements Runnable {
      * variable is false.
      */
     public void run() {
+        isStarted = true;
+
         int sync1;
         int sync2;
         // TODO: 14/07/17 wmu16 - Work out how to fix this while loop
@@ -170,8 +180,10 @@ public class ClientToServerThread implements Runnable {
         notifyDisconnectListeners("Connection to server was terminated");
         closeSocket();
 
-        ViewManager.getInstance().goToStartView();
-        ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
+        Platform.runLater(() -> {
+            ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
+            ViewManager.getInstance().goToStartView();
+        });
     }
 
     public void sendCustomizationRequest(CustomizeRequestType reqType, byte[] payload) {
@@ -196,12 +208,6 @@ public class ClientToServerThread implements Runnable {
     private void handleConnectionError(String message){
         if (connectionErrorListener != null){
             connectionErrorListener.notifyConnectionError(message);
-        }
-
-        try {
-            this.socket.close();
-        } catch (IOException e) {
-            logger.error("Couldn't close socket");
         }
     }
 
@@ -393,9 +399,9 @@ public class ClientToServerThread implements Runnable {
         }
         if (currentByte == -1) {
             notifyDisconnectListeners("Cannot read from server.");
-            closeSocket();
             logger.warn("InputStream reach end of stream", 1);
             handleConnectionError("Could not connect to server. Server is no longer available.");
+            closeSocket();
         }
         return currentByte;
     }
@@ -437,5 +443,9 @@ public class ClientToServerThread implements Runnable {
                 race, XMLMessageSubType.RACE, race.length()
             ).getBuffer()
         );
+    }
+
+    public boolean hasStarted() {
+        return isStarted;
     }
 }
