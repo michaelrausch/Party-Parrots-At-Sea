@@ -50,6 +50,15 @@ public class DirectConnectController implements Initializable {
      */
     private void connectToServer() {
         //TODO fix port number validation
+
+        try{
+            Integer.parseInt(portNumber.getText());
+        }
+        catch (NumberFormatException e){
+            ViewManager.getInstance().showErrorSnackBar("You need to enter a valid port number");
+            return;
+        }
+
         ViewManager.getInstance().getGameClient()
                 .runAsClient(serverAddress.getText(), Integer.parseInt(portNumber.getText()));
     }

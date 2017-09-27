@@ -272,6 +272,8 @@ public class ViewManager {
     }
 
     private void closeAll() {
+        if (stage!= null) stage.close();
+
         try {
             ServerAdvertiser.getInstance().unregister();
         } catch (IOException e1) {

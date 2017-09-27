@@ -119,11 +119,21 @@ public class GameClient {
             ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
             ViewManager.getInstance().setProperty("mapName", regattaData.getCourseName());
 
+            getServerThread().setConnectionErrorListener((eMessage) -> {
+                ViewManager.getInstance().showErrorSnackBar(eMessage);
+                destroyClientToServerThread();
+            });
+
             this.lobbyController = ViewManager.getInstance().goToLobby(true);
 
         } catch (IOException ioe) {
-            ViewManager.getInstance().showErrorSnackBar("Unable to find server");
+            ViewManager.getInstance().showErrorSnackBar("There are no servers currently available.");
         }
+    }
+
+    private void destroyClientToServerThread() {
+        socketThread.closeSocket();
+        socketThread = null;
     }
 
     /**
@@ -224,7 +234,6 @@ public class GameClient {
                     break;
 
                 case RACE_XML:
-                    System.out.println("HEY I GOT A RACE MANG AND I AM CLIENT " + ((Boolean) (server==null)).toString());
                     RaceXMLData raceXMLData = XMLParser.parseRace(
                         StreamParser.extractXmlMessage(packet)
                     );

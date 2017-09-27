@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javafx.scene.Node;
 import javafx.util.Pair;
@@ -34,6 +35,8 @@ public class MapMaker {
     private int index = 0;
     private XMLGenerator xmlGenerator = new XMLGenerator();
 
+    private List<String> maps = new ArrayList<>(Arrays.asList("default.xml", "horseshoe.xml"));
+
     public static MapMaker getInstance() {
         if (instance == null) {
             instance = new MapMaker();
@@ -42,46 +45,49 @@ public class MapMaker {
     }
 
     private MapMaker() {
-        File dir = new File(MapMaker.class.getResource("/maps/").getPath());
-        File[] directoryListing = dir.listFiles();
-        if (directoryListing != null) {
-            for (File child : directoryListing) {
-                Pair<RegattaXMLTemplate, RaceXMLTemplate> regattaRace = XMLParser.parseRaceDef(
-                    child.getAbsolutePath(), "", 1, null, false
-                );
-                filePaths.add(child.getAbsolutePath());
-                RegattaXMLTemplate regattaTemplate = regattaRace.getKey();
-                regattas.add(new RegattaXMLData(
+        for (String mapPath : maps){
+            String path = ("/maps/" + mapPath);
+
+            Pair<RegattaXMLTemplate, RaceXMLTemplate> regattaRace = XMLParser.parseRaceDef(
+                    path, "", 1, null, false
+            );
+
+            RegattaXMLTemplate regattaTemplate = regattaRace.getKey();
+
+            filePaths.add(path);
+
+            regattas.add(new RegattaXMLData(
                     regattaTemplate.getRegattaId(),
                     regattaTemplate.getName(),
                     regattaTemplate.getCourseName(),
                     regattaTemplate.getLatitude(),
                     regattaTemplate.getLongitude(),
                     regattaTemplate.getUtcOffset()
-                ));
+            ));
 
-                RaceXMLTemplate raceTemplate = regattaRace.getValue();
-                xmlGenerator.setRaceTemplate(raceTemplate);
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                DocumentBuilder db;
-                Document doc = null;
-                try {
-                    db = dbf.newDocumentBuilder();
-                    doc = db.parse(new InputSource(new StringReader(xmlGenerator.getRaceAsXml())));
-                } catch (ParserConfigurationException | IOException | SAXException e) {
-                    e.printStackTrace();
-                }
+            RaceXMLTemplate raceTemplate = regattaRace.getValue();
+            xmlGenerator.setRaceTemplate(raceTemplate);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db;
+            Document doc = null;
+            try {
+                db = dbf.newDocumentBuilder();
+                doc = db.parse(new InputSource(new StringReader(xmlGenerator.getRaceAsXml())));
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                e.printStackTrace();
+            }
 
-                RaceXMLData race = XMLParser.parseRace(doc);
-                maxPlayers.add(XMLParser.getMaxPlayers(doc));
+            RaceXMLData race = XMLParser.parseRace(doc);
+            maxPlayers.add(XMLParser.getMaxPlayers(doc));
 
-                mapPreviews.add(new MapPreview(
+            mapPreviews.add(new MapPreview(
                     new ArrayList<>(race.getCompoundMarks().values()),
                     race.getMarkSequence(), race.getCourseLimit()
-                ));
-                races.add(race);
-            }
+            ));
+
+            races.add(race);
         }
+
     }
 
     public void next() {

@@ -1,5 +1,7 @@
 package seng302.gameServer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.discoveryServer.util.ServerListing;
 
@@ -38,6 +40,7 @@ public class ServerAdvertiser {
     private DiscoveryServerClient repositoryClient;
 
     private Hashtable<String ,String> props;
+    private Logger logger = LoggerFactory.getLogger(ServerAdvertiser.class);
 
     private ServerAdvertiser() throws IOException{
         jmdnsInstance = JmDNS.create(InetAddress.getByName(getLocalHostIp()));
@@ -128,7 +131,7 @@ public class ServerAdvertiser {
                     try {
                         jmdnsInstance.registerService(serviceInfo);
                     } catch (IOException e) {
-                        System.out.println("Failed");
+                        logger.warn("Failed to register service info");
                     }
                 }
             }, 0);

@@ -57,6 +57,11 @@ public class ClientToServerThread implements Runnable {
         void notifyDisconnection(String message);
     }
 
+    @FunctionalInterface
+    public interface ConnectionErrorListener {
+        void notifyConnectionError(String message);
+    }
+
     private class ByteReadException extends Exception {
         private ByteReadException(String message) {
             super(message);
@@ -66,6 +71,7 @@ public class ClientToServerThread implements Runnable {
     private Queue<StreamPacket> streamPackets = new ConcurrentLinkedQueue<>();
     private List<ClientSocketListener> listeners = new ArrayList<>();
     private List<DisconnectedFromHostListener> disconnectionListeners = new ArrayList<>();
+    private ConnectionErrorListener connectionErrorListener = null;
     private Thread thread;
 
     private Socket socket;
@@ -183,6 +189,18 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
+    private void handleConnectionError(String message){
+        if (connectionErrorListener != null){
+            connectionErrorListener.notifyConnectionError(message);
+        }
+
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            logger.error("Couldn't close socket");
+        }
+    }
+
     /**
      * Sends a request to the server asking for a source ID
      */
@@ -212,6 +230,7 @@ public class ClientToServerThread implements Runnable {
             return;
         }
 
+
         logger.error("Server Denied Connection, Exiting");
 
         final String alertErrorText;
@@ -222,6 +241,7 @@ public class ClientToServerThread implements Runnable {
         else{
             alertErrorText = "Could not connect to server";
         }
+        handleConnectionError("Server no longer available.");
         notifyDisconnectListeners(alertErrorText);
         closeSocket();
     }
@@ -351,6 +371,12 @@ public class ClientToServerThread implements Runnable {
         }
     }
 
+    public void setConnectionErrorListener(ConnectionErrorListener listener){
+        synchronized (this){
+            connectionErrorListener = listener;
+        }
+    }
+
     private int readByte() throws ByteReadException {
         int currentByte = -1;
         try {
@@ -365,6 +391,7 @@ public class ClientToServerThread implements Runnable {
             notifyDisconnectListeners("Cannot read from server.");
             closeSocket();
             logger.warn("InputStream reach end of stream", 1);
+            handleConnectionError("Could not connect to server. Server is no longer available.");
         }
         return currentByte;
     }

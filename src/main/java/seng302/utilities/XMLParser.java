@@ -1,6 +1,7 @@
 package seng302.utilities;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -380,7 +381,7 @@ public class XMLParser {
     /**
      * This ungodly combination of existing methods and code blocks parses a race definition file.
      * Look upon it and despair.
-     * @param url the location of the race def file
+     * @param url The input file path
      * @param serverName the name of the server
      * @param repetitions the repetitions of a segment of the race def file.
      * @param maxPlayers max number of players. uses the default race max if null or greater than the actual max.
@@ -388,14 +389,14 @@ public class XMLParser {
      * @return a pair which contains regatta string, race string as key, value pair.
      */
     public static Pair<RegattaXMLTemplate, RaceXMLTemplate> parseRaceDef(
-        String url, String serverName, Integer repetitions, Integer maxPlayers, Boolean tokensEnabled
+            String url, String serverName, Integer repetitions, Integer maxPlayers, Boolean tokensEnabled
     ) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db;
         Document doc = null;
         try {
             db = dbf.newDocumentBuilder();
-            doc = db.parse(url);
+            doc = db.parse(XMLParser.class.getResourceAsStream(url));
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
