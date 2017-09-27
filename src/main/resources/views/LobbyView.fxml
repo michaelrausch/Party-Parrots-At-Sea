@@ -110,7 +110,8 @@
                         <Insets bottom="15.0" left="7.0" right="7.0" top="15.0" />
                      </GridPane.margin>
                         </AnchorPane>
-                        <GridPane prefHeight="370.0" prefWidth="189.0" vgap="5.0">
+                        <GridPane prefHeight="370.0" prefWidth="189.0" styleClass="tokenGridView"
+                          vgap="5.0">
                             <children>
                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Tokens"
                                   GridPane.halignment="CENTER">
@@ -131,8 +132,7 @@
                                             </padding>
                                         </Label>
                                         <Pane fx:id="speedTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" style="-fx-border-color: black;"
-                                          styleClass="tokenView"/>
+                                          prefWidth="200.0" styleClass="tokenView"/>
                                     </children>
                                 </StackPane>
                                 <StackPane prefHeight="150.0" prefWidth="200.0"
@@ -148,8 +148,7 @@
                                             </padding>
                                         </Label>
                                         <Pane fx:id="handlingTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" style="-fx-border-color: black;"
-                                          styleClass="tokenView"/>
+                                          prefWidth="200.0" styleClass="tokenView"/>
                                     </children>
                                 </StackPane>
                                 <StackPane prefHeight="150.0" prefWidth="200.0"
@@ -165,8 +164,7 @@
                                             </padding>
                                         </Label>
                                         <Pane fx:id="windWalkerTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" style="-fx-border-color: black;"
-                                          styleClass="tokenView"/>
+                                          prefWidth="200.0" styleClass="tokenView"/>
                                     </children>
                                 </StackPane>
                                 <StackPane prefHeight="150.0" prefWidth="200.0"
@@ -182,8 +180,7 @@
                                             </padding>
                                         </Label>
                                         <Pane fx:id="bumperTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" style="-fx-border-color: black;"
-                                          styleClass="tokenView"/>
+                                          prefWidth="200.0" styleClass="tokenView"/>
                                     </children>
                                 </StackPane>
                                 <StackPane prefHeight="150.0" prefWidth="200.0"
@@ -199,8 +196,7 @@
                                             </padding>
                                         </Label>
                                         <Pane fx:id="randomTokenPane" prefHeight="999.0"
-                                          prefWidth="60.0" style="-fx-border-color: black;"
-                                          styleClass="tokenView"/>
+                                          prefWidth="60.0" styleClass="tokenView"/>
                                     </children>
                                 </StackPane>
                             </children>
