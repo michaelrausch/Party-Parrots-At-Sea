@@ -7,7 +7,6 @@ import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
-import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
@@ -118,17 +117,25 @@ public class ModelFactory {
         Group boatAssets = new Group();
         MeshView hull = importSTL(boatType.hullFile);
         hull.setMaterial(new PhongMaterial(primaryColour));
-        MeshView mast = importSTL(boatType.mastFile);
-        mast.setMaterial(new PhongMaterial(primaryColour));
         MeshView sail = importSTL(boatType.sailFile);
-        sail.setMaterial(new PhongMaterial(Color.WHITE));
+        sail.setMaterial(
+            new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.BLACK : Color.WHITE)
+        );
+
+        boatAssets.getChildren().addAll(hull, sail);
+
+        if (boatType.mastFile != null) {
+            MeshView mast = importSTL(boatType.mastFile);
+            mast.setMaterial(new PhongMaterial(primaryColour));
+            boatAssets.getChildren().add(mast);
+        }
 
         if (boatType.jibFile != null) {
             MeshView jib = importSTL(boatType.jibFile);
-            sail.setMaterial(new PhongMaterial(Color.WHITE));
-            boatAssets.getChildren().addAll(hull, mast, sail, jib);
-        } else {
-            boatAssets.getChildren().addAll(hull, mast, sail);
+            sail.setMaterial(
+                new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.DARKGRAY : Color.WHITE)
+            );
+            boatAssets.getChildren().add(jib);
         }
 
         return boatAssets;

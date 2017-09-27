@@ -341,7 +341,7 @@ public class GameState implements Runnable {
     private void spawnNewToken() {
         tokensInPlay.clear();
         Token token = randomSpawn.getRandomToken();
-//        token.assignType(TokenType.RANDOM);
+//        token.assignType(TokenType.WIND_WALKER);
         logger.debug("Spawned token of type " + token.getTokenType());
         tokensInPlay.add(token);
         MessageFactory.updateTokens(tokensInPlay);
