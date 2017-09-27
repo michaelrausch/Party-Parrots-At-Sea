@@ -40,6 +40,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private boolean terminated;
 
     private Thread thread;
+    private boolean hasStarted = false;
 
     private ServerSocket serverSocket = null;
     private ArrayList<ServerToClientThread> serverToClientThreads = new ArrayList<>();
@@ -98,6 +99,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         new HeartbeatThread(this);
         new ServerListenThread(serverSocket, this);
 
+        hasStarted = true;
+
         //You should handle interrupts in some way, so that the thread won't keep on forever if you exit the app.
         while (!terminated) {
             if (GameState.getPlayerHasLeftFlag()) {
@@ -146,8 +149,10 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             }
         }
         try {
-            for (ServerToClientThread serverToClientThread : serverToClientThreads) {
-                serverToClientThread.terminate();
+            synchronized (this){
+                for (ServerToClientThread serverToClientThread : serverToClientThreads) {
+                    serverToClientThread.terminate();
+                }
             }
             serverSocket.close();
         } catch (IOException e) {
@@ -449,5 +454,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 startingPoint, angleToStart, DISTANCE_TO_START
             );
         }
+    }
+
+    public boolean hasStarted() {
+        return hasStarted;
     }
 }

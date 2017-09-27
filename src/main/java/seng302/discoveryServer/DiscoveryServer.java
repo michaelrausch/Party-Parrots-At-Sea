@@ -11,11 +11,13 @@ import seng302.discoveryServer.util.ServerRepoStreamParser;
 import seng302.discoveryServer.util.ServerTable;
 import seng302.visualiser.ServerListener;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
 
 public class DiscoveryServer {
     public static final String ANSI_GREEN = "\u001B[32m";
@@ -27,6 +29,7 @@ public class DiscoveryServer {
 
     private ServerTable serverTable;
     public static final Integer PORT_NUMBER = 9969;
+    private ServerSocket serverSocket;
 
     private final Logger logger = LoggerFactory.getLogger(DiscoveryServer.class);
 
@@ -56,8 +59,6 @@ public class DiscoveryServer {
         displayHeader();
         serverTable = new ServerTable();
 
-        ServerSocket serverSocket;
-
         try{
             serverSocket = new ServerSocket(PORT_NUMBER);
         }
@@ -69,12 +70,17 @@ public class DiscoveryServer {
 
         logger.info("Started successfully - Now accepting connections");
 
-        while (true){
-            Socket clientSocket = serverSocket.accept();
+        try{
+            while (true){
+                Socket clientSocket = serverSocket.accept();
 
-            parseRequest(clientSocket);
+                parseRequest(clientSocket);
 
-            clientSocket.close();
+                clientSocket.close();
+            }
+        }
+        catch (Exception e){
+            close();
         }
     }
 
@@ -147,6 +153,18 @@ public class DiscoveryServer {
             tries++;
         }
 
+        if (serverToJoin != null && serverToJoin.isMaxPlayersReached()){
+            return null;
+        }
+
         return serverToJoin;
+    }
+
+    public void close(){
+        try {
+            serverSocket.close();
+        } catch (IOException ignored) {
+            ;
+        }
     }
 }

@@ -119,7 +119,7 @@ public class GameClient {
 
             getServerThread().setConnectionErrorListener((eMessage) -> {
                 ViewManager.getInstance().showErrorSnackBar(eMessage);
-                destroyClientToServerThread();
+                //destroyClientToServerThread();
             });
 
             this.lobbyController = ViewManager.getInstance().goToLobby(true);
@@ -147,18 +147,45 @@ public class GameClient {
 
         server = new MainServerThread();
 
+        while (!server.hasStarted()){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         try {
             startClientToServerThread(ipAddress, 4942);
         } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
         }
+
+        // Wait for C2S thread
+        while (!socketThread.hasStarted()){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         socketThread.sendXML(race, serverName, numLegs, maxPlayers, tokensEnabled);
-        while (regattaData == null){
+
+        int triesLeft = 15;
+
+        while (regattaData == null && triesLeft > 0){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            triesLeft--;
+        }
+
+        if (triesLeft <= 0){
+            showConnectionError("Could not launch server");
+            return null;
         }
 
         this.lobbyController = ViewManager.getInstance().goToLobby(false);
