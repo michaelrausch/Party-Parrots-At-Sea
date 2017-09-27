@@ -80,30 +80,6 @@ public class ModelFactory {
         return bo;
     }
 
-    public static BoatModel boatRotatingView(BoatMeshType boatType, Color primaryColour) {
-        Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
-        boatAssets.getTransforms().addAll(
-            new Scale(40, 40, 40),
-            new Rotate(90, new Point3D(0,0,1)),
-            new Rotate(90, new Point3D(0, 1, 0))
-        );
-
-        final Rotate animationRotate = new Rotate(0, new Point3D(1,1,1));
-        boatAssets.getTransforms().add(animationRotate);
-
-        return new BoatModel(boatAssets, new AnimationTimer() {
-
-            private double rotation = 0;
-            private Rotate rotate = animationRotate;
-
-            @Override
-            public void handle(long now) {
-                rotation += 0.5;
-                rotate.setAngle(rotation);
-            }
-        }, boatType);
-    }
-
     public static BoatModel boatGameView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().setAll(
