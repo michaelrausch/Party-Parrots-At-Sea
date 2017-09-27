@@ -13,15 +13,11 @@ import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.ReadOnlyLongWrapper;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.collections.FXCollections;
 import javafx.scene.paint.Color;
-import jdk.nashorn.internal.objects.annotations.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.model.token.TokenType;
 import seng302.visualiser.fxObjects.assets_3D.BoatMeshType;
-import seng302.model.token.TokenType;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 /**
@@ -286,6 +282,7 @@ public class ClientYacht extends Observable {
 
     public void setHeading(Double heading) {
         this.heading = heading;
+        System.out.println(heading);
         setHeadingProperty();
     }
 

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RaceDefinition>
+
+    <CourseName>Madagascar</CourseName>
+
+    <CentralLat>57.6679590</CentralLat>
+    <CentralLng>11.8503233</CentralLng>
+
+    <MaxPlayers>10</MaxPlayers>
+
+    <Marks>
+        <CompoundMark CompoundMarkID="1">
+            <Mark Lat="57.670603" Lng="11.828262"/>
+            <Mark Lat="57.669445" Lng="11.826413"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="2">
+            <Mark Lat="57.6675700" Lng="11.8359880"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="3">
+            <Mark Lat="57.6708220" Lng="11.8433900"/>
+            <Mark Lat="57.671629" Lng="11.840951"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="4">
+            <Mark Lat="57.664190" Lng="11.829576"/>
+            <Mark Lat="57.665316" Lng="11.827184"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="5">
+            <Mark Lat="57.672350" Lng="11.842535"/>
+            <Mark Lat="57.6715240" Lng="11.8444950"/>
+        </CompoundMark>
+    </Marks>
+
+    <Course>
+        <OpeningSegment>
+            <Corner CompoundMarkID="1" Rounding="PS"/>
+            <Corner CompoundMarkID="2" Rounding="P"/>
+        </OpeningSegment>
+
+        <RepeatingSegment>
+            <Corner CompoundMarkID="3" Rounding="SP"/>
+            <Corner CompoundMarkID="4" Rounding="PS"/>
+        </RepeatingSegment>
+
+        <ClosingSegment>
+            <Corner CompoundMarkID="5" Rounding="PS"/>
+        </ClosingSegment>
+    </Course>
+
+    <CourseLimit>
+        <Limit Lat="57.6739450" Lng="11.8417100"/>
+        <Limit Lat="57.6709520" Lng="11.8485010"/>
+        <Limit Lat="57.6690260" Lng="11.8472790"/>
+        <Limit Lat="57.6693140" Lng="11.8457610"/>
+        <Limit Lat="57.6665370" Lng="11.8432910"/>
+        <Limit Lat="57.6641400" Lng="11.8385840"/>
+        <Limit Lat="57.6629430" Lng="11.8332030"/>
+        <Limit Lat="57.6629480" Lng="11.8249660"/>
+        <Limit Lat="57.6686890" Lng="11.8250920"/>
+        <Limit Lat="57.6692230" Lng="11.8231430"/>
+        <Limit Lat="57.6725370" Lng="11.8272480"/>
+        <Limit Lat="57.6708220" Lng="11.8321340"/>
+    </CourseLimit>
+
+</RaceDefinition>
