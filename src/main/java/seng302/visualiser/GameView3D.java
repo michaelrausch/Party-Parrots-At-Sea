@@ -338,8 +338,7 @@ public class GameView3D extends GameView{
                 ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
                 ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
 
-                newBoat.setMarkIndicator(
-                    ModelFactory.importModel(ModelType.NEXT_MARK_INDICATOR).getAssets());
+                newBoat.setMarkIndicator(ModelFactory.importSTL("mark_pointer.stl"));
                 playerBoat = newBoat;
 
             }

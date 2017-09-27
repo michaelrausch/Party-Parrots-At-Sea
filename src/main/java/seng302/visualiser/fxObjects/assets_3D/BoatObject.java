@@ -11,7 +11,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 
 /**
@@ -37,9 +36,8 @@ public class BoatObject extends Group {
     private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
 
     // This stuff only matters to the players boat object.
-    private Group markIndicator;
+    private MeshView markIndicator;
     private MeshView playerIndicator;
-    private Color indicatorColor = Color.BLACK;
     private ReadOnlyDoubleWrapper rotationProperty;
 
     private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
@@ -93,9 +91,7 @@ public class BoatObject extends Group {
         Double angle = Math.toDegrees(
             Math.atan2(boatLoc.getY() - markPoint.getY(), boatLoc.getX() - markPoint.getX())) - 90;
 
-        Double radius = 2.7;
-        Double scale = 0.8;
-
+        Double radius = 0.5;
         Double originX = this.getLayoutX();
         Double originY = this.getLayoutY();
 
@@ -104,8 +100,7 @@ public class BoatObject extends Group {
         markIndicator.getTransforms().clear();
         markIndicator.getTransforms().addAll(
             new Rotate(angle, new Point3D(0, 0, 1)),
-            new Translate(0, -radius, 0.1),
-            new Scale(scale, scale, scale / 10)
+            new Translate(0, -radius, 0)
         );
     }
 
@@ -148,33 +143,24 @@ public class BoatObject extends Group {
         }
     }
 
-    public void setMarkIndicator(Group indicator) {
+    public void setMarkIndicator(MeshView indicator) {
         this.markIndicator = indicator;
         this.getChildren().add(markIndicator);
         createPlayerIndicator();
-        setIndicatorColor(indicatorColor);
+        setIndicatorColor();
     }
 
     private void createPlayerIndicator() {
-        Model torus = ModelFactory.importModel(ModelType.PLAYER_IDENTIFIER_TORUS);
-        torus.getAssets().getTransforms().addAll(
-            new Rotate(90, new Point3D(1, 0, 0)),
-            new Scale(0.7, 0.7, 0.7),
-            new Translate(0, 0.1, 0)
-        );
-
-        this.getChildren().add(torus.getAssets());
-        playerIndicator = (MeshView) ((Group) ((Group) torus.getAssets().getChildren().get(0))
-            .getChildren().get(0)).getChildren().get(0);
+        MeshView torus = ModelFactory.importSTL("player_circle.stl");
+        playerIndicator = torus;
+        this.getChildren().add(torus);
     }
 
-    public void setIndicatorColor(Color color) {
-        this.indicatorColor = color;
-        MeshView markIndicatorMesh = (MeshView) ((Group) ((Group) this.markIndicator.getChildren()
-            .get(0))
-            .getChildren().get(0)).getChildren().get(0);
-        markIndicatorMesh.setMaterial(new PhongMaterial(color));
-        playerIndicator.setMaterial(new PhongMaterial(color));
+    public void setIndicatorColor() {
+        Platform.runLater(() -> {
+            markIndicator.setMaterial(new PhongMaterial(Color.DARKORANGE));
+            playerIndicator.setMaterial(new PhongMaterial(colour));
+        });
     }
 
     public Group getWake () {

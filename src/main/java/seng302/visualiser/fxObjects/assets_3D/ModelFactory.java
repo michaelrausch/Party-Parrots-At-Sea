@@ -115,9 +115,9 @@ public class ModelFactory {
     private static Group getUnmodifiedBoatModel(BoatMeshType boatType, Color primaryColour) {
 
         Group boatAssets = new Group();
-        MeshView hull = importSTL(boatType.hullFile);
+        MeshView hull = importBoatSTL(boatType.hullFile);
         hull.setMaterial(new PhongMaterial(primaryColour));
-        MeshView sail = importSTL(boatType.sailFile);
+        MeshView sail = importBoatSTL(boatType.sailFile);
         sail.setMaterial(
             new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.BLACK : Color.WHITE)
         );
@@ -125,13 +125,13 @@ public class ModelFactory {
         boatAssets.getChildren().addAll(hull, sail);
 
         if (boatType.mastFile != null) {
-            MeshView mast = importSTL(boatType.mastFile);
+            MeshView mast = importBoatSTL(boatType.mastFile);
             mast.setMaterial(new PhongMaterial(primaryColour));
             boatAssets.getChildren().add(mast);
         }
 
         if (boatType.jibFile != null) {
-            MeshView jib = importSTL(boatType.jibFile);
+            MeshView jib = importBoatSTL(boatType.jibFile);
             sail.setMaterial(
                 new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.DARKGRAY : Color.WHITE)
             );
@@ -141,9 +141,13 @@ public class ModelFactory {
         return boatAssets;
     }
 
-    private static MeshView importSTL(String fileName) {
+    private static MeshView importBoatSTL(String fileName) {
+        return importSTL("boatSTLs/" + fileName);
+    }
+
+    public static MeshView importSTL(String fileName) {
         StlMeshImporter importer = new StlMeshImporter();
-        importer.read(ModelFactory.class.getResource("/meshes/boatSTLs/" + fileName));
+        importer.read(ModelFactory.class.getResource("/meshes/" + fileName));
         MeshView importedFile = new MeshView(importer.getImport());
         importedFile.setCache(true);
         importedFile.setCacheHint(CacheHint.SCALE_AND_ROTATE);
