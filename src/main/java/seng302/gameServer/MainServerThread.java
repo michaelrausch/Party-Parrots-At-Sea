@@ -82,8 +82,6 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         startAdvertisingServer();
         PolarTable.parsePolarFile(getClass().getResourceAsStream("/server_config/acc_polars.csv"));
         GameState.addMessageEventListener(this::broadcastMessage);
-        startUpdatingWind();
-        startSpawningTokens();
         sendSetupMessages();
     }
 

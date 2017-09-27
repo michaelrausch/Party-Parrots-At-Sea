@@ -87,7 +87,7 @@ public class GameState implements Runnable {
     private static GameStages currentStage;
     private static MarkOrder markOrder;
     private static long startTime;
-    private static List<Mark> marks;
+    private static Set<Mark> marks = new HashSet<>();
     private static List<Limit> courseLimit;
     private static Integer maxPlayers = 8;
 
@@ -112,8 +112,6 @@ public class GameState implements Runnable {
         isRaceStarted = false;
         previousUpdateTime = System.currentTimeMillis();
         newMessageListeners = new ArrayList<>();
-        marks = new MarkOrder().getAllMarks();
-        randomSpawn = new RandomSpawn(markOrder.getOrderedUniqueCompoundMarks());
 
         resetStartTime();
         //setCourseLimit("/server_config/race.xml");
@@ -125,6 +123,7 @@ public class GameState implements Runnable {
         for (CompoundMark compoundMark : raceXMLData.getCompoundMarks().values()){
             marks.addAll(compoundMark.getMarks());
         }
+        randomSpawn = new RandomSpawn(markOrder.getOrderedUniqueCompoundMarks());
         courseLimit = raceXMLData.getCourseLimit();
     }
 

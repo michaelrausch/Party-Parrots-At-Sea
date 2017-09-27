@@ -27,6 +27,7 @@ public class MarkOrder {
             );
             raceMarkOrder.add(compoundMark);
         }
+        orderedUniqueCompoundMarks = new ArrayList<>(raceXMLData.getCompoundMarks().values());
     }
 
     /**

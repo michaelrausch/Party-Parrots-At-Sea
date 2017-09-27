@@ -102,7 +102,7 @@ public class GameView3D extends GameView{
         chaseCam = new ChaseCamera();
 
         for (PerspectiveCamera pc : Arrays.asList(isometricCam, topDownCam, chaseCam)) {
-            pc.setFarClip(600);
+            pc.setFarClip(100000);
             pc.setNearClip(0.1);
             pc.setFieldOfView(FOV);
         }
@@ -114,7 +114,7 @@ public class GameView3D extends GameView{
         );
         view.setCamera(isometricCam);
 
-        skybox = new Skybox(new Image(getClass().getResourceAsStream("/images/skybox.jpg")), 100000, camera);
+        skybox = new Skybox(new Image(getClass().getResourceAsStream("/images/skybox.jpg")), 100000, isometricCam);
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
 
         Model land = ModelFactory.importModel(ModelType.LAND_SMOOTH);
@@ -375,7 +375,7 @@ public class GameView3D extends GameView{
     private void updateBoatLocation(ClientYacht boat, Double lat, Double lon, Double heading,
         Boolean sailIn, Double velocity) {
         BoatObject bo = boatObjects.get(boat);
-        Point2D p2d = findScaledXY(lat, lon);
+        Point2D p2d = scaledPoint.findScaledXY(lat, lon);
         bo.moveTo(p2d.getX(), p2d.getY(), heading, velocity, sailIn, windDir);
     }
 

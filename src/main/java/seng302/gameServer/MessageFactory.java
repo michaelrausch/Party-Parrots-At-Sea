@@ -22,6 +22,7 @@ import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.model.stream.xml.parser.RaceXMLData;
 import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.XMLGenerator;
 
 import java.util.ArrayList;
