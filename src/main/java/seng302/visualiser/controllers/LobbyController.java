@@ -2,17 +2,25 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXTextArea;
+import java.util.Arrays;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point3D;
+import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 import seng302.discoveryServer.DiscoveryServerClient;
 import seng302.gameServer.GameStages;
 import seng302.gameServer.GameState;
@@ -34,6 +42,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
+import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
 public class LobbyController implements Initializable {
 
@@ -57,6 +67,8 @@ public class LobbyController implements Initializable {
     private AnchorPane serverMap;
     @FXML
     private Label roomLabel;
+    @FXML
+    private Pane speedTokenPane, handlingTokenPane, windWalkerTokenPane, bumperTokenPane, randomTokenPane;
     //---------FXML END---------//
 
     private RaceState raceState;
@@ -128,6 +140,35 @@ public class LobbyController implements Initializable {
         beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
 
         initMapPreview();
+
+        initTokenPreviews();
+    }
+
+    private void initTokenPreviews() {
+        Group speedToken = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
+        Group handlingToken = ModelFactory.importModel(ModelType.HANDLING_PICKUP).getAssets();
+        Group windWalkerToken = ModelFactory.importModel(ModelType.WIND_WALKER_PICKUP).getAssets();
+        Group bumperToken = ModelFactory.importModel(ModelType.BUMPER_PICKUP).getAssets();
+        Group randomToken = ModelFactory.importModel(ModelType.RANDOM_PICKUP).getAssets();
+        List<Group> tokensPreviews = new ArrayList<>(
+            Arrays.asList(speedToken, handlingToken, windWalkerToken, bumperToken, randomToken));
+
+        tokensPreviews.forEach((tokenPreview) -> {
+            tokenPreview.getTransforms().addAll(
+                new Translate(30, 30, 0),
+                new Scale(15, 15, 15));
+        });
+
+        //Hacky rotations for wind and random to level it in the plane
+        windWalkerToken.getTransforms().add(new Rotate(-70, new Point3D(1, 0, 0)));
+        randomToken.getTransforms().add(new Rotate(-90, new Point3D(1, 0, 0)));
+
+        speedTokenPane.getChildren().add(speedToken);
+        handlingTokenPane.getChildren().add(handlingToken);
+        windWalkerTokenPane.getChildren().add(windWalkerToken);
+        bumperTokenPane.getChildren().add(bumperToken);
+        randomTokenPane.getChildren().add(randomToken);
+
     }
 
     private JFXDialog createCustomizeDialog() {
