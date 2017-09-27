@@ -203,28 +203,28 @@ public class LobbyController implements Initializable {
     private JFXDialog makeTokenDialog(Pane inducingPane) {
         String header = "...";
         String body = "Nothing to see here";
-        Group token = new Group();
+        ModelType modelType = ModelType.RANDOM_PICKUP;
 
         if (inducingPane == speedTokenPane) {
             header = "Speed Boost";
             body = "Increases your max velocity";
-            token = ModelFactory.importModel(ModelType.VELOCITY_PICKUP).getAssets();
+            modelType = ModelType.VELOCITY_PICKUP;
         } else if (inducingPane == handlingTokenPane) {
             header = "Handling Boost";
             body = "Increases your turing rate";
-            token = ModelFactory.importModel(ModelType.HANDLING_PICKUP).getAssets();
+            modelType = ModelType.HANDLING_PICKUP;
         } else if (inducingPane == windWalkerTokenPane) {
             header = "Wind Walker";
             body = "The wind now rotates with you, giving you your optimal speed in all directions";
-            token = ModelFactory.importModel(ModelType.WIND_WALKER_PICKUP).getAssets();
+            modelType = ModelType.WIND_WALKER_PICKUP;
         } else if (inducingPane == bumperTokenPane) {
             header = "Bumper";
             body = "While this is active, upon hitting another boat, you will power it down for a short time";
-            token = ModelFactory.importModel(ModelType.BUMPER_PICKUP).getAssets();
+            modelType = ModelType.BUMPER_PICKUP;
         } else if (inducingPane == randomTokenPane) {
             header = "Random";
             body = "A 50% chance of becoming any other token and a 50% chance of slowing your boat for a time";
-            token = ModelFactory.importModel(ModelType.RANDOM_PICKUP).getAssets();
+            modelType = ModelType.RANDOM_PICKUP;
         }
 
         FXMLLoader dialog = new FXMLLoader(
@@ -243,7 +243,7 @@ public class LobbyController implements Initializable {
         controller.setParentController(this);
         controller.setHeader(header);
         controller.setContent(body);
-        controller.setToken(token);
+        controller.setToken(modelType);
         return tokenInfoDialog;
     }
 
