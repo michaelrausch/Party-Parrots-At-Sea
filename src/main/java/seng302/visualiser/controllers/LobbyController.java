@@ -2,8 +2,13 @@ package seng302.visualiser.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXTextArea;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -35,13 +40,6 @@ import seng302.utilities.Sounds;
 import seng302.visualiser.MapPreview;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
@@ -140,7 +138,6 @@ public class LobbyController implements Initializable {
         beginRaceButton.setOnMouseEntered(e -> Sounds.playHoverSound());
 
         initMapPreview();
-
         initTokenPreviews();
     }
 
@@ -155,8 +152,8 @@ public class LobbyController implements Initializable {
 
         tokensPreviews.forEach((tokenPreview) -> {
             tokenPreview.getTransforms().addAll(
-                new Translate(30, 30, 0),
-                new Scale(15, 15, 15));
+                new Translate(40, 50, 0),
+                new Scale(13, 13, 13));
         });
 
         //Hacky rotations for wind and random to level it in the plane
