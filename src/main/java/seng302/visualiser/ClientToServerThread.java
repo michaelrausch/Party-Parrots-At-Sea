@@ -1,19 +1,16 @@
 package seng302.visualiser;
 
-import javafx.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.*;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.utilities.XMLParser;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
