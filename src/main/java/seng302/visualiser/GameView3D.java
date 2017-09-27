@@ -91,6 +91,7 @@ public class GameView3D {
     private Group trail = new Group();
     private Double windDir;
 
+
     private enum ScaleDirection {
         HORIZONTAL,
         VERTICAL
@@ -457,7 +458,7 @@ public class GameView3D {
 
     /**
      * Rescales the race to the size of the window.
-     *
+     *g
      * @param limitingCoordinates the set of geo points that contains the extremities of the race.
      */
     private void rescaleRace(List<GeoPoint> limitingCoordinates) {
@@ -493,6 +494,8 @@ public class GameView3D {
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
                 ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
                 ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
+                newBoat.setMarkIndicator(
+                    ModelFactory.importModel(ModelType.NEXT_MARK_INDICATOR).getAssets());
             }
         }
         Platform.runLater(() -> {
@@ -602,6 +605,10 @@ public class GameView3D {
             public void handle(long now) {
                 if (--count == 0) {
                     count = 60;
+
+                    boatObjects.get(playerYacht);
+                    course.get(playerYacht.getLegNumber()).getMidPoint().getLat();
+
                     Node segment = ModelFactory.importModel(ModelType.TRAIL_SEGMENT).getAssets();
                     Point2D location = findScaledXY(playerYacht.getLocation());
                     segment.getTransforms().addAll(

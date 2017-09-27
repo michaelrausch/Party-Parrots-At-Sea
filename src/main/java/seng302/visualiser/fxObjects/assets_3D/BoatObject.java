@@ -4,10 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Transform;
+import javafx.scene.transform.Translate;
+import seng302.model.ClientYacht;
+import seng302.visualiser.controllers.ViewManager;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -27,6 +33,7 @@ public class BoatObject extends Group {
 
     private BoatModel boatAssets;
     private Group wake;
+    private Group markIndicator;
     private Color colour = Color.BLACK;
     private Boolean isSelected = false;
     private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
@@ -76,7 +83,46 @@ public class BoatObject extends Group {
             this.layoutYProperty().setValue(y);
             wake.setLayoutX(x);
             wake.setLayoutY(y);
+
+            if (markIndicator != null) { // The player boat.
+                updateMarkIndicator();
+            }
+
         });
+    }
+
+    private void updateMarkIndicator() {
+        // calculate heading between boat and next mark
+
+        Integer sourceId = ViewManager.getInstance().getGameClient().getServerThread()
+            .getClientId();
+        ClientYacht playerYacht = ViewManager.getInstance().getGameClient().getAllBoatsMap()
+            .get(sourceId);
+
+        Double x;
+        Double y;
+
+        Double deltaX = (this.getLayoutX() - x);
+        Double deltaY = (this.getLayoutY() - y);
+        Double angle = Math.toDegrees(Math.atan2(deltaY, deltaX));
+
+        ObservableList<Transform> transforms = markIndicator.getTransforms();
+
+        Double radius = 3.0;
+        Double scale = 0.4;
+        //Double angle = this.rotation.getAngle(); // THIS WILL BE THE NEXT MARK
+        Double originX = this.getLayoutX();
+        Double originY = this.getLayoutY();
+
+        Double transX = (radius * Math.cos(Math.toRadians(angle)));
+        Double transY = (radius * Math.sin(Math.toRadians(angle)));
+
+        transforms.clear();
+        transforms.addAll(
+            new Rotate(angle, markIndicator.getLayoutX(), markIndicator.getLayoutY(), 0),
+            new Translate(transX, transY, -1),
+            new Scale(scale, scale, scale)
+        );
     }
 
     private Double normalizeHeading(double heading, double windDirection) {
@@ -116,6 +162,11 @@ public class BoatObject extends Group {
         } else {
             boatAssets.hideSail();
         }
+    }
+
+    public void setMarkIndicator(Group indicator) {
+        this.markIndicator = indicator;
+        this.getChildren().add(markIndicator);
     }
 
     public Group getWake () {

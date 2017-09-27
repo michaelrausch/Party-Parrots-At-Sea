@@ -7,7 +7,6 @@ import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
-import javafx.scene.PointLight;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Circle;
@@ -155,6 +154,8 @@ public class ModelFactory {
             assets.setCacheHint(CacheHint.SCALE_AND_ROTATE);
         }
         switch (tokenType) {
+            case NEXT_MARK_INDICATOR:
+                return makeNextMarkIndicator(assets);
             case VELOCITY_PICKUP:
                 return makeCoinPickup(assets);
             case FINISH_MARKER:
@@ -185,7 +186,19 @@ public class ModelFactory {
         }
     }
 
-    private static Model makeCoinPickup(Group assets){
+    private static Model makeNextMarkIndicator(Group assets) {
+//        assets.getTransforms().addAll(
+//            new Translate(10, 10, 0),
+//            new Rotate(90, new Point3D(0,0,1)),
+//            new Scale(0.5, 0.5, 0.5)
+//        );
+
+        assets.getChildren().add(new AmbientLight());
+
+        return new Model(new Group(assets), null);
+    }
+
+    private static Model makeCoinPickup(Group assets) {
         assets.setRotationAxis(new Point3D(1,0,0));
         assets.setRotate(90);
         assets.setTranslateX(0.2);
