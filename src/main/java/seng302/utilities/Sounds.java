@@ -101,6 +101,10 @@ public class Sounds {
         musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         musicPlayer.setVolume(0.3);
         musicPlayer.play();
+        musicPlayer.setMute(musicMuted);
+        if (soundEffect != null) {
+            soundEffect.stop();
+        }
     }
 
 
