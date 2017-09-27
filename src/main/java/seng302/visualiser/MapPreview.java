@@ -29,7 +29,7 @@ import seng302.visualiser.fxObjects.assets_2D.Marker2D;
 public class MapPreview extends GameView {
 
     private Polygon raceBorder = new CourseBoundary();
-    private Map<Mark, Marker2D> markerObjects;
+    protected Map<Mark, Marker2D> markerObjects;
 
     public MapPreview(List<CompoundMark> marks, List<Corner> course, List<Limit> border) {
         this.compoundMarks = marks;
