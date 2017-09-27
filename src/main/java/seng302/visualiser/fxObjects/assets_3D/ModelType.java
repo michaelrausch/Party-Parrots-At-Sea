@@ -27,7 +27,7 @@ public enum ModelType {
     PLAIN_ARROW ("arrow.dae"),
     START_ARROW ("start_arrow.dae"),
     FINISH_ARROW("finish_arrow.dae"),
-    WIND_ARROW("windFiles/log_arrow.dae");
+    WIND_ARROW("windFiles/arrow56.dae"); // change filename
 
     final String filename;
 

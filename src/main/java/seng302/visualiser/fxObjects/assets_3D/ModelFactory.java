@@ -285,8 +285,8 @@ public class ModelFactory {
 
         Rotate animationRotate = new Rotate(0, new Point3D(0, 1, 0));
         assets.getTransforms().addAll(
-            new Scale(6, 6, 6),
-            new Translate(7, 10, 0),
+            new Translate(55, 60, 0),
+            new Scale(5, 5, 5),
             animationRotate
         );
 

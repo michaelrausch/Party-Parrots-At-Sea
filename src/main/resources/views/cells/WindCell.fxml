@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+
 <?import javafx.scene.layout.Pane?>
-
-
-<Pane fx:id="windPane" prefHeight="120.0" prefWidth="110.0" xmlns="http://javafx.com/javafx/8.0.111"
+<Pane fx:id="windPane" prefHeight="120.0" prefWidth="110.0"
+  stylesheets="@../../css/cells/WindCell.css" xmlns="http://javafx.com/javafx/8"
   xmlns:fx="http://javafx.com/fxml/1"/>
