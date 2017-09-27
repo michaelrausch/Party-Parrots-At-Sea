@@ -1,33 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXSpinner?>
 <?import java.net.URL?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
-<StackPane id="background" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.SplashScreenController">
+<StackPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+  minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
+  xmlns:fx="http://javafx.com/fxml/1"
+  fx:controller="seng302.visualiser.controllers.SplashScreenController">
    <children>
-      <ImageView fitHeight="296.0" fitWidth="295.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_CENTER">
-         <image>
-            <Image url="@../PP.png" />
-         </image>
-         <StackPane.margin>
-            <Insets top="20.0" />
-         </StackPane.margin>
-      </ImageView>
-      <Text fx:id="headText" strokeType="OUTSIDE" strokeWidth="0.0" text="Party Parrots at Sea" StackPane.alignment="BOTTOM_CENTER">
-         <font>
-            <Font name="System Bold" size="42.0" />
-         </font>
-         <StackPane.margin>
-            <Insets bottom="20.0" />
-         </StackPane.margin>
-      </Text>
+      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+         <children>
+            <Label fx:id="subHeadLabel" layoutX="225.0" layoutY="370.0"
+              text="MADE BY :PARTYPARROT:"/>
+            <StackPane layoutX="150.0" layoutY="10.0" prefHeight="150.0" prefWidth="200.0">
+               <children>
+                  <ImageView fitHeight="190.0" fitWidth="190.0" pickOnBounds="true"
+                    preserveRatio="true">
+                     <image>
+                        <Image url="@../PP.png"/>
+                     </image>
+                  </ImageView>
+                  <JFXSpinner fx:id="materialDesignRed" radius="150.0" startingAngle="0.0"
+                    styleClass="materialDesign-red"/>
+                  <JFXSpinner radius="140.0" startingAngle="20.0"
+                    styleClass="materialDesign-orange"/>
+                  <JFXSpinner radius="130.0" startingAngle="40.0"
+                    styleClass="materialDesign-yellow"/>
+                  <JFXSpinner radius="120.0" startingAngle="60.0"
+                    styleClass="materialDesign-green"/>
+                  <JFXSpinner radius="110.0" startingAngle="80.0" styleClass="materialDesign-cyan"/>
+                  <JFXSpinner radius="100.0" startingAngle="100.0"
+                    styleClass="materialDesign-blue"/>
+                  <JFXSpinner radius="90.0" startingAngle="120.0"
+                    styleClass="materialDesign-purple"/>
+               </children>
+            </StackPane>
+            <Label fx:id="headText" layoutX="36.0" layoutY="295.0" text="PARTY PARROT AT SEA"/>
+         </children>
+      </AnchorPane>
    </children>
     <stylesheets>
-        <URL value="@../css/Master.css"/>
-        <URL value="@../css/SplashScreenView.css"/>
+       <URL value="@../css/Master.css"/>
+       <URL value="@../css/SplashScreenView.css"/>
     </stylesheets>
 </StackPane>
