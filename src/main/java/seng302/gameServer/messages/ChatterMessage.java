@@ -40,7 +40,7 @@ public class ChatterMessage extends Message {
         return message;
     }
 
-    public int getMessage_type() {
+    public int getMessageType() {
         return message_type;
     }
 }

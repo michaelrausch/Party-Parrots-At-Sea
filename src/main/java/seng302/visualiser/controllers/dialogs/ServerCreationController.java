@@ -5,14 +5,15 @@ import com.jfoenix.controls.JFXSlider;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.validation.RequiredFieldValidator;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import seng302.gameServer.ServerDescription;
 import seng302.utilities.Sounds;
+import seng302.visualiser.controllers.ServerListController.ServerCreationDialogListener;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.validators.FieldLengthValidator;
 import seng302.visualiser.validators.ValidationTools;
@@ -28,7 +29,11 @@ public class ServerCreationController implements Initializable {
     private Label maxPlayersLabel;
     @FXML
     private JFXButton submitBtn;
+    @FXML
+    private Label closeLabel;
     //---------FXML END---------//
+
+    private List<ServerCreationDialogListener> serverCreationDialogListeners;
 
     public void initialize(URL location, ResourceBundle resources) {
         updateMaxPlayerLabel();
@@ -49,6 +54,7 @@ public class ServerCreationController implements Initializable {
             validateServerSettings();
         });
 
+        closeLabel.setOnMouseClicked(event -> notifyListeners());
     }
 
     /**
@@ -85,6 +91,16 @@ public class ServerCreationController implements Initializable {
 
     public void playButtonHoverSound(MouseEvent mouseEvent) {
         Sounds.playHoverSound();
+    }
+
+    public void setListener(List<ServerCreationDialogListener> serverCreationDialogListeners) {
+        this.serverCreationDialogListeners = serverCreationDialogListeners;
+    }
+
+    public void notifyListeners() {
+        for (ServerCreationDialogListener serverCreationDialogListener : serverCreationDialogListeners) {
+            serverCreationDialogListener.notifyClosure();
+        }
     }
 
 }

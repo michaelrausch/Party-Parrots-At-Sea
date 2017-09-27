@@ -4,14 +4,18 @@
 <?import com.jfoenix.controls.JFXDialogLayout?>
 <?import com.jfoenix.controls.JFXSlider?>
 <?import com.jfoenix.controls.JFXTextField?>
-<?import java.lang.String?>
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="550.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.dialogs.ServerCreationController">
+
+<JFXDialogLayout maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+  minWidth="-Infinity" prefWidth="550.0" xmlns="http://javafx.com/javafx/8.0.111"
+  xmlns:fx="http://javafx.com/fxml/1"
+  fx:controller="seng302.visualiser.controllers.dialogs.ServerCreationController">
     <children>
         <GridPane>
             <columnConstraints>
@@ -59,11 +63,13 @@
                    </VBox>
                </children>
             </GridPane>
+                <Label fx:id="closeLabel" text="✖" GridPane.halignment="RIGHT"
+                  GridPane.valignment="TOP"/>
             </children>
         </GridPane>
     </children>
    <stylesheets>
-       <String fx:value="/css/dialogs/ServerCreation.css" />
-       <String fx:value="/css/Master.css"/>
+       <URL value="@../../css/dialogs/ServerCreation.css"/>
+       <URL value="@../../css/Master.css"/>
    </stylesheets>
 </JFXDialogLayout>

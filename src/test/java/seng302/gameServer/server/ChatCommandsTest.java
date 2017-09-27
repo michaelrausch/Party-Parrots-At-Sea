@@ -110,7 +110,7 @@ public class ChatCommandsTest {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        Assert.assertEquals(5.0, GameState.getSpeedMultiplier(), 0.00001);
+        Assert.assertEquals(5.0, GameState.getServerSpeedMultiplier(), 0.00001);
         mst.terminate();
         try {
             Thread.sleep(200);
@@ -150,7 +150,7 @@ public class ChatCommandsTest {
             ie.printStackTrace();
         }
         mst.terminate();
-        Assert.assertEquals(1.0, GameState.getSpeedMultiplier(), 0.00001);
+        Assert.assertEquals(1.0, GameState.getServerSpeedMultiplier(), 0.00001);
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ie) {
@@ -194,7 +194,7 @@ public class ChatCommandsTest {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        Assert.assertEquals(1.0, GameState.getSpeedMultiplier(), 0.00001);
+        Assert.assertEquals(1.0, GameState.getServerSpeedMultiplier(), 0.00001);
         mst.terminate();
         host.setSocketToClose();
         client.setSocketToClose();

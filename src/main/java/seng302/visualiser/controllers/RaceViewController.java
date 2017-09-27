@@ -20,6 +20,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.chart.LineChart;
@@ -27,12 +29,8 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -46,11 +44,15 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javax.swing.ImageIcon;
 import seng302.model.ClientYacht;
+import seng302.model.ClientYacht.PowerUpListener;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
+import seng302.model.token.Token;
+import seng302.model.token.TokenType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView3D;
 import seng302.visualiser.controllers.annotations.ImportantAnnotationController;
@@ -60,6 +62,8 @@ import seng302.visualiser.controllers.dialogs.FinishDialogController;
 import seng302.visualiser.fxObjects.ChatHistory;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
+import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
+import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
 /**
  * Controller class that manages the display of a race
@@ -67,7 +71,13 @@ import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 public class RaceViewController extends Thread implements ImportantAnnotationDelegate {
 
     private final int CHAT_LIMIT = 128;
+    private static final Double ICON_BLINK_TIMEOUT_RATIO = 0.6;
+    private static final Integer ICON_BLINK_PERIOD = 500;
 
+    @FXML
+    private AnchorPane loadingScreenPane;
+    @FXML
+    private ImageView loadingScreen;
     @FXML
     private Pane basePane;
     @FXML
@@ -110,6 +120,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private Label windSpeedLabel;
     @FXML
     private Label positionLabel, boatSpeedLabel, boatHeadingLabel;
+    @FXML
+    private ImageView velocityIcon, handlingIcon, windWalkerIcon, bumperIcon, badRandomIcon;
 
     //Race Data
     private Map<Integer, ClientYacht> participants;
@@ -130,7 +142,29 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     private JFXDialog finishScreenDialog;
     private FinishDialogController finishDialogController;
 
+    //Icon stuff
+    private Timer blinkingTimer = new Timer();
+    private ImageView iconToDisplay;
+
     public void initialize() {
+        contentStackPane.setVisible(false);
+        Image loadingImage = new Image("PP.png");
+        loadingScreen.setImage(loadingImage);
+        //Centers the Image within the image view
+        double w = 0;
+        double h = 0;
+        double ratioX = loadingScreen.getFitWidth() / loadingImage.getWidth();
+        double ratioY = loadingScreen.getFitHeight() / loadingImage.getHeight();
+        double reduceRatio = 0;
+        if(ratioX >= ratioY) {
+            reduceRatio = ratioY;
+        } else {
+            reduceRatio = ratioX;
+        }
+        w = loadingImage.getWidth() * reduceRatio;
+        h = loadingImage.getHeight() * reduceRatio;
+        loadingScreen.setX((loadingScreen.getFitWidth() - w) / 2);
+        loadingScreen.setY((loadingScreen.getFitHeight() - h) / 2);
         Sounds.stopMusic();
         Sounds.playRaceMusic();
 
@@ -202,6 +236,18 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         createFinishDialog(finishedBoats);
     }
 
+    public void showView(){
+        loadingScreenPane.setVisible(false);
+        contentStackPane.setVisible(true);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                contentStackPane.requestFocus();
+            }
+        });
+    }
+
     /**
      * Create finishScreenDialog and set up finishDialogController.
      */
@@ -222,6 +268,7 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         });
     }
 
+
     public void loadRace (
         Map<Integer, ClientYacht> participants, RaceXMLData raceData, RaceState raceState,
         ClientYacht player) {
@@ -240,6 +287,9 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
                 }
             }
         });
+
+        player.addPowerUpListener(this::displayPowerUpIcon);
+        player.addPowerDownListener(this::removeIcon);
 
         updateOrder(raceState.getPlayerPositions());
         gameView = new GameView3D();
@@ -278,6 +328,68 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             initializeUpdateTimer();
         });
     }
+
+    /**
+     * Displays the relevant icon, starts blinking it when it is close to turning off and then
+     * switches it off after the tokens time out
+     *
+     * @param yacht The yacht only for which we are displaying the icon
+     * @param tokenType The type of token, indicating what icon needs to be displayed
+     */
+    private void displayPowerUpIcon(ClientYacht yacht, TokenType tokenType) {
+        if (yacht == player) {
+            if (iconToDisplay != null) {
+                iconToDisplay.setVisible(false);
+            }
+
+            switch (tokenType) {
+                case BOOST:
+                    iconToDisplay = velocityIcon;
+                    break;
+                case HANDLING:
+                    iconToDisplay = handlingIcon;
+                    break;
+                case WIND_WALKER:
+                    iconToDisplay = windWalkerIcon;
+                    break;
+                case BUMPER:
+                    iconToDisplay = bumperIcon;
+                    break;
+                case RANDOM:
+                    iconToDisplay = badRandomIcon;
+                    break;
+                default:
+                    iconToDisplay = velocityIcon;
+            }
+
+            //Turn icon on
+            iconToDisplay.setVisible(true);
+
+            //Start blinking icon towards end
+            if (blinkingTimer != null) {
+                blinkingTimer.cancel();
+            }
+            blinkingTimer = new Timer("Blinking Timer");
+            blinkingTimer.schedule(new TimerTask() {
+                Boolean isVisible = true;
+
+                @Override
+                public void run() {
+                    isVisible = !isVisible;
+                    iconToDisplay.setVisible(isVisible);
+                }
+            }, (int) (tokenType.getTimeout() * ICON_BLINK_TIMEOUT_RATIO), ICON_BLINK_PERIOD);
+        }
+    }
+
+    public void removeIcon(ClientYacht yacht) {
+        if (yacht == player) {
+            blinkingTimer.cancel();
+            iconToDisplay.setVisible(false);
+            iconToDisplay = null;
+        }
+    }
+
 
     /**
      * The important annotations have been changed, update this view

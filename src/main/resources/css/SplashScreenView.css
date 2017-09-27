@@ -1,0 +1,10 @@
+#background {
+    -fx-background-color: #E7F1F8;
+}
+
+#headText {
+    -fx-background-color: transparent;
+    -fx-font-size: 52px;
+    -fx-text-fill: -fx-pp-light-text-color;
+    -fx-effect: -fx-pp-dropshadow-headers;
+}
