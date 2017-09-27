@@ -2,7 +2,6 @@ package seng302.visualiser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,11 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import org.fxyz3d.scene.Skybox;
 import seng302.gameServer.messages.RoundingSide;
-import seng302.model.*;
+import seng302.model.ClientYacht;
+import seng302.model.GameKeyBind;
+import seng302.model.KeyAction;
+import seng302.model.Limit;
+import seng302.model.ScaledPoint;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
@@ -352,10 +355,10 @@ public class GameView3D extends GameView{
                     List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
                     Point2D midPoint = new Point2D(0, 0);
                     if (marks.size() == 1) {
-                        midPoint = findScaledXY(marks.get(0));
+                        midPoint = scaledPoint.findScaledXY(marks.get(0));
                     } else if (marks.size() == 2) {
-                        midPoint = (findScaledXY(marks.get(0)))
-                            .midpoint(findScaledXY(marks.get(1)));
+                        midPoint = (scaledPoint.findScaledXY(marks.get(0)))
+                            .midpoint(scaledPoint.findScaledXY(marks.get(1)));
                     }
 
                     if (midPoint != null) {
