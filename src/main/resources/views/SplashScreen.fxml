@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.image.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
-
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 <StackPane id="background" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng302.visualiser.controllers.SplashScreenController">
-   <stylesheets>
-      <String fx:value="/css/Master.css" />
-      <String fx:value="/css/SplashScreenView.css" />
-   </stylesheets>
    <children>
       <ImageView fitHeight="296.0" fitWidth="295.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_CENTER">
          <image>
@@ -29,4 +26,8 @@
          </StackPane.margin>
       </Text>
    </children>
+    <stylesheets>
+        <URL value="@../css/Master.css"/>
+        <URL value="@../css/SplashScreenView.css"/>
+    </stylesheets>
 </StackPane>

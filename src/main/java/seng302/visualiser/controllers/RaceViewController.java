@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -43,6 +44,7 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import seng302.model.ClientYacht;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
@@ -433,9 +435,16 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
      * Updates the wind direction arrow and text as from info from the StreamParser
      * @param direction the from north angle of the wind.
      */
+    private double preDir = 0;
     private void updateWindDirection(double direction) {
         windDirectionLabel.setText(String.format("%.1f°", direction));
-        windImageView.setRotate(direction);
+        RotateTransition rt = new RotateTransition(Duration.millis(300), windImageView);
+        rt.setByAngle(direction - preDir);
+        rt.setCycleCount(5);
+        rt.setAutoReverse(true);
+        rt.play();
+        preDir = direction;
+//        windImageView.setRotate(direction);
     }
 
     /**
