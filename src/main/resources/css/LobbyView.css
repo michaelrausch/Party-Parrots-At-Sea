@@ -70,3 +70,7 @@
 .tokenView {
     -fx-cursor: hand;
 }
+
+.tokenGridView StackPane {
+    -fx-background-color: white;
+}
