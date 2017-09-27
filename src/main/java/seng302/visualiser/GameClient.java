@@ -96,7 +96,6 @@ public class GameClient {
             socketThread.addDisconnectionListener((cause) -> {
                 showConnectionError(cause);
                 tearDownConnection();
-                Platform.runLater(this::loadStartScreen);
             });
             socketThread.addStreamObserver(this::parsePackets);
 
@@ -159,16 +158,6 @@ public class GameClient {
         }
     }
 
-    private void loadStartScreen() {
-        FXMLLoader fxmlLoader = new FXMLLoader(
-            getClass().getResource("/views/StartScreenView.fxml"));
-        try {
-            holderPane.getChildren().clear();
-            holderPane.getChildren().add(fxmlLoader.load());
-        } catch (IOException e) {
-            showConnectionError("JavaFX crashed. Please restart the app");
-        }
-    }
 
     private void showConnectionError (String message) {
         Platform.runLater(() -> {

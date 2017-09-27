@@ -64,6 +64,8 @@ public class ViewManager {
         this.stage = stage;
         Parent root = FXMLLoader.load(getClass().getResource("/views/SplashScreen.fxml"));
         Scene scene = new Scene(root);
+        stage.setTitle("Party Parrots At Sea");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
         stage.setScene(scene);
         stage.initStyle(StageStyle.UNDECORATED);
         stage.show();
