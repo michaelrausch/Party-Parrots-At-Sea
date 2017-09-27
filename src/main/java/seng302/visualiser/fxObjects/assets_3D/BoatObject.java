@@ -92,11 +92,6 @@ public class BoatObject extends Group {
             Math.atan2(boatLoc.getY() - markPoint.getY(), boatLoc.getX() - markPoint.getX())) - 90;
 
         Double radius = 0.5;
-        Double originX = this.getLayoutX();
-        Double originY = this.getLayoutY();
-
-        Double transX = (radius * Math.cos(Math.toRadians(angle)));
-        Double transY = (radius * Math.sin(Math.toRadians(angle)));
         markIndicator.getTransforms().clear();
         markIndicator.getTransforms().addAll(
             new Rotate(angle, new Point3D(0, 0, 1)),
