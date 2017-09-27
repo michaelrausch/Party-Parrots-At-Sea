@@ -193,12 +193,12 @@ public class ModelFactory {
     }
 
     private static Model makeIdentifierTorus(Group assets) {
-        assets.getChildren().add(new AmbientLight());
+//        assets.getChildren().add(new AmbientLight());
         return new Model(new Group(assets), null);
     }
 
     private static Model makeNextMarkIndicator(Group assets) {
-        assets.getChildren().add(new AmbientLight());
+//        assets.getChildren().add(new AmbientLight());
         return new Model(new Group(assets), null);
     }
 

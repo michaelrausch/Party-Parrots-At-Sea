@@ -39,7 +39,7 @@ public class BoatObject extends Group {
     // This stuff only matters to the players boat object.
     private Group markIndicator;
     private MeshView playerIndicator;
-    private Color indicatorColor = Color.LIGHTBLUE;
+    private Color indicatorColor = Color.BLACK;
     private ReadOnlyDoubleWrapper rotationProperty;
 
     private List<SelectedBoatListener> selectedBoatListenerListeners = new ArrayList<>();
@@ -104,8 +104,8 @@ public class BoatObject extends Group {
         markIndicator.getTransforms().clear();
         markIndicator.getTransforms().addAll(
             new Rotate(angle, new Point3D(0, 0, 1)),
-            new Translate(0, -radius, -0.1),
-            new Scale(scale, scale, scale / 3)
+            new Translate(0, -radius, 0.3`),
+            new Scale(scale, scale, scale / 10)
         );
     }
 
@@ -160,7 +160,7 @@ public class BoatObject extends Group {
         torus.getAssets().getTransforms().addAll(
             new Rotate(90, new Point3D(1, 0, 0)),
             new Scale(0.7, 0.7, 0.7),
-            new Translate(0, 0, 0)
+            new Translate(0, 0.5, 0)
         );
 
         this.getChildren().add(torus.getAssets());
