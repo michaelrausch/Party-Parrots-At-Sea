@@ -104,6 +104,7 @@ public class ServerYacht {
      * @param secondsElapsed The seconds elapsed since the last update of this yacht
      */
     public void updateLocation(Double secondsElapsed) {
+        //test
         lastLocation = location;
         location = GeoUtility.getGeoCoordinate(location, heading, currentVelocity * secondsElapsed);
     }
