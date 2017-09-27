@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Camera;
@@ -79,6 +80,7 @@ public class GameView3D {
     private List<Limit> borderPoints;
     private Map<Mark, Marker3D> markerObjects;
 
+    private BoatObject playerBoat;
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private BoatObject selectedBoat = null;
     private Group wakesGroup = new Group();
@@ -494,11 +496,23 @@ public class GameView3D {
                 ViewManager.getInstance().getGameClient().getServerThread().getClientId())) {
                 ((ChaseCamera) chaseCam).setPlayerBoat(newBoat);
                 ((TopDownCamera) topDownCam).setPlayerBoat(newBoat);
+
                 newBoat.setMarkIndicator(
                     ModelFactory.importModel(ModelType.NEXT_MARK_INDICATOR).getAssets());
+                playerBoat = newBoat;
+
             }
         }
         Platform.runLater(() -> {
+            ClientYacht playerYacht = ViewManager.getInstance().getGameClient().getAllBoatsMap()
+                .get(ViewManager.getInstance().getGameClient().getServerThread().getClientId());
+
+            for (ObservableValue o : Arrays
+                .asList(playerBoat.layoutXProperty(), playerBoat.layoutXProperty())) {
+                o.addListener((obs, oldVal, newVal) -> playerBoat.updateMarkIndicator(
+                    findScaledXY(course.get(playerYacht.getLegNumber()).getMidPoint())
+                ));
+            }
             gameObjects.getChildren().addAll(wakes);
             gameObjects.getChildren().addAll(boatObjectGroup);
         });

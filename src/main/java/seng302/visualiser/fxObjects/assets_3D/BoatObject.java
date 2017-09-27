@@ -5,6 +5,7 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -12,8 +13,6 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
-import seng302.model.ClientYacht;
-import seng302.visualiser.controllers.ViewManager;
 
 /**
  * BoatGroup is a javafx group that by default contains a graphical objects for representing a 2
@@ -83,34 +82,26 @@ public class BoatObject extends Group {
             this.layoutYProperty().setValue(y);
             wake.setLayoutX(x);
             wake.setLayoutY(y);
-
-            if (markIndicator != null) { // The player boat.
-                updateMarkIndicator();
-            }
-
         });
     }
 
-    private void updateMarkIndicator() {
+    public void updateMarkIndicator(Point2D markPoint) {
         // calculate heading between boat and next mark
 
-        Integer sourceId = ViewManager.getInstance().getGameClient().getServerThread()
-            .getClientId();
-        ClientYacht playerYacht = ViewManager.getInstance().getGameClient().getAllBoatsMap()
-            .get(sourceId);
+        Double x = markPoint.getX();
+        Double y = markPoint.getY();
 
-        Double x;
-        Double y;
-
-        Double deltaX = (this.getLayoutX() - x);
-        Double deltaY = (this.getLayoutY() - y);
+        Double deltaX = (boatAssets.getAssets().getLayoutX() - x);
+        Double deltaY = (boatAssets.getAssets().getLayoutY() - y);
         Double angle = Math.toDegrees(Math.atan2(deltaY, deltaX));
+
+        //Double angle = rotation.getAngle();
 
         ObservableList<Transform> transforms = markIndicator.getTransforms();
 
         Double radius = 3.0;
         Double scale = 0.4;
-        //Double angle = this.rotation.getAngle(); // THIS WILL BE THE NEXT MARK
+
         Double originX = this.getLayoutX();
         Double originY = this.getLayoutY();
 
@@ -119,7 +110,8 @@ public class BoatObject extends Group {
 
         transforms.clear();
         transforms.addAll(
-            new Rotate(angle, markIndicator.getLayoutX(), markIndicator.getLayoutY(), 0),
+            new Rotate(angle, boatAssets.getAssets().getLayoutX(),
+                boatAssets.getAssets().getLayoutY(), 0),
             new Translate(transX, transY, -1),
             new Scale(scale, scale, scale)
         );
