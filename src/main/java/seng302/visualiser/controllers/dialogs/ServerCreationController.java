@@ -28,11 +28,11 @@ public class ServerCreationController implements Initializable {
     @FXML
     private JFXSlider maxPlayersSlider;
     @FXML
-    private Label maxPlayersLabel;
-    @FXML
     private JFXButton submitBtn;
     @FXML
     private Label closeLabel;
+    @FXML
+    private Label maxPlayersLabel;
     @FXML
     private JFXButton nextMapButton;
     @FXML
@@ -47,10 +47,9 @@ public class ServerCreationController implements Initializable {
     private JFXCheckBox pickupsCheckBox;
     @FXML
     private AnchorPane mapHolder;
+    //---------FXML END---------//
 
     private MapMaker mapMaker = MapMaker.getInstance();
-
-    //---------FXML END---------//
 
     private List<ServerCreationDialogListener> serverCreationDialogListeners;
 
@@ -96,7 +95,7 @@ public class ServerCreationController implements Initializable {
         mapHolder.getChildren().setAll(mapMaker.getCurrentGameView());
         mapNameLabel.setText(mapMaker.getCurrentRegatta().getCourseName());
         pickupsCheckBox.setSelected(true);
-        //closeLabel.setOnMouseClicked(event -> notifyListeners());
+        closeLabel.setOnMouseClicked(event -> notifyListeners());
     }
 
     /**
@@ -134,7 +133,8 @@ public class ServerCreationController implements Initializable {
      */
     private void updateMaxPlayerLabel() {
         maxPlayersSlider.setValue(Math.floor(maxPlayersSlider.getValue()));
-        maxPlayersLabel.setText(String.format("Max players: %.0f", maxPlayersSlider.getValue()));
+        maxPlayersLabel.setText(String
+            .format("Only %.0f players are allowed into the game", maxPlayersSlider.getValue()));
     }
 
     private void updateLegSliderLabel() {
