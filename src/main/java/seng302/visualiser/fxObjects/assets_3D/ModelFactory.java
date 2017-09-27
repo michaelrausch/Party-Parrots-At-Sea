@@ -154,6 +154,8 @@ public class ModelFactory {
             assets.setCacheHint(CacheHint.SCALE_AND_ROTATE);
         }
         switch (tokenType) {
+            case PLAYER_IDENTIFIER_TORUS:
+                return makeIdentifierTorus(assets);
             case NEXT_MARK_INDICATOR:
                 return makeNextMarkIndicator(assets);
             case VELOCITY_PICKUP:
@@ -188,6 +190,11 @@ public class ModelFactory {
             default:
                 return new Model(new Group(assets), null);
         }
+    }
+
+    private static Model makeIdentifierTorus(Group assets) {
+        assets.getChildren().add(new AmbientLight());
+        return new Model(new Group(assets), null);
     }
 
     private static Model makeNextMarkIndicator(Group assets) {

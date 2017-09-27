@@ -31,6 +31,7 @@ public class BoatObject extends Group {
     private BoatModel boatAssets;
     private Group wake;
     private Group markIndicator;
+    private Group playerIndicator;
     private Color colour = Color.BLACK;
     private Boolean isSelected = false;
     private Rotate rotation = new Rotate(0, new Point3D(0,0,1));
@@ -93,8 +94,8 @@ public class BoatObject extends Group {
         Double angle = Math.toDegrees(
             Math.atan2(boatLoc.getY() - markPoint.getY(), boatLoc.getX() - markPoint.getX())) - 90;
 
-        Double radius = 3.0;
-        Double scale = 0.4;
+        Double radius = 2.7;
+        Double scale = 0.5;
 
         Double originX = this.getLayoutX();
         Double originY = this.getLayoutY();
@@ -106,7 +107,7 @@ public class BoatObject extends Group {
         markIndicator.getTransforms().clear();
         markIndicator.getTransforms().addAll(
             new Rotate(angle, new Point3D(0, 0, 1)),
-            new Translate(0, -3, -0.1),
+            new Translate(0, -radius, -0.1),
             new Scale(scale, scale, scale / 3)
         );
     }
@@ -153,6 +154,13 @@ public class BoatObject extends Group {
     public void setMarkIndicator(Group indicator) {
         this.markIndicator = indicator;
         this.getChildren().add(markIndicator);
+        Model torus = ModelFactory.importModel(ModelType.PLAYER_IDENTIFIER_TORUS);
+        torus.getAssets().getTransforms().addAll(
+            new Rotate(90, new Point3D(1, 0, 0)),
+            new Scale(0.7, 0.7, 0.7),
+            new Translate(0, 0, 0)
+        );
+        this.getChildren().add(torus.getAssets());
     }
 
     public Group getWake () {

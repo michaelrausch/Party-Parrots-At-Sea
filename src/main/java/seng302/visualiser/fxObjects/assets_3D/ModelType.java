@@ -27,7 +27,8 @@ public enum ModelType {
     PLAIN_ARROW ("arrow.dae"),
     START_ARROW ("start_arrow.dae"),
     FINISH_ARROW("finish_arrow.dae"),
-    NEXT_MARK_INDICATOR("indicator_arrow.dae");
+    NEXT_MARK_INDICATOR("indicator_arrow.dae"),
+    PLAYER_IDENTIFIER_TORUS("torus.dae");
 
     final String filename;
 

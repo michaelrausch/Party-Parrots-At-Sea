@@ -32,7 +32,6 @@ import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
-import seng302.model.token.TokenType;
 import seng302.utilities.GeoUtility;
 import seng302.utilities.Sounds;
 import seng302.visualiser.cameras.ChaseCamera;
