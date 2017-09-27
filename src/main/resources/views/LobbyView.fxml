@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import javafx.scene.*?>
 <?import com.jfoenix.controls.*?>
 <?import java.lang.*?>
@@ -79,9 +80,12 @@
                 </GridPane>
                 <GridPane GridPane.rowIndex="1">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="222.0" minWidth="222.0" prefWidth="222.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"
+                          prefWidth="115.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308"
+                          minWidth="337.0" prefWidth="430.0"/>
+                        <ColumnConstraints hgrow="NEVER" maxWidth="350.0" minWidth="350.0"
+                          prefWidth="350.0"/>
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints vgrow="SOMETIMES" />
@@ -106,123 +110,122 @@
                         <Insets bottom="15.0" left="7.0" right="7.0" top="15.0" />
                      </GridPane.margin>
                         </AnchorPane>
-                        <AnchorPane maxWidth="200.0" minWidth="200.0" prefHeight="370.0" prefWidth="200.0">
-                            <GridPane.margin>
-                                <Insets />
-                            </GridPane.margin>
+                        <GridPane prefHeight="370.0" prefWidth="189.0" vgap="5.0">
                             <children>
-                                <GridPane prefHeight="370.0" prefWidth="189.0" style="-fx-border-color: black; -fx-grid-lines-visible: true;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="309.0" AnchorPane.topAnchor="0.0">
-                                    <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0" prefWidth="80.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="110.0" minWidth="110.0" prefWidth="110.0" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                        <RowConstraints maxHeight="116.0" minHeight="0.0" prefHeight="40.0" vgrow="NEVER" />
-                                        <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
-                                        <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
-                                        <RowConstraints maxHeight="141.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
-                                        <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
-                                        <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
+                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Tokens"
+                                  GridPane.halignment="CENTER">
+                                    <font>
+                                        <Font name="System Bold" size="18.0"/>
+                                    </font>
+                                </Text>
+                                <StackPane prefHeight="150.0" prefWidth="200.0"
+                                  GridPane.rowIndex="1">
                                     <children>
-                                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Token" GridPane.halignment="CENTER">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font></Text>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Ability" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Text>
-                              <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="1">
-                                 <children>
-                                              <Label alignment="BOTTOM_CENTER" text="Speed" StackPane.alignment="BOTTOM_CENTER">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                       <padding>
-                                          <Insets bottom="5.0" />
-                                       </padding>
-                                    </Label>
-                                              <Pane fx:id="speedTokenPane" prefHeight="999.0" prefWidth="200.0" />
-                                 </children>
-                              </StackPane>
-                              <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="2">
-                                 <children>
-                                              <Label alignment="BOTTOM_CENTER" text="Handling" StackPane.alignment="BOTTOM_CENTER">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                       <padding>
-                                          <Insets bottom="5.0" />
-                                       </padding>
-                                    </Label>
-                                              <Pane fx:id="handlingTokenPane" prefHeight="999.0" prefWidth="200.0" />
-                                 </children>
-                              </StackPane>
-                              <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="3">
-                                 <children>
-                                              <Label alignment="BOTTOM_CENTER" text="Wind Walker" StackPane.alignment="BOTTOM_CENTER">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                       <padding>
-                                          <Insets bottom="5.0" />
-                                       </padding>
-                                    </Label>
-                                              <Pane fx:id="windWalkerTokenPane" prefHeight="999.0" prefWidth="200.0" />
-                                 </children>
-                              </StackPane>
-                              <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="4">
-                                 <children>
-                                              <Label alignment="BOTTOM_CENTER" text="Bumper" StackPane.alignment="BOTTOM_CENTER">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                       <padding>
-                                          <Insets bottom="5.0" />
-                                       </padding>
-                                    </Label>
-                                              <Pane fx:id="bumperTokenPane" prefHeight="999.0" prefWidth="200.0" />
-                                 </children>
-                              </StackPane>
-                              <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="5">
-                                 <children>
-                                              <Label alignment="BOTTOM_CENTER" text="Random" StackPane.alignment="BOTTOM_CENTER">
-                                       <font>
-                                          <Font size="12.0" />
-                                       </font>
-                                       <padding>
-                                          <Insets bottom="5.0" />
-                                       </padding>
-                                    </Label>
-                                              <Pane fx:id="randomTokenPane" prefHeight="999.0" prefWidth="60.0" />
-                                 </children>
-                              </StackPane>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Increases your speed and acceleration" textAlignment="CENTER" wrappingWidth="100.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
-                                 <GridPane.margin>
-                                    <Insets />
-                                 </GridPane.margin>
-                              </Text>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Decreases your turning circle" textAlignment="CENTER" wrappingWidth="100.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
-                                 <GridPane.margin>
-                                    <Insets />
-                                 </GridPane.margin>
-                              </Text>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="The wind follows you at the optimal angle" textAlignment="CENTER" wrappingWidth="100.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="CENTER">
-                                 <GridPane.margin>
-                                    <Insets />
-                                 </GridPane.margin>
-                              </Text>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Hitting another yacht will temporarily disable it" textAlignment="CENTER" wrappingWidth="100.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="50/50 chance for a random token or self  slow" textAlignment="CENTER" wrappingWidth="100.0" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="5" GridPane.valignment="CENTER" />
+                                        <Label alignment="BOTTOM_CENTER" text="Speed"
+                                          StackPane.alignment="BOTTOM_CENTER">
+                                            <font>
+                                                <Font size="12.0"/>
+                                            </font>
+                                            <padding>
+                                                <Insets bottom="5.0"/>
+                                            </padding>
+                                        </Label>
+                                        <Pane fx:id="speedTokenPane" prefHeight="999.0"
+                                          prefWidth="200.0" style="-fx-border-color: black;"
+                                          styleClass="tokenView"/>
                                     </children>
-                           <padding>
-                              <Insets bottom="15.0" left="15.0" right="7.0" top="15.0" />
-                           </padding>
-                                </GridPane>
+                                </StackPane>
+                                <StackPane prefHeight="150.0" prefWidth="200.0"
+                                  GridPane.rowIndex="2">
+                                    <children>
+                                        <Label alignment="BOTTOM_CENTER" text="Handling"
+                                          StackPane.alignment="BOTTOM_CENTER">
+                                            <font>
+                                                <Font size="12.0"/>
+                                            </font>
+                                            <padding>
+                                                <Insets bottom="5.0"/>
+                                            </padding>
+                                        </Label>
+                                        <Pane fx:id="handlingTokenPane" prefHeight="999.0"
+                                          prefWidth="200.0" style="-fx-border-color: black;"
+                                          styleClass="tokenView"/>
+                                    </children>
+                                </StackPane>
+                                <StackPane prefHeight="150.0" prefWidth="200.0"
+                                  GridPane.rowIndex="3">
+                                    <children>
+                                        <Label alignment="BOTTOM_CENTER" text="Wind Walker"
+                                          StackPane.alignment="BOTTOM_CENTER">
+                                            <font>
+                                                <Font size="12.0"/>
+                                            </font>
+                                            <padding>
+                                                <Insets bottom="5.0"/>
+                                            </padding>
+                                        </Label>
+                                        <Pane fx:id="windWalkerTokenPane" prefHeight="999.0"
+                                          prefWidth="200.0" style="-fx-border-color: black;"
+                                          styleClass="tokenView"/>
+                                    </children>
+                                </StackPane>
+                                <StackPane prefHeight="150.0" prefWidth="200.0"
+                                  GridPane.rowIndex="4">
+                                    <children>
+                                        <Label alignment="BOTTOM_CENTER" text="Bumper"
+                                          StackPane.alignment="BOTTOM_CENTER">
+                                            <font>
+                                                <Font size="12.0"/>
+                                            </font>
+                                            <padding>
+                                                <Insets bottom="5.0"/>
+                                            </padding>
+                                        </Label>
+                                        <Pane fx:id="bumperTokenPane" prefHeight="999.0"
+                                          prefWidth="200.0" style="-fx-border-color: black;"
+                                          styleClass="tokenView"/>
+                                    </children>
+                                </StackPane>
+                                <StackPane prefHeight="150.0" prefWidth="200.0"
+                                  GridPane.rowIndex="5">
+                                    <children>
+                                        <Label alignment="BOTTOM_CENTER" text="Random"
+                                          StackPane.alignment="BOTTOM_CENTER">
+                                            <font>
+                                                <Font size="12.0"/>
+                                            </font>
+                                            <padding>
+                                                <Insets bottom="5.0"/>
+                                            </padding>
+                                        </Label>
+                                        <Pane fx:id="randomTokenPane" prefHeight="999.0"
+                                          prefWidth="60.0" style="-fx-border-color: black;"
+                                          styleClass="tokenView"/>
+                                    </children>
+                                </StackPane>
                             </children>
-                        </AnchorPane>
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0"
+                                  prefWidth="80.0"/>
+                            </columnConstraints>
+                            <padding>
+                                <Insets bottom="15.0" left="15.0" right="7.0" top="15.0"/>
+                            </padding>
+                            <rowConstraints>
+                                <RowConstraints maxHeight="116.0" minHeight="0.0" prefHeight="40.0"
+                                  vgrow="NEVER"/>
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
+                                  prefHeight="60.0" vgrow="SOMETIMES"/>
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
+                                  prefHeight="60.0" vgrow="SOMETIMES"/>
+                                <RowConstraints maxHeight="141.0" minHeight="-Infinity"
+                                  prefHeight="60.0" vgrow="SOMETIMES"/>
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
+                                  prefHeight="60.0" vgrow="SOMETIMES"/>
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
+                                  prefHeight="60.0" vgrow="SOMETIMES"/>
+                            </rowConstraints>
+                        </GridPane>
                     </children>
                 </GridPane>
             </children>
@@ -234,10 +237,10 @@
                 <RowConstraints maxHeight="1.7976931348623157E308" minHeight="400.0" prefHeight="400.0" vgrow="SOMETIMES" />
                 <RowConstraints maxHeight="80.0" minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
             </rowConstraints>
-            <stylesheets>
-                <String fx:value="/css/Master.css" />
-                <String fx:value="/css/LobbyView.css" />
-            </stylesheets>
         </GridPane>
     </children>
+    <stylesheets>
+        <URL value="@../css/Master.css"/>
+        <URL value="@../css/LobbyView.css"/>
+    </stylesheets>
 </StackPane>
