@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,7 @@ public class GameState implements Runnable {
 
     private static Long previousUpdateTime;
     public static Double windDirection;
+    public static ReadOnlyDoubleWrapper windDirectionProperty = new ReadOnlyDoubleWrapper();
     private static Double windSpeed;
     private static Double serverSpeedMultiplier;
 
@@ -108,6 +110,7 @@ public class GameState implements Runnable {
 
     public GameState() {
         windDirection = 180d;
+        windDirectionProperty.set(windDirection);
         windSpeed = 10000d;
         yachts = new HashMap<>();
         tokensInPlay = new ArrayList<>();
@@ -191,6 +194,7 @@ public class GameState implements Runnable {
 
     public static void setWindDirection(Double newWindDirection) {
         windDirection = newWindDirection;
+        windDirectionProperty.set(newWindDirection);
     }
 
     public static void setWindSpeed(Double newWindSpeed) {
@@ -509,6 +513,7 @@ public class GameState implements Runnable {
         Double optimalAngle = PolarTable.getOptimalAngle();
         Double heading = yacht.getHeading();
         windDirection = (double) Math.floorMod(Math.round(heading + optimalAngle), 360L);
+        windDirectionProperty.set(windDirection);
     }
 
 
@@ -1057,5 +1062,9 @@ public class GameState implements Runnable {
 
     public static void setTokensEnabled (boolean tokensEnabled) {
         GameState.tokensEnabled = tokensEnabled;
+    }
+
+    public static ReadOnlyDoubleWrapper getWindDirectionProperty() {
+        return windDirectionProperty;
     }
 }

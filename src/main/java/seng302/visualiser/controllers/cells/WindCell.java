@@ -2,6 +2,7 @@ package seng302.visualiser.controllers.cells;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Point3D;
 import javafx.scene.Camera;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -9,8 +10,11 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.layout.Pane;
+import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import seng302.gameServer.GameState;
+import seng302.model.ClientYacht;
 import seng302.visualiser.fxObjects.assets_3D.Model;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 
@@ -33,21 +37,34 @@ public class WindCell {
     private PerspectiveCamera camera = null;
     private ObservableList<Transform> cameraTransforms;
 
+    private Model windArrowModel;
+
     /**
      * Initialise WindCell fxml and load 3D wind arrow into a group.
      */
-    public void initialize() {
+    public void init(ClientYacht playerYacht) {
         camera = new PerspectiveCamera();
         camera.setFarClip(1000);
         camera.setNearClip(0.1);
         camera.setFieldOfView(60);
         this.cameraTransforms = camera.getTransforms();
         initialiseWindView();
+
+        GameState.getWindDirectionProperty().addListener(
+            (obs, oldValue, newValue) -> {
+//                if (camera instanceof IsometricCamera) {
+                windArrowModel.getAssets().getTransforms().clear();
+                windArrowModel.getAssets().getTransforms().addAll(
+                    new Rotate(newValue.doubleValue(),
+                        new Point3D(0, 0, 1))
+
+                );
+//                }
+            });
     }
 
     private void initialiseWindView() {
         gameObjects = new Group();
-        System.out.println(windPane);
         windPane.getChildren().add(gameObjects);
 
         root3D = new Group(camera, gameObjects);
@@ -56,7 +73,7 @@ public class WindCell {
         );
         view.setCamera(camera);
 
-        Model windArrowModel = ModelFactory.makeWindArrow();
+        windArrowModel = ModelFactory.makeWindArrow();
 
         gameObjects.getChildren().addAll(
             windArrowModel.getAssets()
@@ -74,5 +91,9 @@ public class WindCell {
                 this.camera.getTransforms().add(t);
             }
         }
+        Translate t = new Translate(-55, -60, 0);
+        this.camera.getTransforms().add(t);
+
+        windArrowModel.getAssets().getTransforms().clear();
     }
 }

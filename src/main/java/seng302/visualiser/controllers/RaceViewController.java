@@ -215,10 +215,10 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
             e.printStackTrace();
         }
 
+        windCell.init(player);
         windCell.setCamera(gameView.getView().getCamera());
         gameView.getView().cameraProperty()
             .addListener((obs, oldVal, newVal) -> windCell.setCamera(newVal));
-        System.out.println(windCell);
 
         windArrowVBox.getChildren().add(windCell.getAssets());
     }
