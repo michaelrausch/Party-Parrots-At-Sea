@@ -93,23 +93,26 @@ public class ModelFactory {
         Group boatAssets = new Group();
         MeshView hull = importBoatSTL(boatType.hullFile);
         hull.setMaterial(new PhongMaterial(primaryColour));
-        MeshView sail = importBoatSTL(boatType.sailFile);
-        sail.setMaterial(
-            new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.BLACK : Color.WHITE)
-        );
-
-        boatAssets.getChildren().addAll(hull, sail);
+        boatAssets.getChildren().add(hull);
 
         if (boatType.mastFile != null) {
             MeshView mast = importBoatSTL(boatType.mastFile);
             mast.setMaterial(new PhongMaterial(primaryColour));
             boatAssets.getChildren().add(mast);
+        } else {
+            boatAssets.getChildren().add(new Group());
         }
+
+        MeshView sail = importBoatSTL(boatType.sailFile);
+        sail.setMaterial(
+            new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.DARKGRAY : Color.WHITE)
+        );
+        boatAssets.getChildren().add(sail);
 
         if (boatType.jibFile != null) {
             MeshView jib = importBoatSTL(boatType.jibFile);
-            sail.setMaterial(
-                new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.DARKGRAY : Color.WHITE)
+            jib.setMaterial(
+                new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.BLACK : Color.WHITE)
             );
             boatAssets.getChildren().add(jib);
         }
