@@ -404,7 +404,9 @@ public class ViewManager {
                 .add(getClass().getResource("/css/dialogs/Snackbar.css").toExternalForm());
 
         JFXSnackbar bar = new JFXSnackbar(decorator);
-        bar.enqueue(new JFXSnackbar.SnackbarEvent(msg));
+        Platform.runLater(() -> {
+            bar.enqueue(new JFXSnackbar.SnackbarEvent(msg));
+        });
     }
 
     public Stage getStage() {

@@ -51,7 +51,7 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
  * Collection of animated3D assets that displays a race.
  */
 
-public class GameView3D extends GameView{
+public class GameView3D extends GameView {
 
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_X = 0;

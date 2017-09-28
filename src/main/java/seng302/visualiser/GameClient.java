@@ -49,12 +49,6 @@ import seng302.visualiser.controllers.RaceViewController;
 import seng302.visualiser.controllers.ViewManager;
 import seng302.visualiser.controllers.dialogs.PopupDialogController;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.*;
-
 /**
  * This class is a client side instance of a yacht racing game in JavaFX. The game is instantiated
  * with a JavaFX Pane to insert itself into.
@@ -314,6 +308,7 @@ public class GameClient {
                     formatAndSendChatMessage(raceView.readChatInput());
                 }
             });
+            gameKeyBind.toggleTurningMode();
             sendToggleTurningModePacket(); // notify the server about player's steering mode
         }
     }
