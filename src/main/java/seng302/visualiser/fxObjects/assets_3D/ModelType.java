@@ -29,6 +29,8 @@ public enum ModelType {
     FINISH_ARROW ("finish_arrow.dae"),
     LAND("land.dae"),
     LAND_SMOOTH("land_smooth.dae"),
+    NEXT_MARK_INDICATOR("indicator_arrow.dae"),
+    PLAYER_IDENTIFIER_TORUS("torus.dae"),
     WIND_ARROW("windFiles/arrow56.dae"); // change filename
 
     final String filename;

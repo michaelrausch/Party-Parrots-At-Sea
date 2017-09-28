@@ -1,10 +1,50 @@
-#background {
-    -fx-background-color: #E7F1F8;
+.root {
+    -fx-effect: -fx-pp-dropshadow-dark;
+    -fx-background-radius: 5;
+    -fx-padding: 10;
+}
+
+#rootPane {
+    -fx-background-image: url("/images/waves.png");
+
 }
 
 #headText {
-    -fx-background-color: transparent;
     -fx-font-size: 52px;
-    -fx-text-fill: -fx-pp-light-text-color;
-    -fx-effect: -fx-pp-dropshadow-headers;
+    -fx-text-fill: rgb(30, 30, 30);
+    -fx-effect: -fx-pp-dropshadow-dark;
+}
+
+#subHeadLabel {
+    -fx-text-fill: rgb(30, 30, 30);
+    -fx-effect: -fx-pp-dropshadow-dark;
+    -fx-font-size: 12px;
+}
+
+.materialDesign-purple .arc {
+    -fx-stroke: #ab47bc;
+}
+
+.materialDesign-blue .arc {
+    -fx-stroke: #2962ff;
+}
+
+.materialDesign-cyan .arc {
+    -fx-stroke: #00b8d4;
+}
+
+.materialDesign-green .arc {
+    -fx-stroke: #00c853;
+}
+
+.materialDesign-yellow .arc {
+    -fx-stroke: #ffd600;
+}
+
+.materialDesign-orange .arc {
+    -fx-stroke: #ff6d00;
+}
+
+.materialDesign-red .arc {
+    -fx-stroke: #d50000;
 }
