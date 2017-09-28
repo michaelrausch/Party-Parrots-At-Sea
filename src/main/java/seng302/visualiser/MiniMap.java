@@ -43,11 +43,13 @@ public class MiniMap extends MapPreview {
             boatIcons.put(yacht, boatIcon);
             boatIcon.getTransforms().add(new Rotate(0));
             yacht.addLocationListener((boat, lat, lon, heading, sailIn, velocity) -> {
-                Polygon bi = boatIcons.get(boat);
-                Point2D p2d = scaledPoint.findScaledXY(lat, lon);
-                bi.setLayoutX(p2d.getX());
-                bi.setLayoutY(p2d.getY());
-                ((Rotate) bi.getTransforms().get(0)).setAngle(heading);
+                Platform.runLater(() -> {
+                    Polygon bi = boatIcons.get(boat);
+                    Point2D p2d = scaledPoint.findScaledXY(lat, lon);
+                    bi.setLayoutX(p2d.getX());
+                    bi.setLayoutY(p2d.getY());
+                    ((Rotate) bi.getTransforms().get(0)).setAngle(heading);
+                });
             });
         }
         Platform.runLater(() -> {

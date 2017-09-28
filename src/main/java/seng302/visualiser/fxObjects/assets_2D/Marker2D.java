@@ -28,8 +28,7 @@ public class Marker2D extends Group {
         mark.setRadius(5);
         mark.setCenterX(0);
         mark.setCenterY(0);
-        Platform.runLater(() -> this.getChildren()
-            .addAll(mark, new Group())); //Empty group placeholder or arrows.
+        Platform.runLater(() -> this.getChildren().add(mark));
     }
 
     /**
@@ -82,13 +81,9 @@ public class Marker2D extends Group {
 
     private void showArrow(List<Group> arrowList, int arrowListIndex) {
         if (arrowListIndex < arrowList.size()) {
-            if (arrowListIndex == 1) {
-                ;
-            }
-            Platform.runLater(() -> {
-                this.getChildren().remove(1);
-                this.getChildren().add(arrowList.get(arrowListIndex));
-            });
+            Platform.runLater(() ->
+                this.getChildren().setAll(mark, arrowList.get(arrowListIndex))
+            );
         }
     }
 
