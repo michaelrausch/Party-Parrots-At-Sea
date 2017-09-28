@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RaceDefinition>
+
+  <CourseName> Loopty Loop </CourseName>
+
+  <CentralLat> 57.6679590 </CentralLat>
+  <CentralLng> 11.8503233 </CentralLng>
+
+  <MaxPlayers> 5 </MaxPlayers>
+
+  <Marks>
+    <CompoundMark CompoundMarkID="1">
+      <Mark Lat="57.6675700" Lng="11.8359880"/>
+      <Mark Lat="57.667610" Lng="11.833473"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="2">
+      <Mark Lat="57.670914" Lng="11.835263"/>
+      <Mark Lat="57.6699024" Lng="11.8353195"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="3">
+      <Mark Lat="57.6674596" Lng="11.8417500"/>
+      <Mark Lat="57.667473" Lng="11.84429"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="4">
+      <Mark Lat="57.6657945" Lng="11.8351409"/>
+      <Mark Lat="57.6643158" Lng="11.8352297"/>
+    </CompoundMark>
+    <CompoundMark CompoundMarkID="5">
+      <Mark Lat="57.667311" Lng="11.828857"/>
+      <Mark Lat="57.667334" Lng="11.825853"/>
+    </CompoundMark>
+  </Marks>
+
+  <Course>
+    <OpeningSegment>
+      <Corner CompoundMarkID="1" Rounding="PS"/>
+      <Corner CompoundMarkID="2" Rounding="P"/>
+    </OpeningSegment>
+
+    <RepeatingSegment>
+      <Corner CompoundMarkID="3" Rounding="SP"/>
+      <Corner CompoundMarkID="4" Rounding="PS"/>
+    </RepeatingSegment>
+
+    <ClosingSegment>
+      <Corner CompoundMarkID="5" Rounding="PS"/>
+    </ClosingSegment>
+  </Course>
+
+  <CourseLimit>
+    <Limit Lat="57.672937" Lng="11.836257" />
+    <Limit Lat="57.671239" Lng="11.843078" />
+    <Limit Lat="57.667128" Lng="11.848022" />
+    <Limit Lat="57.664512" Lng="11.844839" />
+    <Limit Lat="57.662515" Lng="11.835569" />
+    <Limit Lat="57.663939" Lng="11.827501" />
+    <Limit Lat="57.667542" Lng="11.822952" />
+    <Limit Lat="57.671123" Lng="11.826858" />
+  </CourseLimit>
+
+</RaceDefinition>

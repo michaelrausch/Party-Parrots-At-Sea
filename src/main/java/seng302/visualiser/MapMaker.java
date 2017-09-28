@@ -35,7 +35,7 @@ public class MapMaker {
     private int index = 0;
     private XMLGenerator xmlGenerator = new XMLGenerator();
 
-    private List<String> maps = new ArrayList<>(Arrays.asList("default.xml", "horseshoe.xml"));
+    private List<String> maps = new ArrayList<>(Arrays.asList("default.xml", "horseshoe.xml", "loop.xml"));
 
     public static MapMaker getInstance() {
         if (instance == null) {

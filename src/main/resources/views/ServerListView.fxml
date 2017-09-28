@@ -113,8 +113,8 @@
             </columnConstraints>
             <rowConstraints>
                 <RowConstraints maxHeight="80.0" minHeight="80.0" prefHeight="80.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="400.0" prefHeight="459.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="70.0" minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="400.0" prefHeight="429.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="100.0" minHeight="100.0" prefHeight="100.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <stylesheets>
                 <String fx:value="/css/Master.css" />
