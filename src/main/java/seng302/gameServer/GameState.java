@@ -68,7 +68,7 @@ public class GameState implements Runnable {
 
     //Collision constants
     private static final Double MARK_COLLISION_DISTANCE = 15d;
-    public static final Double YACHT_COLLISION_DISTANCE = 25.0;
+    public static final Double YACHT_COLLISION_DISTANCE = 15.0;
     private static final Double BOUNCE_DISTANCE_MARK = 20.0;
     public static final Double BOUNCE_DISTANCE_YACHT = 30.0;
     private static final Double COLLISION_VELOCITY_PENALTY = 0.3;

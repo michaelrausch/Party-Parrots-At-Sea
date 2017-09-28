@@ -50,6 +50,8 @@ public class RaceViewController extends Thread {
     @FXML
     private Pane chatHistoryHolder;
     @FXML
+    private JFXButton chatToggleButton;
+    @FXML
     private TextField chatInput;
     @FXML
     private Label timerLabel;
@@ -85,6 +87,8 @@ public class RaceViewController extends Thread {
     public void initialize() {
         miniMapPane.setVisible(false);
         miniMapButton.setVisible(false);
+        chatHistoryHolder.setVisible(false);
+        chatToggleButton.setVisible(false);
         contentStackPane.setVisible(false);
         Image loadingImage = new Image("PP.png");
         loadingScreen.setImage(loadingImage);
@@ -120,6 +124,9 @@ public class RaceViewController extends Thread {
             chatHistoryHolder.heightProperty()
         );
 
+        contentStackPane.getChildren().remove(chatToggleButton);
+        contentStackPane.getChildren().add(chatToggleButton);
+
         contentStackPane.setOnMouseClicked(event -> {
             contentStackPane.requestFocus();
         });
@@ -146,6 +153,9 @@ public class RaceViewController extends Thread {
         contentStackPane.setVisible(true);
         miniMapPane.setVisible(true);
         miniMapButton.setVisible(true);
+        chatHistoryHolder.setVisible(true);
+        chatToggleButton.setVisible(true);
+
         Platform.runLater(() -> contentStackPane.requestFocus());
     }
 
@@ -194,6 +204,16 @@ public class RaceViewController extends Thread {
             } else {
                 miniMapPane.setVisible(true);
                 miniMapButton.setText("—");
+            }
+        });
+
+        chatToggleButton.setOnMouseClicked((event) -> {
+            if (chatHistoryHolder.visibleProperty().get()) {
+                chatHistoryHolder.setVisible(false);
+                chatToggleButton.setText("+");
+            } else {
+                chatHistoryHolder.setVisible(true);
+                chatToggleButton.setText("—");
             }
         });
 
