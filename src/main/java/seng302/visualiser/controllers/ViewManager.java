@@ -6,10 +6,16 @@ import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialog.DialogTransition;
 import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.svg.SVGGlyph;
+import java.io.IOException;
+import java.util.HashMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.*;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -23,9 +29,6 @@ import seng302.utilities.Sounds;
 import seng302.visualiser.GameClient;
 import seng302.visualiser.controllers.dialogs.KeyBindingDialogController;
 import seng302.visualiser.controllers.dialogs.PopupDialogController;
-
-import java.io.IOException;
-import java.util.HashMap;
 
 public class ViewManager {
 
@@ -376,8 +379,8 @@ public class ViewManager {
                 scene.setOnKeyPressed(gameClient::keyPressed);
                 scene.setOnKeyReleased(gameClient::keyReleased);
 
-                stage.setMinHeight(500);
-                stage.setMinWidth(800);
+                stage.setMinHeight(800);
+                stage.setMinWidth(1200);
                 stage.setTitle("Party Parrots At Sea");
                 stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
                 stage.setOnCloseRequest(e -> closeAll());
