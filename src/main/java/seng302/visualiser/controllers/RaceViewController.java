@@ -73,7 +73,7 @@ public class RaceViewController extends Thread {
     private GameView3D gameView;
     private RaceState raceState;
     private ChatHistory chatHistory;
-        private Timer timer = new Timer();
+    private Timer timer = new Timer();
     private ClientYacht player;
     private JFXDialog finishScreenDialog;
     private FinishDialogController finishDialogController;
@@ -146,12 +146,7 @@ public class RaceViewController extends Thread {
         contentStackPane.setVisible(true);
         miniMapPane.setVisible(true);
         miniMapButton.setVisible(true);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                contentStackPane.requestFocus();
-            }
-        });
+        Platform.runLater(() -> contentStackPane.requestFocus());
     }
 
     /**
@@ -288,7 +283,7 @@ public class RaceViewController extends Thread {
         }
     }
 
-    public void removeIcon(ClientYacht yacht) {
+    private void removeIcon(ClientYacht yacht) {
         if (yacht == player) {
             blinkingTimer.cancel();
             iconToDisplay.setVisible(false);

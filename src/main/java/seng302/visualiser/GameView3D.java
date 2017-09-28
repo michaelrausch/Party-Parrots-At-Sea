@@ -350,18 +350,19 @@ public class GameView3D extends GameView {
             for (ObservableValue o : Arrays
                 .asList(playerBoat.layoutXProperty(), playerBoat.layoutXProperty())) {
                 o.addListener((obs, oldVal, newVal) -> {
+                    if (playerYacht.getLegNumber() < course.size()) {
+                        List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
+                        Point2D midPoint = new Point2D(0, 0);
+                        if (marks.size() == 1) {
+                            midPoint = scaledPoint.findScaledXY(marks.get(0));
+                        } else if (marks.size() == 2) {
+                            midPoint = (scaledPoint.findScaledXY(marks.get(0)))
+                                .midpoint(scaledPoint.findScaledXY(marks.get(1)));
+                        }
 
-                    List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
-                    Point2D midPoint = new Point2D(0, 0);
-                    if (marks.size() == 1) {
-                        midPoint = scaledPoint.findScaledXY(marks.get(0));
-                    } else if (marks.size() == 2) {
-                        midPoint = (scaledPoint.findScaledXY(marks.get(0)))
-                            .midpoint(scaledPoint.findScaledXY(marks.get(1)));
-                    }
-
-                    if (midPoint != null) {
-                        playerBoat.updateMarkIndicator(midPoint);
+                        if (midPoint != null) {
+                            playerBoat.updateMarkIndicator(midPoint);
+                        }
                     }
 
                 });
