@@ -1,17 +1,17 @@
 package seng302.visualiser;
 
-import seng302.gameServer.ServerAdvertiser;
-import seng302.gameServer.ServerDescription;
+import static seng302.gameServer.ServerAdvertiser.getLocalHostIp;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
-import javax.jmdns.impl.JmDNSImpl;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.*;
-
-import static seng302.gameServer.ServerAdvertiser.getLocalHostIp;
+import seng302.gameServer.ServerAdvertiser;
+import seng302.gameServer.ServerDescription;
 
 /**
  * Listens for servers on the local network
@@ -58,7 +58,7 @@ public class ServerListener{
                 servers.remove(toRemove);
             }
 
-            delegate.serverRemoved(new ArrayList<ServerDescription>(servers));
+            delegate.serverRemoved(new ArrayList<>(servers));
 
             // Get all other servers with the same name to respond if they are up
             jmdns.requestServiceInfo(ServerAdvertiser.SERVICE_TYPE, serverName);
@@ -94,13 +94,6 @@ public class ServerListener{
 
         listener = new GameServeMonitor();
         jmdns.addServiceListener(ServerAdvertiser.SERVICE_TYPE, listener);
-
-        /*new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                refresh();
-            }
-        }, 50, SERVICE_REFRESH_INTERVAL);*/
     }
 
     public static ServerListener getInstance() throws IOException {
@@ -134,7 +127,7 @@ public class ServerListener{
         for (ServerDescription server : servers){
             if (server.serverShouldBeRemoved()){
                 listener.servers.remove(server);
-                delegate.serverRemoved(new ArrayList<ServerDescription>(listener.servers));
+                delegate.serverRemoved(new ArrayList<>(listener.servers));
             }
         }
 

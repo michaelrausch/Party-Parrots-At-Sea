@@ -1,6 +1,5 @@
 package seng302.gameServer;
 
-import seng302.gameServer.messages.*;
 import java.util.ArrayList;
 import java.util.List;
 import seng302.gameServer.messages.BoatLocationMessage;
@@ -24,9 +23,6 @@ import seng302.model.stream.xml.parser.RegattaXMLData;
 import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.XMLGenerator;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A Class for interfacing between the data we have in the GameState to the messages we need to send
@@ -77,9 +73,6 @@ public class MessageFactory {
     }
 
     public static void updateBoats(List<ServerYacht> yachts) {
-//        for (ServerYacht serverYacht : yachts) {
-//            System.out.println(serverYacht);
-//        }
         xmlGenerator.getRace().setBoats(yachts);
         String xmlStr = xmlGenerator.getBoatsAsXml();
         MessageFactory.boats = new XMLMessage(xmlStr, XMLMessageSubType.BOAT, xmlStr.length());

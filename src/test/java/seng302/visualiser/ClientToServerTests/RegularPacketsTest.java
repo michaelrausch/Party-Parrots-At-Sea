@@ -20,7 +20,7 @@ public class RegularPacketsTest {
     public void setup() throws Exception {
         new GameState();
         serverThread = new MainServerThread();
-        clientThread = new ClientToServerThread("localhost", 4942);
+        clientThread = new ClientToServerThread("localhost", serverThread.getPortNumber());
         GameState.setCurrentStage(GameStages.RACING);
     }
 

@@ -1,6 +1,5 @@
 package seng302.visualiser;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -35,7 +34,8 @@ public class MapMaker {
     private int index = 0;
     private XMLGenerator xmlGenerator = new XMLGenerator();
 
-    private List<String> maps = new ArrayList<>(Arrays.asList("default.xml", "horseshoe.xml", "loop.xml"));
+    private List<String> maps = new ArrayList<>(
+        Arrays.asList("default.xml", "horseshoe.xml", "loop.xml", "madagascar.xml", "waiheke.xml"));
 
     public static MapMaker getInstance() {
         if (instance == null) {
@@ -106,10 +106,6 @@ public class MapMaker {
 
     public Node getCurrentGameView() {
         return mapPreviews.get(index).getAssets();
-    }
-
-    public RaceXMLData getCurrentRace() {
-        return races.get(index);
     }
 
     public RegattaXMLData getCurrentRegatta() {

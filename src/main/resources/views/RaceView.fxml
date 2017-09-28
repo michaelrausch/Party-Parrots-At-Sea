@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.*?>
-<?import javafx.scene.shape.*?>
 <?import com.jfoenix.controls.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
@@ -292,13 +290,26 @@
         </GridPane>
     </children>
 </StackPane>
+        <Pane fx:id="miniMapPane" maxHeight="200.0" maxWidth="200.0" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white; -fx-opacity: 0.45; -fx-background-radius: 10;" StackPane.alignment="TOP_RIGHT">
+            <StackPane.margin>
+                <Insets right="15.0" top="15.0" />
+            </StackPane.margin>
+        </Pane>
+        <JFXButton fx:id="miniMapButton" style="-fx-background-color: white; -fx-opacity: 0.45; -fx-background-radius: 10;" text="—" StackPane.alignment="TOP_RIGHT">
+            <font>
+                <Font size="15.0" />
+            </font>
+            <StackPane.margin>
+                <Insets right="15.0" top="15.0" />
+            </StackPane.margin>
+        </JFXButton>
         <AnchorPane fx:id="loadingScreenPane">
             <ImageView fx:id="loadingScreen" fitHeight="672.0" fitWidth="1200.0" pickOnBounds="true" preserveRatio="true" />
             <JFXSpinner layoutX="566.0" layoutY="692.0" radius="30.0" />
         </AnchorPane>
     </children>
     <stylesheets>
-        <String fx:value="/css/Master.css"/>
-        <String fx:value="/css/RaceView.css"/>
+        <String fx:value="/css/Master.css" />
+        <String fx:value="/css/RaceView.css" />
     </stylesheets>
 </StackPane>

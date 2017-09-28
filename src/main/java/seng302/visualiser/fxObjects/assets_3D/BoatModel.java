@@ -60,7 +60,9 @@ public class BoatModel extends Model {
      */
     public void changeColour(Color newColour) {
         changeColourChild(HULL_INDEX, newColour);
-        changeColourChild(MAST_INDEX, newColour);
+        if (meshType != BoatMeshType.PARROT) {
+            changeColourChild(MAST_INDEX, newColour);
+        }
     }
 
     private void changeColourChild(int index, Color newColour) {

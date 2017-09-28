@@ -146,6 +146,8 @@ public class ServerAdvertiser {
     public void unregister(){
         if (serviceInfo != null)
             jmdnsInstance.unregisterService(serviceInfo);
+
+        repositoryClient.unregister();
     }
 
     /**

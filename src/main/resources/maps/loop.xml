@@ -15,7 +15,6 @@
     </CompoundMark>
     <CompoundMark CompoundMarkID="2">
       <Mark Lat="57.670914" Lng="11.835263"/>
-      <Mark Lat="57.6699024" Lng="11.8353195"/>
     </CompoundMark>
     <CompoundMark CompoundMarkID="3">
       <Mark Lat="57.6674596" Lng="11.8417500"/>
@@ -29,21 +28,27 @@
       <Mark Lat="57.667311" Lng="11.828857"/>
       <Mark Lat="57.667334" Lng="11.825853"/>
     </CompoundMark>
+    <CompoundMark CompoundMarkID="6">
+      <Mark Lat="57.6675700" Lng="11.8359880"/>
+      <Mark Lat="57.667610" Lng="11.833473"/>
+    </CompoundMark>
   </Marks>
 
   <Course>
     <OpeningSegment>
       <Corner CompoundMarkID="1" Rounding="PS"/>
-      <Corner CompoundMarkID="2" Rounding="P"/>
+      <Corner CompoundMarkID="2" Rounding="S"/>
     </OpeningSegment>
 
     <RepeatingSegment>
       <Corner CompoundMarkID="3" Rounding="SP"/>
       <Corner CompoundMarkID="4" Rounding="PS"/>
+      <Corner CompoundMarkID="5" Rounding="PS"/>
+      <Corner CompoundMarkID="2" Rounding="S"/>
     </RepeatingSegment>
 
     <ClosingSegment>
-      <Corner CompoundMarkID="5" Rounding="PS"/>
+      <Corner CompoundMarkID="6" Rounding="PS"/>
     </ClosingSegment>
   </Course>
 

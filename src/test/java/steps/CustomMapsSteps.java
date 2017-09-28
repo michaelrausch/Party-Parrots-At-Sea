@@ -3,6 +3,9 @@ package steps;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Comparator;
 import org.junit.Assert;
 import seng302.visualiser.MapMaker;
 
@@ -16,26 +19,26 @@ public class CustomMapsSteps {
 
     @Given("^that the game has multiple race xml files$")
     public void that_the_game_has_multiple_race_xml_files() throws Throwable {
-//        mapMaker = MapMaker.getInstance();
-//        String firstMap = mapMaker.getCurrentRacePath();
-//        int numMaps = 0;
-//        do {
-//            mapMaker.next();
-//            numMaps++;
-//        } while (!mapMaker.getCurrentRacePath().equals(firstMap));
-//        Assert.assertTrue(numMaps >= 2);
+        mapMaker = MapMaker.getInstance();
+        String firstMap = mapMaker.getCurrentRacePath();
+        int numMaps = 0;
+        do {
+            mapMaker.next();
+            numMaps++;
+        } while (!mapMaker.getCurrentRacePath().equals(firstMap));
+        Assert.assertTrue(numMaps >= 2);
     }
 
     @Then("^all of them can be seen$")
     public void all_of_them_can_be_seen() throws Throwable {
-//        File[] files = new File(this.getClass().getResource("/maps/").getPath()).listFiles();
-//        for (File file : files) {
-//            if (file.isFile()) {
-//                Assert.assertTrue(file.getAbsolutePath().equals(mapMaker.getCurrentRacePath()));
-//                mapMaker.next();
-//                System.out.println(file.getAbsolutePath());
-//            }
-//        }
+        File[] files = new File(this.getClass().getResource("/maps/").getPath()).listFiles();
+        Arrays.sort(files);
+        for (File file : files) {
+            if (file.isFile()) {
+                Assert.assertTrue(file.getAbsolutePath().endsWith(mapMaker.getCurrentRacePath()));
+                mapMaker.next();
+            }
+        }
     }
 
     @Given("^that I choose a race$")

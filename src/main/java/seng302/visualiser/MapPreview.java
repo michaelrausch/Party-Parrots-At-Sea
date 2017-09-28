@@ -3,7 +3,6 @@ package seng302.visualiser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -19,6 +18,7 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.utilities.GeoUtility;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
+import seng302.visualiser.fxObjects.Marker;
 import seng302.visualiser.fxObjects.assets_2D.CourseBoundary;
 import seng302.visualiser.fxObjects.assets_2D.Gate;
 import seng302.visualiser.fxObjects.assets_2D.Marker2D;
@@ -29,7 +29,6 @@ import seng302.visualiser.fxObjects.assets_2D.Marker2D;
 public class MapPreview extends GameView {
 
     private Polygon raceBorder = new CourseBoundary();
-    private Map<Mark, Marker2D> markerObjects;
 
     public MapPreview(List<CompoundMark> marks, List<Corner> course, List<Limit> border) {
         this.compoundMarks = marks;
@@ -240,7 +239,7 @@ public class MapPreview extends GameView {
      * @param colour The desired colour of the gate.
      * @return the new gate.
      */
-    private Gate makeAndBindGate(Marker2D m1, Marker2D m2, Paint colour) {
+    private Gate makeAndBindGate(Marker m1, Marker m2, Paint colour) {
         Gate gate = new Gate(colour);
         gate.startXProperty().bind(
             m1.layoutXProperty()

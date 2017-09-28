@@ -34,7 +34,6 @@ import seng302.model.mark.Corner;
 import seng302.model.mark.Mark;
 import seng302.model.token.Token;
 import seng302.utilities.GeoUtility;
-import seng302.utilities.Sounds;
 import seng302.visualiser.cameras.ChaseCamera;
 import seng302.visualiser.cameras.IsometricCamera;
 import seng302.visualiser.cameras.RaceCamera;
@@ -51,11 +50,11 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
  * Collection of animated3D assets that displays a race.
  */
 
-public class GameView3D extends GameView{
+public class GameView3D extends GameView {
 
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_X = 0;
-    private final double DEFAULT_CAMERA_Y = 100;
+    private final double DEFAULT_CAMERA_Y = 160;
 
     private Group root3D;
     private SubScene view;
@@ -66,11 +65,6 @@ public class GameView3D extends GameView{
     private PerspectiveCamera isometricCam;
     private PerspectiveCamera topDownCam;
     private PerspectiveCamera chaseCam;
-
-    /* Note that if either of these is null then values for it have not been added and the other
-       should be used as the limits of the map. */
-    private Map<Mark, Marker3D> markerObjects;
-
     private BoatObject playerBoat;
     private Map<ClientYacht, BoatObject> boatObjects = new HashMap<>();
     private Group wakesGroup = new Group();
@@ -96,11 +90,11 @@ public class GameView3D extends GameView{
         }
 
         gameObjects = new Group();
-        root3D = new Group(isometricCam, gameObjects);
+        root3D = new Group(chaseCam, gameObjects);
         view = new SubScene(
             root3D, 5000, 3000, true, SceneAntialiasing.BALANCED
         );
-        view.setCamera(isometricCam);
+        view.setCamera(chaseCam);
 
         skybox = new Skybox(new Image(getClass().getResourceAsStream("/images/skybox.jpg")), 100000, isometricCam);
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
@@ -351,18 +345,19 @@ public class GameView3D extends GameView{
             for (ObservableValue o : Arrays
                 .asList(playerBoat.layoutXProperty(), playerBoat.layoutXProperty())) {
                 o.addListener((obs, oldVal, newVal) -> {
+                    if (playerYacht.getLegNumber() < course.size()) {
+                        List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
+                        Point2D midPoint = new Point2D(0, 0);
+                        if (marks.size() == 1) {
+                            midPoint = scaledPoint.findScaledXY(marks.get(0));
+                        } else if (marks.size() == 2) {
+                            midPoint = (scaledPoint.findScaledXY(marks.get(0)))
+                                .midpoint(scaledPoint.findScaledXY(marks.get(1)));
+                        }
 
-                    List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
-                    Point2D midPoint = new Point2D(0, 0);
-                    if (marks.size() == 1) {
-                        midPoint = scaledPoint.findScaledXY(marks.get(0));
-                    } else if (marks.size() == 2) {
-                        midPoint = (scaledPoint.findScaledXY(marks.get(0)))
-                            .midpoint(scaledPoint.findScaledXY(marks.get(1)));
-                    }
-
-                    if (midPoint != null) {
-                        playerBoat.updateMarkIndicator(midPoint);
+                        if (midPoint != null) {
+                            playerBoat.updateMarkIndicator(midPoint);
+                        }
                     }
 
                 });
@@ -506,6 +501,7 @@ public class GameView3D extends GameView{
     }
 
     public void setBoatAsPlayer (ClientYacht playerYacht) {
+        playerBoat.updateMarkIndicator(scaledPoint.findScaledXY(course.get(0).getMidPoint()));
         playerYacht.toggleSail();
         playerBoatAnimationTimer = new AnimationTimer() {
 
@@ -538,32 +534,5 @@ public class GameView3D extends GameView{
 
     public void setWindDir(double windDir) {
         this.windDir = windDir;
-    }
-
-    private void updateMarkArrows (ClientYacht yacht, int legNumber) {
-        CompoundMark compoundMark;
-        if (legNumber - 1 >= 0) {
-            Sounds.playMarkRoundingSound();
-            compoundMark = course.get(legNumber-1);
-            for (Mark mark : compoundMark.getMarks()) {
-                markerObjects.get(mark).showNextExitArrow();
-            }
-        }
-        CompoundMark nextMark = null;
-        if (legNumber < course.size() - 1) {
-            Sounds.playMarkRoundingSound();
-            nextMark = course.get(legNumber);
-            for (Mark mark : nextMark.getMarks()) {
-                markerObjects.get(mark).showNextEnterArrow();
-            }
-        }
-        if (legNumber - 2 >= 0) {
-            CompoundMark lastMark = course.get(Math.max(0, legNumber - 2));
-            if (lastMark != nextMark) {
-                for (Mark mark : lastMark.getMarks()) {
-                    markerObjects.get(mark).hideAllArrows();
-                }
-            }
-        }
     }
 }

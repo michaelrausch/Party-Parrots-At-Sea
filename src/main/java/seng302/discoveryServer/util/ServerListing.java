@@ -1,7 +1,7 @@
 package seng302.discoveryServer.util;
 
 public class ServerListing {
-    public final static int SERVER_TTL_DEFAULT = 10;
+    public final static int SERVER_TTL_DEFAULT = 5;
 
     private String serverName = "";
     private String mapName = "";
