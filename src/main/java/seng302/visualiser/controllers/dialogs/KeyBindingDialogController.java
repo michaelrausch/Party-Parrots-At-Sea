@@ -27,7 +27,7 @@ public class KeyBindingDialogController implements Initializable {
     @FXML
     private Label closeLabel;
     @FXML
-    private JFXButton zoomInbtn;
+    private JFXButton zoomInBtn;
     @FXML
     private JFXButton zoomOutBtn;
     @FXML
@@ -42,6 +42,8 @@ public class KeyBindingDialogController implements Initializable {
     private JFXButton downwindBtn;
     @FXML
     private JFXButton resetBtn;
+    @FXML
+    private JFXButton confirmBtn;
     @FXML
     private Label upwindLabel;
     @FXML
@@ -70,7 +72,7 @@ public class KeyBindingDialogController implements Initializable {
         gameKeyBind = GameKeyBind.getInstance();
         buttons = new ArrayList<>();
         Collections.addAll(buttons,
-            zoomInbtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn, downwindBtn,
+            zoomInBtn, zoomOutBtn, vmgBtn, sailInOutBtn, tackGybeBtn, upwindBtn, downwindBtn,
             viewButton, rightButton, leftButton, forwardButton, backwardButton);
         bindButtonWithAction();
         loadKeyBind();
@@ -91,6 +93,7 @@ public class KeyBindingDialogController implements Initializable {
         });
 
         closeLabel.setOnMouseClicked(event -> ViewManager.getInstance().closeKeyBindingDialog());
+        confirmBtn.setOnMouseClicked(event -> ViewManager.getInstance().closeKeyBindingDialog());
     }
 
     /**

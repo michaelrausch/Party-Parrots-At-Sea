@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import seng302.discoveryServer.DiscoveryServer;
 import seng302.visualiser.controllers.ViewManager;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class App extends Application {
 
     private static Logger logger = LoggerFactory.getLogger(App.class);
@@ -92,6 +95,17 @@ public class App extends Application {
     }
 
     public static void main(String[] args) throws Exception {
+        /*
+         * Do not trust Java to do garbage collection
+         */
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.gc();
+            }
+        }, 0, 1200);
+
+
         try {
             parseArgs(args);
         } catch (ParseException e) {

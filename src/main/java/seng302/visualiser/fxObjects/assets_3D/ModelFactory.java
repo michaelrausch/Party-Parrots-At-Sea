@@ -80,30 +80,6 @@ public class ModelFactory {
         return bo;
     }
 
-    public static BoatModel boatRotatingView(BoatMeshType boatType, Color primaryColour) {
-        Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
-        boatAssets.getTransforms().addAll(
-            new Scale(40, 40, 40),
-            new Rotate(90, new Point3D(0,0,1)),
-            new Rotate(90, new Point3D(0, 1, 0))
-        );
-
-        final Rotate animationRotate = new Rotate(0, new Point3D(1,1,1));
-        boatAssets.getTransforms().add(animationRotate);
-
-        return new BoatModel(boatAssets, new AnimationTimer() {
-
-            private double rotation = 0;
-            private Rotate rotate = animationRotate;
-
-            @Override
-            public void handle(long now) {
-                rotation += 0.5;
-                rotate.setAngle(rotation);
-            }
-        }, boatType);
-    }
-
     public static BoatModel boatGameView(BoatMeshType boatType, Color primaryColour) {
         Group boatAssets = getUnmodifiedBoatModel(boatType, primaryColour);
         boatAssets.getTransforms().setAll(
@@ -117,23 +93,26 @@ public class ModelFactory {
         Group boatAssets = new Group();
         MeshView hull = importBoatSTL(boatType.hullFile);
         hull.setMaterial(new PhongMaterial(primaryColour));
-        MeshView sail = importBoatSTL(boatType.sailFile);
-        sail.setMaterial(
-            new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.BLACK : Color.WHITE)
-        );
-
-        boatAssets.getChildren().addAll(hull, sail);
+        boatAssets.getChildren().add(hull);
 
         if (boatType.mastFile != null) {
             MeshView mast = importBoatSTL(boatType.mastFile);
             mast.setMaterial(new PhongMaterial(primaryColour));
             boatAssets.getChildren().add(mast);
+        } else {
+            boatAssets.getChildren().add(new Group());
         }
+
+        MeshView sail = importBoatSTL(boatType.sailFile);
+        sail.setMaterial(
+            new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.DARKGRAY : Color.WHITE)
+        );
+        boatAssets.getChildren().add(sail);
 
         if (boatType.jibFile != null) {
             MeshView jib = importBoatSTL(boatType.jibFile);
-            sail.setMaterial(
-                new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.DARKGRAY : Color.WHITE)
+            jib.setMaterial(
+                new PhongMaterial(boatType == BoatMeshType.PARROT ? Color.BLACK : Color.WHITE)
             );
             boatAssets.getChildren().add(jib);
         }

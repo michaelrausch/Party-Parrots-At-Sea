@@ -66,3 +66,11 @@
     /*-fx-background-size: cover;*/
     -fx-background-color: dodgerblue;
 }
+
+.tokenView {
+    -fx-cursor: hand;
+}
+
+.tokenGridView StackPane {
+    -fx-background-color: white;
+}
