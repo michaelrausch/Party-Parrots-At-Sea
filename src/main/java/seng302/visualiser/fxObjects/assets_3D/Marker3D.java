@@ -1,22 +1,17 @@
 package seng302.visualiser.fxObjects.assets_3D;
-
-import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.Group;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
 import seng302.visualiser.fxObjects.MarkArrowFactory.RoundingSide;
+import seng302.visualiser.fxObjects.Marker;
 
 /**
  * Visual object for a mark. Contains a coloured circle and any specified arrows.
  */
-public class Marker3D extends Group {
+public class Marker3D extends Marker {
 
     private Model mark;
-    private List<Group> enterArrows = new ArrayList<>();
-    private List<Group> exitArrows = new ArrayList<>();
-    private int enterArrowIndex = 0;
-    private int exitArrowIndex = 0;
     private ModelType markType;
     private ModelType arrowType;
 
@@ -60,23 +55,8 @@ public class Marker3D extends Group {
         );
     }
 
-    /**
-     * Shows the next EnterArrow. Does nothing if there are no more enter arrows. Other arrows become hidden.
-     */
-    public void showNextEnterArrow() {
-        showArrow(enterArrows, enterArrowIndex);
-        enterArrowIndex++;
-    }
-
-    /**
-     * Shows the next ExitArrow. Does nothing if there are no more enter arrows. Other arrows become hidden.
-     */
-    public void showNextExitArrow() {
-        showArrow(exitArrows, exitArrowIndex);
-        exitArrowIndex++;
-    }
-
-    private void showArrow(List<Group> arrowList, int arrowListIndex) {
+    @Override
+    protected void showArrow(List<Group> arrowList, int arrowListIndex) {
         if (arrowListIndex < arrowList.size()) {
             Platform.runLater(() ->
                 this.getChildren().setAll(mark.getAssets(), arrowList.get(arrowListIndex))
