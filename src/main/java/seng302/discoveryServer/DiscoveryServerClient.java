@@ -19,7 +19,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class DiscoveryServerClient {
-    private final Integer UPDATE_INTERVAL_MS = 1000;
+    private final Integer UPDATE_INTERVAL_MS = 700;
 
     private static String roomCode = null;
     private Timer serverListingUpdateTimer;
