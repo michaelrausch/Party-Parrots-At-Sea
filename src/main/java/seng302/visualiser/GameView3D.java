@@ -89,11 +89,11 @@ public class GameView3D extends GameView {
         }
 
         gameObjects = new Group();
-        root3D = new Group(isometricCam, gameObjects);
+        root3D = new Group(chaseCam, gameObjects);
         view = new SubScene(
             root3D, 5000, 3000, true, SceneAntialiasing.BALANCED
         );
-        view.setCamera(isometricCam);
+        view.setCamera(chaseCam);
 
         skybox = new Skybox(new Image(getClass().getResourceAsStream("/images/skybox.jpg")), 100000, isometricCam);
         skybox.getTransforms().addAll(new Rotate(90, Rotate.X_AXIS));
@@ -361,6 +361,7 @@ public class GameView3D extends GameView {
 
                 });
             }
+            playerBoat.updateMarkIndicator(scaledPoint.findScaledXY(course.get(0).getMidPoint()));
             gameObjects.getChildren().addAll(wakes);
             gameObjects.getChildren().addAll(boatObjectGroup);
         });

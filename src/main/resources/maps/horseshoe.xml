@@ -10,8 +10,8 @@
 
   <Marks>
     <CompoundMark CompoundMarkID="1">
-      <Mark Lat="-14.071412" Lng="47.05756"/>
-      <Mark Lat="-14.069914" Lng="47.058541"/>
+      <Mark Lat="-14.070412" Lng="47.05746"/>
+      <Mark Lat="-14.068014" Lng="47.057541"/>
     </CompoundMark>
     <CompoundMark CompoundMarkID="2">
       <Mark Lat="-14.067194" Lng="47.053818" />
@@ -64,7 +64,7 @@
   <CourseLimit>
     <Limit Lat="-14.073371" Lng="47.058213" />
     <Limit Lat="-14.06453" Lng="47.050003" />
-    <Limit Lat="-14.059022" Lng="47.057286" />
+    <Limit Lat="-14.057022" Lng="47.057286" />
     <Limit Lat="-14.058723" Lng="47.064358" />
     <Limit Lat="-14.06261" Lng="47.071293" />
     <Limit Lat="-14.070814" Lng="47.06762" />
