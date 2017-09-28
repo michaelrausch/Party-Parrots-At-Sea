@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RaceDefinition>
+
+    <CourseName>Waiheke</CourseName>
+
+    <CentralLat>-36.80008</CentralLat>
+    <CentralLng>175.012225</CentralLng>
+
+    <MaxPlayers>10</MaxPlayers>
+
+    <Marks>
+        <CompoundMark CompoundMarkID="1">
+            <Mark Lat="-36.79512" Lng="175.0116"/>
+            <Mark Lat="-36.79468" Lng="175.01312"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="2">
+            <Mark Lat="-36.80069" Lng="175.01495"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="3">
+            <Mark Lat="-36.79892" Lng="175.01832"/>
+            <Mark Lat="-36.79988" Lng="175.01913"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="4">
+            <Mark Lat="-36.80064" Lng="175.01171"/>
+            <Mark Lat="-36.80186" Lng="175.0124"/>
+        </CompoundMark>
+        <CompoundMark CompoundMarkID="5">
+            <Mark Lat="-36.79579" Lng="175.01194"/>
+            <Mark Lat="-36.79545" Lng="175.01349"/>
+        </CompoundMark>
+    </Marks>
+
+    <Course>
+        <OpeningSegment>
+            <Corner CompoundMarkID="1" Rounding="PS"/>
+            <Corner CompoundMarkID="2" Rounding="P"/>
+        </OpeningSegment>
+
+        <RepeatingSegment>
+            <Corner CompoundMarkID="3" Rounding="SP"/>
+            <Corner CompoundMarkID="4" Rounding="PS"/>
+        </RepeatingSegment>
+
+        <ClosingSegment>
+            <Corner CompoundMarkID="5" Rounding="PS"/>
+        </ClosingSegment>
+    </Course>
+
+    <CourseLimit>
+        <Limit Lat="-36.7938" Lng="175.01194"/>
+        <Limit Lat="-36.79411" Lng="175.01555"/>
+        <Limit Lat="-36.79765" Lng="175.01898"/>
+        <Limit Lat="-36.79909" Lng="175.02149"/>
+        <Limit Lat="-36.80163" Lng="175.02014"/>
+        <Limit Lat="-36.80292" Lng="175.0175"/>
+        <Limit Lat="-36.80325" Lng="175.01008"/>
+        <Limit Lat="-36.80107" Lng="175.0089"/>
+        <Limit Lat="-36.79567" Lng="175.00961"/>
+    </CourseLimit>
+
+</RaceDefinition>
