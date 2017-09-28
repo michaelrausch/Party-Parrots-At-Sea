@@ -26,6 +26,7 @@ import seng302.utilities.GeoUtility;
 public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     private static final int PORT = 4942;
+    private static int selectedPort = PORT;
     private static final Integer CLIENT_UPDATES_PER_SECOND = 60;
     private Logger logger = LoggerFactory.getLogger(MainServerThread.class);
     private boolean terminated;
@@ -40,7 +41,8 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     public MainServerThread() {
         new GameState();
         try {
-            serverSocket = new ServerSocket(PORT);
+            serverSocket = new ServerSocket(0);
+            selectedPort = serverSocket.getLocalPort();
         } catch (IOException e) {
             logger.trace("IO error in server thread handler upon trying to make new server socket",
                 0);
@@ -66,7 +68,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
                 .setMapName(regattaXMLData.getCourseName())
                 .setCapacity(capacity)
                 .setNumberOfPlayers(numPlayers - 1)
-                .registerGame(PORT, regattaXMLData.getRegattaName());
+                .registerGame(selectedPort, regattaXMLData.getRegattaName());
         } catch (IOException e) {
             logger.warn("Could not register server");
         }
@@ -345,5 +347,9 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
 
     public boolean hasStarted() {
         return hasStarted;
+    }
+
+    public int getPortNumber() {
+        return selectedPort;
     }
 }

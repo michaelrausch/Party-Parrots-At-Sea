@@ -71,6 +71,8 @@ public class LobbyController implements Initializable {
     @FXML
     private Label roomLabel;
     @FXML
+    private Label portNumber;
+    @FXML
     private Pane speedTokenPane, handlingTokenPane, windWalkerTokenPane, bumperTokenPane, randomTokenPane;
     //---------FXML END---------//
 
@@ -85,6 +87,8 @@ public class LobbyController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         roomLabel.setText("");
+        portNumber.setText("");
+
         this.playerBoats = ViewManager.getInstance().getGameClient().getAllBoatsMap();
 
         if (this.playersColor == null) {
@@ -375,5 +379,9 @@ public class LobbyController implements Initializable {
 
     public void setRoomCode(String roomCode) {
         roomLabel.setText("Room: " + roomCode);
+    }
+
+    public void setPortNumber(String p){
+        portNumber.setText("Port: " + p);
     }
 }

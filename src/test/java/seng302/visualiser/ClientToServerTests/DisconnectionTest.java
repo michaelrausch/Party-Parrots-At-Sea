@@ -12,7 +12,7 @@ public class DisconnectionTest {
     @Test
     public void testServerDisconnection () throws Exception {
         MainServerThread serverThread = new MainServerThread();
-        ClientToServerThread clientThread = new ClientToServerThread("localhost", 4942);
+        ClientToServerThread clientThread = new ClientToServerThread("localhost", serverThread.getPortNumber());
         Thread.sleep(1000);
         clientThread.addDisconnectionListener(message -> Assert.assertTrue(message != null));
         serverThread.terminate();
