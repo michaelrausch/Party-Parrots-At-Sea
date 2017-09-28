@@ -361,7 +361,6 @@ public class GameView3D extends GameView {
 
                 });
             }
-            playerBoat.updateMarkIndicator(scaledPoint.findScaledXY(course.get(0).getMidPoint()));
             gameObjects.getChildren().addAll(wakes);
             gameObjects.getChildren().addAll(boatObjectGroup);
         });
@@ -497,6 +496,7 @@ public class GameView3D extends GameView {
     }
 
     public void setBoatAsPlayer (ClientYacht playerYacht) {
+        playerBoat.updateMarkIndicator(scaledPoint.findScaledXY(course.get(0).getMidPoint()));
         playerYacht.toggleSail();
         playerBoatAnimationTimer = new AnimationTimer() {
 
