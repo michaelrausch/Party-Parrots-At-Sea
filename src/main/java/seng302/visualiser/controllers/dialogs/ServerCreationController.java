@@ -115,7 +115,7 @@ public class ServerCreationController implements Initializable {
      */
     private void createServer() {
         ServerDescription serverDescription = ViewManager.getInstance().getGameClient()
-            .runAsHost("localhost", 4941, serverName.getText(), (int) maxPlayersSlider
+            .runAsHost("localhost", 0, serverName.getText(), (int) maxPlayersSlider
                 .getValue(), mapMaker.getCurrentRacePath(), (int) legsSlider.getValue(), pickupsCheckBox.isSelected());
 
         if (serverDescription == null){

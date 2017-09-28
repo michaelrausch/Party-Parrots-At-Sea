@@ -44,7 +44,7 @@ public class ToggleSailSteps {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        client = new ClientToServerThread("localhost", 4942);
+        client = new ClientToServerThread("localhost", mst.getPortNumber());
         try {
             Thread.sleep(100);
         } catch (InterruptedException ie) {

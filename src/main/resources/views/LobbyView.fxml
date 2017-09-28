@@ -67,6 +67,11 @@
                         <Insets right="20.0" top="10.0" />
                      </GridPane.margin>
                   </Label>
+                  <Label fx:id="portNumber" text="Port: 4191" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets right="20.0" top="-15.0" />
+                     </GridPane.margin>
+                  </Label>
                     </children>
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="732.0" minWidth="10.0" prefWidth="586.0" />
@@ -80,12 +85,9 @@
                 </GridPane>
                 <GridPane GridPane.rowIndex="1">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"
-                          prefWidth="115.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308"
-                          minWidth="337.0" prefWidth="430.0"/>
-                        <ColumnConstraints hgrow="NEVER" maxWidth="350.0" minWidth="350.0"
-                          prefWidth="350.0"/>
+                        <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="115.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="337.0" prefWidth="430.0" />
+                        <ColumnConstraints hgrow="NEVER" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints vgrow="SOMETIMES" />
@@ -110,116 +112,92 @@
                         <Insets bottom="15.0" left="7.0" right="7.0" top="15.0" />
                      </GridPane.margin>
                         </AnchorPane>
-                        <GridPane prefHeight="370.0" prefWidth="189.0" styleClass="tokenGridView"
-                          vgap="5.0">
+                        <GridPane prefHeight="370.0" prefWidth="189.0" styleClass="tokenGridView" vgap="5.0">
                             <children>
-                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Tokens"
-                                  GridPane.halignment="CENTER">
+                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Tokens" GridPane.halignment="CENTER">
                                     <font>
-                                        <Font name="System Bold" size="18.0"/>
+                                        <Font name="System Bold" size="18.0" />
                                     </font>
                                 </Text>
-                                <StackPane prefHeight="150.0" prefWidth="200.0"
-                                  GridPane.rowIndex="1">
+                                <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="1">
                                     <children>
-                                        <Label alignment="BOTTOM_CENTER" text="Speed"
-                                          StackPane.alignment="BOTTOM_CENTER">
+                                        <Label alignment="BOTTOM_CENTER" text="Speed" StackPane.alignment="BOTTOM_CENTER">
                                             <font>
-                                                <Font size="12.0"/>
+                                                <Font size="12.0" />
                                             </font>
                                             <padding>
-                                                <Insets bottom="5.0"/>
+                                                <Insets bottom="5.0" />
                                             </padding>
                                         </Label>
-                                        <Pane fx:id="speedTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" styleClass="tokenView"/>
+                                        <Pane fx:id="speedTokenPane" prefHeight="999.0" prefWidth="200.0" styleClass="tokenView" />
                                     </children>
                                 </StackPane>
-                                <StackPane prefHeight="150.0" prefWidth="200.0"
-                                  GridPane.rowIndex="2">
+                                <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="2">
                                     <children>
-                                        <Label alignment="BOTTOM_CENTER" text="Handling"
-                                          StackPane.alignment="BOTTOM_CENTER">
+                                        <Label alignment="BOTTOM_CENTER" text="Handling" StackPane.alignment="BOTTOM_CENTER">
                                             <font>
-                                                <Font size="12.0"/>
+                                                <Font size="12.0" />
                                             </font>
                                             <padding>
-                                                <Insets bottom="5.0"/>
+                                                <Insets bottom="5.0" />
                                             </padding>
                                         </Label>
-                                        <Pane fx:id="handlingTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" styleClass="tokenView"/>
+                                        <Pane fx:id="handlingTokenPane" prefHeight="999.0" prefWidth="200.0" styleClass="tokenView" />
                                     </children>
                                 </StackPane>
-                                <StackPane prefHeight="150.0" prefWidth="200.0"
-                                  GridPane.rowIndex="3">
+                                <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="3">
                                     <children>
-                                        <Label alignment="BOTTOM_CENTER" text="Wind Walker"
-                                          StackPane.alignment="BOTTOM_CENTER">
+                                        <Label alignment="BOTTOM_CENTER" text="Wind Walker" StackPane.alignment="BOTTOM_CENTER">
                                             <font>
-                                                <Font size="12.0"/>
+                                                <Font size="12.0" />
                                             </font>
                                             <padding>
-                                                <Insets bottom="5.0"/>
+                                                <Insets bottom="5.0" />
                                             </padding>
                                         </Label>
-                                        <Pane fx:id="windWalkerTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" styleClass="tokenView"/>
+                                        <Pane fx:id="windWalkerTokenPane" prefHeight="999.0" prefWidth="200.0" styleClass="tokenView" />
                                     </children>
                                 </StackPane>
-                                <StackPane prefHeight="150.0" prefWidth="200.0"
-                                  GridPane.rowIndex="4">
+                                <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="4">
                                     <children>
-                                        <Label alignment="BOTTOM_CENTER" text="Bumper"
-                                          StackPane.alignment="BOTTOM_CENTER">
+                                        <Label alignment="BOTTOM_CENTER" text="Bumper" StackPane.alignment="BOTTOM_CENTER">
                                             <font>
-                                                <Font size="12.0"/>
+                                                <Font size="12.0" />
                                             </font>
                                             <padding>
-                                                <Insets bottom="5.0"/>
+                                                <Insets bottom="5.0" />
                                             </padding>
                                         </Label>
-                                        <Pane fx:id="bumperTokenPane" prefHeight="999.0"
-                                          prefWidth="200.0" styleClass="tokenView"/>
+                                        <Pane fx:id="bumperTokenPane" prefHeight="999.0" prefWidth="200.0" styleClass="tokenView" />
                                     </children>
                                 </StackPane>
-                                <StackPane prefHeight="150.0" prefWidth="200.0"
-                                  GridPane.rowIndex="5">
+                                <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="5">
                                     <children>
-                                        <Label alignment="BOTTOM_CENTER" text="Random"
-                                          StackPane.alignment="BOTTOM_CENTER">
+                                        <Label alignment="BOTTOM_CENTER" text="Random" StackPane.alignment="BOTTOM_CENTER">
                                             <font>
-                                                <Font size="12.0"/>
+                                                <Font size="12.0" />
                                             </font>
                                             <padding>
-                                                <Insets bottom="5.0"/>
+                                                <Insets bottom="5.0" />
                                             </padding>
                                         </Label>
-                                        <Pane fx:id="randomTokenPane" prefHeight="999.0"
-                                          prefWidth="60.0" styleClass="tokenView"/>
+                                        <Pane fx:id="randomTokenPane" prefHeight="999.0" prefWidth="60.0" styleClass="tokenView" />
                                     </children>
                                 </StackPane>
                             </children>
                             <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0"
-                                  prefWidth="80.0"/>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="80.0" prefWidth="80.0" />
                             </columnConstraints>
                             <padding>
-                                <Insets bottom="15.0" left="15.0" right="7.0" top="15.0"/>
+                                <Insets bottom="15.0" left="15.0" right="7.0" top="15.0" />
                             </padding>
                             <rowConstraints>
-                                <RowConstraints maxHeight="116.0" minHeight="0.0" prefHeight="40.0"
-                                  vgrow="NEVER"/>
-                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
-                                  prefHeight="60.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
-                                  prefHeight="60.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="141.0" minHeight="-Infinity"
-                                  prefHeight="60.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
-                                  prefHeight="60.0" vgrow="SOMETIMES"/>
-                                <RowConstraints maxHeight="285.0" minHeight="-Infinity"
-                                  prefHeight="60.0" vgrow="SOMETIMES"/>
+                                <RowConstraints maxHeight="116.0" minHeight="0.0" prefHeight="40.0" vgrow="NEVER" />
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
+                                <RowConstraints maxHeight="141.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
+                                <RowConstraints maxHeight="285.0" minHeight="-Infinity" prefHeight="60.0" vgrow="SOMETIMES" />
                             </rowConstraints>
                         </GridPane>
                     </children>
@@ -236,7 +214,7 @@
         </GridPane>
     </children>
     <stylesheets>
-        <URL value="@../css/Master.css"/>
-        <URL value="@../css/LobbyView.css"/>
+        <URL value="@../css/Master.css" />
+        <URL value="@../css/LobbyView.css" />
     </stylesheets>
 </StackPane>
