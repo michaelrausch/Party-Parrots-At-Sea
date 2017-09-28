@@ -1,6 +1,5 @@
 package seng302.visualiser.fxObjects.assets_2D;
 
-import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -8,18 +7,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
+import seng302.visualiser.fxObjects.Marker;
 
 /**
  * Visual object for a mark. Contains a coloured circle and any specified arrows.
  */
-public class Marker2D extends Group {
+public class Marker2D extends Marker {
 
     private Circle mark = new Circle();
     private Paint colour = Color.BLACK;
-    private List<Group> enterArrows = new ArrayList<>();
-    private List<Group> exitArrows = new ArrayList<>();
-    private int enterArrowIndex = 0;
-    private int exitArrowIndex = 0;
 
     /**
      * Creates a new Marker containing only a circle. The default colour is black.
@@ -79,7 +75,8 @@ public class Marker2D extends Group {
         exitArrowIndex++;
     }
 
-    private void showArrow(List<Group> arrowList, int arrowListIndex) {
+    @Override
+    protected void showArrow(List<Group> arrowList, int arrowListIndex) {
         if (arrowListIndex < arrowList.size()) {
             Platform.runLater(() ->
                 this.getChildren().setAll(mark, arrowList.get(arrowListIndex))

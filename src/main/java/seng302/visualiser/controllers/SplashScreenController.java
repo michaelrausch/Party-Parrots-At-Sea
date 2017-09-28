@@ -9,6 +9,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 /**
+ * The pre loading screen before launch the start view
  * Created by Kusal on 26-Sep-17.
  */
 public class SplashScreenController implements Initializable{
@@ -26,17 +27,14 @@ public class SplashScreenController implements Initializable{
         public void run(){
             try {
                 Thread.sleep(3000);
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Stage stage = new Stage();
-                            ViewManager.getInstance().initialStartView(stage);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        rootPane.getScene().getWindow().hide();
+                Platform.runLater(() -> {
+                    try {
+                        Stage stage = new Stage();
+                        ViewManager.getInstance().initialStartView(stage);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+                    rootPane.getScene().getWindow().hide();
                 });
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -11,9 +11,9 @@ import seng302.visualiser.fxObjects.assets_3D.BoatObject;
 
 public class TopDownCamera extends PerspectiveCamera implements RaceCamera {
 
-    private final Double PAN_LIMIT = 30.0;
-    private final Double NEAR_ZOOM_LIMIT = -30.0;
-    private final Double FAR_ZOOM_LIMIT = -130.0;
+    private final Double PAN_LIMIT = 40d;
+    private final Double NEAR_ZOOM_LIMIT = -20.0;
+    private final Double FAR_ZOOM_LIMIT = -145d;
     private final Double ZOOM_STEP = 2.5;
 
     private ObservableList<Transform> transforms;
