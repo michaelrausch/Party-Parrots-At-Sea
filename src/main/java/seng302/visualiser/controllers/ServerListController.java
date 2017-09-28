@@ -140,7 +140,9 @@ public class ServerListController implements Initializable, ServerListenerDelega
                 return;
             }
 
-            ViewManager.getInstance().getGameClient().runAsClient(listing.getAddress(), listing.getPortNumber());
+            if (!ViewManager.getInstance().getGameClient().runAsClient(listing.getAddress(), listing.getPortNumber())){
+                ViewManager.getInstance().showErrorSnackBar("Could not connect to server");
+            }
         });
 
         /*
