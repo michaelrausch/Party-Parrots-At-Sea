@@ -1,7 +1,7 @@
 package seng302.visualiser.controllers.cells;
 
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.fxml.FXML;
@@ -60,9 +60,9 @@ public class WindCell {
 
         for (DoubleProperty o : Arrays.asList(playerYacht.getHeadingProperty(), windDirection)) {
             o.addListener((obs, oldValue, newValue) -> {
-                if (isChaseCam) {
-                    camera.getTransforms().clear();
-                    try {
+                Platform.runLater(() -> {
+                    if (isChaseCam) {
+                        camera.getTransforms().clear();
                         for (Transform t : chaseCam.getTransforms()) {
                             if (t instanceof Rotate) {
                                 camera.getTransforms().add(t);
@@ -71,16 +71,14 @@ public class WindCell {
                         this.camera.getTransforms().addAll(
                             new Translate(-55, -60, 0)
                         );
-                    } catch (ConcurrentModificationException cme) {
-
                     }
-                }
 
-                windArrowModel.getAssets().getTransforms().clear();
-                windArrowModel.getAssets().getTransforms().addAll(
-                    new Rotate(windDirection.getValue(),
-                        new Point3D(0, 0, 1))
-                );
+                    windArrowModel.getAssets().getTransforms().clear();
+                    windArrowModel.getAssets().getTransforms().addAll(
+                        new Rotate(windDirection.getValue(),
+                            new Point3D(0, 0, 1))
+                    );
+                });
             });
         }
     }
