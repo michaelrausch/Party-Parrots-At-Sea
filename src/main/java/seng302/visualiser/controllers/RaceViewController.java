@@ -9,26 +9,19 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -50,14 +43,11 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javax.swing.ImageIcon;
 import seng302.model.ClientYacht;
-import seng302.model.ClientYacht.PowerUpListener;
 import seng302.model.RaceState;
 import seng302.model.mark.CompoundMark;
 import seng302.model.mark.Mark;
 import seng302.model.stream.xml.parser.RaceXMLData;
-import seng302.model.token.Token;
 import seng302.model.token.TokenType;
 import seng302.utilities.Sounds;
 import seng302.visualiser.GameView3D;
@@ -69,8 +59,6 @@ import seng302.visualiser.controllers.dialogs.FinishDialogController;
 import seng302.visualiser.fxObjects.ChatHistory;
 import seng302.visualiser.fxObjects.assets_2D.WindArrow;
 import seng302.visualiser.fxObjects.assets_3D.BoatObject;
-import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
-import seng302.visualiser.fxObjects.assets_3D.ModelType;
 
 /**
  * Controller class that manages the display of a race
@@ -132,6 +120,8 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
     @FXML
     private VBox windArrowVBox;
 
+
+    private WindCell windCell;
     //Race Data
     private Map<Integer, ClientYacht> participants;
     private Map<Integer, CompoundMark> markers;
@@ -208,25 +198,29 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
 
         lastWindDirection = 0d;
 
-        initialiseWindArrow();
     }
 
     /**
      * Initialise wind arrow cell.
      */
     private void initialiseWindArrow() {
-        Pane pane = null;
         FXMLLoader loader = new FXMLLoader(
             getClass().getResource("/views/cells/WindCell.fxml"));
-        loader.setController(new WindCell());
+        windCell = new WindCell();
+        loader.setController(windCell);
 
         try {
-            pane = loader.load();
+            loader.load();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        windArrowVBox.getChildren().add(pane);
+        windCell.setCamera(gameView.getView().getCamera());
+        gameView.getView().cameraProperty()
+            .addListener((obs, oldVal, newVal) -> windCell.setCamera(newVal));
+        System.out.println(windCell);
+
+        windArrowVBox.getChildren().add(windCell.getAssets());
     }
 
     public void showFinishDialog(ArrayList<ClientYacht> finishedBoats) {
@@ -320,6 +314,12 @@ public class RaceViewController extends Thread implements ImportantAnnotationDel
         });
         gameView.setWindDir(raceState.windDirectionProperty().doubleValue());
         Platform.runLater(this::initializeUpdateTimer);
+
+        Platform.runLater(() -> {
+            //windCell.setCamera(gameView.getView().getCamera());
+
+            initialiseWindArrow();
+        });
     }
 
     /**

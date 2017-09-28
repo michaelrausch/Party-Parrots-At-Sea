@@ -293,8 +293,8 @@ public class ModelFactory {
 
         Rotate animationRotate = new Rotate(0, new Point3D(0, 1, 0));
         assets.getTransforms().addAll(
-            new Translate(55, 60, 0),
-            new Scale(5, 5, 5),
+            new Translate(0, 0, 0),
+            new Scale(4, 4, 4),
             animationRotate
         );
 
@@ -302,16 +302,6 @@ public class ModelFactory {
             new AmbientLight()
         );
 
-        return new Model(new Group(assets), new AnimationTimer() {
-
-            private double rotation = 0;
-            private Rotate rotate = animationRotate;
-
-            @Override
-            public void handle(long now) {
-                rotation += 1;
-                rotate.setAngle(rotation);
-            }
-        });
+        return new Model(new Group(assets), null);
     }
 }
