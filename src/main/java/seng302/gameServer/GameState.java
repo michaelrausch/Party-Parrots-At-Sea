@@ -238,7 +238,7 @@ public class GameState implements Runnable {
                 if (System.currentTimeMillis() > startTime) {
                     startSpawningTokens();
                     startUpdatingWind();
-                    GameState.setCurrentStage(GameStages.RACING);
+                    GameState.currentStage = GameStages.RACING;
                 }
             }
             if (currentStage == GameStages.RACING) {
@@ -299,8 +299,8 @@ public class GameState implements Runnable {
             windSpeed += random.nextInt(500);
         }
 
-        GameState.setWindSpeed(Double.valueOf(windSpeed));
-        GameState.setWindDirection(direction.doubleValue());
+        GameState.windSpeed = Double.valueOf(windSpeed);
+        GameState.windDirection = direction.doubleValue();
     }
 
 

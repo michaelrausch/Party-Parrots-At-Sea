@@ -51,7 +51,7 @@ import seng302.visualiser.fxObjects.assets_3D.ModelType;
  * Collection of animated3D assets that displays a race.
  */
 
-public class GameView3D extends GameView{
+public class GameView3D extends GameView {
 
     private final double FOV = 60;
     private final double DEFAULT_CAMERA_X = 0;
@@ -350,18 +350,19 @@ public class GameView3D extends GameView{
             for (ObservableValue o : Arrays
                 .asList(playerBoat.layoutXProperty(), playerBoat.layoutXProperty())) {
                 o.addListener((obs, oldVal, newVal) -> {
+                    if (playerYacht.getLegNumber() < course.size()) {
+                        List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
+                        Point2D midPoint = new Point2D(0, 0);
+                        if (marks.size() == 1) {
+                            midPoint = scaledPoint.findScaledXY(marks.get(0));
+                        } else if (marks.size() == 2) {
+                            midPoint = (scaledPoint.findScaledXY(marks.get(0)))
+                                .midpoint(scaledPoint.findScaledXY(marks.get(1)));
+                        }
 
-                    List<Mark> marks = course.get(playerYacht.getLegNumber()).getMarks();
-                    Point2D midPoint = new Point2D(0, 0);
-                    if (marks.size() == 1) {
-                        midPoint = scaledPoint.findScaledXY(marks.get(0));
-                    } else if (marks.size() == 2) {
-                        midPoint = (scaledPoint.findScaledXY(marks.get(0)))
-                            .midpoint(scaledPoint.findScaledXY(marks.get(1)));
-                    }
-
-                    if (midPoint != null) {
-                        playerBoat.updateMarkIndicator(midPoint);
+                        if (midPoint != null) {
+                            playerBoat.updateMarkIndicator(midPoint);
+                        }
                     }
 
                 });

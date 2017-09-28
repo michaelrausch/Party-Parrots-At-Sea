@@ -103,7 +103,7 @@ public class App extends Application {
             public void run() {
                 System.gc();
             }
-        }, 0, 1200);
+        }, 0, 1_000);
 
         try {
             parseArgs(args);

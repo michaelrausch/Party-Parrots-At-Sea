@@ -1,14 +1,5 @@
 package seng302.visualiser;
 
-import javafx.application.Platform;
-import javafx.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import seng302.gameServer.messages.*;
-import seng302.model.stream.packets.PacketType;
-import seng302.model.stream.packets.StreamPacket;
-import seng302.utilities.XMLParser;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +34,7 @@ import seng302.model.stream.xml.generator.RaceXMLTemplate;
 import seng302.model.stream.xml.generator.RegattaXMLTemplate;
 import seng302.utilities.XMLGenerator;
 import seng302.utilities.XMLParser;
-import seng302.visualiser.controllers.ViewManager;
+
 
 /**
  * A class describing a single connection to a Server for the purposes of sending and receiving on

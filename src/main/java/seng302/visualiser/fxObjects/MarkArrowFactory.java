@@ -29,11 +29,11 @@ public class MarkArrowFactory {
         STARBOARD,
     }
 
-    public static final double MARK_ARROW_SEPARATION = 15;
-    public static final double ARROW_LENGTH = 75;
-    public static final double ARROW_HEAD_DEPTH = 10;
-    public static final double ARROW_HEAD_WIDTH = 6;
-    public static final double STROKE_WIDTH = 3;
+    public static final double MARK_ARROW_SEPARATION = 8;
+    public static final double ARROW_LENGTH = 20;
+    public static final double ARROW_HEAD_DEPTH = 5;
+    public static final double ARROW_HEAD_WIDTH = 3;
+    public static final double STROKE_WIDTH = 1;
 
     public static Model constructEntryArrow3D (
         RoundingSide roundingSide, double angle, ModelType type) {
@@ -106,7 +106,7 @@ public class MarkArrowFactory {
         Arc roundSection = new Arc(
             0, 0, MARK_ARROW_SEPARATION, MARK_ARROW_SEPARATION,
             //Where to start drawing arc from
-            (roundingSide == RoundingSide.PORT ? 0 : angleOfEntry),
+            (roundingSide == RoundingSide.PORT ? 180 + angleOfEntry : angleOfEntry),
             //Which way to go around the mark. (clockwise vs anticlockwise)
             roundingSide == RoundingSide.PORT ? Math.abs(angleOfExit - angleOfEntry) : -Math.abs(angleOfEntry - angleOfExit)
         );

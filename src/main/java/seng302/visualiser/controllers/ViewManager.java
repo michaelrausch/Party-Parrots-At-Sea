@@ -79,7 +79,7 @@ public class ViewManager {
         decorator.applyCss();
         decorator.getStylesheets()
             .add(getClass().getResource("/css/Master.css").toExternalForm());
-        gameClient = new GameClient(decorator);
+        gameClient = new GameClient();
         setDecorator(decorator);
 
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));
@@ -404,7 +404,9 @@ public class ViewManager {
                 .add(getClass().getResource("/css/dialogs/Snackbar.css").toExternalForm());
 
         JFXSnackbar bar = new JFXSnackbar(decorator);
-        bar.enqueue(new JFXSnackbar.SnackbarEvent(msg));
+        Platform.runLater(() -> {
+            bar.enqueue(new JFXSnackbar.SnackbarEvent(msg));
+        });
     }
 
     public Stage getStage() {
