@@ -89,7 +89,7 @@ public class GameClient {
      * @param ipAddress IP to connect to.
      * @param portNumber Port to connect to.
      */
-    public void runAsClient(String ipAddress, Integer portNumber) {
+    public boolean runAsClient(String ipAddress, Integer portNumber) {
         try {
             startClientToServerThread(ipAddress, portNumber);
             socketThread.addDisconnectionListener((cause) -> {
@@ -100,12 +100,19 @@ public class GameClient {
 
             ViewManager.getInstance().setPlayerList(clientLobbyList);
 
-            while (regattaData == null){
+            int triesLeft = 10;
+
+            while (regattaData == null && triesLeft >= 0){
                 try {
                     Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException ignored) {
+                    ;
                 }
+                triesLeft--;
+            }
+
+            if (triesLeft < 1){
+                return false;
             }
 
             ViewManager.getInstance().setProperty("serverName", regattaData.getRegattaName());
@@ -121,6 +128,8 @@ public class GameClient {
         } catch (IOException ioe) {
             ViewManager.getInstance().showErrorSnackBar("There are no servers currently available.");
         }
+
+        return true;
     }
 
     private void destroyClientToServerThread() {
