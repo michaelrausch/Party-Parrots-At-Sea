@@ -45,7 +45,7 @@ public class SendChatSteps {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        host = new ClientToServerThread("localhost", 4942);
+        host = new ClientToServerThread("localhost", mst.getPortNumber());
         host.addStreamObserver(() -> {
             while (host.getPacketQueue().peek() != null) {
                 StreamPacket packet = host.getPacketQueue().poll();
@@ -68,7 +68,7 @@ public class SendChatSteps {
         } catch (InterruptedException ie) {
             ie.printStackTrace();
         }
-        client = new ClientToServerThread("localhost", 4942);
+        client = new ClientToServerThread("localhost", mst.getPortNumber());
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ie) {

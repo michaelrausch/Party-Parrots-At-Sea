@@ -143,7 +143,7 @@ public class GameClient {
         }
 
         try {
-            startClientToServerThread("localhost", 4942);
+            startClientToServerThread("localhost", server.getPortNumber());
         } catch (IOException e) {
             showConnectionError("Cannot connect to server as host");
         }
@@ -177,9 +177,11 @@ public class GameClient {
 
         this.lobbyController = ViewManager.getInstance().goToLobby(false);
 
+        lobbyController.setPortNumber(""+server.getPortNumber());
+
         ViewManager.getInstance().setPlayerList(clientLobbyList);
         return new ServerDescription(serverName, regattaData.getCourseName(), GameState.getNumberOfPlayers(), GameState.getCapacity(),
-            "localhost", 4942);
+            "localhost", server.getPortNumber());
     }
 
     private void tearDownConnection() {
