@@ -158,7 +158,13 @@ public abstract class Message {
      * @return The current buffer as a byte array
      */
     public byte[] getBuffer(){
-        return buffer.array();
+        byte[] bytes = buffer.array();
+
+//        buffer.reset();
+//        buffer.clear();
+//        buffer = null;
+
+        return bytes;
     }
 
     /**
