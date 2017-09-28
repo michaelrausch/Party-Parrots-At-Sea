@@ -72,7 +72,6 @@ public class CompoundMark {
                 getSubMark(1).setRoundingSide(RoundingSide.STARBOARD);
                 break;
 
-
         }
     }
 

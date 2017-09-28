@@ -180,10 +180,12 @@ public class ClientToServerThread implements Runnable {
         notifyDisconnectListeners("Connection to server was terminated");
         closeSocket();
 
-        Platform.runLater(() -> {
-            ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
+        //thread.interrupt();
+
+//        Platform.runLater(() -> {
+//            ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
 //            ViewManager.getInstance().goToStartView();
-        });
+//        });
     }
 
     public void sendCustomizationRequest(CustomizeRequestType reqType, byte[] payload) {

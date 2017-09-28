@@ -105,7 +105,6 @@ public class App extends Application {
             }
         }, 0, 1200);
 
-
         try {
             parseArgs(args);
         } catch (ParseException e) {

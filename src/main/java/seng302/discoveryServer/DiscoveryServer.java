@@ -48,7 +48,7 @@ public class DiscoveryServer {
                 "           .:;...'cxxxxxxxxxxxxoc;,::,..cdl;;l'   \n" +
                 "         .cl;':,'';oxxxxxxdxxxxxx:....,cooc,cO;   \n" +
                 "     .,,,::;,lxoc:,,:lxxxxxxxxxxxo:,,;lxxl;'oNc   \n" +
-                "   .cdxo;':lxxxxxxc'';cccccoxxxxxxxxxxxxo,.;lc.  " + ANSI_YELLOW + "Party-Parrots-At-Sea Discovery Server v0.1 " + selectedColor +"\n" +
+                "   .cdxo;':lxxxxxxc'';cccccoxxxxxxxxxxxxo,.;lc.  " + ANSI_YELLOW + "Party-Parrots-At-Sea Discovery Server v1.0.0 (Release) " + selectedColor +"\n" +
                 "  .loc'.'lxxxxxxxxocc;''''';ccoxxxxxxxxx:..oc     \n" +
                 "olc,..',:cccccccccccc:;;;;;;;;:ccccccccc,.'c,     \n" +
                 "Ol;......................................;l'  ");
