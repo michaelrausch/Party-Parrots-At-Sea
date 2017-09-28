@@ -49,8 +49,9 @@ public class ServerTableTest {
         serverTable.addServer(listing);
 
         listing.decrementTtl();
+        listing.decrementTtl();
 
-        Thread.sleep(1000);
+        Thread.sleep(1500);
 
         assertTrue(!serverTable.getAllServers().contains(listing));
     }
