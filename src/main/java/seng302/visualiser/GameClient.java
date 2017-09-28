@@ -382,8 +382,8 @@ public class GameClient {
             if (raceFinished) {
                 raceViewController.showFinishDialog(finishedBoats);
                 Sounds.playFinishSound();
-                close();
-                ViewManager.getInstance().getGameClient().stopGame();
+//                close();
+//                ViewManager.getInstance().getGameClient().stopGame();
                 //loadFinishScreenView();
             }
             raceState.setRaceFinished();

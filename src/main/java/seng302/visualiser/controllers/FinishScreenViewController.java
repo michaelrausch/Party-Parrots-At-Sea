@@ -88,7 +88,7 @@ public class FinishScreenViewController implements Initializable {
 
     public void switchToStartScreenView() {
         Sounds.playButtonClick();
-        setContentPane("/views/StartScreenView.fxml");
+        ViewManager.getInstance().goToStartView();
     }
 
     public void playButtonHoverSound(MouseEvent mouseEvent) {
