@@ -134,4 +134,8 @@ public class RaceState {
     public Boolean getRaceFinished() {
         return raceFinished;
     }
+
+    public ReadOnlyDoubleWrapper getWindDirection() {
+        return windDirection;
+    }
 }

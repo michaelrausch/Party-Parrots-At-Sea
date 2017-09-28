@@ -1,6 +1,9 @@
 package seng302.visualiser.controllers.cells;
 
-import javafx.collections.ObservableList;
+import java.util.Arrays;
+import java.util.ConcurrentModificationException;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.fxml.FXML;
 import javafx.geometry.Point3D;
 import javafx.scene.Camera;
@@ -13,8 +16,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
-import seng302.gameServer.GameState;
 import seng302.model.ClientYacht;
+import seng302.visualiser.cameras.ChaseCamera;
 import seng302.visualiser.fxObjects.assets_3D.Model;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 
@@ -33,34 +36,53 @@ public class WindCell {
     private SubScene view;
     private Group gameObjects;
 
+    private ChaseCamera chaseCam;
+
+    private ClientYacht playerYacht;
+
     // Cameras
     private PerspectiveCamera camera = null;
-    private ObservableList<Transform> cameraTransforms;
 
     private Model windArrowModel;
+    private Boolean isChaseCam;
 
     /**
      * Initialise WindCell fxml and load 3D wind arrow into a group.
      */
-    public void init(ClientYacht playerYacht) {
+    public void init(ClientYacht playerYacht, ReadOnlyDoubleWrapper windDirection) {
+
+        this.playerYacht = playerYacht;
         camera = new PerspectiveCamera();
         camera.setFarClip(1000);
         camera.setNearClip(0.1);
         camera.setFieldOfView(60);
-        this.cameraTransforms = camera.getTransforms();
         initialiseWindView();
 
-        GameState.getWindDirectionProperty().addListener(
-            (obs, oldValue, newValue) -> {
-//                if (camera instanceof IsometricCamera) {
+        for (DoubleProperty o : Arrays.asList(playerYacht.getHeadingProperty(), windDirection)) {
+            o.addListener((obs, oldValue, newValue) -> {
+                if (isChaseCam) {
+                    camera.getTransforms().clear();
+                    try {
+                        for (Transform t : chaseCam.getTransforms()) {
+                            if (t instanceof Rotate) {
+                                camera.getTransforms().add(t);
+                            }
+                        }
+                        this.camera.getTransforms().addAll(
+                            new Translate(-55, -60, 0)
+                        );
+                    } catch (ConcurrentModificationException cme) {
+
+                    }
+                }
+
                 windArrowModel.getAssets().getTransforms().clear();
                 windArrowModel.getAssets().getTransforms().addAll(
-                    new Rotate(newValue.doubleValue(),
+                    new Rotate(windDirection.getValue(),
                         new Point3D(0, 0, 1))
-
                 );
-//                }
             });
+        }
     }
 
     private void initialiseWindView() {
@@ -84,16 +106,28 @@ public class WindCell {
         return view;
     }
 
-    public void setCamera(Camera camera) {
+
+    public void updateCameraTransforms(Camera camera) {
         this.camera.getTransforms().clear();
-        for (Transform t : camera.getTransforms()) {
-            if (!(t instanceof Translate)) {
-                this.camera.getTransforms().add(t);
+
+        for (Transform transform : camera.getTransforms()) {
+            if (!(transform instanceof Translate)) {
+                this.camera.getTransforms().add(transform);
             }
         }
-        Translate t = new Translate(-55, -60, 0);
-        this.camera.getTransforms().add(t);
-
+        this.camera.getTransforms().addAll(
+            new Translate(-55, -60, 0)
+        );
         windArrowModel.getAssets().getTransforms().clear();
+    }
+
+    public void setCamera(Camera camera) {
+        isChaseCam = camera instanceof ChaseCamera;
+        if (isChaseCam) {
+            this.chaseCam = (ChaseCamera) camera;
+        } else {
+            this.chaseCam = null;
+        }
+        updateCameraTransforms(camera);
     }
 }
