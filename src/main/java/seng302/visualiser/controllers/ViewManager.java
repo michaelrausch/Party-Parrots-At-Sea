@@ -79,7 +79,7 @@ public class ViewManager {
         decorator.applyCss();
         decorator.getStylesheets()
             .add(getClass().getResource("/css/Master.css").toExternalForm());
-        gameClient = new GameClient(decorator);
+        gameClient = new GameClient();
         setDecorator(decorator);
 
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/PP.png")));

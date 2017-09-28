@@ -182,7 +182,7 @@ public class ClientToServerThread implements Runnable {
 
         Platform.runLater(() -> {
             ViewManager.getInstance().showErrorSnackBar("Server rejected connection.");
-            ViewManager.getInstance().goToStartView();
+//            ViewManager.getInstance().goToStartView();
         });
     }
 
