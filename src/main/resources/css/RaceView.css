@@ -66,6 +66,13 @@ GridPane .timer * {
     -fx-background-color: transparent;
 }
 
+#chatToggleButton {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-background-radius: 5;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+}
+
 #windImageView {
     -fx-image: url("/images/wind-180.png");
 }
