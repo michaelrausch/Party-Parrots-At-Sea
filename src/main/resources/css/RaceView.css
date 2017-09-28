@@ -5,6 +5,7 @@
 #timerGrid{
     -fx-background-color: rgba(255, 255, 255, 0.6);
     -fx-effect: -fx-pp-dropshadow-light;
+    -fx-background-radius: 5;
 }
 
 GridPane .timer * {
@@ -27,20 +28,24 @@ GridPane .timer * {
 #chatHistoryHolder {
     -fx-background-color: rgba(255, 255, 255, 0.6);
     -fx-effect: -fx-pp-dropshadow-light;
+    -fx-background-radius: 5;
 }
 
 #chatInputHolder {
     -fx-background-color: rgba(255, 255, 255, 0.6);
     -fx-effect: -fx-pp-dropshadow-light;
+    -fx-background-radius: 5;
 }
 
 #windGridPane {
     -fx-background-color: rgba(255, 255, 255, 0.6);
     -fx-effect: -fx-pp-dropshadow-light;
+    -fx-background-radius: 5;
 }
 
 #windHolder {
     -fx-background-color: rgba(255, 255, 255, 0.5);
+    -fx-background-radius: 5;
 }
 
 #chatSend {
@@ -63,4 +68,16 @@ GridPane .timer * {
 
 #windImageView {
     -fx-image: url("/images/wind-180.png");
+}
+
+#miniMapPane {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-background-radius: 5;
+}
+
+#miniMapButton {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-background-radius: 5;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
 }
