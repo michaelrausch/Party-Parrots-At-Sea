@@ -108,10 +108,6 @@ public class MapMaker {
         return mapPreviews.get(index).getAssets();
     }
 
-    public RaceXMLData getCurrentRace() {
-        return races.get(index);
-    }
-
     public RegattaXMLData getCurrentRegatta() {
         return regattas.get(index);
     }
