@@ -44,6 +44,7 @@ public class MarkRoundingMessage extends Message{
         putInt((int) raceId, 4);
         putInt((int) sourceId, 4);
         putByte((byte) boatStatus.getCode());
+        System.out.println(roundingSide.getCode());
         putByte((byte) roundingSide.getCode());
         putByte((byte) markType.getCode());
         putByte((byte) markId);
