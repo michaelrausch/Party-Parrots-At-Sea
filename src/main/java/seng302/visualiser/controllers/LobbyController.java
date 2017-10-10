@@ -5,14 +5,12 @@ import com.jfoenix.controls.JFXDialog;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -20,7 +18,6 @@ import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -43,7 +40,6 @@ import seng302.utilities.Sounds;
 import seng302.visualiser.MapPreview;
 import seng302.visualiser.controllers.cells.PlayerCell;
 import seng302.visualiser.controllers.dialogs.BoatCustomizeController;
-import seng302.visualiser.controllers.dialogs.PopupDialogController;
 import seng302.visualiser.controllers.dialogs.TokenInfoDialogController;
 import seng302.visualiser.fxObjects.assets_3D.ModelFactory;
 import seng302.visualiser.fxObjects.assets_3D.ModelType;
@@ -357,8 +353,8 @@ public class LobbyController implements Initializable {
     }
 
     /**
-     *
-     * @param raceState
+     * Updates the state of the race and changes the value
+     * @param raceState the new race state
      */
     public void updateRaceState(RaceState raceState){
         this.raceState = raceState;

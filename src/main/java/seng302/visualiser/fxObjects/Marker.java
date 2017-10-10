@@ -16,6 +16,9 @@ public abstract class Marker extends Group{
     protected int exitArrowIndex = 0;
 
     public abstract void addArrows(RoundingSide roundingSide, double entryAngle, double exitAngle);
+
+    public abstract void addFinishArrow(RoundingSide roundingSide, double entryAngle, double exitAngle);
+
     /**
      * Shows the next EnterArrow. Does nothing if there are no more enter arrows. Other arrows become hidden.
      */

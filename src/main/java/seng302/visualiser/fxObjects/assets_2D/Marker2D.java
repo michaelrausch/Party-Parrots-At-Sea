@@ -7,6 +7,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import seng302.visualiser.fxObjects.MarkArrowFactory;
+import seng302.visualiser.fxObjects.MarkArrowFactory.RoundingSide;
 import seng302.visualiser.fxObjects.Marker;
 
 /**
@@ -55,6 +56,14 @@ public class Marker2D extends Marker {
         exitArrows.add(
             MarkArrowFactory.constructExitArrow(roundingSide, exitAngle, Color.GRAY)
         );
+    }
+
+    @Override
+    public void addFinishArrow(RoundingSide roundingSide, double entryAngle, double exitAngle){
+        enterArrows.add(
+            MarkArrowFactory.constructInteriorArrow(roundingSide, entryAngle, exitAngle, Color.RED)
+        );
+        exitArrows.add(new Group());
     }
 
     /**

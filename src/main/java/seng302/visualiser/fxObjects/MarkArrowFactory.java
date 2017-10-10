@@ -86,16 +86,6 @@ public class MarkArrowFactory {
      */
     public static Group constructEntryArrow (RoundingSide roundingSide, double angleOfEntry,
         double angleOfExit, Paint colour) {
-        // Check to see if the the angle around mark would take you inside of it. (less than 180)
-        // If so make interior angle.
-        if (roundingSide == RoundingSide.PORT && angleOfEntry < angleOfExit &&
-            Math.abs(angleOfExit - angleOfEntry) < 180) {
-            return makeInteriorAngle(roundingSide, angleOfExit, angleOfEntry, colour);
-
-        } else if (roundingSide == RoundingSide.STARBOARD && angleOfEntry > angleOfExit &&
-            -Math.abs(angleOfEntry - angleOfExit) > -180) {
-            return makeInteriorAngle(roundingSide, angleOfExit, angleOfEntry, colour);
-        }
         //Create regular exit arrow.
         Group arrow = new Group();
         Group exitSection = constructExitArrow(roundingSide, angleOfExit, colour);
@@ -132,7 +122,9 @@ public class MarkArrowFactory {
      * @param colour colour of arrow
      * @return the arrow.
      */
-    private static Group makeInteriorAngle (RoundingSide roundingSide, double angleOfExit, double angleOfEntry, Paint colour) {
+    public static Group constructInteriorArrow(RoundingSide roundingSide, double angleOfExit,
+        double angleOfEntry, Paint colour) {
+
         Group arrow = new Group();
         Polygon lineSegment;
         //Reverse angle of exit/entry to find position between them

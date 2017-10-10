@@ -206,7 +206,7 @@ public class MapPreview extends GameView {
         }
         GeoPoint secondToLastMarkAv = new GeoPoint(averageLat / numMarks, averageLng / numMarks);
         for (Mark mark : course.get(course.size()-1).getMarks()) {
-            markerObjects.get(mark).addArrows(
+            markerObjects.get(mark).addFinishArrow(
                 mark.getRoundingSide() == RoundingSide.STARBOARD ? MarkArrowFactory.RoundingSide.STARBOARD : MarkArrowFactory.RoundingSide.PORT,
                 GeoUtility.getBearing(secondToLastMarkAv, mark),
                 GeoUtility.getBearing(mark, mark)

@@ -6,7 +6,7 @@
     <CentralLat>-36.80008</CentralLat>
     <CentralLng>175.012225</CentralLng>
 
-    <MaxPlayers>10</MaxPlayers>
+    <MaxPlayers> 6 </MaxPlayers>
 
     <Marks>
         <CompoundMark CompoundMarkID="1">
@@ -32,13 +32,13 @@
 
     <Course>
         <OpeningSegment>
-            <Corner CompoundMarkID="1" Rounding="PS"/>
+            <Corner CompoundMarkID="1" Rounding="SP"/>
             <Corner CompoundMarkID="2" Rounding="P"/>
         </OpeningSegment>
 
         <RepeatingSegment>
-            <Corner CompoundMarkID="3" Rounding="SP"/>
-            <Corner CompoundMarkID="4" Rounding="PS"/>
+            <Corner CompoundMarkID="3" Rounding="PS"/>
+            <Corner CompoundMarkID="4" Rounding="SP"/>
         </RepeatingSegment>
 
         <ClosingSegment>
@@ -47,14 +47,14 @@
     </Course>
 
     <CourseLimit>
-        <Limit Lat="-36.7938" Lng="175.01194"/>
-        <Limit Lat="-36.79411" Lng="175.01555"/>
+        <Limit Lat="-36.79350" Lng="175.01194"/>
+        <Limit Lat="-36.79411" Lng="175.01455"/>
         <Limit Lat="-36.79765" Lng="175.01898"/>
         <Limit Lat="-36.79909" Lng="175.02149"/>
         <Limit Lat="-36.80163" Lng="175.02014"/>
         <Limit Lat="-36.80292" Lng="175.0175"/>
-        <Limit Lat="-36.80325" Lng="175.01008"/>
-        <Limit Lat="-36.80107" Lng="175.0089"/>
+        <Limit Lat="-36.80295" Lng="175.01008"/>
+        <Limit Lat="-36.80107" Lng="175.00960"/>
         <Limit Lat="-36.79567" Lng="175.00961"/>
     </CourseLimit>
 

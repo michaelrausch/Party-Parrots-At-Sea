@@ -6,7 +6,7 @@
   <CentralLat> -14.6457 </CentralLat>
   <CentralLng> 47.612855 </CentralLng>
 
-  <MaxPlayers> 5 </MaxPlayers>
+  <MaxPlayers> 8 </MaxPlayers>
 
   <Marks>
     <CompoundMark CompoundMarkID="1">

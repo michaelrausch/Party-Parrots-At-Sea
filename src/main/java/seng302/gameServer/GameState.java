@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
@@ -98,7 +99,7 @@ public class GameState implements Runnable {
     private static long startTime;
     private static Set<Mark> marks = new HashSet<>();
     private static List<Limit> courseLimit = new ArrayList<>();
-    private static Integer maxPlayers = 8;
+    private static Integer maxPlayers = 12;
 
     private static List<Token> tokensInPlay;
     private static RandomSpawn randomSpawn;
@@ -113,7 +114,7 @@ public class GameState implements Runnable {
         windDirectionProperty.set(windDirection);
         windSpeed = 10000d;
         yachts = new HashMap<>();
-        tokensInPlay = new ArrayList<>();
+        tokensInPlay = new CopyOnWriteArrayList<>();
         players = new ArrayList<>();
         customizationFlag = false;
         playerHasLeftFlag = false;
@@ -123,7 +124,7 @@ public class GameState implements Runnable {
         newMessageListeners = new ArrayList<>();
 
         resetStartTime();
-        //setCourseLimit("/server_config/race.xml");
+
         new Thread(this, "GameState").start();   //Run the auto updates on the game state
     }
 

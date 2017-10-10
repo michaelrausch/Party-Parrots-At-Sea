@@ -284,13 +284,13 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
     private void initialiseBoatPositions() {
 
         final double DISTANCE_TO_START = 75d;
-        final double YACHT_SEPARATION = 20d;
+        final double YACHT_SEPARATION = 35d;
 
         //Length of start line
         double startLineLength = GeoUtility.getDistance(
             GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(1),
             GameState.getMarkOrder().getMarkOrder().get(0).getSubMark(2)
-        );
+        ) - YACHT_SEPARATION;
 
         //How many yachts can fit along the start line
         int spacesAlongLine = (int) Math.round(startLineLength / YACHT_SEPARATION);
@@ -312,7 +312,7 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
             GameState.getMarkOrder().getMarkOrder().get(1).getMidPoint()
         );
 
-        GeoPoint startingPoint = GeoUtility.getGeoCoordinate(
+        GeoPoint midPoint = GeoUtility.getGeoCoordinate(
             GameState.getMarkOrder().getMarkOrder().get(0).getMidPoint(),
             angleToStart, DISTANCE_TO_START
         );
@@ -321,26 +321,24 @@ public class MainServerThread implements Runnable, ClientConnectionDelegate {
         Collections.shuffle(randomisedYachts);
         while (randomisedYachts.size() > 0) {
 
-            int numYachtsInLine =
-                spacesAlongLine > randomisedYachts.size() ? randomisedYachts.size()
-                    : spacesAlongLine;
-            double yachtSpace = numYachtsInLine * YACHT_SEPARATION / 2;
+            int numYachts = spacesAlongLine > randomisedYachts.size() ? randomisedYachts.size() : spacesAlongLine;
+            double yachtSpace = (numYachts - 1) * YACHT_SEPARATION / 2;
 
             GeoPoint firstYachtPoint = GeoUtility.getGeoCoordinate(
-                startingPoint, startMarkToMarkAngle + 180, yachtSpace
+                midPoint, startMarkToMarkAngle + 180, yachtSpace
             );
 
-            for (int i = 0; i < numYachtsInLine; i++) {
+            for (int i = 0; i < numYachts; i++) {
                 randomisedYachts.get(0).setHeading(angleFromStart);
                 randomisedYachts.get(0).setLocation(firstYachtPoint);
                 firstYachtPoint = GeoUtility.getGeoCoordinate(
-                    firstYachtPoint, startMarkToMarkAngle, yachtSpace
+                    firstYachtPoint, startMarkToMarkAngle, YACHT_SEPARATION
                 );
                 randomisedYachts.remove(0);
             }
 
-            startingPoint = GeoUtility.getGeoCoordinate(
-                startingPoint, angleToStart, DISTANCE_TO_START
+            midPoint = GeoUtility.getGeoCoordinate(
+                midPoint, angleToStart, YACHT_SEPARATION * 1.5
             );
         }
     }

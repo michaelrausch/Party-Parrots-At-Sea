@@ -55,6 +55,16 @@ public class Marker3D extends Marker {
         );
     }
 
+    public void addFinishArrow(RoundingSide roundingSide, double entryAngle,
+        double exitAngle) {
+        enterArrows.add(
+            MarkArrowFactory.constructEntryArrow3D(roundingSide, entryAngle, ModelType.FINISH_ARROW).getAssets()
+        );
+        exitArrows.add(
+            MarkArrowFactory.constructExitArrow3D(roundingSide, exitAngle, ModelType.FINISH_ARROW).getAssets()
+        );
+    }
+
     @Override
     protected void showArrow(List<Group> arrowList, int arrowListIndex) {
         if (arrowListIndex < arrowList.size()) {
