@@ -364,7 +364,6 @@ public class RaceViewController extends Thread {
         if (yacht == player) {
             blinkingTimer.cancel();
             iconToDisplay.setVisible(false);
-            iconToDisplay = null;
         }
     }
 
