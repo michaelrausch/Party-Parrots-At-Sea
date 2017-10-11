@@ -1,5 +1,6 @@
 package seng302.discoveryServer;
 
+import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import seng302.discoveryServer.util.ServerListing;
@@ -41,7 +42,10 @@ public class DiscoveryServerClient {
 
     private void failError() {
         isInInvalidState = true;
-        ViewManager.getInstance().showErrorSnackBar("You do not appear to be able to connect to the internet. Matchmaking will be unavailable.");
+        Platform.runLater(() -> {
+            ViewManager.getInstance().showErrorSnackBar("You do not appear to be able to connect to the internet. Matchmaking will be unavailable.");
+
+        });
     }
 
     public boolean didFail(){
