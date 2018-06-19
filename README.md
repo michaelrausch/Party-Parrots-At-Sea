@@ -1,13 +1,10 @@
-# SENG302 Project Template
+# Party Parrots At Sea
 
-Basic Maven project with required Maven reporting setup and basic GitLab CI.
+**Authors:** *Michael Rausch, William Muir, Haoming Yin, Alistair Mcintyre, Kusal Ekanayake, Calum Irwin, Peter Galloway, Tan Zhi You *
 
-It is a requirement that your product should be completely built to a deliverable form using the Maven package goal.
+### SENG302
+> The Software Engineering group project gives students in-depth experience in developing software applications in groups. Participants work in groups to develop a complex real application. At the end of this course you will have practiced the skills required to be a Software Engineer in the real world, including gaining the required skills to be able to develop complex applications, dealing with vague (and often conflicting) customer requirements, working under pressure and being a valuable member of a software development team.
 
-Remember to set up your GitLab CI server (refer to the student guide for instructions).
+**Find out more:** www.canterbury.ac.nz/courseinfo/GetCourses.aspx?course=SENG302
 
-# Basic Project Structure
- - `src/` Your application source
- - `doc/` User and design documentation
- - `doc/examples/` Demo example files for use with your application
  
