@@ -7,4 +7,9 @@
 
 **Find out more:** www.canterbury.ac.nz/courseinfo/GetCourses.aspx?course=SENG302
 
- 
+### Running the discovery server
+
+```
+  xvfb-run -a -e server.log java -jar app.jar -runAsDiscoveryServer
+```
+
